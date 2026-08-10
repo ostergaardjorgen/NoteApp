@@ -69,11 +69,7 @@ $engelskUgedag = @{
 # Datamappen loeses HER, i din egen session, og skrives ind i opgaven.
 # Opgaven maa ikke selv slaa LOCALAPPDATA op: den kan koere med et andet
 # miljoe, og saa tager den backup af en tom mappe uden at fejle.
-$dataMappe = $env:NOTEAPP_DATA
-if ([string]::IsNullOrWhiteSpace($dataMappe)) {
-    $dataMappe = Join-Path $env:LOCALAPPDATA 'NoteApp'
-}
-$dataMappe = [IO.Path]::GetFullPath($dataMappe)
+$dataMappe = [IO.Path]::GetFullPath((Get-NoteAppDataRod))
 if (-not (Test-Path $dataMappe)) {
     throw "Datamappen findes ikke: $dataMappe`nKør 'noteapp init' først."
 }

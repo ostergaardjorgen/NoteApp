@@ -17,6 +17,8 @@ try
         "prompt"    => VisPrompt(args.Skip(1).FirstOrDefault()),
         "tilfoej"   => Tilfoej(args.Skip(1).ToArray()),
         "eksport"   => Eksport(args.Skip(1).FirstOrDefault()),
+        "motor"     => Motor(),
+        "transskriber" => await Transskriber(args.Skip(1).ToArray()),
         "recover"   => Genopret(),
         "hjaelp" or "--help" or "-h" => Hjælp(),
         _ => Ukendt(kommando)
@@ -40,6 +42,9 @@ static int Hjælp()
                     Kategorier: person, organisation, produkt, fagterm, forkortelse
           prompt    Viser den ordliste der sendes til Whisper (valgfrit: <kunde>)
           eksport   Skriver ordlisten til ordliste.txt, som Fase 0-scriptet læser
+          motor     Viser hvilken Whisper-motor og model der er i brug
+          transskriber  Transskriberer en optagelse:
+                      noteapp transskriber <mappe-eller-wav> [--cpu]
           recover   Samler møder der aldrig blev lukket ordentligt
 
         Dine data ligger i:
@@ -183,6 +188,87 @@ static int Eksport(string? kunde)
     Console.WriteLine($"Skrevet : {sti}");
     Console.WriteLine($"Termer  : {store.TermCount()} i ordbogen");
     Console.WriteLine($"Tokens  : {LearningStore.EstimateTokens(File.ReadAllText(sti))} af budgettet på 200");
+    return 0;
+}
+
+static int Motor()
+{
+    var s = WhisperInstall.Locate();
+
+    Console.WriteLine($"Motor    : {s.WhisperCli ?? "IKKE FUNDET"}");
+    Console.WriteLine($"Version  : {s.EngineVersion ?? "kunne ikke aflæses"}");
+    Console.WriteLine($"Beregning: {s.Engine}");
+    Console.WriteLine($"Model    : {s.ModelFileName ?? "IKKE FUNDET"}");
+    Console.WriteLine($"Sti      : {s.ModelPath ?? "-"}");
+    Console.WriteLine();
+
+    Console.WriteLine("Modeller på disken:");
+    var installeret = WhisperInstall.Installed().ToList();
+    if (installeret.Count == 0) Console.WriteLine("  (ingen)");
+    foreach (var m in installeret)
+        Console.WriteLine($"  {m.Id,-16} {m.SizeText,8}  {(m.SupportsDanish ? "dansk+" : "KUN engelsk")}");
+
+    Console.WriteLine();
+    Console.WriteLine("Kan hentes:");
+    foreach (var m in WhisperInstall.Models)
+        Console.WriteLine($"  {m.Id,-16} {m.SizeText,8}  {m.Summary}");
+
+    return s.IsComplete ? 0 : 1;
+}
+
+static async Task<int> Transskriber(string[] a)
+{
+    if (a.Length == 0)
+    {
+        Console.Error.WriteLine("Brug: noteapp transskriber <mappe-eller-wav> [--cpu]");
+        return 2;
+    }
+
+    var s = WhisperInstall.Locate();
+    if (!s.IsComplete)
+    {
+        Console.Error.WriteLine("Motor eller model mangler. Kør 'noteapp motor' for at se hvad.");
+        return 1;
+    }
+
+    // Peges der på en mappe, tages mikrofonsporet — det er det spor, der
+    // altid findes, ogsaa ved fysiske moeder uden loopback.
+    var input = a[0];
+    var wav = Directory.Exists(input) ? Path.Combine(input, "mikrofon.wav") : input;
+    if (!File.Exists(wav)) { Console.Error.WriteLine($"Findes ikke: {wav}"); return 1; }
+
+    using var store = new LearningStore();
+    var prompt = store.BuildWhisperPrompt();
+
+    var udBase = Path.Combine(Path.GetDirectoryName(wav)!,
+        Path.GetFileNameWithoutExtension(wav) + "_" +
+        Path.GetFileNameWithoutExtension(s.ModelPath!).Replace("ggml-", ""));
+
+    Console.WriteLine($"Lyd     : {wav} ({Transcriber.WavSeconds(wav):0.0} sek)");
+    Console.WriteLine($"Model   : {s.ModelFileName}  ({s.Engine})");
+    Console.WriteLine($"Ordliste: {LearningStore.EstimateTokens(prompt)} tokens");
+    Console.WriteLine();
+
+    var motor = new Transcriber(s.WhisperCli!);
+    var sidst = -1;
+    var fremdrift = new Progress<TranscriptionProgress>(p =>
+    {
+        var pct = (int)p.Percent;
+        if (pct == sidst) return;
+        sidst = pct;
+        Console.Write($"\r  {p.Message,-40}");
+    });
+
+    var r = await motor.RunAsync(
+        new TranscriptionRequest(wav, s.ModelPath!, udBase, "da", prompt, a.Contains("--cpu")),
+        fremdrift);
+
+    Console.WriteLine();
+    Console.WriteLine();
+    Console.WriteLine($"Tid brugt : {r.ElapsedSeconds:0.0} sek på {r.AudioSeconds:0.0} sek lyd");
+    Console.WriteLine($"RTF       : {r.RealTimeFactor:0.00}  ({(r.RealTimeFactor <= 1 ? "hurtigere end realtid" : "LANGSOMMERE end realtid — planlæg som natjob")})");
+    Console.WriteLine($"Motor-id  : {r.EngineId}");
+    Console.WriteLine($"Tekst     : {r.TextPath}");
     return 0;
 }
 

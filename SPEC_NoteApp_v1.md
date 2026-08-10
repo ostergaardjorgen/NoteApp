@@ -18,6 +18,8 @@ Kan en funktion i sagens natur alligevel flytte data væk — brugerens eget val
 
 Kan kravene ikke opfyldes — fx i en planlagt opgave uden nogen til at godkende — skal funktionen nægte at køre. Fuld udmøntning: `doc\mine-data.md`.
 
+**Retningen er det afgørende** (præciseret 10. august 2026). *Ud* af maskinen: forbudt uden undtagelse. *Ned* på maskinen: tilladt for Whisper-motor og sprogmodel, efter informeret godkendelse ved første start. Uden det ville appen kun kunne installeres af den, der i forvejen havde en 4 GB modelfil. Al netværkskode ligger i `NoteApp.Core\Downloader.cs` og ingen andre steder.
+
 ---
 
 ## 1. Kerneidé og arkitekturvalg

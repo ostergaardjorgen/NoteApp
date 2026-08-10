@@ -13,7 +13,7 @@
 
     <!-- Versionen følger repoets vX.YY. Den vises i sidebjælken, så en
          skærmbillede fra en fejlmelding siger hvilken build det var. -->
-    <Version>0.11.0</Version>
+    <Version>0.13.0</Version>
   </PropertyGroup>
 
   <ItemGroup>

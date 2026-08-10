@@ -3,7 +3,10 @@ using System.Reflection;
 using System.Windows;
 using NoteApp.Core;
 using NoteApp.Desktop.Dictionary;
+using NoteApp.Desktop.Engine;
+using NoteApp.Desktop.Files;
 using NoteApp.Desktop.ReadAloud;
+using NoteApp.Desktop.Transcribe;
 
 namespace NoteApp.Desktop;
 
@@ -29,11 +32,27 @@ public partial class MainWindow : Window
         // fyrer under InitializeComponent.
         if (Indhold is null) return;
 
+        // Skærmene bygges først, når de vises. Ordbogen åbner en
+        // databaseforbindelse, og motorskærmen leder efter filer på disken —
+        // ingen af delene skal ske, mens man bare vil optage.
         if (NavOrdbog.IsChecked == true)
         {
-            // Ordbogen åbner først en databaseforbindelse, når den vises.
             _ordbog ??= new DictionaryView();
             Indhold.Content = _ordbog;
+        }
+        else if (NavTransskriber.IsChecked == true)
+        {
+            // Bygges hver gang: listen over optagelser skal vise den, der
+            // netop er lavet, uden at nogen skal genstarte appen.
+            Indhold.Content = new TranscribeView();
+        }
+        else if (NavMotor.IsChecked == true)
+        {
+            Indhold.Content = new EngineView();
+        }
+        else if (NavFiler.IsChecked == true)
+        {
+            Indhold.Content = new FilesView();
         }
         else
         {

@@ -63,7 +63,7 @@ if (-not (Test-Path $datagraense)) { throw "Fandt ikke $datagraense — uden den
 # ogsaa naar der ikke er et vindue at skrive til.
 $fejlLogRod = $DataMappe
 if ([string]::IsNullOrWhiteSpace($fejlLogRod)) { $fejlLogRod = $env:NOTEAPP_DATA }
-if ([string]::IsNullOrWhiteSpace($fejlLogRod)) { $fejlLogRod = Join-Path $env:LOCALAPPDATA 'NoteApp' }
+if ([string]::IsNullOrWhiteSpace($fejlLogRod)) { $fejlLogRod = Get-NoteAppDataRod }
 $fejlLog = Join-Path $fejlLogRod 'log\backup.log'
 
 trap {
@@ -85,7 +85,7 @@ function Skriv {
 # --- Kilde ----------------------------------------------------------------
 $kilde = $DataMappe
 if ([string]::IsNullOrWhiteSpace($kilde)) { $kilde = $env:NOTEAPP_DATA }
-if ([string]::IsNullOrWhiteSpace($kilde)) { $kilde = Join-Path $env:LOCALAPPDATA 'NoteApp' }
+if ([string]::IsNullOrWhiteSpace($kilde)) { $kilde = Get-NoteAppDataRod }
 $kilde = [IO.Path]::GetFullPath($kilde)
 
 if (-not (Test-Path $kilde)) {
@@ -97,9 +97,9 @@ if (-not (Test-Path $kilde)) {
 # er en backup der ser ud til at lykkes, men indeholder en naesten tom mappe.
 # Derfor: kraev at ordbogen faktisk er der, foer vi kalder det en backup.
 $ordbog = Join-Path $kilde 'learning.db'
-$moeder = Join-Path $kilde 'moeder'
-if (-not (Test-Path $ordbog) -and -not (Test-Path $moeder)) {
-    throw ("Datamappen $kilde indeholder hverken learning.db eller moeder\.`n" +
+$optagelser = Join-Path $kilde 'Optagelser'
+if (-not (Test-Path $ordbog) -and -not (Test-Path $optagelser)) {
+    throw ("Datamappen $kilde indeholder hverken learning.db eller Optagelser\.`n" +
            "Det ligner den forkerte mappe. Er backup planlagt, saa saet " +
            "NOTEAPP_DATA eksplicit i den planlagte opgave.")
 }

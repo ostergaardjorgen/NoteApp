@@ -6,6 +6,19 @@
 
 Besluttet 10. august 2026. Det kostede Fase 3, auto-resuméet — se afsnittet nederst.
 
+### Retningen er det afgørende
+
+Præciseret 10. august 2026. Reglen hed først "ingen netværkskald overhovedet", og det var for groft: den forbød også at hente motor og model ned, og dermed at appen kunne installeres af andre end den, der i forvejen havde en 4 GB modelfil liggende.
+
+| Retning | Regel |
+|---|---|
+| **Ud af maskinen** | Forbudt, uden undtagelse. Ingen optagelser, noter, ordbog, metadata eller fejlrapporter. |
+| **Ned på maskinen** | Tilladt for **Whisper-motoren og sprogmodellen** — og kun efter en informeret godkendelse. |
+
+Hentningen sender intet om dig med. Den beder om en navngiven fil fra en navngiven adresse, og appen viser begge dele, før den spørger. Det eneste, modtageren kan udlede, er at nogen på din internetforbindelse har hentet en Whisper-model — samme spor som at hente et hvilket som helst program.
+
+Al netværkskode ligger i én fil, `src\NoteApp.Core\Downloader.cs`. Ét sted at læse, ét sted at revidere. Skal der hentes noget nyt, går det gennem den; skal der *sendes* noget, er svaret nej.
+
 ### Når noget alligevel kan få data ud
 
 Enkelte funktioner kan i sagens natur ende med at flytte data væk fra maskinen. Backup til en netværkssti er det ene reelle eksempel: det er brugerens eget valg af destination, ikke noget appen gør af sig selv. Dér gælder tre krav uden undtagelse:
@@ -22,16 +35,19 @@ Enkelte funktioner kan i sagens natur ende med at flytte data væk fra maskinen.
 C:\NoteApp\                        KODE — git-repo, ligger på GitHub
   src\  scripts\  doc\  fase0\
 
-%LOCALAPPDATA%\NoteApp\            DINE DATA — aldrig i git, aldrig på GitHub
+C:\AppNoter\                       DINE DATA — aldrig i git, aldrig på GitHub
   learning.db                      ordbog og indlærte rettelser
   ordliste.txt                     din ordliste
-  moeder\<møde>\                   lyd, noter, transskriptioner, metadata
+  indstillinger.json               valgt model, backupmappe
+  Optagelser\<møde>\               lyd, noter, transskriptioner, metadata
   log\
 ```
 
 De to mapper overlapper ikke. Der findes **ingen `.gitignore`-fejl der kan lække en optagelse**, fordi filerne ikke ligger i arbejdstræet til at begynde med. `.gitignore` er et sikkerhedsnet, ikke den primære beskyttelse.
 
-Vil du flytte dine data — fx til en krypteret disk — så sæt miljøvariablen `NOTEAPP_DATA`. Alt følger med af sig selv, og `UserDataPaths.AssertOutsideRepository` fejler højlydt hvis stien nogensinde peger ind i repoet.
+**Placeringen kan ændres i appen** under *Filer og backup* → *Skift mappe*. Filerne kopieres til det nye sted, og først derefter ryddes det gamle — en afbrudt flytning skal efterlade data ét sted, ikke ingen. Valget skrives i `%APPDATA%\NoteApp\datasti.txt`, som med vilje ligger **uden for** datamappen: lå valget inde i den mappe, det selv udpeger, kunne appen ikke finde det igen efter en flytning.
+
+Rækkefølgen er: miljøvariablen `NOTEAPP_DATA` (vinder altid), derefter pegefilen, derefter standarden `C:\AppNoter`. `UserDataPaths.AssertOutsideRepository` fejler højlydt, hvis stien nogensinde peger ind i repoet.
 
 ## Hvad der ligger på GitHub
 
@@ -45,7 +61,13 @@ Testteksten `fase0\oplaesning\testtekst.md` bruger **opdigtede navne** og kan li
 
 ## Backup
 
-Alt sker lokalt. Scripterne har ingen netværkskald, ingen skytjeneste og ingen telemetri.
+**Sikkerhedskopien tages i appen** under *Filer og backup*. Der kan du vælge mappe, se de gemte arkiver og tage en kopi med det samme.
+
+**Lydfiler er som standard IKKE med.** Det er ikke en spareøvelse: en times optagelse fylder over 100 MB, mens ordbog, noter, transskriptioner og indstillinger tilsammen er få MB. Lyden er samtidig det, der er lettest at undvære — arbejdet ligger i transskriptionen og i de rettelser, appen har lært. Tages lyden med hver uge, bliver arkivet så stort, at man holder op med at tage backup, og så er man dårligere stillet end med en lille kopi hver gang. Vil du have lyden med, er der et afkrydsningsfelt, og appen viser forskellen i størrelse, før du vælger.
+
+Loggen skriver, om lyden var med. Uden det kan man ikke bagefter afgøre, om et arkiv rækker til at gendanne et helt møde eller kun teksten.
+
+Alt sker lokalt. Hverken appen eller scripterne har netværkskald, skytjeneste eller telemetri i backup-vejen.
 
 ```bash
 powershell -File C:\NoteApp\scripts\backup-mine-data.ps1

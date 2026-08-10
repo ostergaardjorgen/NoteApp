@@ -22,6 +22,32 @@
     står brugeren med to forskellige beslutningsgrundlag for samme beslutning.
 #>
 
+function Get-NoteAppDataRod {
+    <#
+    .SYNOPSIS
+        Hvor brugerens data ligger — samme rækkefølge som appen bruger.
+
+    .DESCRIPTION
+        Appen kan flytte datamappen, og gør den det, skriver den den nye sti i
+        %APPDATA%\NoteApp\datasti.txt. Slår scriptet ikke det samme op, tager
+        det backup af det forkerte sted uden at opdage det — og en backup, der
+        sikrer en tom mappe, er værre end ingen, fordi man tror man er dækket.
+
+        Rækkefølge: NOTEAPP_DATA, pegefilen, standarden C:\AppNoter.
+    #>
+    if (-not [string]::IsNullOrWhiteSpace($env:NOTEAPP_DATA)) {
+        return [IO.Path]::GetFullPath($env:NOTEAPP_DATA)
+    }
+
+    $peger = Join-Path $env:APPDATA 'NoteApp\datasti.txt'
+    if (Test-Path $peger) {
+        $valgt = (Get-Content $peger -Raw -Encoding UTF8).Trim()
+        if (-not [string]::IsNullOrWhiteSpace($valgt)) { return [IO.Path]::GetFullPath($valgt) }
+    }
+
+    return 'C:\AppNoter'
+}
+
 function Test-ForladerMaskinen {
     <#
     .SYNOPSIS

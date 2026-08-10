@@ -16,6 +16,16 @@ public partial class App : Application
         UserDataPaths.EnsureCreated();
 
         DispatcherUnhandledException += VisFejl;
+
+        // Første start: lad brugeren sætte fagområde og navne, før det første
+        // møde. En tom ordbog gør de første transskriptioner dårligere end
+        // nødvendigt, og det er ikke noget, man opdager — man tror bare, at
+        // værktøjet ikke duer.
+        if (!Settings.Current.SetupCompleted)
+        {
+            var opsaetning = new Setup.SetupWindow();
+            opsaetning.ShowDialog();
+        }
     }
 
     /// <summary>

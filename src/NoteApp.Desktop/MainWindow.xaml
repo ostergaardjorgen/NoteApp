@@ -24,7 +24,16 @@
         <RadioButton x:Name="NavOplaesning" GroupName="nav" Content="Oplæsning"
                      Checked="Nav_Changed" IsChecked="True"
                      Style="{StaticResource NavKnap}" />
+        <RadioButton x:Name="NavTransskriber" GroupName="nav" Content="Transskribér"
+                     Checked="Nav_Changed"
+                     Style="{StaticResource NavKnap}" />
         <RadioButton x:Name="NavOrdbog" GroupName="nav" Content="Ordbog"
+                     Checked="Nav_Changed"
+                     Style="{StaticResource NavKnap}" />
+        <RadioButton x:Name="NavMotor" GroupName="nav" Content="Motor og model"
+                     Checked="Nav_Changed"
+                     Style="{StaticResource NavKnap}" />
+        <RadioButton x:Name="NavFiler" GroupName="nav" Content="Filer og backup"
                      Checked="Nav_Changed"
                      Style="{StaticResource NavKnap}" />
 
