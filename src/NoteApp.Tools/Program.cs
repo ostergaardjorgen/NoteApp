@@ -18,6 +18,8 @@ try
         "tilfoej"   => Tilfoej(args.Skip(1).ToArray()),
         "eksport"   => Eksport(args.Skip(1).FirstOrDefault()),
         "motor"     => Motor(),
+        "hent"      => await Hent(args.Skip(1).ToArray()),
+        "gendan"    => Gendan(args.Skip(1).ToArray()),
         "transskriber" => await Transskriber(args.Skip(1).ToArray()),
         "recover"   => Genopret(),
         "hjaelp" or "--help" or "-h" => Hjælp(),
@@ -214,6 +216,95 @@ static int Motor()
         Console.WriteLine($"  {m.Id,-16} {m.SizeText,8}  {m.Summary}");
 
     return s.IsComplete ? 0 : 1;
+}
+
+/// <summary>
+/// Gendanner fra en sikkerhedskopi. Uden --foralvor er det en proevekoersel,
+/// der ikke roerer dine data — det er den, man skal have koert mindst een
+/// gang, foer man faar brug for den rigtige.
+/// </summary>
+static int Gendan(string[] a)
+{
+    if (a.Length == 0)
+    {
+        Console.Error.WriteLine("Brug: noteapp gendan <arkiv.zip> [--foralvor]");
+        return 2;
+    }
+
+    var arkiv = a[0];
+    if (!File.Exists(arkiv)) { Console.Error.WriteLine($"Findes ikke: {arkiv}"); return 1; }
+
+    var i = RestoreService.Inspect(arkiv);
+    Console.WriteLine($"Arkiv     : {Path.GetFileName(arkiv)}");
+    Console.WriteLine($"Fra       : {i.Created:dd/MM/yyyy HH:mm}");
+    Console.WriteLine($"Indhold   : {i.Files} filer, {i.MegaBytes:0.0} MB");
+    Console.WriteLine($"            {i.Summary}");
+    Console.WriteLine($"Ordbog med: {(i.HasDictionary ? "ja" : "NEJ")}");
+    Console.WriteLine();
+
+    if (!a.Contains("--foralvor"))
+    {
+        var udpakket = RestoreService.TestRestore(arkiv);
+        Console.WriteLine("PRØVEKØRSEL — dine data er ikke rørt.");
+        Console.WriteLine($"Udpakket til: {udpakket}");
+        Console.WriteLine("Ordbogen i arkivet er en gyldig SQLite-fil.");
+        Console.WriteLine();
+        Console.WriteLine("Kør med --foralvor for at gendanne rigtigt.");
+        return 0;
+    }
+
+    var r = RestoreService.Restore(arkiv);
+    Console.WriteLine($"Gendannet : {r.FilesWritten} filer til {UserDataPaths.Root}");
+    Console.WriteLine($"Fortrydes : {r.SafetyArchive ?? "ingen kopi taget — datamappen var tom"}");
+    return 0;
+}
+
+/// <summary>
+/// Henter en model. Samme kode som appens knap — der er kun ét sted i
+/// projektet, der rører netværket, og det er Downloader.
+/// </summary>
+static async Task<int> Hent(string[] a)
+{
+    if (a.Length == 0)
+    {
+        Console.Error.WriteLine("Brug: noteapp hent <model>");
+        Console.Error.WriteLine($"Modeller: {string.Join(", ", WhisperInstall.Models.Select(m => m.Id))}");
+        return 2;
+    }
+
+    var model = WhisperInstall.Model(a[0]);
+    if (model is null) { Console.Error.WriteLine($"Ukendt model: {a[0]}"); return 2; }
+
+    var mål = WhisperInstall.ModelDestination(model);
+
+    Console.WriteLine($"Model     : {model.Id} ({model.SizeText})");
+    Console.WriteLine($"Sprog     : {(model.SupportsDanish ? "flersproget, kan dansk" : "KUN ENGELSK")}");
+    Console.WriteLine($"Hentes fra: {model.Url}");
+    Console.WriteLine($"Gemmes som: {mål}");
+    Console.WriteLine();
+
+    var sidst = -1;
+    var fremdrift = new Progress<DownloadProgress>(p =>
+    {
+        var pct = (int)p.Percent;
+        if (pct == sidst) return;
+        sidst = pct;
+        var tilbage = p.Remaining is null ? "" : $"  {p.Remaining.Value:mm\\:ss} tilbage";
+        Console.Write($"\r  {pct,3}%  {p.BytesDone / 1024.0 / 1024.0,7:0} / {p.BytesTotal / 1024.0 / 1024.0:0} MB" +
+                      $"  {p.BytesPerSecond / 1024.0 / 1024.0:0.0} MB/s{tilbage}    ");
+    });
+
+    var ur = System.Diagnostics.Stopwatch.StartNew();
+    await new Downloader().DownloadAsync(model.Url, mål, model.Bytes, fremdrift);
+    ur.Stop();
+
+    var fil = new FileInfo(mål);
+    Console.WriteLine();
+    Console.WriteLine();
+    Console.WriteLine($"Hentet    : {fil.Length / 1024.0 / 1024.0:0.0} MB på {ur.Elapsed.TotalSeconds:0} sek");
+    Console.WriteLine($"Forventet : {model.Bytes / 1024.0 / 1024.0:0.0} MB");
+    Console.WriteLine($"Stemmer   : {(fil.Length == model.Bytes ? "JA" : "NEJ - filen har ikke den forventede størrelse")}");
+    return fil.Length == model.Bytes ? 0 : 1;
 }
 
 static async Task<int> Transskriber(string[] a)

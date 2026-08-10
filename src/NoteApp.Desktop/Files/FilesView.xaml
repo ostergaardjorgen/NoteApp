@@ -88,10 +88,26 @@
           <RowDefinition Height="Auto" />
           <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <TextBlock Grid.Row="0" Text="Gemte sikkerhedskopier" FontSize="14" FontWeight="SemiBold"
-                   Margin="18,16,18,8" />
+        <Grid Grid.Row="0" Margin="18,16,18,8">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+          </Grid.ColumnDefinitions>
+          <StackPanel Grid.Column="0">
+            <TextBlock Text="Gemte sikkerhedskopier" FontSize="14" FontWeight="SemiBold" />
+            <TextBlock x:Name="ValgtArkiv" Style="{StaticResource Underskrift}" Margin="0,3,0,0"
+                       Text="Vælg et arkiv for at se, hvad det indeholder." />
+          </StackPanel>
+          <StackPanel Grid.Column="1" Orientation="Horizontal">
+            <Button x:Name="ProeveKnap" Content="Prøvekørsel" Click="Proeve_Click"
+                    IsEnabled="False" Margin="0,0,8,0" />
+            <Button x:Name="GendanKnap" Content="Gendan…" Click="Gendan_Click" IsEnabled="False" />
+          </StackPanel>
+        </Grid>
+
         <ListBox x:Name="Arkiver" Grid.Row="1" Background="Transparent" BorderThickness="0"
-                 Margin="10,0,10,12" Foreground="{StaticResource Tekst}">
+                 Margin="10,0,10,12" Foreground="{StaticResource Tekst}"
+                 SelectionChanged="Arkiv_Valgt">
           <ListBox.ItemTemplate>
             <DataTemplate>
               <Grid Margin="6,4">

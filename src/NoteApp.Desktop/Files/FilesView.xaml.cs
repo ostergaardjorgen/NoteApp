@@ -166,6 +166,120 @@ public partial class FilesView : UserControl
         }
     }
 
+    // ------------------------------------------------------------ gendannelse
+
+    private void Arkiv_Valgt(object sender, SelectionChangedEventArgs e)
+    {
+        var valgt = Arkiver.SelectedItem as ArkivVisning;
+        ProeveKnap.IsEnabled = valgt is not null;
+        GendanKnap.IsEnabled = valgt is not null;
+
+        if (valgt is null)
+        {
+            ValgtArkiv.Text = "Vælg et arkiv for at se, hvad det indeholder.";
+            return;
+        }
+
+        try
+        {
+            var i = RestoreService.Inspect(Path.Combine(Destination, valgt.Navn));
+            ValgtArkiv.Text = $"{i.Files} filer · {i.MegaBytes:0.0} MB · {i.Summary}";
+        }
+        catch (Exception ex)
+        {
+            ValgtArkiv.Text = $"Kan ikke læse arkivet: {ex.Message}";
+            ProeveKnap.IsEnabled = false;
+            GendanKnap.IsEnabled = false;
+        }
+    }
+
+    /// <summary>
+    /// Prøvekørslen rører ikke dine data. Den findes, fordi en backup, man
+    /// aldrig har prøvet at gendanne, er en formodning — og det opdager man
+    /// ellers først den dag, det gælder.
+    /// </summary>
+    private void Proeve_Click(object sender, RoutedEventArgs e)
+    {
+        if (Arkiver.SelectedItem is not ArkivVisning valgt) return;
+        var sti = Path.Combine(Destination, valgt.Navn);
+
+        try
+        {
+            var i = RestoreService.Inspect(sti);
+            var udpakket = RestoreService.TestRestore(sti);
+
+            var svar = MessageBox.Show(
+                $"Prøvekørsel gennemført. Dine nuværende data er IKKE rørt.\n\n" +
+                $"Arkivet: {valgt.Navn}\n" +
+                $"Indhold: {i.Files} filer, {i.MegaBytes:0.0} MB\n" +
+                $"         {i.Summary}\n" +
+                (i.HasDictionary
+                    ? "Ordbogen er med og er en gyldig databasefil.\n"
+                    : "BEMÆRK: der er ingen ordbog i arkivet.\n") +
+                (i.AudioFiles == 0
+                    ? "Der er ingen lyd i arkivet — optagelserne kan ikke afspilles efter en gendannelse.\n"
+                    : "") +
+                $"\nUdpakket til:\n{udpakket}\n\nÅbn mappen?",
+                "Prøvekørsel", MessageBoxButton.YesNo, MessageBoxImage.Information);
+
+            if (svar == MessageBoxResult.Yes) Aabn(udpakket);
+            Status.Text = $"Prøvekørsel af {valgt.Navn} gennemført.";
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(ex.Message, "Prøvekørslen fejlede", MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+    }
+
+    private void Gendan_Click(object sender, RoutedEventArgs e)
+    {
+        if (Arkiver.SelectedItem is not ArkivVisning valgt) return;
+        var sti = Path.Combine(Destination, valgt.Navn);
+
+        ArchiveContents i;
+        try { i = RestoreService.Inspect(sti); }
+        catch (Exception ex)
+        {
+            MessageBox.Show(ex.Message, "Kan ikke læse arkivet", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        var svar = MessageBox.Show(
+            $"Gendan fra {valgt.Navn}?\n\n" +
+            $"Fra {i.Created:dd/MM/yyyy HH:mm}\n" +
+            $"Indhold: {i.Summary}\n\n" +
+            $"Filerne skrives ind i {UserDataPaths.Root} og overskriver dem, der hedder det samme.\n\n" +
+            (i.AudioFiles == 0
+                ? "Arkivet indeholder ingen lyd. Eksisterende lydfiler bliver liggende — de bliver ikke slettet.\n\n"
+                : "") +
+            "Der tages automatisk et sikkerhedsarkiv af dine nuværende data først, så du kan fortryde.\n\n" +
+            "Gendan nu?",
+            "Gendan fra sikkerhedskopi", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+
+        if (svar != MessageBoxResult.OK) return;
+
+        try
+        {
+            var r = RestoreService.Restore(sti);
+
+            MessageBox.Show(
+                $"{r.FilesWritten} filer gendannet.\n\n" +
+                (r.SafetyArchive is null
+                    ? "Der blev ikke taget et fortrydelsesarkiv — datamappen var tom, så der var intet at sikre.\n\n"
+                    : $"Dine tidligere data ligger som:\n{r.SafetyArchive}\n\n") +
+                "LUK OG START APPEN IGEN, så ordbogen genindlæses. Indtil da viser " +
+                "appen stadig det, den havde i hukommelsen.",
+                "Gendannet", MessageBoxButton.OK, MessageBoxImage.Information);
+
+            Status.Text = $"Gendannet fra {valgt.Navn}. Genstart appen.";
+            Opdater();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(ex.Message, "Gendannelsen fejlede", MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+    }
+
     // ------------------------------------------------------------------ hjælp
 
     private string? VaelgMappe(string titel, string start)

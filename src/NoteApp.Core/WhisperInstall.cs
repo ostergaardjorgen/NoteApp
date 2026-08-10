@@ -66,8 +66,14 @@ public static class WhisperInstall
     /// afhænger af, om man holder møder på dansk eller engelsk, og om der er
     /// et NVIDIA-kort i maskinen.
     ///
-    /// Størrelserne er de faktiske filstørrelser fra Hugging Face og vises,
-    /// FØR brugeren siger ja til at hente — ikke bagefter.
+    /// Størrelserne er de faktiske filstørrelser fra Hugging Face, målt med
+    /// et HEAD-kald 10. august 2026. De vises, FØR brugeren siger ja til at
+    /// hente — ikke bagefter.
+    ///
+    /// Tallet er ikke pynt: Downloader bruger det til at afgøre, om en fil,
+    /// der allerede ligger der, er hel. Er tallet forkert, hentes modellen
+    /// igen hver eneste gang. To af dem var gættet forkert i første udgave,
+    /// og det viste sig kun, fordi hentningen blev afprøvet.
     /// </summary>
     public static readonly IReadOnlyList<WhisperModel> Models = new[]
     {
@@ -104,7 +110,7 @@ public static class WhisperInstall
             "Mærkbart dårligere dansk. Negationer forsvinder, og det er den fejl, der vender betydningen om."),
 
         new WhisperModel(
-            "small.en", "ggml-small.en.bin", 487_601_967L,
+            "small.en", "ggml-small.en.bin", 487_614_201L,
             "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.en.bin",
             ModelLanguages.EnglishOnly,
             "Kun engelsk. Bedre engelsk end small til samme størrelse.",
@@ -112,7 +118,7 @@ public static class WhisperInstall
             "KAN IKKE DANSK. Vælges den til et dansk møde, kommer der volapyk ud — ikke en fejlmeddelelse."),
 
         new WhisperModel(
-            "base.en", "ggml-base.en.bin", 147_951_465L,
+            "base.en", "ggml-base.en.bin", 147_964_211L,
             "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.en.bin",
             ModelLanguages.EnglishOnly,
             "Kun engelsk, letvægt. 148 MB.",
