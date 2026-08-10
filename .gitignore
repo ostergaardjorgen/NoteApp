@@ -1,0 +1,61 @@
+# =============================================================================
+#  DINE DATA MÅ ALDRIG HAVNE HER
+# =============================================================================
+#  Den primære beskyttelse er ikke denne fil, men placeringen: alt personligt
+#  ligger i %LOCALAPPDATA%\NoteApp — uden for dette arbejdstræ. Reglerne
+#  herunder er et sikkerhedsnet, hvis noget alligevel bliver kopieret ind.
+#
+#  Se doc\mine-data.md.
+# -----------------------------------------------------------------------------
+
+# Den indlærte ordbog og rettelseshistorik — unik for din installation
+*.db
+*.db-wal
+*.db-shm
+learning.db
+ordliste.txt
+
+# Optagelser, noter og transskriptioner
+fase0/optagelser/
+fase0/transskriptioner/
+moeder/
+*.wav
+*.mp3
+*.m4a
+notes.jsonl
+meeting.json
+
+# Måleresultater fra enkeltkørsler — kun konklusion.md hører i versionsstyring
+fase0/resultater/rtf_*.csv
+fase0/resultater/noejagtighed_*.csv
+
+# Personlige varianter af testmaterialet: teksten på GitHub bruger opdigtede
+# navne. Din version med rigtige kollegaer og kunder gør ikke.
+*.personlig.md
+*.personlig.txt
+
+# Backup-arkiver
+noteapp-data_*.zip
+
+# -----------------------------------------------------------------------------
+#  Byggeartefakter og værktøjer
+# -----------------------------------------------------------------------------
+
+# Whisper-modeller og binærer — hentes med scripts, hører ikke i git
+models/
+tools/
+
+# Publiceret app — genskabes med dotnet publish
+app/
+
+# .NET build-output
+bin/
+obj/
+*.user
+
+# Windows
+Thumbs.db
+desktop.ini
+
+# Lokale arbejdsregler - maa ikke i versionsstyring
+CLAUDE.md

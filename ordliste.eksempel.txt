@@ -1,0 +1,5 @@
+Vi taler om identitets- og adgangsstyring, IAM, Entra ID, Microsoft Graph, SCIM,
+provisionering og deprovisionering, funktionsroller, rettighedsstyring, attestering,
+adgangsafstemning, onboarding og offboarding, JIT-adgang, PIM, privilegerede roller,
+SSO, MFA, MitID Erhverv, Zitadel, sikkerhedsgrupper, tenant, Active Directory,
+Exchange Online, NIS2, CRA og ISO 27001.
