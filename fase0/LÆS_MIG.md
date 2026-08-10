@@ -33,7 +33,7 @@ Spørgsmål 2 er delvist besvaret (se nedenfor). Spørgsmål 1 kræver et **rigt
 
 ## Placering
 
-Alt ligger i `C:\NoteApp\` — kildekode, modeller, whisper-binærer og optagelser. NAS'en er backup via git, ikke arbejdsdrev; målingen ovenfor viser hvorfor.
+Alt ligger i `C:\NoteApp\` — kildekode, modeller, whisper-binærer og optagelser. Målingen ovenfor viser hvorfor der ikke arbejdes fra et netværksdrev. Koden backes op til GitHub (privat repo).
 
 ---
 

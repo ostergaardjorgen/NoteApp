@@ -2,7 +2,7 @@
 
 Konsolideret 2026-08-07 ud fra samtalehistorikken. Erstatter den oprindelige iOS-plan.
 
-Projektmappe: `C:\NoteApp\` — kildekode, modeller, whisper-binærer og optagelser. NAS'en (`\\NAS_HOME\home\Drive\Vagtsom\NoteApp.git`) er backup via git, ikke arbejdsdrev. Begrundelsen er målt, ikke antaget — se afsnit 8.
+Projektmappe: `C:\NoteApp\` — kildekode, modeller, whisper-binærer og optagelser. Koden backes op til GitHub (privat repo); begrundelsen for at arbejde på lokal disk er målt, ikke antaget — se afsnit 8.
 
 ---
 
@@ -218,7 +218,9 @@ Teams-kalenderintegration, auto-start ved mødestart, live-transkription, søgni
 
 50 gange langsommere, og det er en omkostning der betales **hver gang** en transskription starter. NAS'en er ikke direkte-tilsluttet-hurtig i praksis, uanset kabling.
 
-**NAS'en bruges som backup:** et bart git-repo på `\\NAS_HOME\home\Drive\Vagtsom\NoteApp.git`. `git push` efter hver arbejdssession. Det giver durabiliteten uden at betale SMB-prisen ved hver kørsel.
+**Backup af koden: GitHub**, privat repo, `git push origin main` efter hver arbejdssession. Besluttet 10. august 2026; NAS'en blev tidligere brugt som ekstra bart git-repo, men to backupmål af den samme kode gav ingen ekstra sikkerhed og ét sted mere at glemme at pushe til.
+
+Det gælder **kun koden**. Dine data ligger uden for arbejdstræet og kommer aldrig i git — de sikres for sig, lokalt, se `doc\mine-data.md`.
 
 Modellerne (4,4 GB) er bevidst uden for versionsstyring — de hentes fra Hugging Face med scriptet, ikke fra backup.
 

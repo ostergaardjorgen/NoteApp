@@ -11,7 +11,7 @@ Alt er sat op og testet 8. august 2026. Du behøver ikke gøre noget for at komm
 | Whisper-modeller | `C:\NoteApp\models\` | `ggml-large-v3.bin` (2,9 GB), `ggml-medium.bin` (1,4 GB) |
 | Optageren, klar til brug | `C:\NoteApp\app\Fase0Recorder.exe` | 147 MB, selvstændig — kræver ingen runtime |
 | Kildekode | `C:\NoteApp\src\` | |
-| Backup | `\\NAS_HOME\home\Drive\Vagtsom\NoteApp.git` | git remote `nas` |
+| Kodebackup | https://github.com/ostergaardjorgen/NoteApp (privat) | git remote `origin` |
 
 **Tre genveje ligger på skrivebordet:**
 
@@ -90,10 +90,10 @@ dotnet publish C:\NoteApp\src\Fase0Recorder\Fase0Recorder.csproj -c Release -r w
 
 Luk optageren først — `Fase0Recorder.exe` kan ikke overskrives mens den kører.
 
-Backup til NAS efter en arbejdssession:
+Push efter en arbejdssession:
 
 ```bash
-git -C C:\NoteApp push nas main
+git -C C:\NoteApp push origin main
 ```
 
 ---
@@ -110,11 +110,13 @@ winget install --id Microsoft.DotNet.SDK.8 --silent --accept-package-agreements 
 
 En NVIDIA-GPU er ikke et krav, men den er forskellen på at vente og at lade den køre om natten. Uden GPU: brug `medium` frem for `large-v3`.
 
-**2. Hent koden fra backup**
+**2. Hent koden**
 
 ```bash
-git clone \\NAS_HOME\home\Drive\Vagtsom\NoteApp.git C:\NoteApp
+git clone https://github.com/ostergaardjorgen/NoteApp.git C:\NoteApp
 ```
+
+Repoet er privat, så det kræver, at du er logget på GitHub. Bemærk at **kun koden ligger der** — dine data (optagelser, `learning.db`, ordliste) er aldrig i git og skal hentes fra din egen backup, se `doc\mine-data.md`.
 
 **3. Hent whisper.cpp og modellerne**
 
@@ -150,7 +152,7 @@ Se efter `using CUDA0 backend` og `CUDA0 total size`. Er totalen større end kor
 
 ## Vigtigt om placering
 
-**Læg ikke modellerne på et netværksdrev.** Målt på denne maskine tog indlæsning af `ggml-large-v3.bin` **248 sekunder over SMB mod 4,9 sekunder fra lokal SSD** — og den omkostning betales hver eneste gang en transskription starter. NAS'en bruges kun som git-backup.
+**Læg ikke modellerne på et netværksdrev.** Målt på denne maskine tog indlæsning af `ggml-large-v3.bin` **248 sekunder over SMB mod 4,9 sekunder fra lokal SSD** — og den omkostning betales hver eneste gang en transskription starter.
 
 ## Juridisk note
 
