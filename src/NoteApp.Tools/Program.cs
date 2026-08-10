@@ -15,6 +15,8 @@ try
         "status"    => Status(),
         "init"      => Init(),
         "prompt"    => VisPrompt(args.Skip(1).FirstOrDefault()),
+        "tilfoej"   => Tilfoej(args.Skip(1).ToArray()),
+        "eksport"   => Eksport(args.Skip(1).FirstOrDefault()),
         "recover"   => Genopret(),
         "hjaelp" or "--help" or "-h" => Hjælp(),
         _ => Ukendt(kommando)
@@ -33,7 +35,11 @@ static int Hjælp()
 
           status    Viser hvor dine data ligger og hvad de indeholder
           init      Opretter ordbogen og indlæser ordliste.txt
+          tilfoej   Lægger et ord i ordbogen:
+                      noteapp tilfoej "Malene" person [vaegt] [kunde]
+                    Kategorier: person, organisation, produkt, fagterm, forkortelse
           prompt    Viser den ordliste der sendes til Whisper (valgfrit: <kunde>)
+          eksport   Skriver ordlisten til ordliste.txt, som Fase 0-scriptet læser
           recover   Samler møder der aldrig blev lukket ordentligt
 
         Dine data ligger i:
@@ -123,6 +129,60 @@ static int Init()
     }
 
     Console.WriteLine($"Termer i alt: {store.TermCount()}");
+    return 0;
+}
+
+/// <summary>
+/// Lægger ét ord i ordbogen. Findes, fordi UI'et er rigtigt til at gå en
+/// ordbog igennem, men klodset når man skal hælde en håndfuld navne ind på
+/// én gang — fx alle deltagerne fra ét møde.
+/// </summary>
+static int Tilfoej(string[] a)
+{
+    if (a.Length < 2)
+    {
+        Console.Error.WriteLine("Brug: noteapp tilfoej \"<ord>\" <kategori> [vaegt] [kunde]");
+        Console.Error.WriteLine($"Kategorier: {string.Join(", ", TermCategories.All)}");
+        return 2;
+    }
+
+    var ord = a[0];
+    var kategori = a[1].ToLowerInvariant();
+
+    if (!TermCategories.All.Contains(kategori))
+    {
+        Console.Error.WriteLine($"Ukendt kategori: {kategori}");
+        Console.Error.WriteLine($"Vælg mellem: {string.Join(", ", TermCategories.All)}");
+        return 2;
+    }
+
+    var vægt = a.Length > 2 && double.TryParse(a[2],
+        System.Globalization.NumberStyles.Any,
+        System.Globalization.CultureInfo.InvariantCulture, out var v) ? v : 1.0;
+    var kunde = a.Length > 3 ? a[3] : null;
+
+    using var store = new LearningStore();
+    store.AddTerm(ord, kategori, vægt, kunde);
+
+    Console.WriteLine($"Tilføjet: {ord} ({TermCategories.Label(kategori)}, vægt {vægt:0.0}" +
+                      (kunde is null ? "" : $", kunde {kunde}") + ")");
+    Console.WriteLine($"Termer i alt: {store.TermCount()}");
+    return 0;
+}
+
+/// <summary>
+/// Skriver ordbogens prompt til ordliste.txt. Ordbogen er kilden; filen er et
+/// øjebliksbillede af den, og det er filen, Fase 0-scriptet læser. Uden dette
+/// trin måler gaten på en ordliste, der kan være uger gammel.
+/// </summary>
+static int Eksport(string? kunde)
+{
+    using var store = new LearningStore();
+    var sti = store.ExportVocabularyFile(scope: kunde);
+
+    Console.WriteLine($"Skrevet : {sti}");
+    Console.WriteLine($"Termer  : {store.TermCount()} i ordbogen");
+    Console.WriteLine($"Tokens  : {LearningStore.EstimateTokens(File.ReadAllText(sti))} af budgettet på 200");
     return 0;
 }
 
