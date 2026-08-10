@@ -195,8 +195,14 @@ static int Eksport(string? kunde)
 
 static int Motor()
 {
-    var s = WhisperInstall.Locate();
+    // Samme valg som appen. Indstillingerne ligger i Core netop for det:
+    // laeser CLI'en ikke det samme, viser den en anden model end den appen
+    // bruger, og saa bruger man en time paa at forstaa hvorfor.
+    var valgt = AppSettings.Current.PreferredModel;
+    var s = WhisperInstall.Locate(valgt);
 
+    Console.WriteLine($"Valgt i appen: {valgt ?? "(intet valg — bedste model på disken bruges)"}");
+    Console.WriteLine();
     Console.WriteLine($"Motor    : {s.WhisperCli ?? "IKKE FUNDET"}");
     Console.WriteLine($"Version  : {s.EngineVersion ?? "kunne ikke aflæses"}");
     Console.WriteLine($"Beregning: {s.Engine}");

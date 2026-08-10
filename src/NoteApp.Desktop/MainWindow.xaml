@@ -36,6 +36,9 @@
         <RadioButton x:Name="NavFiler" GroupName="nav" Content="Filer og backup"
                      Checked="Nav_Changed"
                      Style="{StaticResource NavKnap}" />
+        <RadioButton x:Name="NavIndstillinger" GroupName="nav" Content="Indstillinger"
+                     Checked="Nav_Changed"
+                     Style="{StaticResource NavKnap}" />
 
         <Border Height="1" Background="{StaticResource PanelKant}" Margin="6,22,6,16" />
 

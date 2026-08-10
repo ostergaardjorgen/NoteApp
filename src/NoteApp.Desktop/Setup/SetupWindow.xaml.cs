@@ -151,9 +151,9 @@ public partial class SetupWindow : Window
         // huskede at trykke eksportér.
         store.ExportVocabularyFile();
 
-        Settings.Current.SetupCompleted = true;
-        Settings.Current.Industry = _branche;
-        Settings.Current.Save();
+        AppSettings.Current.SetupCompleted = true;
+        AppSettings.Current.Industry = _branche;
+        AppSettings.Current.Save();
 
         MessageBox.Show(
             $"Ordbogen er sat op med {fraSkabelon + navne + firmaer} ord: " +

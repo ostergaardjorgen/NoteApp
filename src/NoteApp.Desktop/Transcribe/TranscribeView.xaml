@@ -131,6 +131,8 @@
       </StackPanel>
 
       <StackPanel Grid.Column="1" Orientation="Horizontal">
+        <Button x:Name="SletKnap" Content="Slet optagelse" Click="Slet_Click" IsEnabled="False"
+                Margin="0,0,8,0" />
         <Button x:Name="AabnKnap" Content="Åbn mappen" Click="Aabn_Click" IsEnabled="False" Margin="0,0,8,0" />
         <Button x:Name="AfbrydKnap" Content="Afbryd" Click="Afbryd_Click" Visibility="Collapsed" Margin="0,0,8,0" />
         <Button x:Name="KoerKnap" Content="Transskribér" Click="Koer_Click" Style="{StaticResource Primaer}"

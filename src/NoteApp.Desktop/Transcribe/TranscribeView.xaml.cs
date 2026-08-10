@@ -18,12 +18,26 @@ public sealed class OptagelseVisning
         Titel = meta?.Title ?? Path.GetFileName(mappe);
         Sekunder = File.Exists(wav) ? Transcriber.WavSeconds(wav) : 0;
 
+        // Konsol-optagerens meeting.json har et andet skema, saa StartedAt
+        // bliver default og datoen ville staa som 01-01. Mappens tidsstempel
+        // er saa det eneste rigtige svar.
+        var start = meta?.StartedAt ?? default;
+        var dato = start == default
+            ? Directory.GetLastWriteTime(mappe)
+            : start.LocalDateTime;
+
         var længde = TimeSpan.FromSeconds(Sekunder);
-        var dato = meta?.StartedAt.ToString("dd/MM HH:mm") ?? Directory.GetLastWriteTime(mappe).ToString("dd/MM HH:mm");
-        Detaljer = $"{dato} · {længde:mm\\:ss}";
+        Detaljer = $"{dato:dd/MM HH:mm} · {længde:mm\\:ss}";
 
         HarLyd = File.Exists(wav) && Sekunder > 0;
         if (!HarLyd) Detaljer += " · ingen lyd";
+
+        try
+        {
+            Bytes = Directory.EnumerateFiles(mappe, "*", SearchOption.AllDirectories)
+                .Sum(f => new FileInfo(f).Length);
+        }
+        catch (IOException) { Bytes = 0; }
     }
 
     public string Mappe { get; }
@@ -31,6 +45,9 @@ public sealed class OptagelseVisning
     public string Detaljer { get; }
     public double Sekunder { get; }
     public bool HarLyd { get; }
+    public long Bytes { get; }
+
+    public double MegaBytes => Bytes / 1024.0 / 1024.0;
 }
 
 /// <summary>
@@ -79,6 +96,7 @@ public partial class TranscribeView : UserControl
         var valgt = Optagelser.SelectedItem as OptagelseVisning;
         KoerKnap.IsEnabled = valgt?.HarLyd == true && _afbryd is null;
         AabnKnap.IsEnabled = valgt is not null;
+        SletKnap.IsEnabled = valgt is not null && _afbryd is null;
 
         if (valgt is { HarLyd: false })
             Status.Text = "Den optagelse har ingen lydfil — der er intet at transskribere.";
@@ -90,7 +108,7 @@ public partial class TranscribeView : UserControl
     {
         if (Optagelser.SelectedItem is not OptagelseVisning valgt) return;
 
-        var install = WhisperInstall.Locate(Settings.Current.PreferredModel);
+        var install = WhisperInstall.Locate(AppSettings.Current.PreferredModel);
         if (!install.IsComplete)
         {
             MessageBox.Show(
@@ -177,6 +195,59 @@ public partial class TranscribeView : UserControl
 
         Status.Text = $"Færdig · {r.EngineId} · gemt som {Path.GetFileName(r.TextPath)}";
         AabnKnap.IsEnabled = true;
+    }
+
+    /// <summary>
+    /// Sletter en optagelse med alt, hvad der hører til den.
+    ///
+    /// Dialogen lister, hvad der forsvinder, og hvor meget det fylder. En
+    /// optagelse kan ikke laves om — mødet er holdt — så det er ikke nok at
+    /// spørge "er du sikker?"; man skal kunne se, om det er den rigtige.
+    /// Der er ingen papirkurv i appen: filen ligger i din egen datamappe, og
+    /// en skjult kopi ville bare være data, du ikke vidste du havde.
+    /// </summary>
+    private void Slet_Click(object sender, RoutedEventArgs e)
+    {
+        if (Optagelser.SelectedItem is not OptagelseVisning valgt) return;
+
+        var transskriptioner = Directory.Exists(valgt.Mappe)
+            ? Directory.GetFiles(valgt.Mappe, "*.txt").Length
+            : 0;
+        var noter = File.Exists(Path.Combine(valgt.Mappe, "notes.jsonl"));
+
+        var hvad = new List<string>();
+        if (valgt.HarLyd) hvad.Add($"lyden ({TimeSpan.FromSeconds(valgt.Sekunder):mm\\:ss})");
+        if (transskriptioner > 0) hvad.Add($"{transskriptioner} transskriptioner");
+        if (noter) hvad.Add("noter og blokmærker");
+
+        var svar = MessageBox.Show(
+            $"Slet «{valgt.Titel}»?\n\n" +
+            $"{valgt.Detaljer}\n" +
+            $"Fylder: {valgt.MegaBytes:0.0} MB\n" +
+            $"Mappe : {valgt.Mappe}\n\n" +
+            (hvad.Count > 0 ? $"Følgende slettes: {string.Join(", ", hvad)}.\n\n" : "") +
+            "Det kan ikke fortrydes. Mødet kan ikke optages om.\n\n" +
+            "Ligger optagelsen i en sikkerhedskopi, findes den stadig der — men " +
+            "backup uden lyd indeholder kun teksten.",
+            "Slet optagelse", MessageBoxButton.YesNo, MessageBoxImage.Warning,
+            MessageBoxResult.No);
+
+        if (svar != MessageBoxResult.Yes) return;
+
+        try
+        {
+            Directory.Delete(valgt.Mappe, recursive: true);
+            Status.Text = $"«{valgt.Titel}» er slettet ({valgt.MegaBytes:0.0} MB frigjort).";
+            _sidsteMappe = null;
+            IndlaesOptagelser();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(
+                $"Kunne ikke slette:\n\n{ex.Message}\n\n" +
+                "Er filen åben i et andet program, så luk det og prøv igen.",
+                "Sletning fejlede", MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
     }
 
     private void Afbryd_Click(object sender, RoutedEventArgs e) => _afbryd?.Cancel();

@@ -83,7 +83,7 @@ public partial class EngineView : UserControl
 
     private void Opdater()
     {
-        var s = WhisperInstall.Locate(Settings.Current.PreferredModel);
+        var s = WhisperInstall.Locate(AppSettings.Current.PreferredModel);
 
         MotorNavn.Text = s.WhisperCli is null ? "ikke installeret" : "whisper.cpp";
         MotorVersion.Text = s.EngineVersion ?? "ukendt (lagt der i hånden)";
@@ -127,8 +127,8 @@ public partial class EngineView : UserControl
 
         if (alleredeHentet)
         {
-            Settings.Current.PreferredModel = model.Id;
-            Settings.Current.Save();
+            AppSettings.Current.PreferredModel = model.Id;
+            AppSettings.Current.Save();
             Opdater();
             Status.Text = $"{model.Id} er nu den model, transskriptionen bruger.";
             return;
@@ -178,8 +178,8 @@ public partial class EngineView : UserControl
         {
             await _downloader.DownloadAsync(model.Url, destination, model.Bytes, fremdrift, _afbryd.Token);
 
-            Settings.Current.PreferredModel = model.Id;
-            Settings.Current.Save();
+            AppSettings.Current.PreferredModel = model.Id;
+            AppSettings.Current.Save();
 
             Status.Text = $"{model.Id} er hentet og er nu den model, transskriptionen bruger.";
         }

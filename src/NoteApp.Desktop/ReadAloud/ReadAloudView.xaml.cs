@@ -44,7 +44,7 @@ public partial class ReadAloudView : UserControl
             ? "Teksten læses fra den kopi, der er indlejret i appen."
             : $"Teksten læses fra {kilde} — ret filen, og genstart appen for at se ændringen.";
 
-        var mik = AudioDevices.DefaultMicrophone();
+        var mik = AudioDevices.ResolveMicrophone(AppSettings.Current.MicrophoneId, out _);
         MikrofonNavn.Text = mik?.FriendlyName ?? "ingen mikrofon fundet";
         OptagKnap.IsEnabled = mik is not null;
         Status.Text = mik is null
@@ -69,11 +69,23 @@ public partial class ReadAloudView : UserControl
 
     private void StartOptagelse()
     {
-        var mik = AudioDevices.DefaultMicrophone();
+        // Den valgte mikrofon fra Indstillinger. Er den taget ud siden sidst,
+        // falder vi tilbage paa Windows' standard — men siger det foerst, saa
+        // man ikke opdager det efter tyve minutters oplaesning.
+        var mik = AudioDevices.ResolveMicrophone(AppSettings.Current.MicrophoneId, out var fallback);
         if (mik is null)
         {
             MessageBox.Show("Ingen mikrofon fundet.", "Kan ikke optage", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
+        }
+
+        if (fallback)
+        {
+            var svar = MessageBox.Show(
+                $"Den mikrofon, du havde valgt under Indstillinger, er ikke tilsluttet.\n\n" +
+                $"Der optages i stedet fra: {mik.FriendlyName}\n\nFortsæt?",
+                "Mikrofonen er skiftet", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+            if (svar != MessageBoxResult.OK) return;
         }
 
         // Oplæsning er per definition et fysisk møde: ét spor, kun mikrofonen.

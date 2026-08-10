@@ -21,7 +21,7 @@ public partial class App : Application
         // møde. En tom ordbog gør de første transskriptioner dårligere end
         // nødvendigt, og det er ikke noget, man opdager — man tror bare, at
         // værktøjet ikke duer.
-        if (!Settings.Current.SetupCompleted)
+        if (!AppSettings.Current.SetupCompleted)
         {
             var opsaetning = new Setup.SetupWindow();
             opsaetning.ShowDialog();

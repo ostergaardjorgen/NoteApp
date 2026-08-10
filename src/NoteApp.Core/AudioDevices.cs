@@ -3,16 +3,100 @@ using NAudio.Wave;
 
 namespace NoteApp.Core;
 
-public sealed record DeviceInfo(string Id, string FriendlyName);
+public sealed record DeviceInfo(string Id, string FriendlyName, bool IsDefault = false)
+{
+    public string Display => IsDefault ? $"{FriendlyName}  (Windows' standard)" : FriendlyName;
+}
 
 /// <summary>
-/// Enhedsvalg tages fra Windows' standardenheder. Appen viser hvad der blev
-/// valgt, men tilbyder ikke en dropdown — jf. speccen afsnit 2. Vælger man
-/// forkert enhed midt i et møde, er skaden allerede sket; at vise navnet
-/// tydeligt er den kontrol der faktisk hjælper.
+/// Lydenheder.
+///
+/// Oprindeligt tog appen altid Windows' standardenheder og tilbød ingen
+/// dropdown (speccen afsnit 2). Den beslutning er omgjort 10. august 2026:
+/// med en Jabra-højttaler, en laptopmikrofon og et headset tilsluttet er
+/// Windows' standard ofte den forkerte, og uden et valg i appen skal man ud
+/// i Windows' lydindstillinger midt i en mødeforberedelse.
+///
+/// Valget gemmes som enheds-ID, ikke som navn: to headset af samme model
+/// hedder det samme. Er den valgte enhed væk — headsettet er taget ud —
+/// falder appen tilbage på Windows' standard frem for at fejle, og siger det.
 /// </summary>
 public static class AudioDevices
 {
+    /// <summary>Alle mikrofoner, Windows kender. Standarden står først.</summary>
+    public static IReadOnlyList<DeviceInfo> Microphones() => Enumerate(DataFlow.Capture, Role.Communications);
+
+    /// <summary>Alle afspilningsenheder. Loopback optages fra den, lyden faktisk går til.</summary>
+    public static IReadOnlyList<DeviceInfo> Speakers() => Enumerate(DataFlow.Render, Role.Multimedia);
+
+    private static IReadOnlyList<DeviceInfo> Enumerate(DataFlow flow, Role role)
+    {
+        try
+        {
+            using var e = new MMDeviceEnumerator();
+
+            string? standardId = null;
+            try { standardId = e.GetDefaultAudioEndpoint(flow, role).ID; } catch (Exception) { }
+
+            return e.EnumerateAudioEndPoints(flow, DeviceState.Active)
+                .Select(d => new DeviceInfo(d.ID, d.FriendlyName, d.ID == standardId))
+                .OrderByDescending(d => d.IsDefault)
+                .ThenBy(d => d.FriendlyName)
+                .ToList();
+        }
+        catch (Exception)
+        {
+            return Array.Empty<DeviceInfo>();
+        }
+    }
+
+    /// <summary>
+    /// Finder den valgte enhed, eller falder tilbage på Windows' standard,
+    /// hvis den er væk. <paramref name="wasFallback"/> siger, om der blev
+    /// faldet tilbage — brugeren skal have det at vide FØR optagelsen, ikke
+    /// opdage det bagefter.
+    /// </summary>
+    public static DeviceInfo? ResolveMicrophone(string? preferredId, out bool wasFallback)
+        => Resolve(Microphones(), preferredId, DefaultMicrophone(), out wasFallback);
+
+    public static DeviceInfo? ResolveSpeaker(string? preferredId, out bool wasFallback)
+        => Resolve(Speakers(), preferredId, DefaultRenderDevice(), out wasFallback);
+
+    private static DeviceInfo? Resolve(IReadOnlyList<DeviceInfo> alle, string? preferredId,
+                                       DeviceInfo? standard, out bool wasFallback)
+    {
+        wasFallback = false;
+
+        if (!string.IsNullOrWhiteSpace(preferredId))
+        {
+            var valgt = alle.FirstOrDefault(d => d.Id == preferredId);
+            if (valgt is not null) return valgt;
+            wasFallback = true;
+        }
+
+        return standard;
+    }
+
+    /// <summary>Øjebliksniveau på en mikrofon. Bruges til måleren, når enheden vælges.</summary>
+    public static float MeasureCapturePeak(string deviceId, TimeSpan window, CancellationToken ct = default)
+    {
+        var peak = 0f;
+        using var device = Resolve(deviceId);
+        using var probe = new WasapiCapture(device);
+
+        probe.DataAvailable += (_, e) =>
+        {
+            var p = PeakMeter.Peak(e.Buffer, e.BytesRecorded, probe.WaveFormat);
+            if (p > peak) peak = p;
+        };
+
+        probe.StartRecording();
+        try { ct.WaitHandle.WaitOne(window); }
+        finally { probe.StopRecording(); }
+
+        return peak;
+    }
+
     public static DeviceInfo? DefaultMicrophone()
     {
         try

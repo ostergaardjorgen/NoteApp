@@ -28,7 +28,7 @@ public partial class FilesView : UserControl
     }
 
     private string Destination =>
-        Settings.Current.BackupDestination ?? BackupService.DefaultDestination;
+        AppSettings.Current.BackupDestination ?? BackupService.DefaultDestination;
 
     private void Opdater()
     {
@@ -52,7 +52,7 @@ public partial class FilesView : UserControl
             ? "Denne mappe ligger uden for maskinen. Arkivet er ikke krypteret, og alle med adgang til den kan åbne det."
             : "";
 
-        TagLydMed.IsChecked = Settings.Current.BackupIncludeAudio;
+        TagLydMed.IsChecked = AppSettings.Current.BackupIncludeAudio;
 
         // Forskellen mellem med og uden lyd er typisk tre stoerrelsesordener.
         // Den skal staa der, ellers er afkrydsningsfeltet et gaet.
@@ -128,23 +128,23 @@ public partial class FilesView : UserControl
             BackupService.Log($"GODKENDT: backupmappe uden for maskinen -> {valgt}");
         }
 
-        Settings.Current.BackupDestination = valgt;
-        Settings.Current.Save();
+        AppSettings.Current.BackupDestination = valgt;
+        AppSettings.Current.Save();
         Status.Text = $"Sikkerhedskopier lægges nu i {valgt}";
         Opdater();
     }
 
     private void Lyd_Klik(object sender, RoutedEventArgs e)
     {
-        Settings.Current.BackupIncludeAudio = TagLydMed.IsChecked == true;
-        Settings.Current.Save();
+        AppSettings.Current.BackupIncludeAudio = TagLydMed.IsChecked == true;
+        AppSettings.Current.Save();
         Opdater();
     }
 
     private void Koer_Click(object sender, RoutedEventArgs e)
     {
         KoerKnap.IsEnabled = false;
-        var medLyd = Settings.Current.BackupIncludeAudio;
+        var medLyd = AppSettings.Current.BackupIncludeAudio;
         Status.Text = "Tager sikkerhedskopi …";
 
         try

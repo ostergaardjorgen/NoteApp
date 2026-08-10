@@ -5,6 +5,7 @@ using NoteApp.Core;
 using NoteApp.Desktop.Dictionary;
 using NoteApp.Desktop.Engine;
 using NoteApp.Desktop.Files;
+using NoteApp.Desktop.Preferences;
 using NoteApp.Desktop.ReadAloud;
 using NoteApp.Desktop.Transcribe;
 
@@ -53,6 +54,12 @@ public partial class MainWindow : Window
         else if (NavFiler.IsChecked == true)
         {
             Indhold.Content = new FilesView();
+        }
+        else if (NavIndstillinger.IsChecked == true)
+        {
+            // Bygges hver gang: enhedslisten skal vise det, der er tilsluttet
+            // NU, ikke da appen startede.
+            Indhold.Content = new SettingsView();
         }
         else
         {
