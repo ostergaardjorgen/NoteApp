@@ -44,6 +44,16 @@ public sealed class AppSettings
 
     public string? SpeakerId { get; set; }
 
+    /// <summary>
+    /// Skift afsnit automatisk under oplæsning. Kræver en lille model ved
+    /// siden af den store — se LiveListener. Slået fra som standard: den
+    /// koster GPU-tid, og en fejltolkning midt i en oplæsning er irriterende.
+    /// </summary>
+    public bool AutoAdvance { get; set; }
+
+    /// <summary>Model til live-lytningen. Den store bruges til den rigtige transskription.</summary>
+    public string LiveModel { get; set; } = "small";
+
     private static string Path => System.IO.Path.Combine(UserDataPaths.Root, "indstillinger.json");
 
     private static AppSettings? _current;

@@ -182,7 +182,13 @@
           <TextBlock x:Name="MikrofonNavn" Style="{StaticResource Underskrift}" Margin="12,0,0,0"
                      VerticalAlignment="Center" MaxWidth="360" TextTrimming="CharacterEllipsis" />
         </StackPanel>
-        <TextBlock x:Name="Status" Style="{StaticResource Underskrift}" />
+        <StackPanel Orientation="Horizontal">
+          <CheckBox x:Name="FoelgMed" Content="Skift afsnit automatisk, når jeg har læst det"
+                    Click="FoelgMed_Klik" FontSize="12" Margin="0,0,10,0" />
+          <TextBlock x:Name="FoelgStatus" Style="{StaticResource Underskrift}"
+                     VerticalAlignment="Center" Foreground="{StaticResource TekstMeget}" />
+        </StackPanel>
+        <TextBlock x:Name="Status" Style="{StaticResource Underskrift}" Margin="0,4,0,0" />
       </StackPanel>
 
       <StackPanel Grid.Column="1" Orientation="Horizontal">

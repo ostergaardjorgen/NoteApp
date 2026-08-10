@@ -27,6 +27,11 @@ public partial class ReadAloudView : UserControl
     private int _afsnitIndex;
     private int _sidsteBlok = -1;
 
+    // Live-lytningen der skifter afsnit af sig selv. Den er en hjaelper:
+    // fejler den, eller taber den traaden, virker mellemrum praecis som foer.
+    private LiveListener? _lytter;
+    private readonly ScriptFollower _foelger = new();
+
     public ReadAloudView()
     {
         InitializeComponent();
@@ -66,6 +71,9 @@ public partial class ReadAloudView : UserControl
 
         _timer = new DispatcherTimer(DispatcherPriority.Render) { Interval = TimeSpan.FromMilliseconds(100) };
         _timer.Tick += (_, _) => Opdater();
+
+        FoelgMed.IsChecked = AppSettings.Current.AutoAdvance;
+        VisFoelgStatus();
 
         Loaded += (_, _) => Focus();
     }
@@ -122,6 +130,9 @@ public partial class ReadAloudView : UserControl
 
         VisAfsnit();
         _timer.Start();
+
+        if (AppSettings.Current.AutoAdvance) StartLytning();
+
         Focus();
     }
 
@@ -130,6 +141,7 @@ public partial class ReadAloudView : UserControl
         if (_session is null) return;
 
         _timer.Stop();
+        StopLytning();
 
         var filer = _session.Stop();
         var mappe = _session.SessionDir;
@@ -166,6 +178,112 @@ public partial class ReadAloudView : UserControl
             Process.Start(new ProcessStartInfo("explorer.exe", $"\"{mappe}\"") { UseShellExecute = true });
     }
 
+    // ------------------------------------------------------------ auto-skift
+
+    /// <summary>
+    /// Fortæller, om automatisk skift kan lade sig gøre — og hvorfor ikke,
+    /// hvis det ikke kan. Et afkrydsningsfelt, der stille intet gør, er
+    /// værre end et, der er slået fra med en begrundelse.
+    /// </summary>
+    private void VisFoelgStatus()
+    {
+        var install = WhisperInstall.Locate();
+        var stream = LiveListener.FindStreamExe(install.WhisperCli);
+        var model = LiveModelPath();
+
+        if (stream is null)
+        {
+            FoelgMed.IsEnabled = false;
+            FoelgStatus.Text = "kræver whisper-stream, som ikke findes i din motor-mappe";
+        }
+        else if (model is null)
+        {
+            FoelgMed.IsEnabled = false;
+            FoelgStatus.Text = $"hent modellen «{AppSettings.Current.LiveModel}» under Motor og model først";
+        }
+        else
+        {
+            FoelgMed.IsEnabled = true;
+            FoelgStatus.Text = FoelgMed.IsChecked == true
+                ? $"lytter med {AppSettings.Current.LiveModel} — mellemrum virker stadig"
+                : "";
+        }
+    }
+
+    /// <summary>
+    /// Stien til live-modellen. Den er bevidst en anden end den store: den
+    /// skal svare hvert andet sekund, ikke skrive det bedste resultat.
+    /// </summary>
+    private static string? LiveModelPath()
+    {
+        var id = AppSettings.Current.LiveModel;
+        var model = WhisperInstall.Model(id);
+        if (model is null) return null;
+
+        var sti = WhisperInstall.Locate(id).ModelPath;
+        return sti is not null && Path.GetFileName(sti).Equals(model.FileName, StringComparison.OrdinalIgnoreCase)
+            ? sti
+            : null;
+    }
+
+    private void FoelgMed_Klik(object sender, RoutedEventArgs e)
+    {
+        AppSettings.Current.AutoAdvance = FoelgMed.IsChecked == true;
+        AppSettings.Current.Save();
+        VisFoelgStatus();
+
+        if (_session is null) return;
+
+        if (AppSettings.Current.AutoAdvance) StartLytning();
+        else StopLytning();
+    }
+
+    private void StartLytning()
+    {
+        var install = WhisperInstall.Locate();
+        var stream = LiveListener.FindStreamExe(install.WhisperCli);
+        var model = LiveModelPath();
+        if (stream is null || model is null) return;
+
+        // Lyt paa den mikrofon, brugeren har valgt — ikke paa Windows'
+        // standard. Ellers foelger appen en anden lyd end den, den optager.
+        var enheder = LiveListener.ListCaptureDevices(stream);
+        var valgt = AudioDevices.ResolveMicrophone(AppSettings.Current.MicrophoneId, out _);
+        var sdlId = LiveListener.MatchDevice(enheder, valgt?.FriendlyName);
+
+        _lytter = new LiveListener(stream);
+        _lytter.Heard += tekst => Dispatcher.BeginInvoke(() => Hoert(tekst));
+        _lytter.Failed += fejl => Dispatcher.BeginInvoke(() =>
+        {
+            FoelgStatus.Text = $"kunne ikke lytte med: {fejl} — brug mellemrum";
+        });
+
+        _foelger.SetParagraph(_script.Paragraphs[_afsnitIndex].Text);
+        _lytter.Start(model, sdlId);
+
+        FoelgStatus.Text = sdlId >= 0
+            ? $"lytter med {AppSettings.Current.LiveModel} — mellemrum virker stadig"
+            : $"lytter på Windows' standardmikrofon — mellemrum virker stadig";
+    }
+
+    private void StopLytning()
+    {
+        _lytter?.Dispose();
+        _lytter = null;
+    }
+
+    /// <summary>
+    /// Kaldes for hver linje, live-lytningen producerer. Skifter afsnit, når
+    /// slutningen af det aktuelle er hørt.
+    /// </summary>
+    private void Hoert(string tekst)
+    {
+        if (_session is null || _session.IsPaused) return;
+        if (_afsnitIndex + 1 >= _script.Paragraphs.Count) return;
+
+        if (_foelger.Feed(tekst)) Flyt(1);
+    }
+
     /// <summary>
     /// Pause og fortsæt. Under pausen optages der intet — mikrofonen slippes,
     /// og uret står stille. Det er dét, der gør det trygt at trykke start:
@@ -183,11 +301,16 @@ public partial class ReadAloudView : UserControl
             OptagerPrik.Fill = (Brush)FindResource("Optager");
             Status.Text = "Optager igen.";
             _timer.Start();
+            if (AppSettings.Current.AutoAdvance) StartLytning();
         }
         else
         {
             _session.Pause();
             _timer.Stop();
+
+            // Lytningen stoppes ogsaa. Ellers ville den blive ved med at
+            // hoere efter under en pause, hvor der netop ikke skal optages.
+            StopLytning();
             PauseKnap.Content = "▶ Fortsæt";
             OptagerPrik.Fill = (Brush)FindResource("Advarsel");
             Niveau.Width = 0;
@@ -213,6 +336,11 @@ public partial class ReadAloudView : UserControl
 
         _afsnitIndex = ny;
         VisAfsnit();
+
+        // Foelgeren skal vide, hvad den nu skal lytte efter — ogsaa naar man
+        // selv trykker mellemrum. Ellers ville den blive ved med at vente paa
+        // slutningen af et afsnit, brugeren allerede har forladt.
+        _foelger.SetParagraph(_script.Paragraphs[_afsnitIndex].Text);
     }
 
     /// <summary>
