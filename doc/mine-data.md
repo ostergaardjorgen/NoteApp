@@ -101,7 +101,7 @@ powershell -File C:\NoteApp\scripts\gendan-mine-data.ps1 -Proeve
 
 1. **Det verificerer arkivet efter oprettelse.** Et arkiv der ikke kan åbnes er ikke en backup, og det skal opdages nu — ikke den dag du får brug for det.
 2. **Det logger hvilken mappe der blev taget backup af.** En backup-log der ikke siger *hvad* den sikrede, kan ikke afsløre at den sikrede den forkerte mappe.
-3. **Det nægter at køre, hvis datamappen hverken har `learning.db` eller `moeder\`.** En planlagt opgave kan køre med et andet miljø end den session der oprettede den, og så peger `LOCALAPPDATA` et andet sted hen. Uden dette værn ville du få en stribe grønne "backup gennemført" af en tom mappe. Derfor skriver `planlaeg-backup.ps1` også datamappen eksplicit ind i opgaven i stedet for at lade den slå den op selv.
+3. **Det nægter at køre, hvis datamappen hverken har `learning.db` eller `Optagelser\`.** En planlagt opgave kan køre med et andet miljø end den session, der oprettede den, og så peger den et andet sted hen. Uden dette værn ville du få en stribe grønne "backup gennemført" af en tom mappe. Derfor skriver `planlaeg-backup.ps1` også datamappen eksplicit ind i opgaven i stedet for at lade den slå den op selv.
 
 ## Fase 3 er fjernet — og hvorfor
 

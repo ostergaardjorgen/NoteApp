@@ -101,6 +101,33 @@ public sealed class RecordingSession : IDisposable
         foreach (var t in _tracks) t.Start();
     }
 
+    public bool IsPaused { get; private set; }
+
+    /// <summary>
+    /// Holder pause. Uret standser sammen med lyden, så noternes tidsstempler
+    /// bliver ved med at passe til det, der faktisk er optaget — ellers ville
+    /// en note lande et forkert sted i transskriptionen efter hver pause.
+    ///
+    /// Der optages intet imens. Det er ikke en dæmpning: mikrofonen slippes.
+    /// </summary>
+    public void Pause()
+    {
+        if (IsPaused || !_clock.IsRunning) return;
+
+        foreach (var t in _tracks) t.Pause();
+        _clock.Stop();
+        IsPaused = true;
+    }
+
+    public void Resume()
+    {
+        if (!IsPaused) return;
+
+        _clock.Start();
+        foreach (var t in _tracks) t.Resume();
+        IsPaused = false;
+    }
+
     /// <summary>
     /// Stopper og samler segmenterne. Fejler samlingen for ét spor, fortsætter
     /// vi med det andet — og segmenterne bliver liggende, så genopretningen

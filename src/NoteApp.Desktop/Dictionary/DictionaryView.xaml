@@ -43,8 +43,8 @@
                 AutoGenerateColumns="False" IsReadOnly="True"
                 HeadersVisibility="Column" GridLinesVisibility="Horizontal"
                 Background="{StaticResource Panel}" Foreground="{StaticResource Tekst}"
-                RowBackground="{StaticResource Panel}" AlternatingRowBackground="#FF20242D"
-                HorizontalGridLinesBrush="#FF262B35" BorderBrush="{StaticResource PanelKant}"
+                RowBackground="{StaticResource Panel}" AlternatingRowBackground="#FF262B34"
+                HorizontalGridLinesBrush="#FF343B48" BorderBrush="{StaticResource PanelKant}"
                 BorderThickness="1" SelectionMode="Single"
                 SelectionChanged="Gitter_SelectionChanged"
                 RowHeaderWidth="0" FontSize="13">
@@ -100,7 +100,7 @@
           <!-- Prompten er den eneste måde at se, om ordbogen faktisk virker.
                Whisper har ~224 tokens; overfyldes den, skriver modellen
                prompten ind i transskriptionen. Derfor står tallet her. -->
-          <Border Background="#FF11141A" CornerRadius="6" Padding="12" BorderThickness="1"
+          <Border Background="#FF181B22" CornerRadius="6" Padding="12" BorderThickness="1"
                   BorderBrush="{StaticResource PanelKant}">
             <StackPanel>
               <TextBlock Text="Sådan ser Whispers prompt ud nu" FontSize="13" FontWeight="SemiBold"

@@ -3,7 +3,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="NoteApp" Height="820" Width="1280" MinHeight="640" MinWidth="1040"
         Background="{StaticResource Baggrund}"
-        WindowStartupLocation="CenterScreen">
+        WindowStartupLocation="CenterScreen"
+        Icon="app.ico">
 
   <Grid>
     <Grid.ColumnDefinitions>
@@ -18,8 +19,15 @@
             BorderBrush="{StaticResource PanelKant}" BorderThickness="0,0,1,0">
       <StackPanel Margin="14,22,14,14">
 
-        <TextBlock Text="NoteApp" FontSize="19" FontWeight="SemiBold" Margin="6,0,0,2" />
-        <TextBlock x:Name="Version" Style="{StaticResource Underskrift}" Margin="6,0,0,26" />
+        <StackPanel Orientation="Horizontal" Margin="4,0,0,2">
+          <Image Source="app.png" Width="30" Height="30" VerticalAlignment="Center"
+                 RenderOptions.BitmapScalingMode="HighQuality" />
+          <StackPanel Margin="10,0,0,0" VerticalAlignment="Center">
+            <TextBlock Text="NoteApp" FontSize="19" FontWeight="SemiBold" />
+            <TextBlock x:Name="Version" Style="{StaticResource Underskrift}" />
+          </StackPanel>
+        </StackPanel>
+        <Border Height="26" />
 
         <RadioButton x:Name="NavOplaesning" GroupName="nav" Content="Oplæsning"
                      Checked="Nav_Changed" IsChecked="True"

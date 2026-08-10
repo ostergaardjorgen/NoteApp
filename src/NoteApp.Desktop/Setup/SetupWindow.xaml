@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Velkommen til NoteApp" Height="680" Width="780"
         Background="{StaticResource Baggrund}" WindowStartupLocation="CenterScreen"
-        ResizeMode="NoResize">
+        ResizeMode="NoResize" Icon="../app.ico">
 
   <Grid Margin="32,26,32,24">
     <Grid.RowDefinitions>
@@ -12,9 +12,13 @@
       <RowDefinition Height="Auto" />
     </Grid.RowDefinitions>
 
-    <StackPanel Grid.Row="0" Margin="0,0,0,20">
-      <TextBlock x:Name="TrinTitel" Text="Velkommen" FontSize="24" FontWeight="SemiBold" />
-      <TextBlock x:Name="TrinUnder" Style="{StaticResource Underskrift}" Margin="0,4,0,0" FontSize="13" />
+    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,20">
+      <Image Source="../app.png" Width="52" Height="52" VerticalAlignment="Top" Margin="0,2,16,0"
+             RenderOptions.BitmapScalingMode="HighQuality" />
+      <StackPanel VerticalAlignment="Center">
+        <TextBlock x:Name="TrinTitel" Text="Velkommen" FontSize="24" FontWeight="SemiBold" />
+        <TextBlock x:Name="TrinUnder" Style="{StaticResource Underskrift}" Margin="0,4,0,0" FontSize="13" />
+      </StackPanel>
     </StackPanel>
 
     <!-- ===================== Trin 1: hvad appen er ====================== -->
@@ -28,7 +32,7 @@
           <TextBlock FontSize="13" LineHeight="22" Margin="0,12,0,0" Foreground="{StaticResource TekstSvag}"
                      Text="Selve transskriptionen laves af Whisper, som kører lokalt. Motoren og sprogmodellen skal hentes én gang — det er det eneste, appen bruger internettet til, og du bliver spurgt først." />
 
-          <Border Background="#2233A35D" BorderBrush="{StaticResource Godkendt}" BorderThickness="1"
+          <Border Background="#334CBE72" BorderBrush="{StaticResource Godkendt}" BorderThickness="1"
                   CornerRadius="6" Padding="14,10" Margin="0,16,0,0">
             <TextBlock FontSize="12" Foreground="{StaticResource Tekst}" LineHeight="19"
                        Text="Retningen er det afgørende: der hentes NED til maskinen, og der sendes aldrig noget OP. Appen har ingen kode, der kan sende en optagelse nogen steder hen." />
@@ -82,11 +86,11 @@
                   </Border>
                   <ControlTemplate.Triggers>
                     <Trigger Property="IsMouseOver" Value="True">
-                      <Setter TargetName="kant" Property="Background" Value="#FF232833" />
+                      <Setter TargetName="kant" Property="Background" Value="#FF2C323D" />
                     </Trigger>
                     <Trigger Property="IsChecked" Value="True">
                       <Setter TargetName="kant" Property="BorderBrush" Value="{StaticResource Accent}" />
-                      <Setter TargetName="kant" Property="Background" Value="#FF2A3242" />
+                      <Setter TargetName="kant" Property="Background" Value="#FF33405A" />
                     </Trigger>
                   </ControlTemplate.Triggers>
                 </ControlTemplate>

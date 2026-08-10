@@ -47,10 +47,10 @@
                     </Border>
                     <ControlTemplate.Triggers>
                       <Trigger Property="IsMouseOver" Value="True">
-                        <Setter TargetName="kant" Property="Background" Value="#FF232833" />
+                        <Setter TargetName="kant" Property="Background" Value="#FF2C323D" />
                       </Trigger>
                       <Trigger Property="IsSelected" Value="True">
-                        <Setter TargetName="kant" Property="Background" Value="#FF2A3242" />
+                        <Setter TargetName="kant" Property="Background" Value="#FF33405A" />
                       </Trigger>
                     </ControlTemplate.Triggers>
                   </ControlTemplate>
@@ -126,7 +126,7 @@
 
       <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
         <ProgressBar x:Name="Fremdrift" Height="6" Minimum="0" Maximum="100" Visibility="Collapsed"
-                     Background="#FF232833" Foreground="{StaticResource Accent}" BorderThickness="0" />
+                     Background="#FF2C323D" Foreground="{StaticResource Accent}" BorderThickness="0" />
         <TextBlock x:Name="Status" Style="{StaticResource Underskrift}" Margin="0,6,0,0" />
       </StackPanel>
 

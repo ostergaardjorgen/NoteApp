@@ -12,9 +12,10 @@
     skriver JA. Uden et vindue at spørge i — fx som planlagt opgave — nægter
     det at køre frem for at gætte sig til et ja.
 
-    Kilden er %LOCALAPPDATA%\NoteApp (eller NOTEAPP_DATA, hvis den er sat).
-    Det er den samme mappe, appen bruger, og den ligger med vilje uden for
-    kode-repoet, så dine data ikke kan komme med i en git-push.
+    Kilden er den datamappe, appen bruger — som standard C:\AppNoter, eller
+    den mappe du har valgt i appen. Den slås op på samme måde som i appen, så
+    de to aldrig kan pege forskellige steder hen. Mappen ligger med vilje uden
+    for kode-repoet, så dine data ikke kan komme med i en git-push.
 
 .PARAMETER Destination
     Hvor arkivet skal ligge. Standard er %USERPROFILE%\NoteApp-backup — altså

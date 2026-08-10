@@ -29,8 +29,13 @@ internal static class Program
     /// fase0\optagelser, så den sti vinder når den findes. Kildefilens
     /// placering på compile-tidspunktet peger på repoet uanset hvor
     /// build-output havner — men en publiceret kopi kan være flyttet til en
-    /// maskine hvor stien ikke findes, og så falder vi tilbage på LOCALAPPDATA
-    /// frem for at crashe eller skrive et tilfældigt sted hen.
+    /// maskine hvor stien ikke findes, og så falder vi tilbage på appens
+    /// datamappe frem for at crashe eller skrive et tilfældigt sted hen.
+    ///
+    /// Rækkefølgen for den fallback er den samme som i appen: NOTEAPP_DATA,
+    /// så pegefilen i %APPDATA%\NoteApp\datasti.txt, så standarden
+    /// C:\AppNoter. Dette projekt henviser ikke til NoteApp.Core, så logikken
+    /// står her — den skal holdes i takt med UserDataPaths.
     /// </summary>
     private static string DefaultOutputRoot([CallerFilePath] string? thisFile = null)
     {
@@ -38,9 +43,32 @@ internal static class Program
         var iRepo = Path.Combine(repoRoot, "fase0", "optagelser");
         if (Directory.Exists(repoRoot)) return iRepo;
 
-        return Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "NoteApp", "optagelser");
+        return Path.Combine(DataRoot(), "Optagelser");
+    }
+
+    private static string DataRoot()
+    {
+        var tilsidesat = Environment.GetEnvironmentVariable("NOTEAPP_DATA");
+        if (!string.IsNullOrWhiteSpace(tilsidesat)) return Path.GetFullPath(tilsidesat);
+
+        try
+        {
+            var peger = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                "NoteApp", "datasti.txt");
+
+            if (File.Exists(peger))
+            {
+                var valgt = File.ReadAllText(peger).Trim();
+                if (!string.IsNullOrWhiteSpace(valgt)) return Path.GetFullPath(valgt);
+            }
+        }
+        catch (IOException)
+        {
+            // En ulæselig pegefil må ikke forhindre en optagelse i at starte.
+        }
+
+        return @"C:\AppNoter";
     }
 
     private static int Main(string[] args)

@@ -2,8 +2,9 @@
 #  DINE DATA MÅ ALDRIG HAVNE HER
 # =============================================================================
 #  Den primære beskyttelse er ikke denne fil, men placeringen: alt personligt
-#  ligger i %LOCALAPPDATA%\NoteApp — uden for dette arbejdstræ. Reglerne
-#  herunder er et sikkerhedsnet, hvis noget alligevel bliver kopieret ind.
+#  ligger i datamappen — som standard C:\AppNoter, uden for dette arbejdstræ.
+#  Reglerne herunder er et sikkerhedsnet, hvis noget alligevel bliver
+#  kopieret ind.
 #
 #  Se doc\mine-data.md.
 # -----------------------------------------------------------------------------
@@ -18,6 +19,7 @@ ordliste.txt
 # Optagelser, noter og transskriptioner
 fase0/optagelser/
 fase0/transskriptioner/
+Optagelser/
 moeder/
 *.wav
 *.mp3

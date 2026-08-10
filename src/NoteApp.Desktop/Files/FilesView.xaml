@@ -58,7 +58,7 @@
           <!-- Hvad kommer med. Lyd er fra som standard: den fylder alt, og
                den er det, der er lettest at undvære — arbejdet ligger i
                transskriptionen og de indlærte rettelser. -->
-          <Border Background="#FF11141A" CornerRadius="6" Padding="12,10" Margin="0,12,0,0"
+          <Border Background="#FF181B22" CornerRadius="6" Padding="12,10" Margin="0,12,0,0"
                   BorderThickness="1" BorderBrush="{StaticResource PanelKant}">
             <StackPanel>
               <TextBlock Text="Hvad kommer med" Style="{StaticResource Underskrift}" Margin="0,0,0,8" />

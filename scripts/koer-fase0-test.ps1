@@ -61,13 +61,15 @@ Write-Host "Whisper : $($whisper.FullName)" -ForegroundColor DarkGray
 # repoets fase0\optagelser, mens NoteApp-appen skriver i din datamappe, hvor
 # data hoerer hjemme. Gaten skal kunne finde begge — ellers braekker
 # arbejdsgangen praecis mellem "optag" og "maal".
-$dataRod = $env:NOTEAPP_DATA
-if ([string]::IsNullOrWhiteSpace($dataRod)) { $dataRod = Join-Path $env:LOCALAPPDATA 'NoteApp' }
+# Datamappen slaas op praecis som appen goer det: NOTEAPP_DATA, saa
+# pegefilen, saa standarden. Skriver man stien selv, holder den op med at
+# passe i det oejeblik brugeren flytter mappen i appen.
+. (Join-Path $PSScriptRoot 'lib-datagraense.ps1')
+$dataRod = Get-NoteAppDataRod
 
 $kilder = @(
     (Join-Path $root 'fase0\optagelser'),
-    (Join-Path $dataRod 'moeder'),
-    (Join-Path $dataRod 'optagelser')
+    (Join-Path $dataRod 'Optagelser')
 ) | Where-Object { Test-Path $_ }
 
 if ($Sti) {

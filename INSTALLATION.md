@@ -56,7 +56,39 @@ Kategorien er ikke en etiket til at sortere efter — **den afgør, hvem der kom
 
 Der er ikke flere kategorier med vilje. En kategori, der ikke ændrer udvælgelsen, ville kun være mere arbejde ved indtastning.
 
-Panelet nederst til højre viser **den prompt, Whisper faktisk får**, og hvor mange af de 224 tokens den fylder. Bliver tallet gult, er der ord, der ikke kom med — så er det vægten, der afgør, hvem der ryger ud. Knappen **Gem ordlisten til Whisper** skriver den til `%LOCALAPPDATA%\NoteApp\ordliste.txt`, og det er den fil, gate-scriptet læser.
+Panelet nederst til højre viser **den prompt, Whisper faktisk får**, og hvor mange af de 224 tokens den fylder. Bliver tallet gult, er der ord, der ikke kom med — så er det vægten, der afgør, hvem der ryger ud. Knappen **Gem ordlisten til Whisper** skriver den til `C:\AppNoter\ordliste.txt` — den fil, transskriptionen læser.
+
+### Transskribér
+
+Kører en optagelse gennem Whisper på din egen maskine. Vælg optagelsen til venstre, tryk **Transskribér**, og følg fremdriften.
+
+Bagefter vises fire tal: lydens længde, tiden det tog, **realtidsfaktoren** og antal ord. Realtidsfaktoren er den vigtigste — er den over 1,0, tager transskriptionen længere tid end mødet varede, og så er det et natjob frem for noget, man venter på. Appen regner om til, hvad et 90-minutters møde ville koste.
+
+Optagelser kan også **slettes** herfra. Dialogen viser, hvad der forsvinder, og hvor meget det fylder. Der er ingen papirkurv.
+
+### Motor og model
+
+Viser hvad der faktisk kører: at det er whisper.cpp, hvilken version, om beregningen sker på GPU eller CPU, og hvilken model.
+
+Seks modeller kan hentes, hver med fordele og ulemper skrevet ud. Vær særligt opmærksom på mærkatet: modeller mærket **KUN ENGELSK** kan ikke dansk, og bruges de til et dansk møde, kommer der volapyk ud — ikke en fejlmeddelelse.
+
+**Version:** whisper.cpp stempler hverken sin exe-fil eller sit output med et versionsnummer. Appen kan derfor kun kende versionen af en motor, den selv har hentet. Er motoren lagt på maskinen i hånden, står der `ukendt` — det er det ærlige svar, og der gættes ikke.
+
+Knappen **Søg efter opdatering** slår op hos GitHub. Det sker kun, når du trykker; appen kontakter aldrig nettet af sig selv.
+
+### Filer og backup
+
+Hvor dine filer ligger, og hvor sikkerhedskopien lander. Begge mapper kan skiftes, og skifter du datamappen, flyttes indholdet med.
+
+**Lydfiler er som standard ikke med i backup.** En time optagelse fylder over 100 MB, mens ordbog, noter, transskriptioner og indstillinger tilsammen er få MB — og lyden er også det, der er lettest at undvære, for arbejdet ligger i teksten og i de indlærte rettelser. Der er et afkrydsningsfelt, hvis du vil have den med, og appen viser forskellen i størrelse først.
+
+Herfra kan du også **gendanne**. Kør **Prøvekørsel** først: den pakker arkivet ud i en midlertidig mappe og kontrollerer, at ordbogen er en gyldig databasefil, uden at røre dine data. **Gendan** skriver arkivet ind og tager altid et fortrydelsesarkiv af det nuværende først.
+
+### Indstillinger
+
+Vælg mikrofon og højttaler blandt Windows' enheder. Måleren ved siden af hver viser, om der faktisk kommer lyd — sig noget, og se om den rører sig. Det er den eneste kontrol, der reelt afslører en forkert valgt enhed, for navnet siger intet om, hvor lyden går hen.
+
+Er den valgte enhed taget ud siden sidst, falder appen tilbage på Windows' standard og siger det, **inden** optagelsen starter.
 
 ---
 
@@ -100,18 +132,17 @@ Et 90-minutters møde fylder ca. 100 MB pr. spor.
 
 ## Hvad der IKKE er der endnu
 
-Det her er **Fase 0-værktøjet**, ikke det færdige produkt. Der er bevidst intet vindue, ingen knapper og ingen indstillinger — kun et konsolvindue der optager.
-
-Følgende kommer i senere faser og findes ikke nu:
+NoteApp har et rigtigt vindue med seks skærme (se ovenfor), men det er stadig ikke det færdige produkt. Følgende kommer i senere faser og findes ikke nu:
 
 | Feature | Fase |
 |---|---|
-| Rigtigt WPF-vindue med start/stop-knap | 1 |
+| Optagelse af et almindeligt møde fra UI'et — appen optager i dag kun oplæsningen; til møder bruges konsol-optageren | 1 |
 | Live-noter under mødet | 1 |
 | Global hotkey til "markér nu" | 1 |
-| Chunked autosave i 30-sekunders segmenter | 1 |
 | Talergenkendelse og navngivning | 2 |
 | Afspilning synkroniseret med transskript | 4 |
+
+**Chunked autosave er allerede på plads** — begge optagere skriver lyden som 30-sekunders segmenter undervejs og samler dem først ved stop. Et crash eller et fladt batteri koster højst det sidste segment, ikke hele mødet.
 
 Auto-resumé i appen stod tidligere på listen som Fase 3. **Den er fjernet 10. august 2026:** den ville sende transskriptionen ud af maskinen, og ingen data må forlade den pc, appen kører på. Referatet laver du som hidtil ved at kopiere eksporten ind i Claude — forskellen er, at det er dig, der flytter teksten. Se `doc\mine-data.md`.
 

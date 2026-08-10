@@ -72,15 +72,19 @@ dotnet build C:\NoteApp\src\Fase0Recorder\Fase0Recorder.csproj -c Release
 
 ---
 
-## Trin 2 — kør gaten
+## Trin 2 — transskribér
+
+**Den normale vej er i appen:** gå til skærmen *Transskribér*, vælg optagelsen, og tryk Transskribér. Den viser lydens længde, tiden det tog, realtidsfaktoren og antal ord, når den er færdig — og den regner om til, hvad et 90-minutters møde ville koste.
+
+Det er nok til at besvare gatens spørgsmål 2. Scriptet nedenfor findes stadig og gør én ting mere: det kører **alle fire kombinationer** — `medium` og `large-v3`, hver med og uden ordliste — så forskellene kan holdes op mod hinanden i én tabel. Skal du sammenligne modeller, er det stadig den hurtigste vej.
 
 ```bash
 powershell -File C:\NoteApp\scripts\koer-fase0-test.ps1
 ```
 
-Uden argumenter tager den den nyeste optagelse og kører alle fire kombinationer pr. spor: `medium` og `large-v3`, hver med og uden IAM-ordliste.
+Uden argumenter tager den den nyeste optagelse og kører alle fire kombinationer pr. spor.
 
-Den leder begge steder, der kan ligge optagelser: `fase0\optagelser\` (konsol-optageren) og din datamappe `%LOCALAPPDATA%\NoteApp\moeder\` (appen). Ordlisten tages fra datamappen, hvis den findes — det er den, appens ordbog skriver til. En bestemt optagelse vælges med `-Session <mappenavn>` eller `-Sti <fuld sti>`.
+Den leder begge steder, der kan ligge optagelser: `fase0\optagelser\` (konsol-optageren) og din datamappe `C:\AppNoter\Optagelser\` (appen). Ordlisten tages fra datamappen, hvis den findes — det er den, appens ordbog skriver til. En bestemt optagelse vælges med `-Session <mappenavn>` eller `-Sti <fuld sti>`.
 
 Kun én model, og tving CPU for at se hvad GPU'en er værd:
 

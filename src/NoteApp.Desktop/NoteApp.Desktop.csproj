@@ -13,8 +13,21 @@
 
     <!-- Versionen følger repoets vX.YY. Den vises i sidebjælken, så en
          skærmbillede fra en fejlmelding siger hvilken build det var. -->
-    <Version>0.15.0</Version>
+    <Version>0.16.0</Version>
+
+    <!-- Ikonet i exe-filen: proceslinje, Stifinder og Alt-Tab. Uden det får
+         appen Windows' generiske programikon. Genskabes fra AppIkon.jpg med
+         tools\lav-ikon.ps1. -->
+    <ApplicationIcon>app.ico</ApplicationIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Samme billede som ressource, så vinduerne og sidebjælken kan vise
+         det. app.ico bærer alle størrelser; app.png bruges, hvor der skal
+         skaleres frit. -->
+    <Resource Include="app.ico" />
+    <Resource Include="app.png" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\NoteApp.Core\NoteApp.Core.csproj" />

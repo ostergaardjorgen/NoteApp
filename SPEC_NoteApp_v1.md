@@ -68,9 +68,24 @@ public record MeetingSession(
 ```
 
 ### UI
-Startskærm = to store knapper ("Fysisk møde" / "Onlinemøde") + valgfrit titelfelt. Derefter: enhedsstatus, niveaumålere for aktive spor, én stor optageknap. Ingen indstillinger, ingen dropdowns — enhedsvalg tages fra Windows' standardenheder, appen viser kun hvad der blev valgt.
+Startskærm = to store knapper ("Fysisk møde" / "Onlinemøde") + valgfrit titelfelt. Derefter: enhedsstatus, niveaumålere for aktive spor, én stor optageknap.
 
 **Titelfelt fra start**, selv om det føles overflødigt — efter tyve møder er `2026-08-07_14-30` ubrugeligt som filnavn.
+
+### Enhedsvalg — ændret 10. august 2026
+
+Speccen sagde oprindeligt: *ingen indstillinger, ingen dropdowns; enhedsvalg tages fra Windows' standardenheder, og appen viser kun hvad der blev valgt.* Begrundelsen var, at vælger man forkert enhed midt i et møde, er skaden allerede sket.
+
+**Den beslutning er omgjort.** Argumentet holdt ikke i praksis: med en Jabra-højttaler, en laptopmikrofon og et headset tilsluttet samtidig er Windows' standard ofte den forkerte, og uden et valg i appen skal man ud i Windows' lydindstillinger midt i en mødeforberedelse.
+
+Der er nu en skærm **Indstillinger** med:
+
+- Dropdown over alle aktive mikrofoner og alle aktive afspilningsenheder. Windows' standard står øverst og er mærket som sådan.
+- **En levende niveaumåler ved hver.** Det er den, der bærer beslutningen: enhedens navn siger intet om, hvorvidt lyden faktisk går derigennem. Man vælger, siger noget, og ser om måleren rører sig.
+
+Valget gemmes som Windows-enheds-ID, ikke som navn — to headset af samme model hedder præcis det samme. Er den valgte enhed taget ud, falder appen tilbage på Windows' standard og **siger det, før optagelsen starter**, ikke bagefter.
+
+Sanity-checket ovenfor består uændret. Et valg af enhed erstatter ikke målingen af, om der faktisk kommer signal.
 
 ---
 
@@ -197,7 +212,7 @@ Erstatningen er **ingen erstatning, men den vej der altid var der**: eksport-mar
 Fasenummeret står tilbage med vilje, så Fase 4 og 5 ikke skal renummereres og så beslutningen ikke bliver usynlig.
 
 ### Fase 4 — Output og lagring (uge 4)
-Alt i `%LOCALAPPDATA%\<app>\` — lydfil, transskription, `meeting.json` med metadata. Markdown-eksport og kopiér-knap. **Afspilning synkroniseret med transskript (#5).** SQLite-metadata fra dag ét (forberedelse til #6), men ingen tung DB i v1 — mappestruktur pr. møde rækker til indholdet.
+Alt i datamappen — som standard `C:\AppNoter\`, med optagelserne under `Optagelser\`. Lydfil, transskription, `meeting.json` med metadata. Placeringen kan flyttes i appen under *Filer og backup*; se `doc\mine-data.md`. Markdown-eksport og kopiér-knap. **Afspilning synkroniseret med transskript (#5).** SQLite-metadata fra dag ét (forberedelse til #6), men ingen tung DB i v1 — mappestruktur pr. møde rækker til indholdet.
 
 ### Fase 5 (v1.1)
 #6 søgning, #7 stemmeprofiler, #8 auto-detect, #9 taletidsfordeling.
@@ -229,7 +244,7 @@ Det gælder **kun koden**. Dine data ligger uden for arbejdstræet og kommer ald
 
 Modellerne (4,4 GB) er bevidst uden for versionsstyring — de hentes fra Hugging Face med scriptet, ikke fra backup.
 
-Runtime-stier (`%LOCALAPPDATA%` i afsnit 6, Fase 4) ændres ikke af dette. Optagelser skrives fortsat lokalt under mødet; et netværksudfald må aldrig kunne afbryde en igangværende optagelse.
+Runtime-stier (datamappen i afsnit 6, Fase 4) ændres ikke af dette. Optagelser skrives fortsat lokalt under mødet; et netværksudfald må aldrig kunne afbryde en igangværende optagelse.
 
 ---
 

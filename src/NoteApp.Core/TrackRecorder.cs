@@ -30,6 +30,7 @@ public sealed class TrackRecorder : IDisposable
     private readonly Func<double> _elapsedSeconds;
 
     private string _deviceId;
+    private volatile bool _paused;
     private WasapiCapture? _capture;
     private BufferedWaveProvider? _incoming;
     private IWaveProvider? _converted;
@@ -79,6 +80,47 @@ public sealed class TrackRecorder : IDisposable
         _pump = new Thread(Pump) { IsBackground = true, Name = $"pump:{Name}" };
         _pump.Start();
         _capture!.StartRecording();
+    }
+
+    /// <summary>
+    /// Holder pause. Optagelsen fortsætter i et nyt segment ved Resume.
+    ///
+    /// Selve WASAPI-optagelsen stoppes, og det aktuelle segment lukkes. Det
+    /// er dét, der gør pausen ægte: intet af det, der bliver sagt imens,
+    /// ligger nogen steder — heller ikke i en buffer.
+    /// </summary>
+    public void Pause()
+    {
+        if (!_running || _paused) return;
+
+        // Flaget FOERST: det lukker baade for indkommende samples og for
+        // genopretningen, saa stoppet ikke laeses som et mistet enhedstab.
+        _paused = true;
+
+        try { _capture?.StopRecording(); } catch (Exception) { /* enheden kan allerede være væk */ }
+
+        lock (_gate)
+        {
+            DrainLocked();
+            CloseSegmentLocked();
+        }
+    }
+
+    /// <summary>Fortsætter efter en pause. Der skrives i et nyt segment.</summary>
+    public void Resume()
+    {
+        if (!_running || !_paused) return;
+
+        try
+        {
+            _capture?.StartRecording();
+            _paused = false;
+        }
+        catch (Exception ex)
+        {
+            _paused = false;
+            Record($"kunne ikke genoptage optagelsen: {ex.Message}");
+        }
     }
 
     public void Stop()
@@ -158,6 +200,15 @@ public sealed class TrackRecorder : IDisposable
         var capture = _capture;
         if (capture is null) return;
 
+        // Under pause smides lyden vaek foer den naar bufferen. Det er det,
+        // der goer pausen aegte: selv hvis enheden stadig leverer samples i et
+        // oejeblik efter StopRecording, havner de ingen steder.
+        if (_paused)
+        {
+            _peak = 0f;
+            return;
+        }
+
         var p = PeakMeter.Peak(e.Buffer, e.BytesRecorded, capture.WaveFormat);
         if (p > _peak) _peak = p;
 
@@ -169,6 +220,11 @@ public sealed class TrackRecorder : IDisposable
         // Et rent stop går også gennem denne hændelse. Kun uventede stop skal
         // føre til genstart.
         if (!_running) return;
+
+        // En pause stopper optagelsen med vilje. Uden dette vaern laeser
+        // genopretningen den som et mistet enhedstab og starter optagelsen
+        // igen efter et sekund — og saa optages der lyd under pausen.
+        if (_paused) return;
 
         var årsag = e.Exception?.Message ?? "enheden stoppede uventet";
         Record($"Sporet mistede enheden: {årsag}");

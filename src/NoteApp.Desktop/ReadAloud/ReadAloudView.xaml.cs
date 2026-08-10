@@ -33,16 +33,29 @@ public partial class ReadAloudView : UserControl
 
         _script = ScriptDocument.Load();
 
-        Vejledning.ItemsSource = _script.Instructions;
-        NavneAdvarsel.Text =
-            $"Teksten er på {_script.TotalWords} ord — cirka {_script.EstimatedDuration.TotalMinutes:0} minutter " +
-            "ved 120 ord i minuttet. Har du ikke skiftet de opdigtede navne ud med rigtige kollegaer og kunder, " +
-            "så gør det først: det er navnene, testen skal afsløre.";
+        Indledning.Text =
+            $"Teksten er på {_script.TotalWords} ord og tager cirka " +
+            $"{_script.EstimatedDuration.TotalMinutes:0} minutter at læse i almindeligt taletempo. " +
+            "Den handler om et opdigtet møde — indholdet betyder ikke noget, og navnene i den er " +
+            "opfundet. Det er din stemme og dine fagord, appen skal lære at kende.";
 
-        var kilde = ScriptDocument.DiskPath();
-        TekstKilde.Text = kilde is null
-            ? "Teksten læses fra den kopi, der er indlejret i appen."
-            : $"Teksten læses fra {kilde} — ret filen, og genstart appen for at se ændringen.";
+        // Tallene er talt op i facitlisten, ikke skoennet. Skiftes teksten ud,
+        // skal de taelles igen — et forkert tal her ville vaere en paastand om,
+        // at oplaesningen maaler noget, den ikke maaler.
+        var sidsteBlok = _script.Blocks.LastOrDefault();
+        HvorforLaengde.Text =
+            "Stopper du efter 5 minutter, er du midt i anden blok. Så har du læst 4 af de 17 " +
+            "negationer op — og ingen af de 6 beslutninger eller 7 opgaver med ejer, for de " +
+            "ligger alle sammen efter minut 10. To af opgaverne bliver kun nævnt i forbifarten, " +
+            "og netop dem er de sværeste at fange. " +
+            (sidsteBlok is null
+                ? ""
+                : $"Sidste blok begynder først {sidsteBlok.TargetStart:mm\\:ss}.");
+
+        Praktisk.Text =
+            "Læs som om du taler til en kollega, ikke som en oplæsning. Pauser, vejrtrækning og små " +
+            "tøvelyde hører med — det er dem, der gør optagelsen realistisk. Læs ikke overskrifterne højt; " +
+            "de er kun til dig. Sæt dig i normal afstand fra mikrofonen, og læn dig ikke ind mod den.";
 
         var mik = AudioDevices.ResolveMicrophone(AppSettings.Current.MicrophoneId, out _);
         MikrofonNavn.Text = mik?.FriendlyName ?? "ingen mikrofon fundet";
@@ -103,6 +116,8 @@ public partial class ReadAloudView : UserControl
         OptagKnap.Content = "■ Stop og gem";
         NaesteKnap.IsEnabled = true;
         ForrigeKnap.IsEnabled = false;
+        PauseKnap.Visibility = Visibility.Visible;
+        PauseKnap.Content = "❚❚ Pause";
         OptagerPrik.Fill = (Brush)FindResource("Optager");
 
         VisAfsnit();
@@ -127,6 +142,7 @@ public partial class ReadAloudView : UserControl
         OptagKnap.Content = "● Start optagelse";
         NaesteKnap.IsEnabled = false;
         ForrigeKnap.IsEnabled = false;
+        PauseKnap.Visibility = Visibility.Collapsed;
         LaesePanel.Visibility = Visibility.Collapsed;
         VejledningPanel.Visibility = Visibility.Visible;
         OptagerPrik.Fill = (Brush)FindResource("TekstMeget");
@@ -148,6 +164,38 @@ public partial class ReadAloudView : UserControl
 
         if (svar == MessageBoxResult.Yes)
             Process.Start(new ProcessStartInfo("explorer.exe", $"\"{mappe}\"") { UseShellExecute = true });
+    }
+
+    /// <summary>
+    /// Pause og fortsæt. Under pausen optages der intet — mikrofonen slippes,
+    /// og uret står stille. Det er dét, der gør det trygt at trykke start:
+    /// kommer der nogen ind ad døren, skal man ikke først finde ud af, om
+    /// samtalen bliver optaget.
+    /// </summary>
+    private void Pause_Click(object sender, RoutedEventArgs e)
+    {
+        if (_session is null) return;
+
+        if (_session.IsPaused)
+        {
+            _session.Resume();
+            PauseKnap.Content = "❚❚ Pause";
+            OptagerPrik.Fill = (Brush)FindResource("Optager");
+            Status.Text = "Optager igen.";
+            _timer.Start();
+        }
+        else
+        {
+            _session.Pause();
+            _timer.Stop();
+            PauseKnap.Content = "▶ Fortsæt";
+            OptagerPrik.Fill = (Brush)FindResource("Advarsel");
+            Niveau.Width = 0;
+            Ur.Text = _session.Elapsed.ToString(@"mm\:ss");
+            Status.Text = "PÅ PAUSE — der optages ikke. Tryk Fortsæt, når du er klar.";
+        }
+
+        Focus();
     }
 
     // ------------------------------------------------------------ navigation
@@ -200,13 +248,13 @@ public partial class ReadAloudView : UserControl
     {
         var p = _script.Paragraphs[_afsnitIndex];
         Afsnit.Text = p.Text;
-        NaesteAfsnit.Text = _afsnitIndex + 1 < _script.Paragraphs.Count
-            ? _script.Paragraphs[_afsnitIndex + 1].Text
-            : "— sidste afsnit. Stop optagelsen, når du har læst det.";
 
         var blok = _script.Blocks[p.BlockIndex];
         BlokTitel.Text = blok.Title;
-        BlokUnder.Text = $"Afsnit {_afsnitIndex + 1} af {_script.Paragraphs.Count}  ·  mål for blokken {blok.TargetStart:mm\\:ss}–{blok.TargetEnd:mm\\:ss}";
+        var sidste = _afsnitIndex + 1 >= _script.Paragraphs.Count;
+        BlokUnder.Text = sidste
+            ? $"Sidste afsnit af {_script.Paragraphs.Count} — tryk «Stop og gem», når du har læst det"
+            : $"Afsnit {_afsnitIndex + 1} af {_script.Paragraphs.Count}  ·  mål for blokken {blok.TargetStart:mm\\:ss}–{blok.TargetEnd:mm\\:ss}";
 
         // Blokskiftet skrives som bogmærke. Uden det kan transskriptionen ikke
         // holdes op mod facitlisten blok for blok, og så skal hele teksten

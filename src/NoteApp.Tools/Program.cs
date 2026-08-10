@@ -49,11 +49,16 @@ static int Hjælp()
                       noteapp transskriber <mappe-eller-wav> [--cpu]
           recover   Samler møder der aldrig blev lukket ordentligt
 
-        Dine data ligger i:
-          %LOCALAPPDATA%\NoteApp   (eller NOTEAPP_DATA, hvis sat)
+        Dine data ligger i C:\AppNoter — eller den mappe, du har valgt i
+        appen under Filer og backup. Miljøvariablen NOTEAPP_DATA vinder over
+        begge dele.
 
         De ligger med vilje uden for kode-repoet, så de ikke kan komme med
-        i en git-push. Backup tages med scripts\backup-mine-data.ps1.
+        i en git-push.
+
+        Sikkerhedskopi tages i appen under Filer og backup — der kan du også
+        gendanne. scripts\backup-mine-data.ps1 gør det samme fra en planlagt
+        opgave.
         """);
     return 0;
 }

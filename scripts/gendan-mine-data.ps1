@@ -38,8 +38,11 @@ if (-not $Arkiv) {
 }
 if (-not (Test-Path $Arkiv)) { throw "Arkivet findes ikke: $Arkiv" }
 
-$mål = $env:NOTEAPP_DATA
-if ([string]::IsNullOrWhiteSpace($mål)) { $mål = Join-Path $env:LOCALAPPDATA 'NoteApp' }
+# Samme opslag som appen: NOTEAPP_DATA, saa pegefilen, saa standarden.
+# En gendannelse til den forkerte mappe ser ud til at lykkes og efterlader
+# brugeren uden sine data dér, hvor appen leder.
+. (Join-Path $PSScriptRoot 'lib-datagraense.ps1')
+$mål = Get-NoteAppDataRod
 
 Write-Host "Arkiv : $Arkiv"
 Write-Host "Mål   : $mål"

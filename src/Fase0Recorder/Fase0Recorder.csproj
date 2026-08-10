@@ -8,6 +8,10 @@
     <RootNamespace>NoteApp.Fase0</RootNamespace>
     <AssemblyName>Fase0Recorder</AssemblyName>
     <InvariantGlobalization>false</InvariantGlobalization>
+
+    <!-- Samme ikon som appen, saa konsol-optageren ikke ligner en tilfaeldig
+         DOS-prompt i proceslinjen. -->
+    <ApplicationIcon>app.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>

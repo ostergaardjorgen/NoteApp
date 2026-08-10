@@ -68,7 +68,7 @@
           <ItemsControl x:Name="Modeller">
             <ItemsControl.ItemTemplate>
               <DataTemplate>
-                <Border Background="#FF11141A" CornerRadius="8" Padding="16" Margin="0,0,0,10"
+                <Border Background="#FF181B22" CornerRadius="8" Padding="16" Margin="0,0,0,10"
                         BorderThickness="1" BorderBrush="{Binding KantFarve}">
                   <Grid>
                     <Grid.ColumnDefinitions>
@@ -128,7 +128,7 @@
 
       <StackPanel Grid.Column="0" VerticalAlignment="Center">
         <ProgressBar x:Name="Fremdrift" Height="6" Minimum="0" Maximum="100" Visibility="Collapsed"
-                     Background="#FF232833" Foreground="{StaticResource Accent}" BorderThickness="0" />
+                     Background="#FF2C323D" Foreground="{StaticResource Accent}" BorderThickness="0" />
         <TextBlock x:Name="Status" Style="{StaticResource Underskrift}" Margin="0,6,0,0" />
       </StackPanel>
 
