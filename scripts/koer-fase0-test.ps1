@@ -18,8 +18,12 @@
 #>
 [CmdletBinding()]
 param(
-    # Mappenavn under fase0\optagelser\. Udelades den, bruges den nyeste optagelse.
+    # Mappenavn under fase0\optagelser\ ELLER under din datamappe. Udelades
+    # den, bruges den nyeste optagelse fra begge steder.
     [string] $Session,
+
+    # Fuld sti til en optagelsesmappe. Vinder over -Session.
+    [string] $Sti,
 
     [ValidateSet('medium', 'large-v3')]
     [string[]] $Modeller = @('medium', 'large-v3'),
@@ -53,22 +57,49 @@ if (-not $whisper) {
 Write-Host "Whisper : $($whisper.FullName)" -ForegroundColor DarkGray
 
 # --- Find optagelsen ------------------------------------------------------
-$optagelser = Join-Path $root 'fase0\optagelser'
-if ($Session) {
-    $sessionDir = Join-Path $optagelser $Session
+# Der er to kilder, fordi der er to optagere: konsol-optageren skriver i
+# repoets fase0\optagelser, mens NoteApp-appen skriver i din datamappe, hvor
+# data hoerer hjemme. Gaten skal kunne finde begge — ellers braekker
+# arbejdsgangen praecis mellem "optag" og "maal".
+$dataRod = $env:NOTEAPP_DATA
+if ([string]::IsNullOrWhiteSpace($dataRod)) { $dataRod = Join-Path $env:LOCALAPPDATA 'NoteApp' }
+
+$kilder = @(
+    (Join-Path $root 'fase0\optagelser'),
+    (Join-Path $dataRod 'moeder'),
+    (Join-Path $dataRod 'optagelser')
+) | Where-Object { Test-Path $_ }
+
+if ($Sti) {
+    $sessionDir = $Sti
+} elseif ($Session) {
+    $fundet = $kilder | ForEach-Object { Join-Path $_ $Session } | Where-Object { Test-Path $_ } | Select-Object -First 1
+    if (-not $fundet) { throw "Fandt ikke optagelsen '$Session' i:`n  $($kilder -join "`n  ")" }
+    $sessionDir = $fundet
 } else {
-    $nyeste = Get-ChildItem $optagelser -Directory -ErrorAction SilentlyContinue |
+    $nyeste = $kilder |
+        ForEach-Object { Get-ChildItem $_ -Directory -ErrorAction SilentlyContinue } |
         Sort-Object LastWriteTime -Descending | Select-Object -First 1
-    if (-not $nyeste) { throw "Ingen optagelser i $optagelser. Kør Fase0Recorder først." }
+    if (-not $nyeste) {
+        throw "Ingen optagelser fundet i:`n  $($kilder -join "`n  ")`nOptag noget i NoteApp foerst."
+    }
     $sessionDir = $nyeste.FullName
 }
 if (-not (Test-Path $sessionDir)) { throw "Findes ikke: $sessionDir" }
+Write-Host "Optagelse: $sessionDir" -ForegroundColor DarkGray
 
 # --- Ordliste (feature #3: Whisper initial_prompt) ------------------------
-$ordlistePath = Join-Path $root 'ordliste.txt'
-$ordliste = if (Test-Path $ordlistePath) {
+# Ordbogen i appen er kilden; ordliste.txt i datamappen er dens oejebliksbillede
+# og vinder derfor over den gamle statiske fil i repoet.
+$ordlisteKandidater = @(
+    (Join-Path $dataRod 'ordliste.txt'),
+    (Join-Path $root 'ordliste.txt')
+)
+$ordlistePath = $ordlisteKandidater | Where-Object { Test-Path $_ } | Select-Object -First 1
+$ordliste = if ($ordlistePath) {
     ((Get-Content $ordlistePath -Raw -Encoding UTF8) -replace '\s+', ' ').Trim()
 } else { '' }
+if ($ordlistePath) { Write-Host "Ordliste : $ordlistePath" -ForegroundColor DarkGray }
 
 $varianter = @(@{ Navn = 'medOrdliste'; Prompt = $ordliste })
 if (-not $SpringOrdlisteOver) {

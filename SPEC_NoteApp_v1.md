@@ -171,6 +171,9 @@ Optag et rigtigt Teams-møde: mikrofon + loopback som to WAV-filer. Kør begge g
 Vurdér: er navne, fagtermer og forkortelser brugbare, og kan en LLM lave et retvisende resumé af det. **Mål transskriptionstiden i forhold til mødets længde** — over 1:1 på din hardware ⇒ planlæg det som natjob frem for noget du venter på.
 
 ### Fase 1 — Optagelse (uge 1)
+
+**Skallen står** (10. august 2026): `src\NoteApp.Desktop`, WPF på .NET 8, udgivet som `app\NoteApp.exe`. To skærme — *Oplæsning* (teleprompter + optager til Fase 0-testen) og *Ordbog* (vedligehold af de fem termkategorier med live-visning af Whisper-prompten). Den bygger på `NoteApp.Core`, så optagelse, autosave og datagrænse er den samme kode som konsol-optagerens efterfølger skal bruge. Resten af listen nedenfor mangler stadig.
+
 .NET 8 + WPF (WinUI 3 hvis moderne look ønskes, men WPF er hurtigere at komme i gang med). NAudio til begge streams. Skriv til to WAV-filer med **fælles starttidsstempel**.
 
 Indhold: start/stop, timer, niveaumålere pr. spor, liste over optagelser, **chunked autosave (#4)**, **live-notefelt (#1)**, **global hotkey (#2)**.

@@ -9,19 +9,58 @@ Alt er sat op og testet 8. august 2026. Du behøver ikke gøre noget for at komm
 | .NET SDK | `C:\Program Files\dotnet` | 8.0.423 |
 | whisper.cpp (CUDA 12.4) | `C:\NoteApp\tools\whisper\Release\` | v1.9.2 |
 | Whisper-modeller | `C:\NoteApp\models\` | `ggml-large-v3.bin` (2,9 GB), `ggml-medium.bin` (1,4 GB) |
-| Optageren, klar til brug | `C:\NoteApp\app\Fase0Recorder.exe` | 147 MB, selvstændig — kræver ingen runtime |
+| **NoteApp (appen med UI)** | `C:\NoteApp\app\NoteApp.exe` | 147 MB, selvstændig — kræver ingen runtime |
+| Konsol-optageren | `C:\NoteApp\app\Fase0Recorder.exe` | 147 MB, selvstændig |
 | Kildekode | `C:\NoteApp\src\` | |
 | Kodebackup | https://github.com/ostergaardjorgen/NoteApp (privat) | git remote `origin` |
 
-**Tre genveje ligger på skrivebordet:**
+**Genveje på skrivebordet:**
 
-- **NoteApp - Optag onlinemøde** — mikrofon + systemlyd fra Teams
-- **NoteApp - Optag fysisk møde** — kun mikrofon
+- **NoteApp** — appen med UI. Den skal du bruge til Fase 0-oplæsningen.
+- **NoteApp - Optag onlinemøde** — konsol-optager, mikrofon + systemlyd fra Teams
+- **NoteApp - Optag fysisk møde** — konsol-optager, kun mikrofon
 - **NoteApp - Transskribér seneste** — kører nyeste optagelse gennem Whisper
 
 ---
 
-## Sådan bruger du den
+## NoteApp — appen med UI
+
+Dobbeltklik på **NoteApp**. Den har to skærme, og de svarer til de to ting, der skal gøres, før Fase 0-gaten kan bestås.
+
+### Oplæsning
+
+Teleprompteren til testoplæsningen. Den viser ét afsnit ad gangen i stor skrift, med det næste svagt nedenunder, så du kan tage tilløb uden at miste linjen.
+
+- **Mellemrum** (eller pil ned/højre) går til næste afsnit. **Pil op/venstre** går tilbage.
+- Uret viser både din faktiske tid og **hvor du burde være** — plus om du er foran eller bagud. Det er ikke pynt: læser du teksten på 12 minutter, er optagelsen for kort til at måle RTF på, og så skal den laves om.
+- **Niveaumåleren bliver rød ved stilhed.** Det er den fejl, man ellers opdager bagefter.
+- Ved hvert blokskift skrives et mærke i `notes.jsonl`, så transskriptionen kan holdes op mod facitlisten blok for blok i stedet for at skulle læses igennem i ét stræk.
+
+Optagelsen er altid et **fysisk møde** — ét spor, kun mikrofonen. Der er ingen anden part at optage.
+
+Teksten hentes fra `C:\NoteApp\fase0\oplaesning\testtekst.md`, hvis repoet er der. **Ret navnene i den fil til rigtige kollegaer og kunder, før du læser** — og genstart appen bagefter. Er repoet ikke der, bruger appen den kopi, der er indlejret i exe'en.
+
+### Ordbog
+
+Ordene, der sendes med til Whisper, så den ved, hvad den skal lytte efter.
+
+Kategorien er ikke en etiket til at sortere efter — **den afgør, hvem der kommer med**, når ordbogen er større end de ca. 224 tokens, Whisper har plads til:
+
+| Kategori | Bruges til | Prioritet |
+|---|---|---|
+| Person | Kollegaer, kunder, mødedeltagere | Vælges først |
+| Organisation | Firmaer, myndigheder, afdelinger | Vælges næst |
+| Produkt | Produkt- og systemnavne, fx Entra ID | Efter vægt |
+| Fagterm | Fagudtryk, fx provisionering, attestering | Efter vægt |
+| Forkortelse | SCIM, IAM, JML | Efter vægt |
+
+Der er ikke flere kategorier med vilje. En kategori, der ikke ændrer udvælgelsen, ville kun være mere arbejde ved indtastning.
+
+Panelet nederst til højre viser **den prompt, Whisper faktisk får**, og hvor mange af de 224 tokens den fylder. Bliver tallet gult, er der ord, der ikke kom med — så er det vægten, der afgør, hvem der ryger ud. Knappen **Gem ordlisten til Whisper** skriver den til `%LOCALAPPDATA%\NoteApp\ordliste.txt`, og det er den fil, gate-scriptet læser.
+
+---
+
+## Konsol-optageren
 
 ### 1. Start optagelsen når mødet begynder
 

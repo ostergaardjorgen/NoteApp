@@ -8,6 +8,61 @@ public sealed record PromptTerm(string Canonical, string Category, string? Hint)
 
 public sealed record AliasRule(string Normalized, string Canonical, int WordCount);
 
+/// <summary>En række i ordbogen, som den vises og redigeres i UI'et.</summary>
+public sealed record TermRow(
+    long Id,
+    string Canonical,
+    string Category,
+    double Weight,
+    string? Scope,
+    string? Hint,
+    bool Active,
+    int AliasCount);
+
+/// <summary>
+/// De fem kategorier fra skemaet, med de navne et menneske genkender.
+///
+/// Kategorien er ikke en etiket til at sortere efter — den STYRER, hvad der
+/// kommer med i Whispers prompt, når ordbogen er større end de ca. 224 tokens
+/// der er plads til. Personer og organisationer vælges først, fordi det er
+/// navne, modellen oftest staver forkert. Derfor er der heller ikke flere
+/// kategorier end disse: en kategori uden konsekvens for udvælgelsen ville
+/// kun være ekstra arbejde ved indtastning.
+/// </summary>
+public static class TermCategories
+{
+    public const string Person = "person";
+    public const string Organisation = "organisation";
+    public const string Produkt = "produkt";
+    public const string Fagterm = "fagterm";
+    public const string Forkortelse = "forkortelse";
+
+    public static readonly IReadOnlyList<string> All = new[]
+    {
+        Person, Organisation, Produkt, Fagterm, Forkortelse
+    };
+
+    public static string Label(string category) => category switch
+    {
+        Person => "Person",
+        Organisation => "Organisation",
+        Produkt => "Produkt",
+        Fagterm => "Fagterm",
+        Forkortelse => "Forkortelse",
+        _ => category
+    };
+
+    public static string Explanation(string category) => category switch
+    {
+        Person => "Kollegaer, kunder, mødedeltagere. Vælges FØRST til prompten — navne er dem, Whisper oftest staver forkert.",
+        Organisation => "Firmaer, myndigheder, afdelinger. Vælges næst efter personer.",
+        Produkt => "Produkt- og systemnavne, fx Entra ID.",
+        Fagterm => "Fagudtryk i din branche, fx provisionering, attestering.",
+        Forkortelse => "SCIM, IAM, JML. Udtales tit som ord og bliver derfor stavet forkert.",
+        _ => ""
+    };
+}
+
 /// <summary>
 /// Den lokale læring: ordbogen, de hørte varianter og rettelseshistorikken.
 ///
@@ -68,6 +123,99 @@ public sealed class LearningStore : IDisposable
         cmd.Parameters.AddWithValue("$s", (object?)scope ?? DBNull.Value);
         cmd.Parameters.AddWithValue("$h", (object?)hint ?? DBNull.Value);
         return (long)cmd.ExecuteScalar()!;
+    }
+
+    /// <summary>
+    /// Hele ordbogen til redigering. Inaktive termer kommer med, så de kan
+    /// aktiveres igen — en term man har slået fra, er sjældent en fejl man
+    /// vil have slettet.
+    /// </summary>
+    public IReadOnlyList<TermRow> ListTerms(string? search = null, string? category = null)
+    {
+        using var cmd = _db.CreateCommand();
+        cmd.CommandText = @"
+            SELECT t.id, t.canonical, t.category, t.weight, t.scope,
+                   t.pronunciation_hint, t.active,
+                   (SELECT COUNT(*) FROM alias a WHERE a.term_id = t.id)
+            FROM term t
+            WHERE ($q IS NULL OR t.canonical LIKE '%' || $q || '%')
+              AND ($k IS NULL OR t.category = $k)
+            ORDER BY
+                CASE t.category
+                    WHEN 'person' THEN 0 WHEN 'organisation' THEN 1 ELSE 2 END,
+                t.canonical COLLATE NOCASE;";
+        cmd.Parameters.AddWithValue("$q", string.IsNullOrWhiteSpace(search) ? DBNull.Value : search);
+        cmd.Parameters.AddWithValue("$k", string.IsNullOrWhiteSpace(category) ? DBNull.Value : category);
+
+        var liste = new List<TermRow>();
+        using var r = cmd.ExecuteReader();
+        while (r.Read())
+        {
+            liste.Add(new TermRow(
+                r.GetInt64(0), r.GetString(1), r.GetString(2), r.GetDouble(3),
+                r.IsDBNull(4) ? null : r.GetString(4),
+                r.IsDBNull(5) ? null : r.GetString(5),
+                r.GetInt32(6) == 1,
+                r.GetInt32(7)));
+        }
+        return liste;
+    }
+
+    public void UpdateTerm(long id, string canonical, string category, double weight,
+                           string? scope, string? hint, bool active)
+    {
+        using var cmd = _db.CreateCommand();
+        cmd.CommandText = @"
+            UPDATE term
+               SET canonical = $c, category = $k, weight = $w,
+                   scope = $s, pronunciation_hint = $h, active = $a
+             WHERE id = $id;";
+        cmd.Parameters.AddWithValue("$c", canonical);
+        cmd.Parameters.AddWithValue("$k", category);
+        cmd.Parameters.AddWithValue("$w", weight);
+        cmd.Parameters.AddWithValue("$s", (object?)scope ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("$h", (object?)hint ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("$a", active ? 1 : 0);
+        cmd.Parameters.AddWithValue("$id", id);
+        cmd.ExecuteNonQuery();
+    }
+
+    /// <summary>
+    /// Sletter en term og dens aliaser. Rettelseshistorikken bevares —
+    /// correction.term_id er ON DELETE SET NULL, fordi en rettelse er en
+    /// kendsgerning om et bestemt møde og skal kunne læses tilbage, også
+    /// efter ordbogen er ryddet op.
+    /// </summary>
+    public void DeleteTerm(long id)
+    {
+        using var cmd = _db.CreateCommand();
+        cmd.CommandText = "DELETE FROM term WHERE id = $id;";
+        cmd.Parameters.AddWithValue("$id", id);
+        cmd.ExecuteNonQuery();
+    }
+
+    public IReadOnlyDictionary<string, int> CountByCategory()
+    {
+        using var cmd = _db.CreateCommand();
+        cmd.CommandText = "SELECT category, COUNT(*) FROM term WHERE active = 1 GROUP BY category;";
+        var d = new Dictionary<string, int>();
+        using var r = cmd.ExecuteReader();
+        while (r.Read()) d[r.GetString(0)] = r.GetInt32(1);
+        return d;
+    }
+
+    /// <summary>
+    /// Skriver den prompt, Whisper faktisk skal bruge, til en fil. Det er
+    /// filen, Fase 0-scriptet læser — ordbogen er kilden, filen er et
+    /// øjebliksbillede af den.
+    /// </summary>
+    public string ExportVocabularyFile(string? path = null, string? scope = null, int tokenBudget = 200)
+    {
+        var mål = path ?? UserDataPaths.Vocabulary;
+        var prompt = BuildWhisperPrompt(scope, tokenBudget);
+        Directory.CreateDirectory(System.IO.Path.GetDirectoryName(mål)!);
+        File.WriteAllText(mål, prompt, new UTF8Encoding(false));
+        return mål;
     }
 
     /// <summary>

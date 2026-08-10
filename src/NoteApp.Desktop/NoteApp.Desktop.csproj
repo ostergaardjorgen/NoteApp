@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>NoteApp.Desktop</RootNamespace>
+    <AssemblyName>NoteApp</AssemblyName>
+    <InvariantGlobalization>false</InvariantGlobalization>
+    <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
+
+    <!-- Versionen følger repoets vX.YY. Den vises i sidebjælken, så en
+         skærmbillede fra en fejlmelding siger hvilken build det var. -->
+    <Version>0.11.0</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NoteApp.Core\NoteApp.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Oplæsningsteksten indlejres, så appen virker på en maskine uden
+         repo-mappen. Findes repo-kopien, vinder den ved kørsel: så slår
+         dine rettelser i teksten igennem uden at bygge appen om. -->
+    <EmbeddedResource Include="..\..\fase0\oplaesning\testtekst.md"
+                      LogicalName="NoteApp.Desktop.testtekst.md" />
+  </ItemGroup>
+
+</Project>

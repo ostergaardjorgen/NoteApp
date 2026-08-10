@@ -1,0 +1,44 @@
+<Window x:Class="NoteApp.Desktop.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="NoteApp" Height="820" Width="1280" MinHeight="640" MinWidth="1040"
+        Background="{StaticResource Baggrund}"
+        WindowStartupLocation="CenterScreen">
+
+  <Grid>
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="196" />
+      <ColumnDefinition Width="*" />
+    </Grid.ColumnDefinitions>
+
+    <!-- Sidebjælke. To punkter, fordi appen kan to ting — og fordi det er
+         nemmere at tilføje et tredje senere end at fjerne fem, der ikke
+         bruges. -->
+    <Border Grid.Column="0" Background="{StaticResource Panel}"
+            BorderBrush="{StaticResource PanelKant}" BorderThickness="0,0,1,0">
+      <StackPanel Margin="14,22,14,14">
+
+        <TextBlock Text="NoteApp" FontSize="19" FontWeight="SemiBold" Margin="6,0,0,2" />
+        <TextBlock x:Name="Version" Style="{StaticResource Underskrift}" Margin="6,0,0,26" />
+
+        <RadioButton x:Name="NavOplaesning" GroupName="nav" Content="Oplæsning"
+                     Checked="Nav_Changed" IsChecked="True"
+                     Style="{StaticResource NavKnap}" />
+        <RadioButton x:Name="NavOrdbog" GroupName="nav" Content="Ordbog"
+                     Checked="Nav_Changed"
+                     Style="{StaticResource NavKnap}" />
+
+        <Border Height="1" Background="{StaticResource PanelKant}" Margin="6,22,6,16" />
+
+        <TextBlock Text="Dine data" Style="{StaticResource Underskrift}" Margin="6,0,0,4" />
+        <TextBlock x:Name="DataSti" Style="{StaticResource Underskrift}"
+                   Foreground="{StaticResource TekstMeget}" Margin="6,0,0,10" FontSize="11" />
+        <TextBlock Style="{StaticResource Underskrift}" Foreground="{StaticResource TekstMeget}"
+                   FontSize="11" Margin="6,0,0,0"
+                   Text="Intet forlader denne pc. Appen har ingen netværkskald." />
+      </StackPanel>
+    </Border>
+
+    <ContentControl x:Name="Indhold" Grid.Column="1" />
+  </Grid>
+</Window>

@@ -1,0 +1,119 @@
+<UserControl x:Class="NoteApp.Desktop.Dictionary.DictionaryView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="{StaticResource Baggrund}">
+
+  <Grid Margin="24,20,24,20">
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="*" />
+      <ColumnDefinition Width="360" />
+    </Grid.ColumnDefinitions>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+    </Grid.RowDefinitions>
+
+    <!-- ============================ Overskrift ========================== -->
+    <StackPanel Grid.Row="0" Grid.ColumnSpan="2" Margin="0,0,0,14">
+      <TextBlock Text="Ordbog" Style="{StaticResource Overskrift}" />
+      <TextBlock Style="{StaticResource Underskrift}"
+                 Text="Ordene her sendes med til Whisper, så den ved, hvad den skal lytte efter. Kategorien er ikke en etiket — den afgør, hvem der kommer med, når der ikke er plads til alle." />
+    </StackPanel>
+
+    <!-- ============================ Listen ============================== -->
+    <Grid Grid.Row="1" Grid.Column="0" Margin="0,0,18,0">
+      <Grid.RowDefinitions>
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="*" />
+        <RowDefinition Height="Auto" />
+      </Grid.RowDefinitions>
+
+      <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
+        <TextBox x:Name="Soeg" Width="220" TextChanged="Soeg_Changed" />
+        <TextBlock Text="Søg" Style="{StaticResource Underskrift}" Margin="-212,0,0,0"
+                   VerticalAlignment="Center" IsHitTestVisible="False"
+                   x:Name="SoegPladsholder" Foreground="{StaticResource TekstMeget}" />
+        <ComboBox x:Name="FilterKategori" Width="160" Margin="12,0,0,0"
+                  SelectionChanged="Filter_Changed" />
+        <TextBlock x:Name="Antal" Style="{StaticResource Underskrift}" Margin="14,0,0,0"
+                   VerticalAlignment="Center" />
+      </StackPanel>
+
+      <DataGrid x:Name="Gitter" Grid.Row="1"
+                AutoGenerateColumns="False" IsReadOnly="True"
+                HeadersVisibility="Column" GridLinesVisibility="Horizontal"
+                Background="{StaticResource Panel}" Foreground="{StaticResource Tekst}"
+                RowBackground="{StaticResource Panel}" AlternatingRowBackground="#FF20242D"
+                HorizontalGridLinesBrush="#FF262B35" BorderBrush="{StaticResource PanelKant}"
+                BorderThickness="1" SelectionMode="Single"
+                SelectionChanged="Gitter_SelectionChanged"
+                RowHeaderWidth="0" FontSize="13">
+        <DataGrid.Columns>
+          <DataGridTextColumn Header="Ord" Binding="{Binding Canonical}" Width="*" />
+          <DataGridTextColumn Header="Kategori" Binding="{Binding KategoriTekst}" Width="120" />
+          <DataGridTextColumn Header="Vægt" Binding="{Binding Weight}" Width="60" />
+          <DataGridTextColumn Header="Kunde" Binding="{Binding Scope}" Width="110" />
+          <DataGridTextColumn Header="Hørt som" Binding="{Binding AliasCount}" Width="80" />
+          <DataGridTextColumn Header="Aktiv" Binding="{Binding AktivTekst}" Width="55" />
+        </DataGrid.Columns>
+      </DataGrid>
+
+      <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,12,0,0">
+        <Button Content="Importér fra ordliste.txt" Click="Import_Click" Margin="0,0,8,0" />
+        <Button x:Name="SletKnap" Content="Slet valgte" Click="Slet_Click" IsEnabled="False" />
+      </StackPanel>
+    </Grid>
+
+    <!-- ============================ Redigering ========================== -->
+    <Border Grid.Row="1" Grid.Column="1" Background="{StaticResource Panel}" CornerRadius="10"
+            BorderBrush="{StaticResource PanelKant}" BorderThickness="1" Padding="18">
+      <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel>
+
+          <TextBlock x:Name="FormTitel" Text="Nyt ord" FontSize="15" FontWeight="SemiBold" Margin="0,0,0,14" />
+
+          <TextBlock Text="Ord" Style="{StaticResource Underskrift}" />
+          <TextBox x:Name="FeltOrd" Margin="0,4,0,12" />
+
+          <TextBlock Text="Kategori" Style="{StaticResource Underskrift}" />
+          <ComboBox x:Name="FeltKategori" Margin="0,4,0,4" SelectionChanged="Kategori_Changed" />
+          <TextBlock x:Name="KategoriForklaring" Style="{StaticResource Underskrift}"
+                     Foreground="{StaticResource TekstMeget}" Margin="0,0,0,12" />
+
+          <TextBlock Text="Vægt — højere kommer først med i prompten" Style="{StaticResource Underskrift}" />
+          <TextBox x:Name="FeltVaegt" Text="1,0" Margin="0,4,0,12" />
+
+          <TextBlock Text="Udtale (valgfri), fx: udtales 'skim'" Style="{StaticResource Underskrift}" />
+          <TextBox x:Name="FeltUdtale" Margin="0,4,0,12" />
+
+          <TextBlock Text="Kunde (valgfri) — ordet vælges kun til møder om dem" Style="{StaticResource Underskrift}" />
+          <TextBox x:Name="FeltKunde" Margin="0,4,0,12" />
+
+          <CheckBox x:Name="FeltAktiv" Content="Aktiv" IsChecked="True" Foreground="{StaticResource Tekst}"
+                    Margin="0,0,0,16" />
+
+          <StackPanel Orientation="Horizontal" Margin="0,0,0,18">
+            <Button Content="Gem" Click="Gem_Click" Style="{StaticResource Primaer}" Margin="0,0,8,0" />
+            <Button Content="Ryd" Click="Ryd_Click" />
+          </StackPanel>
+
+          <!-- Prompten er den eneste måde at se, om ordbogen faktisk virker.
+               Whisper har ~224 tokens; overfyldes den, skriver modellen
+               prompten ind i transskriptionen. Derfor står tallet her. -->
+          <Border Background="#FF11141A" CornerRadius="6" Padding="12" BorderThickness="1"
+                  BorderBrush="{StaticResource PanelKant}">
+            <StackPanel>
+              <TextBlock Text="Sådan ser Whispers prompt ud nu" FontSize="13" FontWeight="SemiBold"
+                         Margin="0,0,0,8" />
+              <TextBlock x:Name="PromptTekst" FontSize="12" Foreground="{StaticResource TekstSvag}"
+                         LineHeight="18" MaxHeight="150" />
+              <TextBlock x:Name="PromptTal" Style="{StaticResource Underskrift}" Margin="0,10,0,0" />
+              <Button Content="Gem ordlisten til Whisper" Click="Eksport_Click" Margin="0,12,0,0" />
+            </StackPanel>
+          </Border>
+
+        </StackPanel>
+      </ScrollViewer>
+    </Border>
+  </Grid>
+</UserControl>

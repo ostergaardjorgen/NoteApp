@@ -37,12 +37,18 @@ Alt ligger i `C:\NoteApp\` — kildekode, modeller, whisper-binærer og optagels
 
 ---
 
-## Trin 1 — optag et rigtigt møde
+## Trin 1 — optag oplæsningen
 
-Optageren er allerede bygget. Kør den **når mødet starter**:
+Start **NoteApp** fra skrivebordet og bliv på skærmen *Oplæsning*. Den viser teksten ét afsnit ad gangen, holder øje med tempoet og sætter blokmærker undervejs.
+
+**Ret navnene i `oplaesning\testtekst.md` først.** De opdigtede navne kan ikke afsløre det, testen skal måle — det er dine rigtige kollegaers og kunders navne, Whisper staver forkert. Genstart appen efter rettelsen.
+
+Læs i normalt taletempo, og hold øje med tempoindikatoren øverst til højre. Målet er 15-20 minutters lyd; under 15 minutter giver RTF-tal, hvor modelindlæsningen fylder for meget.
+
+Alternativt, til et rigtigt møde frem for oplæsningen:
 
 ```bash
-C:\NoteApp\src\Fase0Recorder\bin\Release\net8.0-windows\Fase0Recorder.exe --type online --title "Kundemøde Nordby"
+C:\NoteApp\app\Fase0Recorder.exe --type online --title "Kundemøde Nordby"
 ```
 
 Mødetypen skal vælges aktivt — der er ingen default. `--type fysisk` optager kun mikrofonen.
@@ -73,6 +79,8 @@ powershell -File C:\NoteApp\scripts\koer-fase0-test.ps1
 ```
 
 Uden argumenter tager den den nyeste optagelse og kører alle fire kombinationer pr. spor: `medium` og `large-v3`, hver med og uden IAM-ordliste.
+
+Den leder begge steder, der kan ligge optagelser: `fase0\optagelser\` (konsol-optageren) og din datamappe `%LOCALAPPDATA%\NoteApp\moeder\` (appen). Ordlisten tages fra datamappen, hvis den findes — det er den, appens ordbog skriver til. En bestemt optagelse vælges med `-Session <mappenavn>` eller `-Sti <fuld sti>`.
 
 Kun én model, og tving CPU for at se hvad GPU'en er værd:
 
