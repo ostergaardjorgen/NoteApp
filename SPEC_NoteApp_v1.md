@@ -6,6 +6,20 @@ Projektmappe: `C:\NoteApp\` — kildekode, modeller, whisper-binærer og optagel
 
 ---
 
+## 0. Ufravigeligt princip: intet forlader maskinen
+
+**Ingen feature må introducere en risiko for, at data kan forlade den pc, appen er installeret på.** Besluttet 10. august 2026. Det står over alt andet i dette dokument: er en feature i konflikt med princippet, bliver featuren fjernet — ikke princippet blødt op. Det kostede Fase 3 (afsnit 6).
+
+Kan en funktion i sagens natur alligevel flytte data væk — brugerens eget valg af en netværkssti til backup er det ene reelle eksempel — gælder tre krav:
+
+1. Det sker kun ved en **aktiv brugerbeslutning**, aldrig som standard eller som sideeffekt.
+2. Beslutningen kræver en **godkendelse i selve øjeblikket**. Handlingen stopper og venter; en advarsel man kan læse forbi tæller ikke.
+3. Godkendelsen skal være **informeret**: skærmen lister hvad der sendes, hvorhen, om det er krypteret, hvem der derefter kan læse det, og hvad alternativet er.
+
+Kan kravene ikke opfyldes — fx i en planlagt opgave uden nogen til at godkende — skal funktionen nægte at køre. Fuld udmøntning: `doc\mine-data.md`.
+
+---
+
 ## 1. Kerneidé og arkitekturvalg
 
 Windows-desktop frem for iOS, fordi Windows kan optage **to separate spor**:
@@ -114,7 +128,9 @@ Markdown med **kontekstblok øverst** — mødetype, dato, varighed, deltagerlis
 
 Kontekstblokken er det der får Claude til at levere et brugbart referat i stedet for et generisk resumé, og koster ti sekunders udfyldning.
 
-**Fase 3 (auto-resumé) beholdes** — besluttet 2026-08-07. Eksport-markdownen er stadig en selvstændig vej ud af appen: du kan enten lade appen lave resuméet, eller kopiere eksporten ind i Claude og arbejde den igennem manuelt. De to udelukker ikke hinanden.
+**Eksporten er den eneste vej ud af appen** — besluttet 2026-08-10, da Fase 3 blev fjernet (afsnit 6). Du kopierer markdownen ind i Claude og arbejder referatet igennem. Appen sender aldrig noget selv; det er dig, der flytter teksten, bevidst, for det møde du har valgt.
+
+Derfor er kontekstblokken ikke pynt. Den er det, der gør en manuel kopiering lige så god som et automatisk resumé ville have været.
 
 ---
 
@@ -166,22 +182,14 @@ Test: 90 minutters møde, skift lydenhed midtvejs (headset til/fra), maskinen g�
 - **2b Diarisering:** embeddings + agglomerativ klyngning på loopback-sporet (afsnit 3).
 - **2c Navngivnings-UI:** navngiv, flet, ret enkeltsegment, autocomplete.
 
-### Fase 3 — Auto-resumé (uge 3) — BESLUTTET: BEHOLDES
-Transskription til Claude via API med fast skema: **resumé, beslutninger, action points med ejer, åbne spørgsmål**. Prompt-skemaet varierer efter mødetype (afsnit 2).
+### Fase 3 — Auto-resumé — FJERNET 2026-08-10
+Fasen er udgået. Den ville have sendt transskriptionen til Claudes API og var dermed det eneste sted, data forlod maskinen — i direkte konflikt med princippet i afsnit 0.
 
-Dette er **det eneste sted data forlader maskinen**. Derfor:
-- **Eksplicit valg pr. møde, ikke en global indstilling.** Et afkryds i UI'et før afsendelse, med tydelig visning af hvad der sendes.
-- **API-nøgle i Windows Credential Manager**, aldrig i en config-fil eller i kildekoden på NAS'en.
-- Eksport-markdown (afsnit 4) bevares som selvstændig vej — auto-resuméet erstatter den ikke. Du kan stadig arbejde referatet igennem manuelt bagefter.
+Beslutningen 7. august om at beholde den er omgjort. Begrundelsen for at fjerne frem for at indpakke: et eksplicit tilvalg pr. møde reducerer risikoen, men fjerner den ikke. Koden til at sende ville stadig ligge i appen, og en fejl, en genvej eller en senere ændring kunne aktivere den. Grænsen holder kun, hvis muligheden ikke findes.
 
-API-detaljer der gælder for den model der er default i dag (`claude-opus-5`):
-- **Struktureret output** via `output_config.format` med et JSON-skema for de fire felter — ikke fritekst der skal parses, og ikke prefill (prefill giver 400 på denne model).
-- **Adaptiv tænkning** er slået til som standard. `max_tokens` dækker tænkning + svar tilsammen, så sæt den rundhåndet — et snævert loft klipper svaret midt over.
-- **`temperature`, `top_p` og `top_k` afvises med 400.** Styr output med prompten, ikke med sampling-parametre.
-- **Stream** ved høje `max_tokens`, ellers rammer kaldet HTTP-timeout.
-- Håndtér `stop_reason == "refusal"` **før** du læser indholdet — svaret kan være tomt.
+Erstatningen er **ingen erstatning, men den vej der altid var der**: eksport-markdown med kontekstblok (afsnit 4), som du selv kopierer ind i Claude. Skulle auto-resumé blive relevant igen, er den eneste farbare vej en **lokal model på maskinen** — det er en ny beslutning, ikke en genoplivning af denne.
 
-Et 90-minutters møde bliver en stor transskription; tjek token-antallet med `count_tokens` mod `claude-opus-5` frem for at gætte, inden prisen vurderes.
+Fasenummeret står tilbage med vilje, så Fase 4 og 5 ikke skal renummereres og så beslutningen ikke bliver usynlig.
 
 ### Fase 4 — Output og lagring (uge 4)
 Alt i `%LOCALAPPDATA%\<app>\` — lydfil, transskription, `meeting.json` med metadata. Markdown-eksport og kopiér-knap. **Afspilning synkroniseret med transskript (#5).** SQLite-metadata fra dag ét (forberedelse til #6), men ingen tung DB i v1 — mappestruktur pr. møde rækker til indholdet.
@@ -193,6 +201,8 @@ Alt i `%LOCALAPPDATA%\<app>\` — lydfil, transskription, `meeting.json` med met
 
 ## 7. Udenfor scope (v1)
 Teams-kalenderintegration, auto-start ved mødestart, live-transkription, søgning på tværs, redigering af transskript-tekst, installer og signering.
+
+**Permanent udenfor scope, ikke bare v1:** enhver funktion der sender data ud af maskinen — auto-resumé via API, skysynkronisering, telemetri, fejlrapportering med indhold, delelinks. Se afsnit 0.
 
 ---
 
@@ -247,7 +257,9 @@ Tre regler der er strukturelle og ikke kan eftermonteres:
 2. **`learning.db` indeholder ingen modelartefakter.** `engine_id` er proveniens, aldrig en betingelse for om en rettelse må bruges. En rettelse lært under `large-v3` gælder også under efterfølgeren.
 3. **Ingen finjustering af Whisper.** Det ville binde al læring til én basismodel, og hver opdatering ville koste alt. Det er præcis dét, arkitekturen findes for at undgå.
 
-Bemærk at der er **to modeller med hver sin begrænsning**: Whisper har ca. 224 tokens til ordlisten og begynder at hallucinere prompten ind i transskriptionen hvis den overfyldes, mens Claude i Fase 3 kan få hele ordbogen med uden risiko. Samme datalag, to forskellige udtræk.
+Bemærk grænsen på **Whispers** side: der er ca. 224 tokens til ordlisten, og den begynder at hallucinere prompten ind i transskriptionen, hvis den overfyldes. Udtrækket til `initial_prompt` skal derfor prioriteres — de termer der oftest rammes forkert, ikke hele ordbogen.
+
+Datalaget kan sagtens rumme mere end det. Det overskydende bruges lokalt: til efterbehandling af transskriptionen, til autocomplete i navngivnings-UI'et og til regressionstesten nedenfor. Der er efter afsnit 0 ingen anden model at fodre.
 
 **Sidegevinst:** arkivet af rettelser bliver en regressionstest for Whisper-opdateringer. Kør gamle møder gennem en ny version og tæl, hvor mange gemte rettelser der ikke længere er nødvendige — det måler forbedringen på dit eget domæne i stedet for på en generisk benchmark. Stiger tallet i stedet, er opdateringen en regression.
 

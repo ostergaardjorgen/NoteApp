@@ -87,7 +87,9 @@ Hører Whisper "skal" hvor der står "skal ikke", bliver referatet ikke bare un�
 
 ## Niveau 2 — hvad referatet SKAL fange
 
-Kopiér transskriptionen ind i Claude, bed om et referat med resumé, beslutninger, action points med ejer og åbne spørgsmål — altså præcis det skema, Fase 3 skal bruge. Hold svaret op mod listerne her.
+Kopiér transskriptionen ind i Claude, bed om et referat med resumé, beslutninger, action points med ejer og åbne spørgsmål. Hold svaret op mod listerne her.
+
+Det er ikke en midlertidig arbejdsgang, mens vi venter på en funktion i appen. Efter at Fase 3 er fjernet, **er** det arbejdsgangen: appen leverer eksporten, du flytter den selv. Derfor er det også den, der skal testes her.
 
 ### De 6 beslutninger
 
@@ -151,6 +153,6 @@ Igen: fire læses op som en samlet liste, tre rejses undervejs uden at blive gen
 | Action points med rigtig ejer | 7 af 7 | 6 af 7 | 5 eller færre |
 | Åbne spørgsmål fanget | 7 af 7 | 6 af 7 | 5 eller færre |
 
-De tre første rækker måles automatisk af `scripts\maal-noejagtighed.ps1`. De tre sidste kræver, at du læser referatet igennem — det er tyve minutters arbejde, og det er den eneste måde at afgøre, om Fase 3 overhovedet er værd at bygge.
+De tre første rækker måles automatisk af `scripts\maal-noejagtighed.ps1`. De tre sidste kræver, at du læser referatet igennem — det er tyve minutters arbejde, og det er den eneste måde at afgøre, om transskriptionen er god nok til at bære et referat. Det er selve Fase 0-gaten: falder de tre rækker igennem, er det ikke referatet, der skal rettes, men kvaliteten af transskriptionen.
 
 Negationsrækken har ingen "acceptabel" tolerance ved lavere tal med vilje. En mistet negation vender betydningen om, og et referat der siger det modsatte af hvad der blev sagt, er værre end intet referat.

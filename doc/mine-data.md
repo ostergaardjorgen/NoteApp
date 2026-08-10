@@ -1,5 +1,21 @@
 # Mine data — hvor de ligger, og hvorfor de aldrig kan lække
 
+## Grundprincip: intet forlader den pc, appen kører på
+
+**Ingen feature i NoteApp må introducere en risiko for, at data kan forlade den pc, appen er installeret på.** Det er ikke en anbefaling og ikke en standardindstilling, der kan skrues på — det er en grænse, der ligger fast. En feature, der bryder den, bliver ikke bygget, uanset hvor nyttig den er.
+
+Besluttet 10. august 2026. Det kostede Fase 3, auto-resuméet — se afsnittet nederst.
+
+### Når noget alligevel kan få data ud
+
+Enkelte funktioner kan i sagens natur ende med at flytte data væk fra maskinen. Backup til en netværkssti er det ene reelle eksempel: det er brugerens eget valg af destination, ikke noget appen gør af sig selv. Dér gælder tre krav uden undtagelse:
+
+1. **Det sker kun ved en aktiv brugerbeslutning.** Aldrig som standard, aldrig som en indstilling man slår til én gang og glemmer, aldrig som en sideeffekt af noget andet man bad om.
+2. **Beslutningen kræver en godkendelse i selve øjeblikket.** En advarsel, man kan læse forbi mens handlingen alligevel kører videre, er ikke en godkendelse. Handlingen skal stoppe og vente på et svar.
+3. **Godkendelsen skal være informeret.** Teksten skal på skærmen liste problemstillingen konkret: *hvad* der sendes, *hvorhen*, om det er krypteret undervejs og på destinationen, *hvem* der derefter kan læse det, og hvad alternativet er, hvis man vil holde alt lokalt. Uden den liste er det ikke en beslutning — det er et klik.
+
+**Kan de tre krav ikke opfyldes, skal funktionen nægte at køre.** En planlagt opgave kører uden nogen til at godkende; derfor må den ikke kunne skrive til en netværkssti, med mindre valget er truffet og bekræftet på forhånd, mens du sad ved maskinen.
+
 ## Grænsen er fysisk, ikke en regel man skal huske
 
 ```
@@ -35,7 +51,13 @@ Alt sker lokalt. Scripterne har ingen netværkskald, ingen skytjeneste og ingen 
 powershell -File C:\NoteApp\scripts\backup-mine-data.ps1
 ```
 
-Arkivet lander som standard i `%USERPROFILE%\NoteApp-backup`, altså på din egen maskine. Vælger du selv en netværkssti, siger scriptet det højt først — for så forlader arkivet maskinen, og det er ikke krypteret.
+Arkivet lander som standard i `%USERPROFILE%\NoteApp-backup`, altså på din egen maskine.
+
+Vælger du en destination **uden for maskinen**, stopper scriptet og beder om en skrevet bekræftelse først.
+
+> **Et drevbogstav siger intet om, hvor drevet ligger.** På denne maskine er `E:` og `H:` mappede netværksdrev — de ser ud som almindelige diske, men en backup dertil forlader pc'en. Derfor tjekker scriptet drevtypen i stedet for at se på stien, og det viser dig, hvilke drev der rent faktisk er lokale, når det spørger.
+
+Bekræftelsen fungerer sådan: Det lister samtidig, hvad beslutningen indebærer: hvad arkivet indeholder, at det ikke er krypteret, at det derefter kan læses af enhver med adgang til den share, og hvad du kan gøre i stedet. Svarer du ikke `JA`, tages der ingen backup. Kører scriptet uden et vindue at spørge i — fx som planlagt opgave — nægter det at bruge netværksstien i stedet for at gætte sig til et ja. Det er de tre krav i grundprincippet, håndhævet i kode og ikke kun i dokumentation.
 
 Ugentlig automatik:
 
@@ -59,10 +81,14 @@ powershell -File C:\NoteApp\scripts\gendan-mine-data.ps1 -Proeve
 2. **Det logger hvilken mappe der blev taget backup af.** En backup-log der ikke siger *hvad* den sikrede, kan ikke afsløre at den sikrede den forkerte mappe.
 3. **Det nægter at køre, hvis datamappen hverken har `learning.db` eller `moeder\`.** En planlagt opgave kan køre med et andet miljø end den session der oprettede den, og så peger `LOCALAPPDATA` et andet sted hen. Uden dette værn ville du få en stribe grønne "backup gennemført" af en tom mappe. Derfor skriver `planlaeg-backup.ps1` også datamappen eksplicit ind i opgaven i stedet for at lade den slå den op selv.
 
-## Det ene sted data kan forlade maskinen
+## Fase 3 er fjernet — og hvorfor
 
-**Fase 3, auto-resuméet.** Den sender transskriptionen til Claudes API. Det er det eneste netværkskald i hele appen, og det er derfor det er bygget som et **eksplicit valg pr. møde** med en tydelig visning af hvad der sendes — ikke som en global indstilling man slår til og glemmer.
+Fase 3 var auto-resumé i appen: transskriptionen sendt til Claudes API, svaret tilbage som referat. Den var besluttet beholdt 7. august 2026.
 
-Skal kravet "ingen af mine data forlader min pc" gælde **uden undtagelse**, så er Fase 3 i konflikt med det, og den bør droppes eller erstattes af en lokal model. Det er din beslutning, ikke en teknisk detalje — sig til, hvis den skal væk.
+**Den er fjernet 10. august 2026.** Den var det eneste netværkskald i hele appen og dermed det eneste sted, data kunne forlade maskinen. Ingen indpakning gjorde den forenelig med grundprincippet øverst: et eksplicit valg pr. møde reducerer risikoen, men fjerner den ikke — koden til at sende ville stadig ligge i appen, og en fejl, en genvej eller en senere ændring kunne aktivere den. Grænsen holder kun, hvis muligheden ikke findes.
 
-Alt andet — optagelse, transskription, diarisering, ordbog, rettelser, eksport — kører udelukkende på din maskine. Whisper er en lokal binær, modellerne ligger på din disk, og der er intet kald ud af huset.
+**Det du mister, er mindre end det lyder.** Eksport-markdownen med kontekstblok var aldrig et fallback — den var altid den primære vej ud. Du kopierer eksporten ind i Claude og arbejder referatet igennem, præcis som du gør i dag. Forskellen er, at *du* flytter teksten, bevidst, for det møde du har valgt. Appen gør det aldrig af sig selv.
+
+Skulle auto-resumé blive relevant igen, er den eneste vej en **lokal model på din egen maskine**. Det er en ny beslutning, ikke en genoplivning af den gamle.
+
+Alt i appen — optagelse, transskription, diarisering, ordbog, rettelser, eksport — kører udelukkende på din maskine. Whisper er en lokal binær, modellerne ligger på din disk, og der er intet kald ud af huset overhovedet.

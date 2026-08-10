@@ -4,9 +4,9 @@ namespace NoteApp.Core;
 
 /// <summary>
 /// Mødetypen styrer hvilke spor der optages, hvordan de flettes i fase 2, og
-/// hvilket prompt-skema resuméet bruger i fase 3. Der er bevidst ingen
-/// standardværdi: vælges der forkert på et onlinemøde, opdages det først når
-/// mødet er slut og loopback-sporet er tomt.
+/// hvilken kontekstblok eksporten får med. Der er bevidst ingen standardværdi:
+/// vælges der forkert på et onlinemøde, opdages det først når mødet er slut og
+/// loopback-sporet er tomt.
 /// </summary>
 public enum MeetingType
 {

@@ -72,8 +72,9 @@ Følgende kommer i senere faser og findes ikke nu:
 | Global hotkey til "markér nu" | 1 |
 | Chunked autosave i 30-sekunders segmenter | 1 |
 | Talergenkendelse og navngivning | 2 |
-| Auto-resumé via Claude | 3 |
 | Afspilning synkroniseret med transskript | 4 |
+
+Auto-resumé i appen stod tidligere på listen som Fase 3. **Den er fjernet 10. august 2026:** den ville sende transskriptionen ud af maskinen, og ingen data må forlade den pc, appen kører på. Referatet laver du som hidtil ved at kopiere eksporten ind i Claude — forskellen er, at det er dig, der flytter teksten. Se `doc\mine-data.md`.
 
 Fase 1 starter først når Fase 0-gaten er bestået — altså når du har optaget et rigtigt møde på 20-30+ minutter og vurderet om dansk Whisper-output er brugbart. Se `fase0\LÆS_MIG.md`.
 

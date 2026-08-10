@@ -155,8 +155,9 @@ public sealed class LearningStore : IDisposable
     /// Derfor vælges der: navne først, så vægt, så hvad der senest har været
     /// i brug — indtil budgettet er brugt.
     ///
-    /// Claude i fase 3 kalder IKKE denne metode. Den har intet token-loft der
-    /// kan gøre skade og får hele ordbogen.
+    /// Token-loftet gælder kun denne vej ud af ordbogen. Lokale forbrugere —
+    /// efterbehandling, autocomplete i navngivnings-UI'et — kan læse hele
+    /// datalaget direkte og skal ikke igennem prioriteringen her.
     /// </summary>
     public string BuildWhisperPrompt(string? scope = null, int tokenBudget = 200)
     {
