@@ -56,92 +56,68 @@
 
         <!-- Startskærm: vejledningen fra tekstens indledning. Vises indtil
              optagelsen begynder, så instruktionerne læses FØR, ikke undervejs. -->
-        <ScrollViewer x:Name="VejledningPanel" Grid.Row="0" Padding="36,26"
-                      VerticalScrollBarVisibility="Auto">
-          <StackPanel MaxWidth="820" HorizontalAlignment="Left">
+        <!-- Tre kort, der passer paa skaermen uden at rulle. Foerste udgave var
+             en side tekst; ingen laeser en side tekst for at komme i gang med
+             at laese en anden. Hvert kort svarer paa eet spoergsmaal med to
+             linjer. -->
+        <Grid x:Name="VejledningPanel" Grid.Row="0" Margin="36,30,36,24">
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+          </Grid.RowDefinitions>
 
-            <TextBlock Text="Du skal læse en tekst højt" FontSize="20" FontWeight="SemiBold"
-                       Margin="0,0,0,6" />
-            <TextBlock x:Name="Indledning" FontSize="14" LineHeight="23"
-                       Foreground="{StaticResource TekstSvag}" Margin="0,0,0,22" />
-
-            <!-- Trinene. Folk vil vide, hvad der sker, før de trykker paa en
-                 knap der hedder "optag" — ikke bagefter. -->
-            <TextBlock Text="Sådan foregår det" FontSize="15" FontWeight="SemiBold" Margin="0,0,0,10" />
-
-            <Grid Margin="0,0,0,22">
-              <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
-              </Grid.ColumnDefinitions>
-              <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-              </Grid.RowDefinitions>
-
-              <TextBlock Grid.Row="0" Grid.Column="0" Text="1" FontSize="14" FontWeight="Bold" Width="26"
-                         Foreground="{StaticResource Accent}" />
-              <TextBlock Grid.Row="0" Grid.Column="1" FontSize="14" LineHeight="23" Margin="0,0,0,10"
-                         Foreground="{StaticResource TekstSvag}"
-                         Text="Der står ét afsnit på skærmen ad gangen, og det er alt, du skal læse. Når du er færdig med det, trykker du mellemrum, og det næste kommer frem." />
-
-              <TextBlock Grid.Row="1" Grid.Column="0" Text="2" FontSize="14" FontWeight="Bold" Width="26"
-                         Foreground="{StaticResource Accent}" />
-              <TextBlock Grid.Row="1" Grid.Column="1" FontSize="14" LineHeight="23" Margin="0,0,0,10"
-                         Foreground="{StaticResource TekstSvag}"
-                         Text="Kun din mikrofon optages, og lyden bliver på denne pc. Der er ingen sky og intet netværkskald undervejs." />
-
-              <TextBlock Grid.Row="2" Grid.Column="0" Text="3" FontSize="14" FontWeight="Bold" Width="26"
-                         Foreground="{StaticResource Accent}" />
-              <TextBlock Grid.Row="2" Grid.Column="1" FontSize="14" LineHeight="23"
-                         Foreground="{StaticResource TekstSvag}"
-                         Text="Bagefter skriver appen teksten ud og viser, hvor godt den ramte. Det er dét, oplæsningen er til for — den lærer appen, hvordan du lyder." />
-            </Grid>
-
-            <!-- "Hvorfor saa laenge" er det foerste, folk taenker. Svaret skal
-                 vaere konkret, ellers foeles de 20 minutter som spild. -->
-            <Border Background="#FF181B22" BorderBrush="{StaticResource PanelKant}" BorderThickness="1"
-                    CornerRadius="8" Padding="18,15" Margin="0,0,0,18">
-              <StackPanel>
-                <TextBlock Text="Hvorfor 20 minutter og ikke 5?" FontSize="15" FontWeight="SemiBold"
-                           Margin="0,0,0,10" />
-
-                <TextBlock FontSize="13" LineHeight="21" Margin="0,0,0,8" Foreground="{StaticResource TekstSvag}"
-                           Text="Fordi det, der skal måles, ligger sidst. Teksten er bygget som et rigtigt møde: den starter med baggrund og tal, og først til sidst falder beslutningerne og opgaverne." />
-
-                <TextBlock x:Name="HvorforLaengde" FontSize="13" LineHeight="21" Margin="0,0,0,8"
-                           Foreground="{StaticResource TekstSvag}" />
-
-                <TextBlock FontSize="13" LineHeight="21" Margin="0,0,0,8" Foreground="{StaticResource TekstSvag}"
-                           Text="Der er også noget, der kun viser sig med tiden. Din stemme falder til ro efter et par minutter, tempoet glider, og du bliver træt — de fejl, der dukker op ved minut 15, findes ikke ved minut 2. Whisper arbejder desuden i 30-sekunders vinduer og bærer sammenhæng med sig fra vindue til vindue; om den holder kursen eller begynder at drive, kan en kort optagelse slet ikke afsløre." />
-
-                <TextBlock FontSize="13" LineHeight="21" Foreground="{StaticResource Tekst}"
-                           Text="Kort sagt: 5 minutter svarer på, om det virker. 20 minutter svarer på, om du kan stole på det efter et rigtigt møde." />
-              </StackPanel>
-            </Border>
-
-            <!-- Trygheden. Det er den, der afgoer om nogen tor trykke start. -->
-            <Border Background="#334CBE72" BorderBrush="{StaticResource Godkendt}" BorderThickness="1"
-                    CornerRadius="8" Padding="18,15" Margin="0,0,0,18">
-              <StackPanel>
-                <TextBlock Text="Du kan altid afbryde" FontSize="15" FontWeight="SemiBold" Margin="0,0,0,10" />
-
-                <TextBlock FontSize="13" LineHeight="21" Margin="0,0,0,7" Foreground="{StaticResource Tekst}"
-                           Text="Kommer der nogen ind, eller ringer telefonen — tryk Pause. Så optages der intet, før du trykker igen. Uret står stille imens, og det du allerede har læst, bliver ikke rørt." />
-
-                <TextBlock FontSize="13" LineHeight="21" Margin="0,0,0,7" Foreground="{StaticResource Tekst}"
-                           Text="Stopper du helt, bliver det, du nåede, gemt som en optagelse. Du kan læse resten en anden dag — eller slette optagelsen igen under Transskribér." />
-
-                <TextBlock FontSize="13" LineHeight="21" Foreground="{StaticResource Tekst}"
-                           Text="Går strømmen, eller lukker appen ned, mister du højst de sidste 30 sekunder. Lyden skrives til disken undervejs, ikke til sidst." />
-              </StackPanel>
-            </Border>
-
-            <TextBlock x:Name="Praktisk" FontSize="13" LineHeight="21"
-                       Foreground="{StaticResource TekstMeget}" />
+          <StackPanel Grid.Row="0" Margin="0,0,0,26">
+            <TextBlock Text="Læs teksten højt — cirka 20 minutter" FontSize="26" FontWeight="SemiBold" />
+            <TextBlock x:Name="Indledning" FontSize="14" Margin="0,8,0,0"
+                       Foreground="{StaticResource TekstSvag}" />
           </StackPanel>
-        </ScrollViewer>
+
+          <Grid Grid.Row="1" VerticalAlignment="Top">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" Background="#FF181B22" BorderBrush="{StaticResource PanelKant}"
+                    BorderThickness="1" CornerRadius="10" Padding="20,18" Margin="0,0,7,0">
+              <StackPanel>
+                <TextBlock Text="Sådan gør du" FontSize="15" FontWeight="SemiBold" Margin="0,0,0,12" />
+                <TextBlock FontSize="13" LineHeight="21" Foreground="{StaticResource TekstSvag}"
+                           Text="Der står ét afsnit på skærmen. Læs kun det — når du er færdig, henter mellemrum det næste." />
+                <TextBlock FontSize="13" LineHeight="21" Margin="0,10,0,0" Foreground="{StaticResource TekstSvag}"
+                           Text="Tal som til en kollega. Pauser og tøvelyde hører med." />
+              </StackPanel>
+            </Border>
+
+            <Border Grid.Column="1" Background="#FF181B22" BorderBrush="{StaticResource PanelKant}"
+                    BorderThickness="1" CornerRadius="10" Padding="20,18" Margin="7,0,7,0">
+              <StackPanel>
+                <TextBlock Text="Hvorfor så længe" FontSize="15" FontWeight="SemiBold" Margin="0,0,0,12" />
+                <TextBlock x:Name="HvorforLaengde" FontSize="13" LineHeight="21"
+                           Foreground="{StaticResource TekstSvag}" />
+                <TextBlock FontSize="13" LineHeight="21" Margin="0,10,0,0" Foreground="{StaticResource TekstSvag}"
+                           Text="5 minutter viser, om det virker. 20 viser, om du kan stole på det." />
+              </StackPanel>
+            </Border>
+
+            <Border Grid.Column="2" Background="#334CBE72" BorderBrush="{StaticResource Godkendt}"
+                    BorderThickness="1" CornerRadius="10" Padding="20,18" Margin="7,0,0,0">
+              <StackPanel>
+                <TextBlock Text="Du kan afbryde" FontSize="15" FontWeight="SemiBold" Margin="0,0,0,12" />
+                <TextBlock FontSize="13" LineHeight="21" Foreground="{StaticResource Tekst}"
+                           Text="Kommer der nogen? Tryk Pause — så optages der intet, før du selv fortsætter." />
+                <TextBlock FontSize="13" LineHeight="21" Margin="0,10,0,0" Foreground="{StaticResource Tekst}"
+                           Text="Stopper du, gemmes det du nåede. Et crash koster højst 30 sekunder." />
+              </StackPanel>
+            </Border>
+          </Grid>
+
+          <TextBlock Grid.Row="2" x:Name="Praktisk" FontSize="12" Margin="0,20,0,0"
+                     Foreground="{StaticResource TekstMeget}" />
+        </Grid>
+
 
         <!-- Oplæsningen: ét afsnit ad gangen, stort. Det næste står svagt
              nedenunder, så man kan tage tilløb til det uden at miste linjen. -->

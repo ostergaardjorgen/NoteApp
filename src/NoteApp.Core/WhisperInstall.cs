@@ -33,13 +33,30 @@ public sealed record WhisperModel(
     public bool SupportsDanish => Languages == ModelLanguages.Multilingual;
 }
 
-public sealed record InstallState(string? WhisperCli, string? ModelPath, bool HasCuda, string? EngineVersion)
+public sealed record InstallState(
+    string? WhisperCli,
+    string? ModelPath,
+    bool HasCuda,
+    string? EngineVersion,
+    DateTimeOffset? EngineInstalled)
 {
     public bool IsComplete => WhisperCli is not null && ModelPath is not null;
 
     public string Engine => HasCuda ? "GPU (CUDA)" : "CPU";
 
     public string? ModelFileName => ModelPath is null ? null : Path.GetFileName(ModelPath);
+
+    /// <summary>
+    /// Hvad der skal stå om motorens alder.
+    ///
+    /// whisper.cpp stempler hverken sin exe eller sit output med en version,
+    /// så den kendes kun, hvis appen selv har installeret motoren. Ellers
+    /// vises datoen på binæren i stedet — den kan vi kontrollere. Et felt,
+    /// der siger "ukendt", er værre end ingenting: det ligner en fejl.
+    /// </summary>
+    public (string Label, string Value) AgeLine => EngineVersion is not null
+        ? ("Version", EngineVersion)
+        : ("Sidst opdateret", EngineInstalled?.ToLocalTime().ToString("d. MMMM yyyy") ?? "—");
 }
 
 /// <summary>
@@ -143,7 +160,20 @@ public static class WhisperInstall
         // lagt der i haanden, ER versionen ukendt — og det skal siges, ikke gaettes.
         var version = cli is null ? null : (EngineManifest.Load(cli)?.Version ?? ReadVersion(cli));
 
-        return new InstallState(cli, model, cuda, version);
+        // Filens dato er det, vi altid kan svare paa. Manifestets dato vinder,
+        // naar appen selv har hentet motoren.
+        DateTimeOffset? installeret = null;
+        if (cli is not null)
+        {
+            installeret = EngineManifest.Load(cli)?.InstalledAt;
+            if (installeret is null)
+            {
+                try { installeret = new FileInfo(cli).LastWriteTime; }
+                catch (IOException) { }
+            }
+        }
+
+        return new InstallState(cli, model, cuda, version, installeret);
     }
 
     /// <summary>

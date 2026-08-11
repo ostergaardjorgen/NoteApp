@@ -209,7 +209,8 @@ static int Motor()
     Console.WriteLine($"Valgt i appen: {valgt ?? "(intet valg — bedste model på disken bruges)"}");
     Console.WriteLine();
     Console.WriteLine($"Motor    : {s.WhisperCli ?? "IKKE FUNDET"}");
-    Console.WriteLine($"Version  : {s.EngineVersion ?? "kunne ikke aflæses"}");
+    var (etiket, vaerdi) = s.AgeLine;
+    Console.WriteLine($"{etiket,-9}: {vaerdi}");
     Console.WriteLine($"Beregning: {s.Engine}");
     Console.WriteLine($"Model    : {s.ModelFileName ?? "IKKE FUNDET"}");
     Console.WriteLine($"Sti      : {s.ModelPath ?? "-"}");

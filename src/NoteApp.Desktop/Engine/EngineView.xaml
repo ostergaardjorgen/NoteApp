@@ -37,7 +37,8 @@
         <TextBlock Grid.Row="0" Grid.Column="0" Text="Motor" Style="{StaticResource Underskrift}" />
         <TextBlock Grid.Row="0" Grid.Column="1" x:Name="MotorNavn" HorizontalAlignment="Right" FontSize="13" />
 
-        <TextBlock Grid.Row="1" Grid.Column="0" Text="Version" Style="{StaticResource Underskrift}" Margin="0,8,0,0" />
+        <TextBlock Grid.Row="1" Grid.Column="0" x:Name="AlderLabel" Text="Sidst opdateret"
+                   Style="{StaticResource Underskrift}" Margin="0,8,0,0" />
         <TextBlock Grid.Row="1" Grid.Column="1" x:Name="MotorVersion" HorizontalAlignment="Right" FontSize="13" Margin="0,8,0,0" />
 
         <TextBlock Grid.Row="2" Grid.Column="0" Text="Beregning" Style="{StaticResource Underskrift}" Margin="0,8,0,0" />

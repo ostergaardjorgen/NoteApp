@@ -17,9 +17,12 @@
          bruges. -->
     <Border Grid.Column="0" Background="{StaticResource Panel}"
             BorderBrush="{StaticResource PanelKant}" BorderThickness="0,0,1,0">
-      <StackPanel Margin="14,22,14,14">
+      <!-- To omraader: navigationen oeverst, oplysningen om datamappen
+           nederst. Laa den lige under menupunkterne, saa den ud som endnu et
+           punkt man kunne klikke paa. -->
+      <DockPanel Margin="14,22,14,16" LastChildFill="False">
 
-        <StackPanel Orientation="Horizontal" Margin="4,0,0,2">
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="4,0,0,2">
           <Image Source="app.png" Width="30" Height="30" VerticalAlignment="Center"
                  RenderOptions.BitmapScalingMode="HighQuality" />
           <StackPanel Margin="10,0,0,0" VerticalAlignment="Center">
@@ -27,36 +30,37 @@
             <TextBlock x:Name="Version" Style="{StaticResource Underskrift}" />
           </StackPanel>
         </StackPanel>
-        <Border Height="26" />
+        <StackPanel DockPanel.Dock="Top" Margin="0,26,0,0">
+          <RadioButton x:Name="NavOplaesning" GroupName="nav" Content="Oplæsning"
+                       Checked="Nav_Changed" IsChecked="True"
+                       Style="{StaticResource NavKnap}" />
+          <RadioButton x:Name="NavTransskriber" GroupName="nav" Content="Transskribér"
+                       Checked="Nav_Changed"
+                       Style="{StaticResource NavKnap}" />
+          <RadioButton x:Name="NavOrdbog" GroupName="nav" Content="Ordbog"
+                       Checked="Nav_Changed"
+                       Style="{StaticResource NavKnap}" />
+          <RadioButton x:Name="NavMotor" GroupName="nav" Content="Motor og model"
+                       Checked="Nav_Changed"
+                       Style="{StaticResource NavKnap}" />
+          <RadioButton x:Name="NavFiler" GroupName="nav" Content="Filer og backup"
+                       Checked="Nav_Changed"
+                       Style="{StaticResource NavKnap}" />
+          <RadioButton x:Name="NavIndstillinger" GroupName="nav" Content="Indstillinger"
+                       Checked="Nav_Changed"
+                       Style="{StaticResource NavKnap}" />
+        </StackPanel>
 
-        <RadioButton x:Name="NavOplaesning" GroupName="nav" Content="Oplæsning"
-                     Checked="Nav_Changed" IsChecked="True"
-                     Style="{StaticResource NavKnap}" />
-        <RadioButton x:Name="NavTransskriber" GroupName="nav" Content="Transskribér"
-                     Checked="Nav_Changed"
-                     Style="{StaticResource NavKnap}" />
-        <RadioButton x:Name="NavOrdbog" GroupName="nav" Content="Ordbog"
-                     Checked="Nav_Changed"
-                     Style="{StaticResource NavKnap}" />
-        <RadioButton x:Name="NavMotor" GroupName="nav" Content="Motor og model"
-                     Checked="Nav_Changed"
-                     Style="{StaticResource NavKnap}" />
-        <RadioButton x:Name="NavFiler" GroupName="nav" Content="Filer og backup"
-                     Checked="Nav_Changed"
-                     Style="{StaticResource NavKnap}" />
-        <RadioButton x:Name="NavIndstillinger" GroupName="nav" Content="Indstillinger"
-                     Checked="Nav_Changed"
-                     Style="{StaticResource NavKnap}" />
-
-        <Border Height="1" Background="{StaticResource PanelKant}" Margin="6,22,6,16" />
-
-        <TextBlock Text="Dine data" Style="{StaticResource Underskrift}" Margin="6,0,0,4" />
-        <TextBlock x:Name="DataSti" Style="{StaticResource Underskrift}"
-                   Foreground="{StaticResource TekstMeget}" Margin="6,0,0,10" FontSize="11" />
-        <TextBlock Style="{StaticResource Underskrift}" Foreground="{StaticResource TekstMeget}"
-                   FontSize="11" Margin="6,0,0,0"
-                   Text="Intet forlader denne pc. Appen har ingen netværkskald." />
-      </StackPanel>
+        <StackPanel DockPanel.Dock="Bottom">
+          <Border Height="1" Background="{StaticResource PanelKant}" Margin="6,0,6,14" />
+          <TextBlock Text="Dine data" Style="{StaticResource Underskrift}" Margin="6,0,0,3" />
+          <TextBlock x:Name="DataSti" Style="{StaticResource Underskrift}"
+                     Foreground="{StaticResource TekstMeget}" Margin="6,0,0,10" FontSize="11" />
+          <TextBlock Style="{StaticResource Underskrift}" Foreground="{StaticResource TekstMeget}"
+                     FontSize="11" Margin="6,0,0,0"
+                     Text="Intet forlader denne pc. Appen har ingen netværkskald." />
+        </StackPanel>
+      </DockPanel>
     </Border>
 
     <ContentControl x:Name="Indhold" Grid.Column="1" />

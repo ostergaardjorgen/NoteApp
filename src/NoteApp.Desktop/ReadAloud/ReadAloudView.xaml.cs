@@ -39,28 +39,19 @@ public partial class ReadAloudView : UserControl
         _script = ScriptDocument.Load();
 
         Indledning.Text =
-            $"Teksten er på {_script.TotalWords} ord og tager cirka " +
-            $"{_script.EstimatedDuration.TotalMinutes:0} minutter at læse i almindeligt taletempo. " +
-            "Den handler om et opdigtet møde — indholdet betyder ikke noget, og navnene i den er " +
-            "opfundet. Det er din stemme og dine fagord, appen skal lære at kende.";
+            $"{_script.TotalWords} ord fordelt på {_script.Paragraphs.Count} afsnit. " +
+            "Teksten er et opdigtet møde — indholdet betyder ikke noget. " +
+            "Det er din stemme og dine fagord, appen skal lære at kende.";
 
         // Tallene er talt op i facitlisten, ikke skoennet. Skiftes teksten ud,
         // skal de taelles igen — et forkert tal her ville vaere en paastand om,
         // at oplaesningen maaler noget, den ikke maaler.
-        var sidsteBlok = _script.Blocks.LastOrDefault();
         HvorforLaengde.Text =
-            "Stopper du efter 5 minutter, er du midt i anden blok. Så har du læst 4 af de 17 " +
-            "negationer op — og ingen af de 6 beslutninger eller 7 opgaver med ejer, for de " +
-            "ligger alle sammen efter minut 10. To af opgaverne bliver kun nævnt i forbifarten, " +
-            "og netop dem er de sværeste at fange. " +
-            (sidsteBlok is null
-                ? ""
-                : $"Sidste blok begynder først {sidsteBlok.TargetStart:mm\\:ss}.");
+            "Alle 6 beslutninger og 7 opgaver ligger efter minut 10. Læser du kun 5 minutter, " +
+            "måler du ingen af dem.";
 
         Praktisk.Text =
-            "Læs som om du taler til en kollega, ikke som en oplæsning. Pauser, vejrtrækning og små " +
-            "tøvelyde hører med — det er dem, der gør optagelsen realistisk. Læs ikke overskrifterne højt; " +
-            "de er kun til dig. Sæt dig i normal afstand fra mikrofonen, og læn dig ikke ind mod den.";
+            "Læs ikke overskrifterne højt — de er kun til dig. Sid i normal afstand fra mikrofonen.";
 
         var mik = AudioDevices.ResolveMicrophone(AppSettings.Current.MicrophoneId, out _);
         MikrofonNavn.Text = mik?.FriendlyName ?? "ingen mikrofon fundet";

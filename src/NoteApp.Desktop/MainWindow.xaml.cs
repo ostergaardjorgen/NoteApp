@@ -20,8 +20,10 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
 
+        // Versionen paa appen kender vi — den staar i assemblyen. Det er kun
+        // Whispers version, vi ikke kan aflaese; se WhisperInstall.
         Version.Text = "v" + (Assembly.GetExecutingAssembly()
-            .GetName().Version?.ToString(2) ?? "0.11");
+            .GetName().Version?.ToString(2) ?? "0.0");
         DataSti.Text = UserDataPaths.Root;
 
         Indhold.Content = _oplaesning;

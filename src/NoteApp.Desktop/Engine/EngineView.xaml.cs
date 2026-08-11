@@ -86,7 +86,14 @@ public partial class EngineView : UserControl
         var s = WhisperInstall.Locate(AppSettings.Current.PreferredModel);
 
         MotorNavn.Text = s.WhisperCli is null ? "ikke installeret" : "whisper.cpp";
-        MotorVersion.Text = s.EngineVersion ?? "ukendt (lagt der i hånden)";
+
+        // Version hvis vi kender den, ellers datoen paa binaeren. Der staar
+        // aldrig "ukendt": et felt, der ikke kan svare, skal stille et andet
+        // spoergsmaal, ikke vise sin egen uvidenhed.
+        var (label, vaerdi) = s.AgeLine;
+        AlderLabel.Text = label;
+        MotorVersion.Text = s.WhisperCli is null ? "—" : vaerdi;
+
         MotorBeregning.Text = s.WhisperCli is null ? "—" : s.Engine;
         ModelNavn.Text = s.ModelFileName ?? "ingen model hentet";
 
@@ -94,9 +101,7 @@ public partial class EngineView : UserControl
             ? $"Motoren hentes til {WhisperInstall.EngineDirectory}"
             : $"{s.WhisperCli}\nModeller: {WhisperInstall.ModelDirectory}";
 
-        MotorVersion.Foreground = s.EngineVersion is null
-            ? (Brush)FindResource("TekstSvag")
-            : (Brush)FindResource("Tekst");
+        MotorVersion.Foreground = (Brush)FindResource("Tekst");
 
         var installerede = WhisperInstall.Installed().Select(m => m.Id).ToHashSet(StringComparer.OrdinalIgnoreCase);
         var iBrug = s.ModelFileName;
