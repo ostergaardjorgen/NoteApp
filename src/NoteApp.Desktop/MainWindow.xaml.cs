@@ -96,7 +96,7 @@ public partial class MainWindow : Window
         Activate();
 
         NavMoede.IsChecked = true;
-        _moede.Start();
+        _moede.Lynstart();
     }
 
     private void Nav_Changed(object sender, RoutedEventArgs e)

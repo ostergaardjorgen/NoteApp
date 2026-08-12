@@ -90,6 +90,54 @@ public partial class MeetingView : UserControl
 
     private void Start_Click(object sender, RoutedEventArgs e) => Start();
 
+    /// <summary>
+    /// Lynstart fra genvejstasten: find selv ud af, om det er et onlinemøde.
+    ///
+    /// Reglen er den enkle og den rigtige: kommer der lyd ud af højttaleren,
+    /// er der nogen i den anden ende, og så skal det spor med. Er der stille,
+    /// er det et fysisk møde, og så optages kun mikrofonen.
+    ///
+    /// Der måles i 700 ms. Længere ville udskyde optagelsen, og det, der
+    /// bliver sagt i de første sekunder, er tit dagsordenen. Er højttaleren
+    /// tavs netop dér — ingen taler lige nu — bliver det optaget som et fysisk
+    /// møde, og DET SKAL SIGES, så man kan stoppe og starte forfra.
+    /// </summary>
+    public void Lynstart()
+    {
+        if (IsRecording) return;
+
+        var højttaler = AudioDevices.ResolveSpeaker(AppSettings.Current.SpeakerId, out _);
+        var online = false;
+        var måltNiveau = 0f;
+
+        if (højttaler is not null)
+        {
+            try
+            {
+                måltNiveau = AudioDevices.MeasureLoopbackPeak(højttaler.Id, TimeSpan.FromMilliseconds(700));
+                online = måltNiveau > AudioDevices.SilenceThreshold;
+            }
+            catch (Exception)
+            {
+                // Kan der ikke maales, optages der som fysisk moede. Det er den
+                // sikre fejl: mikrofonen kommer altid med.
+            }
+        }
+
+        TypeOnline.IsChecked = online;
+        TypeFysisk.IsChecked = !online;
+
+        Start();
+
+        if (!IsRecording) return;
+
+        Status.Text = online
+            ? $"Der kom lyd fra {højttaler!.FriendlyName} — optager som onlinemøde med begge spor. Skift til «Fysisk møde» og start forfra, hvis det er forkert."
+            : (højttaler is null
+                ? "Ingen afspilningsenhed — optager kun mikrofonen."
+                : "Der var stille i højttaleren, så det optages som fysisk møde. Er du på et onlinemøde, hvor ingen talte netop nu, så stop, vælg «Onlinemøde» og start forfra.");
+    }
+
     /// <summary>Kaldes både fra knappen og fra genvejstasten.</summary>
     public void Start()
     {
@@ -158,12 +206,13 @@ public partial class MeetingView : UserControl
         OptagerPrik.Fill = (Brush)FindResource("Optager");
 
         Overskrift.Text = titel ?? "Mødet optages";
-        Underskrift.Text = online
-            ? "Fysisk møde · mikrofon + højttaler"
-            : "Fysisk møde · kun mikrofon";
         Underskrift.Text = online ? "Onlinemøde · mikrofon + højttaler" : "Fysisk møde · kun mikrofon";
 
         Status.Text = $"Gemmes i {_session.SessionDir}";
+
+        // Fokus i notefeltet, saa man kan skrive med det samme. Undtagen naar
+        // lynstarten har noget at fortaelle om, hvad den valgte — saa staar
+        // beskeden, indtil man selv klikker.
         FeltNote.Focus();
     }
 
