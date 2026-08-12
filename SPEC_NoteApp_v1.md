@@ -214,6 +214,24 @@ Fasenummeret står tilbage med vilje, så Fase 4 og 5 ikke skal renummereres og 
 ### Fase 4 — Output og lagring (uge 4)
 Alt i datamappen — som standard `C:\AppNoter\`, med optagelserne under `Optagelser\`. Lydfil, transskription, `meeting.json` med metadata. Placeringen kan flyttes i appen under *Filer og backup*; se `doc\mine-data.md`. Markdown-eksport og kopiér-knap. **Afspilning synkroniseret med transskript (#5).** SQLite-metadata fra dag ét (forberedelse til #6), men ingen tung DB i v1 — mappestruktur pr. møde rækker til indholdet.
 
+### Fase 6 — Lokalt LLM-lag (planlagt, ikke bygget)
+
+Skabeloner, der laver mødereferater, opgavelister, kundeudtalelser og tilbudsudkast ud af transskriptionen — kørt af en **lokal** sprogmodel via llama.cpp.
+
+Det er ikke Fase 3, der kommer tilbage. Fase 3 blev fjernet, fordi den sendte transskriptionen til et API. Her forlader intet maskinen: modellen ligger på disken, og der er ingen ny vej ud — kun den samme `Downloader`, der henter ned. Det er værd at holde fast i, netop fordi et LLM-lag er dér, fristelsen til et sky-API opstår.
+
+**Hele laget er valgfrit. Det er et krav, ikke en ambition.**
+
+- Appen skal være fuldt brugbar uden det: optag → transskribér → eksportér markdown, og arbejd referatet igennem selv. Den vej består uændret som den primære, jf. afsnit 4.
+- **Der hentes ingenting, før brugeren beder om det.** LLM-modeller fylder fra 5 til 18 GB, og den, der aldrig bruger laget, skal ikke bruge en byte disk på det.
+- Opsætningen ved første start nævner det ikke. Whisper er nødvendig for kernefunktionen og hører derfor til i opsætningen; en sprogmodel er det ikke.
+- **Ingen påmindelser.** Ingen banner om at "du mangler at sætte AI op". Et valgfrit lag, der rykker for opmærksomhed, er ikke valgfrit i praksis.
+- Skærmen findes, men siger tydeligt hvad den er, og at man ikke behøver den.
+
+**Hardware afgør modelvalget, og det skal vises frem for gættes.** Udviklingsmaskinen har 6 GB VRAM: en 8-9B model i 4-bit fylder ~5 GB og kører helt på GPU'en, mens en 30B fylder ~18 GB og må køre på CPU og RAM. Det er ikke nødvendigvis diskvalificerende — et referat laves én gang, bagefter — men forskellen skal stå ved valget, målt på maskinen.
+
+**Gate før der bygges UI:** hent én model, kør én skabelon på en rigtig dansk transskription, og se om dansk output holder hele vejen. Den typiske fejl for modeller uden dokumenteret dansk evaluering er, at de driver over i engelsk midt i et langt svar.
+
 ### Fase 5 (v1.1)
 #6 søgning, #7 stemmeprofiler, #8 auto-detect, #9 taletidsfordeling.
 
