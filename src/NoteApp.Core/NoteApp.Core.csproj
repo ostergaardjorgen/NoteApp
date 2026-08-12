@@ -20,6 +20,10 @@
     <!-- Skemaet indlejres, så appen ikke afhænger af at repo-mappen findes
          ved siden af den publicerede exe. -->
     <EmbeddedResource Include="..\schema\learning.sql" LogicalName="NoteApp.Core.learning.sql" />
+
+    <!-- Skabelonerne indlejres, saa de kan laegges i datamappen ved foerste
+         brug. De skal LIGGE som filer, brugeren kan rette. -->
+    <EmbeddedResource Include="Llm\skabeloner\*.md" />
   </ItemGroup>
 
 </Project>

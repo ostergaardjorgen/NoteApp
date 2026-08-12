@@ -232,6 +232,32 @@ Det er ikke Fase 3, der kommer tilbage. Fase 3 blev fjernet, fordi den sendte tr
 
 **Gate før der bygges UI:** hent én model, kør én skabelon på en rigtig dansk transskription, og se om dansk output holder hele vejen. Den typiske fejl for modeller uden dokumenteret dansk evaluering er, at de driver over i engelsk midt i et langt svar.
 
+#### Kun én tung opgave ad gangen — og hvad der IKKE er en tung opgave
+
+Målt 12. august 2026 på udviklingsmaskinen:
+
+| | VRAM | GPU | Disk |
+|---|---|---|---|
+| Whisper large-v3 | 3.094 MB | ja | — |
+| Qwen3-8B Q4_K_M | ~4.700 MB | ja | — |
+| **Optagelse** | **0** | **nej** | 31 KB/sek |
+
+Kortet har 6.144 MB. Transskription og et udkast kan altså ikke ligge der samtidig, mens **optagelse slet ikke rører grafikkortet**.
+
+Det giver tre forskellige svar, og de skal holdes adskilt — en advarsel om noget, der ikke er et problem, er lige så forkert som en manglende advarsel:
+
+**Optagelse må aldrig kunne blokeres.** Det er ikke en bekvemmelighed, det er et princip: optagelse er den eneste handling i appen, der ikke kan gøres om. En transskription kan køres igen, et udkast kan laves forfra — et møde kan ikke holdes om. Gør en fremtidig ændring optagelse afhængig af, at noget andet er færdigt, er det en fejl, uanset hvor fornuftigt det virker.
+
+Det er samtidig en styrke, der skal siges højt frem for at ligge implicit: **du kan altid trykke optag.** Kører der en transskription eller et udkast, er det ligegyldigt — de bruger grafikkortet, optagelsen bruger en tråd og 31 KB/sek. Appen skal oplyse om det roligt, dér hvor man ellers ville nå at tvivle.
+
+1. **Transskription og udkast samtidig: nej.** `HeavyJobLock` er en navngiven lås på tværs af processer, fordi kommandolinjen og appen deler samme grafikkort. Den, der kommer for sent, får at vide hvad der kører, og hvor lang tid der cirka er igen.
+2. **Optage mens et udkast kører: ja, uden videre.** Appen må gerne oplyse, at der kører noget, men ikke advare — optagelsen bruger hverken GPU eller nævneværdig CPU.
+3. **Starte et udkast mens der optages: tilladt, men frarådes.** Ikke på grund af hukommelse, men fordi maskinen har fire kerner, og et udkast bruger dem alle. Optagelsen skriver 30-sekunders segmenter og fører protokol over tabt lyd, så et udfald ville være synligt frem for tavst — men et møde kan ikke holdes om. Beskeden skal sige mekanismen og lade brugeren vælge.
+
+**Modellen ligger kun i hukommelsen, mens den bruges.** Derfor engangskørsler med `llama-cli` frem for en server: processen slutter, og hukommelsen frigives. Prisen er, at 4,7 GB skal læses fra disk ved hver kørsel — den er talt med i estimatet.
+
+**Estimater bygger på målte hastigheder**, gemt pr. model i `hastigheder.json`. Har en model aldrig kørt før, findes der intet tal, og så siger appen det frem for at finde på et.
+
 ### Fase 5 (v1.1)
 #6 søgning, #7 stemmeprofiler, #8 auto-detect, #9 taletidsfordeling.
 

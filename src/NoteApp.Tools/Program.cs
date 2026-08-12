@@ -20,6 +20,8 @@ try
         "motor"     => Motor(),
         "hent"      => await Hent(args.Skip(1).ToArray()),
         "hentmotor" => await HentMotor(args.Skip(1).ToArray()),
+        "sprogmodel" => await Sprogmodel(args.Skip(1).ToArray()),
+        "udkast"    => await Udkast(args.Skip(1).ToArray()),
         "gendan"    => Gendan(args.Skip(1).ToArray()),
         "transskriber" => await Transskriber(args.Skip(1).ToArray()),
         "recover"   => Genopret(),
@@ -229,6 +231,152 @@ static int Motor()
         Console.WriteLine($"  {m.Id,-16} {m.SizeText,8}  {m.Summary}");
 
     return s.IsComplete ? 0 : 1;
+}
+
+/// <summary>
+/// Sprogmodeller til skabelonlaget. Uden argument vises kataloget.
+/// </summary>
+static async Task<int> Sprogmodel(string[] a)
+{
+    if (a.Length == 0)
+    {
+        var vram = 6144L * 1024 * 1024;   // maales rigtigt i appen; her til visningen
+
+        Console.WriteLine("Frit til salg (Apache 2.0 / MIT):");
+        foreach (var m in NoteApp.Core.Llm.LlmCatalog.Default)
+            Console.WriteLine($"  {m.Id,-20} {m.SizeText,8}  {(m.FitsInVram(vram) ? "passer i VRAM" : "kører på CPU")}  {m.License}");
+
+        Console.WriteLine();
+        Console.WriteLine("Betingelser følger med til dine kunder — vælges kun bevidst:");
+        foreach (var m in NoteApp.Core.Llm.LlmCatalog.WithObligations)
+            Console.WriteLine($"  {m.Id,-20} {m.SizeText,8}  {m.License}");
+
+        Console.WriteLine();
+        Console.WriteLine("Hent med: noteapp sprogmodel <id>");
+        return 0;
+    }
+
+    var valgt = NoteApp.Core.Llm.LlmCatalog.ById(a[0]);
+    if (valgt is null) { Console.Error.WriteLine($"Kender ikke modellen: {a[0]}"); return 2; }
+
+    if (valgt.LicenseClass != NoteApp.Core.Llm.LicenseClass.FriTilSalg)
+    {
+        Console.WriteLine($"BEMÆRK — {valgt.License}");
+        Console.WriteLine(valgt.LicenseObligation);
+        Console.WriteLine();
+    }
+
+    Directory.CreateDirectory(NoteApp.Core.Llm.LlmRunner.ModelDirectory);
+    var maal = Path.Combine(NoteApp.Core.Llm.LlmRunner.ModelDirectory, valgt.FileName);
+
+    Console.WriteLine($"Henter {valgt.Id} ({valgt.SizeText}) fra {valgt.Repo}");
+
+    var sidst = -1;
+    var fremdrift = new Progress<DownloadProgress>(p =>
+    {
+        var pct = (int)p.Percent;
+        if (pct == sidst) return;
+        sidst = pct;
+        var tilbage = p.Remaining is null ? "" : $"  {p.Remaining.Value:mm\\:ss} tilbage";
+        Console.Write($"\r  {pct,3}%  {p.BytesDone / 1024.0 / 1024.0,6:0} / {p.BytesTotal / 1024.0 / 1024.0:0} MB" +
+                      $"  {p.BytesPerSecond / 1024.0 / 1024.0:0.0} MB/s{tilbage}   ");
+    });
+
+    await new Downloader().DownloadAsync(valgt.Url, maal, null, fremdrift);
+
+    Console.WriteLine();
+    Console.WriteLine($"Hentet: {maal}  ({new FileInfo(maal).Length / 1024.0 / 1024.0 / 1024.0:0.0} GB)");
+    return 0;
+}
+
+/// <summary>
+/// Kører en skabelon på en tekst og gemmer udkastet med proveniens.
+///   noteapp udkast &lt;mappe-eller-tekstfil&gt; [skabelon] [model.gguf]
+/// </summary>
+static async Task<int> Udkast(string[] a)
+{
+    NoteApp.Core.Llm.DraftStore.SeedTemplates();
+
+    var cli = NoteApp.Core.Llm.LlmRunner.FindCli();
+    if (cli is null) { Console.Error.WriteLine("llama-cli.exe er ikke hentet endnu."); return 1; }
+
+    var modeller = NoteApp.Core.Llm.LlmRunner.InstalledModels();
+    if (modeller.Count == 0) { Console.Error.WriteLine("Ingen sprogmodel hentet. Kør 'noteapp sprogmodel'."); return 1; }
+
+    var skabeloner = NoteApp.Core.Llm.PromptTemplate.LoadAll();
+    if (skabeloner.Count == 0) { Console.Error.WriteLine($"Ingen skabeloner i {NoteApp.Core.Llm.PromptTemplate.Directory}"); return 1; }
+
+    if (a.Length == 0)
+    {
+        Console.WriteLine("Skabeloner:");
+        foreach (var s in skabeloner) Console.WriteLine($"  {s.Name}");
+        Console.WriteLine();
+        Console.WriteLine("Modeller:");
+        foreach (var m in modeller) Console.WriteLine($"  {Path.GetFileName(m)}");
+        Console.WriteLine();
+        Console.WriteLine("Brug: noteapp udkast <mappe-eller-tekstfil> [skabelon] [model.gguf]");
+        return 0;
+    }
+
+    // Kilden: enten en moedemappe eller en ren tekstfil.
+    string tekst, moedeMappe, titel;
+    if (Directory.Exists(a[0]))
+    {
+        moedeMappe = a[0];
+        var txt = Directory.GetFiles(moedeMappe, "*.txt").OrderByDescending(File.GetLastWriteTime).FirstOrDefault();
+        if (txt is null) { Console.Error.WriteLine("Fandt ingen transskription (.txt) i mappen."); return 1; }
+        tekst = File.ReadAllText(txt);
+        titel = MeetingStore.Load(moedeMappe)?.Title ?? Path.GetFileName(moedeMappe);
+    }
+    else if (File.Exists(a[0]))
+    {
+        tekst = File.ReadAllText(a[0]);
+        moedeMappe = Path.GetDirectoryName(Path.GetFullPath(a[0]))!;
+        titel = Path.GetFileNameWithoutExtension(a[0]);
+    }
+    else { Console.Error.WriteLine($"Findes ikke: {a[0]}"); return 1; }
+
+    var skabelon = a.Length > 1
+        ? skabeloner.FirstOrDefault(s => s.Name.Contains(a[1], StringComparison.OrdinalIgnoreCase)) ?? skabeloner[0]
+        : skabeloner[0];
+
+    var model = a.Length > 2
+        ? modeller.FirstOrDefault(m => Path.GetFileName(m).Contains(a[2], StringComparison.OrdinalIgnoreCase)) ?? modeller[0]
+        : modeller[0];
+
+    using var store = new LearningStore();
+
+    var felter = new Dictionary<string, string?>
+    {
+        ["transskription"] = tekst,
+        ["titel"] = titel,
+        ["dato"] = DateTime.Now.ToString("d. MMMM yyyy"),
+        ["varighed"] = "",
+        ["noter"] = "",
+        ["ordbog"] = store.BuildWhisperPrompt(tokenBudget: 2000)
+    };
+
+    Console.WriteLine($"Skabelon : {skabelon.Name}");
+    Console.WriteLine($"Model    : {Path.GetFileName(model)}");
+    Console.WriteLine($"Tekst    : {tekst.Length} tegn (~{tekst.Length / 3} tokens)");
+    Console.WriteLine();
+
+    var runner = new NoteApp.Core.Llm.LlmRunner(cli);
+    var sidstBesked = "";
+    var fremdrift = new Progress<NoteApp.Core.Llm.LlmProgress>(p =>
+    {
+        if (p.Message != sidstBesked) { sidstBesked = p.Message; Console.WriteLine($"  {p.Message}"); }
+    });
+
+    var r = await runner.RunAsync(model, skabelon, skabelon.Render(felter), fremdrift);
+
+    var sti = NoteApp.Core.Llm.DraftStore.Save(moedeMappe, skabelon, r);
+
+    Console.WriteLine();
+    Console.WriteLine($"Tid      : {r.Elapsed.TotalSeconds:0.0} sek");
+    Console.WriteLine($"Tokens   : {r.PromptTokens} ind, {r.ResponseTokens} ud  ({r.TokensPerSecond:0.0}/sek)");
+    Console.WriteLine($"Gemt     : {sti}");
+    return 0;
 }
 
 /// <summary>
