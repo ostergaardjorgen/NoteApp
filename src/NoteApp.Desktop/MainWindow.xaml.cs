@@ -5,6 +5,7 @@ using NoteApp.Core;
 using NoteApp.Desktop.Dictionary;
 using NoteApp.Desktop.Engine;
 using NoteApp.Desktop.Files;
+using NoteApp.Desktop.Meeting;
 using NoteApp.Desktop.Preferences;
 using NoteApp.Desktop.ReadAloud;
 using NoteApp.Desktop.Templates;
@@ -14,7 +15,9 @@ namespace NoteApp.Desktop;
 
 public partial class MainWindow : Window
 {
+    private readonly MeetingView _moede = new();
     private readonly ReadAloudView _oplaesning = new();
+    private readonly GlobalHotkey _genvej = new();
     private DictionaryView? _ordbog;
 
     /// <summary>Optagelsen, Optagelser-skærmen skal åbne på. Bruges én gang.</summary>
@@ -44,7 +47,38 @@ public partial class MainWindow : Window
             else NavTransskriber.IsChecked = true;
         };
 
-        Indhold.Content = _oplaesning;
+        // Efter et møde peger appen samme vej som efter en oplæsning: hen til
+        // optagelsen, med spørgsmålet om den skal skrives ud.
+        _moede.FærdigMedMøde += sti =>
+        {
+            _aabnOptagelse = sti;
+            NavTransskriber.IsChecked = true;
+        };
+
+        Indhold.Content = _moede;
+
+        // Genvejstasten kobles på, når vinduet findes. Virker den ikke, skal
+        // det siges — en genvej, der stille er død, opdages først den dag, man
+        // trykker på den under et møde.
+        Loaded += (_, _) =>
+        {
+            _genvej.Trykket += LynstartOptagelse;
+            _moede.VisGenvej(_genvej.Tilslut(this) ? null : _genvej.Fejl);
+        };
+    }
+
+    /// <summary>
+    /// Genvejstasten er trykket. Vinduet hentes frem, og optagelsen går i gang
+    /// med det samme — man skal ikke først finde den rigtige skærm.
+    /// </summary>
+    private void LynstartOptagelse()
+    {
+        if (WindowState == WindowState.Minimized) WindowState = WindowState.Normal;
+        Show();
+        Activate();
+
+        NavMoede.IsChecked = true;
+        _moede.Start();
     }
 
     private void Nav_Changed(object sender, RoutedEventArgs e)
@@ -89,9 +123,13 @@ public partial class MainWindow : Window
             // NU, ikke da appen startede.
             Indhold.Content = new SettingsView();
         }
-        else
+        else if (NavOplaesning.IsChecked == true)
         {
             Indhold.Content = _oplaesning;
+        }
+        else
+        {
+            Indhold.Content = _moede;
         }
     }
 
@@ -101,7 +139,9 @@ public partial class MainWindow : Window
     /// </summary>
     protected override void OnClosing(CancelEventArgs e)
     {
-        if (!_oplaesning.StopHvisIGang()) e.Cancel = true;
+        if (!_moede.StopHvisIGang() || !_oplaesning.StopHvisIGang()) { e.Cancel = true; return; }
+
+        _genvej.Dispose();
         base.OnClosing(e);
     }
 }

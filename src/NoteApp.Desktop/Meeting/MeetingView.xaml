@@ -1,0 +1,171 @@
+<UserControl x:Class="NoteApp.Desktop.Meeting.MeetingView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="{StaticResource Baggrund}"
+             Focusable="True">
+
+  <UserControl.Resources>
+    <!-- Mødetypen som to knapper frem for en rulleliste: der er to valg, og
+         de skal begge kunne ses uden at klikke. -->
+    <Style x:Key="Typevalg" TargetType="RadioButton">
+      <Setter Property="Cursor" Value="Hand" />
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="RadioButton">
+            <Border x:Name="Kant" CornerRadius="8" BorderThickness="1" Padding="20,10"
+                    Background="#FF181B22" BorderBrush="{StaticResource PanelKant}">
+              <ContentPresenter />
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="Kant" Property="BorderBrush" Value="{StaticResource TekstMeget}" />
+              </Trigger>
+              <Trigger Property="IsChecked" Value="True">
+                <Setter TargetName="Kant" Property="BorderBrush" Value="{StaticResource Accent}" />
+                <Setter TargetName="Kant" Property="Background" Value="#FF1D2530" />
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+  </UserControl.Resources>
+
+  <Grid Margin="24,20,24,20">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+
+    <!-- ============================ Topbjælke ============================ -->
+    <Grid Grid.Row="0" Margin="0,0,0,16">
+      <StackPanel>
+        <TextBlock x:Name="Overskrift" Text="Optag møde" Style="{StaticResource Overskrift}" />
+        <TextBlock x:Name="Underskrift" Style="{StaticResource Underskrift}"
+                   Text="Alt bliver på denne pc. Ingen lyd forlader maskinen." />
+      </StackPanel>
+
+      <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+        <StackPanel Margin="0,0,18,0" HorizontalAlignment="Right">
+          <TextBlock x:Name="Ur" Text="00:00:00" FontSize="30" FontWeight="SemiBold"
+                     FontFamily="Consolas" HorizontalAlignment="Right" />
+          <TextBlock x:Name="UrUnder" Style="{StaticResource Underskrift}" HorizontalAlignment="Right" />
+        </StackPanel>
+        <Ellipse x:Name="OptagerPrik" Width="14" Height="14" Fill="{StaticResource TekstMeget}"
+                 VerticalAlignment="Center" />
+      </StackPanel>
+    </Grid>
+
+    <!-- ========================= Før optagelsen ========================= -->
+    <Border Grid.Row="1" x:Name="KlarPanel" Background="{StaticResource Panel}" CornerRadius="12"
+            BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+      <Grid Margin="40,32">
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Selve handlingen. Den fylder, fordi det er dét, appen er til:
+             et møde begynder om et øjeblik, og der skal ét tryk til. -->
+        <StackPanel Grid.Row="0" HorizontalAlignment="Center">
+          <Button x:Name="StartKnap" Click="Start_Click" Cursor="Hand" Padding="0"
+                  BorderThickness="0" Background="Transparent">
+            <Border CornerRadius="14" Background="{StaticResource Optager}" Padding="52,26">
+              <StackPanel>
+                <TextBlock Text="● Optag mødet nu" FontSize="27" FontWeight="SemiBold"
+                           Foreground="#FFFFFFFF" HorizontalAlignment="Center" />
+                <TextBlock x:Name="GenvejTekst" FontSize="12.5" Margin="0,7,0,0"
+                           Foreground="#CCFFFFFF" HorizontalAlignment="Center" />
+              </StackPanel>
+            </Border>
+          </Button>
+        </StackPanel>
+
+        <!-- Titlen er valgfri. Et krav om at navngive et møde, før man må
+             trykke, koster de første tredive sekunder af mødet. -->
+        <StackPanel Grid.Row="1" HorizontalAlignment="Center" MaxWidth="480" Margin="0,26,0,0">
+          <TextBlock Text="Hvad handler mødet om? (kan udfyldes bagefter)"
+                     Style="{StaticResource Underskrift}" HorizontalAlignment="Center" />
+          <TextBox x:Name="FeltTitel" Margin="0,6,0,0" FontSize="14" Padding="10,8"
+                   HorizontalContentAlignment="Center" />
+        </StackPanel>
+
+        <!-- Mødetypen afgør, om der optages fra højttaleren også. -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,24,0,0">
+          <RadioButton x:Name="TypeFysisk" GroupName="type" IsChecked="True" Content="Fysisk møde"
+                       Style="{StaticResource Typevalg}" Checked="Type_Valgt" />
+          <RadioButton x:Name="TypeOnline" GroupName="type" Content="Onlinemøde" Margin="10,0,0,0"
+                       Style="{StaticResource Typevalg}" Checked="Type_Valgt" />
+        </StackPanel>
+
+        <TextBlock Grid.Row="3" x:Name="TypeForklaring" HorizontalAlignment="Center" Margin="0,16,0,0"
+                   FontSize="12.5" TextWrapping="Wrap" MaxWidth="560" TextAlignment="Center"
+                   LineHeight="20" Foreground="{StaticResource TekstMeget}" />
+      </Grid>
+    </Border>
+
+    <!-- ========================= Under optagelsen ======================= -->
+    <Border Grid.Row="1" x:Name="OptagPanel" Background="{StaticResource Panel}" CornerRadius="12"
+            BorderBrush="{StaticResource PanelKant}" BorderThickness="1" Visibility="Collapsed">
+      <Grid Margin="28,24">
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="*" />
+          <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="Noter undervejs" FontSize="15" FontWeight="SemiBold" />
+        <TextBlock Grid.Row="0" Margin="0,22,0,0" FontSize="12.5" TextWrapping="Wrap"
+                   Foreground="{StaticResource TekstMeget}"
+                   Text="Skriv en note og tryk Enter. Den bliver tidsstemplet, så den kan flettes ind i udskriften det rigtige sted. Ctrl+B sætter et bogmærke uden tekst." />
+
+        <ScrollViewer Grid.Row="1" Margin="0,16,0,0" VerticalScrollBarVisibility="Auto">
+          <ItemsControl x:Name="Noter">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <Grid Margin="0,0,0,8">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                  </Grid.ColumnDefinitions>
+                  <TextBlock Grid.Column="0" Text="{Binding Tid}" FontFamily="Consolas" FontSize="12"
+                             Margin="0,0,14,0" Foreground="{StaticResource Accent}" />
+                  <TextBlock Grid.Column="1" Text="{Binding Tekst}" FontSize="13" TextWrapping="Wrap"
+                             Foreground="{StaticResource TekstSvag}" />
+                </Grid>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </ScrollViewer>
+
+        <TextBox Grid.Row="2" x:Name="FeltNote" Margin="0,14,0,0" FontSize="14" Padding="10,9"
+                 KeyDown="Note_KeyDown" />
+      </Grid>
+    </Border>
+
+    <!-- ============================ Bundbjælke =========================== -->
+    <Grid Grid.Row="2" Margin="0,16,0,0">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*" />
+        <ColumnDefinition Width="Auto" />
+      </Grid.ColumnDefinitions>
+
+      <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
+        <TextBlock x:Name="MikrofonNavn" FontSize="12.5" Foreground="{StaticResource TekstSvag}" />
+        <TextBlock x:Name="Status" Style="{StaticResource Underskrift}" Margin="0,4,0,0"
+                   TextWrapping="Wrap" />
+      </StackPanel>
+
+      <StackPanel Grid.Column="1" Orientation="Horizontal">
+        <Button x:Name="PauseKnap" Content="❚❚ Pause" Click="Pause_Click" Padding="18,10"
+                Visibility="Collapsed" Margin="0,0,10,0" />
+        <Button x:Name="StopKnap" Content="■ Stop og gem" Click="Stop_Click" Padding="20,10"
+                Visibility="Collapsed" Background="{StaticResource Optager}" Foreground="#FFFFFFFF"
+                BorderThickness="0" FontWeight="SemiBold" />
+      </StackPanel>
+    </Grid>
+  </Grid>
+</UserControl>

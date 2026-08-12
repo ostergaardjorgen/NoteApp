@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using NoteApp.Core;
+using NoteApp.Core.Llm;
 
 namespace NoteApp.Desktop.Transcribe;
 
@@ -154,6 +155,8 @@ public partial class TranscribeView : UserControl
         // Findes teksten allerede, vises den frem for forklaringen. Det er den,
         // man er kommet efter, naar optagelsen er skrevet ud een gang.
         var færdig = valgt is null ? null : FindTekst(valgt.Mappe);
+        ReferatKnap.IsEnabled = færdig is not null && _afbryd is null;
+
         if (færdig is not null)
         {
             Forklaring.Visibility = Visibility.Collapsed;
@@ -182,6 +185,147 @@ public partial class TranscribeView : UserControl
             ? "Vælg en optagelse i listen til venstre og tryk «Transskribér» nederst til højre. Så skriver appen alt det talte ud som tekst, du kan læse, søge i og rette."
             : $"«{valgt.Titel}» er klar. Tryk «Transskribér» nederst til højre, så skriver appen alt det talte ud som tekst, du kan læse, søge i og rette.";
         Status.Text = "";
+    }
+
+    // ------------------------------------------------------------- referatet
+
+    /// <summary>
+    /// Fra tekst til referat. Det er dét, hele kæden er til for, og indtil nu
+    /// kunne det kun gøres fra kommandolinjen — altså ikke af den, der
+    /// installerer appen.
+    ///
+    /// Sprogmodellen er frivillig. Er der ingen, siges det med hvad man gør
+    /// ved det, og resten af appen virker uændret.
+    /// </summary>
+    private async void Referat_Click(object sender, RoutedEventArgs e)
+    {
+        if (Optagelser.SelectedItem is not OptagelseVisning valgt) return;
+
+        var tekstFil = FindTekst(valgt.Mappe);
+        if (tekstFil is null)
+        {
+            MessageBox.Show("Optagelsen er ikke skrevet ud endnu. Tryk «Transskribér» først.",
+                "Ingen tekst at arbejde med", MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+
+        var cli = LlmRunner.FindCli();
+        var modeller = LlmRunner.InstalledModels();
+
+        if (cli is null || modeller.Count == 0)
+        {
+            MessageBox.Show(
+                "Der er ingen sprogmodel klar endnu.\n\n" +
+                "Et referat laves af en model, der kører her på maskinen. Hent en under «AI-modeller» — " +
+                "så virker knappen her.\n\n" +
+                "Alt det andet i appen virker uændret uden.",
+                "Mangler en sprogmodel", MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+
+        var skabeloner = PromptTemplate.LoadAll();
+        if (skabeloner.Count == 0)
+        {
+            DraftStore.SeedTemplates();
+            skabeloner = PromptTemplate.LoadAll();
+        }
+        if (skabeloner.Count == 0)
+        {
+            MessageBox.Show("Der er ingen skabeloner. Opret en under «Skabeloner».",
+                "Ingen skabelon", MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+
+        var skabelon = skabeloner[0];
+
+        // Skabelonens foretrukne model, hvis den er hentet. Ellers den foerste
+        // — og det siges, saa man ikke tror, man fik den, der stod i skabelonen.
+        var model = modeller.FirstOrDefault(m =>
+            skabelon.PreferredModel is not null &&
+            Path.GetFileName(m).Contains(skabelon.PreferredModel, StringComparison.OrdinalIgnoreCase))
+            ?? modeller[0];
+
+        var byttet = skabelon.PreferredModel is not null &&
+                     !Path.GetFileName(model).Contains(skabelon.PreferredModel, StringComparison.OrdinalIgnoreCase);
+
+        var svar = MessageBox.Show(
+            $"Lav «{skabelon.Name}» af «{valgt.Titel}»?\n\n" +
+            $"Model: {Path.GetFileNameWithoutExtension(model)}" +
+            (byttet ? $"\n(skabelonen foretrækker {skabelon.PreferredModel}, som ikke er hentet)" : "") +
+            "\n\nDet tager typisk to til fire minutter. Du kan lave noget andet imens — også optage " +
+            "et nyt møde.\n\nUdkastet skal læses igennem: en sprogmodel kan skrive et tal, der ikke blev sagt.",
+            "Lav referat", MessageBoxButton.OKCancel, MessageBoxImage.Question);
+
+        if (svar != MessageBoxResult.OK) return;
+
+        ReferatKnap.IsEnabled = false;
+        KoerKnap.IsEnabled = false;
+        Fremdrift.Visibility = Visibility.Visible;
+        Fremdrift.IsIndeterminate = true;
+        Status.Text = "Starter sprogmodellen …";
+
+        try
+        {
+            var meta = MeetingStore.Load(valgt.Mappe);
+            using var ordbog = new LearningStore();
+
+            var felter = new Dictionary<string, string?>
+            {
+                ["transskription"] = File.ReadAllText(tekstFil, System.Text.Encoding.UTF8),
+                ["titel"] = valgt.Titel,
+                ["dato"] = DateTime.Now.ToString("d. MMMM yyyy"),
+                ["varighed"] = TimeSpan.FromSeconds(valgt.Sekunder).ToString(@"h\:mm"),
+                ["noter"] = LaesNoter(valgt.Mappe),
+                ["sprog"] = meta?.Language is null ? "ikke registreret" : Transcriber.LanguageName(meta.Language),
+                ["ordbog"] = ordbog.BuildWhisperPrompt(tokenBudget: 2000)
+                    .Replace("Vi taler om ", "").TrimEnd('.')
+            };
+
+            var fremdrift = new Progress<LlmProgress>(p => Status.Text = p.Message);
+            var runner = new LlmRunner(cli);
+            var r = await runner.RunAsync(model, skabelon, skabelon.Render(felter), fremdrift);
+
+            var sti = DraftStore.Save(valgt.Mappe, skabelon, r);
+
+            Forklaring.Visibility = Visibility.Collapsed;
+            ResultatRude.Visibility = Visibility.Visible;
+            Maalinger.Visibility = Visibility.Collapsed;
+            Resultat.Text = r.Text.Trim();
+            Resultat.Foreground = (Brush)FindResource("Tekst");
+
+            Status.Text = $"Referat gemt: {Path.GetFileName(sti)} · {r.Elapsed.TotalSeconds:0} sek · " +
+                          "læs det igennem mod udskriften, før du sender det videre";
+        }
+        catch (Exception ex)
+        {
+            Status.Text = "Referatet blev ikke lavet.";
+            MessageBox.Show($"Referatet kunne ikke laves.\n\n{ex.Message}", "Kunne ikke lave referat",
+                MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+        finally
+        {
+            Fremdrift.IsIndeterminate = false;
+            Fremdrift.Visibility = Visibility.Collapsed;
+            ReferatKnap.IsEnabled = true;
+            KoerKnap.IsEnabled = true;
+        }
+    }
+
+    /// <summary>Noterne fra mødet som ren tekst, så de kan gå med til modellen.</summary>
+    private static string LaesNoter(string mappe)
+    {
+        var fil = Path.Combine(mappe, "notes.jsonl");
+        if (!File.Exists(fil)) return "";
+
+        var linjer = new List<string>();
+        foreach (var l in File.ReadLines(fil, System.Text.Encoding.UTF8))
+        {
+            var t = System.Text.RegularExpressions.Regex.Match(l, "\"Text\"\\s*:\\s*\"(?<t>[^\"]*)\"");
+            var tid = System.Text.RegularExpressions.Regex.Match(l, "\"Timecode\"\\s*:\\s*\"(?<v>[^\"]*)\"");
+            if (t.Success && t.Groups["t"].Value.Length > 0)
+                linjer.Add($"[{tid.Groups["v"].Value}] {t.Groups["t"].Value}");
+        }
+        return string.Join("\n", linjer);
     }
 
     /// <summary>Den nyeste udskrevne tekst i mappen, hvis der er en.</summary>

@@ -216,6 +216,12 @@
                 Margin="0,0,8,0" />
         <Button x:Name="AabnKnap" Content="Åbn mappen" Click="Aabn_Click" IsEnabled="False" Margin="0,0,8,0" />
         <Button x:Name="AfbrydKnap" Content="Afbryd" Click="Afbryd_Click" Visibility="Collapsed" Margin="0,0,8,0" />
+
+        <!-- Vejen videre. Den er der først, når der ER en tekst — et referat
+             kan ikke laves af lyd, kun af det, lyden er skrevet ud til. -->
+        <Button x:Name="ReferatKnap" Content="Lav referat  →" Click="Referat_Click"
+                Margin="0,0,8,0" MinWidth="140" IsEnabled="False" Padding="14,8" />
+
         <Button x:Name="KoerKnap" Content="Transskribér" Click="Koer_Click" Style="{StaticResource Primaer}"
                 MinWidth="150" IsEnabled="False" />
       </StackPanel>

@@ -31,10 +31,13 @@
           </StackPanel>
         </StackPanel>
         <StackPanel DockPanel.Dock="Top" Margin="0,26,0,0">
-          <!-- «Start her» frem for «Oplæsning»: menuen skal fortælle, hvor man
-               begynder, ikke hvad skærmen teknisk indeholder. -->
-          <RadioButton x:Name="NavOplaesning" GroupName="nav" Content="Start her"
+          <!-- «Optag møde» er øverst og er det, appen er til. Alt det andet —
+               oplæsning, ordbog, skabeloner — findes for at gøre DEN bedre. -->
+          <RadioButton x:Name="NavMoede" GroupName="nav" Content="Optag møde"
                        Checked="Nav_Changed" IsChecked="True"
+                       Style="{StaticResource NavKnap}" />
+          <RadioButton x:Name="NavOplaesning" GroupName="nav" Content="Start her"
+                       Checked="Nav_Changed"
                        Style="{StaticResource NavKnap}" />
           <!-- «Din ordbog» ligger nr. 2, lige under «Start her»: det er den, der
                tilpasser appen til dine ord, og dermed det næste skridt efter

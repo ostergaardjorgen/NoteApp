@@ -97,6 +97,33 @@
       </StackPanel>
     </Border>
 
+    <!-- ===================== Klar til næste møde ======================== -->
+    <Border Grid.Row="3" Background="{StaticResource Panel}" CornerRadius="10" Padding="20"
+            BorderBrush="{StaticResource PanelKant}" BorderThickness="1" Margin="0,0,0,14"
+            VerticalAlignment="Top">
+      <StackPanel>
+        <TextBlock Text="Klar til næste møde" FontSize="15" FontWeight="SemiBold" />
+        <TextBlock FontSize="12.5" Margin="0,6,0,0" TextWrapping="Wrap" LineHeight="20"
+                   Foreground="{StaticResource TekstMeget}"
+                   Text="Genvejstasten kan kun starte en optagelse, hvis appen kører. Derfor hænger de to ting sammen." />
+
+        <CheckBox x:Name="StartMedWindows" Margin="0,14,0,0" Click="Autostart_Klik"
+                  Content="Start NoteApp, når jeg logger på Windows" />
+        <TextBlock x:Name="AutostartStatus" FontSize="12" Margin="24,6,0,0" TextWrapping="Wrap"
+                   Foreground="{StaticResource TekstMeget}" />
+
+        <Border Background="#FF181B22" BorderBrush="{StaticResource PanelKant}" BorderThickness="1"
+                CornerRadius="8" Padding="14,11" Margin="0,14,0,0">
+          <StackPanel>
+            <TextBlock x:Name="GenvejOverskrift" FontSize="13" FontWeight="SemiBold"
+                       Text="Lynstart: Ctrl+Alt+R" />
+            <TextBlock x:Name="GenvejForklaring" FontSize="12.5" Margin="0,6,0,0" TextWrapping="Wrap"
+                       LineHeight="20" Foreground="{StaticResource TekstSvag}" />
+          </StackPanel>
+        </Border>
+      </StackPanel>
+    </Border>
+
     <Grid Grid.Row="4" Margin="0,12,0,0">
       <Grid.ColumnDefinitions>
         <ColumnDefinition Width="*" />

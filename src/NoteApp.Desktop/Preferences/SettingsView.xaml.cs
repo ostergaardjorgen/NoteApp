@@ -33,8 +33,47 @@ public partial class SettingsView : UserControl
         _timer = new DispatcherTimer(DispatcherPriority.Background) { Interval = TimeSpan.FromMilliseconds(100) };
         _timer.Tick += (_, _) => OpdaterMaalere();
 
-        Loaded += (_, _) => { Indlaes(); _timer.Start(); };
+        Loaded += (_, _) => { Indlaes(); VisAutostart(); _timer.Start(); };
         Unloaded += (_, _) => { _timer.Stop(); StopProber(); };
+    }
+
+    // ---------------------------------------------------------- klar til møde
+
+    private void VisAutostart()
+    {
+        StartMedWindows.IsChecked = Autostart.ErSlaaetTil();
+
+        AutostartStatus.Text = Autostart.ErForaeldet()
+            ? "Bemærk: den gemte opstart peger på en anden placering, end appen kører fra nu. " +
+              "Slå den fra og til igen, så bliver stien rettet."
+            : "Appen åbner ikke et vindue ved opstart — den ligger klar, indtil du trykker genvejstasten.";
+
+        GenvejForklaring.Text =
+            $"Tryk {GlobalHotkey.Beskrivelse} hvor som helst i Windows, så begynder optagelsen med det samme " +
+            "og appen kommer frem. Kombinationen er valgt, fordi den er ledig i Windows selv og i " +
+            "de programmer, møder typisk foregår i. Ctrl+Shift+R og Ctrl+R er genindlæsning i browsere, " +
+            "og Win+R åbner Kør — derfor ikke dem.";
+    }
+
+    private void Autostart_Klik(object sender, RoutedEventArgs e)
+    {
+        var til = StartMedWindows.IsChecked == true;
+        var fejl = Autostart.Saet(til);
+
+        if (fejl is not null)
+        {
+            // Feltet skal vise virkeligheden, ikke oensket. Et haevet flueben,
+            // der ikke gjorde noget, er en loegn, man opdager en morgen.
+            StartMedWindows.IsChecked = Autostart.ErSlaaetTil();
+            Status.Text = $"Kunne ikke ændre opstarten: {fejl}";
+            return;
+        }
+
+        Status.Text = til
+            ? "NoteApp starter nu med Windows og ligger klar til genvejstasten."
+            : "NoteApp starter ikke længere med Windows.";
+
+        VisAutostart();
     }
 
     private void Indlaes()

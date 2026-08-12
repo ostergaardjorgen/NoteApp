@@ -26,6 +26,25 @@ public partial class App : Application
             var opsaetning = new Setup.SetupWindow();
             opsaetning.ShowDialog();
         }
+
+        // --minimeret: startet af Windows ved login. Så skal der ikke poppe et
+        // vindue op midt i det, man var i gang med — appen ligger bare klar,
+        // så genvejstasten virker. Vinduet kommer frem, når man trykker.
+        if (e.Args.Any(a => a.Equals("--minimeret", StringComparison.OrdinalIgnoreCase)))
+            _startMinimeret = true;
+    }
+
+    private bool _startMinimeret;
+
+    protected override void OnActivated(EventArgs e)
+    {
+        base.OnActivated(e);
+
+        if (!_startMinimeret || MainWindow is null) return;
+        _startMinimeret = false;
+
+        MainWindow.WindowState = WindowState.Minimized;
+        MainWindow.ShowInTaskbar = true;
     }
 
     /// <summary>
