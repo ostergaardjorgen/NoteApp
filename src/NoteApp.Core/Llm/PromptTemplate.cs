@@ -24,16 +24,16 @@ namespace NoteApp.Core.Llm;
 /// </summary>
 public sealed class PromptTemplate
 {
-    public required string Name { get; init; }
-    public string? Description { get; init; }
-    public string? PreferredModel { get; init; }
-    public double Temperature { get; init; } = 0.2;
+    public required string Name { get; set; }
+    public string? Description { get; set; }
+    public string? PreferredModel { get; set; }
+    public double Temperature { get; set; } = 0.2;
 
     /// <summary>Loft over svarets længde. Et referat af et langt møde skal have plads.</summary>
-    public int MaxTokens { get; init; } = 2048;
+    public int MaxTokens { get; set; } = 2048;
 
-    public required string SystemPrompt { get; init; }
-    public required string UserPrompt { get; init; }
+    public required string SystemPrompt { get; set; }
+    public required string UserPrompt { get; set; }
 
     /// <summary>Filen den kom fra. Null hvis den er indbygget.</summary>
     public string? Path { get; init; }
@@ -108,6 +108,60 @@ public sealed class PromptTemplate
             sb.Replace("{{" + felt + "}}", v ?? "");
         }
         return sb.ToString();
+    }
+
+    /// <summary>
+    /// Skabelonen som den ser ud i filen. Samme format som den blev læst i —
+    /// en skabelon, der er redigeret i appen, skal stadig kunne åbnes i en
+    /// almindelig editor bagefter.
+    /// </summary>
+    public string ToMarkdown()
+    {
+        var sb = new StringBuilder();
+        sb.Append("navn: ").AppendLine(Name);
+        if (!string.IsNullOrWhiteSpace(Description)) sb.Append("beskrivelse: ").AppendLine(Description);
+        if (!string.IsNullOrWhiteSpace(PreferredModel)) sb.Append("model: ").AppendLine(PreferredModel);
+        sb.Append("temperatur: ").AppendLine(
+            Temperature.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture));
+        sb.Append("maks_tokens: ").AppendLine(MaxTokens.ToString());
+        sb.AppendLine("---");
+        sb.AppendLine(SystemPrompt.Trim());
+        sb.AppendLine("---");
+        sb.AppendLine(UserPrompt.Trim());
+        return sb.ToString();
+    }
+
+    /// <summary>
+    /// Gemmer skabelonen. Skrives til en midlertidig fil og flyttes på plads,
+    /// så en afbrudt skrivning ikke efterlader en halv skabelon — den ville
+    /// først fejle den dag, man havde brug for den.
+    /// </summary>
+    public string Save(string? path = null)
+    {
+        var mål = path ?? Path ?? System.IO.Path.Combine(Directory, Filnavn(Name));
+        System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(mål)!);
+
+        var midlertidig = mål + ".ny";
+        File.WriteAllText(midlertidig, ToMarkdown(), new UTF8Encoding(false));
+        File.Move(midlertidig, mål, overwrite: true);
+        return mål;
+    }
+
+    /// <summary>Et navn, der kan være et filnavn — æøå og mellemrum oversat.</summary>
+    public static string Filnavn(string navn)
+    {
+        var sb = new StringBuilder();
+        foreach (var c in navn.ToLowerInvariant())
+        {
+            if (char.IsLetterOrDigit(c) && c < 128) sb.Append(c);
+            else if (c == 'æ') sb.Append("ae");
+            else if (c == 'ø') sb.Append("oe");
+            else if (c == 'å') sb.Append("aa");
+            else if (sb.Length > 0 && sb[^1] != '-') sb.Append('-');
+        }
+
+        var rent = sb.ToString().Trim('-');
+        return (rent.Length == 0 ? "skabelon" : rent) + ".md";
     }
 
     public static IReadOnlyList<PromptTemplate> LoadAll()

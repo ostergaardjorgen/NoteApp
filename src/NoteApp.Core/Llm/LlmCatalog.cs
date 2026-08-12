@@ -31,7 +31,17 @@ public sealed record LlmModelInfo(
     string? LicenseObligation,
     string Summary,
     string Pros,
-    string Cons)
+    string Cons,
+    /// <summary>
+    /// Sat, hvis modellen er prøvet af og fravalgt. Teksten er begrundelsen,
+    /// og den skal kunne læses af en, der ikke var med.
+    ///
+    /// En fravalgt model bliver stående i kataloget frem for at blive slettet.
+    /// Slettes den, er der intet, der forhindrer, at den bliver tilføjet igen
+    /// om et halvt år af nøjagtig de samme gode grunde — og så koster den de
+    /// samme timer at afvise en gang til.
+    /// </summary>
+    string? Rejected = null)
 {
     public string Url => $"https://huggingface.co/{Repo}/resolve/main/{FileName}";
 
@@ -81,7 +91,16 @@ public static class LlmCatalog
             "Apache 2.0", LicenseClass.FriTilSalg, null,
             "Mellemklasse. Kræver, at en del af modellen ligger i almindelig RAM.",
             "Mærkbart bedre til lange, sammenhængende referater end en 8B. Apache 2.0.",
-            "Fylder 14 GB og passer ikke på et 6 GB-kort. Regn med minutter frem for sekunder pr. referat."),
+            "Fylder 14 GB og passer ikke på et 6 GB-kort.",
+            Rejected:
+                "Prøvet af 12. august 2026 på et 6 GB-kort (RTX 2060, 32 GB RAM) og fravalgt. " +
+                "To kørsler på den samme testtekst — 20 minutters møde, 4.481 tokens — blev afbrudt " +
+                "efter henholdsvis 50 og 20 minutter uden at have skrevet et referat færdigt. " +
+                "Qwen3-8B klarer den samme tekst på 160 sekunder. " +
+                "Årsagen er ikke modellens kvalitet, men størrelsen: 14 GB på et 6 GB-kort betyder, " +
+                "at llama.cpp lægger det, der kan være, på kortet og resten i RAM, og de lag, der " +
+                "ligger i RAM, sætter tempoet. Målt under kørslen: 5,8 GB på kortet og 14,1 GB i RAM. " +
+                "Et referat, man venter en time på, bliver ikke lavet — man skriver det selv i mellemtiden."),
 
         new LlmModelInfo(
             "muse-glimmer-30b", "unsloth/Muse-Glimmer-30B-GGUF",
@@ -110,13 +129,24 @@ public static class LlmCatalog
             "Licensen stiller krav til navngivning og angivelse i dit produkt.")
     };
 
-    /// <summary>Det brugeren ser som standard: kun det, der er frit at sælge med.</summary>
+    /// <summary>
+    /// Det brugeren ser som standard: frit at sælge med, og ikke prøvet af og
+    /// fravalgt.
+    /// </summary>
     public static IEnumerable<LlmModelInfo> Default =>
-        Known.Where(m => m.LicenseClass == LicenseClass.FriTilSalg);
+        Known.Where(m => m.LicenseClass == LicenseClass.FriTilSalg && m.Rejected is null);
 
     /// <summary>De øvrige. Vises kun, når brugeren aktivt beder om at se dem.</summary>
     public static IEnumerable<LlmModelInfo> WithObligations =>
-        Known.Where(m => m.LicenseClass == LicenseClass.BetingelserFoelgerMed);
+        Known.Where(m => m.LicenseClass == LicenseClass.BetingelserFoelgerMed && m.Rejected is null);
+
+    /// <summary>
+    /// Prøvet af og fravalgt. Vises som en note frem for at blive skjult: den,
+    /// der undrer sig over, hvorfor en kendt model ikke er med, skal kunne se
+    /// svaret i appen i stedet for at prøve den af igen.
+    /// </summary>
+    public static IEnumerable<LlmModelInfo> Rejected =>
+        Known.Where(m => m.Rejected is not null);
 
     public static LlmModelInfo? ById(string id) =>
         Known.FirstOrDefault(m => m.Id.Equals(id, StringComparison.OrdinalIgnoreCase));

@@ -43,7 +43,13 @@
           <RadioButton x:Name="NavOrdbog" GroupName="nav" Content="Din ordbog"
                        Checked="Nav_Changed"
                        Style="{StaticResource NavKnap}" />
-          <RadioButton x:Name="NavTransskriber" GroupName="nav" Content="Transskribér"
+          <!-- «Optagelser» frem for «Transskribér»: menupunktet siger, hvad man
+               finder derinde. Handlingen står på selve skærmen, ved den
+               optagelse den hører til. -->
+          <RadioButton x:Name="NavTransskriber" GroupName="nav" Content="Optagelser"
+                       Checked="Nav_Changed"
+                       Style="{StaticResource NavKnap}" />
+          <RadioButton x:Name="NavSkabeloner" GroupName="nav" Content="Skabeloner"
                        Checked="Nav_Changed"
                        Style="{StaticResource NavKnap}" />
           <RadioButton x:Name="NavMotor" GroupName="nav" Content="Motor og model"

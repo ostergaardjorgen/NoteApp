@@ -15,9 +15,9 @@
     </Grid.RowDefinitions>
 
     <StackPanel Grid.Row="0" Grid.ColumnSpan="2" Margin="0,0,0,14">
-      <TextBlock Text="Transskribér" Style="{StaticResource Overskrift}" />
+      <TextBlock Text="Optagelser" Style="{StaticResource Overskrift}" />
       <TextBlock Style="{StaticResource Underskrift}"
-                 Text="Kører optagelsen gennem Whisper på denne pc. Ingen lyd forlader maskinen." />
+                 Text="Vælg en optagelse, og skriv den ud til tekst. Det sker på denne pc — ingen lyd forlader maskinen." />
     </StackPanel>
 
     <!-- ========================= Optagelser ============================ -->

@@ -7,6 +7,7 @@ using NoteApp.Desktop.Engine;
 using NoteApp.Desktop.Files;
 using NoteApp.Desktop.Preferences;
 using NoteApp.Desktop.ReadAloud;
+using NoteApp.Desktop.Templates;
 using NoteApp.Desktop.Transcribe;
 
 namespace NoteApp.Desktop;
@@ -54,6 +55,12 @@ public partial class MainWindow : Window
             // Bygges hver gang: listen over optagelser skal vise den, der
             // netop er lavet, uden at nogen skal genstarte appen.
             Indhold.Content = new TranscribeView();
+        }
+        else if (NavSkabeloner.IsChecked == true)
+        {
+            // Bygges hver gang: skabelonerne er filer, og de kan være rettet i
+            // en editor siden sidst.
+            Indhold.Content = new TemplatesView();
         }
         else if (NavMotor.IsChecked == true)
         {
