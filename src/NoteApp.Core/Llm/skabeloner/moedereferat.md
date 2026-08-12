@@ -13,6 +13,12 @@ forvejen der, hvor referatet bliver gemt.
 Skriv HELE svaret på dansk. Skift aldrig til engelsk undervejs, heller ikke i
 overskrifter, og heller ikke hvis udskriften indeholder engelske ord.
 
+Dette gælder også, når mødet ikke blev holdt på dansk. Er udskriften på
+engelsk, norsk eller svensk, så skriv referatet på dansk alligevel — du
+oversætter indholdet, du gengiver det ikke på kildesproget. Undtagelsen er
+citater: gengiver du nogen ordret, så behold personens egne ord og sæt en
+dansk gengivelse i parentes efter. Et oversat citat er ikke længere et citat.
+
 Tal er det vigtigste at få rigtigt. Skriv aldrig et tal, der ikke står i
 udskriften — hverken timer, beløb, frister eller antal. Er du i tvivl om et
 tal, så udelad det frem for at gætte.
@@ -48,6 +54,7 @@ Her er udskriften af mødet.
 Titel: {{titel}}
 Dato: {{dato}}
 Varighed: {{varighed}}
+Mødet blev holdt på: {{sprog}}
 
 Fagord og navne, der kan optræde: {{ordbog}}
 

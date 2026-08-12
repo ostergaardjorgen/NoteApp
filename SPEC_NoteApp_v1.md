@@ -202,6 +202,20 @@ Test: 90 minutters møde, skift lydenhed midtvejs (headset til/fra), maskinen g�
 - **2b Diarisering:** embeddings + agglomerativ klyngning på loopback-sporet (afsnit 3).
 - **2c Navngivnings-UI:** navngiv, flet, ret enkeltsegment, autocomplete.
 
+#### Sprog — tilføjet 12. august 2026
+
+Whisper var låst til `-l da`. Det er lavet om til `auto`, fordi møder ikke altid holdes på dansk. Låst til dansk bliver et engelsk møde ikke afvist — det bliver transskriberet til volapyk, og volapyk ligner et resultat. En fejl, der ligner et resultat, er værre end en fejlmeddelelse.
+
+Det detekterede sprog gemmes på mødet i `meeting.json` (`Language`, `LanguageProbability`) og står i statuslinjen, når transskriptionen er færdig. Derfra er det tilgængeligt for skabelonerne som `{{sprog}}`.
+
+**Oversættelse hører til i skabelonen, ikke i Whisper.** Whisper kan kun oversætte *til engelsk* — den kan ikke oversætte til dansk. Derfor gør skabelonen det: `moedereferat.md` skriver referatet på dansk, uanset hvilket sprog mødet blev holdt på. Ordrette citater beholder personens egne ord med en dansk gengivelse i parentes, fordi et oversat citat ikke længere er et citat.
+
+**To begrænsninger, der skal stå eksplicit:**
+
+Detekteringen sker **én gang**, ud fra de første tredive sekunder. Skifter mødet sprog undervejs — et dansk møde med en engelsk gæst — opdager Whisper det ikke. Feltet er altså mødets *hovedsprog*, ikke en markering pr. afsnit. Markering pr. afsnit ville kræve, at lyden deles op og detekteres stykkevis; det er ikke bygget.
+
+Dansk, norsk og svensk ligner hinanden nok til, at detekteringen kan lande forkert. Derfor gemmes sandsynligheden, og under 0,7 vises den som usikker frem for at blive skjult. Sproget kan låses med `--sprog da`, når det er kendt på forhånd.
+
 ### Fase 3 — Auto-resumé — FJERNET 2026-08-10
 Fasen er udgået. Den ville have sendt transskriptionen til Claudes API og var dermed det eneste sted, data forlod maskinen — i direkte konflikt med princippet i afsnit 0.
 

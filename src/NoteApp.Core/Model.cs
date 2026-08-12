@@ -47,6 +47,23 @@ public sealed class MeetingMetadata
     /// <summary>Sat af genopretningen når mødet blev samlet fra efterladte segmenter.</summary>
     public bool RecoveredAfterCrash { get; set; }
 
+    /// <summary>
+    /// Sproget mødet blev holdt på, som Whisper fandt det. Null indtil mødet
+    /// er transskriberet.
+    ///
+    /// Gemmes, fordi skabelonerne skal kunne forholde sig til sproget bagefter
+    /// — et referat af et engelsk møde skal skrives på dansk, og det kan kun
+    /// lade sig gøre, hvis det står et sted, at mødet var engelsk.
+    /// </summary>
+    public string? Language { get; set; }
+
+    /// <summary>
+    /// Hvor sikker sprogdetekteringen var (0-1). Null når sproget var valgt
+    /// på forhånd. Dansk, norsk og svensk ligner hinanden nok til, at tallet
+    /// er værd at kunne slå op, når et referat ser forkert ud.
+    /// </summary>
+    public double? LanguageProbability { get; set; }
+
     public Dictionary<string, string> Tracks { get; init; } = new();
 }
 

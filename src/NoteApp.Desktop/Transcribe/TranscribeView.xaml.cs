@@ -145,7 +145,10 @@ public partial class TranscribeView : UserControl
         {
             var motor = new Transcriber(install.WhisperCli!);
             var r = await motor.RunAsync(
-                new TranscriptionRequest(wav, install.ModelPath!, udBase, "da", prompt),
+                // "auto": Whisper finder selv sproget. Møder holdes ikke altid
+                // på dansk, og et engelsk møde tvunget gennem dansk giver
+                // volapyk frem for en fejl — og volapyk ligner et resultat.
+                new TranscriptionRequest(wav, install.ModelPath!, udBase, "auto", prompt),
                 fremdrift, _afbryd.Token);
 
             VisResultat(r);
@@ -193,7 +196,15 @@ public partial class TranscribeView : UserControl
         Resultat.Text = tekst.Length == 0 ? "(tom transskription — var der lyd på optagelsen?)" : tekst;
         Resultat.Foreground = (Brush)FindResource("Tekst");
 
-        Status.Text = $"Færdig · {r.EngineId} · gemt som {Path.GetFileName(r.TextPath)}";
+        // Sproget staar i statuslinjen, fordi det er den oplysning, der
+        // forklarer en tekst, der ser forkert ud. Er detekteringen usikker,
+        // skal usikkerheden staa der ogsaa — dansk, norsk og svensk ligner
+        // hinanden, og et forkert sprog er ikke til at gennemskue bagefter.
+        var sprog = Transcriber.LanguageName(r.DetectedLanguage);
+        if (r.LanguageProbability is double p && p < 0.7)
+            sprog += $" (usikker, {p * 100:0}%)";
+
+        Status.Text = $"Færdig · {sprog} · {r.EngineId} · gemt som {Path.GetFileName(r.TextPath)}";
         AabnKnap.IsEnabled = true;
     }
 

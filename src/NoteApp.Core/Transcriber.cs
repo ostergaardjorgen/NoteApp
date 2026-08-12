@@ -8,7 +8,15 @@ public sealed record TranscriptionRequest(
     string WavPath,
     string ModelPath,
     string OutputBase,
-    string Language = "da",
+    /// <summary>
+    /// Sprogkode, eller "auto" for at lade Whisper finde det selv.
+    ///
+    /// "auto" er standard, fordi møder ikke altid holdes på dansk. Låses det
+    /// til dansk, bliver et engelsk møde transskriberet som var det dansk, og
+    /// resultatet er volapyk frem for en fejlmeddelelse — den værste slags
+    /// fejl, fordi den ligner et resultat.
+    /// </summary>
+    string Language = "auto",
     string? Prompt = null,
     bool ForceCpu = false);
 
@@ -18,7 +26,22 @@ public sealed record TranscriptionResult(
     string LogPath,
     double AudioSeconds,
     double ElapsedSeconds,
-    string EngineId)
+    string EngineId,
+    /// <summary>
+    /// Det sprog, Whisper landede på. Enten det, brugeren valgte, eller det,
+    /// modellen selv fandt. Skrives med i referatet, så skabelonerne kan
+    /// forholde sig til sproget frem for at gætte.
+    /// </summary>
+    string DetectedLanguage = "da",
+    /// <summary>
+    /// Hvor sikker detekteringen var (0-1). Null, når sproget var valgt på
+    /// forhånd og der altså ikke blev detekteret noget.
+    ///
+    /// Tallet betyder noget i praksis: dansk, norsk og svensk ligner hinanden
+    /// nok til, at en detektering kan lande forkert. Er den usikker, skal det
+    /// kunne ses frem for at blive skjult bag et flag.
+    /// </summary>
+    double? LanguageProbability = null)
 {
     /// <summary>
     /// Realtidsfaktoren: transskriptionstid delt med lydens længde. Over 1,0
@@ -150,6 +173,7 @@ public sealed class Transcriber
                 $"whisper-cli afsluttede med kode {p.ExitCode}. Se loggen: {logPath}");
 
         var engine = BuildEngineId(request.ModelPath, log.ToString());
+        var (sprog, sikkerhed) = ReadLanguage(log.ToString(), request.Language);
 
         return new TranscriptionResult(
             request.OutputBase + ".txt",
@@ -157,8 +181,61 @@ public sealed class Transcriber
             logPath,
             lyd,
             Math.Round(ur.Elapsed.TotalSeconds, 1),
-            engine);
+            engine,
+            sprog,
+            sikkerhed);
     }
+
+    /// <summary>
+    /// Hvilket sprog blev det, og hvor sikkert var det.
+    ///
+    /// Whisper skriver ved detektering en linje i stil med:
+    ///   auto-detected language: da (p = 0.98342)
+    ///
+    /// VIGTIGT om rækkevidden: detekteringen sker ÉN gang, ud fra de første
+    /// tredive sekunder af lyden. Skifter mødet sprog undervejs — og det gør
+    /// et dansk møde med en engelsk gæst — opdager Whisper det ikke. Sproget
+    /// her er altså mødets hovedsprog, ikke en markering pr. afsnit. Det skal
+    /// stå, som det er; et felt, der lover mere end det holder, er værre end
+    /// intet felt.
+    /// </summary>
+    private static (string Sprog, double? Sikkerhed) ReadLanguage(string log, string ønsket)
+    {
+        var m = Regex.Match(log,
+            @"auto-detected language:\s*(?<kode>[a-z]{2,3})\s*(?:\(\s*p\s*=\s*(?<p>[\d.]+))?",
+            RegexOptions.IgnoreCase);
+
+        if (m.Success)
+        {
+            double? p = double.TryParse(m.Groups["p"].Value,
+                System.Globalization.NumberStyles.Float,
+                System.Globalization.CultureInfo.InvariantCulture, out var v) ? v : null;
+            return (m.Groups["kode"].Value.ToLowerInvariant(), p);
+        }
+
+        // Ingen detektering i loggen. Enten fordi sproget var valgt paa
+        // forhaand, eller fordi Whisper skrev det anderledes end ventet. I
+        // begge tilfaelde er det oenskede sprog det aerlige svar — men "auto"
+        // er ikke et sprog, og maa ikke ende i et referat som om det var.
+        return ønsket.Equals("auto", StringComparison.OrdinalIgnoreCase)
+            ? ("ukendt", null)
+            : (ønsket.ToLowerInvariant(), null);
+    }
+
+    /// <summary>Sprogkode til noget, der kan staa i et referat.</summary>
+    public static string LanguageName(string kode) => kode.ToLowerInvariant() switch
+    {
+        "da" => "dansk",
+        "en" => "engelsk",
+        "no" or "nn" or "nb" => "norsk",
+        "sv" => "svensk",
+        "de" => "tysk",
+        "nl" => "hollandsk",
+        "fr" => "fransk",
+        "es" => "spansk",
+        "ukendt" => "ukendt",
+        _ => kode
+    };
 
     /// <summary>
     /// Proveniens: hvilken motor og model lavede denne tekst. Gemmes med

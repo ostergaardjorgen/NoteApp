@@ -320,13 +320,21 @@ static async Task<int> Udkast(string[] a)
 
     // Kilden: enten en moedemappe eller en ren tekstfil.
     string tekst, moedeMappe, titel;
+    string sprog = "ikke registreret";
     if (Directory.Exists(a[0]))
     {
         moedeMappe = a[0];
         var txt = Directory.GetFiles(moedeMappe, "*.txt").OrderByDescending(File.GetLastWriteTime).FirstOrDefault();
         if (txt is null) { Console.Error.WriteLine("Fandt ingen transskription (.txt) i mappen."); return 1; }
         tekst = File.ReadAllText(txt);
-        titel = MeetingStore.Load(moedeMappe)?.Title ?? Path.GetFileName(moedeMappe);
+        var meta = MeetingStore.Load(moedeMappe);
+        titel = meta?.Title ?? Path.GetFileName(moedeMappe);
+
+        // Sproget staar kun her, hvis moedet er transskriberet med
+        // detektering. Er det ikke registreret, siges det — frem for at
+        // antage dansk og faa skabelonen til at tro paa noget, ingen har maalt.
+        if (!string.IsNullOrEmpty(meta?.Language))
+            sprog = Transcriber.LanguageName(meta.Language);
     }
     else if (File.Exists(a[0]))
     {
@@ -353,6 +361,7 @@ static async Task<int> Udkast(string[] a)
         ["dato"] = DateTime.Now.ToString("d. MMMM yyyy"),
         ["varighed"] = "",
         ["noter"] = "",
+        ["sprog"] = sprog,
         // Ordbogen sendes som en ren liste. BuildWhisperPrompt formulerer den
         // som "Vi taler om ..." fordi Whisper konditionerer paa sprogtone —
         // en sprogmodel skal bare have ordene.
@@ -570,8 +579,14 @@ static async Task<int> Transskriber(string[] a)
         Console.Write($"\r  {p.Message,-40}");
     });
 
+    // --sprog da laaser sproget; uden det finder Whisper det selv. Detektering
+    // er standard, fordi et engelsk moede transskriberet som dansk giver
+    // volapyk frem for en fejl — og volapyk ligner et resultat.
+    var i = Array.IndexOf(a, "--sprog");
+    var ønsketSprog = i >= 0 && i + 1 < a.Length ? a[i + 1] : "auto";
+
     var r = await motor.RunAsync(
-        new TranscriptionRequest(wav, s.ModelPath!, udBase, "da", prompt, a.Contains("--cpu")),
+        new TranscriptionRequest(wav, s.ModelPath!, udBase, ønsketSprog, prompt, a.Contains("--cpu")),
         fremdrift);
 
     Console.WriteLine();
@@ -579,6 +594,29 @@ static async Task<int> Transskriber(string[] a)
     Console.WriteLine($"Tid brugt : {r.ElapsedSeconds:0.0} sek på {r.AudioSeconds:0.0} sek lyd");
     Console.WriteLine($"RTF       : {r.RealTimeFactor:0.00}  ({(r.RealTimeFactor <= 1 ? "hurtigere end realtid" : "LANGSOMMERE end realtid — planlæg som natjob")})");
     Console.WriteLine($"Motor-id  : {r.EngineId}");
+
+    var sikkerhed = r.LanguageProbability is double p2
+        ? $" (detekteret, {p2 * 100:0}% sikker)"
+        : " (valgt på forhånd)";
+    Console.WriteLine($"Sprog     : {Transcriber.LanguageName(r.DetectedLanguage)}{sikkerhed}");
+
+    if (r.LanguageProbability is double lav && lav < 0.7)
+        Console.WriteLine("            BEMÆRK: usikker detektering. Dansk, norsk og svensk " +
+                          "ligner hinanden. Lås sproget med --sprog da, hvis teksten ser forkert ud.");
+
+    // Sproget gemmes paa moedet, saa skabelonerne kan forholde sig til det
+    // senere. Uden det er detekteringen kun en linje i en log, der bliver slettet.
+    if (Directory.Exists(input))
+    {
+        var meta = MeetingStore.Load(input);
+        if (meta is not null)
+        {
+            meta.Language = r.DetectedLanguage;
+            meta.LanguageProbability = r.LanguageProbability;
+            MeetingStore.Save(input, meta);
+        }
+    }
+
     Console.WriteLine($"Tekst     : {r.TextPath}");
     return 0;
 }

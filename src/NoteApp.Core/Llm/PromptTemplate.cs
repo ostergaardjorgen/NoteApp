@@ -51,7 +51,8 @@ public sealed class PromptTemplate
         ["dato"] = "Dato og klokkeslæt",
         ["varighed"] = "Mødets længde",
         ["noter"] = "Dine egne noter og bogmærker fra mødet",
-        ["ordbog"] = "Dine fagord og navne — hjælper modellen med at stave rigtigt"
+        ["ordbog"] = "Dine fagord og navne — hjælper modellen med at stave rigtigt",
+        ["sprog"] = "Det sprog mødet blev holdt på, som Whisper fandt det"
     };
 
     public static PromptTemplate Parse(string text, string? path = null)
