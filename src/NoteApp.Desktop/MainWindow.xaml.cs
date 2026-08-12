@@ -63,8 +63,26 @@ public partial class MainWindow : Window
         Loaded += (_, _) =>
         {
             _genvej.Trykket += LynstartOptagelse;
-            _moede.VisGenvej(_genvej.Tilslut(this) ? null : _genvej.Fejl);
+            TilslutGenvej();
         };
+    }
+
+    /// <summary>
+    /// Registrerer genvejen og fortæller mødeskærmen, hvad der blev til noget.
+    /// Kaldes igen, når valget ændres under Indstillinger.
+    /// </summary>
+    public void TilslutGenvej()
+    {
+        var ok = _genvej.Tilslut(this, AppSettings.Current.HotkeyId);
+        _moede.VisGenvej(ok ? _genvej.Aktiv!.Navn : null, _genvej.Bemærkning);
+
+        // Blev der valgt en anden end den oenskede, gemmes den. Ellers ville
+        // appen proeve den optagede igen ved hver opstart og skifte hver gang.
+        if (ok && _genvej.Aktiv!.Id != AppSettings.Current.HotkeyId)
+        {
+            AppSettings.Current.HotkeyId = _genvej.Aktiv.Id;
+            AppSettings.Current.Save();
+        }
     }
 
     /// <summary>

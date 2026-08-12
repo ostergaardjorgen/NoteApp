@@ -42,7 +42,7 @@ public partial class MeetingView : UserControl
             : $"Mikrofon: {mik.FriendlyName}";
         StartKnap.IsEnabled = mik is not null;
 
-        VisGenvej(null);
+        VisGenvej(null, "endnu ikke registreret");
 
         VisType();
         Loaded += (_, _) => Focus();
@@ -58,11 +58,19 @@ public partial class MeetingView : UserControl
     /// først den dag, man trykker på den før et møde og bagefter finder ud af,
     /// at der ikke blev optaget noget.
     /// </summary>
-    public void VisGenvej(string? fejl)
+    public void VisGenvej(string? tast, string? bemærkning)
     {
-        GenvejTekst.Text = fejl is null
-            ? $"eller tryk {GlobalHotkey.Beskrivelse} — virker også, når appen er skjult"
-            : $"Genvejstasten virker ikke: {fejl}";
+        if (tast is null)
+        {
+            GenvejTekst.Text = bemærkning is null
+                ? "Genvejstasten kunne ikke registreres"
+                : $"Ingen genvejstast: {bemærkning}. Vælg en anden under Indstillinger.";
+            return;
+        }
+
+        GenvejTekst.Text = bemærkning is null
+            ? $"eller tryk {tast} — virker også, når appen er skjult"
+            : $"eller tryk {tast} ({bemærkning})";
     }
 
     // ------------------------------------------------------------- mødetype

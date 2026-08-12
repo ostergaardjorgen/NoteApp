@@ -54,6 +54,16 @@ public sealed class AppSettings
     /// <summary>Model til live-lytningen. Den store bruges til den rigtige transskription.</summary>
     public string LiveModel { get; set; } = "small";
 
+    /// <summary>
+    /// Den genvejstast, der lynstarter en optagelse — gemt som id, ikke som
+    /// tastekombination, så navnet kan skrives om uden at valget går tabt.
+    ///
+    /// Null betyder «tag den første ledige». Genvejstaster er optaget af vidt
+    /// forskellige programmer fra maskine til maskine, og et fast valg, der
+    /// ikke kan lade sig gøre, er ingen genvej.
+    /// </summary>
+    public string? HotkeyId { get; set; }
+
     private static string Path => System.IO.Path.Combine(UserDataPaths.Root, "indstillinger.json");
 
     private static AppSettings? _current;

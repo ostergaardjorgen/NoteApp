@@ -116,9 +116,21 @@
                 CornerRadius="8" Padding="14,11" Margin="0,14,0,0">
           <StackPanel>
             <TextBlock x:Name="GenvejOverskrift" FontSize="13" FontWeight="SemiBold"
-                       Text="Lynstart: Ctrl+Alt+R" />
-            <TextBlock x:Name="GenvejForklaring" FontSize="12.5" Margin="0,6,0,0" TextWrapping="Wrap"
-                       LineHeight="20" Foreground="{StaticResource TekstSvag}" />
+                       Text="Lynstart af optagelse" />
+            <TextBlock FontSize="12.5" Margin="0,6,0,0" TextWrapping="Wrap" LineHeight="20"
+                       Foreground="{StaticResource TekstSvag}"
+                       Text="Tryk kombinationen hvor som helst i Windows, så begynder optagelsen med det samme. Listen viser, hvad der er ledigt på netop din maskine — det er forskelligt fra pc til pc." />
+
+            <ComboBox x:Name="Genveje" Margin="0,12,0,0" SelectionChanged="Genvej_Valgt">
+              <ComboBox.ItemTemplate>
+                <DataTemplate>
+                  <TextBlock Text="{Binding Visning}" />
+                </DataTemplate>
+              </ComboBox.ItemTemplate>
+            </ComboBox>
+
+            <TextBlock x:Name="GenvejForklaring" FontSize="12" Margin="2,8,0,0" TextWrapping="Wrap"
+                       LineHeight="19" Foreground="{StaticResource TekstMeget}" />
           </StackPanel>
         </Border>
       </StackPanel>

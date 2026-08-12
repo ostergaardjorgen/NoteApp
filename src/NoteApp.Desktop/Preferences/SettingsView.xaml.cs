@@ -48,11 +48,68 @@ public partial class SettingsView : UserControl
               "Slå den fra og til igen, så bliver stien rettet."
             : "Appen åbner ikke et vindue ved opstart — den ligger klar, indtil du trykker genvejstasten.";
 
-        GenvejForklaring.Text =
-            $"Tryk {GlobalHotkey.Beskrivelse} hvor som helst i Windows, så begynder optagelsen med det samme " +
-            "og appen kommer frem. Kombinationen er valgt, fordi den er ledig i Windows selv og i " +
-            "de programmer, møder typisk foregår i. Ctrl+Shift+R og Ctrl+R er genindlæsning i browsere, " +
-            "og Win+R åbner Kør — derfor ikke dem.";
+        VisGenveje();
+    }
+
+    private bool _indlæserGenveje;
+
+    /// <summary>
+    /// Listen over genvejskombinationer, med hvad der faktisk er ledigt lige
+    /// nu. Ledigheden PRØVES af frem for at blive gættet — det er forskelligt
+    /// fra maskine til maskine, og et valg, der ikke kan lade sig gøre, skal
+    /// ikke stå som om det kan.
+    /// </summary>
+    private void VisGenveje()
+    {
+        var vindue = Window.GetWindow(this);
+        if (vindue is null) return;
+
+        _indlæserGenveje = true;
+
+        var valgt = AppSettings.Current.HotkeyId;
+        var rækker = GlobalHotkey.Muligheder.Select(m =>
+        {
+            var ledig = m.Id == valgt || GlobalHotkey.ErLedig(m, vindue);
+            return new
+            {
+                m.Id,
+                m.Hvorfor,
+                Visning = ledig ? m.Navn : $"{m.Navn}  —  optaget af et andet program",
+                Ledig = ledig
+            };
+        }).ToList();
+
+        Genveje.ItemsSource = rækker;
+        Genveje.SelectedItem = rækker.FirstOrDefault(r => r.Id == valgt)
+                            ?? rækker.FirstOrDefault(r => r.Ledig);
+
+        _indlæserGenveje = false;
+
+        var v = Genveje.SelectedItem as dynamic;
+        GenvejForklaring.Text = v is null ? "" : (string)v.Hvorfor;
+    }
+
+    private void Genvej_Valgt(object sender, SelectionChangedEventArgs e)
+    {
+        if (_indlæserGenveje || Genveje.SelectedItem is null) return;
+
+        var valg = (dynamic)Genveje.SelectedItem!;
+        GenvejForklaring.Text = (string)valg.Hvorfor;
+
+        if (!(bool)valg.Ledig)
+        {
+            Status.Text = "Den kombination er taget af et andet program. Vælg en anden.";
+            return;
+        }
+
+        AppSettings.Current.HotkeyId = (string)valg.Id;
+        AppSettings.Current.Save();
+
+        // Registreringen skal ske med det samme. Et valg, der foerst virker
+        // efter en genstart, er et valg, man tror er i kraft.
+        if (Window.GetWindow(this) is MainWindow hoved) hoved.TilslutGenvej();
+
+        Status.Text = $"Lynstart er nu {(string)valg.Visning}.";
     }
 
     private void Autostart_Klik(object sender, RoutedEventArgs e)
