@@ -274,6 +274,56 @@ public sealed class LearningStore : IDisposable
         return ReadAliases(cmd);
     }
 
+    /// <summary>
+    /// Godkender en variant til automatisk rettelse fremover — eller afviser
+    /// den, så appen holder op med at spørge om den.
+    ///
+    /// Forfremmelse sker ALDRIG af sig selv. En regel, appen har fundet på,
+    /// ville rette i noget, ingen har set efter, og en forkert regel er værre
+    /// end den hørefejl, den skulle rette: hørefejlen ser man, rettelsen
+    /// ligner det rigtige ord.
+    /// </summary>
+    public void SetAliasAutoApply(long termId, string heard, bool godkendt)
+    {
+        using var cmd = _db.CreateCommand();
+        cmd.CommandText = godkendt
+            ? "UPDATE alias SET auto_apply = 1, rejected_at = NULL WHERE term_id = $t AND normalized = $n;"
+            : "UPDATE alias SET auto_apply = 0, rejected_at = datetime('now') WHERE term_id = $t AND normalized = $n;";
+        cmd.Parameters.AddWithValue("$t", termId);
+        cmd.Parameters.AddWithValue("$n", Normalize(heard));
+        cmd.ExecuteNonQuery();
+    }
+
+    /// <summary>
+    /// Slår en term op på dens kanoniske form. Bruges når en rettelse skrives
+    /// ind: «det her ord skal hedde det her», hvor termen findes i forvejen.
+    /// </summary>
+    public long? FindTermId(string canonical)
+    {
+        using var cmd = _db.CreateCommand();
+        cmd.CommandText = "SELECT id FROM term WHERE canonical = $c COLLATE NOCASE LIMIT 1;";
+        cmd.Parameters.AddWithValue("$c", canonical);
+        var r = cmd.ExecuteScalar();
+        return r is null or DBNull ? null : Convert.ToInt64(r);
+    }
+
+    /// <summary>
+    /// Registrerer en rettelse og gør den til en regel med det samme.
+    ///
+    /// Bruges, når rettelsen kommer fra et menneske, der har set både det
+    /// hørte og det rigtige — dér er der ikke noget at være i tvivl om.
+    /// Termen oprettes, hvis den ikke findes i forvejen.
+    /// </summary>
+    public long LearnCorrection(string heard, string canonical, string category = "fagterm",
+                                string engineId = "manuel", string meetingId = "")
+    {
+        var termId = FindTermId(canonical) ?? AddTerm(canonical, category);
+        RecordAlias(termId, heard);
+        SetAliasAutoApply(termId, heard, true);
+        RecordCorrection(meetingId, "", heard, canonical, engineId, "manuel", termId);
+        return termId;
+    }
+
     public IReadOnlyList<AliasRule> AutoApplyRules()
     {
         using var cmd = _db.CreateCommand();

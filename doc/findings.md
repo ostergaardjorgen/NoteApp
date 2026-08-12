@@ -360,3 +360,72 @@ Det var forkert at bruge en dag på at lede efter en bedre sprogmodel. **Flaskeh
 Rækkefølgen fremover er derfor: få ordbogen til at virke, mål den, og lad sprogmodellen være.
 
 **Rettelse til vores egen målestok:** `bedoem-referat.ps1` straffer sprogmodellen for transskriptionens fejl. Tallene kan sammenlignes mellem **modeller på samme tekst**, men ikke bruges til at afgøre, om et referat er godt, når teksten under det er beskadiget. Begrænsningen står nu i scriptet.
+
+---
+
+## 8. Hvordan appen kan blive bedre — målt, ikke antaget
+
+*Målt 12. august 2026. Dette afsnit besvarer spørgsmålet: hvad er mekanismen, der gør løsningen bedre og bedre?*
+
+### 8.1 Ordlisten i Whispers initial_prompt gør ingen forskel
+
+Samme lyd (15 minutter), samme indstillinger, kørt to gange — én gang med ordlisten på 58 termer, én gang uden:
+
+| | Med ordliste | Uden ordliste |
+|---|---|---|
+| Ord | 2338 | 2338 |
+| Linjer | 165 | 165 |
+| **Forskelle** | **0** | |
+
+Ikke «næsten ens». **Byte for byte identisk.**
+
+### 8.2 Hvorfor: `-mc 0` og `--prompt` udelukker hinanden
+
+Forklaringen er ikke, at ordlisten er dårlig. Den er, at den slet ikke bliver brugt.
+
+`--prompt` leveres gennem den samme kanal som «tidligere tekst» — og `-mc 0` slår netop den kanal fra. Efterprøvet på et fire minutters udsnit: med `-mc 0` er output identisk med og uden ordliste. Uden `-mc 0` har ordlisten en effekt — men det er den, der udløser loopet i 4.3.
+
+Mellemveje afprøvet på samme udsnit, alle med ordliste:
+
+| Indstilling | Loop | Fagord ramt |
+|---|---|---|
+| standard (`-mc 16384`) | **ja** | — |
+| `-mc 160` | nej | kun Entra |
+| `-mc 64` | nej | kun Entra |
+| `-mc 16` | nej | kun Entra |
+| `-mc 0` | nej | kun Entra |
+
+**Ordlisten henter ikke fagordene ved nogen indstilling.** Kernesys, SCIM og MitID blev ikke ramt i en eneste kørsel — heller ikke dem, hvor ordlisten beviseligt var aktiv. Entra rammes også *uden* ordliste.
+
+**Konklusion:** ordlisten som mekanisme i Whisper er ikke vejen. Den koster (loopet) og leverer intet målbart. `-mc 0` beholdes, og prompten er dermed i praksis sat ud af kraft.
+
+### 8.3 Vejen der virker: rettelser efter transskriptionen
+
+Whisper kan ikke trænes. Vægtene er faste. Det eneste sted, der kan læres, er **efter** genkendelsen.
+
+`TranscriptCorrector` anvender de rettelser, brugeren har lavet, på nye transskriptioner. Reglerne kommer fra mennesker, der har set både det hørte og det rigtige — der er ikke noget at gætte om.
+
+Afprøvet på den rigtige transskription med syv lærte regler:
+
+| Hørt | Rettet til | Antal |
+|---|---|---|
+| midt i det erhverv | MitID Erhverv | 2 |
+| **søv** | **syv** | **2** |
+| kerne sys | Kernesys | 1 |
+| modtagelsesystemer | modtagersystemer | 1 |
+| skim | SCIM | 1 |
+| n3id | Entra ID | 1 |
+
+**8 rettelser fra 6 regler.** Herunder «søv» → «syv», som var dét, der ødelagde faktummet om de syv servicekonti i 7.
+
+Det er forskellen på de to mekanismer: ordlisten påvirker en model, vi ikke kan se ind i, og gjorde målt ingen forskel. Rettelserne gør præcis det, der står i dem, hver gang.
+
+**Sikkerhedsnettet:** den rå tekst gemmes som `.raa.txt` ved siden af, og rettelserne vises i statuslinjen. Bliver teksten lavet om uden at det siges, ved man ikke, hvad man læser — og kan heller ikke opdage, at en regel er blevet forkert.
+
+**Forfremmelse sker aldrig af sig selv.** En regel, appen selv fandt på, ville rette i noget, ingen har set efter. En forkert regel er værre end hørefejlen: hørefejlen ser man, rettelsen ligner det rigtige ord.
+
+### 8.4 Det, der mangler for at sløjfen er hel
+
+Tre ting findes nu: at lære en regel (`noteapp laer`), at anvende reglerne automatisk, og at prøve dem af på en fil (`noteapp laer --proev`).
+
+Det, der mangler, er **opsamlingen**: der er endnu ingen skærm, hvor man retter et ord i en transskription og får det gemt som en regel. Indtil den findes, skal reglerne skrives ind i hånden, og så bliver de ikke skrevet ind. Det er det næste stykke arbejde, og det er dét, der afgør, om appen faktisk bliver bedre af at blive brugt.

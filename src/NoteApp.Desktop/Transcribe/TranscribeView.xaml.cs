@@ -246,7 +246,22 @@ public partial class TranscribeView : UserControl
                 new TranscriptionRequest(wav, install.ModelPath!, udBase, "auto", prompt),
                 fremdrift, _afbryd.Token);
 
-            VisResultat(r);
+            // Efterretning: de fejl, du allerede har rettet én gang, rettes nu
+            // af sig selv. Det er DEN vej, appen lærer — ordlisten i Whispers
+            // initial_prompt er målt til ingen forskel at gøre.
+            IReadOnlyList<AppliedCorrection> rettelser = Array.Empty<AppliedCorrection>();
+            try
+            {
+                using var ordbog = new LearningStore();
+                rettelser = TranscriptCorrector.FromStore(ordbog).ApplyToFile(r.TextPath);
+            }
+            catch (Exception)
+            {
+                // En fejl i efterretningen maa ikke koste transskriptionen.
+                // Den raa tekst ligger der, og den er det vaesentlige.
+            }
+
+            VisResultat(r, rettelser);
             _sidsteMappe = valgt.Mappe;
         }
         catch (OperationCanceledException)
@@ -268,7 +283,7 @@ public partial class TranscribeView : UserControl
         }
     }
 
-    private void VisResultat(TranscriptionResult r)
+    private void VisResultat(TranscriptionResult r, IReadOnlyList<AppliedCorrection>? rettelser = null)
     {
         var tekst = r.Text.Trim();
         var ord = tekst.Split(' ', '\n', '\r').Count(s => s.Length > 0);
@@ -301,7 +316,17 @@ public partial class TranscribeView : UserControl
         if (r.LanguageProbability is double p && p < 0.7)
             sprog += $" (usikker, {p * 100:0}%)";
 
-        Status.Text = $"Færdig · {sprog} · {r.EngineId} · gemt som {Path.GetFileName(r.TextPath)}";
+        // Rettelserne skal SES. Bliver teksten lavet om uden at det siges,
+        // ved man ikke, hvad man læser — og så kan man heller ikke opdage, at
+        // en regel er blevet forkert.
+        var rettet = "";
+        if (rettelser is { Count: > 0 })
+        {
+            var antal = rettelser.Sum(x => x.Count);
+            rettet = $" · {antal} rettet fra din ordbog";
+        }
+
+        Status.Text = $"Færdig · {sprog}{rettet} · {r.EngineId} · gemt som {Path.GetFileName(r.TextPath)}";
         AabnKnap.IsEnabled = true;
     }
 

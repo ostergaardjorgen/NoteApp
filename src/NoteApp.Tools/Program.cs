@@ -24,6 +24,7 @@ try
         "udkast"    => await Udkast(args.Skip(1).ToArray()),
         "gendan"    => Gendan(args.Skip(1).ToArray()),
         "transskriber" => await Transskriber(args.Skip(1).ToArray()),
+        "laer"      => Laer(args.Skip(1).ToArray()),
         "recover"   => Genopret(),
         "hjaelp" or "--help" or "-h" => Hjælp(),
         _ => Ukendt(kommando)
@@ -639,7 +640,70 @@ static async Task<int> Transskriber(string[] a)
         }
     }
 
+    // Efterretning: de fejl, du allerede har rettet een gang, rettes nu af sig
+    // selv. Det er DEN vej, appen laerer — ordlisten i Whispers initial_prompt
+    // er maalt til ingen forskel at goere (se doc/findings.md 8).
+    var retter = TranscriptCorrector.FromStore(store);
+    var ændringer = retter.ApplyToFile(r.TextPath);
+    if (ændringer.Count > 0)
+    {
+        var ialt = ændringer.Sum(æ => æ.Count);
+        Console.WriteLine($"Rettet    : {ialt} steder ud fra {ændringer.Count} lærte regler");
+        foreach (var æ in ændringer.OrderByDescending(x => x.Count).Take(6))
+            Console.WriteLine($"            {æ.Heard} → {æ.Corrected}  ({æ.Count}x)");
+        Console.WriteLine($"            rå udgave: {Path.ChangeExtension(r.TextPath, ".raa.txt")}");
+    }
+
     Console.WriteLine($"Tekst     : {r.TextPath}");
+    return 0;
+}
+
+/// <summary>
+/// Lærer appen en rettelse: «det her blev hørt, det skal hedde det her».
+///
+/// Det er den vej, appen bliver bedre. Ordlisten i Whispers initial_prompt er
+/// målt til ingen forskel at gøre (doc/findings.md 8), men en rettelse, der er
+/// skrevet ned én gang, virker hver gang derefter — og den kan efterprøves ved
+/// at køre den samme lyd igennem igen.
+/// </summary>
+static int Laer(string[] a)
+{
+    using var store = new LearningStore();
+
+    if (a.Length == 0)
+    {
+        var regler = store.AutoApplyRules();
+        Console.WriteLine($"Lærte rettelser: {regler.Count}");
+        foreach (var r in regler.Take(40))
+            Console.WriteLine($"  {r.Normalized,-32} → {r.Canonical}");
+
+        Console.WriteLine();
+        Console.WriteLine("Lær en ny:   noteapp laer \"det der blev hørt\" \"det rigtige\"");
+        Console.WriteLine("Prøv på fil: noteapp laer --proev <tekstfil>");
+        return 0;
+    }
+
+    // --proev retter en kopi og viser hvad der ville ske. En regel, man ikke
+    // kan proeve af, er et gaet.
+    if (a[0] is "--proev" or "--prøv")
+    {
+        if (a.Length < 2 || !File.Exists(a[1])) { Console.Error.WriteLine("Angiv en tekstfil."); return 1; }
+
+        var (tekst, æ) = TranscriptCorrector.FromStore(store)
+            .Apply(File.ReadAllText(a[1], System.Text.Encoding.UTF8));
+
+        Console.WriteLine($"{æ.Sum(x => x.Count)} rettelser fra {æ.Count} regler:");
+        foreach (var x in æ.OrderByDescending(x => x.Count))
+            Console.WriteLine($"  {x.Heard,-32} → {x.Corrected,-24} {x.Count}x");
+
+        if (æ.Count == 0) Console.WriteLine("  (ingen — enten er teksten ren, eller reglerne mangler)");
+        return 0;
+    }
+
+    if (a.Length < 2) { Console.Error.WriteLine("Brug: noteapp laer \"hørt\" \"rigtigt\""); return 1; }
+
+    store.LearnCorrection(a[0], a[1], a.Length > 2 ? a[2] : "fagterm");
+    Console.WriteLine($"Lært: «{a[0]}» rettes til «{a[1]}» fremover.");
     return 0;
 }
 
