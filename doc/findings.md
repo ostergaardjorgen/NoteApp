@@ -49,9 +49,13 @@ Målt under kørslen: **5,8 GB på grafikkortet, 14,1 GB i almindelig RAM.**
 
 *Ikke afklaret:* om Mistral-Small-24B ville være god nok fagligt. Det blev aldrig målt, fordi den aldrig blev færdig. Spørgsmålet er kun relevant igen på en maskine med mere VRAM.
 
+**Filen er slettet 12. august** — 13,35 GB frigjort. Modellen kan heller ikke længere hentes: `noteapp sprogmodel mistral-small-24b` afviser med begrundelsen og henviser hertil. Skal den ind igen, skal fravalget fjernes bevidst i `LlmCatalog.cs`.
+
 ### 1.3 Muse-Glimmer-30B UD-Q3_K_XL — hentet, ikke målt endnu
 
-13,4 GB. Samme størrelsesproblem som Mistral, og forventningen er derfor den samme. Måles for at have tallet frem for forventningen.
+12,44 GB. Samme størrelsesproblem som Mistral, og forventningen er derfor den samme. Måles for at have tallet frem for forventningen.
+
+**Første forsøg 12. august blev kasseret**, ikke afsluttet: en transskription kørte samtidig og havde taget kortet først. Muse blev skubbet i RAM og stod på **21,7 GB** mod de 14,1, Mistral brugte alene. Den måling ville ikke sige noget om modellen, kun om at de to sloges om det samme kort. Køres igen, når maskinen er ledig.
 
 ---
 
@@ -92,6 +96,18 @@ Målt under kørslen: **5,8 GB på grafikkortet, 14,1 GB i almindelig RAM.**
 
 **Konsekvens, tilføjet 12. august:** medlytningen under oplæsning bruger whisper-stream og konkurrerer altså om kortet. Fejlede den, blev det ikke opdaget — se 4.2.
 
+### 3.1 Konflikten set i praksis
+
+*Målt 12. august 2026, utilsigtet: en transskription blev startet i appen, mens en modelkørsel var i gang.*
+
+Ingen af dem fejlede. **Den, der nåede kortet først, beholdt det** — transskriptionen var startet og lå på GPU'en, og sprogmodellen blev henvist til RAM. Den stod på **21,7 GB RAM** mod de 14,1 GB, den samme slags kørsel brugte alene.
+
+Det er den venlige udgave af konflikten: intet går i stykker, men den ene bliver mange gange langsommere uden at sige det.
+
+**Konsekvens:** advarslen skal ikke handle om, at noget fejler — det gør det ikke. Den skal handle om, at den anden opgave bliver drastisk langsommere, og om hvilken af dem der bliver ramt: den, der starter sidst.
+
+**Konsekvens for målinger:** en modelmåling foretaget under en transskription er ubrugelig. Den siger noget om konflikten, ikke om modellen.
+
 ---
 
 ## 4. Fejl i vores egen kode, fundet ved at bruge den
@@ -123,7 +139,34 @@ To fejl:
 
 **Konsekvens:** afkrydsningsfeltet slår fra ved fejl, årsagen vises, de sidste otte stderr-linjer gemmes, og en vagthund melder, hvis der ikke er hørt noget på 25 sekunder. En medlytning, der kører uden at høre noget, ligner præcis en, der virker.
 
-### 4.3 Bedømmelsen af referater fandt på fejl
+### 4.3 Ordlisten fik Whisper til at gå i ring — den alvorligste hidtil
+
+*Fundet 12. august 2026 på den første rigtige oplæsning.*
+
+Den 15 minutters optagelse gav **388 linjer, hvoraf 372 var den samme sætning.** Teksten var brugbar de første 14 linjer — cirka to minutter — og gik derefter i ring med *"Vi har haft en stor udfald til en købmekanisk køb"* resten af vejen.
+
+Isoleret på et fire minutters udsnit af den samme lyd:
+
+| Kørsel | Linjer | Unikke | Udfald |
+|---|---|---|---|
+| uden ordliste | 44 | 41 | ok |
+| **med ordliste (som appen kørte)** | **61** | **16** | **gik i ring** |
+| med ordliste og `-mc 0` | 31 | 31 | ok |
+| med ordliste og `-et 3.0` | 47 | 47 | ok, men 68 sek mod 32 |
+
+**Årsagen er et samspil mellem to ting, der hver for sig er fornuftige.** Ordlisten sendes som `initial_prompt` — det er det, der får fagord og navne til at blive stavet rigtigt. Og whisper.cpp bærer som standard sin **egen tidligere udgang** med videre som kontekst til næste vindue. Rammer den én gentagelse, fodrer den sig selv med den, og der er ingen vej tilbage.
+
+**Rettelsen er `-mc 0`:** bær ikke tidligere tekst med over. Ordlisten beholdes, loopet forsvinder.
+
+Prisen er længere afsnit — færre linjebrud, samme indhold. Efterprøvet: begge kørsler slutter på nøjagtig den samme sætning, så der klippes intet af. `-mc 0` var samtidig den hurtigste af de to rettelser og ramte "leverandøren" korrekt, hvor `-et 3.0` skrev "demandørerne".
+
+**Efter rettelsen, hele optagelsen på ny:** 165 linjer, **165 unikke**, 2338 ord mod manuskriptets 2349 — 99,5 %. RTF 0,29 (260 sekunder på 910 sekunders lyd). Sproget detekteret som dansk med 97 % sikkerhed.
+
+**Hvorfor det ikke blev opdaget før:** alle tidligere prøver var korte, og loopet sætter først ind efter et par minutter. En fejl, der kræver et rigtigt, langt møde for at vise sig, findes ikke ved at prøve appen af i fem minutter.
+
+**Restfejl, ikke løst:** sidste linje blev *"Danske tekster af Nicolai Winther"* — en kendt Whisper-tilbøjelighed til at digte undertekst-kreditering på afsluttende stilhed. Kosmetisk, men den skal fjernes, før et referat sendes videre.
+
+### 4.4 Bedømmelsen af referater fandt på fejl
 
 Første udgave af `scripts/bedoem-referat.ps1` rapporterede to fejl, modellen ikke havde begået:
 
@@ -132,13 +175,13 @@ Første udgave af `scripts/bedoem-referat.ps1` rapporterede to fejl, modellen ik
 
 **Konsekvens:** tal læses i deres sammenhæng, forankret til det ord de hører til, og afsnit holdes adskilt. En bedømmelse, der finder på fejl, er værre end ingen bedømmelse. Efter rettelsen: 5 af 7 — det samme som en manuel gennemlæsning gav.
 
-### 4.4 En gate, der fejlede på sin egen brugsanvisning
+### 4.5 En gate, der fejlede på sin egen brugsanvisning
 
 `leverancetjek` faldt med *"Cannot bind argument to parameter 'Path'"*, når den blev kaldt præcis som dokumenteret. `$PSScriptRoot` var brugt som standardværdi i `param`-blokken.
 
 **Konsekvens:** stien findes efter `param`-blokken. En gate, der fejler på sin egen brugsanvisning, bliver sprunget over frem for rettet — og så er den ikke længere en gate.
 
-### 4.5 Downloads kunne ikke genoptages
+### 4.6 Downloads kunne ikke genoptages
 
 En sprogmodel fylder 13-14 GB og tager tyve minutter. Blev hentningen afbrudt, blev alt hentet igen fra nul.
 

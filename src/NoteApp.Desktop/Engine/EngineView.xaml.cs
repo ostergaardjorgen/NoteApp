@@ -140,7 +140,7 @@ public partial class EngineView : UserControl
         }
 
         // Krav 3 fra datagrænsen: en informeret godkendelse. Hvad hentes,
-        // hvorfra, hvor meget — og hvad det betyder — FØR der spørges.
+        // hvorfra, hvor meget — og hvad det betyder — F~R der spørges.
         var advarsel = model.SupportsDanish
             ? ""
             : "\n\nADVARSEL: denne model kan KUN engelsk. Bruges den til et dansk møde, kommer der volapyk ud — ikke en fejlmeddelelse.\n";
@@ -167,8 +167,6 @@ public partial class EngineView : UserControl
         _afbryd = new CancellationTokenSource();
         Fremdrift.Visibility = Visibility.Visible;
         AfbrydKnap.Visibility = Visibility.Visible;
-        OpdaterKnap.IsEnabled = false;
-
         var fremdrift = new Progress<DownloadProgress>(p =>
         {
             Fremdrift.Value = p.Percent;
@@ -205,7 +203,6 @@ public partial class EngineView : UserControl
         {
             Fremdrift.Visibility = Visibility.Collapsed;
             AfbrydKnap.Visibility = Visibility.Collapsed;
-            OpdaterKnap.IsEnabled = true;
             _afbryd?.Dispose();
             _afbryd = null;
             Opdater();
@@ -215,48 +212,18 @@ public partial class EngineView : UserControl
     private void Afbryd_Click(object sender, RoutedEventArgs e) => _afbryd?.Cancel();
 
     // ------------------------------------------------------------ opdatering
-
-    private async void Opdater_Click(object sender, RoutedEventArgs e)
-    {
-        var s = WhisperInstall.Locate();
-        OpdaterKnap.IsEnabled = false;
-        Status.Text = "Slår op hos github.com …";
-
-        try
-        {
-            var tjek = await EngineUpdates.CheckAsync(s.EngineVersion);
-
-            if (tjek.LatestVersion is null)
-            {
-                Status.Text = "Kunne ikke aflæse, hvad den nyeste version er.";
-                return;
-            }
-
-            if (tjek.InstalledVersionUnknown)
-            {
-                MessageBox.Show(
-                    $"Nyeste whisper.cpp er {tjek.LatestVersion}.\n\n" +
-                    "Din motor er lagt på maskinen i hånden, og whisper.cpp stempler ikke sin " +
-                    "exe-fil med en version. Appen kan derfor ikke se, hvilken du har — og " +
-                    "gætter ikke.\n\n" +
-                    "Vil du være sikker på at køre den nyeste, kan du hente den fra:\n" +
-                    (tjek.DownloadUrl ?? "github.com/ggerganov/whisper.cpp/releases"),
-                    "Version ukendt", MessageBoxButton.OK, MessageBoxImage.Information);
-                Status.Text = $"Nyeste er {tjek.LatestVersion}. Din version kendes ikke.";
-                return;
-            }
-
-            Status.Text = tjek.UpdateAvailable
-                ? $"Nyere version findes: {tjek.LatestVersion} (du har {tjek.InstalledVersion})."
-                : $"Du kører nyeste version ({tjek.InstalledVersion}).";
-        }
-        catch (Exception ex)
-        {
-            Status.Text = $"Kunne ikke søge efter opdatering: {ex.Message}";
-        }
-        finally
-        {
-            OpdaterKnap.IsEnabled = true;
-        }
-    }
+    //
+    // «Søg efter opdatering» er fjernet fra skærmen, og opslaget mod github er
+    // fjernet med den.
+    //
+    // Begrundelsen er ikke, at det ikke virkede. En nyere whisper.cpp kan
+    // ændre transskriptionen til det bedre ELLER til det værre, og forskellen
+    // kan kun ses ved at måle den på en oplæsning med facitliste. Det er ikke
+    // noget, en bruger skal opdage midt i et arbejdsår, og det er ikke en
+    // beslutning, der kan tages ud fra et versionsnummer.
+    //
+    // Motoren opdateres, når den er afprøvet, og følger med en ny udgave af
+    // appen. Det er samtidig det eneste sted, appen ellers ville have ringet
+    // ud — nu gør den det kun ved hentning af motor og modeller.
 }
+

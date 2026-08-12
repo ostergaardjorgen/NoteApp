@@ -104,7 +104,27 @@ public sealed class Transcriber
             "-otxt",
             "-oj",
             "-of", request.OutputBase,
-            "-pp"                       // fremdrift, saa UI'et kan vise noget
+            "-pp",                      // fremdrift, saa UI'et kan vise noget
+
+            // -mc 0: baer ikke tidligere tekst med over i naeste vindue.
+            //
+            // Uden den gik en 15 minutters optagelse i ring efter cirka to
+            // minutter og gentog den samme saetning 372 gange ud af 388 linjer.
+            // Maalt 12. august 2026 paa et fire minutters udsnit:
+            //
+            //   uden ordliste, som foer   44 linjer, 41 unikke   ok
+            //   MED ordliste, som foer    61 linjer, 16 unikke   GIK I RING
+            //   med ordliste og -mc 0     31 linjer, 31 unikke   ok
+            //
+            // Aarsagen er samspillet: ordlisten sendes som initial_prompt, og
+            // whisper.cpp baerer som standard sin EGEN tidligere udgang med
+            // videre som kontekst. Rammer den een gentagelse, fodrer den sig
+            // selv med den, og saa er der ingen vej tilbage.
+            //
+            // Prisen er laengere afsnit — samme indhold, faerre linjebrud.
+            // Efterproevet paa samme udsnit: begge slutter paa den samme
+            // saetning, saa der bliver ikke klippet noget af.
+            "-mc", "0"
         };
 
         if (!string.IsNullOrWhiteSpace(request.Prompt)) { args.Add("--prompt"); args.Add(request.Prompt); }

@@ -251,6 +251,15 @@ static async Task<int> Sprogmodel(string[] a)
         foreach (var m in NoteApp.Core.Llm.LlmCatalog.WithObligations)
             Console.WriteLine($"  {m.Id,-20} {m.SizeText,8}  {m.License}");
 
+        var fravalgt = NoteApp.Core.Llm.LlmCatalog.Rejected.ToList();
+        if (fravalgt.Count > 0)
+        {
+            Console.WriteLine();
+            Console.WriteLine("Undersøgt og fravalgt — kan ikke hentes:");
+            foreach (var m in fravalgt)
+                Console.WriteLine($"  {m.Id,-20} {m.SizeText,8}  se doc/findings.md");
+        }
+
         Console.WriteLine();
         Console.WriteLine("Hent med: noteapp sprogmodel <id>");
         return 0;
@@ -258,6 +267,19 @@ static async Task<int> Sprogmodel(string[] a)
 
     var valgt = NoteApp.Core.Llm.LlmCatalog.ById(a[0]);
     if (valgt is null) { Console.Error.WriteLine($"Kender ikke modellen: {a[0]}"); return 2; }
+
+    // En model, der er proevet af og fravalgt, maa ikke kunne hentes ved et
+    // uheld. Begrundelsen staar, saa fravalget kan omgoeres bevidst — og saa
+    // de timer, det kostede at afvise den, ikke bliver brugt igen.
+    if (valgt.Rejected is not null)
+    {
+        Console.Error.WriteLine($"{valgt.Id} er undersøgt og fravalgt.");
+        Console.Error.WriteLine();
+        Console.Error.WriteLine(valgt.Rejected);
+        Console.Error.WriteLine();
+        Console.Error.WriteLine("Se doc/findings.md. Skal den ind igen, skal fravalget fjernes bevidst i LlmCatalog.cs.");
+        return 3;
+    }
 
     if (valgt.LicenseClass != NoteApp.Core.Llm.LicenseClass.FriTilSalg)
     {

@@ -52,7 +52,7 @@
           <RadioButton x:Name="NavSkabeloner" GroupName="nav" Content="Skabeloner"
                        Checked="Nav_Changed"
                        Style="{StaticResource NavKnap}" />
-          <RadioButton x:Name="NavMotor" GroupName="nav" Content="Motor og model"
+          <RadioButton x:Name="NavMotor" GroupName="nav" Content="AI-modeller"
                        Checked="Nav_Changed"
                        Style="{StaticResource NavKnap}" />
           <RadioButton x:Name="NavFiler" GroupName="nav" Content="Filer og backup"

@@ -110,9 +110,90 @@
         <TextBlock x:Name="RtfForklaring" Grid.Row="0" VerticalAlignment="Bottom" Margin="18,0,18,4"
                    Style="{StaticResource Underskrift}" />
 
-        <ScrollViewer Grid.Row="1" Padding="18,10,18,16" VerticalScrollBarVisibility="Auto">
-          <TextBlock x:Name="Resultat" FontSize="13" LineHeight="22" Foreground="{StaticResource TekstSvag}"
-                     Text="Vælg en optagelse til venstre, og tryk Transskribér." />
+        <!-- Forklaringen. Den fylder feltet, indtil der er en tekst at vise.
+             Et tomt felt under en fremdriftslinje fortæller ikke, om man
+             venter på noget godt, hvor længe det tager, eller hvad man må
+             gøre imens — og så sidder man og ser på det i stedet for at
+             lave noget andet. -->
+        <ScrollViewer x:Name="Forklaring" Grid.Row="1" Padding="26,20,26,18"
+                      VerticalScrollBarVisibility="Auto">
+          <StackPanel MaxWidth="560" HorizontalAlignment="Left">
+
+            <TextBlock x:Name="ForklaringOverskrift" FontSize="19" FontWeight="SemiBold"
+                       TextWrapping="Wrap" Text="Fra lyd til tekst" />
+            <TextBlock x:Name="ForklaringUnder" FontSize="13.5" LineHeight="22" Margin="0,10,0,0"
+                       TextWrapping="Wrap" Foreground="{StaticResource TekstSvag}"
+                       Text="Vælg en optagelse i listen til venstre og tryk «Transskribér» nederst til højre. Så skriver appen alt det talte ud som tekst, du kan læse, søge i og rette." />
+
+            <!-- Tre trin. Ikke fordi det er teknisk interessant, men fordi det
+                 svarer på "hvor lang tid tager det" og "hvad sker der nu". -->
+            <StackPanel Margin="0,22,0,0">
+              <Grid Margin="0,0,0,14">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="30" />
+                  <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="1" FontSize="15" FontWeight="SemiBold"
+                           Foreground="{StaticResource Accent}" />
+                <StackPanel Grid.Column="1">
+                  <TextBlock Text="Modellen indlæses" FontSize="13.5" FontWeight="SemiBold" />
+                  <TextBlock FontSize="12.5" LineHeight="19" TextWrapping="Wrap" Margin="0,3,0,0"
+                             Foreground="{StaticResource TekstMeget}"
+                             Text="Tager typisk et halvt minut første gang. Der sker ikke noget på skærmen imens — det er normalt." />
+                </StackPanel>
+              </Grid>
+
+              <Grid Margin="0,0,0,14">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="30" />
+                  <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="2" FontSize="15" FontWeight="SemiBold"
+                           Foreground="{StaticResource Accent}" />
+                <StackPanel Grid.Column="1">
+                  <TextBlock Text="Lyden skrives ud" FontSize="13.5" FontWeight="SemiBold" />
+                  <TextBlock FontSize="12.5" LineHeight="19" TextWrapping="Wrap" Margin="0,3,0,0"
+                             Foreground="{StaticResource TekstMeget}"
+                             Text="Fremdriften står nederst. Med grafikkort går det hurtigere end lyden varer; uden tager det længere tid end selve mødet." />
+                </StackPanel>
+              </Grid>
+
+              <Grid>
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="30" />
+                  <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="3" FontSize="15" FontWeight="SemiBold"
+                           Foreground="{StaticResource Accent}" />
+                <StackPanel Grid.Column="1">
+                  <TextBlock Text="Teksten står her" FontSize="13.5" FontWeight="SemiBold" />
+                  <TextBlock FontSize="12.5" LineHeight="19" TextWrapping="Wrap" Margin="0,3,0,0"
+                             Foreground="{StaticResource TekstMeget}"
+                             Text="Den gemmes automatisk ved siden af optagelsen. Du skal ikke gemme noget selv." />
+                </StackPanel>
+              </Grid>
+            </StackPanel>
+
+            <Border Background="#334CBE72" BorderBrush="{StaticResource Godkendt}" BorderThickness="1"
+                    CornerRadius="10" Padding="16,13" Margin="0,22,0,0">
+              <StackPanel>
+                <TextBlock Text="Du kan roligt lave noget andet imens" FontSize="13"
+                           FontWeight="SemiBold" Foreground="{StaticResource Tekst}" />
+                <TextBlock FontSize="12.5" LineHeight="20" Margin="0,6,0,0" TextWrapping="Wrap"
+                           Foreground="{StaticResource Tekst}"
+                           Text="Du kan lukke skærmen, skifte til en anden fane — og du kan optage et nyt møde, mens det forrige bliver skrevet ud. Optagelse bruger hverken grafikkort eller nævneværdig plads, og den kan derfor aldrig blive blokeret af det her." />
+              </StackPanel>
+            </Border>
+
+            <TextBlock FontSize="12.5" LineHeight="20" Margin="2,18,0,0" TextWrapping="Wrap"
+                       Foreground="{StaticResource TekstMeget}"
+                       Text="Teksten bliver ikke perfekt. Navne og fagord er det, der oftest rammes forkert — dem retter du i «Din ordbog», og så bliver de ramt bedre næste gang." />
+          </StackPanel>
+        </ScrollViewer>
+
+        <ScrollViewer x:Name="ResultatRude" Grid.Row="1" Padding="18,10,18,16"
+                      VerticalScrollBarVisibility="Auto" Visibility="Collapsed">
+          <TextBlock x:Name="Resultat" FontSize="13" LineHeight="22" Foreground="{StaticResource TekstSvag}" />
         </ScrollViewer>
       </Grid>
     </Border>

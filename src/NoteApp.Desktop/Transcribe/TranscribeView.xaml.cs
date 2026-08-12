@@ -88,7 +88,12 @@ public partial class TranscribeView : UserControl
             .ToList();
 
         if (Optagelser.Items.Count == 0)
-            Status.Text = "Ingen optagelser endnu. Læs teksten op på skærmen Oplæsning først.";
+        {
+            Status.Text = "Ingen optagelser endnu.";
+            ForklaringOverskrift.Text = "Der er ingen optagelser endnu";
+            ForklaringUnder.Text =
+                "Gå til «Start her» og læs en af teksterne op. Så har du en optagelse, du kan skrive ud til tekst her.";
+        }
     }
 
     private void Optagelse_Valgt(object sender, SelectionChangedEventArgs e)
@@ -98,11 +103,46 @@ public partial class TranscribeView : UserControl
         AabnKnap.IsEnabled = valgt is not null;
         SletKnap.IsEnabled = valgt is not null && _afbryd is null;
 
+        if (_afbryd is not null) return;   // der koeres — forklaringen staar om det
+
+        // Findes teksten allerede, vises den frem for forklaringen. Det er den,
+        // man er kommet efter, naar optagelsen er skrevet ud een gang.
+        var færdig = valgt is null ? null : FindTekst(valgt.Mappe);
+        if (færdig is not null)
+        {
+            Forklaring.Visibility = Visibility.Collapsed;
+            ResultatRude.Visibility = Visibility.Visible;
+            Resultat.Text = File.ReadAllText(færdig, System.Text.Encoding.UTF8).Trim();
+            Resultat.Foreground = (Brush)FindResource("Tekst");
+            Status.Text = "Skrevet ud tidligere. Tryk «Transskribér» for at gøre det igen.";
+            return;
+        }
+
+        Forklaring.Visibility = Visibility.Visible;
+        ResultatRude.Visibility = Visibility.Collapsed;
+        Maalinger.Visibility = Visibility.Collapsed;
+
         if (valgt is { HarLyd: false })
+        {
+            ForklaringOverskrift.Text = "Den optagelse har ingen lyd";
+            ForklaringUnder.Text =
+                "Der er ingen lydfil i mappen, så der er intet at skrive ud. Vælg en anden optagelse i listen.";
             Status.Text = "Den optagelse har ingen lydfil — der er intet at transskribere.";
-        else if (valgt is not null)
-            Status.Text = "";
+            return;
+        }
+
+        ForklaringOverskrift.Text = "Fra lyd til tekst";
+        ForklaringUnder.Text = valgt is null
+            ? "Vælg en optagelse i listen til venstre og tryk «Transskribér» nederst til højre. Så skriver appen alt det talte ud som tekst, du kan læse, søge i og rette."
+            : $"«{valgt.Titel}» er klar. Tryk «Transskribér» nederst til højre, så skriver appen alt det talte ud som tekst, du kan læse, søge i og rette.";
+        Status.Text = "";
     }
+
+    /// <summary>Den nyeste udskrevne tekst i mappen, hvis der er en.</summary>
+    private static string? FindTekst(string mappe) =>
+        Directory.Exists(mappe)
+            ? Directory.GetFiles(mappe, "*.txt").OrderByDescending(File.GetLastWriteTime).FirstOrDefault()
+            : null;
 
     private async void Koer_Click(object sender, RoutedEventArgs e)
     {
@@ -134,6 +174,15 @@ public partial class TranscribeView : UserControl
         Fremdrift.Value = 0;
         Maalinger.Visibility = Visibility.Collapsed;
         Resultat.Text = "";
+
+        // Forklaringen bliver staaende, mens der koeres. Det er praecis dér,
+        // den er noget vaerd: den svarer paa "hvor lang tid tager det" og
+        // "maa jeg lave noget andet imens".
+        Forklaring.Visibility = Visibility.Visible;
+        ResultatRude.Visibility = Visibility.Collapsed;
+        ForklaringOverskrift.Text = "Skriver lyden ud …";
+        ForklaringUnder.Text =
+            "Fremdriften står nederst. Teksten dukker op her, når den er færdig, og bliver gemt automatisk.";
 
         var fremdrift = new Progress<TranscriptionProgress>(p =>
         {
@@ -193,6 +242,8 @@ public partial class TranscribeView : UserControl
             : $"Under 1,0: hurtigere end realtid. Et 90-minutters møde ville tage cirka {r.RealTimeFactor * 90:0} minutter.";
 
         Maalinger.Visibility = Visibility.Visible;
+        Forklaring.Visibility = Visibility.Collapsed;
+        ResultatRude.Visibility = Visibility.Visible;
         Resultat.Text = tekst.Length == 0 ? "(tom transskription — var der lyd på optagelsen?)" : tekst;
         Resultat.Foreground = (Brush)FindResource("Tekst");
 
