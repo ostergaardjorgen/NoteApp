@@ -39,6 +39,10 @@
          dine rettelser i teksten igennem uden at bygge appen om. -->
     <EmbeddedResource Include="..\..\fase0\oplaesning\testtekst.md"
                       LogicalName="NoteApp.Desktop.testtekst.md" />
+    <EmbeddedResource Include="..\..\fase0\oplaesning\testtekst-blandet.md"
+                      LogicalName="NoteApp.Desktop.testtekst-blandet.md" />
+    <EmbeddedResource Include="..\..\fase0\oplaesning\testtekst-engelsk.md"
+                      LogicalName="NoteApp.Desktop.testtekst-engelsk.md" />
   </ItemGroup>
 
 </Project>

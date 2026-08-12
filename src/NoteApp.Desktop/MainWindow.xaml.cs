@@ -26,6 +26,12 @@ public partial class MainWindow : Window
             .GetName().Version?.ToString(2) ?? "0.0");
         DataSti.Text = UserDataPaths.Root;
 
+        // Efter en oplæsning peger kvitteringen videre til transskription.
+        // Skærmskiftet skal ske her, fordi det er MainWindow, der ejer
+        // navigationen — og fordi menupunktet skal markeres med, ellers
+        // skifter indholdet uden at menuen følger med.
+        _oplaesning.TranskriptionØnskes += () => NavTransskriber.IsChecked = true;
+
         Indhold.Content = _oplaesning;
     }
 

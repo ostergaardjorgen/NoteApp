@@ -20,7 +20,7 @@ namespace NoteApp.Desktop.ReadAloud;
 /// </summary>
 public partial class ReadAloudView : UserControl
 {
-    private readonly ScriptDocument _script;
+    private ScriptDocument _script;
     private readonly DispatcherTimer _timer;
 
     private RecordingSession? _session;
@@ -32,23 +32,17 @@ public partial class ReadAloudView : UserControl
     private LiveListener? _lytter;
     private readonly ScriptFollower _foelger = new();
 
+    // Vagthunden fanger det tilfaelde, hvor medlytningen lever, men intet
+    // hoerer. Uden den ser den slags ud praecis som en, der virker.
+    private DispatcherTimer? _vagthund;
+    private bool _hoertNoget;
+
     public ReadAloudView()
     {
         InitializeComponent();
 
         _script = ScriptDocument.Load();
-
-        Indledning.Text =
-            $"{_script.TotalWords} ord fordelt på {_script.Paragraphs.Count} afsnit. " +
-            "Teksten er et opdigtet møde — indholdet betyder ikke noget. " +
-            "Det er din stemme og dine fagord, appen skal lære at kende.";
-
-        // Tallene er talt op i facitlisten, ikke skoennet. Skiftes teksten ud,
-        // skal de taelles igen — et forkert tal her ville vaere en paastand om,
-        // at oplaesningen maaler noget, den ikke maaler.
-        HvorforLaengde.Text =
-            "Alle 6 beslutninger og 7 opgaver ligger efter minut 10. Læser du kun 5 minutter, " +
-            "måler du ingen af dem.";
+        VisTekst();
 
         Praktisk.Text =
             "Læs ikke overskrifterne højt — de er kun til dig. Sid i normal afstand fra mikrofonen.";
@@ -56,9 +50,7 @@ public partial class ReadAloudView : UserControl
         var mik = AudioDevices.ResolveMicrophone(AppSettings.Current.MicrophoneId, out _);
         MikrofonNavn.Text = mik?.FriendlyName ?? "ingen mikrofon fundet";
         OptagKnap.IsEnabled = mik is not null;
-        Status.Text = mik is null
-            ? "Der er ingen mikrofon. Tilslut en, og genstart appen."
-            : $"{_script.Blocks.Count} blokke, {_script.Paragraphs.Count} afsnit. Optagelsen gemmes i {UserDataPaths.Meetings}";
+        if (mik is null) Status.Text = "Der er ingen mikrofon. Tilslut en, og genstart appen.";
 
         _timer = new DispatcherTimer(DispatcherPriority.Render) { Interval = TimeSpan.FromMilliseconds(100) };
         _timer.Tick += (_, _) => Opdater();
@@ -66,10 +58,172 @@ public partial class ReadAloudView : UserControl
         FoelgMed.IsChecked = AppSettings.Current.AutoAdvance;
         VisFoelgStatus();
 
-        Loaded += (_, _) => Focus();
+        // Bjaelkens bredde kan foerst regnes, naar sporet har en bredde. Den
+        // saettes derfor baade ved indlaesning og naar vinduet aendrer stoerrelse.
+        Loaded += (_, _) => { Focus(); SaetBjaelke(); };
+        SizeChanged += (_, _) => SaetBjaelke();
     }
 
     public bool IsRecording => _session?.IsRecording == true;
+
+    // ------------------------------------------------------------ tekstvalg
+
+    /// <summary>
+    /// Skifter oplæsningstekst. Kan ikke ske under en optagelse — teksten er
+    /// det, transskriptionen holdes op imod, og skiftes den midtvejs, måler
+    /// optagelsen ingenting.
+    /// </summary>
+    /// <summary>Hvilket af de tre kort der er valgt.</summary>
+    private int ValgtIndex =>
+        Valg2.IsChecked == true ? 2 : Valg1.IsChecked == true ? 1 : 0;
+
+    private void Vaelg(int index)
+    {
+        var knap = index switch { 2 => Valg2, 1 => Valg1, _ => Valg0 };
+        knap.IsChecked = true;    // Tekst_Valgt henter teksten
+    }
+
+    private void Tekst_Valgt(object sender, RoutedEventArgs e)
+    {
+        if (!IsInitialized) return;
+
+        if (IsRecording)
+        {
+            MessageBox.Show(
+                "Teksten kan ikke skiftes, mens der optages.\n\n" +
+                "Stop optagelsen først — det, du har læst, bliver gemt.",
+                "Optagelsen kører", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        var valgt = ScriptDocument.Available[ValgtIndex];
+        try
+        {
+            _script = ScriptDocument.Load(valgt.File);
+        }
+        catch (Exception ex)
+        {
+            // Teksten kan mangle, hvis repo-mappen er flyttet OG appen er bygget
+            // uden den indlejrede kopi. Sig hvad der mangler frem for at falde.
+            MessageBox.Show(ex.Message, "Teksten kunne ikke hentes",
+                MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        _afsnitIndex = 0;
+        _sidsteBlok = -1;
+
+        // Et tekstskift lukker kvitteringen: den hoerer til den forrige
+        // oplaesning, og at lade den staa ville vise tal for noget andet end
+        // det, der nu er valgt.
+        KvitteringPanel.Visibility = Visibility.Collapsed;
+        VejledningPanel.Visibility = Visibility.Visible;
+
+        VisTekst();
+    }
+
+    /// <summary>Alt, der afhænger af hvilken tekst der er valgt, ét sted.</summary>
+    private void VisTekst()
+    {
+        var valgt = ScriptDocument.Available[ValgtIndex];
+        var minutter = (int)Math.Round(_script.EstimatedDuration.TotalMinutes);
+
+        Overskrift.Text = "Lær appen dine ord at kende";
+        Indledning.Text =
+            $"Valgt: {valgt.Name} — {_script.TotalWords} ord, {_script.Paragraphs.Count} afsnit, cirka {minutter} minutter. " +
+            "Indholdet er et opdigtet møde og betyder ikke noget. Det er din udtale og dine fagord, der bliver målt.";
+
+        HvorforOverskrift.Text = $"Hvorfor «{valgt.Name}»";
+        HvorforLaengde.Text = valgt.Why;
+        HvorforNaeste.Text = valgt.Next;
+
+        VisSkarphed();
+
+        if (_session is null && OptagKnap.IsEnabled)
+            Status.Text = $"{_script.Blocks.Count} blokke, {_script.Paragraphs.Count} afsnit. " +
+                          $"Optagelsen gemmes i {UserDataPaths.Meetings}";
+    }
+
+    /// <summary>
+    /// Måleren over, hvor meget appen har at gå efter.
+    ///
+    /// Den lover IKKE, at Whisper lærer din stemme — det gør den ikke, vægtene
+    /// ligger fast. Det, der bliver skarpere, er to ting, der begge kan måles:
+    /// ordbogen, som går med ind i genkendelsen, og sikkerheden i målingen af,
+    /// hvor godt det går. Derfor er det de to tal, der står, frem for en
+    /// procentsats, ingen kan efterprøve.
+    /// </summary>
+    private void VisSkarphed()
+    {
+        var (minutter, læst) = OptagetIndtilNu();
+
+        Status0.Text = læst.Contains("dansk") ? "✓ indtalt" : "";
+        Status1.Text = læst.Contains("blandet") ? "✓ indtalt" : "";
+        Status2.Text = læst.Contains("engelsk") ? "✓ indtalt" : "";
+
+        // 30 minutter er "fuld" bjaelke: de tre tekster tilsammen. Det er et
+        // maal, ikke en graense — den bliver ved med at blive bedre bagefter.
+        const double maal = 30.0;
+        var andel = Math.Min(1.0, minutter / maal);
+
+        SkarpTal.Text = $"{minutter:0} min · {læst.Count} af 3";
+        SkarpBjaelke.Width = Math.Max(0, SkarpBjaelke.Width);
+        SkarpBjaelke.Tag = andel;   // bredden saettes i Loaded/SizeChanged
+        SaetBjaelke();
+
+        SkarpTekst.Text = læst.Count switch
+        {
+            0 => "Appen har intet at gå efter endnu. Den første indtaling er også den, der giver mest: uden den findes der ikke et udgangspunkt at måle senere forbedringer imod.",
+            1 => "Godt begyndt. Hver ny indtaling dækker noget, den forrige ikke gjorde — og jo flere fagord og navne der har været forbi, jo flere kan ordbogen holde styr på.",
+            2 => "Der mangler én. Den sidste er den, der lukker hullet: så er både dansk, engelsk og sprogskiftet dækket, og du ved, hvor grænsen går.",
+            _ => "Alle tre er indtalt. Herfra bliver det skarpere af sig selv: hver gang du retter et ord i en transskription, lærer ordbogen det, og næste møde bliver ramt bedre."
+        };
+    }
+
+    private void SaetBjaelke()
+    {
+        if (SkarpBjaelke.Tag is not double andel) return;
+        if (SkarpBjaelke.Parent is not FrameworkElement spor) return;
+
+        var bredde = spor.ActualWidth;
+        if (bredde > 0) SkarpBjaelke.Width = bredde * andel;
+    }
+
+    /// <summary>
+    /// Hvor meget der er indtalt indtil nu, og hvilke af de tre tekster der er
+    /// dækket. Læses af mapperne frem for at blive gemt et sted for sig — så
+    /// kan tallet ikke komme ud af trit med det, der faktisk ligger på disken.
+    /// </summary>
+    private static (double Minutter, HashSet<string> Laest) OptagetIndtilNu()
+    {
+        var læst = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        double minutter = 0;
+
+        if (!Directory.Exists(UserDataPaths.Meetings)) return (0, læst);
+
+        foreach (var mappe in Directory.GetDirectories(UserDataPaths.Meetings))
+        {
+            var meta = MeetingStore.Load(mappe);
+            if (meta?.Title is null) continue;
+
+            // «Fase0-oplaesning» er den gamle titel, fra dengang der kun fandtes
+            // een tekst. Den taeller som den danske — optagelsen er lavet, og
+            // den skal ikke forsvinde fra taellingen, fordi navngivningen er
+            // aendret bagefter.
+            var gammel = meta.Title.Equals("Fase0-oplaesning", StringComparison.OrdinalIgnoreCase);
+            if (!gammel && !meta.Title.StartsWith("Oplaesning", StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            minutter += meta.DurationSeconds / 60.0;
+
+            if (gammel) { læst.Add("dansk"); continue; }
+
+            foreach (var t in ScriptDocument.Available)
+                if (meta.Title.EndsWith(t.Key, StringComparison.OrdinalIgnoreCase)) læst.Add(t.Key);
+        }
+
+        return (minutter, læst);
+    }
 
     // ---------------------------------------------------------------- optag
 
@@ -102,7 +256,12 @@ public partial class ReadAloudView : UserControl
 
         // Oplæsning er per definition et fysisk møde: ét spor, kun mikrofonen.
         // Der er ingen anden part, og derfor intet loopback-spor at fejle på.
-        _session = RecordingSession.Create(MeetingType.Physical, "Fase0-oplaesning", mik, null);
+        // Titlen baerer, HVILKEN tekst der blev laest. Uden den kan skaermen
+        // ikke vise, hvad der mangler — og saa er de tre kort bare tre knapper.
+        _session = RecordingSession.Create(
+            MeetingType.Physical,
+            "Oplaesning-" + ScriptDocument.Available[ValgtIndex].Key,
+            mik, null);
         _session.IncidentOccurred += i => Dispatcher.Invoke(() =>
             Status.Text = $"Hændelse ved {TimeSpan.FromSeconds(i.AtSeconds):mm\\:ss}: {i.What}");
 
@@ -111,6 +270,7 @@ public partial class ReadAloudView : UserControl
         _afsnitIndex = 0;
         _sidsteBlok = -1;
         VejledningPanel.Visibility = Visibility.Collapsed;
+        KvitteringPanel.Visibility = Visibility.Collapsed;
         LaesePanel.Visibility = Visibility.Visible;
         OptagKnap.Content = "■ Stop og gem";
         NaesteKnap.IsEnabled = true;
@@ -147,26 +307,103 @@ public partial class ReadAloudView : UserControl
         ForrigeKnap.IsEnabled = false;
         PauseKnap.Visibility = Visibility.Collapsed;
         LaesePanel.Visibility = Visibility.Collapsed;
-        VejledningPanel.Visibility = Visibility.Visible;
         OptagerPrik.Fill = (Brush)FindResource("TekstMeget");
+
+        VisKvittering(mappe, længde, noter);
+    }
+
+    // ---------------------------------------------------------- kvitteringen
+
+    private string? _sidsteOptagelse;
+
+    /// <summary>
+    /// Kvitteringen efter en oplæsning.
+    ///
+    /// Den findes, fordi den forrige udgave sluttede med ingenting: en dialog
+    /// spurgte, om mappen skulle åbnes, og så stod man i en mappe med tre filer
+    /// uden at vide, hvad der skulle ske nu. Tyve minutters oplæsning er et
+    /// stykke arbejde, og et stykke arbejde skal kvitteres og pege videre.
+    /// </summary>
+    private void VisKvittering(string mappe, TimeSpan længde, int blokke)
+    {
+        _sidsteOptagelse = mappe;
+
+        VejledningPanel.Visibility = Visibility.Collapsed;
+        KvitteringPanel.Visibility = Visibility.Visible;
+
+        var læste = _afsnitIndex + 1;
+        var helt = læste >= _script.Paragraphs.Count;
+        var ord = _script.Paragraphs.Take(læste).Sum(p => p.WordCount);
+        var tempo = længde.TotalMinutes > 0 ? ord / længde.TotalMinutes : 0;
+
         BlokTitel.Text = "Optagelsen er gemt";
-        BlokUnder.Text = $"{længde:hh\\:mm\\:ss} lyd, {noter} blokmærker";
+        BlokUnder.Text = $"{længde:hh\\:mm\\:ss} lyd, {blokke} blokmærker";
 
-        var kort = længde < TimeSpan.FromMinutes(15);
-        Status.Text = kort
-            ? $"ADVARSEL: kun {længde:mm\\:ss}. Gaten har brug for 15-20 minutter for at give brugbare tal."
-            : $"{længde:mm\\:ss} optaget — det er nok til gaten.";
+        KvitOverskrift.Text = helt ? "Godt læst op — hele teksten er i hus" : "Optagelsen er gemt";
+        KvitUnder.Text = helt
+            ? "Appen har nu din stemme på det materiale, den kan måles på."
+            : $"Du nåede {læste} af {_script.Paragraphs.Count} afsnit. Det er gemt, og du kan læse resten en anden gang — det bliver bare en ny optagelse.";
 
-        var spor = filer.Count > 0 ? string.Join(", ", filer.Values.Select(Path.GetFileName)) : "ingen";
+        KvitLaengde.Text = længde.ToString(@"mm\:ss");
+        KvitAfsnit.Text = $"{læste}/{_script.Paragraphs.Count}";
+        KvitTempo.Text = $"{tempo:0}";
 
-        var svar = MessageBox.Show(
-            $"Optagelsen ligger i:\n{mappe}\n\nSpor: {spor}\nVarighed: {længde:hh\\:mm\\:ss}\n\n" +
-            (kort ? "Bemærk: under 15 minutter giver upålidelige RTF-tal.\n\n" : "") +
-            "Åbn mappen nu?",
-            "Optagelse gemt", MessageBoxButton.YesNo, MessageBoxImage.Information);
+        // Vurderingen skal sige, hvad tallene BETYDER. "15:10" er ikke en
+        // vurdering; "det er nok til gaten" er.
+        var nok = længde >= TimeSpan.FromMinutes(15);
+        KvitVurdering.Text = nok
+            ? $"{længde:mm\\:ss} er nok til at give pålidelige tal. Læste du hurtigere end de 120 ord i minuttet, teksten er sat efter, betyder det ikke noget for målingen — det er ordene, der tælles, ikke minutterne."
+            : $"{længde:mm\\:ss} er under de 15 minutter, målingen har brug for. Du kan godt transskribere den, men tallene bliver usikre. Læs gerne en tekst mere.";
+        KvitVurdering.Foreground = (Brush)FindResource(nok ? "Godkendt" : "Advarsel");
 
-        if (svar == MessageBoxResult.Yes)
-            Process.Start(new ProcessStartInfo("explorer.exe", $"\"{mappe}\"") { UseShellExecute = true });
+        Status.Text = nok
+            ? $"{længde:mm\\:ss} optaget — det er nok til gaten."
+            : $"Kun {længde:mm\\:ss}. Gaten har brug for 15-20 minutter for at give brugbare tal.";
+
+        // Naeste tekst: den foerste af de tre, der IKKE er indtalt endnu. Er de
+        // alle taget, peges der paa den naeste i raekken — en tekst kan laeses
+        // igen, og mere materiale er ikke spildt.
+        var (_, alleredeLæst) = OptagetIndtilNu();
+        var næste = -1;
+        for (var i = 0; i < ScriptDocument.Available.Count; i++)
+            if (!alleredeLæst.Contains(ScriptDocument.Available[i].Key)) { næste = i; break; }
+
+        var alleTaget = næste < 0;
+        if (alleTaget) næste = (ValgtIndex + 1) % ScriptDocument.Available.Count;
+
+        KvitNaesteKnapIndex = næste;
+        var n = ScriptDocument.Available[næste];
+        KvitNaesteTekst.Content = alleTaget ? $"Læs «{n.Name}» igen" : $"Næste: {n.Name}";
+        KvitNaesteHvad.Text = alleTaget
+            ? "Alle tre er indtalt. Herfra flytter det mest at rette ord i transskriptionerne — det er dét, ordbogen lærer af."
+            : n.Why;
+
+        VisSkarphed();
+    }
+
+    private int KvitNaesteKnapIndex;
+
+    private void KvitTransskriber_Click(object sender, RoutedEventArgs e) => TranskriptionØnskes?.Invoke();
+
+    /// <summary>
+    /// Bedt om at komme videre til transskription. Skærmskiftet ligger i
+    /// MainWindow, som er den eneste, der kender navigationen.
+    /// </summary>
+    public event Action? TranskriptionØnskes;
+
+    private void KvitNaesteTekst_Click(object sender, RoutedEventArgs e)
+    {
+        KvitteringPanel.Visibility = Visibility.Collapsed;
+        VejledningPanel.Visibility = Visibility.Visible;
+        BlokTitel.Text = "Klar til oplæsning";
+        BlokUnder.Text = string.Empty;
+        Vaelg(KvitNaesteKnapIndex);
+    }
+
+    private void KvitAabnMappe_Click(object sender, RoutedEventArgs e)
+    {
+        if (_sidsteOptagelse is null) return;
+        Process.Start(new ProcessStartInfo("explorer.exe", $"\"{_sidsteOptagelse}\"") { UseShellExecute = true });
     }
 
     // ------------------------------------------------------------ auto-skift
@@ -244,13 +481,39 @@ public partial class ReadAloudView : UserControl
 
         _lytter = new LiveListener(stream);
         _lytter.Heard += tekst => Dispatcher.BeginInvoke(() => Hoert(tekst));
+
+        // Fejler medlytningen, SKAL afkrydsningsfeltet slaa fra. Ellers staar
+        // der, at der lyttes med, mens der ikke goer — og saa venter man paa et
+        // skift, der aldrig kommer, i stedet for at bruge mellemrum.
         _lytter.Failed += fejl => Dispatcher.BeginInvoke(() =>
         {
-            FoelgStatus.Text = $"kunne ikke lytte med: {fejl} — brug mellemrum";
+            FoelgMed.IsChecked = false;
+            FoelgStatus.Text = $"{fejl} — brug mellemrum";
+            FoelgStatus.Foreground = (Brush)FindResource("Advarsel");
         });
 
+        // Vagthund: hoeres der intet i det foerste stykke tid, er noget galt,
+        // selv om processen lever. En medlytning, der koerer uden at hoere
+        // noget, ligner en, der virker.
+        _hoertNoget = false;
+        _vagthund = new DispatcherTimer { Interval = TimeSpan.FromSeconds(25) };
+        _vagthund.Tick += (_, _) =>
+        {
+            _vagthund!.Stop();
+            if (_hoertNoget || _lytter is null) return;
+
+            FoelgMed.IsChecked = false;
+            FoelgStatus.Text = "der blev ikke hørt noget på 25 sekunder — brug mellemrum";
+            FoelgStatus.Foreground = (Brush)FindResource("Advarsel");
+        };
+        _vagthund.Start();
+
         _foelger.SetParagraph(_script.Paragraphs[_afsnitIndex].Text);
-        _lytter.Start(model, sdlId);
+
+        // Lyt paa TEKSTENS sprog. Lytter den efter dansk, mens der laeses
+        // engelsk, holder den op med at genkende ordene og staar stille — og
+        // saa ser det ud, som om appen har mistet traaden.
+        _lytter.Start(model, sdlId, _script.Language);
 
         FoelgStatus.Text = sdlId >= 0
             ? $"lytter med {AppSettings.Current.LiveModel} — mellemrum virker stadig"
@@ -259,6 +522,8 @@ public partial class ReadAloudView : UserControl
 
     private void StopLytning()
     {
+        _vagthund?.Stop();
+        _vagthund = null;
         _lytter?.Dispose();
         _lytter = null;
     }
@@ -269,6 +534,8 @@ public partial class ReadAloudView : UserControl
     /// </summary>
     private void Hoert(string tekst)
     {
+        _hoertNoget = true;
+
         if (_session is null || _session.IsPaused) return;
         if (_afsnitIndex + 1 >= _script.Paragraphs.Count) return;
 

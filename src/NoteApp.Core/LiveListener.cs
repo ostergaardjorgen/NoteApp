@@ -23,6 +23,19 @@ public sealed class LiveListener : IDisposable
     private readonly string _streamExe;
     private Process? _proc;
 
+    /// <summary>
+    /// De sidste linjer fra stderr. De blev kasseret i første udgave, og da
+    /// lytningen så døde ved opstart, stod der stadig «lytter med small» på
+    /// skærmen — resten af oplæsningen. Grunden til at den døde stod i den
+    /// tekst, der blev smidt væk.
+    /// </summary>
+    private readonly Queue<string> _sidsteFejllinjer = new();
+
+    /// <summary>Sat, når vi selv stopper — så et exit ikke meldes som en fejl.</summary>
+    private bool _stopperSelv;
+
+    private bool _harHørtNoget;
+
     public LiveListener(string streamExe) => _streamExe = streamExe;
 
     /// <summary>Rejses for hver linje tekst, lytningen producerer.</summary>
@@ -138,6 +151,10 @@ public sealed class LiveListener : IDisposable
         psi.ArgumentList.Add("-t"); psi.ArgumentList.Add("4");
         if (captureId >= 0) { psi.ArgumentList.Add("-c"); psi.ArgumentList.Add(captureId.ToString()); }
 
+        _stopperSelv = false;
+        _harHørtNoget = false;
+        _sidsteFejllinjer.Clear();
+
         try
         {
             _proc = new Process { StartInfo = psi, EnableRaisingEvents = true };
@@ -145,12 +162,31 @@ public sealed class LiveListener : IDisposable
             _proc.OutputDataReceived += (_, e) =>
             {
                 if (string.IsNullOrWhiteSpace(e.Data)) return;
+                _harHørtNoget = true;
                 Heard?.Invoke(e.Data);
             };
 
-            // stderr er fremdrift og modelindlaesning, ikke tekst. Den laeses
-            // for ikke at fylde bufferen op og laase processen.
-            _proc.ErrorDataReceived += (_, _) => { };
+            // stderr er fremdrift og modelindlaesning, ikke tekst — men det er
+            // ogsaa dér, en fejl staar. Linjerne gemmes, saa de kan vises, hvis
+            // processen doer, frem for at blive kasseret.
+            _proc.ErrorDataReceived += (_, e) =>
+            {
+                if (string.IsNullOrWhiteSpace(e.Data)) return;
+                lock (_sidsteFejllinjer)
+                {
+                    _sidsteFejllinjer.Enqueue(e.Data.Trim());
+                    while (_sidsteFejllinjer.Count > 8) _sidsteFejllinjer.Dequeue();
+                }
+            };
+
+            // Doer processen, mens vi tror, vi lytter, SKAL det siges. Uden
+            // dette blev der ikke skiftet afsnit i tyve minutter, mens skaermen
+            // paastod, at der blev lyttet med.
+            _proc.Exited += (_, _) =>
+            {
+                if (_stopperSelv) return;
+                Failed?.Invoke(Fejlaarsag());
+            };
 
             _proc.Start();
             _proc.BeginOutputReadLine();
@@ -163,9 +199,39 @@ public sealed class LiveListener : IDisposable
         }
     }
 
+    /// <summary>
+    /// Hvorfor lytningen holdt op. Det, brugeren skal se, er hvad der kan
+    /// gøres ved det — ikke en stakspor.
+    /// </summary>
+    private string Fejlaarsag()
+    {
+        string[] linjer;
+        lock (_sidsteFejllinjer) linjer = _sidsteFejllinjer.ToArray();
+
+        var samlet = string.Join(" ", linjer);
+
+        // Den hyppigste aarsag paa et 6 GB-kort: en sprogmodel eller en
+        // transskription har taget hukommelsen. Det er ikke en fejl i appen,
+        // og raadet er et andet end ved alle andre fejl.
+        if (Regex.IsMatch(samlet, @"out of memory|CUDA error|failed to allocate|cudaMalloc",
+                RegexOptions.IgnoreCase))
+            return "der var ikke plads på grafikkortet — kører der en transskription eller et udkast samtidig?";
+
+        if (Regex.IsMatch(samlet, @"failed to open|no such device|SDL", RegexOptions.IgnoreCase))
+            return "mikrofonen kunne ikke åbnes til medlytning";
+
+        if (!_harHørtNoget)
+            return "lytningen stoppede, før den nåede at høre noget";
+
+        var sidste = linjer.LastOrDefault(l => l.Length > 0);
+        return sidste is null ? "lytningen stoppede" : $"lytningen stoppede: {sidste}";
+    }
+
     public void Stop()
     {
         if (_proc is null) return;
+
+        _stopperSelv = true;   // et exit herfra er ikke en fejl
 
         try { if (!_proc.HasExited) _proc.Kill(entireProcessTree: true); }
         catch (Exception) { /* den kan allerede vaere doed */ }

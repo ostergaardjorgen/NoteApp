@@ -33,18 +33,27 @@ public sealed class ScriptDocument
             RegexOptions.Compiled);
 
     private ScriptDocument(string title, IReadOnlyList<string> instructions,
-                           IReadOnlyList<ScriptBlock> blocks, IReadOnlyList<ScriptParagraph> paragraphs)
+                           IReadOnlyList<ScriptBlock> blocks, IReadOnlyList<ScriptParagraph> paragraphs,
+                           string language)
     {
         Title = title;
         Instructions = instructions;
         Blocks = blocks;
         Paragraphs = paragraphs;
+        Language = language;
     }
 
     public string Title { get; }
     public IReadOnlyList<string> Instructions { get; }
     public IReadOnlyList<ScriptBlock> Blocks { get; }
     public IReadOnlyList<ScriptParagraph> Paragraphs { get; }
+
+    /// <summary>
+    /// Sproget teksten er skrevet på, læst af frontmatter. Bruges af den
+    /// live-lytning, der flytter afsnittet af sig selv: lytter den efter
+    /// dansk, mens der læses engelsk, holder den op med at følge med.
+    /// </summary>
+    public string Language { get; }
 
     public int TotalWords => Paragraphs.Sum(p => p.WordCount);
 
@@ -57,16 +66,48 @@ public sealed class ScriptDocument
     /// samme, uden at appen skal bygges om. Ellers bruges den indlejrede kopi,
     /// så appen også virker på en maskine uden repoet.
     /// </summary>
-    public static string? DiskPath() => RepoFiles.Find("fase0", "oplaesning", "testtekst.md");
+    public static string? DiskPath(string fileName = DefaultFile) =>
+        RepoFiles.Find("fase0", "oplaesning", fileName);
 
-    public static ScriptDocument Load()
+    public const string DefaultFile = "testtekst.md";
+
+    /// <summary>
+    /// De tekster, der kan læses op, i den rækkefølge de giver mening at tage.
+    ///
+    /// Navnet er det, der står i menuen; filen er den, der bliver læst. Listen
+    /// står her frem for i UI'et, så en ny tekst kun skal tilføjes ét sted —
+    /// og så det fremgår, hvad hver tekst måler. En tekst uden et formål er
+    /// bare tyve minutters oplæsning.
+    /// </summary>
+    public static readonly IReadOnlyList<(string File, string Key, string Name, string Why, string Next)> Available = new[]
     {
-        var sti = DiskPath();
+        (DefaultFile, "dansk", "Dansk",
+            "Beslutningerne og opgaverne ligger sidst i teksten. Læser du kun de første minutter, måler du ingen af dem.",
+            "Det er også den eneste, der er lang nok til at afgøre, om en senere opdatering af modellen faktisk hjalp."),
+
+        ("testtekst-blandet.md", "blandet", "Blandet",
+            "Whisper finder sproget én gang, ud fra de første tredive sekunder. Skifter mødet sprog undervejs, opdager den det ikke.",
+            "Beslutningen ligger med vilje i den engelske del, så det kan ses, om et sprogskifte koster dig en beslutning."),
+
+        ("testtekst-engelsk.md", "engelsk", "Engelsk",
+            "En dansker, der taler engelsk, er det svære tilfælde: accenten trækker genkendelsen mod dansk.",
+            "Den viser samtidig, om referatet kommer ud på dansk, selvom mødet ikke var det.")
+    };
+
+    /// <summary>
+    /// Henter en tekst. Repo-kopien vinder, hvis den findes: så slår rettelser
+    /// igennem med det samme, uden at appen skal bygges om. Ellers bruges den
+    /// indlejrede kopi, så appen også virker på en maskine uden repoet.
+    /// </summary>
+    public static ScriptDocument Load(string fileName = DefaultFile)
+    {
+        var sti = DiskPath(fileName);
         if (sti is not null) return Parse(File.ReadAllText(sti, Encoding.UTF8));
 
         using var stream = Assembly.GetExecutingAssembly()
-            .GetManifestResourceStream("NoteApp.Desktop.testtekst.md")
-            ?? throw new InvalidOperationException("Oplæsningsteksten er ikke indlejret i appen.");
+            .GetManifestResourceStream("NoteApp.Desktop." + fileName)
+            ?? throw new InvalidOperationException(
+                $"Oplæsningsteksten «{fileName}» findes hverken på disken eller i appen.");
         using var reader = new StreamReader(stream, Encoding.UTF8);
         return Parse(reader.ReadToEnd());
     }
@@ -74,6 +115,7 @@ public sealed class ScriptDocument
     public static ScriptDocument Parse(string markdown)
     {
         var titel = "Oplæsningstekst";
+        var sprog = "da";
         var instruktioner = new List<string>();
         var blokke = new List<ScriptBlock>();
         var afsnit = new List<ScriptParagraph>();
@@ -87,6 +129,14 @@ public sealed class ScriptDocument
             var linje = rå.Trim();
 
             if (linje.Length == 0 || linje == "---") continue;
+
+            // Frontmatter: kun "sprog" bruges. Den staar foer titlen, saa den
+            // fanges her frem for at ende som en vejledningslinje paa skaermen.
+            if (blokIndex < 0 && linje.StartsWith("sprog:", StringComparison.OrdinalIgnoreCase))
+            {
+                sprog = linje[6..].Trim().ToLowerInvariant();
+                continue;
+            }
 
             if (linje.StartsWith("# "))
             {
@@ -118,7 +168,7 @@ public sealed class ScriptDocument
             afsnit.Add(new ScriptParagraph(blokIndex, Rens(linje)));
         }
 
-        return new ScriptDocument(titel, instruktioner, blokke, afsnit);
+        return new ScriptDocument(titel, instruktioner, blokke, afsnit, sprog);
     }
 
     private static TimeSpan ParseTid(string mmss)
