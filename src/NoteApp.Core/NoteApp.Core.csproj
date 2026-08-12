@@ -11,6 +11,9 @@
   <ItemGroup>
     <PackageReference Include="NAudio" Version="2.2.1" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="8.0.11" />
+    <!-- Bruges kun til at spoerge Windows, om der er et NVIDIA-kort. Uden
+         det svar kan appen ikke anbefale den rigtige Whisper-udgave. -->
+    <PackageReference Include="System.Management" Version="8.0.0" />
   </ItemGroup>
 
   <ItemGroup>

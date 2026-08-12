@@ -13,7 +13,7 @@
 
     <!-- Versionen følger repoets vX.YY. Den vises i sidebjælken, så en
          skærmbillede fra en fejlmelding siger hvilken build det var. -->
-    <Version>0.18.0</Version>
+    <Version>0.20.0</Version>
 
     <!-- Ikonet i exe-filen: proceslinje, Stifinder og Alt-Tab. Uden det får
          appen Windows' generiske programikon. Genskabes fra AppIkon.jpg med

@@ -1,28 +1,53 @@
 # Installation af NoteApp
 
-## Installationspakke (.msi)
+## Installationsfil
 
-NoteApp kan installeres som et almindeligt Windows-program. Pakken bygges med:
+NoteApp installeres som et almindeligt Windows-program. Filen bygges med:
 
 ```bash
 powershell -File C:\NoteApp\scripts\byg-installer.ps1
 ```
 
-Scriptet udgiver appen først og pakker derefter præcis de filer ned. Resultatet er `C:\NoteApp\installer\NoteApp.msi` på cirka 107 MB.
+Der kommer to filer i `C:\NoteApp\installer\`:
 
-Installation kræver administratorrettigheder, fordi programmet lander i Program Files:
-
-```bash
-msiexec /i C:\NoteApp\installer\NoteApp.msi
-```
+- **NoteApp-setup.exe** (108 MB) — den, der skal sendes eller dobbeltklikkes. Beder selv om administratorrettigheder undervejs.
+- **NoteApp.msi** (107 MB) — nyttelasten, til automatisk udrulning.
 
 Efter installation ligger programmet i `C:\Program Files\NoteApp`, med genveje i Startmenuen og på skrivebordet, og en post under **Tilføj/fjern programmer**.
 
-**Afinstallation rører ikke dine data.** Pakken kender kun til Program Files. Optagelser, noter, ordbog og indstillinger ligger i datamappen — som standard `C:\AppNoter` — og bliver liggende. Vil du af med dem, skal du selv slette mappen. Det står også i beskrivelsen under Tilføj/fjern programmer.
+### Udvikling og installation lever side om side
+
+| | Sti | Bruges til |
+|---|---|---|
+| Udvikling | `C:\NoteApp\app\NoteApp.exe` | Køres direkte, mens der bygges og prøves af |
+| Installation | `C:\Program Files\NoteApp\NoteApp.exe` | Den rigtige installation |
+
+Begge læser den **samme datamappe** (`C:\AppNoter`). Det er med vilje: ordbog, optagelser og indstillinger skal være de samme, uanset hvilken kopi der startes.
+
+### Hvad der sker ved en ny installation oven på en gammel
+
+| Situation | Hvad installationsfilen gør |
+|---|---|
+| Ældre version installeret | Opdaterer. Den gamle fjernes automatisk, så der kun bliver én post under Tilføj/fjern |
+| **Samme** version installeret | Siger, at den allerede er installeret, og tilbyder at reparere eller afinstallere |
+| Ingen installation | Installerer |
+
+**Hæv derfor versionen i `NoteApp.Desktop.csproj`, før du bygger en opdatering.** Gør du ikke det, tilbyder installationsprogrammet at reparere frem for at opdatere, og man tror, at ændringen ikke virkede.
+
+**Afinstallation rører ikke dine data.** Pakken kender kun til Program Files. Optagelser, noter, ordbog og indstillinger bliver liggende i datamappen. Det står også i beskrivelsen under Tilføj/fjern programmer.
 
 **Byggeværktøj:** WiX 5, installeret som .NET-værktøj med `dotnet tool install --global wix --version 5.0.2`. Versionen er bevidst bundet: WiX 6 og 7 kræver, at man accepterer en betalt licensaftale (Open Source Maintenance Fee), og det er en beslutning, der skal træffes bevidst frem for af et byggescript.
 
-**Det pakken ikke indeholder:** Whisper-motoren. På en frisk maskine uden `C:\NoteApp\tools\whisper` vil skærmen *Motor og model* melde, at motoren mangler. Modeller kan appen hente selv; motoren skal endnu lægges på plads i hånden.
+### Whisper hentes ved første start
+
+Installationsfilen indeholder ikke Whisper — den ville fylde 640 MB mere. I stedet spørger appen ved første start, som **fjerde trin i opsætningen**:
+
+- **Motoren** vælges efter maskinen: er der et NVIDIA-kort, foreslås CUDA-udgaven, som er cirka ti gange hurtigere. Ellers CPU-udgaven, der virker overalt.
+- **Modellen** vælges efter samme logik: `large-v3` med GPU, `small` uden.
+
+Størrelserne hentes fra GitHub, så de altid passer, og de vises **før** du siger ja. Findes motor eller model allerede på maskinen, springes de over.
+
+Går hentningen galt, gemmes ordbogen alligevel, og begge dele kan hentes bagefter under *Motor og model*.
 
 ---
 

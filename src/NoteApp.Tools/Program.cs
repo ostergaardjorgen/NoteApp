@@ -19,6 +19,7 @@ try
         "eksport"   => Eksport(args.Skip(1).FirstOrDefault()),
         "motor"     => Motor(),
         "hent"      => await Hent(args.Skip(1).ToArray()),
+        "hentmotor" => await HentMotor(args.Skip(1).ToArray()),
         "gendan"    => Gendan(args.Skip(1).ToArray()),
         "transskriber" => await Transskriber(args.Skip(1).ToArray()),
         "recover"   => Genopret(),
@@ -228,6 +229,61 @@ static int Motor()
         Console.WriteLine($"  {m.Id,-16} {m.SizeText,8}  {m.Summary}");
 
     return s.IsComplete ? 0 : 1;
+}
+
+/// <summary>
+/// Henter og udpakker Whisper-motoren. Uden argument vises hvad der findes,
+/// og hvad der anbefales til denne maskine.
+/// </summary>
+static async Task<int> HentMotor(string[] a)
+{
+    Console.WriteLine("Spørger GitHub om nyeste udgivelse ...");
+    var udgivelse = await EngineInstaller.FetchLatestAsync();
+
+    Console.WriteLine($"Version : {udgivelse.Version}");
+    Console.WriteLine($"NVIDIA  : {(EngineInstaller.HasNvidiaGpu() ? "ja — CUDA kan bruges" : "nej — CPU-udgave anbefales")}");
+    Console.WriteLine();
+
+    var anbefalet = EngineInstaller.Recommend(udgivelse);
+
+    Console.WriteLine("Udgaver:");
+    foreach (var b in udgivelse.Builds)
+    {
+        var maerke = b == anbefalet ? " <- anbefales" : "";
+        Console.WriteLine($"  {b.FileName,-38} {b.SizeText,8}{maerke}");
+    }
+    Console.WriteLine();
+
+    if (a.Length == 0)
+    {
+        Console.WriteLine("Hent med: noteapp hentmotor <filnavn>   (eller 'anbefalet')");
+        return 0;
+    }
+
+    var valgt = a[0].Equals("anbefalet", StringComparison.OrdinalIgnoreCase)
+        ? anbefalet
+        : udgivelse.Builds.FirstOrDefault(b => b.FileName.Equals(a[0], StringComparison.OrdinalIgnoreCase));
+
+    if (valgt is null) { Console.Error.WriteLine($"Kender ikke udgaven: {a[0]}"); return 2; }
+
+    var sidst = -1;
+    var fremdrift = new Progress<DownloadProgress>(p =>
+    {
+        var pct = (int)p.Percent;
+        if (pct == sidst) return;
+        sidst = pct;
+        Console.Write($"\r  {pct,3}%  {p.BytesDone / 1024.0 / 1024.0,6:0} / {p.BytesTotal / 1024.0 / 1024.0:0} MB   ");
+    });
+
+    await EngineInstaller.InstallAsync(valgt, udgivelse.Version, fremdrift,
+        new Progress<string>(s => Console.WriteLine($"\n{s}")));
+
+    Console.WriteLine();
+    var s2 = WhisperInstall.Locate();
+    Console.WriteLine($"Motor nu : {s2.WhisperCli ?? "IKKE FUNDET"}");
+    var (etiket2, vaerdi2) = s2.AgeLine;
+    Console.WriteLine($"{etiket2,-9}: {vaerdi2}");
+    return s2.WhisperCli is null ? 1 : 0;
 }
 
 /// <summary>

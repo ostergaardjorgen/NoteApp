@@ -157,6 +157,51 @@
                  Text="Begge felter må stå tomme — du kan altid tilføje flere senere under Ordbog. Navnene bliver på maskinen." />
     </Grid>
 
+    <!-- ===================== Trin 4: motor og model ===================== -->
+    <Grid x:Name="Trin4" Grid.Row="1" Visibility="Collapsed">
+      <Grid.RowDefinitions>
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="*" />
+        <RowDefinition Height="Auto" />
+      </Grid.RowDefinitions>
+
+      <TextBlock Grid.Row="0" FontSize="13" Foreground="{StaticResource TekstSvag}" Margin="0,0,0,16" LineHeight="20"
+                 Text="Transskriptionen laves af Whisper, som kører på din egen maskine. Motoren og en sprogmodel skal hentes én gang. Det er det eneste, appen bruger internettet til — og der sendes intet fra din pc, kun hentes ned." />
+
+      <Border Grid.Row="1" Background="{StaticResource Panel}" CornerRadius="10" Padding="18,15"
+              BorderBrush="{StaticResource PanelKant}" BorderThickness="1" Margin="0,0,0,12">
+        <StackPanel>
+          <TextBlock x:Name="MotorOverskrift" Text="Motor" FontSize="15" FontWeight="SemiBold" />
+          <TextBlock x:Name="MotorValg" FontSize="13" Margin="0,6,0,0"
+                     Foreground="{StaticResource TekstSvag}" />
+          <TextBlock x:Name="MotorBegrundelse" Style="{StaticResource Underskrift}" Margin="0,6,0,0" />
+        </StackPanel>
+      </Border>
+
+      <Border Grid.Row="2" Background="{StaticResource Panel}" CornerRadius="10" Padding="18,15"
+              BorderBrush="{StaticResource PanelKant}" BorderThickness="1" VerticalAlignment="Top">
+        <StackPanel>
+          <TextBlock Text="Sprogmodel" FontSize="15" FontWeight="SemiBold" />
+          <TextBlock x:Name="ModelValg" FontSize="13" Margin="0,6,0,0"
+                     Foreground="{StaticResource TekstSvag}" />
+          <TextBlock x:Name="ModelBegrundelse" Style="{StaticResource Underskrift}" Margin="0,6,0,0" />
+
+          <StackPanel Orientation="Horizontal" Margin="0,14,0,0">
+            <TextBlock Text="I alt at hente:" Style="{StaticResource Underskrift}" VerticalAlignment="Center" />
+            <TextBlock x:Name="SamletStoerrelse" FontSize="14" FontWeight="SemiBold" Margin="8,0,0,0"
+                       VerticalAlignment="Center" />
+          </StackPanel>
+        </StackPanel>
+      </Border>
+
+      <StackPanel Grid.Row="3" Margin="0,14,0,0">
+        <ProgressBar x:Name="HentFremdrift" Height="6" Minimum="0" Maximum="100" Visibility="Collapsed"
+                     Background="#FF2C323D" Foreground="{StaticResource Accent}" BorderThickness="0" />
+        <TextBlock x:Name="HentStatus" Style="{StaticResource Underskrift}" Margin="0,8,0,0" />
+      </StackPanel>
+    </Grid>
+
     <!-- ============================ Knapper ============================ -->
     <Grid Grid.Row="2" Margin="0,20,0,0">
       <Grid.ColumnDefinitions>

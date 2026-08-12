@@ -43,8 +43,14 @@ public partial class SetupWindow : Window
     {
         ("Velkommen til NoteApp", "Møde-noter der bliver på din egen maskine"),
         ("Hvad handler dine møder om?", "Så starter ordbogen med de rigtige fagord"),
-        ("Hvem holder du møder med?", "Navne er dem, Whisper oftest staver forkert")
+        ("Hvem holder du møder med?", "Navne er dem, Whisper oftest staver forkert"),
+        ("Sidste trin: hent Whisper", "Motoren og en sprogmodel, så appen kan skrive dine møder ud")
     };
+
+    private EngineRelease? _udgivelse;
+    private EngineBuild? _motorValg;
+    private WhisperModel? _modelValg;
+    private bool _henter;
 
     public SetupWindow()
     {
@@ -63,6 +69,7 @@ public partial class SetupWindow : Window
         Trin1.Visibility = nr == 0 ? Visibility.Visible : Visibility.Collapsed;
         Trin2.Visibility = nr == 1 ? Visibility.Visible : Visibility.Collapsed;
         Trin3.Visibility = nr == 2 ? Visibility.Visible : Visibility.Collapsed;
+        Trin4.Visibility = nr == 3 ? Visibility.Visible : Visibility.Collapsed;
 
         TrinTitel.Text = Trin[nr].Titel;
         TrinUnder.Text = Trin[nr].Under;
@@ -73,8 +80,89 @@ public partial class SetupWindow : Window
         {
             0 => "Kom i gang",
             1 => "Næste",
-            _ => "Færdig"
+            2 => "Næste",
+            _ => "Hent og afslut"
         };
+
+        if (nr == 3) _ = ForberedHentning();
+    }
+
+    // ------------------------------------------------------- motor og model
+
+    /// <summary>
+    /// Slår op, hvad der skal hentes, og hvor meget det fylder — FØR brugeren
+    /// trykker. Er begge dele der i forvejen, siges det, og trinnet bliver et
+    /// klik videre i stedet for en hentning.
+    /// </summary>
+    private async Task ForberedHentning()
+    {
+        var installeret = WhisperInstall.Locate();
+
+        // Motoren
+        if (installeret.WhisperCli is not null)
+        {
+            MotorOverskrift.Text = "Motor — allerede på plads";
+            MotorValg.Text = installeret.Engine == "GPU (CUDA)"
+                ? "whisper.cpp med GPU-understøttelse er fundet på maskinen."
+                : "whisper.cpp er fundet på maskinen.";
+            MotorBegrundelse.Text = installeret.WhisperCli;
+            _motorValg = null;
+        }
+        else
+        {
+            MotorValg.Text = "Slår op hos GitHub …";
+            try
+            {
+                _udgivelse = await EngineInstaller.FetchLatestAsync();
+                _motorValg = EngineInstaller.Recommend(_udgivelse);
+
+                if (_motorValg is null)
+                {
+                    MotorValg.Text = "Kunne ikke finde en Windows-udgave at hente.";
+                }
+                else
+                {
+                    var harGpu = EngineInstaller.HasNvidiaGpu();
+                    MotorOverskrift.Text = $"Motor — whisper.cpp {_udgivelse.Version}";
+                    MotorValg.Text = $"{_motorValg.FileName}  ({_motorValg.SizeText})";
+                    MotorBegrundelse.Text = harGpu
+                        ? "Maskinen har et NVIDIA-kort, så GPU-udgaven vælges. Den er cirka ti gange hurtigere end CPU."
+                        : "Der er ikke fundet et NVIDIA-kort, så CPU-udgaven vælges. Den virker overalt, men et langt møde tager længere tid end mødet selv.";
+                }
+            }
+            catch (Exception ex)
+            {
+                MotorValg.Text = "Kunne ikke nå GitHub.";
+                MotorBegrundelse.Text = $"{ex.Message} — du kan hente motoren senere under Motor og model.";
+            }
+        }
+
+        // Modellen
+        if (installeret.ModelPath is not null)
+        {
+            ModelValg.Text = $"{Path.GetFileName(installeret.ModelPath)} er allerede på maskinen.";
+            ModelBegrundelse.Text = installeret.ModelPath;
+            _modelValg = null;
+        }
+        else
+        {
+            // large-v3 paa en GPU-maskine, ellers den lille. Kvaliteten paa
+            // dansk er markant bedre med den store, men uden GPU er den
+            // ubrugelig langsom.
+            _modelValg = EngineInstaller.HasNvidiaGpu()
+                ? WhisperInstall.Model("large-v3")
+                : WhisperInstall.Model("small");
+
+            ModelValg.Text = $"{_modelValg!.Id}  ({_modelValg.SizeText})";
+            ModelBegrundelse.Text = _modelValg.Summary + " Du kan skifte model senere under Motor og model.";
+        }
+
+        var samlet = (_motorValg?.Bytes ?? 0) + (_modelValg?.Bytes ?? 0);
+        SamletStoerrelse.Text = samlet == 0
+            ? "ingenting — alt er der allerede"
+            : $"{samlet / 1024.0 / 1024.0:0} MB";
+
+        NaesteKnap.Content = samlet == 0 ? "Færdig" : "Hent og afslut";
     }
 
     /// <summary>
@@ -126,25 +214,100 @@ public partial class SetupWindow : Window
 
     private void Tilbage_Click(object sender, RoutedEventArgs e) => VisTrin(Math.Max(0, _trin - 1));
 
-    private void Naeste_Click(object sender, RoutedEventArgs e)
+    private async void Naeste_Click(object sender, RoutedEventArgs e)
     {
+        if (_henter) return;
+
         if (_trin < Trin.Length - 1)
         {
             VisTrin(_trin + 1);
             return;
         }
 
+        // Ordbogen gemmes FOERST. Gaar hentningen galt, eller afbryder
+        // brugeren, skal fagomraade og navne ikke vaere tabt.
+        GemOrdbog();
+
+        if (_motorValg is not null || _modelValg is not null)
+        {
+            var ok = await HentAlt();
+            if (!ok) return;
+        }
+
         Afslut();
     }
 
-    private void Afslut()
+    /// <summary>
+    /// Henter motor og model. Fejler noget, siges det — og opsætningen
+    /// afsluttes alligevel, så brugeren ikke sidder fast i et velkomstforløb.
+    /// Begge dele kan hentes bagefter under Motor og model.
+    /// </summary>
+    private async Task<bool> HentAlt()
+    {
+        _henter = true;
+        NaesteKnap.IsEnabled = false;
+        TilbageKnap.IsEnabled = false;
+        HentFremdrift.Visibility = Visibility.Visible;
+
+        var fremdrift = new Progress<DownloadProgress>(p =>
+        {
+            HentFremdrift.Value = p.Percent;
+            var tilbage = p.Remaining is null ? "" : $" · {p.Remaining.Value:mm\\:ss} tilbage";
+            HentStatus.Text = $"{p.BytesDone / 1024.0 / 1024.0:0} af {p.BytesTotal / 1024.0 / 1024.0:0} MB" +
+                              $" · {p.BytesPerSecond / 1024.0 / 1024.0:0.0} MB/s{tilbage}";
+        });
+
+        try
+        {
+            if (_motorValg is not null && _udgivelse is not null)
+            {
+                await EngineInstaller.InstallAsync(_motorValg, _udgivelse.Version, fremdrift,
+                    new Progress<string>(s => HentStatus.Text = s));
+            }
+
+            if (_modelValg is not null)
+            {
+                HentStatus.Text = $"Henter {_modelValg.Id} …";
+                await new Downloader().DownloadAsync(
+                    _modelValg.Url, WhisperInstall.ModelDestination(_modelValg), _modelValg.Bytes, fremdrift);
+
+                AppSettings.Current.PreferredModel = _modelValg.Id;
+                AppSettings.Current.Save();
+            }
+
+            HentStatus.Text = "Færdig.";
+            return true;
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(
+                $"Hentningen blev ikke færdig.\n\n{ex.Message}\n\n" +
+                "Din ordbog er gemt, og opsætningen afsluttes. Du kan hente motor og model " +
+                "senere under «Motor og model».",
+                "Kunne ikke hente", MessageBoxButton.OK, MessageBoxImage.Warning);
+
+            Afslut(visKvittering: false);
+            return false;
+        }
+        finally
+        {
+            _henter = false;
+            NaesteKnap.IsEnabled = true;
+            TilbageKnap.IsEnabled = true;
+            HentFremdrift.Visibility = Visibility.Collapsed;
+        }
+    }
+
+    private int _fraSkabelon, _navne, _firmaer;
+
+    private void GemOrdbog()
     {
         using var store = new LearningStore();
 
         var skabelon = IndustryTemplates.ById(_branche);
-        var fraSkabelon = skabelon is null ? 0 : IndustryTemplates.Apply(store, skabelon);
-        var navne = IndustryTemplates.AddNames(store, Navne.Text);
-        var firmaer = IndustryTemplates.AddNames(store, Firmaer.Text, TermCategories.Organisation);
+        _fraSkabelon = skabelon is null ? 0 : IndustryTemplates.Apply(store, skabelon);
+        _navne = IndustryTemplates.AddNames(store, Navne.Text);
+        _firmaer = IndustryTemplates.AddNames(store, Firmaer.Text, TermCategories.Organisation);
 
         // Ordlisten skrives med det samme. Ellers ville ordbogen vaere fyldt,
         // men filen Whisper faktisk laeser vaere tom indtil naeste gang nogen
@@ -154,13 +317,25 @@ public partial class SetupWindow : Window
         AppSettings.Current.SetupCompleted = true;
         AppSettings.Current.Industry = _branche;
         AppSettings.Current.Save();
+    }
 
-        MessageBox.Show(
-            $"Ordbogen er sat op med {fraSkabelon + navne + firmaer} ord: " +
-            $"{fraSkabelon} fra skabelonen, {navne} navne og {firmaer} firmaer.\n\n" +
-            "Næste skridt er at hente en sprogmodel under Motor og model — " +
-            "uden den kan der ikke transskriberes.",
-            "Klar", MessageBoxButton.OK, MessageBoxImage.Information);
+    private void Afslut(bool visKvittering = true)
+    {
+        if (visKvittering)
+        {
+            var install = WhisperInstall.Locate(AppSettings.Current.PreferredModel);
+
+            var klar = install.IsComplete
+                ? $"Whisper er klar: {install.ModelFileName} på {install.Engine}."
+                : "Motor eller model mangler stadig — hent dem under «Motor og model».";
+
+            MessageBox.Show(
+                $"Ordbogen er sat op med {_fraSkabelon + _navne + _firmaer} ord: " +
+                $"{_fraSkabelon} fra skabelonen, {_navne} navne og {_firmaer} firmaer.\n\n" +
+                klar + "\n\n" +
+                "Første opgave er at læse testteksten højt. Den står klar på skærmen «Oplæsning».",
+                "Klar", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
 
         DialogResult = true;
         Close();

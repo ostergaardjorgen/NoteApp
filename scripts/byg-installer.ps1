@@ -92,19 +92,32 @@ try
     $msiVersion = ($version -split '\.')[0..2] -join '.'
 
     & $wix build 'NoteApp.wxs' -ext WixToolset.UI.wixext -d "Version=$msiVersion" -o 'NoteApp.msi'
-    if ($LASTEXITCODE -ne 0) { throw "wix build fejlede." }
+    if ($LASTEXITCODE -ne 0) { throw "wix build af MSI fejlede." }
+
+    # Indpakningen: en setup.exe, der baerer MSI'en. Den beder selv om
+    # administratorrettigheder, saa modtageren ikke skal vide, at en .msi skal
+    # hoejreklikkes — og mange mailfiltre lukker en .exe igennem, hvor en .msi
+    # bliver stoppet.
+    Write-Host "Bygger setup.exe ..." -ForegroundColor Cyan
+    & $wix extension add --global WixToolset.BootstrapperApplications.wixext/5.0.2
+    & $wix build 'Bundle.wxs' -ext WixToolset.BootstrapperApplications.wixext -d "Version=$msiVersion" -o 'NoteApp-setup.exe'
+    if ($LASTEXITCODE -ne 0) { throw "wix build af setup.exe fejlede." }
 }
 finally
 {
     Pop-Location
 }
 
-$pakke = Get-Item $msi
+$setup = Join-Path $installer 'NoteApp-setup.exe'
+
 Write-Host ""
 Write-Host "Færdig." -ForegroundColor Green
-Write-Host "  Pakke   : $($pakke.FullName)"
-Write-Host "  Størrelse: $([math]::Round($pakke.Length / 1MB, 1)) MB"
+foreach ($f in @($setup, $msi)) {
+    if (Test-Path $f) {
+        Write-Host ("  {0,-22} {1,7:0.0} MB" -f (Split-Path $f -Leaf), ((Get-Item $f).Length / 1MB))
+    }
+}
 Write-Host ""
-Write-Host "Installér med:  msiexec /i `"$($pakke.FullName)`"" -ForegroundColor DarkGray
-Write-Host "Afinstallér med: msiexec /x `"$($pakke.FullName)`"" -ForegroundColor DarkGray
+Write-Host "Send NoteApp-setup.exe til den, der skal installere. Den beder selv om" -ForegroundColor DarkGray
+Write-Host "administratorrettigheder og installerer MSI'en." -ForegroundColor DarkGray
 Write-Host "Afinstallation fjerner kun programmet — datamappen bliver liggende." -ForegroundColor DarkGray
