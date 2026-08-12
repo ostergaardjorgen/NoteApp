@@ -8,9 +8,16 @@
     <!-- Et valgkort. Det ER en RadioButton — kun én kan være valgt, og
          tastaturet virker som man forventer — men den ser ud som en boks, man
          trykker på. Prikken er væk: kortet i sig selv viser valget med kant og
-         baggrund, og en prik oveni ville sige det samme to gange. -->
+         baggrund, og en prik oveni ville sige det samme to gange.
+
+         Hover løfter kortet en anelse. Bevægelsen er lille med vilje — den skal
+         bekræfte, at boksen kan trykkes på, ikke tage opmærksomheden. -->
     <Style x:Key="Tekstkort" TargetType="RadioButton">
       <Setter Property="Cursor" Value="Hand" />
+      <Setter Property="RenderTransformOrigin" Value="0.5,0.5" />
+      <Setter Property="RenderTransform">
+        <Setter.Value><ScaleTransform ScaleX="1" ScaleY="1" /></Setter.Value>
+      </Setter>
       <Setter Property="Template">
         <Setter.Value>
           <ControlTemplate TargetType="RadioButton">
@@ -21,6 +28,7 @@
             <ControlTemplate.Triggers>
               <Trigger Property="IsMouseOver" Value="True">
                 <Setter TargetName="Kant" Property="BorderBrush" Value="{StaticResource TekstMeget}" />
+                <Setter TargetName="Kant" Property="Background" Value="#FF212832" />
               </Trigger>
               <Trigger Property="IsChecked" Value="True">
                 <Setter TargetName="Kant" Property="BorderBrush" Value="{StaticResource Accent}" />
@@ -32,6 +40,71 @@
           </ControlTemplate>
         </Setter.Value>
       </Setter>
+      <Style.Triggers>
+        <EventTrigger RoutedEvent="MouseEnter">
+          <BeginStoryboard>
+            <Storyboard>
+              <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleX"
+                               To="1.02" Duration="0:0:0.12" />
+              <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleY"
+                               To="1.02" Duration="0:0:0.12" />
+            </Storyboard>
+          </BeginStoryboard>
+        </EventTrigger>
+        <EventTrigger RoutedEvent="MouseLeave">
+          <BeginStoryboard>
+            <Storyboard>
+              <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleX"
+                               To="1" Duration="0:0:0.12" />
+              <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleY"
+                               To="1" Duration="0:0:0.12" />
+            </Storyboard>
+          </BeginStoryboard>
+        </EventTrigger>
+      </Style.Triggers>
+    </Style>
+
+    <!-- De tre oplysningskort. Samme opførsel som valgkortene, så det er
+         tydeligt, at man også kan pege på dem — det er dér, hele teksten
+         ligger, når der ikke er plads til den på skærmen. -->
+    <Style x:Key="Infokort" TargetType="Border">
+      <Setter Property="Background" Value="#FF181B22" />
+      <Setter Property="BorderBrush" Value="{StaticResource PanelKant}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="10" />
+      <Setter Property="Padding" Value="18,14" />
+      <Setter Property="Cursor" Value="Help" />
+      <Setter Property="ToolTipService.InitialShowDelay" Value="220" />
+      <Setter Property="ToolTipService.ShowDuration" Value="60000" />
+      <Setter Property="RenderTransformOrigin" Value="0.5,0.5" />
+      <Setter Property="RenderTransform">
+        <Setter.Value><ScaleTransform ScaleX="1" ScaleY="1" /></Setter.Value>
+      </Setter>
+      <Style.Triggers>
+        <Trigger Property="IsMouseOver" Value="True">
+          <Setter Property="BorderBrush" Value="{StaticResource Accent}" />
+        </Trigger>
+        <EventTrigger RoutedEvent="MouseEnter">
+          <BeginStoryboard>
+            <Storyboard>
+              <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleX"
+                               To="1.025" Duration="0:0:0.12" />
+              <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleY"
+                               To="1.025" Duration="0:0:0.12" />
+            </Storyboard>
+          </BeginStoryboard>
+        </EventTrigger>
+        <EventTrigger RoutedEvent="MouseLeave">
+          <BeginStoryboard>
+            <Storyboard>
+              <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleX"
+                               To="1" Duration="0:0:0.12" />
+              <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleY"
+                               To="1" Duration="0:0:0.12" />
+            </Storyboard>
+          </BeginStoryboard>
+        </EventTrigger>
+      </Style.Triggers>
     </Style>
   </UserControl.Resources>
 
@@ -92,11 +165,17 @@
              at laese en anden. Hvert kort svarer paa eet spoergsmaal med to
              linjer. -->
         <Grid x:Name="VejledningPanel" Grid.Row="0" Margin="36,26,36,20">
+          <!-- Alle raekker er Auto paa naer den tomme. Med en *-raekke om
+               oplysningskortene fik de "hvad der var tilbage", og naar det ikke
+               var nok, blev teksten klippet midt i en saetning. Nu faar hver
+               raekke den hoejde, den har brug for, og luften ligger samlet i
+               raekke 4. -->
           <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" MinHeight="0" />
             <RowDefinition Height="Auto" />
           </Grid.RowDefinitions>
 
@@ -193,51 +272,56 @@
           </Border>
 
           <!-- ============ Det praktiske ============ -->
-          <Grid Grid.Row="3" VerticalAlignment="Top" Margin="0,18,0,0">
+          <!-- Tre korte kort. Hele teksten ligger i tooltippen: der er ikke
+               altid plads til den paa skaermen, og en tekst, der bliver klippet
+               midt i en saetning, er vaerre end en, der staar kort og kan
+               foldes ud ved at pege paa den. -->
+          <Grid Grid.Row="3" VerticalAlignment="Top" Margin="0,16,0,0">
             <Grid.ColumnDefinitions>
               <ColumnDefinition Width="*" />
               <ColumnDefinition Width="*" />
               <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
-            <Border Grid.Column="0" Background="#FF181B22" BorderBrush="{StaticResource PanelKant}"
-                    BorderThickness="1" CornerRadius="10" Padding="18,15" Margin="0,0,7,0">
+            <Border Grid.Column="0" Style="{StaticResource Infokort}" Margin="0,0,7,0">
+              <Border.ToolTip>
+                <TextBlock TextWrapping="Wrap" LineHeight="22">Der står ét afsnit på skærmen ad gangen. Læs kun det — når du er færdig, henter mellemrum det næste.<LineBreak /><LineBreak />Tal som til en kollega. Pauser og tøvelyde hører med; de er det, der gør optagelsen ægte i stedet for en oplæsning.</TextBlock>
+              </Border.ToolTip>
               <StackPanel>
-                <TextBlock Text="Sådan gør du" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,10" />
-                <TextBlock FontSize="12.5" LineHeight="20" TextWrapping="Wrap" Foreground="{StaticResource TekstSvag}"
-                           Text="Der står ét afsnit på skærmen. Læs kun det — mellemrum henter det næste." />
-                <TextBlock FontSize="12.5" LineHeight="20" Margin="0,8,0,0" TextWrapping="Wrap"
+                <TextBlock Text="Sådan gør du" FontSize="14" FontWeight="SemiBold" />
+                <TextBlock FontSize="12.5" Margin="0,7,0,0" TextTrimming="CharacterEllipsis"
                            Foreground="{StaticResource TekstSvag}"
-                           Text="Tal som til en kollega. Pauser og tøvelyde hører med — de gør optagelsen ægte." />
+                           Text="Ét afsnit ad gangen. Tal som til en kollega." />
               </StackPanel>
             </Border>
 
-            <Border Grid.Column="1" Background="#FF181B22" BorderBrush="{StaticResource PanelKant}"
-                    BorderThickness="1" CornerRadius="10" Padding="18,15" Margin="7,0,7,0">
+            <Border Grid.Column="1" Style="{StaticResource Infokort}" Margin="7,0,7,0">
+              <Border.ToolTip>
+                <TextBlock x:Name="HvorforFuld" TextWrapping="Wrap" LineHeight="22" />
+              </Border.ToolTip>
               <StackPanel>
                 <TextBlock x:Name="HvorforOverskrift" Text="Hvorfor lige den her" FontSize="14"
-                           FontWeight="SemiBold" Margin="0,0,0,10" />
-                <TextBlock x:Name="HvorforLaengde" FontSize="12.5" LineHeight="20" TextWrapping="Wrap"
-                           Foreground="{StaticResource TekstSvag}" />
-                <TextBlock x:Name="HvorforNaeste" FontSize="12.5" LineHeight="20" Margin="0,8,0,0"
-                           TextWrapping="Wrap" Foreground="{StaticResource TekstSvag}" />
+                           FontWeight="SemiBold" />
+                <TextBlock x:Name="HvorforLaengde" FontSize="12.5" Margin="0,7,0,0"
+                           TextTrimming="CharacterEllipsis" Foreground="{StaticResource TekstSvag}" />
               </StackPanel>
             </Border>
 
-            <Border Grid.Column="2" Background="#334CBE72" BorderBrush="{StaticResource Godkendt}"
-                    BorderThickness="1" CornerRadius="10" Padding="18,15" Margin="7,0,0,0">
+            <Border Grid.Column="2" Style="{StaticResource Infokort}" Margin="7,0,0,0"
+                    Background="#334CBE72" BorderBrush="{StaticResource Godkendt}">
+              <Border.ToolTip>
+                <TextBlock TextWrapping="Wrap" LineHeight="22">Kommer der nogen ind ad døren? Tryk Pause — så optages der intet, før du selv fortsætter.<LineBreak /><LineBreak />Stopper du midtvejs, bliver det du nåede gemt. Går appen ned, koster det højst 30 sekunder.</TextBlock>
+              </Border.ToolTip>
               <StackPanel>
-                <TextBlock Text="Du bestemmer" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,10" />
-                <TextBlock FontSize="12.5" LineHeight="20" TextWrapping="Wrap" Foreground="{StaticResource Tekst}"
-                           Text="Kommer der nogen? Tryk Pause — så optages der intet, før du selv fortsætter." />
-                <TextBlock FontSize="12.5" LineHeight="20" Margin="0,8,0,0" TextWrapping="Wrap"
+                <TextBlock Text="Du bestemmer" FontSize="14" FontWeight="SemiBold" />
+                <TextBlock FontSize="12.5" Margin="0,7,0,0" TextTrimming="CharacterEllipsis"
                            Foreground="{StaticResource Tekst}"
-                           Text="Stopper du midtvejs, gemmes det du nåede. Et crash koster højst 30 sekunder." />
+                           Text="Pause når som helst. Intet går tabt." />
               </StackPanel>
             </Border>
           </Grid>
 
-          <TextBlock Grid.Row="4" x:Name="Praktisk" FontSize="12" Margin="0,16,0,0"
+          <TextBlock Grid.Row="5" x:Name="Praktisk" FontSize="12" Margin="0,16,0,0"
                      Foreground="{StaticResource TekstMeget}" />
         </Grid>
 

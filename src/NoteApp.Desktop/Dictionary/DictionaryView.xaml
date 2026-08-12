@@ -15,7 +15,7 @@
 
     <!-- ============================ Overskrift ========================== -->
     <StackPanel Grid.Row="0" Grid.ColumnSpan="2" Margin="0,0,0,14">
-      <TextBlock Text="Ordbog" Style="{StaticResource Overskrift}" />
+      <TextBlock Text="Din ordbog" Style="{StaticResource Overskrift}" />
       <TextBlock Style="{StaticResource Underskrift}"
                  Text="Ordene her sendes med til Whisper, så den ved, hvad den skal lytte efter. Kategorien er ikke en etiket — den afgør, hvem der kommer med, når der ikke er plads til alle." />
     </StackPanel>

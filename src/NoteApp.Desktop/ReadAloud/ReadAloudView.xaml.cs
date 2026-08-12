@@ -133,9 +133,11 @@ public partial class ReadAloudView : UserControl
             $"Valgt: {valgt.Name} — {_script.TotalWords} ord, {_script.Paragraphs.Count} afsnit, cirka {minutter} minutter. " +
             "Indholdet er et opdigtet møde og betyder ikke noget. Det er din udtale og dine fagord, der bliver målt.";
 
+        // Kortet viser den korte udgave; hele begrundelsen ligger i tooltippen,
+        // fordi der ikke altid er plads til den paa skaermen.
         HvorforOverskrift.Text = $"Hvorfor «{valgt.Name}»";
         HvorforLaengde.Text = valgt.Why;
-        HvorforNaeste.Text = valgt.Next;
+        HvorforFuld.Text = valgt.Why + "\n\n" + valgt.Next;
 
         VisSkarphed();
 

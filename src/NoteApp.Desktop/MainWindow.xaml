@@ -31,13 +31,19 @@
           </StackPanel>
         </StackPanel>
         <StackPanel DockPanel.Dock="Top" Margin="0,26,0,0">
-          <RadioButton x:Name="NavOplaesning" GroupName="nav" Content="Oplæsning"
+          <!-- «Start her» frem for «Oplæsning»: menuen skal fortælle, hvor man
+               begynder, ikke hvad skærmen teknisk indeholder. -->
+          <RadioButton x:Name="NavOplaesning" GroupName="nav" Content="Start her"
                        Checked="Nav_Changed" IsChecked="True"
                        Style="{StaticResource NavKnap}" />
-          <RadioButton x:Name="NavTransskriber" GroupName="nav" Content="Transskribér"
+          <!-- «Din ordbog» ligger nr. 2, lige under «Start her»: det er den, der
+               tilpasser appen til dine ord, og dermed det næste skridt efter
+               den første indtaling — ikke noget, der hører til langt nede blandt
+               indstillingerne. -->
+          <RadioButton x:Name="NavOrdbog" GroupName="nav" Content="Din ordbog"
                        Checked="Nav_Changed"
                        Style="{StaticResource NavKnap}" />
-          <RadioButton x:Name="NavOrdbog" GroupName="nav" Content="Ordbog"
+          <RadioButton x:Name="NavTransskriber" GroupName="nav" Content="Transskribér"
                        Checked="Nav_Changed"
                        Style="{StaticResource NavKnap}" />
           <RadioButton x:Name="NavMotor" GroupName="nav" Content="Motor og model"

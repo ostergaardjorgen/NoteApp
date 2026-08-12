@@ -118,6 +118,28 @@
       </Setter>
     </Style>
 
+    <!-- Tooltips: WPF's standard er en smal, lys strimmel med én linje, der
+         bliver klippet. Når et kort er for lille til hele teksten, er det
+         tooltippen, der skal bære den — så den skal kunne rumme et afsnit og
+         være til at læse på en mørk flade. -->
+    <Style TargetType="ToolTip">
+      <Setter Property="Foreground" Value="{StaticResource Tekst}" />
+      <Setter Property="FontFamily" Value="Segoe UI" />
+      <Setter Property="FontSize" Value="13.5" />
+      <Setter Property="MaxWidth" Value="430" />
+      <Setter Property="HasDropShadow" Value="True" />
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="ToolTip">
+            <Border Background="#FF262C36" BorderBrush="{StaticResource Accent}"
+                    BorderThickness="1" CornerRadius="8" Padding="16,13">
+              <ContentPresenter />
+            </Border>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
     <Style TargetType="TextBox">
       <Setter Property="Background" Value="#FF181B22" />
       <Setter Property="Foreground" Value="{StaticResource Tekst}" />
