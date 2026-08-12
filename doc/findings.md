@@ -108,6 +108,25 @@ Det er den venlige udgave af konflikten: intet går i stykker, men den ene blive
 
 **Konsekvens for målinger:** en modelmåling foretaget under en transskription er ubrugelig. Den siger noget om konflikten, ikke om modellen.
 
+### 3.2 Den alvorlige konflikt er ikke om grafikkortet — den er om RAM
+
+*Målt 12. august 2026: appen holdt op med at svare og måtte lukkes hårdt.*
+
+`HeavyJobLock` beskytter grafikkortet. Den beskytter ikke mod det, der faktisk væltede maskinen.
+
+En model, der ikke kan være på kortet, lander i almindelig RAM. Muse-Glimmer på 12,4 GB stod på **18,9 GB RAM** og efterlod **3,6 GB af 32,5**. Så begyndte Windows at swappe, og alt holdt op med at reagere — også vinduer, der intet havde med sagen at gøre.
+
+| Model | Filstørrelse | RAM under kørsel |
+|---|---|---|
+| Mistral-24B (delvist på kort) | 14,3 GB | 14,1 GB |
+| Muse-Glimmer-30B (ikke på kort) | 12,4 GB | 18,9 GB |
+
+Vægtene alene siger det ikke: konteksten, tokenbufferne og selve programmet kommer oven i. Tommelfingerreglen fra de to målinger er **filstørrelsen gange 1,4**.
+
+**Ingen data gik tabt.** Efterprøvet efter den hårde lukning: `meeting.json` læses, `segmenter\` er tom, lydfilen er hel (910 sek), transskriptionen er intakt (165 linjer, 165 unikke), `learning.db` har sine 58 termer og efterlod hverken `-wal` eller `-journal`. Der kørte ingen optagelse på tidspunktet.
+
+**Konsekvens:** `LlmRunner` kontrollerer nu den frie hukommelse før start og **kaster** frem for at advare og fortsætte. Når maskinen først er gået i stå, er der ingen, der kan nå at trykke afbryd. Kravet er `filstørrelse × 1,4 + 2 GB` til Windows og appen selv. Kan hukommelsen ikke aflæses, blokeres der ikke — en advarsel bygget på et tal, vi ikke har, er værre end ingen advarsel.
+
 ---
 
 ## 4. Fejl i vores egen kode, fundet ved at bruge den

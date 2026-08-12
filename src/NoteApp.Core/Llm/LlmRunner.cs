@@ -86,6 +86,25 @@ public sealed class LlmRunner
     {
         if (!File.Exists(modelPath)) throw new FileNotFoundException("Sprogmodellen findes ikke", modelPath);
 
+        // Er der plads i den almindelige hukommelse? Er der ikke, swapper
+        // Windows, og saa holder HELE maskinen op med at svare — ikke kun
+        // denne koersel. Maalt 12. august: en 12,4 GB model tog 18,9 GB RAM og
+        // efterlod 3,6 GB af 32,5; appen maatte lukkes haardt.
+        //
+        // Der kastes frem for at advare og fortsaette: naar maskinen er gaaet
+        // i staa, er der ingen, der kan naa at trykke "afbryd".
+        var modelStørrelse = new FileInfo(modelPath).Length;
+        var (plads, krævet, fri) = Arbejdshukommelse.HarPlads(modelStørrelse);
+        if (!plads)
+            throw new InvalidOperationException(
+                $"Der er ikke hukommelse nok til {Path.GetFileName(modelPath)}.\n\n" +
+                $"Modellen fylder {Arbejdshukommelse.Gigabyte(modelStørrelse)} og har brug for cirka " +
+                $"{Arbejdshukommelse.Gigabyte(krævet)} arbejdshukommelse. Der er " +
+                $"{Arbejdshukommelse.Gigabyte(fri)} fri.\n\n" +
+                "Luk nogle programmer, eller vælg en mindre model. Startes den alligevel, " +
+                "begynder Windows at bruge disken som hukommelse, og så holder hele maskinen " +
+                "op med at svare — ikke kun NoteApp.");
+
         // Groft skoen: dansk tekst lander omkring 3 tegn pr. token. Bevidst
         // rundhaandet, saa prompten ikke bliver klippet over.
         var anslaaetPrompt = (template.SystemPrompt.Length + userPrompt.Length) / 3 + 200;

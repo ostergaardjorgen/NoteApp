@@ -40,6 +40,76 @@ public sealed record HeavyJobInfo(HeavyJobKind Kind, string What, DateTimeOffset
 /// Låsen er navngivet på tværs af processer, fordi kommandolinjeværktøjet og
 /// appen kan køre samtidig — og de deler det samme grafikkort.
 /// </summary>
+/// <summary>
+/// Hvor meget arbejdshukommelse maskinen har fri, og hvad det betyder for en
+/// model, der vil fylde et bestemt antal byte.
+///
+/// Låsen ovenfor beskytter grafikkortet. Den beskytter ikke mod DEN her:
+/// en model, der ikke kan være på kortet, lander i almindelig RAM, og løber
+/// den maskinen tør, begynder Windows at swappe. Så holder alt op med at
+/// svare — også vinduer, der intet har med sagen at gøre.
+///
+/// Målt 12. august 2026: en 12,4 GB model stod på 18,9 GB RAM og efterlod
+/// 3,6 GB af 32,5. Appen holdt op med at reagere og måtte lukkes hårdt. Der
+/// gik ingen data tabt, men maskinen var ubrugelig imens.
+/// </summary>
+public static class Arbejdshukommelse
+{
+    /// <summary>Fri fysisk hukommelse i byte. 0 hvis det ikke kan aflæses.</summary>
+    public static long Fri()
+    {
+        try
+        {
+            var status = new MEMORYSTATUSEX { dwLength = (uint)System.Runtime.InteropServices.Marshal.SizeOf<MEMORYSTATUSEX>() };
+            return GlobalMemoryStatusEx(ref status) ? (long)status.ullAvailPhys : 0;
+        }
+        catch (Exception) { return 0; }
+    }
+
+    /// <summary>
+    /// Er der plads til en model på <paramref name="modelBytes"/>, når den
+    /// ikke kan ligge på grafikkortet?
+    ///
+    /// Tillægget på 40 % er ikke et sikkerhedsskøn taget ud af luften: de
+    /// målte kørsler brugte 14,1 GB RAM til en 14,3 GB-model, der lå delvist
+    /// på kortet, og 18,9 GB til en 12,4 GB-model, der ikke gjorde. Konteksten,
+    /// tokenbufferne og selve programmet kommer oven i vægtene.
+    ///
+    /// Der skal desuden blive 2 GB tilbage til Windows og til appen selv.
+    /// Uden den margen swapper maskinen, og så er det ikke kun modellen, der
+    /// bliver langsom.
+    /// </summary>
+    public static (bool Plads, long KrævetBytes, long FriBytes) HarPlads(long modelBytes)
+    {
+        var krævet = (long)(modelBytes * 1.4) + 2L * 1024 * 1024 * 1024;
+        var fri = Fri();
+
+        // Kan hukommelsen ikke aflaeses, blokeres der ikke. En advarsel, der
+        // bygger paa et tal, vi ikke har, er vaerre end ingen advarsel.
+        return (fri == 0 || fri >= krævet, krævet, fri);
+    }
+
+    public static string Gigabyte(long bytes) => $"{bytes / 1024.0 / 1024.0 / 1024.0:0.0} GB";
+
+    [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
+    private struct MEMORYSTATUSEX
+    {
+        public uint dwLength;
+        public uint dwMemoryLoad;
+        public ulong ullTotalPhys;
+        public ulong ullAvailPhys;
+        public ulong ullTotalPageFile;
+        public ulong ullAvailPageFile;
+        public ulong ullTotalVirtual;
+        public ulong ullAvailVirtual;
+        public ulong ullAvailExtendedVirtual;
+    }
+
+    [System.Runtime.InteropServices.DllImport("kernel32.dll", SetLastError = true)]
+    [return: System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.Bool)]
+    private static extern bool GlobalMemoryStatusEx(ref MEMORYSTATUSEX lpBuffer);
+}
+
 public sealed class HeavyJobLock : IDisposable
 {
     private const string MutexNavn = @"Local\NoteApp.TungOpgave";
