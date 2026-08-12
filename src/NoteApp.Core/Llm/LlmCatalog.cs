@@ -69,7 +69,7 @@ public static class LlmCatalog
     public static readonly IReadOnlyList<LlmModelInfo> Known = new[]
     {
         new LlmModelInfo(
-            "qwen3-8b", "Qwen/Qwen3-8B-GGUF", "Qwen3-8B-Q4_K_M.gguf", 4_700_000_000L,
+            "qwen3-8b", "Qwen/Qwen3-8B-GGUF", "Qwen3-8B-Q4_K_M.gguf", 5_027_783_488L,
             "Apache 2.0", LicenseClass.FriTilSalg, null,
             "Lille nok til at ligge helt på et 6 GB-kort. Startvalget.",
             "Kører helt på GPU'en på almindelige laptops og svarer på sekunder. Apache 2.0 — fri at sælge med.",
@@ -77,7 +77,7 @@ public static class LlmCatalog
 
         new LlmModelInfo(
             "mistral-small-24b", "bartowski/Mistral-Small-24B-Instruct-2501-GGUF",
-            "Mistral-Small-24B-Instruct-2501-Q4_K_M.gguf", 14_300_000_000L,
+            "Mistral-Small-24B-Instruct-2501-Q4_K_M.gguf", 14_333_908_672L,
             "Apache 2.0", LicenseClass.FriTilSalg, null,
             "Mellemklasse. Kræver, at en del af modellen ligger i almindelig RAM.",
             "Mærkbart bedre til lange, sammenhængende referater end en 8B. Apache 2.0.",
@@ -85,7 +85,7 @@ public static class LlmCatalog
 
         new LlmModelInfo(
             "muse-glimmer-30b", "unsloth/Muse-Glimmer-30B-GGUF",
-            "Muse-Glimmer-30B-UD-Q3_K_XL.gguf", 13_000_000_000L,
+            "Muse-Glimmer-30B-UD-Q3_K_XL.gguf", 13_360_983_072L,
             "Apache 2.0", LicenseClass.FriTilSalg, null,
             "Stor model med langt kontekstvindue. Til de længste møder.",
             "Bygget til lange kørsler; et 90-minutters møde fylder let 20.000 tokens, og dem kan den holde styr på. Apache 2.0.",
@@ -93,7 +93,7 @@ public static class LlmCatalog
 
         // Med vilje IKKE i standardlisten. De kan vaelges til, men kun bevidst.
         new LlmModelInfo(
-            "gemma-3-12b", "unsloth/gemma-3-12b-it-qat-GGUF", "gemma-3-12b-it-qat-Q4_0.gguf", 6_400_000_000L,
+            "gemma-3-12b", "unsloth/gemma-3-12b-it-qat-GGUF", "gemma-3-12b-it-qat-Q4_0.gguf", 6_909_282_688L,
             "Gemma Terms of Use", LicenseClass.BetingelserFoelgerMed,
             "Google kræver, at du videregiver Gemma-vilkårene og brugspolitikken til enhver, du giver appen eller modellen videre til. Modellen er ikke open source, og Google kan begrænse anvendelsen.",
             "Googles model. Ofte stærk på europæiske sprog.",
@@ -102,7 +102,7 @@ public static class LlmCatalog
 
         new LlmModelInfo(
             "llama-31-8b", "bartowski/Meta-Llama-3.1-8B-Instruct-GGUF",
-            "Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf", 4_900_000_000L,
+            "Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf", 4_920_739_232L,
             "Llama 3.1 Community License", LicenseClass.BetingelserFoelgerMed,
             "Meta kræver, at der står «Built with Llama», at afledte modeller navngives med Llama som præfiks, og licensen gælder kun under 700 mio. månedlige brugere.",
             "Metas model. Bredt understøttet og velafprøvet.",
