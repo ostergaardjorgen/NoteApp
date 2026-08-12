@@ -51,11 +51,45 @@ Målt under kørslen: **5,8 GB på grafikkortet, 14,1 GB i almindelig RAM.**
 
 **Filen er slettet 12. august** — 13,35 GB frigjort. Modellen kan heller ikke længere hentes: `noteapp sprogmodel mistral-small-24b` afviser med begrundelsen og henviser hertil. Skal den ind igen, skal fravalget fjernes bevidst i `LlmCatalog.cs`.
 
-### 1.3 Muse-Glimmer-30B UD-Q3_K_XL — hentet, ikke målt endnu
+### 1.3 Muse-Glimmer-30B UD-Q3_K_XL — fravalgt på denne maskine
 
-12,44 GB. Samme størrelsesproblem som Mistral, og forventningen er derfor den samme. Måles for at have tallet frem for forventningen.
+*Målt 12. august 2026 på præcis samme tekst og facitliste som de to andre.*
 
-**Første forsøg 12. august blev kasseret**, ikke afsluttet: en transskription kørte samtidig og havde taget kortet først. Muse blev skubbet i RAM og stod på **21,7 GB** mod de 14,1, Mistral brugte alene. Den måling ville ikke sige noget om modellen, kun om at de to sloges om det samme kort. Køres igen, når maskinen er ledig.
+Første forsøg blev kasseret, ikke afsluttet: en transskription kørte samtidig og havde taget kortet først. Anden kørsel fik maskinen for sig selv.
+
+**Efter syv minutter var modellen ikke engang færdig med at blive indlæst.** Der var endnu ikke skrevet et eneste ord. Qwen3-8B er helt færdig med referatet på 160 sekunder.
+
+Målt: **18,9 GB RAM, 3,6 GB tilbage af 32,5.** Modellen fylder 12,4 GB og kan slet ikke ligge på et 6 GB-kort, så alt kørte i almindelig hukommelse. Maskinen begyndte at swappe og holdt op med at svare — se 3.2.
+
+Filen er slettet, 12,44 GB frigjort.
+
+**Kvaliteten er stadig ukendt.** Den blev aldrig målt, fordi modellen aldrig nåede at skrive noget. Det er værd at holde fast i: fravalget siger intet om, hvor gode referater den laver.
+
+---
+
+## 1.4 Den vigtigste læring af de to fravalg
+
+**Begge fravalg gælder denne maskine, ikke modellerne.**
+
+Grænsen, der blev fundet, er ikke "24B- og 30B-modeller er dårlige". Den er:
+
+> **En model, der ikke kan ligge på grafikkortet, er ubrugelig i praksis.** Ikke langsom — ubrugelig. Forskellen er 160 sekunder mod «ikke færdig efter syv til halvtreds minutter».
+
+På den nuværende hardware (RTX 2060, 6144 MiB) betyder det modeller op til cirka 5 GB på disken. Det er derfor Qwen3-8B er valget — ikke fordi den er den bedste model, men fordi den er den bedste af dem, der kan være der.
+
+**Hvad en større maskine ville ændre:**
+
+| Kort | VRAM | Hvad der bliver muligt |
+|---|---|---|
+| RTX 2060 (nu) | 6 GB | op til ca. 5 GB model — Qwen3-8B |
+| 16 GB-kort | 16 GB | Mistral-Small-24B (14,3 GB) helt på GPU |
+| 24 GB-kort | 24 GB | Muse-Glimmer-30B (12,4 GB) med rigelig plads til kontekst |
+
+Med et kort, der kan rumme dem, ville begge køre helt på GPU'en, og så er spørgsmålet et helt andet: **er de fagligt bedre nok til at retfærdiggøre maskinen?** Det er ikke målt, og det kan ikke måles her.
+
+Det er derfor, fravalgene bliver stående i kataloget med begrundelsen frem for at blive slettet. Skifter hardwaren, er de to modeller de første, der skal prøves igen — og så skal `LlmCatalog.cs` og denne fil læses sammen, ikke gættes forfra.
+
+**Der er også en produktkonsekvens:** appen skal sælges til maskiner, vi ikke kender. Kravet om, at modellen skal kunne ligge på kortet, gør VRAM til det tal, der afgør, hvad en bruger kan bruge appen til. Det bør stå i systemkravene med rigtige tal frem for som «et NVIDIA-kort anbefales».
 
 ---
 

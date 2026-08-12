@@ -108,7 +108,16 @@ public static class LlmCatalog
             "Apache 2.0", LicenseClass.FriTilSalg, null,
             "Stor model med langt kontekstvindue. Til de længste møder.",
             "Bygget til lange kørsler; et 90-minutters møde fylder let 20.000 tokens, og dem kan den holde styr på. Apache 2.0.",
-            "Kører på CPU og RAM på et 6 GB-kort. Dansk er ikke evalueret af udgiveren — det skal måles på dine egne referater."),
+            "Kræver mere end 6 GB VRAM for at være brugbar.",
+            Rejected:
+                "Prøvet af 12. august 2026 på et 6 GB-kort (RTX 2060, 32 GB RAM) og fravalgt PÅ DEN MASKINE. " +
+                "Efter syv minutter var modellen ikke engang færdig med at blive indlæst — der var endnu ikke " +
+                "skrevet et eneste ord. Qwen3-8B er helt færdig med referatet på 160 sekunder. " +
+                "Modellen fylder 12,4 GB og kan slet ikke ligge på kortet, så den kørte i almindelig RAM: " +
+                "18,9 GB brugt, 3,6 GB tilbage af 32,5. Maskinen begyndte at swappe og holdt op med at svare. " +
+                "FRAVALGET GÆLDER DENNE HARDWARE, ikke modellen. Med et kort, der kan rumme de 12,4 GB — " +
+                "24 GB VRAM eller mere — og rigelig RAM ville den kunne køre helt på GPU'en, og så er " +
+                "spørgsmålet om kvalitet et andet og uafklaret spørgsmål. Se doc/findings.md."),
 
         // Med vilje IKKE i standardlisten. De kan vaelges til, men kun bevidst.
         new LlmModelInfo(
