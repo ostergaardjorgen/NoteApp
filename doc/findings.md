@@ -267,4 +267,65 @@ Oplæsning er en **måling**: den har en facitliste og kan give et tal. Rigtige 
 
 **Oplæsning overvurderer kvaliteten.** Én taler, ingen der taler i munden på hinanden, tydelig udtale, ingen afbrydelser. Fejlraten fra en oplæsning er et bedste tilfælde — det rigtige møde bliver dårligere. Det skal stå i appen.
 
-**Første rigtige oplæsning, 12. august:** 15:10 lyd, 45 afsnit, 5 blokmærker, tempo 265 sekunder hurtigere end de 120 ord i minuttet, teksten er sat efter. Blokmærkerne blev gemt korrekt. Transskription og score mangler.
+**Første rigtige oplæsning, 12. august:** 15:10 lyd, 45 afsnit, 5 blokmærker, tempo 265 sekunder hurtigere end de 120 ord i minuttet, teksten er sat efter. Blokmærkerne blev gemt korrekt.
+
+---
+
+## 7. Fase 0-gaten på rigtig lyd
+
+*Målt 12. august 2026 på den første rigtige oplæsning, efter loop-rettelsen i 4.3.*
+
+### Hastigheden — bestået
+
+**RTF 0,29.** 260 sekunder på 910 sekunders lyd. Et 90-minutters møde ville tage cirka 26 minutter. Transskription er altså noget, man venter på over en kop kaffe, ikke et natjob. Det var gatens hovedspørgsmål, og svaret er positivt.
+
+### Fuldstændigheden — bestået
+
+2338 ord mod manuskriptets 2349, **99,5 %**. 165 linjer, alle unikke. Sproget detekteret som dansk med 97 % sikkerhed.
+
+### Tallene — næsten, og "næsten" er problemet
+
+| Fakta | Resultat |
+|---|---|
+| 412 brugere, 388 automatiske, 24 manuelle | rigtigt |
+| 6 % fejlrate, 10 % i business casen | rigtigt |
+| 16 timers vindue, 15 minutter, faktor 64 | rigtigt |
+| **loft på 24 timer, maksimalt 3 forlængelser** | **rigtigt** |
+| 120 timer til ERP, budget på 450 | rigtigt |
+| **301 timer brugt** | **skrevet som 381** |
+| **syv servicekonti** | **"syv" blev til "søv" — to gange** |
+
+Nødadgangens loft — det tal Qwen3 tidligere hallucinerede som 48 — står korrekt i transskriptionen. Fejlen dér lå altså i sprogmodellen, ikke i Whisper.
+
+Til gengæld er **381 mod 301** præcis den slags fejl, der er farlig: den ser ud som et tal, ingen opdager den ved gennemlæsning, og den går direkte videre i referatet.
+
+"Syv" hørt som "søv" ødelagde to sætninger: *"alle undtagen syv objekter"* blev til *"alle underens søv objekter"*, og *"De syv er alle servicekonti"* blev til *"I søv er alle servicekonti"*. Faktum om de syv servicekonti overlevede altså ikke.
+
+### Ordbogen — virker ikke som antaget
+
+**Dette er det alvorligste fund.** Ordlisten sendes med som `initial_prompt` netop for at få fagord og navne rigtigt. Af otte kontrollerede termer, der alle **står i ordbogen**, blev seks ikke ramt:
+
+| Term i ordbogen | I transskriptionen |
+|---|---|
+| Kernesys | "kerne, sys" |
+| SCIM | "skim" |
+| Entra ID | "N3ID" ét sted, "entra" et andet |
+| MitID | slet ikke |
+| deprovisionering | slet ikke |
+| adgangsafstemning | slet ikke |
+| attestering | ramt |
+| funktionsroller | ramt |
+
+**Konsekvens:** ordbogens virkning skal måles, ikke antages. Den koster os allerede noget — det var den, der udløste loopet i 4.3 — og indtil videre er der ikke belæg for, at den betaler for sig. Åbne spørgsmål, der skal afklares før ordbogen kan siges at virke:
+
+1. Er 158 tokens for lidt til at flytte noget, eller for meget til at blive vægtet?
+2. Virker `--prompt` overhovedet efter hensigten i denne whisper.cpp-udgave?
+3. Ville en kortere liste med kun de ti vigtigste termer ramme bedre end 58?
+
+Måles ved at køre den **samme** lyd med og uden ordliste og tælle ramte fagord. Det er billigt nu, hvor lyden findes.
+
+### Samlet
+
+Gaten er bestået på hastighed og fuldstændighed. Den er **ikke** bestået på pålidelighed: ét forkert tal og ét tabt faktum på 15 minutters ren oplæsning af én taler uden baggrundsstøj — altså det letteste tænkelige materiale. Et rigtigt møde bliver dårligere.
+
+Det bekræfter kravet fra 1.1 fra en anden vinkel: **et udkast skal præsenteres som noget, der skal læses igennem mod lyden**, ikke som et resultat.
