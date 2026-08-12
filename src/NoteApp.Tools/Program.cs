@@ -353,7 +353,11 @@ static async Task<int> Udkast(string[] a)
         ["dato"] = DateTime.Now.ToString("d. MMMM yyyy"),
         ["varighed"] = "",
         ["noter"] = "",
+        // Ordbogen sendes som en ren liste. BuildWhisperPrompt formulerer den
+        // som "Vi taler om ..." fordi Whisper konditionerer paa sprogtone —
+        // en sprogmodel skal bare have ordene.
         ["ordbog"] = store.BuildWhisperPrompt(tokenBudget: 2000)
+            .Replace("Vi taler om ", "").TrimEnd('.')
     };
 
     Console.WriteLine($"Skabelon : {skabelon.Name}");
