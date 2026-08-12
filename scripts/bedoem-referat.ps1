@@ -26,6 +26,18 @@
       deltagerlisten med, og alle modeller får 7 ud af 7 uanset hvad de
       skrev under Opgaver.
 
+    VIGTIG BEGRÆNSNING, lært 12. august 2026:
+
+      Scriptet leder efter ORD. Er referatet lavet ud fra en transskription,
+      hvor ordene allerede er hørt forkert, straffer scriptet sprogmodellen
+      for transskriptionens fejl. Målt på rigtig lyd gav det 3 af 6
+      beslutninger — men alle seks stod der, blot som "nødadmisse" i stedet
+      for "nødadgang" og "midt i det erhverv" i stedet for "MitID Erhverv".
+
+      Tallene er derfor kun sammenlignelige mellem MODELLER på den SAMME
+      tekst. De kan ikke bruges til at afgøre, om et referat er godt, når
+      teksten under det er beskadiget. Dér skal der læses.
+
 .EXAMPLE
     powershell -File C:\NoteApp\scripts\bedoem-referat.ps1 -Mappe "C:\AppNoter\Optagelser\proeve-referat\udkast"
 #>

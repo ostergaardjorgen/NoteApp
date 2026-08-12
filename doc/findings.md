@@ -329,3 +329,34 @@ Måles ved at køre den **samme** lyd med og uden ordliste og tælle ramte fagor
 Gaten er bestået på hastighed og fuldstændighed. Den er **ikke** bestået på pålidelighed: ét forkert tal og ét tabt faktum på 15 minutters ren oplæsning af én taler uden baggrundsstøj — altså det letteste tænkelige materiale. Et rigtigt møde bliver dårligere.
 
 Det bekræfter kravet fra 1.1 fra en anden vinkel: **et udkast skal præsenteres som noget, der skal læses igennem mod lyden**, ikke som et resultat.
+
+### 7.1 Referatet af den rigtige optagelse — og hvor fejlene kom fra
+
+*Qwen3-8B, 172,8 sekunder, 640 tokens ud.*
+
+Den automatiske bedømmelse gav 3 af 6 beslutninger og 3 af 7 opgaver. **Læst igennem er alle seks beslutninger der.** Bedømmelsen ledte efter ord, og ordene var allerede hørt forkert i transskriptionen:
+
+| Sagt | Whisper skrev | Referatet skrev |
+|---|---|---|
+| nødadgang | (ikke genkendt) | "nødadmisse" |
+| MitID Erhverv | (ikke genkendt) | "midt i det erhverv" |
+| modtagersystemer | — | "modtagelsesystemer" |
+| Malene | — | "Marlene" |
+| NIS2 | — | "NIST 2" |
+
+**Det afgørende:** næsten alle fejl i det færdige referat er **arvet fra transskriptionen**, ikke lavet af sprogmodellen.
+
+Hvad sprogmodellen faktisk gjorde:
+
+- Ingen talfejl. Loftet på 24 timer og de 3 forlængelser står korrekt — den 48-timers hallucination fra 1.1 kom ikke igen, fordi transskriptionen denne gang havde tallet rigtigt.
+- **Den rettede "søv" til "syv"** af sig selv: *"De syv forældreløse servicekonti skal ryddes op"*, selvom transskriptionen sagde *"I søv er alle servicekonti"*. Sammenhængen bar den igennem.
+- Den udelod de forkerte 381 timer helt frem for at bringe dem videre.
+- Struktur, dansk og fristerne er i orden.
+
+**Konsekvensen for hvad der skal laves nu:**
+
+Det var forkert at bruge en dag på at lede efter en bedre sprogmodel. **Flaskehalsen er Whisper og ordbogen**, ikke sprogmodellen. Qwen3-8B laver et brugbart referat af en beskadiget tekst; en model ti gange så stor ville lave et pænere referat af den samme beskadigede tekst.
+
+Rækkefølgen fremover er derfor: få ordbogen til at virke, mål den, og lad sprogmodellen være.
+
+**Rettelse til vores egen målestok:** `bedoem-referat.ps1` straffer sprogmodellen for transskriptionens fejl. Tallene kan sammenlignes mellem **modeller på samme tekst**, men ikke bruges til at afgøre, om et referat er godt, når teksten under det er beskadiget. Begrænsningen står nu i scriptet.
