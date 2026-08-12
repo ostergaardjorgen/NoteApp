@@ -55,6 +55,12 @@ bin/
 obj/
 *.user
 
+# Byggeresultater fra installationspakken. Kilden (NoteApp.wxs) hører i git,
+# den færdige pakke gør ikke — den er 100+ MB og kan bygges igen.
+installer/*.msi
+installer/*.wixpdb
+installer/*.cab
+
 # Windows
 Thumbs.db
 desktop.ini

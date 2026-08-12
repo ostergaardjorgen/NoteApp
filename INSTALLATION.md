@@ -1,5 +1,32 @@
 # Installation af NoteApp
 
+## Installationspakke (.msi)
+
+NoteApp kan installeres som et almindeligt Windows-program. Pakken bygges med:
+
+```bash
+powershell -File C:\NoteApp\scripts\byg-installer.ps1
+```
+
+Scriptet udgiver appen først og pakker derefter præcis de filer ned. Resultatet er `C:\NoteApp\installer\NoteApp.msi` på cirka 107 MB.
+
+Installation kræver administratorrettigheder, fordi programmet lander i Program Files:
+
+```bash
+msiexec /i C:\NoteApp\installer\NoteApp.msi
+```
+
+Efter installation ligger programmet i `C:\Program Files\NoteApp`, med genveje i Startmenuen og på skrivebordet, og en post under **Tilføj/fjern programmer**.
+
+**Afinstallation rører ikke dine data.** Pakken kender kun til Program Files. Optagelser, noter, ordbog og indstillinger ligger i datamappen — som standard `C:\AppNoter` — og bliver liggende. Vil du af med dem, skal du selv slette mappen. Det står også i beskrivelsen under Tilføj/fjern programmer.
+
+**Byggeværktøj:** WiX 5, installeret som .NET-værktøj med `dotnet tool install --global wix --version 5.0.2`. Versionen er bevidst bundet: WiX 6 og 7 kræver, at man accepterer en betalt licensaftale (Open Source Maintenance Fee), og det er en beslutning, der skal træffes bevidst frem for af et byggescript.
+
+**Det pakken ikke indeholder:** Whisper-motoren. På en frisk maskine uden `C:\NoteApp\tools\whisper` vil skærmen *Motor og model* melde, at motoren mangler. Modeller kan appen hente selv; motoren skal endnu lægges på plads i hånden.
+
+---
+
+
 ## Hvad der allerede er installeret på denne maskine
 
 Alt er sat op og testet 8. august 2026. Du behøver ikke gøre noget for at komme i gang — spring til "Sådan bruger du den".
@@ -25,20 +52,22 @@ Alt er sat op og testet 8. august 2026. Du behøver ikke gøre noget for at komm
 
 ## NoteApp — appen med UI
 
-Dobbeltklik på **NoteApp**. Den har to skærme, og de svarer til de to ting, der skal gøres, før Fase 0-gaten kan bestås.
+Dobbeltklik på **NoteApp**. Den har seks skærme: Oplæsning, Transskribér, Ordbog, Motor og model, Filer og backup, og Indstillinger.
 
 ### Oplæsning
 
-Teleprompteren til testoplæsningen. Den viser ét afsnit ad gangen i stor skrift, med det næste svagt nedenunder, så du kan tage tilløb uden at miste linjen.
+Teleprompteren til testoplæsningen. Den viser **ét afsnit ad gangen** i stor hvid skrift — og kun det. Der står intet andet på skærmen, netop for at man ikke kommer til at læse hjælpeteksten med.
 
 - **Mellemrum** (eller pil ned/højre) går til næste afsnit. **Pil op/venstre** går tilbage.
-- Uret viser både din faktiske tid og **hvor du burde være** — plus om du er foran eller bagud. Det er ikke pynt: læser du teksten på 12 minutter, er optagelsen for kort til at måle RTF på, og så skal den laves om.
+- **Skift afsnit automatisk** kan slås til: appen lytter med og henter selv det næste afsnit, når den har hørt slutningen af det aktuelle. Mellemrum virker uændret ved siden af.
+- Uret viser både din faktiske tid og **hvor du burde være**, plus om du er foran eller bagud.
 - **Niveaumåleren bliver rød ved stilhed.** Det er den fejl, man ellers opdager bagefter.
-- Ved hvert blokskift skrives et mærke i `notes.jsonl`, så transskriptionen kan holdes op mod facitlisten blok for blok i stedet for at skulle læses igennem i ét stræk.
+- **Pause** stopper optagelsen midlertidigt. Der optages intet imens, og uret står stille — så noternes tidsstempler bliver ved med at passe til lyden.
+- Ved hvert blokskift skrives et mærke i `notes.jsonl`, så transskriptionen kan holdes op mod facitlisten blok for blok.
 
 Optagelsen er altid et **fysisk møde** — ét spor, kun mikrofonen. Der er ingen anden part at optage.
 
-Teksten hentes fra `C:\NoteApp\fase0\oplaesning\testtekst.md`, hvis repoet er der. **Ret navnene i den fil til rigtige kollegaer og kunder, før du læser** — og genstart appen bagefter. Er repoet ikke der, bruger appen den kopi, der er indlejret i exe'en.
+Teksten hentes fra `C:\NoteApp\fase0\oplaesning\testtekst.md`, hvis repoet er der; ellers bruges den kopi, der er indlejret i exe'en. Navnene i teksten er opdigtede, og det er med vilje: det er din stemme og dine fagord, testen måler — ikke om lige de navne staves rigtigt.
 
 ### Ordbog
 
@@ -68,11 +97,11 @@ Optagelser kan også **slettes** herfra. Dialogen viser, hvad der forsvinder, og
 
 ### Motor og model
 
-Viser hvad der faktisk kører: at det er whisper.cpp, hvilken version, om beregningen sker på GPU eller CPU, og hvilken model.
+Viser hvad der faktisk kører: at det er whisper.cpp, hvor gammel motoren er, om beregningen sker på GPU eller CPU, og hvilken model.
 
 Seks modeller kan hentes, hver med fordele og ulemper skrevet ud. Vær særligt opmærksom på mærkatet: modeller mærket **KUN ENGELSK** kan ikke dansk, og bruges de til et dansk møde, kommer der volapyk ud — ikke en fejlmeddelelse.
 
-**Version:** whisper.cpp stempler hverken sin exe-fil eller sit output med et versionsnummer. Appen kan derfor kun kende versionen af en motor, den selv har hentet. Er motoren lagt på maskinen i hånden, står der `ukendt` — det er det ærlige svar, og der gættes ikke.
+**Alder frem for version:** whisper.cpp stempler hverken sin exe-fil eller sit output med et versionsnummer. Appen kan derfor kun kende versionen af en motor, den selv har hentet — og der står **Version** i så fald. Er motoren lagt på maskinen i hånden, står der i stedet **Sidst opdateret** med datoen på filen, som faktisk kan aflæses. Der står aldrig "ukendt": et felt, der ikke kan svare, skal stille et andet spørgsmål frem for at vise sin egen uvidenhed.
 
 Knappen **Søg efter opdatering** slår op hos GitHub. Det sker kun, når du trykker; appen kontakter aldrig nettet af sig selv.
 
