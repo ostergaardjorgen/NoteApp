@@ -20,13 +20,22 @@
           UpgradeCode="3b6f1d84-9a27-4c5e-b0f3-6d8e2a71c904"
           IconSourceFile="..\src\NoteApp.Desktop\app.ico">
 
+    <!-- rtfLargeLicense frem for hyperlinkLicense: den foerste udgave havde
+         et tomt felt, hvor teksten skulle staa, fordi hyperlink-temaet kun
+         viser et link. Her vises hele introen, saa man kan se hvad der bliver
+         installeret, foer man trykker. -->
     <BootstrapperApplication>
       <bal:WixStandardBootstrapperApplication
-          Theme="hyperlinkLicense"
-          LicenseUrl=""
+          Theme="rtfLargeLicense"
+          ThemeFile="tema.thm"
+          LicenseFile="vilkaar.rtf"
           LogoFile="..\src\NoteApp.Desktop\app.png"
           SuppressOptionsUI="yes" />
     </BootstrapperApplication>
+
+    <!-- Dansk tekst paa knapper og overskrifter. Uden den staar der engelsk
+         i en app, der ellers er helt paa dansk. -->
+    <WixVariable Id="WixStdbaThemeWxl" Value="da-DK.wxl" />
 
     <Chain>
       <MsiPackage SourceFile="NoteApp.msi" Vital="yes" Compressed="yes" />

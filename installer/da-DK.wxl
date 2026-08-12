@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Dansk tekst i installationsprogrammet.
+
+  VIGTIGT: denne fil ERSTATTER temaets egen tekstfil — den supplerer den ikke.
+  Enhver tekst, der ikke står her, vises som sit rå navn i vinduet, fx
+  "InstallCancelB" på en knap. Første udgave brugte "CloseButton" hvor temaet
+  hedder "CancelButton", og resultatet var netop det.
+
+  Skal temaet skiftes, eller opdateres WiX, så gennemgå alle sider bagefter:
+  installation, fremdrift, ændring, succes, fejl, filer i brug og hjælp.
+-->
+<WixLocalization Culture="da-DK" xmlns="http://wixtoolset.org/schemas/v4/wxl">
+
+  <String Id="Caption" Value="Installér [WixBundleName]" />
+  <String Id="Title" Value="[WixBundleName]" />
+
+  <!-- Vises under navnet i hovedet. Uden dem stod der kun "NoteApp" og
+       en tom flade — og man kunne ikke se, hvilken version man var ved at
+       installere, hvilket er netop det, man har brug for ved en opdatering. -->
+  <String Id="HeaderVersion" Value="Version [WixBundleVersion]" />
+  <String Id="HeaderTagline" Value="Møde-noter der bliver på din egen pc" />
+  <String Id="ConfirmCancelMessage" Value="Vil du afbryde installationen?" />
+  <String Id="ExecuteUpgradeRelatedBundleMessage" Value="Tidligere version" />
+  <String Id="HelpHeader" Value="Hjælp til installationen" />
+  <String Id="HelpText" Value="/install | /repair | /uninstall | /layout [mappe] — installér, reparér, afinstallér eller udpak indholdet. Er intet angivet, installeres der.&#10;/passive | /quiet — kør uden dialog eller helt uden vindue. Er intet angivet, vises vinduet.&#10;/norestart — genstart ikke maskinen automatisk.&#10;/log &lt;fil&gt; — skriv en log. Er intet angivet, skrives den i %TEMP%." />
+  <String Id="HelpCloseButton" Value="&amp;Luk" />
+
+  <String Id="InstallHeader" Value="Installér [WixBundleName]" />
+  <String Id="InstallVersion" Value="Version [WixBundleVersion]" />
+  <String Id="InstallAcceptCheckbox" Value="Jeg har &amp;læst ovenstående" />
+  <String Id="InstallOptionsButton" Value="&amp;Indstillinger" />
+  <String Id="InstallInstallButton" Value="&amp;Installér" />
+  <String Id="InstallCancelButton" Value="&amp;Annullér" />
+  <String Id="InstallLicenseLinkText" Value="Om NoteApp" />
+
+  <String Id="OptionsHeader" Value="Installationsindstillinger" />
+  <String Id="OptionsLocationLabel" Value="Installér i:" />
+  <String Id="OptionsBrowseButton" Value="&amp;Gennemse" />
+  <String Id="OptionsOkButton" Value="&amp;OK" />
+  <String Id="OptionsCancelButton" Value="&amp;Annullér" />
+
+  <String Id="ProgressHeader" Value="Installerer [WixBundleName]" />
+  <String Id="ProgressLabel" Value="Fremdrift:" />
+  <String Id="OverallProgressPackageText" Value="Går i gang …" />
+  <String Id="ProgressCancelButton" Value="&amp;Annullér" />
+
+  <String Id="ModifyHeader" Value="[WixBundleName] er allerede installeret" />
+  <String Id="ModifyRepairButton" Value="&amp;Reparér" />
+  <String Id="ModifyUninstallButton" Value="&amp;Afinstallér" />
+  <String Id="ModifyCancelButton" Value="&amp;Luk" />
+
+  <String Id="SuccessHeader" Value="Færdig" />
+  <String Id="SuccessInstallHeader" Value="NoteApp er installeret" />
+  <String Id="SuccessRepairHeader" Value="Reparationen er gennemført" />
+  <String Id="SuccessUninstallHeader" Value="NoteApp er fjernet" />
+  <String Id="SuccessLaunchButton" Value="&amp;Start NoteApp" />
+  <String Id="SuccessRestartText" Value="Maskinen skal genstartes, før ændringerne træder i kraft." />
+  <String Id="SuccessRestartButton" Value="&amp;Genstart" />
+  <String Id="SuccessCancelButton" Value="&amp;Luk" />
+
+  <String Id="FailureHeader" Value="Det gik ikke igennem" />
+  <String Id="FailureInstallHeader" Value="Installationen blev ikke gennemført" />
+  <String Id="FailureUninstallHeader" Value="Afinstallationen blev ikke gennemført" />
+  <String Id="FailureRepairHeader" Value="Reparationen blev ikke gennemført" />
+  <String Id="FailureHyperlinkLogText" Value="Der opstod en fejl. &lt;a href=&quot;#&quot;&gt;Se loggen&lt;/a&gt; for detaljer." />
+  <String Id="FailureRestartText" Value="Maskinen skal genstartes, før den kan gøres færdig." />
+  <String Id="FailureRestartButton" Value="&amp;Genstart" />
+  <String Id="FailureCancelButton" Value="&amp;Luk" />
+
+  <String Id="FilesInUseHeader" Value="Filer er i brug" />
+  <String Id="FilesInUseLabel" Value="Disse programmer bruger filer, der skal opdateres:" />
+  <String Id="FilesInUseCloseRadioButton" Value="&amp;Luk programmerne, og forsøg igen" />
+  <String Id="FilesInUseDontCloseRadioButton" Value="Luk &amp;ikke programmerne — genstart maskinen bagefter" />
+  <String Id="FilesInUseOkButton" Value="&amp;OK" />
+  <String Id="FilesInUseCancelButton" Value="&amp;Annullér" />
+  <String Id="FilesInUseNetfxCloseRadioButton" Value="&amp;Luk programmerne, og forsøg igen" />
+  <String Id="FilesInUseRetryButton" Value="&amp;Prøv igen" />
+  <String Id="FilesInUseIgnoreButton" Value="&amp;Fortsæt alligevel" />
+  <String Id="FilesInUseExitButton" Value="&amp;Afslut" />
+  <String Id="FilesInUseTitle" Value="Filer i brug" />
+
+  <!--
+    Disse fjorten manglede i første udgave. De sad på sider, man kun ser EFTER
+    en handling — blandt andet SuccessCloseButton, som ville have vist rå kode
+    på knappen, når installationen var gennemført. Listen er sammenholdt med
+    temaets egen RtfTheme.wxl, så den nu er komplet.
+  -->
+  <String Id="CheckingForUpdatesLabel" Value="Ser efter opdateringer …" />
+  <String Id="UpdateButton" Value="&amp;Hent opdatering" />
+
+  <String Id="SuccessCloseButton" Value="&amp;Luk" />
+  <String Id="SuccessCacheHeader" Value="Filerne er hentet" />
+  <String Id="SuccessLayoutHeader" Value="Indholdet er pakket ud" />
+  <String Id="SuccessModifyHeader" Value="Ændringen er gennemført" />
+  <String Id="SuccessUnsafeUninstallHeader" Value="NoteApp er fjernet" />
+  <String Id="SuccessUninstallRestartText" Value="Maskinen skal genstartes, før NoteApp er helt fjernet." />
+
+  <String Id="FailureCloseButton" Value="&amp;Luk" />
+  <String Id="FailureCacheHeader" Value="Filerne kunne ikke hentes" />
+  <String Id="FailureLayoutHeader" Value="Indholdet kunne ikke pakkes ud" />
+  <String Id="FailureModifyHeader" Value="Ændringen blev ikke gennemført" />
+  <String Id="FailureUnsafeUninstallHeader" Value="Afinstallationen blev ikke gennemført" />
+
+</WixLocalization>
