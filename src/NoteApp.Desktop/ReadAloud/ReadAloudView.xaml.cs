@@ -388,17 +388,22 @@ public partial class ReadAloudView : UserControl
         KvitAfsnit.Text = $"{læste}/{_script.Paragraphs.Count}";
         KvitTempo.Text = $"{tempo:0}";
 
-        // Vurderingen skal sige, hvad tallene BETYDER. "15:10" er ikke en
-        // vurdering; "det er nok til gaten" er.
-        var nok = længde >= TimeSpan.FromMinutes(15);
-        KvitVurdering.Text = nok
-            ? $"{længde:mm\\:ss} er nok til at give pålidelige tal. Læste du hurtigere end de 120 ord i minuttet, teksten er sat efter, betyder det ikke noget for målingen — det er ordene, der tælles, ikke minutterne."
-            : $"{længde:mm\\:ss} er under de 15 minutter, målingen har brug for. Du kan godt transskribere den, men tallene bliver usikre. Læs gerne en tekst mere.";
+        // Vurderingen skal sige, hvad tallene BETYDER. "05:11" er ikke en
+        // vurdering; "hele teksten er med" er.
+        //
+        // Maalestokken er TEKSTEN, ikke et fast antal minutter. Foerste udgave
+        // sammenlignede med 15 minutter uanset hvad, og saa fik en fuldt laest
+        // 5-minutters tekst besked om, at den var for kort. Den var praecis saa
+        // lang, som den skulle vaere.
+        var nok = helt;
+        KvitVurdering.Text = helt
+            ? $"Hele teksten er læst — {længde:mm\\:ss} lyd. Læste du hurtigere end de 120 ord i minuttet, teksten er sat efter, betyder det ikke noget: det er ordene, der tælles, ikke minutterne."
+            : $"Du nåede {læste} af {_script.Paragraphs.Count} afsnit. Det er gemt og kan godt transskriberes, men resten af teksten er ikke målt. Læs den færdig en anden gang — det bliver en ny optagelse.";
         KvitVurdering.Foreground = (Brush)FindResource(nok ? "Godkendt" : "Advarsel");
 
-        Status.Text = nok
-            ? $"{længde:mm\\:ss} optaget — det er nok til gaten."
-            : $"Kun {længde:mm\\:ss}. Gaten har brug for 15-20 minutter for at give brugbare tal.";
+        Status.Text = helt
+            ? $"{længde:mm\\:ss} optaget — hele «{ScriptDocument.Available[ValgtIndex].Name}» er i hus."
+            : $"{længde:mm\\:ss} optaget, {læste} af {_script.Paragraphs.Count} afsnit.";
 
         // Naeste tekst: den foerste af de tre, der IKKE er indtalt endnu. Er de
         // alle taget, peges der paa den naeste i raekken — en tekst kan laeses
@@ -415,7 +420,8 @@ public partial class ReadAloudView : UserControl
         var n = ScriptDocument.Available[næste];
         KvitNaesteTekst.Content = alleTaget ? $"Læs «{n.Name}» igen" : $"Næste: {n.Name}";
         KvitNaesteHvad.Text = alleTaget
-            ? "Alle tre er indtalt. Herfra flytter det mest at rette ord i transskriptionerne — det er dét, ordbogen lærer af."
+            ? "Alle tre tekster er indtalt. Næste skridt er at skrive dem ud og rette de ord, der blev hørt forkert — " +
+              "under «Din ordbog». Det er rettelserne, appen lærer af, og de flytter mere end en indtaling mere."
             : n.Why;
 
         VisSkarphed();
@@ -423,13 +429,23 @@ public partial class ReadAloudView : UserControl
 
     private int KvitNaesteKnapIndex;
 
-    private void KvitTransskriber_Click(object sender, RoutedEventArgs e) => TranskriptionØnskes?.Invoke();
+    private void KvitTransskriber_Click(object sender, RoutedEventArgs e)
+    {
+        if (_sidsteOptagelse is null) return;
+        TranskriptionØnskes?.Invoke(_sidsteOptagelse);
+    }
 
     /// <summary>
-    /// Bedt om at komme videre til transskription. Skærmskiftet ligger i
-    /// MainWindow, som er den eneste, der kender navigationen.
+    /// Bedt om at komme videre til transskription af en BESTEMT optagelse.
+    ///
+    /// Stien følger med. Uden den landede man bare på listen over alle
+    /// optagelser og skulle selv finde den, man lige havde lavet — og det er
+    /// ikke «videre», det er «start forfra et andet sted».
+    ///
+    /// Skærmskiftet ligger i MainWindow, som er den eneste, der kender
+    /// navigationen.
     /// </summary>
-    public event Action? TranskriptionØnskes;
+    public event Action<string>? TranskriptionØnskes;
 
     private void KvitNaesteTekst_Click(object sender, RoutedEventArgs e)
     {

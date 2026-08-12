@@ -17,6 +17,9 @@ public partial class MainWindow : Window
     private readonly ReadAloudView _oplaesning = new();
     private DictionaryView? _ordbog;
 
+    /// <summary>Optagelsen, Optagelser-skærmen skal åbne på. Bruges én gang.</summary>
+    private string? _aabnOptagelse;
+
     public MainWindow()
     {
         InitializeComponent();
@@ -31,7 +34,15 @@ public partial class MainWindow : Window
         // Skærmskiftet skal ske her, fordi det er MainWindow, der ejer
         // navigationen — og fordi menupunktet skal markeres med, ellers
         // skifter indholdet uden at menuen følger med.
-        _oplaesning.TranskriptionØnskes += () => NavTransskriber.IsChecked = true;
+        //
+        // Stien gemmes, så Optagelser-skærmen kan åbne PÅ den optagelse, der
+        // lige er lavet, og spørge, om den skal skrives ud.
+        _oplaesning.TranskriptionØnskes += sti =>
+        {
+            _aabnOptagelse = sti;
+            if (NavTransskriber.IsChecked == true) Nav_Changed(this, new RoutedEventArgs());
+            else NavTransskriber.IsChecked = true;
+        };
 
         Indhold.Content = _oplaesning;
     }
@@ -54,7 +65,9 @@ public partial class MainWindow : Window
         {
             // Bygges hver gang: listen over optagelser skal vise den, der
             // netop er lavet, uden at nogen skal genstarte appen.
-            Indhold.Content = new TranscribeView();
+            var aabn = _aabnOptagelse;
+            _aabnOptagelse = null;          // gælder kun dette skift
+            Indhold.Content = new TranscribeView(aabn);
         }
         else if (NavSkabeloner.IsChecked == true)
         {

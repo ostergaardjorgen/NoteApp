@@ -63,10 +63,56 @@ public partial class TranscribeView : UserControl
     private CancellationTokenSource? _afbryd;
     private string? _sidsteMappe;
 
-    public TranscribeView()
+    public TranscribeView() : this(null) { }
+
+    /// <summary>
+    /// <paramref name="aabnMappe"/> er den optagelse, skærmen skal åbne på —
+    /// sat, når man kommer hertil fra kvitteringen efter en oplæsning.
+    ///
+    /// Uden den landede man på listen over alle optagelser og skulle selv
+    /// finde den, man lige havde lavet. Det er ikke «videre», det er «start
+    /// forfra et andet sted».
+    /// </summary>
+    public TranscribeView(string? aabnMappe)
     {
         InitializeComponent();
         IndlaesOptagelser();
+
+        if (aabnMappe is null) return;
+
+        var match = Optagelser.Items.Cast<OptagelseVisning>()
+            .FirstOrDefault(o => string.Equals(o.Mappe.TrimEnd('\\'), aabnMappe.TrimEnd('\\'),
+                                               StringComparison.OrdinalIgnoreCase));
+        if (match is null) return;
+
+        Optagelser.SelectedItem = match;
+        Optagelser.ScrollIntoView(match);
+
+        // Spoerg foerst, naar vinduet er tegnet. En dialog fra en konstruktoer
+        // aabner over en halvfaerdig skaerm, og saa kan man ikke se, hvad man
+        // siger ja til.
+        Loaded += (_, _) => SpoergOmStart(match);
+    }
+
+    private bool _harSpurgt;
+
+    private void SpoergOmStart(OptagelseVisning optagelse)
+    {
+        if (_harSpurgt) return;
+        _harSpurgt = true;
+
+        if (!optagelse.HarLyd) return;
+
+        var minutter = optagelse.Sekunder / 60.0;
+        var svar = MessageBox.Show(
+            $"Skriv «{optagelse.Titel}» ud til tekst nu?\n\n" +
+            $"Længde: {TimeSpan.FromSeconds(optagelse.Sekunder):mm\\:ss}\n" +
+            $"Det tager typisk {Math.Max(1, Math.Round(minutter * 0.3)):0} til {Math.Max(2, Math.Round(minutter * 0.5)):0} minutter " +
+            "på denne maskine.\n\n" +
+            "Du kan roligt lave noget andet imens — også optage et nyt møde.",
+            "Klar til at skrive ud", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+        if (svar == MessageBoxResult.Yes) Koer_Click(this, new RoutedEventArgs());
     }
 
     private void IndlaesOptagelser()
