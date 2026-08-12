@@ -64,6 +64,36 @@
       </Style.Triggers>
     </Style>
 
+    <!-- Knappen på hvert kort. Den er hele handlingen: den vælger teksten OG
+         starter optagelsen. Før skulle man først klikke på boksen og derefter
+         finde en knap i modsatte hjørne — to skridt til noget, der er ét, og
+         intet på boksen fortalte, at man skulle videre et andet sted hen. -->
+    <Style x:Key="Kortknap" TargetType="Button">
+      <Setter Property="Margin" Value="0,14,0,0" />
+      <Setter Property="Padding" Value="0,9" />
+      <Setter Property="FontSize" Value="13" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Cursor" Value="Hand" />
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="Button">
+            <Border x:Name="Flade" CornerRadius="7" Background="#FF2A3240"
+                    BorderBrush="{StaticResource PanelKant}" BorderThickness="1"
+                    Padding="{TemplateBinding Padding}">
+              <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="Flade" Property="Background" Value="{StaticResource Accent}" />
+                <Setter Property="Foreground" Value="#FF0B1220" />
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
     <!-- De tre oplysningskort. Samme opførsel som valgkortene, så det er
          tydeligt, at man også kan pege på dem — det er dér, hele teksten
          ligger, når der ikke er plads til den på skærmen. -->
@@ -211,6 +241,7 @@
                            Text="Nok materiale til at måle, hvor godt dine ord bliver ramt — og til at se, om en senere opdatering hjalp." />
                 <TextBlock x:Name="Status0" FontSize="12" Margin="0,10,0,0" FontWeight="SemiBold"
                            Foreground="{StaticResource Godkendt}" />
+                <Button x:Name="Start0" Tag="0" Click="KortStart_Click" Style="{StaticResource Kortknap}" />
               </StackPanel>
             </RadioButton>
 
@@ -226,6 +257,7 @@
                            Text="Dansk møde, hvor en engelsk kollega kobler sig på. Viser, hvad et sprogskifte midt i mødet koster." />
                 <TextBlock x:Name="Status1" FontSize="12" Margin="0,10,0,0" FontWeight="SemiBold"
                            Foreground="{StaticResource Godkendt}" />
+                <Button x:Name="Start1" Tag="1" Click="KortStart_Click" Style="{StaticResource Kortknap}" />
               </StackPanel>
             </RadioButton>
 
@@ -241,6 +273,7 @@
                            Text="Dit engelske mødesprog med dansk accent. Det er dér, genkendelsen har sværest ved at følge med." />
                 <TextBlock x:Name="Status2" FontSize="12" Margin="0,10,0,0" FontWeight="SemiBold"
                            Foreground="{StaticResource Godkendt}" />
+                <Button x:Name="Start2" Tag="2" Click="KortStart_Click" Style="{StaticResource Kortknap}" />
               </StackPanel>
             </RadioButton>
           </Grid>

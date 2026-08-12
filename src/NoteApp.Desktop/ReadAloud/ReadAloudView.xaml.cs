@@ -50,7 +50,16 @@ public partial class ReadAloudView : UserControl
         var mik = AudioDevices.ResolveMicrophone(AppSettings.Current.MicrophoneId, out _);
         MikrofonNavn.Text = mik?.FriendlyName ?? "ingen mikrofon fundet";
         OptagKnap.IsEnabled = mik is not null;
-        if (mik is null) Status.Text = "Der er ingen mikrofon. Tilslut en, og genstart appen.";
+
+        // Knappen nederst er stopknappen. Den vises foerst, naar der er noget
+        // at stoppe; paa forsiden ligger handlingen paa kortene.
+        OptagKnap.Visibility = Visibility.Collapsed;
+
+        if (mik is null)
+        {
+            Status.Text = "Der er ingen mikrofon. Tilslut en, og genstart appen.";
+            Start0.IsEnabled = Start1.IsEnabled = Start2.IsEnabled = false;
+        }
 
         _timer = new DispatcherTimer(DispatcherPriority.Render) { Interval = TimeSpan.FromMilliseconds(100) };
         _timer.Tick += (_, _) => Opdater();
@@ -81,6 +90,20 @@ public partial class ReadAloudView : UserControl
     {
         var knap = index switch { 2 => Valg2, 1 => Valg1, _ => Valg0 };
         knap.IsChecked = true;    // Tekst_Valgt henter teksten
+    }
+
+    /// <summary>
+    /// Knappen på et kort: vælg teksten OG gå i gang. Det er hele pointen med
+    /// at have den dér — at man ikke skal videre til et andet hjørne af
+    /// skærmen for at gøre det, boksen handler om.
+    /// </summary>
+    private void KortStart_Click(object sender, RoutedEventArgs e)
+    {
+        if (IsRecording) return;   // knapperne er skjult under optagelse
+        if (sender is not Button b || !int.TryParse(b.Tag?.ToString(), out var index)) return;
+
+        Vaelg(index);
+        StartOptagelse();
     }
 
     private void Tekst_Valgt(object sender, RoutedEventArgs e)
@@ -159,9 +182,18 @@ public partial class ReadAloudView : UserControl
     {
         var (minutter, læst) = OptagetIndtilNu();
 
-        Status0.Text = læst.Contains("dansk") ? "✓ indtalt" : "";
-        Status1.Text = læst.Contains("blandet") ? "✓ indtalt" : "";
-        Status2.Text = læst.Contains("engelsk") ? "✓ indtalt" : "";
+        // Statuslinjen og knapteksten hænger sammen: er teksten indtalt, hedder
+        // knappen «Læs igen», og det er ikke et forslag — bare et tilbud, der
+        // ikke lyder som en opgave, der mangler.
+        var status = new[] { Status0, Status1, Status2 };
+        var knapper = new[] { Start0, Start1, Start2 };
+
+        for (var i = 0; i < ScriptDocument.Available.Count && i < 3; i++)
+        {
+            var taget = læst.Contains(ScriptDocument.Available[i].Key);
+            status[i].Text = taget ? "✓ indtalt" : "";
+            knapper[i].Content = taget ? "Læs igen" : "● Start oplæsning";
+        }
 
         // 30 minutter er "fuld" bjaelke: de tre tekster tilsammen. Det er et
         // maal, ikke en graense — den bliver ved med at blive bedre bagefter.
@@ -274,6 +306,11 @@ public partial class ReadAloudView : UserControl
         VejledningPanel.Visibility = Visibility.Collapsed;
         KvitteringPanel.Visibility = Visibility.Collapsed;
         LaesePanel.Visibility = Visibility.Visible;
+
+        // Nu — og kun nu — er knappen nederst relevant: den er stopknappen.
+        // Paa forsiden stod den som en anden vej til det samme, og saa er der
+        // to knapper til een handling.
+        OptagKnap.Visibility = Visibility.Visible;
         OptagKnap.Content = "■ Stop og gem";
         NaesteKnap.IsEnabled = true;
         ForrigeKnap.IsEnabled = false;
@@ -305,6 +342,7 @@ public partial class ReadAloudView : UserControl
         _session = null;
 
         OptagKnap.Content = "● Start optagelse";
+        OptagKnap.Visibility = Visibility.Collapsed;   // handlingen bor paa kortene
         NaesteKnap.IsEnabled = false;
         ForrigeKnap.IsEnabled = false;
         PauseKnap.Visibility = Visibility.Collapsed;
