@@ -16,11 +16,22 @@
       <RowDefinition Height="Auto" />
     </Grid.RowDefinitions>
 
-    <StackPanel Grid.Row="0" Margin="0,0,0,16">
-      <TextBlock Text="Indstillinger" Style="{StaticResource Overskrift}" />
-      <TextBlock Style="{StaticResource Underskrift}"
-                 Text="Vælg mikrofon og højttaler. Måleren viser, om der faktisk kommer lyd." />
-    </StackPanel>
+    <Grid Grid.Row="0" Margin="0,0,0,16">
+      <StackPanel>
+        <TextBlock Text="Indstillinger" Style="{StaticResource Overskrift}" />
+        <TextBlock Style="{StaticResource Underskrift}" TextWrapping="Wrap" MaxWidth="700"
+                   HorizontalAlignment="Left"
+                   Text="Vælg mikrofon og højttaler. Appen lytter ikke, før du trykker prøv — eller trykker optag." />
+      </StackPanel>
+
+      <!-- Måleren kræver, at mikrofonen åbnes. Det skal være et valg: en app,
+           der lytter, fordi man kigger på en indstillingsskærm, holder ikke
+           det løfte, resten af appen giver. -->
+      <Button x:Name="ProeveKnap" Content="▶ Prøv mikrofon og højttaler" Click="Proeve_Click"
+              HorizontalAlignment="Right" VerticalAlignment="Center" Padding="16,9"
+              Background="{StaticResource Accent}" Foreground="#FF0B1220" BorderThickness="0"
+              FontWeight="SemiBold" />
+    </Grid>
 
     <!-- ============================ Mikrofon ============================ -->
     <Border Grid.Row="1" Background="{StaticResource Panel}" CornerRadius="10" Padding="20" Margin="0,0,0,14"

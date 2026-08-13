@@ -33,7 +33,7 @@ public partial class SettingsView : UserControl
         _timer = new DispatcherTimer(DispatcherPriority.Background) { Interval = TimeSpan.FromMilliseconds(100) };
         _timer.Tick += (_, _) => OpdaterMaalere();
 
-        Loaded += (_, _) => { Indlaes(); VisAutostart(); _timer.Start(); };
+        Loaded += (_, _) => { Indlaes(); VisAutostart(); };
         Unloaded += (_, _) => { _timer.Stop(); StopProber(); };
     }
 
@@ -160,7 +160,6 @@ public partial class SettingsView : UserControl
         if (mikrofoner.Count == 0) MikStatus.Text = "ingen mikrofon fundet";
         if (hoejttalere.Count == 0) HoejtStatus.Text = "ingen afspilningsenhed fundet";
 
-        StartProber();
     }
 
     private static void Vis(TextBlock felt, bool synlig, string tekst)
@@ -178,7 +177,6 @@ public partial class SettingsView : UserControl
         AppSettings.Current.MicrophoneId = d.Id;
         AppSettings.Current.Save();
         Status.Text = $"Mikrofon: {d.FriendlyName}";
-        StartProber();
     }
 
     private void Hoejttaler_Valgt(object sender, SelectionChangedEventArgs e)
@@ -188,7 +186,6 @@ public partial class SettingsView : UserControl
         AppSettings.Current.SpeakerId = d.Id;
         AppSettings.Current.Save();
         Status.Text = $"Højttaler: {d.FriendlyName}";
-        StartProber();
     }
 
     private void Genindlaes_Click(object sender, RoutedEventArgs e)
@@ -200,6 +197,19 @@ public partial class SettingsView : UserControl
 
     // ---------------------------------------------------------------- målere
 
+    /// <summary>
+    /// Åbner mikrofon og højttaler for at MÅLE niveauet — kun når brugeren
+    /// har bedt om det.
+    ///
+    /// Før kørte målingen, så snart man åbnede Indstillinger, og blev ved,
+    /// så længe man var der. Appen lyttede altså uden at nogen havde trykket
+    /// optag. Det er forkert i en app, hvis hele løfte er, at man ved præcis,
+    /// hvornår der bliver optaget — og det er også skidt for optagelser: to
+    /// programmer om den samme enhed er sjældent gratis.
+    ///
+    /// Måleren slukker af sig selv efter et stykke tid. En prøve, man skal
+    /// huske at stoppe, bliver ikke stoppet.
+    /// </summary>
     private void StartProber()
     {
         StopProber();
@@ -209,6 +219,20 @@ public partial class SettingsView : UserControl
 
         if (Hoejttalere.SelectedItem is DeviceInfo h)
             _hoejtProbe = WasapiLevelProbe.Start(h.Id, loopback: true);
+
+        _timer.Start();
+
+        _proeveSlut = DateTime.Now.AddSeconds(20);
+        ProeveKnap.Content = "■ Stop prøven";
+        MikStatus.Text = "Sig noget — måleren skal røre sig";
+    }
+
+    private DateTime _proeveSlut = DateTime.MinValue;
+
+    private void Proeve_Click(object sender, RoutedEventArgs e)
+    {
+        if (_mikProbe is null && _hoejtProbe is null) StartProber();
+        else StopProber();
     }
 
     private void StopProber()
@@ -217,10 +241,23 @@ public partial class SettingsView : UserControl
         _hoejtProbe?.Dispose();
         _mikProbe = null;
         _hoejtProbe = null;
+
+        _timer.Stop();
+        _proeveSlut = DateTime.MinValue;
+
+        if (ProeveKnap is not null) ProeveKnap.Content = "▶ Prøv mikrofon og højttaler";
+        if (MikNiveau is not null) MikNiveau.Width = 0;
+        if (HoejtNiveau is not null) HoejtNiveau.Width = 0;
+        if (MikStatus is not null) MikStatus.Text = "Måleren kører kun, mens du prøver";
+        if (HoejtStatus is not null) HoejtStatus.Text = "";
     }
 
     private void OpdaterMaalere()
     {
+        // Proeven slukker af sig selv. En maaler, der koerer videre, er en
+        // mikrofon, der staar aaben uden grund.
+        if (_proeveSlut != DateTime.MinValue && DateTime.Now > _proeveSlut) { StopProber(); return; }
+
         Tegn(_mikProbe, MikNiveau, MikStatus, "Sig noget — måleren skal røre sig");
         Tegn(_hoejtProbe, HoejtNiveau, HoejtStatus, "Afspil lyd — måleren skal røre sig");
     }

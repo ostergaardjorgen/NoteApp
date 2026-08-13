@@ -55,6 +55,51 @@ public partial class SpeakWordWindow : Window
         _ur.Tick += (_, _) => Opdater();
 
         VisEksempel();
+        VisMikrofoner();
+    }
+
+    /// <summary>
+    /// Mikrofonlisten står i selve optagevinduet.
+    ///
+    /// Er den valgte enhed væk, falder Windows tilbage til sin standard — og
+    /// gør den det uden at sige det, taler man ind i noget andet end det, man
+    /// tror. Det skete: klippet blev tavst, og skylden landede på Whisper.
+    ///
+    /// Vælger man en anden her, gemmes den. Det er den samme indstilling som
+    /// under Indstillinger; to steder at vælge fra må ikke give to svar.
+    /// </summary>
+    private void VisMikrofoner()
+    {
+        var alle = AudioDevices.Microphones();
+        Mikrofoner.ItemsSource = alle;
+
+        var valgt = AudioDevices.ResolveMicrophone(AppSettings.Current.MicrophoneId, out var faldtTilbage);
+
+        _indlæser = true;
+        Mikrofoner.SelectedItem = alle.FirstOrDefault(d => d.Id == valgt?.Id);
+        _indlæser = false;
+
+        Mikrofon.Text = valgt is null
+            ? "Ingen mikrofon fundet."
+            : faldtTilbage
+                ? "Den mikrofon, du havde valgt, er ikke tilsluttet — her er Windows' standard i stedet."
+                : "";
+
+        Mikrofon.Visibility = Mikrofon.Text.Length == 0 ? Visibility.Collapsed : Visibility.Visible;
+        Mikrofon.Foreground = (Brush)FindResource(faldtTilbage ? "Advarsel" : "TekstMeget");
+    }
+
+    private bool _indlæser;
+
+    private void Mikrofon_Valgt(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+    {
+        if (_indlæser || Mikrofoner.SelectedItem is not DeviceInfo d) return;
+
+        AppSettings.Current.MicrophoneId = d.Id;
+        AppSettings.Current.Save();
+
+        Mikrofon.Visibility = Visibility.Collapsed;
+        OptagStatus.Text = $"Optager nu fra {d.FriendlyName}.";
     }
 
     /// <summary>
@@ -158,9 +203,13 @@ public partial class SpeakWordWindow : Window
         OptagFlade.Background = (Brush)FindResource("Optager");
         Niveau.Width = 0;
 
-        if (sekunder < 1.0)
+        // For kort lyd giver vroevl frem for en fejl. Whisper digter paa
+        // meget korte klip — «Tak.», «Undertekster af …» — og det ville se ud
+        // som en hoerefejl paa ordet.
+        if (sekunder < 2.0)
         {
-            OptagStatus.Text = "Der blev kun optaget et øjeblik. Prøv igen, og sig en hel kort sætning.";
+            OptagStatus.Text = $"Der blev kun optaget {sekunder:0.0} sekund. Læs hele sætningen op — " +
+                               "kortere klip giver Whisper for lidt at gå efter, og så digter den.";
             return;
         }
 

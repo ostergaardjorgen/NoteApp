@@ -27,6 +27,7 @@ try
         "laer"      => Laer(args.Skip(1).ToArray()),
         "dokument"  => Dokument(args.Skip(1).ToArray()),
         "score"     => Score(args.Skip(1).ToArray()),
+        "mikrofontest" => Mikrofontest(args.Skip(1).ToArray()),
         "recover"   => Genopret(),
         "hjaelp" or "--help" or "-h" => Hjælp(),
         _ => Ukendt(kommando)
@@ -812,6 +813,62 @@ static int Score(string[] a)
             Console.WriteLine($"  {f.Forventet,-28} → {(f.Hørt.Length == 0 ? "(manglede)" : f.Hørt)}");
     }
 
+    return 0;
+}
+
+/// <summary>
+/// Optager nogle få sekunder og siger, hvad der kom ud.
+///
+/// To spørgsmål besvares: kom der lyd, og kom der lyd nok TID. Det sidste er
+/// ikke selvfølgeligt — en fejl i optagerens pumpe gjorde syv sekunders tale
+/// til halvandet sekunds fil, og det så ud som om Whisper hørte forkert.
+/// </summary>
+static int Mikrofontest(string[] a)
+{
+    var sekunder = a.Length > 0 && double.TryParse(a[0], out var s) ? s : 5.0;
+
+    var mik = AudioDevices.ResolveMicrophone(AppSettings.Current.MicrophoneId, out var faldtTilbage);
+    if (mik is null) { Console.Error.WriteLine("Ingen mikrofon fundet."); return 1; }
+
+    Console.WriteLine($"Mikrofon : {mik.FriendlyName}{(faldtTilbage ? "  (IKKE den valgte — faldt tilbage)" : "")}");
+    Console.WriteLine($"Optager  : {sekunder:0.0} sekunder — sig noget nu …");
+
+    var fil = Path.Combine(Path.GetTempPath(), $"noteapp-miktest-{Guid.NewGuid():N}.wav");
+    var optager = new ShortClipRecorder(fil);
+
+    optager.Start(mik.Id);
+    var ur = System.Diagnostics.Stopwatch.StartNew();
+
+    var top = 0f;
+    while (ur.Elapsed.TotalSeconds < sekunder)
+    {
+        top = Math.Max(top, optager.Niveau);
+        Thread.Sleep(100);
+    }
+
+    var længde = optager.Stop();
+    optager.Dispose();
+
+    var bytes = new FileInfo(fil).Length;
+
+    Console.WriteLine();
+    Console.WriteLine($"Filen    : {bytes:N0} byte = {længde:0.0} sekunder");
+    Console.WriteLine($"Højeste niveau: {top * 100:0.0} % af fuld skala");
+    Console.WriteLine();
+
+    // Det er FORHOLDET, der afgoer, om pumpen virker. Er filen kortere end
+    // den tid, der blev optaget, er der tabt lyd — og saa er det ikke
+    // Whisper, der hoerer forkert.
+    var andel = længde / sekunder;
+    if (andel < 0.9)
+        Console.WriteLine($"FEJL: kun {andel * 100:0} % af tiden blev skrevet til filen. Der tabes lyd.");
+    else
+        Console.WriteLine($"Længden passer ({andel * 100:0} % af den optagne tid).");
+
+    if (top < 0.01)
+        Console.WriteLine("ADVARSEL: der kom stort set ingen lyd. Er det den rigtige mikrofon?");
+
+    Console.WriteLine($"Klippet : {fil}");
     return 0;
 }
 
