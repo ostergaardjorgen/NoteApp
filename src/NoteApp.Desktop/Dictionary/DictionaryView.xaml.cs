@@ -42,22 +42,11 @@ public partial class DictionaryView : UserControl
     private readonly LearningStore _store;
     private long? _redigerer;
 
-    private const string AlleKategorier = "Alle kategorier";
-
     public DictionaryView()
     {
         InitializeComponent();
 
         _store = new LearningStore();
-
-        FilterKategori.Items.Add(AlleKategorier);
-        foreach (var k in TermCategories.All)
-        {
-            FilterKategori.Items.Add(TermCategories.Label(k));
-            FeltKategori.Items.Add(TermCategories.Label(k));
-        }
-        FilterKategori.SelectedIndex = 0;
-        FeltKategori.SelectedIndex = TermCategories.All.ToList().IndexOf(TermCategories.Fagterm);
 
         Indlaes();
     }
@@ -66,21 +55,13 @@ public partial class DictionaryView : UserControl
 
     private void Indlaes()
     {
-        var kategori = FilterKategori.SelectedIndex <= 0
-            ? null
-            : TermCategories.All[FilterKategori.SelectedIndex - 1];
-
-        var rækker = _store.ListTerms(Soeg.Text, kategori);
+        var rækker = _store.ListTerms(Soeg.Text);
         Gitter.ItemsSource = rækker.Select(r => new TermVisning(r)).ToList();
 
         SoegPladsholder.Visibility = string.IsNullOrEmpty(Soeg.Text)
             ? Visibility.Visible : Visibility.Collapsed;
 
-        var pr = _store.CountByCategory();
-        var dele = TermCategories.All
-            .Where(k => pr.ContainsKey(k))
-            .Select(k => $"{pr[k]} {TermCategories.Label(k).ToLowerInvariant()}");
-        Antal.Text = $"{_store.TermCount()} aktive: {string.Join(", ", dele)}";
+        Antal.Text = $"{_store.TermCount()} ord i ordbogen";
 
         OpdaterPrompt();
     }
@@ -97,20 +78,12 @@ public partial class DictionaryView : UserControl
         _redigerer = v.Row.Id;
         FormTitel.Text = $"Redigerer «{v.Canonical}»";
         FeltOrd.Text = v.Row.Canonical;
-        FeltKategori.SelectedIndex = TermCategories.All.ToList().IndexOf(v.Row.Category);
-        FeltVaegt.Text = v.Row.Weight.ToString("0.0", CultureInfo.CurrentCulture);
         FeltUdtale.Text = v.Row.Hint ?? "";
         FeltKunde.Text = v.Row.Scope ?? "";
         FeltAktiv.IsChecked = v.Row.Active;
     }
 
     // ------------------------------------------------------------ redigering
-
-    private void Kategori_Changed(object sender, SelectionChangedEventArgs e)
-    {
-        if (FeltKategori.SelectedIndex < 0) return;
-        KategoriForklaring.Text = TermCategories.Explanation(TermCategories.All[FeltKategori.SelectedIndex]);
-    }
 
     private void Gem_Click(object sender, RoutedEventArgs e)
     {
@@ -121,21 +94,64 @@ public partial class DictionaryView : UserControl
             return;
         }
 
-        if (!double.TryParse(FeltVaegt.Text.Replace('.', ','), NumberStyles.Any,
-                             CultureInfo.CurrentCulture, out var vægt))
-            vægt = 1.0;
+        // Vægten er ikke længere et felt på skærmen. Den bruges kun, når
+        // ordlisten skal skæres til for at være i et budget, og det sker ikke:
+        // budgettet er 2000 tokens mod under hundrede ord.
+        const double vægt = 1.0;
 
-        var kategori = TermCategories.All[Math.Max(0, FeltKategori.SelectedIndex)];
         var udtale = Tom(FeltUdtale.Text);
         var kunde = Tom(FeltKunde.Text);
         var aktiv = FeltAktiv.IsChecked == true;
 
         if (_redigerer is long id)
-            _store.UpdateTerm(id, ord, kategori, vægt, kunde, udtale, aktiv);
+            _store.UpdateTerm(id, ord, "fagterm", vægt, kunde, udtale, aktiv);
         else
-            _store.AddTerm(ord, kategori, vægt, kunde, udtale);
+            _store.AddTerm(ord, "fagterm", vægt, kunde, udtale);
 
         Ryd_Click(sender, e);
+        Indlaes();
+    }
+
+    /// <summary>Forslag mens man skriver — så det samme ord ikke oprettes to gange.</summary>
+    private void Ord_Changed(object sender, TextChangedEventArgs e)
+    {
+        if (Forslag is null) return;
+
+        var skrevet = FeltOrd.Text.Trim();
+        var fundne = skrevet.Length < 2
+            ? Array.Empty<string>()
+            : _store.Foreslaa(skrevet).Where(f => !f.Equals(skrevet, StringComparison.OrdinalIgnoreCase)).ToArray();
+
+        Forslag.ItemsSource = fundne;
+
+        // Staar ordet der ALLEREDE, er det ikke et forslag — det er en advarsel.
+        var findes = skrevet.Length > 0 && _store.FindTermId(skrevet) is not null && _redigerer is null;
+        ForslagTekst.Text = findes ? $"«{skrevet}» står allerede i ordbogen." : "";
+        ForslagTekst.Visibility = findes ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    private void Forslag_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button b && b.Content is string ord) FeltOrd.Text = ord;
+    }
+
+    /// <summary>
+    /// Slår ord sammen, der står flere gange. Dubletterne stammer fra
+    /// kategorierne: det samme ord kunne oprettes én gang som fagterm og én
+    /// gang som produkt, uden at nogen kunne se det.
+    /// </summary>
+    private void Dubletter_Click(object sender, RoutedEventArgs e)
+    {
+        var antal = _store.SlaaDubletterSammen();
+
+        MessageBox.Show(
+            antal == 0
+                ? "Der er ingen dubletter i ordbogen."
+                : $"{antal} dubletter slået sammen.\n\nDen ældste post er beholdt, og de øvriges " +
+                  "varianter er flyttet over på den — en variant, der er hørt flere gange, må ikke " +
+                  "gå tabt, fordi posten forsvinder.",
+            "Dubletter", MessageBoxButton.OK, MessageBoxImage.Information);
+
         Indlaes();
     }
 
@@ -161,7 +177,6 @@ public partial class DictionaryView : UserControl
         _redigerer = null;
         FormTitel.Text = "Nyt ord";
         FeltOrd.Text = "";
-        FeltVaegt.Text = "1,0";
         FeltUdtale.Text = "";
         FeltKunde.Text = "";
         FeltAktiv.IsChecked = true;

@@ -78,8 +78,6 @@
         <TextBlock Text="Søg" Style="{StaticResource Underskrift}" Margin="-212,0,0,0"
                    VerticalAlignment="Center" IsHitTestVisible="False"
                    x:Name="SoegPladsholder" Foreground="{StaticResource TekstMeget}" />
-        <ComboBox x:Name="FilterKategori" Width="160" Margin="12,0,0,0"
-                  SelectionChanged="Filter_Changed" />
         <TextBlock x:Name="Antal" Style="{StaticResource Underskrift}" Margin="14,0,0,0"
                    VerticalAlignment="Center" />
       </StackPanel>
@@ -95,8 +93,6 @@
                 RowHeaderWidth="0" FontSize="13">
         <DataGrid.Columns>
           <DataGridTextColumn Header="Ord" Binding="{Binding Canonical}" Width="*" />
-          <DataGridTextColumn Header="Kategori" Binding="{Binding KategoriTekst}" Width="120" />
-          <DataGridTextColumn Header="Vægt" Binding="{Binding Weight}" Width="60" />
           <DataGridTextColumn Header="Kunde" Binding="{Binding Scope}" Width="110" />
           <DataGridTextColumn Header="Hørt som" Binding="{Binding AliasCount}" Width="80" />
           <DataGridTextColumn Header="Aktiv" Binding="{Binding AktivTekst}" Width="55" />
@@ -105,7 +101,8 @@
 
       <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,12,0,0">
         <Button Content="Importér fra ordliste.txt" Click="Import_Click" Margin="0,0,8,0" />
-        <Button x:Name="SletKnap" Content="Slet valgte" Click="Slet_Click" IsEnabled="False" />
+        <Button x:Name="SletKnap" Content="Slet valgte" Click="Slet_Click" IsEnabled="False" Margin="0,0,8,0" />
+        <Button Content="Slå dubletter sammen" Click="Dubletter_Click" />
       </StackPanel>
     </Grid>
 
@@ -118,17 +115,38 @@
           <TextBlock x:Name="FormTitel" Text="Nyt ord" FontSize="15" FontWeight="SemiBold" Margin="0,0,0,14" />
 
           <TextBlock Text="Ord" Style="{StaticResource Underskrift}" />
-          <TextBox x:Name="FeltOrd" Margin="0,4,0,12" />
+          <TextBox x:Name="FeltOrd" Margin="0,4,0,0" TextChanged="Ord_Changed" />
 
-          <TextBlock Text="Kategori" Style="{StaticResource Underskrift}" />
-          <ComboBox x:Name="FeltKategori" Margin="0,4,0,4" SelectionChanged="Kategori_Changed" />
-          <TextBlock x:Name="KategoriForklaring" Style="{StaticResource Underskrift}"
-                     Foreground="{StaticResource TekstMeget}" Margin="0,0,0,12" />
+          <!-- Forslag mens man skriver. Ordbogen havde tre ord stående to
+               gange, fordi man ikke kunne se, at de var der i forvejen. Et
+               opslag, der først sker ved «Gem», er for sent. -->
+          <ItemsControl x:Name="Forslag" Margin="0,6,0,0">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <Button Content="{Binding}" Click="Forslag_Click" HorizontalContentAlignment="Left"
+                        Padding="10,6" Margin="0,0,0,3" Cursor="Hand" FontSize="12.5"
+                        Background="#FF1D2530" BorderBrush="{StaticResource PanelKant}"
+                        BorderThickness="1" HorizontalAlignment="Stretch" />
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
 
-          <TextBlock Text="Vægt — højere kommer først med, når der ikke er plads til alle" Style="{StaticResource Underskrift}" />
-          <TextBox x:Name="FeltVaegt" Text="1,0" Margin="0,4,0,12" />
+          <TextBlock x:Name="ForslagTekst" FontSize="12" Margin="2,6,0,0" TextWrapping="Wrap"
+                     Foreground="{StaticResource Advarsel}" Visibility="Collapsed" />
 
-          <TextBlock Text="Udtale (valgfri), fx: udtales 'skim'" Style="{StaticResource Underskrift}" />
+          <!-- KATEGORIEN ER FJERNET.
+               Den havde én funktion: at bestemme rækkefølgen, når ordlisten
+               skulle skæres til for at være i et budget. Listen går ikke
+               længere til Whisper, og til sprogmodellen er budgettet 2000
+               tokens mod under hundrede ord — den skæres aldrig til.
+               Til gengæld skabte den dubletter: det samme ord kunne oprettes
+               én gang som fagterm og én gang som produkt.
+               Feltet står stadig i databasen, fordi «person» kan blive brugbar
+               igen, når talere skal navngives. Det er bare ikke noget, brugeren
+               skal forholde sig til nu. -->
+
+          <TextBlock Text="Udtale (valgfri), fx: udtales 'skim'" Style="{StaticResource Underskrift}"
+                     Margin="0,14,0,0" />
           <TextBox x:Name="FeltUdtale" Margin="0,4,0,12" />
 
           <TextBlock Text="Kunde (valgfri) — ordet vælges kun til møder om dem" Style="{StaticResource Underskrift}" />

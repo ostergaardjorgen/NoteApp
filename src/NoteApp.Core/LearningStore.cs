@@ -298,6 +298,101 @@ public sealed class LearningStore : IDisposable
     /// Slår en term op på dens kanoniske form. Bruges når en rettelse skrives
     /// ind: «det her ord skal hedde det her», hvor termen findes i forvejen.
     /// </summary>
+    /// <summary>
+    /// Ord i ordbogen, der ligner det, man er ved at skrive.
+    ///
+    /// Findes for at forhindre dubletter. Ordbogen havde «Active Directory»,
+    /// «adgangsafstemning» og «attestering» to gange hver — de blev oprettet
+    /// under hver sin kategori, uden at nogen kunne se, at ordet var der i
+    /// forvejen. Et opslag, der først sker ved gem, er for sent.
+    /// </summary>
+    public IReadOnlyList<string> Foreslaa(string begyndelse, int maks = 8)
+    {
+        if (string.IsNullOrWhiteSpace(begyndelse)) return Array.Empty<string>();
+
+        using var cmd = _db.CreateCommand();
+
+        // Ord der BEGYNDER med det skrevne foerst, derefter ord der indeholder
+        // det. Man leder efter begyndelsen af et ord, ikke midten.
+        cmd.CommandText = @"
+            SELECT canonical FROM term
+            WHERE canonical LIKE $b || '%' COLLATE NOCASE
+            UNION
+            SELECT canonical FROM term
+            WHERE canonical LIKE '%' || $b || '%' COLLATE NOCASE
+              AND canonical NOT LIKE $b || '%' COLLATE NOCASE
+            LIMIT $n;";
+        cmd.Parameters.AddWithValue("$b", begyndelse.Trim());
+        cmd.Parameters.AddWithValue("$n", maks);
+
+        var liste = new List<string>();
+        using var r = cmd.ExecuteReader();
+        while (r.Read()) liste.Add(r.GetString(0));
+        return liste;
+    }
+
+    /// <summary>
+    /// Slår ord sammen, der står flere gange med samme stavemåde.
+    ///
+    /// Dubletterne stammer fra kategorierne: det samme ord kunne oprettes én
+    /// gang som fagterm og én gang som produkt. Kategorien er væk, og så er
+    /// der ingen grund til, at ordet står to steder.
+    ///
+    /// Den ældste post beholdes — den har historikken — og de øvriges aliaser
+    /// flyttes over, før de slettes. Returnerer hvor mange der blev slået
+    /// sammen.
+    /// </summary>
+    public int SlaaDubletterSammen()
+    {
+        using var find = _db.CreateCommand();
+        find.CommandText = @"
+            SELECT LOWER(canonical) AS n, COUNT(*) AS antal
+            FROM term GROUP BY n HAVING antal > 1;";
+
+        var navne = new List<string>();
+        using (var r = find.ExecuteReader())
+            while (r.Read()) navne.Add(r.GetString(0));
+
+        var sammenlagt = 0;
+
+        foreach (var navn in navne)
+        {
+            using var hent = _db.CreateCommand();
+            hent.CommandText = "SELECT id FROM term WHERE LOWER(canonical) = $n ORDER BY id;";
+            hent.Parameters.AddWithValue("$n", navn);
+
+            var ider = new List<long>();
+            using (var r = hent.ExecuteReader())
+                while (r.Read()) ider.Add(r.GetInt64(0));
+
+            if (ider.Count < 2) continue;
+
+            var beholdes = ider[0];
+
+            foreach (var fjernes in ider.Skip(1))
+            {
+                using var flyt = _db.CreateCommand();
+
+                // Aliaser flyttes med. En variant, der er hoert tre gange paa
+                // den ene post, maa ikke gaa tabt, fordi posten forsvinder.
+                // OR IGNORE: findes varianten allerede paa den beholdte, er
+                // der intet at flytte.
+                flyt.CommandText = @"
+                    UPDATE OR IGNORE alias SET term_id = $b WHERE term_id = $f;
+                    UPDATE correction SET term_id = $b WHERE term_id = $f;
+                    DELETE FROM alias WHERE term_id = $f;
+                    DELETE FROM term  WHERE id = $f;";
+                flyt.Parameters.AddWithValue("$b", beholdes);
+                flyt.Parameters.AddWithValue("$f", fjernes);
+                flyt.ExecuteNonQuery();
+
+                sammenlagt++;
+            }
+        }
+
+        return sammenlagt;
+    }
+
     public long? FindTermId(string canonical)
     {
         using var cmd = _db.CreateCommand();

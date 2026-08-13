@@ -43,21 +43,47 @@ public sealed class GlobalHotkey : IDisposable
     /// Kandidaterne i den rækkefølge, de prøves. Funktionstasterne står sidst
     /// som sikkerhedsnet: de er sjældent taget, men også sværere at huske.
     /// </summary>
-    public static readonly IReadOnlyList<HotkeyValg> Muligheder = new[]
+    public static readonly IReadOnlyList<HotkeyValg> Muligheder = Byg();
+
+    private static IReadOnlyList<HotkeyValg> Byg()
     {
-        new HotkeyValg("ctrl-alt-r", "Ctrl+Alt+R", MOD_CONTROL | MOD_ALT, 0x52,
-            "R for «record». Ledig i Windows selv, men tages af nogle lyd- og skærmoptagere."),
-        new HotkeyValg("ctrl-alt-m", "Ctrl+Alt+M", MOD_CONTROL | MOD_ALT, 0x4D,
-            "M for «møde». Bruges af enkelte noteprogrammer."),
-        new HotkeyValg("ctrl-alt-o", "Ctrl+Alt+O", MOD_CONTROL | MOD_ALT, 0x4F,
-            "O for «optag». Sjældent taget."),
-        new HotkeyValg("ctrl-shift-alt-r", "Ctrl+Shift+Alt+R", MOD_CONTROL | MOD_SHIFT | MOD_ALT, 0x52,
-            "Tre taster gør den næsten sikkert ledig — til gengæld skal begge hænder med."),
-        new HotkeyValg("ctrl-alt-f9", "Ctrl+Alt+F9", MOD_CONTROL | MOD_ALT, 0x78,
-            "Funktionstast. Næsten altid ledig, men sværere at huske."),
-        new HotkeyValg("ctrl-alt-f12", "Ctrl+Alt+F12", MOD_CONTROL | MOD_ALT, 0x7B,
-            "Sidste udvej. Fri på stort set enhver maskine.")
-    };
+        var liste = new List<HotkeyValg>();
+
+        // TALLENE FØRST. Ctrl+Shift+ét tal rammes med venstre hånd alene, og
+        // kombinationen er sjældent taget: programmer bruger typisk bogstaver,
+        // og Windows selv bruger Win+tal til proceslinjen — ikke Ctrl+Shift.
+        //
+        // Hastighed er hele pointen. Et møde begynder, og der skal trykkes
+        // ÉN gang, uden at kigge ned på tastaturet.
+        for (var n = 1; n <= 9; n++)
+            liste.Add(new HotkeyValg($"ctrl-shift-{n}", $"Ctrl+Shift+{n}",
+                MOD_CONTROL | MOD_SHIFT, (uint)(0x30 + n),
+                "Tal rammes med venstre hånd alene og er sjældent taget af andre programmer."));
+
+        liste.Add(new HotkeyValg("ctrl-shift-0", "Ctrl+Shift+0", MOD_CONTROL | MOD_SHIFT, 0x30,
+            "Tal rammes med venstre hånd alene og er sjældent taget af andre programmer."));
+
+        // Bogstaverne som reserve. De er nemmere at huske, men oftere taget —
+        // Ctrl+Alt+R og Ctrl+Alt+M var begge optaget på den første maskine,
+        // appen blev prøvet på.
+        liste.AddRange(new[]
+        {
+            new HotkeyValg("ctrl-alt-r", "Ctrl+Alt+R", MOD_CONTROL | MOD_ALT, 0x52,
+                "R for «record». Tages af nogle lyd- og skærmoptagere."),
+            new HotkeyValg("ctrl-alt-m", "Ctrl+Alt+M", MOD_CONTROL | MOD_ALT, 0x4D,
+                "M for «møde». Bruges af enkelte noteprogrammer."),
+            new HotkeyValg("ctrl-alt-o", "Ctrl+Alt+O", MOD_CONTROL | MOD_ALT, 0x4F,
+                "O for «optag»."),
+            new HotkeyValg("ctrl-shift-alt-r", "Ctrl+Shift+Alt+R", MOD_CONTROL | MOD_SHIFT | MOD_ALT, 0x52,
+                "Tre taster gør den næsten sikkert ledig — til gengæld skal begge hænder med."),
+            new HotkeyValg("ctrl-alt-f9", "Ctrl+Alt+F9", MOD_CONTROL | MOD_ALT, 0x78,
+                "Funktionstast. Næsten altid ledig, men sværere at huske."),
+            new HotkeyValg("ctrl-alt-f12", "Ctrl+Alt+F12", MOD_CONTROL | MOD_ALT, 0x7B,
+                "Sidste udvej. Fri på stort set enhver maskine.")
+        });
+
+        return liste;
+    }
 
     private HwndSource? _kilde;
     private IntPtr _håndtag;

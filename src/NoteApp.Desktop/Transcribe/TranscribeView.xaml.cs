@@ -189,6 +189,73 @@ public partial class TranscribeView : UserControl
         Status.Text = "";
     }
 
+    // -------------------------------------------------------------- rettelser
+
+    private void Resultat_SelectionChanged(object sender, RoutedEventArgs e)
+    {
+        if (RetKnap is null) return;
+
+        var valgt = Resultat.SelectedText.Trim();
+
+        // Der skal vaere markeret noget, der ligner et ord — ikke et halvt
+        // afsnit. En regel paa tredive ord ville aldrig ramme igen.
+        RetKnap.IsEnabled = valgt.Length is > 1 and <= 60 && !valgt.Contains('\n');
+    }
+
+    /// <summary>
+    /// Retter et ord OG lærer rettelsen.
+    ///
+    /// Det er her, appen faktisk bliver bedre. Alt det andet — ordbogen,
+    /// modellerne, skabelonerne — ændrer ikke på, hvad Whisper hører. Det gør
+    /// den her: næste gang det samme bliver hørt forkert, er det rettet, før
+    /// nogen ser det.
+    /// </summary>
+    private void Ret_Click(object sender, RoutedEventArgs e)
+    {
+        if (Optagelser.SelectedItem is not OptagelseVisning valgt) return;
+
+        var markeret = Resultat.SelectedText.Trim();
+        if (markeret.Length == 0) return;
+
+        var tekstFil = FindTekst(valgt.Mappe);
+        if (tekstFil is null) return;
+
+        // Hvor mange gange staar det i teksten? Det aendrer, hvad rettelsen
+        // betyder, og det skal staa FOER man siger ja.
+        var antal = System.Text.RegularExpressions.Regex.Matches(
+            Resultat.Text, System.Text.RegularExpressions.Regex.Escape(markeret),
+            System.Text.RegularExpressions.RegexOptions.IgnoreCase).Count;
+
+        var vindue = new CorrectionWindow(markeret, antal) { Owner = Window.GetWindow(this) };
+        if (vindue.ShowDialog() != true) return;
+
+        try
+        {
+            using var ordbog = new LearningStore();
+
+            ordbog.LearnCorrection(vindue.Hørt, vindue.Rigtigt,
+                engineId: "manuel", meetingId: Path.GetFileName(valgt.Mappe));
+
+            // Reglen anvendes med det samme paa den tekst, der ligger. Ellers
+            // skulle man skrive den ud igen for at se sin egen rettelse.
+            var ændringer = TranscriptCorrector.FromStore(ordbog).ApplyToFile(tekstFil);
+            Resultat.Text = File.ReadAllText(tekstFil, System.Text.Encoding.UTF8).Trim();
+
+            var rettet = ændringer.Sum(x => x.Count);
+            Status.Text = rettet > 0
+                ? $"Lært: «{vindue.Hørt}» → «{vindue.Rigtigt}». Rettet {rettet} steder her og fremover."
+                : $"Lært: «{vindue.Hørt}» → «{vindue.Rigtigt}». Gælder fremover.";
+
+            Historik.Skriv(HaendelseType.Rettelser, $"Rettelse lært: {vindue.Hørt} → {vindue.Rigtigt}",
+                $"{rettet} steder rettet i «{valgt.Titel}»", sti: tekstFil);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Rettelsen kunne ikke gemmes.\n\n{ex.Message}", "Kunne ikke lære",
+                MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+    }
+
     // -------------------------------------------------------------- omdøbning
 
     /// <summary>

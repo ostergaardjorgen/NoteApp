@@ -191,10 +191,35 @@
           </StackPanel>
         </ScrollViewer>
 
-        <ScrollViewer x:Name="ResultatRude" Grid.Row="1" Padding="18,10,18,16"
-                      VerticalScrollBarVisibility="Auto" Visibility="Collapsed">
-          <TextBlock x:Name="Resultat" FontSize="13" LineHeight="22" Foreground="{StaticResource TekstSvag}" />
-        </ScrollViewer>
+        <!-- Teksten er en TextBox, ikke en TextBlock. Grunden er ikke kosmetisk:
+             man skal kunne MARKERE et ord, der er hørt forkert, og lære appen
+             det rigtige. Uden det er «appen lærer af dine rettelser» en
+             påstand, der ikke kan indfries. -->
+        <Grid x:Name="ResultatRude" Grid.Row="1" Visibility="Collapsed">
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+          </Grid.RowDefinitions>
+
+          <Border Grid.Row="0" Background="#FF1D2530" BorderBrush="{StaticResource PanelKant}"
+                  BorderThickness="0,0,0,1" Padding="18,10">
+            <Grid>
+              <TextBlock x:Name="RetTekst" VerticalAlignment="Center" FontSize="12.5"
+                         TextWrapping="Wrap" Foreground="{StaticResource TekstMeget}"
+                         Text="Er et ord hørt forkert? Markér det i teksten og tryk «Ret ordet» — så retter appen det af sig selv i alle fremtidige udskrifter." />
+              <Button x:Name="RetKnap" Content="Ret ordet …" Click="Ret_Click" HorizontalAlignment="Right"
+                      Padding="14,7" IsEnabled="False" />
+            </Grid>
+          </Border>
+
+          <!-- TextBox har ingen LineHeight; linjeafstanden kommer fra
+               skrifttypen. Det er den eneste pris for at kunne markere. -->
+          <TextBox x:Name="Resultat" Grid.Row="1" FontSize="13"
+                   Foreground="{StaticResource TekstSvag}" Background="Transparent"
+                   BorderThickness="0" IsReadOnly="True" TextWrapping="Wrap"
+                   VerticalScrollBarVisibility="Auto" Padding="18,10,18,16"
+                   SelectionChanged="Resultat_SelectionChanged" />
+        </Grid>
       </Grid>
     </Border>
 
