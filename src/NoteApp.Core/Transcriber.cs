@@ -18,7 +18,16 @@ public sealed record TranscriptionRequest(
     /// </summary>
     string Language = "auto",
     string? Prompt = null,
-    bool ForceCpu = false);
+    bool ForceCpu = false,
+
+    /// <summary>
+    /// Skal ordlisten sendes til Whisper som initial_prompt?
+    ///
+    /// Falsk som standard, og det er et MÅLT valg, ikke en forglemmelse. Se
+    /// forklaringen i <see cref="Transcriber.RunAsync"/> og doc/findings.md
+    /// afsnit 8.
+    /// </summary>
+    bool SendPromptTilWhisper = false);
 
 public sealed record TranscriptionResult(
     string TextPath,
@@ -127,7 +136,30 @@ public sealed class Transcriber
             "-mc", "0"
         };
 
-        if (!string.IsNullOrWhiteSpace(request.Prompt)) { args.Add("--prompt"); args.Add(request.Prompt); }
+        // ORDLISTEN SENDES IKKE LÆNGERE TIL WHISPER.
+        //
+        // Målt 12.-13. august 2026 på den samme lyd, tre gange:
+        //
+        //   -mc 0 (som her)   output BYTE-IDENTISK med og uden ordliste
+        //   -mc 16/64/160     ordlisten er aktiv, men henter stadig ingen
+        //                     fagord: Kernesys, SCIM og MitID blev ikke ramt
+        //                     i en eneste kørsel. «Entra» rammes også UDEN.
+        //   -mc 16384 (std)   ordlisten er aktiv og udløser det loop, der
+        //                     gjorde 372 af 388 linjer til den samme sætning.
+        //
+        // Den leverede altså intet ved nogen indstilling, og ved én af dem
+        // ødelagde den transskriptionen. Ordbogen er ikke afskaffet — den
+        // bruges til at rette teksten BAGEFTER, hvor rettelserne gør præcis
+        // det, der står i dem, og til at stave navne rigtigt i referatet.
+        //
+        // Feltet beholdes på forespørgslen, så en senere måling kan slå den
+        // til igen uden at ændre kaldere. Skal det ske, så læs doc/findings.md
+        // afsnit 8 først.
+        if (request.SendPromptTilWhisper && !string.IsNullOrWhiteSpace(request.Prompt))
+        {
+            args.Add("--prompt");
+            args.Add(request.Prompt);
+        }
         if (request.ForceCpu) args.Add("-ng");
 
         var psi = new ProcessStartInfo(_whisperCli)

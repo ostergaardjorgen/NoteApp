@@ -1,24 +1,27 @@
 <Window x:Class="NoteApp.Desktop.Transcribe.RenameWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Omdøb optagelse" Width="480" SizeToContent="Height" MinHeight="200"
+        x:Name="Vindue" Width="520" SizeToContent="Height" MinHeight="220"
         WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
         Background="{StaticResource Baggrund}">
-  <!-- SizeToContent frem for en fast højde: vinduet var 230 px, og knapperne
-       blev klippet af. En fast højde holder kun ved præcis den skriftstørrelse
-       og DPI, den blev prøvet på — og et vindue, hvor man hverken kan se
-       knappen eller ændre størrelsen, er en blindgyde. -->
+  <!-- SizeToContent frem for en fast højde: en fast højde holder kun ved
+       præcis den skriftstørrelse og skalering, den blev prøvet på, og med
+       NoResize er der ingen vej ud, hvis den ikke passer. -->
 
-  <StackPanel Margin="24">
-    <TextBlock Text="Hvad skal optagelsen hedde?" FontSize="17" FontWeight="SemiBold" />
-    <TextBlock Style="{StaticResource Underskrift}" Margin="0,6,0,0" TextWrapping="Wrap"
-               Text="Kun navnet ændres. Mappen på disken bliver liggende, så dokumenter, der allerede er lavet, stadig kan finde tilbage." />
+  <StackPanel Margin="26">
+    <TextBlock x:Name="Overskrift" FontSize="18" FontWeight="SemiBold" TextWrapping="Wrap" />
+    <TextBlock x:Name="Forklaring" Style="{StaticResource Underskrift}" Margin="0,8,0,0"
+               TextWrapping="Wrap" LineHeight="20" />
 
-    <TextBox x:Name="Felt" Margin="0,16,0,0" FontSize="15" Padding="10,8" />
+    <TextBox x:Name="Felt" Margin="0,18,0,0" FontSize="15" Padding="12,10" />
 
-    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
-      <Button Content="Annullér" Click="Annuller_Click" Padding="18,9" Margin="0,0,10,0" IsCancel="True" />
-      <Button Content="Gem navnet" Click="Gem_Click" Padding="20,9" IsDefault="True"
+    <TextBlock x:Name="Hjaelp" FontSize="12" Margin="2,8,0,0" TextWrapping="Wrap"
+               Foreground="{StaticResource TekstMeget}" />
+
+    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,22,0,0">
+      <Button x:Name="AnnullerKnap" Content="Annullér" Click="Annuller_Click" Padding="18,9"
+              Margin="0,0,10,0" IsCancel="True" />
+      <Button x:Name="GemKnap" Content="Gem navnet" Click="Gem_Click" Padding="22,9" IsDefault="True"
               Background="{StaticResource Accent}" Foreground="#FF0B1220" BorderThickness="0"
               FontWeight="SemiBold" />
     </StackPanel>

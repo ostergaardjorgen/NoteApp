@@ -17,7 +17,52 @@
     <StackPanel Grid.Row="0" Grid.ColumnSpan="2" Margin="0,0,0,14">
       <TextBlock Text="Din ordbog" Style="{StaticResource Overskrift}" />
       <TextBlock Style="{StaticResource Underskrift}"
-                 Text="Ordene her sendes med til Whisper, så den ved, hvad den skal lytte efter. Kategorien er ikke en etiket — den afgør, hvem der kommer med, når der ikke er plads til alle." />
+                 Text="Dine navne og fagord. De retter teksten bagefter og staver rigtigt i dine dokumenter." />
+
+      <!-- Teksten her stod tidligere som «ordene sendes til Whisper, så den
+           ved hvad den skal lytte efter». Det var forkert, og det var målt
+           forkert: samme lyd med og uden ordlisten gav byte-identisk resultat.
+           En forklaring, der lover noget, der ikke sker, er værre end ingen. -->
+      <Border Background="#FF181B22" BorderBrush="{StaticResource PanelKant}" BorderThickness="1"
+              CornerRadius="10" Padding="20,16" Margin="0,12,0,0">
+        <Grid>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+          </Grid.ColumnDefinitions>
+
+          <StackPanel Grid.Column="0" Margin="0,0,18,0">
+            <TextBlock Text="HVAD ORDBOGEN GØR" FontSize="11" FontWeight="SemiBold"
+                       Foreground="{StaticResource Godkendt}" />
+            <TextBlock FontSize="12.5" LineHeight="20" Margin="0,8,0,0" TextWrapping="Wrap"
+                       Foreground="{StaticResource TekstSvag}"
+                       Text="Retter kendte hørefejl i udskriften, efter den er lavet. Har du én gang rettet «søv» til «syv», sker det af sig selv hver gang derefter." />
+            <TextBlock FontSize="12.5" LineHeight="20" Margin="0,8,0,0" TextWrapping="Wrap"
+                       Foreground="{StaticResource TekstSvag}"
+                       Text="Følger med til sprogmodellen, når der laves et dokument, så navne og fagord staves rigtigt i referatet." />
+          </StackPanel>
+
+          <StackPanel Grid.Column="1" Margin="18,0,0,0">
+            <TextBlock Text="HVAD DEN IKKE GØR" FontSize="11" FontWeight="SemiBold"
+                       Foreground="{StaticResource Advarsel}" />
+            <TextBlock FontSize="12.5" LineHeight="20" Margin="0,8,0,0" TextWrapping="Wrap"
+                       Foreground="{StaticResource TekstSvag}"
+                       Text="Den gør ikke Whisper bedre til at høre efter. Det blev prøvet: samme optagelse med og uden ordbogen gav nøjagtig samme tekst — og ved én indstilling fik den Whisper til at gentage sig selv i en time." />
+            <TextBlock x:Name="HvorforIkke" FontSize="12.5" LineHeight="20" Margin="0,8,0,0"
+                       TextWrapping="Wrap" Foreground="{StaticResource TekstMeget}"
+                       Cursor="Help"
+                       Text="Whisper kan ikke læres noget — hold musen her for at se hvorfor.">
+              <TextBlock.ToolTip>
+                <TextBlock MaxWidth="460" TextWrapping="Wrap" LineHeight="21">Whisper er en færdigtrænet model. Den kan i princippet efteruddannes, men ikke her, og af fire grunde:<LineBreak /><LineBreak />
+                  <Run FontWeight="SemiBold">1. Det kræver materiale.</Run> Timer af din tale med en kontrolleret udskrift til hver. Du har halvanden time i alt; der skal typisk titalls timer til.<LineBreak /><LineBreak />
+                  <Run FontWeight="SemiBold">2. Det kræver et større grafikkort.</Run> Modellen har 1,5 milliarder parametre. Selv den lette metode kræver 16–24 GB; dit kort har 6.<LineBreak /><LineBreak />
+                  <Run FontWeight="SemiBold">3. Den eneste overkommelige vej går udenom maskinen.</Run> Skulle det ske i skyen, skulle dine møder sendes derop — og det er præcis dét, hele løsningen er bygget for at undgå.<LineBreak /><LineBreak />
+                  <Run FontWeight="SemiBold">4. Det ville ikke løse de fejl, vi har.</Run> Fejlene er navne og tal. Dem retter en regel med det samme, gratis, og den kan fortrydes. En efteruddannet model kan ingen af delene.</TextBlock>
+              </TextBlock.ToolTip>
+            </TextBlock>
+          </StackPanel>
+        </Grid>
+      </Border>
     </StackPanel>
 
     <!-- ============================ Listen ============================== -->
@@ -80,7 +125,7 @@
           <TextBlock x:Name="KategoriForklaring" Style="{StaticResource Underskrift}"
                      Foreground="{StaticResource TekstMeget}" Margin="0,0,0,12" />
 
-          <TextBlock Text="Vægt — højere kommer først med i prompten" Style="{StaticResource Underskrift}" />
+          <TextBlock Text="Vægt — højere kommer først med, når der ikke er plads til alle" Style="{StaticResource Underskrift}" />
           <TextBox x:Name="FeltVaegt" Text="1,0" Margin="0,4,0,12" />
 
           <TextBlock Text="Udtale (valgfri), fx: udtales 'skim'" Style="{StaticResource Underskrift}" />
@@ -103,7 +148,7 @@
           <Border Background="#FF181B22" CornerRadius="6" Padding="12" BorderThickness="1"
                   BorderBrush="{StaticResource PanelKant}">
             <StackPanel>
-              <TextBlock Text="Sådan ser Whispers prompt ud nu" FontSize="13" FontWeight="SemiBold"
+              <TextBlock Text="Sådan ser ordlisten ud til sprogmodellen" FontSize="13" FontWeight="SemiBold"
                          Margin="0,0,0,8" />
               <TextBlock x:Name="PromptTekst" FontSize="12" Foreground="{StaticResource TekstSvag}"
                          LineHeight="18" MaxHeight="150" />

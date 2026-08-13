@@ -206,7 +206,8 @@ public partial class TranscribeView : UserControl
         var meta = MeetingStore.Load(valgt.Mappe);
         var nu = meta?.Title ?? valgt.Titel;
 
-        var vindue = new RenameWindow(nu) { Owner = Window.GetWindow(this) };
+        var vindue = RenameWindow.TilOptagelse(nu);
+        vindue.Owner = Window.GetWindow(this);
         if (vindue.ShowDialog() != true) return;
 
         var nyt = vindue.NytNavn;

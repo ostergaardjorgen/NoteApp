@@ -49,7 +49,7 @@ public partial class MeetingView : UserControl
     public bool IsPaused => _session?.IsPaused == true;
     public TimeSpan Elapsed => _session?.Elapsed ?? TimeSpan.Zero;
     public IReadOnlyList<NoteVisning> Noter => _noter;
-    public string Titel => FeltTitel.Text.Trim();
+    public string Titel => _session is null ? "" : "Mødet optages";
 
     /// <summary>Rejses når en optagelse begynder — så appen kan blive til mødet.</summary>
     public event Action? Startet;
@@ -97,16 +97,10 @@ public partial class MeetingView : UserControl
     ///
     /// To felter, der gør det samme, skal ikke have hver sin kode.
     /// </summary>
-    private void Titel_Changed(object sender, TextChangedEventArgs e) => VisPladsholdere();
-
     private void Note_Changed(object sender, TextChangedEventArgs e) => VisPladsholdere();
 
     private void VisPladsholdere()
     {
-        if (TitelPladsholder is not null && FeltTitel is not null)
-            TitelPladsholder.Visibility = FeltTitel.Text.Length == 0
-                ? Visibility.Visible : Visibility.Collapsed;
-
         if (NotePladsholder is not null && FeltNote is not null)
             NotePladsholder.Visibility = FeltNote.Text.Length == 0
                 ? Visibility.Visible : Visibility.Collapsed;
@@ -127,6 +121,44 @@ public partial class MeetingView : UserControl
     /// slettes det, når optagelsen stoppes.
     /// </summary>
     public void Lynstart() => Start();
+
+    /// <summary>
+    /// Spørger, hvad mødet skal hedde — bagefter, hvor man ved det.
+    ///
+    /// Forslaget bygges af det, der er kendt: den første note og datoen. Er
+    /// der ingen noter, er datoen alt, vi har, og så siger forslaget det frem
+    /// for at finde på noget.
+    ///
+    /// Trykker man Annullér, får optagelsen datoen som navn. Den bliver
+    /// gemt uanset hvad — et møde, der forsvinder, fordi man lukkede en
+    /// dialog, ville være den værste fejl i hele appen.
+    /// </summary>
+    private string? SpørgOmNavn()
+    {
+        var dato = DateTime.Now.ToString("d. MMMM");
+
+        // Foerste note er tit emnet eller hvem man taler med. Er den lang,
+        // klippes den — den skal vaere et udgangspunkt, ikke en titel.
+        var førsteNote = _noter.LastOrDefault()?.Tekst ?? "";
+        if (førsteNote == "(bogmærke)") førsteNote = "";
+        if (førsteNote.Length > 45) førsteNote = førsteNote[..45].TrimEnd() + "…";
+
+        var forslag = førsteNote.Length > 0 ? $"{førsteNote} — {dato}" : $"Møde {dato}";
+
+        var vindue = new Transcribe.RenameWindow(
+            forslag,
+            "Hvad skal mødet hedde?",
+            _noter.Count > 0
+                ? "Forslaget er bygget af din første note og dagens dato. Skriv henover, hvis noget andet passer bedre — typisk hvem mødet var med."
+                : "Der er ingen noter at bygge et forslag på, så her er bare datoen. Skriv typisk hvem mødet var med.",
+            "Navnet følger med til udskriften og til de dokumenter, du laver af mødet.",
+            "Gem optagelsen",
+            "Mødet er slut")
+        { Owner = Window.GetWindow(this) };
+
+        var svar = vindue.ShowDialog();
+        return svar == true && vindue.NytNavn.Length > 0 ? vindue.NytNavn : $"Møde {dato}";
+    }
 
     /// <summary>Kaldes både fra knappen og fra genvejstasten.</summary>
     public void Start()
@@ -154,12 +186,11 @@ public partial class MeetingView : UserControl
             if (svar != MessageBoxResult.OK) return;
         }
 
-        var titel = string.IsNullOrWhiteSpace(FeltTitel.Text) ? null : FeltTitel.Text.Trim();
 
         try
         {
             _session = RecordingSession.Create(
-                højttaler is not null ? MeetingType.Online : MeetingType.Physical, titel, mik, højttaler);
+                højttaler is not null ? MeetingType.Online : MeetingType.Physical, null, mik, højttaler);
         }
         catch (Exception ex)
         {
@@ -228,9 +259,16 @@ public partial class MeetingView : UserControl
         var længde = _session.Elapsed;
         var noter = _session.Notebook.Notes.Count;
 
-        // Titlen kan vaere skrevet, mens moedet koerte. Den gemmes med, saa
-        // optagelsen ikke hedder et klokkeslet i listen bagefter.
-        var titel = string.IsNullOrWhiteSpace(FeltTitel.Text) ? null : FeltTitel.Text.Trim();
+        // NAVNGIVNINGEN SKER HER, NÅR MØDET ER SLUT.
+        //
+        // Før stod titelfeltet før knappen, og det er det forkerte tidspunkt:
+        // et møde begynder om et øjeblik, man aner ikke hvad det kommer til at
+        // handle om, og feltet blev derfor stående tomt. Bagefter VED man det.
+        //
+        // Forslaget bygges af det, der faktisk er kendt, når mødet er slut —
+        // den første note og datoen. Ikke klokkeslættet: man husker «mødet med
+        // Espen den 13.», ikke «mødet 09:57».
+        var titel = SpørgOmNavn();
 
         _session.Stop();
         _session.Dispose();

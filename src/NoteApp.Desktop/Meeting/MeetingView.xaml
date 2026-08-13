@@ -66,27 +66,17 @@
 
       <!-- ===================== Midten: felter ====================== -->
       <Grid Grid.Column="1" Margin="20,0,20,0" VerticalAlignment="Center">
-        <!-- Før optagelsen: titel og mødetype -->
+        <!-- Før optagelsen står her INTET at udfylde.
+             Titelfeltet lå her før, og det var det forkerte tidspunkt: et møde
+             begynder om et øjeblik, man aner ikke hvad det kommer til at handle
+             om, og feltet blev derfor stående tomt. Navnet spørges der om, når
+             mødet er slut — dér ved man det.
+             Fysisk/online-valget er væk af samme grund: det kunne ikke træffes
+             rigtigt på forhånd. -->
         <Grid x:Name="KlarFelter">
-          <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="Auto" />
-          </Grid.ColumnDefinitions>
-
-          <TextBox x:Name="FeltTitel" Grid.Column="0" FontSize="13.5" Padding="10,8"
-                   VerticalAlignment="Center" Margin="0,0,14,0" TextChanged="Titel_Changed"
-                   ToolTip="Kan også udfyldes, mens mødet kører — eller bagefter." />
-          <TextBlock x:Name="TitelPladsholder" Grid.Column="0" IsHitTestVisible="False" FontSize="13.5"
-                     Margin="13,0,0,0" VerticalAlignment="Center" Foreground="{StaticResource TekstMeget}"
-                     Text="Hvad handler mødet om? (kan vente)" />
-
-          <!-- Fysisk/online-valget er væk. Det kunne ikke træffes rigtigt på
-               forhånd: et onlinemøde, hvor ingen taler i det øjeblik man
-               trykker, ser ud som et fysisk møde — og vælger man forkert,
-               mangler alle de andre deltagere.
-               Nu optages højttaleren altid, og er sporet tavst hele vejen
-               igennem, slettes det bagefter. Svaret måles i stedet for at
-               blive gættet. -->
+          <TextBlock x:Name="KlarTekst" VerticalAlignment="Center" FontSize="13.5"
+                     TextWrapping="Wrap" Foreground="{StaticResource TekstMeget}"
+                     Text="Tryk optag, når mødet begynder. Du navngiver det bagefter — og du kan skrive noter undervejs." />
         </Grid>
 
         <!-- Under optagelsen: notefeltet -->
