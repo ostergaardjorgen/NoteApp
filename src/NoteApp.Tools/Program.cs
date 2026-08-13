@@ -26,6 +26,7 @@ try
         "transskriber" => await Transskriber(args.Skip(1).ToArray()),
         "laer"      => Laer(args.Skip(1).ToArray()),
         "dokument"  => Dokument(args.Skip(1).ToArray()),
+        "score"     => Score(args.Skip(1).ToArray()),
         "recover"   => Genopret(),
         "hjaelp" or "--help" or "-h" => Hjælp(),
         _ => Ukendt(kommando)
@@ -762,6 +763,55 @@ static int Dokument(string[] a)
     var sti = NoteApp.Core.Documents.DocumentStore.Save(info);
     Console.WriteLine($"Gemt: {sti}");
     Console.WriteLine($"      {new FileInfo(sti).Length:N0} byte · åbnes i Word, LibreOffice og Google Docs");
+    return 0;
+}
+
+/// <summary>
+/// Hvor tæt er udskriften på manuskriptet?
+///
+/// Det er den eneste rigtige måling appen har: ved en oplæsning findes facit.
+/// Tallet er dét, der skal flytte sig, når ordbogen bliver bedre.
+/// </summary>
+static int Score(string[] a)
+{
+    if (a.Length < 2)
+    {
+        Console.WriteLine("Brug: noteapp score <manuskript.md> <udskrift.txt> [--alle]");
+        return 0;
+    }
+
+    if (!File.Exists(a[0]) || !File.Exists(a[1]))
+    {
+        Console.Error.WriteLine("Én af filerne findes ikke.");
+        return 1;
+    }
+
+    var manus = NoteApp.Core.ReadAloudScore.ManuskriptTekst(
+        File.ReadAllText(a[0], System.Text.Encoding.UTF8));
+
+    var (ialt, ramt, afvigelser) = NoteApp.Core.ReadAloudScore.Sammenlign(
+        manus, File.ReadAllText(a[1], System.Text.Encoding.UTF8));
+
+    if (ialt == 0) { Console.Error.WriteLine("Manuskriptet gav ingen ord."); return 1; }
+
+    Console.WriteLine($"Ord i manuskriptet : {ialt}");
+    Console.WriteLine($"Ramt               : {ramt}  ({100.0 * ramt / ialt:0.0} %)");
+    Console.WriteLine($"Afvigelser         : {afvigelser.Count}");
+
+    if (a.Contains("--alle"))
+    {
+        Console.WriteLine();
+        foreach (var f in afvigelser)
+            Console.WriteLine($"  {f.Forventet,-28} → {(f.Hørt.Length == 0 ? "(manglede)" : f.Hørt)}");
+    }
+    else
+    {
+        Console.WriteLine();
+        Console.WriteLine("De 20 første:");
+        foreach (var f in afvigelser.Take(20))
+            Console.WriteLine($"  {f.Forventet,-28} → {(f.Hørt.Length == 0 ? "(manglede)" : f.Hørt)}");
+    }
+
     return 0;
 }
 
