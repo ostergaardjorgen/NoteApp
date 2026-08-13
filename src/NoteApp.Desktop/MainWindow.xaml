@@ -52,6 +52,9 @@
           <RadioButton x:Name="NavTransskriber" GroupName="nav" Content="Optagelser"
                        Checked="Nav_Changed"
                        Style="{StaticResource NavKnap}" />
+          <RadioButton x:Name="NavDokumenter" GroupName="nav" Content="Dokumenter"
+                       Checked="Nav_Changed"
+                       Style="{StaticResource NavKnap}" />
           <RadioButton x:Name="NavSkabeloner" GroupName="nav" Content="Skabeloner"
                        Checked="Nav_Changed"
                        Style="{StaticResource NavKnap}" />

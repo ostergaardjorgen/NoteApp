@@ -25,6 +25,7 @@ try
         "gendan"    => Gendan(args.Skip(1).ToArray()),
         "transskriber" => await Transskriber(args.Skip(1).ToArray()),
         "laer"      => Laer(args.Skip(1).ToArray()),
+        "dokument"  => Dokument(args.Skip(1).ToArray()),
         "recover"   => Genopret(),
         "hjaelp" or "--help" or "-h" => Hjælp(),
         _ => Ukendt(kommando)
@@ -704,6 +705,63 @@ static int Laer(string[] a)
 
     store.LearnCorrection(a[0], a[1], a.Length > 2 ? a[2] : "fagterm");
     Console.WriteLine($"Lært: «{a[0]}» rettes til «{a[1]}» fremover.");
+    return 0;
+}
+
+/// <summary>
+/// Laver et OpenDocument-dokument ud af et udkast, der allerede findes.
+///
+/// Formatet er .odt — en åben ISO-standard, som Word, LibreOffice og Google
+/// Docs alle kan læse. Et referat skal kunne sendes til en kollega uden at
+/// spørge, hvad de har installeret.
+/// </summary>
+static int Dokument(string[] a)
+{
+    if (a.Length == 0)
+    {
+        var alle = NoteApp.Core.Documents.DocumentStore.LoadAll();
+        Console.WriteLine($"Dokumenter i {NoteApp.Core.Documents.DocumentStore.Directory}: {alle.Count}");
+        foreach (var d in alle.Take(30))
+            Console.WriteLine($"  {d.Created:dd-MM HH:mm}  {d.Title,-40} {d.Template}");
+
+        Console.WriteLine();
+        Console.WriteLine("Lav et: noteapp dokument <udkast.md> [titel]");
+        return 0;
+    }
+
+    if (!File.Exists(a[0])) { Console.Error.WriteLine($"Findes ikke: {a[0]}"); return 1; }
+
+    var råt = File.ReadAllText(a[0], System.Text.Encoding.UTF8);
+
+    // Forsiden fra udkastet er metadata, ikke indhold. Den skal ikke staa
+    // midt i referatet som en raekke tekniske linjer.
+    var dele = System.Text.RegularExpressions.Regex.Split(råt.Replace("\r\n", "\n").TrimStart(), @"(?m)^---\s*$");
+    var krop = dele.Length > 2 ? string.Join("\n", dele.Skip(2)).Trim() : råt.Trim();
+
+    string Hent(string felt)
+    {
+        var m = System.Text.RegularExpressions.Regex.Match(råt, $@"(?m)^{felt}:\s*(.+)$");
+        return m.Success ? m.Groups[1].Value.Trim() : "";
+    }
+
+    var titel = a.Length > 1 ? a[1] : Path.GetFileNameWithoutExtension(a[0]);
+    var skabelon = Hent("skabelon");
+    var model = Hent("model");
+
+    var info = new NoteApp.Core.Documents.DocumentInfo
+    {
+        Title = titel,
+        Template = skabelon.Length > 0 ? skabelon : "(ukendt)",
+        Model = model.Length > 0 ? model : "(ukendt)",
+        SourceRecording = Path.GetDirectoryName(Path.GetFullPath(a[0])) ?? "",
+        SourceTitle = Path.GetFileName(Path.GetDirectoryName(Path.GetDirectoryName(Path.GetFullPath(a[0])))) ?? "",
+        Markdown = krop,
+        FileName = NoteApp.Core.Documents.DocumentStore.FileNameFor(titel, skabelon)
+    };
+
+    var sti = NoteApp.Core.Documents.DocumentStore.Save(info);
+    Console.WriteLine($"Gemt: {sti}");
+    Console.WriteLine($"      {new FileInfo(sti).Length:N0} byte · åbnes i Word, LibreOffice og Google Docs");
     return 0;
 }
 

@@ -4,6 +4,7 @@ using System.Windows;
 using NoteApp.Core;
 using NoteApp.Desktop.Dictionary;
 using NoteApp.Desktop.Engine;
+using NoteApp.Desktop.Documents;
 using NoteApp.Desktop.Files;
 using NoteApp.Desktop.Meeting;
 using NoteApp.Desktop.Preferences;
@@ -22,6 +23,9 @@ public partial class MainWindow : Window
 
     /// <summary>Optagelsen, Optagelser-skærmen skal åbne på. Bruges én gang.</summary>
     private string? _aabnOptagelse;
+
+    /// <summary>Dokumentet, Dokumenter-skærmen skal åbne på. Bruges én gang.</summary>
+    private string? _aabnDokument;
 
     public MainWindow()
     {
@@ -119,7 +123,24 @@ public partial class MainWindow : Window
             // netop er lavet, uden at nogen skal genstarte appen.
             var aabn = _aabnOptagelse;
             _aabnOptagelse = null;          // gælder kun dette skift
-            Indhold.Content = new TranscribeView(aabn);
+
+            var skærm = new TranscribeView(aabn);
+
+            // Er der lige lavet et dokument, skal appen vise det frem. Ellers
+            // er det gemt et sted, man selv skal finde.
+            skærm.DokumentOprettet += id =>
+            {
+                _aabnDokument = id;
+                NavDokumenter.IsChecked = true;
+            };
+
+            Indhold.Content = skærm;
+        }
+        else if (NavDokumenter.IsChecked == true)
+        {
+            var id = _aabnDokument;
+            _aabnDokument = null;
+            Indhold.Content = new DocumentsView(id);
         }
         else if (NavSkabeloner.IsChecked == true)
         {

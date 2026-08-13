@@ -1,0 +1,146 @@
+<UserControl x:Class="NoteApp.Desktop.Documents.DocumentsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="{StaticResource Baggrund}">
+
+  <Grid Margin="24,20,24,20">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+
+    <StackPanel Grid.Row="0" Margin="0,0,0,14">
+      <TextBlock Text="Dokumenter" Style="{StaticResource Overskrift}" />
+      <TextBlock Style="{StaticResource Underskrift}"
+                 Text="De færdige tekster. Gemt som .odt — åbnes i Word, LibreOffice og Google Docs." />
+    </StackPanel>
+
+    <Grid Grid.Row="1">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="300" />
+        <ColumnDefinition Width="*" />
+      </Grid.ColumnDefinitions>
+
+      <!-- Listen -->
+      <Border Grid.Column="0" Background="{StaticResource Panel}" CornerRadius="10"
+              BorderBrush="{StaticResource PanelKant}" BorderThickness="1" Margin="0,0,10,0">
+        <DockPanel>
+          <TextBlock DockPanel.Dock="Top" x:Name="Antal" Margin="16,14,16,8"
+                     FontSize="13" FontWeight="SemiBold" />
+
+          <ListBox x:Name="Liste" Margin="8,0,8,8" BorderThickness="0" Background="Transparent"
+                   SelectionChanged="Valgt_Changed">
+            <ListBox.ItemTemplate>
+              <DataTemplate>
+                <StackPanel Margin="6,7">
+                  <TextBlock Text="{Binding Title}" FontSize="13.5" TextTrimming="CharacterEllipsis" />
+                  <TextBlock FontSize="11" Margin="0,2,0,0" Foreground="{StaticResource TekstMeget}">
+                    <Run Text="{Binding Created, StringFormat=dd-MM HH:mm, Mode=OneWay}" />
+                    <Run Text=" · " />
+                    <Run Text="{Binding Template, Mode=OneWay}" />
+                  </TextBlock>
+                </StackPanel>
+              </DataTemplate>
+            </ListBox.ItemTemplate>
+          </ListBox>
+        </DockPanel>
+      </Border>
+
+      <!-- Det valgte dokument -->
+      <Border Grid.Column="1" Background="{StaticResource Panel}" CornerRadius="10"
+              BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+        <Grid>
+          <!-- Tom-tilstand -->
+          <StackPanel x:Name="TomPanel" VerticalAlignment="Center" HorizontalAlignment="Center"
+                      MaxWidth="440">
+            <TextBlock Text="Der er ingen dokumenter endnu" FontSize="17" FontWeight="SemiBold"
+                       HorizontalAlignment="Center" />
+            <TextBlock FontSize="13" Margin="0,10,0,0" TextWrapping="Wrap" LineHeight="21"
+                       TextAlignment="Center" Foreground="{StaticResource TekstSvag}"
+                       Text="Gå til «Optagelser», vælg en optagelse der er skrevet ud til tekst, og tryk «Opret dokument». Så vælger du en skabelon — referat, opgaveliste eller hvad du selv har lavet." />
+          </StackPanel>
+
+          <ScrollViewer x:Name="Detaljer" Padding="24,20" VerticalScrollBarVisibility="Auto"
+                        Visibility="Collapsed">
+            <StackPanel>
+              <TextBlock x:Name="Titel" FontSize="19" FontWeight="SemiBold" TextWrapping="Wrap" />
+
+              <!-- Proveniensen. Et referat, ingen kan finde tilbage fra, er en
+                   tekst, ingen tør bruge til noget. -->
+              <Border Background="#FF181B22" BorderBrush="{StaticResource PanelKant}" BorderThickness="1"
+                      CornerRadius="8" Padding="16,13" Margin="0,14,0,0">
+                <Grid>
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                  </Grid.ColumnDefinitions>
+                  <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                  </Grid.RowDefinitions>
+
+                  <TextBlock Grid.Row="0" Grid.Column="0" Text="Lavet" Margin="0,0,24,0"
+                             FontSize="12.5" Foreground="{StaticResource TekstMeget}" />
+                  <TextBlock Grid.Row="0" Grid.Column="1" x:Name="Lavet" FontSize="12.5" />
+
+                  <TextBlock Grid.Row="1" Grid.Column="0" Text="Fra optagelse" Margin="0,7,24,0"
+                             FontSize="12.5" Foreground="{StaticResource TekstMeget}" />
+                  <TextBlock Grid.Row="1" Grid.Column="1" x:Name="FraOptagelse" FontSize="12.5"
+                             Margin="0,7,0,0" TextWrapping="Wrap" />
+
+                  <TextBlock Grid.Row="2" Grid.Column="0" Text="Skabelon" Margin="0,7,24,0"
+                             FontSize="12.5" Foreground="{StaticResource TekstMeget}" />
+                  <TextBlock Grid.Row="2" Grid.Column="1" x:Name="Skabelon" FontSize="12.5" Margin="0,7,0,0" />
+
+                  <TextBlock Grid.Row="3" Grid.Column="0" Text="Sprogmodel" Margin="0,7,24,0"
+                             FontSize="12.5" Foreground="{StaticResource TekstMeget}" />
+                  <TextBlock Grid.Row="3" Grid.Column="1" x:Name="Model" FontSize="12.5" Margin="0,7,0,0" />
+
+                  <TextBlock Grid.Row="4" Grid.Column="0" Text="Fil" Margin="0,7,24,0"
+                             FontSize="12.5" Foreground="{StaticResource TekstMeget}" />
+                  <TextBlock Grid.Row="4" Grid.Column="1" x:Name="Filnavn" FontSize="12.5" Margin="0,7,0,0"
+                             TextWrapping="Wrap" Foreground="{StaticResource TekstMeget}" />
+                </Grid>
+              </Border>
+
+              <TextBlock Text="Din beskrivelse" Style="{StaticResource Underskrift}" Margin="0,18,0,0" />
+              <TextBox x:Name="FeltBeskrivelse" Margin="0,5,0,0" FontSize="13" Padding="9,7"
+                       AcceptsReturn="True" TextWrapping="Wrap" Height="70"
+                       VerticalScrollBarVisibility="Auto" TextChanged="Beskrivelse_Aendret" />
+              <TextBlock FontSize="11.5" Margin="2,5,0,0" TextWrapping="Wrap"
+                         Foreground="{StaticResource TekstMeget}"
+                         Text="Beskrivelsen står øverst i selve dokumentet, ikke kun her — så den følger med, når du sender det videre." />
+
+              <TextBlock Text="Indhold" Style="{StaticResource Underskrift}" Margin="0,18,0,0" />
+              <Border Background="#FF181B22" BorderBrush="{StaticResource PanelKant}" BorderThickness="1"
+                      CornerRadius="8" Padding="16,13" Margin="0,5,0,0">
+                <TextBlock x:Name="Indhold" FontSize="12.5" LineHeight="21" TextWrapping="Wrap"
+                           Foreground="{StaticResource TekstSvag}" />
+              </Border>
+            </StackPanel>
+          </ScrollViewer>
+        </Grid>
+      </Border>
+    </Grid>
+
+    <Grid Grid.Row="2" Margin="0,14,0,0">
+      <TextBlock x:Name="Status" VerticalAlignment="Center" FontSize="12"
+                 Foreground="{StaticResource TekstMeget}" TextWrapping="Wrap" />
+
+      <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+        <Button x:Name="SletKnap" Content="Slet dokument" Click="Slet_Click" IsEnabled="False"
+                Margin="0,0,8,0" Padding="14,8" />
+        <Button x:Name="MappeKnap" Content="Åbn mappen" Click="Mappe_Click" Margin="0,0,8,0" Padding="14,8" />
+        <Button x:Name="GemKnap" Content="Gem beskrivelse" Click="Gem_Click" IsEnabled="False"
+                Margin="0,0,8,0" Padding="14,8" />
+        <Button x:Name="AabnKnap" Content="Åbn dokumentet" Click="Aabn_Click" IsEnabled="False"
+                Padding="18,8" Background="{StaticResource Accent}" Foreground="#FF0B1220"
+                BorderThickness="0" FontWeight="SemiBold" />
+      </StackPanel>
+    </Grid>
+  </Grid>
+</UserControl>

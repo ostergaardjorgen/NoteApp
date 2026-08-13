@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using NoteApp.Core;
+using NoteApp.Core.Documents;
 using NoteApp.Core.Llm;
 
 namespace NoteApp.Desktop.Transcribe;
@@ -156,6 +157,7 @@ public partial class TranscribeView : UserControl
         // man er kommet efter, naar optagelsen er skrevet ud een gang.
         var færdig = valgt is null ? null : FindTekst(valgt.Mappe);
         ReferatKnap.IsEnabled = færdig is not null && _afbryd is null;
+        OmdoebKnap.IsEnabled = valgt is not null && _afbryd is null;
 
         if (færdig is not null)
         {
@@ -185,6 +187,60 @@ public partial class TranscribeView : UserControl
             ? "Vælg en optagelse i listen til venstre og tryk «Transskribér» nederst til højre. Så skriver appen alt det talte ud som tekst, du kan læse, søge i og rette."
             : $"«{valgt.Titel}» er klar. Tryk «Transskribér» nederst til højre, så skriver appen alt det talte ud som tekst, du kan læse, søge i og rette.";
         Status.Text = "";
+    }
+
+    /// <summary>Rejses når et dokument er lavet — så appen kan vise det frem.</summary>
+    public event Action<string>? DokumentOprettet;
+
+    // -------------------------------------------------------------- omdøbning
+
+    /// <summary>
+    /// Omdøber en optagelse.
+    ///
+    /// Kun titlen i meeting.json ændres — MAPPEN røres ikke. Et dokument, der
+    /// allerede er lavet, peger på stien, og en optagelse, der skifter sti,
+    /// ville rive den forbindelse over. Navnet er det, man leder efter; stien
+    /// er det, appen leder efter.
+    /// </summary>
+    private void Omdoeb_Click(object sender, RoutedEventArgs e)
+    {
+        if (Optagelser.SelectedItem is not OptagelseVisning valgt) return;
+
+        var meta = MeetingStore.Load(valgt.Mappe);
+        var nu = meta?.Title ?? valgt.Titel;
+
+        var vindue = new RenameWindow(nu) { Owner = Window.GetWindow(this) };
+        if (vindue.ShowDialog() != true) return;
+
+        var nyt = vindue.NytNavn;
+
+        if (meta is null)
+        {
+            MessageBox.Show(
+                "Der er ingen oplysninger gemt om den optagelse (meeting.json mangler), " +
+                "så navnet kan ikke ændres. Mappenavnet står tilbage som det er.",
+                "Kan ikke omdøbe", MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+
+        try
+        {
+            meta.Title = nyt;
+            MeetingStore.Save(valgt.Mappe, meta);
+
+            var gemtMappe = valgt.Mappe;
+            IndlaesOptagelser();
+
+            Optagelser.SelectedItem = Optagelser.Items.Cast<OptagelseVisning>()
+                .FirstOrDefault(o => o.Mappe == gemtMappe);
+
+            Status.Text = $"Omdøbt til «{nyt}».";
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Navnet kunne ikke gemmes.\n\n{ex.Message}", "Kunne ikke omdøbe",
+                MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
     }
 
     // ------------------------------------------------------------- referatet
@@ -236,27 +292,13 @@ public partial class TranscribeView : UserControl
             return;
         }
 
-        var skabelon = skabeloner[0];
+        var dialog = new Documents.NewDocumentWindow(valgt.Titel, skabeloner, modeller)
+        { Owner = Window.GetWindow(this) };
 
-        // Skabelonens foretrukne model, hvis den er hentet. Ellers den foerste
-        // — og det siges, saa man ikke tror, man fik den, der stod i skabelonen.
-        var model = modeller.FirstOrDefault(m =>
-            skabelon.PreferredModel is not null &&
-            Path.GetFileName(m).Contains(skabelon.PreferredModel, StringComparison.OrdinalIgnoreCase))
-            ?? modeller[0];
+        if (dialog.ShowDialog() != true || dialog.Valgt is null) return;
 
-        var byttet = skabelon.PreferredModel is not null &&
-                     !Path.GetFileName(model).Contains(skabelon.PreferredModel, StringComparison.OrdinalIgnoreCase);
-
-        var svar = MessageBox.Show(
-            $"Lav «{skabelon.Name}» af «{valgt.Titel}»?\n\n" +
-            $"Model: {Path.GetFileNameWithoutExtension(model)}" +
-            (byttet ? $"\n(skabelonen foretrækker {skabelon.PreferredModel}, som ikke er hentet)" : "") +
-            "\n\nDet tager typisk to til fire minutter. Du kan lave noget andet imens — også optage " +
-            "et nyt møde.\n\nUdkastet skal læses igennem: en sprogmodel kan skrive et tal, der ikke blev sagt.",
-            "Lav referat", MessageBoxButton.OKCancel, MessageBoxImage.Question);
-
-        if (svar != MessageBoxResult.OK) return;
+        var skabelon = dialog.Valgt;
+        var model = dialog.ModelSti;
 
         ReferatKnap.IsEnabled = false;
         KoerKnap.IsEnabled = false;
@@ -285,7 +327,24 @@ public partial class TranscribeView : UserControl
             var runner = new LlmRunner(cli);
             var r = await runner.RunAsync(model, skabelon, skabelon.Render(felter), fremdrift);
 
-            var sti = DraftStore.Save(valgt.Mappe, skabelon, r);
+            // Udkastet gemmes raat ved siden af optagelsen — det er
+            // arbejdsdokumentet. Dokumentet er det, man sender videre.
+            DraftStore.Save(valgt.Mappe, skabelon, r);
+
+            var info = new DocumentInfo
+            {
+                Title = dialog.Titel,
+                Description = dialog.Beskrivelse,
+                SourceRecording = valgt.Mappe,
+                SourceTitle = valgt.Titel,
+                Template = skabelon.Name,
+                Model = Path.GetFileNameWithoutExtension(model),
+                Seconds = r.Elapsed.TotalSeconds,
+                Markdown = r.Text.Trim(),
+                FileName = DocumentStore.FileNameFor(dialog.Titel, skabelon.Name)
+            };
+
+            var odt = DocumentStore.Save(info);
 
             Forklaring.Visibility = Visibility.Collapsed;
             ResultatRude.Visibility = Visibility.Visible;
@@ -293,8 +352,10 @@ public partial class TranscribeView : UserControl
             Resultat.Text = r.Text.Trim();
             Resultat.Foreground = (Brush)FindResource("Tekst");
 
-            Status.Text = $"Referat gemt: {Path.GetFileName(sti)} · {r.Elapsed.TotalSeconds:0} sek · " +
+            Status.Text = $"Dokument gemt: {Path.GetFileName(odt)} · {r.Elapsed.TotalSeconds:0} sek · " +
                           "læs det igennem mod udskriften, før du sender det videre";
+
+            DokumentOprettet?.Invoke(info.Id);
         }
         catch (Exception ex)
         {
