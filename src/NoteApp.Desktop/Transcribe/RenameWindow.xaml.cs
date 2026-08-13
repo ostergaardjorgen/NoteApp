@@ -14,6 +14,19 @@ public partial class RenameWindow : Window
 {
     public string NytNavn => Felt.Text.Trim();
 
+    /// <summary>
+    /// Sat, hvis brugeren valgte at kassere frem for at gemme.
+    ///
+    /// Muligheden findes, fordi man ofte trykker optag for at PRØVE noget —
+    /// virker mikrofonen, kommer den anden part med — og så skal der ikke
+    /// ligge en optagelse tilbage af det. En liste, der fyldes med prøver,
+    /// gør det svært at finde de rigtige møder.
+    /// </summary>
+    public bool Kasseret { get; private set; }
+
+    /// <summary>Slår «Kassér»-knappen til. Kun relevant lige efter et møde.</summary>
+    public void TilladKasser() => KasserKnap.Visibility = Visibility.Visible;
+
     public RenameWindow(string forslag, string overskrift, string forklaring,
                         string hjælp = "", string knap = "Gem navnet", string titel = "Navngiv")
     {
@@ -57,6 +70,20 @@ public partial class RenameWindow : Window
             return;
         }
 
+        DialogResult = true;
+    }
+
+    private void Kasser_Click(object sender, RoutedEventArgs e)
+    {
+        // Der spoerges. Det er den eneste handling i vinduet, der ikke kan
+        // fortrydes — lyden er vaek bagefter.
+        var svar = MessageBox.Show(
+            "Kassér optagelsen?\n\nLyden og noterne slettes, og det kan ikke fortrydes.",
+            "Kassér", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+
+        if (svar != MessageBoxResult.Yes) return;
+
+        Kasseret = true;
         DialogResult = true;
     }
 

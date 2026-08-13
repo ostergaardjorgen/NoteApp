@@ -1,3 +1,4 @@
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -156,8 +157,32 @@ public partial class MeetingView : UserControl
             "Mødet er slut")
         { Owner = Window.GetWindow(this) };
 
+        vindue.TilladKasser();
+
         var svar = vindue.ShowDialog();
+
+        if (svar == true && vindue.Kasseret) return null;   // null = kassér
+
         return svar == true && vindue.NytNavn.Length > 0 ? vindue.NytNavn : $"Møde {dato}";
+    }
+
+    /// <summary>
+    /// Sletter en optagelse, der blev kasseret.
+    ///
+    /// Hele mappen ryger: lyd, noter og oplysninger. Der er ikke noget at
+    /// beholde — brugeren har netop sagt, at det var en prøve.
+    /// </summary>
+    private static void Kasser(string mappe)
+    {
+        try
+        {
+            if (Directory.Exists(mappe)) Directory.Delete(mappe, recursive: true);
+        }
+        catch (Exception)
+        {
+            // Kan mappen ikke slettes — en fil kan vaere aaben — bliver den
+            // liggende. Det er spildplads, ikke et tab.
+        }
     }
 
     /// <summary>Kaldes både fra knappen og fra genvejstasten.</summary>
@@ -274,7 +299,12 @@ public partial class MeetingView : UserControl
         _session.Dispose();
         _session = null;
 
-        if (titel is not null)
+        // null betyder «kassér». Det er brugerens svar paa navnedialogen, og
+        // der er ikke noget at gemme — de trykkede optag for at proeve noget.
+        var kasseret = titel is null;
+
+        if (kasseret) Kasser(mappe);
+        else
         {
             var meta = MeetingStore.Load(mappe);
             if (meta is not null && string.IsNullOrWhiteSpace(meta.Title))
@@ -296,9 +326,20 @@ public partial class MeetingView : UserControl
         UrUnder.Text = "";
 
 
+        if (kasseret)
+        {
+            Status.Text = $"Kasseret. {længde:hh\\:mm\\:ss} lyd er slettet.";
+
+            Historik.Skriv(HaendelseType.Optagelse, "Optagelse kasseret",
+                $"{længde:hh\\:mm\\:ss} lyd og {noter} noter slettet efter brugerens valg",
+                Udfald.Afbrudt, sekunder: længde.TotalSeconds);
+
+            return null;
+        }
+
         Status.Text = $"Gemt: {længde:hh\\:mm\\:ss} lyd, {noter} noter.";
 
-        Historik.Skriv(HaendelseType.Optagelse, $"Møde optaget: {titel ?? "uden titel"}",
+        Historik.Skriv(HaendelseType.Optagelse, $"Møde optaget: {titel}",
             $"{længde:hh\\:mm\\:ss} lyd · {noter} noter · " + (_varOnline ? "begge spor" : "kun mikrofon"),
             længde < TimeSpan.FromSeconds(10) ? Udfald.SeEfter : Udfald.Fuldført,
             sti: mappe, sekunder: længde.TotalSeconds);

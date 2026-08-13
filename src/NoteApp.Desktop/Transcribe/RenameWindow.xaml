@@ -18,12 +18,21 @@
     <TextBlock x:Name="Hjaelp" FontSize="12" Margin="2,8,0,0" TextWrapping="Wrap"
                Foreground="{StaticResource TekstMeget}" />
 
-    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,22,0,0">
+    <Grid Margin="0,22,0,0">
+      <!-- Kassér står til VENSTRE og alene. Den er den eneste handling her,
+           der ikke kan fortrydes, og den skal ikke ligge ved siden af den, man
+           trykker på hver gang. -->
+      <Button x:Name="KasserKnap" Content="Kassér optagelsen" Click="Kasser_Click"
+              HorizontalAlignment="Left" Padding="16,9" Visibility="Collapsed"
+              Foreground="{StaticResource Optager}" />
+
+    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
       <Button x:Name="AnnullerKnap" Content="Annullér" Click="Annuller_Click" Padding="18,9"
               Margin="0,0,10,0" IsCancel="True" />
       <Button x:Name="GemKnap" Content="Gem navnet" Click="Gem_Click" Padding="22,9" IsDefault="True"
               Background="{StaticResource Accent}" Foreground="#FF0B1220" BorderThickness="0"
               FontWeight="SemiBold" />
     </StackPanel>
+    </Grid>
   </StackPanel>
 </Window>
