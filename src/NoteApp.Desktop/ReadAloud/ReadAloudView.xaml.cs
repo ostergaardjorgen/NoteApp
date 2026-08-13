@@ -238,27 +238,40 @@ public partial class ReadAloudView : UserControl
         foreach (var mappe in Directory.GetDirectories(UserDataPaths.Meetings))
         {
             var meta = MeetingStore.Load(mappe);
-            if (meta?.Title is null) continue;
+            if (meta is null) continue;
 
-            // «Fase0-oplaesning» er den gamle titel, fra dengang der kun fandtes
-            // een tekst. Den taeller som den danske — optagelsen er lavet, og
-            // den skal ikke forsvinde fra taellingen, fordi navngivningen er
-            // aendret bagefter.
-            // Der læses BÅDE «Oplæsning-» og den gamle «Oplaesning-». Titlen
-            // blev skrevet uden æ indtil 13. august, og en optagelse må ikke
-            // forsvinde fra tællingen, fordi stavemåden er rettet bagefter.
-            var gammel = meta.Title.Equals("Fase0-oplaesning", StringComparison.OrdinalIgnoreCase);
-            if (!gammel &&
-                !meta.Title.StartsWith("Oplæsning", StringComparison.OrdinalIgnoreCase) &&
-                !meta.Title.StartsWith("Oplaesning", StringComparison.OrdinalIgnoreCase))
-                continue;
+            // Tre kilder, i den rækkefølge de er til at stole på.
+            //
+            //   1. Feltet. Det er appens eget og kan ikke ændres af en omdøbning.
+            //   2. Titlen. Sådan blev det gemt indtil 13. august.
+            //   3. MAPPENAVNET. Det ændrer sig ikke, når en optagelse omdøbes.
+            //
+            // Punkt 3 er ikke pynt: den første oplæsning hed «Fase0-oplaesning»
+            // og blev omdøbt til «Første oplæsning». Så forsvandt den fra
+            // tællingen — den var der, men appen kunne ikke længere se det.
+            // Titlen er brugerens og skal kunne hedde hvad som helst.
+            var kilde = meta.ReadAloudScript;
+
+            if (kilde is null)
+            {
+                var navn = (meta.Title ?? "") + " " + Path.GetFileName(mappe);
+
+                var erOplæsning =
+                    navn.Contains("Oplæsning", StringComparison.OrdinalIgnoreCase) ||
+                    navn.Contains("Oplaesning", StringComparison.OrdinalIgnoreCase);
+
+                if (!erOplæsning) continue;
+
+                // Findes ingen nøgle i navnet, er det den gamle enkelttekst —
+                // dengang fandtes kun den danske.
+                kilde = ScriptDocument.Available
+                    .Where(t => navn.Contains(t.Key, StringComparison.OrdinalIgnoreCase))
+                    .Select(t => t.Key)
+                    .FirstOrDefault() ?? "dansk";
+            }
 
             minutter += meta.DurationSeconds / 60.0;
-
-            if (gammel) { læst.Add("dansk"); continue; }
-
-            foreach (var t in ScriptDocument.Available)
-                if (meta.Title.EndsWith(t.Key, StringComparison.OrdinalIgnoreCase)) læst.Add(t.Key);
+            læst.Add(kilde);
         }
 
         return (minutter, læst);
@@ -303,8 +316,17 @@ public partial class ReadAloudView : UserControl
             // staves den med æ. At den samtidig bruges til at genkende, hvilken
             // tekst der blev læst, er en teknisk detalje — den må ikke koste
             // en stavefejl på skærmen.
-            "Oplæsning-" + ScriptDocument.Available[ValgtIndex].Key,
+            "Oplæsning — " + ScriptDocument.Available[ValgtIndex].Name,
             mik, null);
+
+        // NØGLEN gemmes i sit eget felt. Titlen er brugerens og må hedde hvad
+        // som helst; feltet her er appens og overlever en omdøbning.
+        var metaNy = MeetingStore.Load(_session.SessionDir);
+        if (metaNy is not null)
+        {
+            metaNy.ReadAloudScript = ScriptDocument.Available[ValgtIndex].Key;
+            MeetingStore.Save(_session.SessionDir, metaNy);
+        }
         _session.IncidentOccurred += i => Dispatcher.Invoke(() =>
             Status.Text = $"Hændelse ved {TimeSpan.FromSeconds(i.AtSeconds):mm\\:ss}: {i.What}");
 

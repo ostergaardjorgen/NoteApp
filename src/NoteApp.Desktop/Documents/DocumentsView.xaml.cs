@@ -60,7 +60,7 @@ public partial class DocumentsView : UserControl
         if (Liste.SelectedItem is not DocumentInfo d)
         {
             _valgt = null;
-            SletKnap.IsEnabled = AabnKnap.IsEnabled = GemKnap.IsEnabled = false;
+            SletKnap.IsEnabled = AabnKnap.IsEnabled = GemKnap.IsEnabled = OmdoebKnap.IsEnabled = false;
             return;
         }
 
@@ -92,6 +92,7 @@ public partial class DocumentsView : UserControl
         _indlæser = false;
 
         SletKnap.IsEnabled = true;
+        OmdoebKnap.IsEnabled = true;
         AabnKnap.IsEnabled = findes;
         GemKnap.IsEnabled = false;
         Status.Text = findes ? fil : "Dokumentfilen findes ikke længere — kun oplysningerne om den.";
@@ -100,6 +101,39 @@ public partial class DocumentsView : UserControl
     private void Beskrivelse_Aendret(object sender, TextChangedEventArgs e)
     {
         if (!_indlæser) GemKnap.IsEnabled = _valgt is not null;
+    }
+
+    /// <summary>
+    /// Omdøber dokumentet. Titlen skrives ind i selve .odt-filen, så den
+    /// følger med, når filen sendes videre.
+    ///
+    /// FILNAVNET røres ikke. Filen kan allerede være sendt eller åbnet af
+    /// nogen, og et filnavn, der skifter under hånden, kan ikke findes igen.
+    /// Sammenhængen holdes af id'et, ikke af navnet.
+    /// </summary>
+    private void Omdoeb_Click(object sender, RoutedEventArgs e)
+    {
+        if (_valgt is null) return;
+
+        var vindue = Transcribe.RenameWindow.TilDokument(_valgt.Title);
+        vindue.Owner = Window.GetWindow(this);
+
+        if (vindue.ShowDialog() != true) return;
+
+        try
+        {
+            _valgt.Title = vindue.NytNavn;
+            DocumentStore.Save(_valgt);
+
+            var id = _valgt.Id;
+            Indlæs(id);
+            Status.Text = $"Omdøbt til «{vindue.NytNavn}».";
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Navnet kunne ikke gemmes.\n\n{ex.Message}", "Kunne ikke omdøbe",
+                MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
     }
 
     private void Gem_Click(object sender, RoutedEventArgs e)

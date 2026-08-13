@@ -48,6 +48,19 @@ public sealed class MeetingMetadata
     public bool RecoveredAfterCrash { get; set; }
 
     /// <summary>
+    /// Hvilken prøvetekst der blev læst op: «dansk», «blandet», «engelsk».
+    /// Null for rigtige møder.
+    ///
+    /// Feltet findes, fordi tællingen på «Start her» før læste teksten ud af
+    /// TITLEN. Da en optagelse blev omdøbt til noget andet, forsvandt den fra
+    /// tællingen — den var der, men appen kunne ikke længere se det.
+    ///
+    /// Titlen er brugerens; den skal kunne hedde hvad som helst. Nøglen er
+    /// appens og hører i sit eget felt.
+    /// </summary>
+    public string? ReadAloudScript { get; set; }
+
+    /// <summary>
     /// Sproget mødet blev holdt på, som Whisper fandt det. Null indtil mødet
     /// er transskriberet.
     ///

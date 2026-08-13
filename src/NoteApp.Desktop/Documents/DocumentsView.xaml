@@ -132,6 +132,8 @@
                  Foreground="{StaticResource TekstMeget}" TextWrapping="Wrap" />
 
       <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+        <Button x:Name="OmdoebKnap" Content="Omdøb" Click="Omdoeb_Click" IsEnabled="False"
+                Margin="0,0,8,0" Padding="14,8" />
         <Button x:Name="SletKnap" Content="Slet dokument" Click="Slet_Click" IsEnabled="False"
                 Margin="0,0,8,0" Padding="14,8" />
         <Button x:Name="MappeKnap" Content="Åbn mappen" Click="Mappe_Click" Margin="0,0,8,0" Padding="14,8" />

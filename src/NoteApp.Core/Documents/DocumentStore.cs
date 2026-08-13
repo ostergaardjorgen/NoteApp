@@ -21,9 +21,22 @@ public sealed class DocumentInfo
 
     public DateTimeOffset Created { get; init; } = DateTimeOffset.Now;
 
-    /// <summary>Mappen med optagelsen, dokumentet er lavet af. Tom hvis kilden er væk.</summary>
-    public string SourceRecording { get; init; } = "";
-    public string SourceTitle { get; init; } = "";
+    /// <summary>
+    /// Mødets id — den ENESTE holdbare forbindelse tilbage til optagelsen.
+    ///
+    /// Stien kan flyttes, og titlen kan omdøbes; begge dele skete, og begge
+    /// dele rev forbindelsen over. Et id ændrer sig aldrig.
+    /// </summary>
+    public string SourceMeetingId { get; init; } = "";
+
+    /// <summary>
+    /// Sti og titel, som de var, da dokumentet blev lavet. De er til at VISE,
+    /// ikke til at slå op med — de kan være forældede, og de opdateres af
+    /// <see cref="DocumentStore.Opfrisk"/>, når mødet stadig findes.
+    /// </summary>
+    public string SourceRecording { get; set; } = "";
+
+    public string SourceTitle { get; set; } = "";
 
     public string Template { get; init; } = "";
     public string Model { get; init; } = "";
@@ -91,6 +104,33 @@ public static class DocumentStore
         return Save(info);
     }
 
+    /// <summary>
+    /// Henter kildens NUVÆRENDE navn og sti ud fra mødets id.
+    ///
+    /// Uden dette ville et dokument blive ved med at vise det navn, mødet
+    /// havde, da dokumentet blev lavet — også efter en omdøbning. To navne på
+    /// den samme optagelse er værre end ét forkert: man kan ikke se, om det er
+    /// det samme møde.
+    ///
+    /// Findes mødet ikke længere, bliver de gamle værdier stående. De er det
+    /// eneste spor tilbage af, hvad dokumentet blev lavet af.
+    /// </summary>
+    public static bool Opfrisk(DocumentInfo info)
+    {
+        if (info.SourceMeetingId.Length == 0) return false;
+
+        var fundet = MeetingStore.FindById(info.SourceMeetingId);
+        if (fundet is null) return false;
+
+        var (mappe, meta) = fundet.Value;
+        var ændret = info.SourceRecording != mappe ||
+                     info.SourceTitle != (meta.Title ?? Path.GetFileName(mappe));
+
+        info.SourceRecording = mappe;
+        info.SourceTitle = meta.Title ?? Path.GetFileName(mappe);
+        return ændret;
+    }
+
     public static IReadOnlyList<DocumentInfo> LoadAll()
     {
         var liste = new List<DocumentInfo>();
@@ -101,7 +141,12 @@ public static class DocumentStore
             try
             {
                 var d = JsonSerializer.Deserialize<DocumentInfo>(File.ReadAllText(fil, Encoding.UTF8));
-                if (d is not null) liste.Add(d);
+                if (d is null) continue;
+
+                // Navnet paa kilden hentes friskt. Er moedet doebt om, foelger
+                // dokumentet med af sig selv.
+                Opfrisk(d);
+                liste.Add(d);
             }
             catch (JsonException)
             {

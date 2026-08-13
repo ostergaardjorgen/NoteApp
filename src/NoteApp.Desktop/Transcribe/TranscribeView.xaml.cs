@@ -320,6 +320,9 @@ public partial class TranscribeView : UserControl
         {
             Title = dialog.Titel,
             Description = dialog.Beskrivelse,
+            // Id'et er forbindelsen. Sti og titel gemmes kun til visning og
+            // bliver frisket op, naar dokumentet laeses.
+            SourceMeetingId = meta?.Id.ToString() ?? "",
             SourceRecording = valgt.Mappe,
             SourceTitle = valgt.Titel,
             Template = skabelon.Name,
@@ -431,6 +434,23 @@ public partial class TranscribeView : UserControl
             }
 
             VisResultat(r, rettelser);
+
+            // Vejen videre foreslås, frem for at man skal finde den selv. Det
+            // er alligevel dét, man kom efter — teksten er sjældent målet.
+            //
+            // Der spørges KUN, når der er en model at gøre det med. Et tilbud,
+            // der ender i «du mangler noget», er ikke et tilbud.
+            if (LlmRunner.FindCli() is not null && LlmRunner.InstalledModels().Count > 0)
+            {
+                var svar = MessageBox.Show(
+                    $"«{valgt.Titel}» er skrevet ud.\n\n" +
+                    "Vil du lave et dokument ud af den nu — et referat, en opgaveliste eller " +
+                    "hvad du selv har lavet af skabeloner?\n\n" +
+                    "Du kan også gøre det senere med knappen «Opret dokument».",
+                    "Teksten er klar", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+                if (svar == MessageBoxResult.Yes) Referat_Click(this, new RoutedEventArgs());
+            }
             _sidsteMappe = valgt.Mappe;
         }
         catch (OperationCanceledException)

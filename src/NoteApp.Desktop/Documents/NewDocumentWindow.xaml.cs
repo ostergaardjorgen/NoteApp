@@ -22,6 +22,7 @@ public partial class NewDocumentWindow : Window
     public string ModelSti { get; private set; } = "";
 
     private readonly IReadOnlyList<string> _modeller;
+    private readonly string _optagelse;
 
     public NewDocumentWindow(string optagelsesTitel, IReadOnlyList<PromptTemplate> skabeloner,
                              IReadOnlyList<string> modeller)
@@ -29,12 +30,13 @@ public partial class NewDocumentWindow : Window
         InitializeComponent();
 
         _modeller = modeller;
+        _optagelse = optagelsesTitel;
         Kilde.Text = $"Bygges på «{optagelsesTitel}». Dokumentet gemmes som .odt og kan åbnes i Word.";
 
         Skabeloner.ItemsSource = skabeloner;
         if (skabeloner.Count > 0) Skabeloner.SelectedIndex = 0;
 
-        FeltTitel.Text = optagelsesTitel;
+        // Titlen saettes af Skabelon_Valgt, som fyrer paa SelectedIndex ovenfor.
         FeltTitel.Focus();
         FeltTitel.SelectAll();
     }
@@ -58,8 +60,10 @@ public partial class NewDocumentWindow : Window
                 ? $"Sprogmodel: {Path.GetFileNameWithoutExtension(ModelSti)}. Tager typisk to til fire minutter."
                 : $"Sprogmodel: {Path.GetFileNameWithoutExtension(ModelSti)} — skabelonen foretrækker «{ønsket}», som ikke er hentet.";
 
-        if (FeltTitel.Text.Length == 0 || Valgt is not null && FeltTitel.Text == Valgt.Name)
-            FeltTitel.Text = t.Name;
+        // Dokumentets navn er optagelsens navn plus skabelonens. Saadan kan man se
+        // i listen, hvad det er, uden at aabne det.
+        if (FeltTitel.Text.Length == 0 || Valgt is not null && FeltTitel.Text == $"{_optagelse} — {Valgt.Name}")
+            FeltTitel.Text = $"{_optagelse} — {t.Name}";
 
         Valgt = t;
     }

@@ -54,6 +54,31 @@ public static class MeetingStore
         Save(sessionDir, meta);
     }
 
+    /// <summary>
+    /// Finder et møde på dets id.
+    ///
+    /// Id'et er den eneste holdbare forbindelse mellem et dokument og den
+    /// optagelse, det er lavet af. Sti og titel kan begge ændre sig — det er
+    /// sket, og begge gange rev det forbindelsen over. Derfor slås der op på
+    /// id og ikke på navn.
+    ///
+    /// Der ledes i mapperne frem for i et register: et register kan komme ud
+    /// af trit med det, der ligger på disken, og så peger det på noget, der
+    /// ikke er der.
+    /// </summary>
+    public static (string Mappe, MeetingMetadata Meta)? FindById(string id)
+    {
+        if (string.IsNullOrWhiteSpace(id) || !Directory.Exists(UserDataPaths.Meetings)) return null;
+
+        foreach (var mappe in Directory.EnumerateDirectories(UserDataPaths.Meetings))
+        {
+            var meta = Load(mappe);
+            if (meta is not null && meta.Id.ToString() == id) return (mappe, meta);
+        }
+
+        return null;
+    }
+
     public static string Slug(string? title, DateTimeOffset when)
     {
         var stempel = when.ToString("yyyy-MM-dd_HH-mm");
