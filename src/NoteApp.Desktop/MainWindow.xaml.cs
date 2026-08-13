@@ -49,6 +49,21 @@ public partial class MainWindow : Window
             JobHvad.Text = s.Kører ? $"{s.Hvad} laves …" : s.Hvad + " færdigt";
             JobBesked.Text = s.Besked;
 
+            // Bjaelken vises kun, naar der ER noget at maale. Under
+            // modelindlaesningen staar der ingen procent, og en bjaelke paa nul
+            // i et halvt minut ligner en, der har haengt sig — dér er en
+            // ubestemt bjaelke det aerlige svar.
+            if (!s.Kører)
+            {
+                JobBar.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                JobBar.Visibility = Visibility.Visible;
+                JobBar.IsIndeterminate = s.Procent < 0;
+                if (s.Procent >= 0) JobBar.Value = s.Procent;
+            }
+
             JobPrik.Fill = (System.Windows.Media.Brush)FindResource(s.Kører ? "Accent" : "Godkendt");
             JobAfbrydKnap.Visibility = s.Kører ? Visibility.Visible : Visibility.Collapsed;
             JobLukKnap.Visibility = s.Kører ? Visibility.Collapsed : Visibility.Visible;
@@ -128,6 +143,12 @@ public partial class MainWindow : Window
         // skærm der vises. Den bygges én gang og bliver siddende — en optagelse
         // må aldrig kunne dø af, at man klikker på et menupunkt.
         OptagBjaelke.Content = _moede;
+
+        // Startskærmen sættes HER, ikke af Nav_Changed. Menupunktet er markeret
+        // fra XAML'en, men Checked fyrer under InitializeComponent, hvor
+        // Indhold endnu er null — så handleren returnerer, og skærmen stod tom,
+        // indtil man klikkede på et andet punkt og tilbage igen.
+        Indhold.Content = _oplaesning;
 
         // Genvejstasten kobles på, når vinduet findes. Virker den ikke, skal
         // det siges — en genvej, der stille er død, opdages først den dag, man
@@ -212,6 +233,11 @@ public partial class MainWindow : Window
         else if (NavFiler.IsChecked == true)
         {
             Indhold.Content = new FilesView();
+        }
+        else if (NavHistorik.IsChecked == true)
+        {
+            // Bygges hver gang: historikken skal vise det, der lige er sket.
+            Indhold.Content = new History.HistoryView();
         }
         else if (NavIndstillinger.IsChecked == true)
         {

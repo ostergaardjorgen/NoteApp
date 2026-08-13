@@ -27,6 +27,9 @@ public partial class MeetingView : UserControl
     private readonly DispatcherTimer _ur;
     private readonly List<NoteVisning> _noter = new();
 
+    /// <summary>Om den koerende optagelse ogsaa tager hoejttalersporet med.</summary>
+    private bool _varOnline;
+
     public MeetingView()
     {
         InitializeComponent();
@@ -189,6 +192,7 @@ public partial class MeetingView : UserControl
         }
 
         var online = TypeOnline.IsChecked == true;
+        _varOnline = online;
         DeviceInfo? højttaler = null;
 
         if (online)
@@ -318,6 +322,11 @@ public partial class MeetingView : UserControl
 
 
         Status.Text = $"Gemt: {længde:hh\\:mm\\:ss} lyd, {noter} noter.";
+
+        Historik.Skriv(HaendelseType.Optagelse, $"Møde optaget: {titel ?? "uden titel"}",
+            $"{længde:hh\\:mm\\:ss} lyd · {noter} noter · " + (_varOnline ? "online, begge spor" : "fysisk, kun mikrofon"),
+            længde < TimeSpan.FromSeconds(10) ? Udfald.SeEfter : Udfald.Fuldført,
+            sti: mappe, sekunder: længde.TotalSeconds);
 
         FærdigMedMøde?.Invoke(mappe);
         return mappe;

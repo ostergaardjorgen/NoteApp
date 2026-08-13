@@ -6,8 +6,14 @@ using NoteApp.Core.Llm;
 
 namespace NoteApp.Desktop.Jobs;
 
-/// <summary>Hvad der sker lige nu, til den linje der altid er fremme.</summary>
-public sealed record JobStatus(string Hvad, string Besked, bool Kører);
+/// <summary>
+/// Hvad der sker lige nu, til den linje der altid er fremme.
+///
+/// <paramref name="Procent"/> er negativ, når der ikke er noget at måle endnu
+/// — under modelindlæsningen ved ingen, hvor lang tid der er tilbage, og en
+/// bjælke, der står på nul i et halvt minut, ligner en, der har hængt sig.
+/// </summary>
+public sealed record JobStatus(string Hvad, string Besked, bool Kører, double Procent = -1);
 
 /// <summary>
 /// De lange kørsler, der skal overleve, at man går et andet sted hen i appen.
@@ -71,7 +77,11 @@ public static class BackgroundJobs
 
         try
         {
-            var fremdrift = new Progress<LlmProgress>(p => Meld(p.Message));
+            var fremdrift = new Progress<LlmProgress>(p =>
+                Meld(p.Ord > 0
+                        ? $"{p.Ord} ord skrevet · {p.Forloebet.TotalSeconds:0} sek"
+                        : p.Message,
+                     procent: p.Ord > 0 ? p.Percent : -1));
             var runner = new LlmRunner(cli);
             var r = await runner.RunAsync(model, skabelon, skabelon.Render(felter), fremdrift, _afbryd.Token);
 
@@ -82,15 +92,25 @@ public static class BackgroundJobs
             skabelonInfo.Markdown = r.Text.Trim();
             var odt = DocumentStore.Save(skabelonInfo);
 
+            Historik.Skriv(HaendelseType.Dokument, $"Dokument oprettet: {skabelonInfo.Title}",
+                $"Skabelon «{skabelon.Name}» · {r.ResponseTokens} tokens · {r.TokensPerSecond:0.0}/sek",
+                Udfald.Fuldført, skabelonInfo.Model, odt, r.Elapsed.TotalSeconds);
+
             Meld($"Færdigt: {Path.GetFileName(odt)} · {r.Elapsed.TotalSeconds:0} sek", kører: false);
             DokumentFærdigt?.Invoke(skabelonInfo.Id);
         }
         catch (OperationCanceledException)
         {
+            Historik.Skriv(HaendelseType.Dokument, $"Dokument afbrudt: {skabelonInfo.Title}",
+                "Brugeren stoppede kørslen", Udfald.Afbrudt, skabelonInfo.Model);
+
             Meld("Afbrudt. Der blev ikke gemt noget dokument.", kører: false);
         }
         catch (Exception ex)
         {
+            Historik.Skriv(HaendelseType.Dokument, $"Dokument fejlede: {skabelonInfo.Title}",
+                ex.Message, Udfald.Fejlet, skabelonInfo.Model);
+
             Meld($"Dokumentet blev ikke lavet: {ex.Message}", kører: false);
 
             MessageBox.Show(
@@ -105,6 +125,6 @@ public static class BackgroundJobs
         }
     }
 
-    private static void Meld(string besked, bool kører = true) =>
-        Ændret?.Invoke(new JobStatus("Dokument", besked, kører));
+    private static void Meld(string besked, bool kører = true, double procent = -1) =>
+        Ændret?.Invoke(new JobStatus("Dokument", besked, kører, procent));
 }

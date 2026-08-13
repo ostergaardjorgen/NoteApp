@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -493,6 +493,19 @@ public partial class TranscribeView : UserControl
             var antal = rettelser.Sum(x => x.Count);
             rettet = $" · {antal} rettet fra din ordbog";
         }
+
+        // Historikken. Et usikkert sprogvalg skal stå som «se efter», ikke som
+        // fuldført: netop dét kostede en times møde, der blev skrevet ned på
+        // engelsk, fordi de første tredive sekunder var på engelsk.
+        var usikker = r.LanguageProbability is double p2 && p2 < 0.7;
+        Historik.Skriv(
+            HaendelseType.Transskription,
+            usikker ? "Transskription færdig — sproget er usikkert" : "Transskription færdig",
+            $"{TimeSpan.FromSeconds(r.AudioSeconds):hh\\:mm\\:ss} lyd · sprog {Transcriber.LanguageName(r.DetectedLanguage)}" +
+            (r.LanguageProbability is double p3 ? $" ({p3 * 100:0}% sikker)" : " (valgt)") +
+            $" · RTF {r.RealTimeFactor:0.00}{rettet}",
+            usikker ? Udfald.SeEfter : Udfald.Fuldført,
+            r.EngineId, r.TextPath, r.ElapsedSeconds);
 
         Status.Text = $"Færdig · {sprog}{rettet} · {r.EngineId} · gemt som {Path.GetFileName(r.TextPath)}";
         AabnKnap.IsEnabled = true;

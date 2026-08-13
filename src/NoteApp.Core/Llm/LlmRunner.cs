@@ -13,7 +13,20 @@ public sealed record LlmResult(
     public double TokensPerSecond => Elapsed.TotalSeconds <= 0 ? 0 : ResponseTokens / Elapsed.TotalSeconds;
 }
 
-public sealed record LlmProgress(string Message, string? PartialText = null);
+/// <summary>
+/// Fremdrift under en kørsel.
+///
+/// <paramref name="Percent"/> er ord skrevet i forhold til skabelonens loft.
+/// Det er et LOFT, ikke et maal: modellen stopper som regel af sig selv, foer
+/// den naar det, og saa springer bjaelken fra fx 60 til faerdig. Derfor staar
+/// de faktiske tal ved siden af — «312 ord · 84 sek» kan man forholde sig til,
+/// selv naar procenten ikke naar hele vejen.
+///
+/// Alternativet var en snurrende cirkel, og den kan ikke svare paa det, man
+/// spoerger om: koerer den stadig, eller er den gaaet i staa?
+/// </summary>
+public sealed record LlmProgress(string Message, string? PartialText = null,
+                                 int Ord = 0, double Percent = 0, TimeSpan Forloebet = default);
 
 /// <summary>
 /// Kører en lokal sprogmodel gennem llama.cpp.
@@ -176,11 +189,25 @@ public sealed class LlmRunner
         // llama-cli skriver svaret paa stdout og alt om modelindlaesning,
         // hastighed og hukommelse paa stderr. Begge skal laeses, ellers
         // fyldes bufferen og processen gaar i staa.
+        // Ord skrevet indtil nu. Tokens kan ikke taelles herfra — llama-cli
+        // oplyser dem foerst til sidst — men ord kan, og et ord er cirka 1,3
+        // token paa dansk. Det er godt nok til en bjaelke, og tallet ved siden
+        // af er det rigtige ord-tal, ikke et skoen.
+        var ordSkrevet = 0;
+        var maksOrd = Math.Max(1, (int)(template.MaxTokens / 1.3));
+
         p.OutputDataReceived += (_, e) =>
         {
             if (e.Data is null) return;
             svar.AppendLine(e.Data);
-            progress?.Report(new LlmProgress("Skriver …", e.Data));
+
+            ordSkrevet += e.Data.Split(' ', StringSplitOptions.RemoveEmptyEntries).Length;
+
+            progress?.Report(new LlmProgress(
+                "Skriver …", e.Data,
+                ordSkrevet,
+                Math.Min(100, ordSkrevet * 100.0 / maksOrd),
+                ur.Elapsed));
         };
         p.ErrorDataReceived += (_, e) =>
         {

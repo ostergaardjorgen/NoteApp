@@ -1,0 +1,106 @@
+<UserControl x:Class="NoteApp.Desktop.History.HistoryView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="{StaticResource Baggrund}">
+
+  <Grid Margin="24,20,24,20">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+
+    <StackPanel Grid.Row="0" Margin="0,0,0,14">
+      <TextBlock Text="Historik" Style="{StaticResource Overskrift}" />
+      <TextBlock Style="{StaticResource Underskrift}"
+                 Text="Alt appen har gjort, hvornår, med hvilken model — og hvordan det gik." />
+    </StackPanel>
+
+    <!-- Det, en revision spørger om, står som ét tal. Et svar, der skal
+         udledes ved at læse en liste igennem, er ikke et svar. -->
+    <Border Grid.Row="1" Background="#FF16241C" BorderBrush="{StaticResource Godkendt}"
+            BorderThickness="1" CornerRadius="10" Padding="20,15" Margin="0,0,0,14">
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="Auto" />
+          <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <TextBlock Grid.Column="0" x:Name="UdgaaendeTal" FontSize="30" FontWeight="SemiBold"
+                   VerticalAlignment="Center" Margin="0,0,20,0"
+                   Foreground="{StaticResource Godkendt}" />
+
+        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+          <TextBlock x:Name="UdgaaendeOverskrift" FontSize="14.5" FontWeight="SemiBold" />
+          <TextBlock x:Name="UdgaaendeTekst" FontSize="12.5" Margin="0,4,0,0" TextWrapping="Wrap"
+                     LineHeight="20" Foreground="{StaticResource TekstSvag}" />
+        </StackPanel>
+      </Grid>
+    </Border>
+
+    <Border Grid.Row="2" Background="{StaticResource Panel}" CornerRadius="10"
+            BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+      <DockPanel>
+        <Grid DockPanel.Dock="Top" Margin="20,16,20,10">
+          <TextBlock x:Name="Antal" FontSize="13.5" FontWeight="SemiBold" VerticalAlignment="Center" />
+          <ComboBox x:Name="Filter" HorizontalAlignment="Right" Width="200"
+                    SelectionChanged="Filter_Valgt" />
+        </Grid>
+
+        <TextBlock x:Name="TomTekst" DockPanel.Dock="Top" Margin="20,10,20,0" FontSize="13"
+                   TextWrapping="Wrap" LineHeight="21" Visibility="Collapsed"
+                   Foreground="{StaticResource TekstMeget}"
+                   Text="Der er ikke sket noget endnu. Historikken fyldes, efterhånden som du optager møder, skriver dem ud og laver dokumenter." />
+
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="8,0,8,10">
+          <ItemsControl x:Name="Liste">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <Border Background="#FF181B22" CornerRadius="8" Padding="16,12" Margin="12,4"
+                        BorderThickness="1" BorderBrush="{Binding Kantfarve}">
+                  <Grid>
+                    <Grid.ColumnDefinitions>
+                      <ColumnDefinition Width="Auto" />
+                      <ColumnDefinition Width="*" />
+                      <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" Margin="0,0,20,0" MinWidth="110">
+                      <TextBlock Text="{Binding Klokkeslet}" FontFamily="Consolas" FontSize="13" />
+                      <TextBlock Text="{Binding Dato}" FontSize="11" Margin="0,2,0,0"
+                                 Foreground="{StaticResource TekstMeget}" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1">
+                      <TextBlock Text="{Binding Hvad}" FontSize="13.5" FontWeight="SemiBold"
+                                 TextWrapping="Wrap" />
+                      <TextBlock Text="{Binding Detaljer}" FontSize="12" Margin="0,3,0,0"
+                                 TextWrapping="Wrap" Foreground="{StaticResource TekstSvag}" />
+                      <TextBlock Text="{Binding Model}" FontSize="11.5" Margin="0,3,0,0"
+                                 TextWrapping="Wrap" Foreground="{StaticResource TekstMeget}" />
+                    </StackPanel>
+
+                    <TextBlock Grid.Column="2" Text="{Binding UdfaldTekst}" FontSize="12"
+                               FontWeight="SemiBold" VerticalAlignment="Center" Margin="16,0,0,0"
+                               Foreground="{Binding Kantfarve}" />
+                  </Grid>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </ScrollViewer>
+      </DockPanel>
+    </Border>
+
+    <Grid Grid.Row="3" Margin="0,14,0,0">
+      <TextBlock x:Name="Status" VerticalAlignment="Center" FontSize="12"
+                 Foreground="{StaticResource TekstMeget}" TextWrapping="Wrap" />
+
+      <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+        <Button Content="Åbn logfilen" Click="Aabn_Click" Padding="14,8" Margin="0,0,8,0" />
+        <Button Content="Opdatér" Click="Genindlaes_Click" Padding="14,8" />
+      </StackPanel>
+    </Grid>
+  </Grid>
+</UserControl>
