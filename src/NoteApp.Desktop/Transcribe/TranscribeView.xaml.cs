@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -189,9 +189,6 @@ public partial class TranscribeView : UserControl
         Status.Text = "";
     }
 
-    /// <summary>Rejses når et dokument er lavet — så appen kan vise det frem.</summary>
-    public event Action<string>? DokumentOprettet;
-
     // -------------------------------------------------------------- omdøbning
 
     /// <summary>
@@ -253,7 +250,7 @@ public partial class TranscribeView : UserControl
     /// Sprogmodellen er frivillig. Er der ingen, siges det med hvad man gør
     /// ved det, og resten af appen virker uændret.
     /// </summary>
-    private async void Referat_Click(object sender, RoutedEventArgs e)
+    private void Referat_Click(object sender, RoutedEventArgs e)
     {
         if (Optagelser.SelectedItem is not OptagelseVisning valgt) return;
 
@@ -300,18 +297,12 @@ public partial class TranscribeView : UserControl
         var skabelon = dialog.Valgt;
         var model = dialog.ModelSti;
 
-        ReferatKnap.IsEnabled = false;
-        KoerKnap.IsEnabled = false;
-        Fremdrift.Visibility = Visibility.Visible;
-        Fremdrift.IsIndeterminate = true;
-        Status.Text = "Starter sprogmodellen …";
+        var meta = MeetingStore.Load(valgt.Mappe);
 
-        try
+        Dictionary<string, string?> felter;
+        using (var ordbog = new LearningStore())
         {
-            var meta = MeetingStore.Load(valgt.Mappe);
-            using var ordbog = new LearningStore();
-
-            var felter = new Dictionary<string, string?>
+            felter = new Dictionary<string, string?>
             {
                 ["transskription"] = File.ReadAllText(tekstFil, System.Text.Encoding.UTF8),
                 ["titel"] = valgt.Titel,
@@ -322,54 +313,26 @@ public partial class TranscribeView : UserControl
                 ["ordbog"] = ordbog.BuildWhisperPrompt(tokenBudget: 2000)
                     .Replace("Vi taler om ", "").TrimEnd('.')
             };
-
-            var fremdrift = new Progress<LlmProgress>(p => Status.Text = p.Message);
-            var runner = new LlmRunner(cli);
-            var r = await runner.RunAsync(model, skabelon, skabelon.Render(felter), fremdrift);
-
-            // Udkastet gemmes raat ved siden af optagelsen — det er
-            // arbejdsdokumentet. Dokumentet er det, man sender videre.
-            DraftStore.Save(valgt.Mappe, skabelon, r);
-
-            var info = new DocumentInfo
-            {
-                Title = dialog.Titel,
-                Description = dialog.Beskrivelse,
-                SourceRecording = valgt.Mappe,
-                SourceTitle = valgt.Titel,
-                Template = skabelon.Name,
-                Model = Path.GetFileNameWithoutExtension(model),
-                Seconds = r.Elapsed.TotalSeconds,
-                Markdown = r.Text.Trim(),
-                FileName = DocumentStore.FileNameFor(dialog.Titel, skabelon.Name)
-            };
-
-            var odt = DocumentStore.Save(info);
-
-            Forklaring.Visibility = Visibility.Collapsed;
-            ResultatRude.Visibility = Visibility.Visible;
-            Maalinger.Visibility = Visibility.Collapsed;
-            Resultat.Text = r.Text.Trim();
-            Resultat.Foreground = (Brush)FindResource("Tekst");
-
-            Status.Text = $"Dokument gemt: {Path.GetFileName(odt)} · {r.Elapsed.TotalSeconds:0} sek · " +
-                          "læs det igennem mod udskriften, før du sender det videre";
-
-            DokumentOprettet?.Invoke(info.Id);
         }
-        catch (Exception ex)
+
+        var info = new DocumentInfo
         {
-            Status.Text = "Referatet blev ikke lavet.";
-            MessageBox.Show($"Referatet kunne ikke laves.\n\n{ex.Message}", "Kunne ikke lave referat",
-                MessageBoxButton.OK, MessageBoxImage.Warning);
-        }
-        finally
-        {
-            Fremdrift.IsIndeterminate = false;
-            Fremdrift.Visibility = Visibility.Collapsed;
-            ReferatKnap.IsEnabled = true;
-            KoerKnap.IsEnabled = true;
-        }
+            Title = dialog.Titel,
+            Description = dialog.Beskrivelse,
+            SourceRecording = valgt.Mappe,
+            SourceTitle = valgt.Titel,
+            Template = skabelon.Name,
+            Model = Path.GetFileNameWithoutExtension(model),
+            FileName = DocumentStore.FileNameFor(dialog.Titel, skabelon.Name)
+        };
+
+        // Koerslen sendes til baggrunden og slippes her. Laa den i denne
+        // skaerm, ville den doe, naar man klikkede paa et andet menupunkt:
+        // skaermene bygges om ved hvert skift. Fremdriften vises i bjaelken
+        // nederst i vinduet, som altid er fremme.
+        Jobs.BackgroundJobs.LavDokument(cli, model, skabelon, felter, info, valgt.Mappe);
+
+        Status.Text = "Dokumentet laves. Du kan roligt gaa videre — fremdriften staar nederst i vinduet.";
     }
 
     /// <summary>Noterne fra mødet som ren tekst, så de kan gå med til modellen.</summary>

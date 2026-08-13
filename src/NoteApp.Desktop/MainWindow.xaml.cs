@@ -6,6 +6,7 @@ using NoteApp.Desktop.Dictionary;
 using NoteApp.Desktop.Engine;
 using NoteApp.Desktop.Documents;
 using NoteApp.Desktop.Files;
+using NoteApp.Desktop.Jobs;
 using NoteApp.Desktop.Meeting;
 using NoteApp.Desktop.Preferences;
 using NoteApp.Desktop.ReadAloud;
@@ -26,6 +27,55 @@ public partial class MainWindow : Window
 
     /// <summary>Dokumentet, Dokumenter-skærmen skal åbne på. Bruges én gang.</summary>
     private string? _aabnDokument;
+
+    /// <summary>Id på det dokument, en kørsel netop har lavet.</summary>
+    private string? _færdigtDokument;
+
+    // ------------------------------------------------------------ kørselsbjælken
+
+    /// <summary>
+    /// Viser, hvad der kører. Bjælken bliver stående, når kørslen er færdig,
+    /// indtil man selv skjuler den eller går hen og ser dokumentet.
+    ///
+    /// Det er hele pointen: en kvittering, der forsvinder af sig selv, når man
+    /// står et andet sted i appen, er ikke en kvittering.
+    /// </summary>
+    private void VisJob(JobStatus s)
+    {
+        Dispatcher.Invoke(() =>
+        {
+            JobBjaelke.Visibility = Visibility.Visible;
+            JobHvad.Text = s.Kører ? $"{s.Hvad} laves …" : s.Hvad + " færdigt";
+            JobBesked.Text = s.Besked;
+
+            JobPrik.Fill = (System.Windows.Media.Brush)FindResource(s.Kører ? "Accent" : "Godkendt");
+            JobAfbrydKnap.Visibility = s.Kører ? Visibility.Visible : Visibility.Collapsed;
+            JobLukKnap.Visibility = s.Kører ? Visibility.Collapsed : Visibility.Visible;
+            JobVisKnap.Visibility = !s.Kører && _færdigtDokument is not null
+                ? Visibility.Visible : Visibility.Collapsed;
+        });
+    }
+
+    private void JobVis_Click(object sender, RoutedEventArgs e)
+    {
+        _aabnDokument = _færdigtDokument;
+        JobBjaelke.Visibility = Visibility.Collapsed;
+
+        if (NavDokumenter.IsChecked == true) Nav_Changed(this, new RoutedEventArgs());
+        else NavDokumenter.IsChecked = true;
+    }
+
+    private void JobLuk_Click(object sender, RoutedEventArgs e) =>
+        JobBjaelke.Visibility = Visibility.Collapsed;
+
+    private void JobAfbryd_Click(object sender, RoutedEventArgs e)
+    {
+        var svar = MessageBox.Show(
+            "Afbryd kørslen?\n\nDer bliver ikke gemt noget dokument, og arbejdet skal gøres om.",
+            "Afbryd", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+
+        if (svar == MessageBoxResult.Yes) BackgroundJobs.Afbryd();
+    }
 
     public MainWindow()
     {
@@ -59,7 +109,16 @@ public partial class MainWindow : Window
             NavTransskriber.IsChecked = true;
         };
 
-        Indhold.Content = _moede;
+        // Kørsler, der ikke hører til nogen skærm. Bjælken nederst er det
+        // eneste sted, de kan ses fra — derfor bor den i vinduet og ikke i en
+        // skærm, der bliver bygget om, hver gang man skifter menupunkt.
+        BackgroundJobs.Ændret += VisJob;
+        BackgroundJobs.DokumentFærdigt += id => _færdigtDokument = id;
+
+        // Optagebjælken ligger fast øverst og er den samme, uanset hvilken
+        // skærm der vises. Den bygges én gang og bliver siddende — en optagelse
+        // må aldrig kunne dø af, at man klikker på et menupunkt.
+        OptagBjaelke.Content = _moede;
 
         // Genvejstasten kobles på, når vinduet findes. Virker den ikke, skal
         // det siges — en genvej, der stille er død, opdages først den dag, man
@@ -99,7 +158,6 @@ public partial class MainWindow : Window
         Show();
         Activate();
 
-        NavMoede.IsChecked = true;
         _moede.Lynstart();
     }
 
@@ -124,17 +182,7 @@ public partial class MainWindow : Window
             var aabn = _aabnOptagelse;
             _aabnOptagelse = null;          // gælder kun dette skift
 
-            var skærm = new TranscribeView(aabn);
-
-            // Er der lige lavet et dokument, skal appen vise det frem. Ellers
-            // er det gemt et sted, man selv skal finde.
-            skærm.DokumentOprettet += id =>
-            {
-                _aabnDokument = id;
-                NavDokumenter.IsChecked = true;
-            };
-
-            Indhold.Content = skærm;
+            Indhold.Content = new TranscribeView(aabn);
         }
         else if (NavDokumenter.IsChecked == true)
         {
@@ -162,13 +210,9 @@ public partial class MainWindow : Window
             // NU, ikke da appen startede.
             Indhold.Content = new SettingsView();
         }
-        else if (NavOplaesning.IsChecked == true)
-        {
-            Indhold.Content = _oplaesning;
-        }
         else
         {
-            Indhold.Content = _moede;
+            Indhold.Content = _oplaesning;
         }
     }
 

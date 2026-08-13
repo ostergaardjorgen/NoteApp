@@ -6,7 +6,20 @@
         WindowStartupLocation="CenterScreen"
         Icon="app.ico">
 
+  <!-- Tre bånd: optagebjælken øverst, appen i midten, kørselsbjælken nederst.
+       De to bjælker hører ikke til nogen skærm — den ene fordi optagelse er
+       kernefunktionen og skal kunne nås fra hvor som helst, den anden fordi en
+       kørsel på fire minutter skal kunne følges, mens man laver noget andet. -->
   <Grid>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+
+    <ContentControl x:Name="OptagBjaelke" Grid.Row="0" />
+
+    <Grid Grid.Row="1">
     <Grid.ColumnDefinitions>
       <ColumnDefinition Width="196" />
       <ColumnDefinition Width="*" />
@@ -31,13 +44,13 @@
           </StackPanel>
         </StackPanel>
         <StackPanel DockPanel.Dock="Top" Margin="0,26,0,0">
-          <!-- «Optag møde» er øverst og er det, appen er til. Alt det andet —
-               oplæsning, ordbog, skabeloner — findes for at gøre DEN bedre. -->
-          <RadioButton x:Name="NavMoede" GroupName="nav" Content="Optag møde"
-                       Checked="Nav_Changed" IsChecked="True"
-                       Style="{StaticResource NavKnap}" />
+          <!-- «Optag møde» står IKKE i menuen. Det er kernefunktionen, og den
+               skal ikke være et sted, man går hen — den ligger som en fast
+               bjælke øverst, der er der uanset hvilken skærm man står på.
+               Dermed er «Start her» det første punkt, hvilket også er det,
+               navnet lover. -->
           <RadioButton x:Name="NavOplaesning" GroupName="nav" Content="Start her"
-                       Checked="Nav_Changed"
+                       Checked="Nav_Changed" IsChecked="True"
                        Style="{StaticResource NavKnap}" />
           <!-- «Din ordbog» ligger nr. 2, lige under «Start her»: det er den, der
                tilpasser appen til dine ord, og dermed det næste skridt efter
@@ -82,5 +95,37 @@
     </Border>
 
     <ContentControl x:Name="Indhold" Grid.Column="1" />
+    </Grid>
+
+    <!-- Kørslen, der ikke hører til nogen skærm. Den ligger nederst i vinduet,
+         fordi den skal kunne ses, uanset hvor man går hen — et dokument tager
+         minutter, og i den tid vil man gerne kigge på noget andet. -->
+      <Border x:Name="JobBjaelke" Grid.Row="2" Background="#FF1A2230" Visibility="Collapsed"
+              BorderBrush="{StaticResource Accent}" BorderThickness="0,1,0,0" Padding="24,10">
+        <Grid>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+          </Grid.ColumnDefinitions>
+
+          <Ellipse x:Name="JobPrik" Grid.Column="0" Width="9" Height="9" VerticalAlignment="Center"
+                   Margin="0,0,12,0" Fill="{StaticResource Accent}" />
+
+          <StackPanel Grid.Column="1" VerticalAlignment="Center">
+            <TextBlock x:Name="JobHvad" FontSize="12.5" FontWeight="SemiBold" />
+            <TextBlock x:Name="JobBesked" FontSize="12" Margin="0,2,0,0" TextWrapping="Wrap"
+                       Foreground="{StaticResource TekstSvag}" />
+          </StackPanel>
+
+          <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+            <Button x:Name="JobVisKnap" Content="Vis dokumentet" Click="JobVis_Click"
+                    Visibility="Collapsed" Padding="12,6" Margin="0,0,8,0" />
+            <Button x:Name="JobLukKnap" Content="Skjul" Click="JobLuk_Click"
+                    Visibility="Collapsed" Padding="12,6" Margin="0,0,8,0" />
+            <Button x:Name="JobAfbrydKnap" Content="Afbryd" Click="JobAfbryd_Click" Padding="12,6" />
+          </StackPanel>
+        </Grid>
+      </Border>
   </Grid>
 </Window>

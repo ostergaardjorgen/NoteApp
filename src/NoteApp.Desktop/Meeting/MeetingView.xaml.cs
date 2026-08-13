@@ -34,18 +34,13 @@ public partial class MeetingView : UserControl
         _ur = new DispatcherTimer(DispatcherPriority.Render) { Interval = TimeSpan.FromMilliseconds(250) };
         _ur.Tick += (_, _) => Opdater();
 
-        Noter.ItemsSource = _noter;
-
-        var mik = AudioDevices.ResolveMicrophone(AppSettings.Current.MicrophoneId, out _);
-        MikrofonNavn.Text = mik is null
-            ? "Ingen mikrofon fundet — tilslut en og genstart appen"
-            : $"Mikrofon: {mik.FriendlyName}";
+                var mik = AudioDevices.ResolveMicrophone(AppSettings.Current.MicrophoneId, out _);
         StartKnap.IsEnabled = mik is not null;
+        if (mik is null) Status.Text = "Ingen mikrofon fundet";
 
         VisGenvej(null, "endnu ikke registreret");
 
         VisType();
-        Loaded += (_, _) => Focus();
     }
 
     public bool IsRecording => _session?.IsRecording == true;
@@ -60,17 +55,20 @@ public partial class MeetingView : UserControl
     /// </summary>
     public void VisGenvej(string? tast, string? bemærkning)
     {
-        if (tast is null)
-        {
-            GenvejTekst.Text = bemærkning is null
-                ? "Genvejstasten kunne ikke registreres"
-                : $"Ingen genvejstast: {bemærkning}. Vælg en anden under Indstillinger.";
-            return;
-        }
+        // Bjaelken har ikke plads til en linje om genvejen. Den staar som
+        // tooltip paa knappen, hvor man kigger hen, naar man er i tvivl.
+        StartKnap.ToolTip = tast is null
+            ? $"Genvejstasten virker ikke: {bemærkning ?? "ukendt årsag"}. Vælg en anden under Indstillinger."
+            : bemærkning is null
+                ? $"Eller tryk {tast} — virker også, når appen er skjult bag andre vinduer."
+                : $"Eller tryk {tast}. {bemærkning}";
+    }
 
-        GenvejTekst.Text = bemærkning is null
-            ? $"eller tryk {tast} — virker også, når appen er skjult"
-            : $"eller tryk {tast} ({bemærkning})";
+    /// <summary>Pladsholderen i titelfeltet skjules, når der står noget.</summary>
+    private void Titel_Changed(object sender, TextChangedEventArgs e)
+    {
+        if (TitelPladsholder is null) return;
+        TitelPladsholder.Visibility = FeltTitel.Text.Length == 0 ? Visibility.Visible : Visibility.Collapsed;
     }
 
     // ------------------------------------------------------------- mødetype
@@ -79,11 +77,11 @@ public partial class MeetingView : UserControl
 
     private void VisType()
     {
-        if (TypeForklaring is null) return;
+        if (Status is null || IsRecording) return;
 
-        TypeForklaring.Text = TypeOnline.IsChecked == true
-            ? "Onlinemøde: der optages både fra din mikrofon og fra det, højttaleren afspiller — altså også de andre deltagere. De to spor gemmes hver for sig, så de kan skilles ad bagefter."
-            : "Fysisk møde: der optages kun fra mikrofonen. Sæt den midt på bordet, hvis I er flere.";
+        Status.Text = TypeOnline.IsChecked == true
+            ? "Online: mikrofon + højttaler, så de andre deltagere kommer med"
+            : "Fysisk: kun mikrofonen. Sæt den midt på bordet, hvis I er flere";
     }
 
     // ------------------------------------------------------------- optagelse
@@ -194,19 +192,20 @@ public partial class MeetingView : UserControl
             Status.Text = $"Hændelse ved {TimeSpan.FromSeconds(i.AtSeconds):hh\\:mm\\:ss}: {i.What}");
 
         _noter.Clear();
-        Noter.Items.Refresh();
 
         _session.Start();
         _ur.Start();
 
-        KlarPanel.Visibility = Visibility.Collapsed;
-        OptagPanel.Visibility = Visibility.Visible;
+        KlarFelter.Visibility = Visibility.Collapsed;
+        OptagFelter.Visibility = Visibility.Visible;
+        StartKnap.Visibility = Visibility.Collapsed;
+        UrPanel.Visibility = Visibility.Visible;
+        NoteTaeller.Text = "";
         PauseKnap.Visibility = Visibility.Visible;
         StopKnap.Visibility = Visibility.Visible;
         OptagerPrik.Fill = (Brush)FindResource("Optager");
 
-        Overskrift.Text = titel ?? "Mødet optages";
-        Underskrift.Text = online ? "Onlinemøde · mikrofon + højttaler" : "Fysisk møde · kun mikrofon";
+        Status.Text = online ? "Optager · mikrofon + højttaler" : "Optager · kun mikrofon";
 
         Status.Text = $"Gemmes i {_session.SessionDir}";
 
@@ -267,8 +266,10 @@ public partial class MeetingView : UserControl
             }
         }
 
-        KlarPanel.Visibility = Visibility.Visible;
-        OptagPanel.Visibility = Visibility.Collapsed;
+        KlarFelter.Visibility = Visibility.Visible;
+        OptagFelter.Visibility = Visibility.Collapsed;
+        StartKnap.Visibility = Visibility.Visible;
+        UrPanel.Visibility = Visibility.Collapsed;
         PauseKnap.Visibility = Visibility.Collapsed;
         PauseKnap.Content = "❚❚ Pause";
         StopKnap.Visibility = Visibility.Collapsed;
@@ -276,8 +277,7 @@ public partial class MeetingView : UserControl
         Ur.Text = "00:00:00";
         UrUnder.Text = "";
 
-        Overskrift.Text = "Optag møde";
-        Underskrift.Text = "Alt bliver på denne pc. Ingen lyd forlader maskinen.";
+
         Status.Text = $"Gemt: {længde:hh\\:mm\\:ss} lyd, {noter} noter.";
 
         FærdigMedMøde?.Invoke(mappe);
@@ -327,7 +327,8 @@ public partial class MeetingView : UserControl
 
         _session.Notebook.Add(tekst);
         _noter.Insert(0, new NoteVisning(_session.Elapsed.ToString(@"hh\:mm\:ss"), tekst));
-        Noter.Items.Refresh();
+        NoteTaeller.Text = _noter.Count == 1 ? "1 note" : $"{_noter.Count} noter";
+        NotePladsholder.Visibility = Visibility.Visible;   // feltet er tømt igen
     }
 
     // ------------------------------------------------------------------- ur
