@@ -3,12 +3,16 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              Background="{StaticResource Baggrund}">
 
+  <!-- Rækkerne er Auto og ligger i en ScrollViewer. Med en fast *-række blev
+       panelet nederst klippet på en lav skærm, og der var ingen måde at nå
+       det på. En indstilling, man ikke kan se, kan man ikke ændre. -->
+  <ScrollViewer VerticalScrollBarVisibility="Auto">
   <Grid Margin="24,20,24,20">
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
       <RowDefinition Height="Auto" />
       <RowDefinition Height="Auto" />
-      <RowDefinition Height="*" />
+      <RowDefinition Height="Auto" />
       <RowDefinition Height="Auto" />
     </Grid.RowDefinitions>
 
@@ -146,4 +150,5 @@
       <Button Grid.Column="1" Content="Opdatér enhedslisten" Click="Genindlaes_Click" />
     </Grid>
   </Grid>
+  </ScrollViewer>
 </UserControl>

@@ -1,9 +1,13 @@
 <Window x:Class="NoteApp.Desktop.Transcribe.RenameWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Omdøb optagelse" Height="230" Width="480"
+        Title="Omdøb optagelse" Width="480" SizeToContent="Height" MinHeight="200"
         WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
         Background="{StaticResource Baggrund}">
+  <!-- SizeToContent frem for en fast højde: vinduet var 230 px, og knapperne
+       blev klippet af. En fast højde holder kun ved præcis den skriftstørrelse
+       og DPI, den blev prøvet på — og et vindue, hvor man hverken kan se
+       knappen eller ændre størrelsen, er en blindgyde. -->
 
   <StackPanel Margin="24">
     <TextBlock Text="Hvad skal optagelsen hedde?" FontSize="17" FontWeight="SemiBold" />

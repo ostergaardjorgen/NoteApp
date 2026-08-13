@@ -1,9 +1,12 @@
 <Window x:Class="NoteApp.Desktop.Setup.SetupWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Velkommen til NoteApp" Height="680" Width="780"
+        Title="Velkommen til NoteApp" Height="680" Width="780" MinHeight="520" MinWidth="640"
         Background="{StaticResource Baggrund}" WindowStartupLocation="CenterScreen"
-        ResizeMode="NoResize" Icon="../app.ico">
+        ResizeMode="CanResize" Icon="../app.ico">
+  <!-- Kan ændres i størrelse. Det er det første, en ny bruger ser, og et
+       vindue, hvor «Næste» ligger uden for skærmen, er ikke til at komme
+       videre fra. -->
 
   <Grid Margin="32,26,32,24">
     <Grid.RowDefinitions>
@@ -122,10 +125,18 @@
           <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
-        <StackPanel Grid.Column="0" Margin="0,0,8,0">
-          <TextBlock Text="Personer" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,2" />
-          <TextBlock Text="Kollegaer og mødedeltagere" Style="{StaticResource Underskrift}" Margin="0,0,0,8" />
-          <Grid Height="270">
+        <!-- Grid frem for StackPanel: en StackPanel straekker ikke sine boern
+             lodret, saa felterne blev staaende i en fast hoejde uanset
+             vinduets. Nu vokser de med det. -->
+        <Grid Grid.Column="0" Margin="0,0,8,0">
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+          </Grid.RowDefinitions>
+          <TextBlock Grid.Row="0" Text="Personer" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,2" />
+          <TextBlock Grid.Row="1" Text="Kollegaer og mødedeltagere" Style="{StaticResource Underskrift}" Margin="0,0,0,8" />
+          <Grid Grid.Row="2" MinHeight="150">
             <TextBox x:Name="Navne" AcceptsReturn="True" TextWrapping="Wrap"
                      VerticalScrollBarVisibility="Auto" FontSize="14" Padding="12,10"
                      VerticalContentAlignment="Top" TextChanged="Felt_Changed" />
@@ -135,12 +146,17 @@
               Anders Jensen<LineBreak />Malene Holm<LineBreak />Thomas Bech<LineBreak /><LineBreak />ét navn pr. linje
             </TextBlock>
           </Grid>
-        </StackPanel>
+        </Grid>
 
-        <StackPanel Grid.Column="1" Margin="8,0,0,0">
-          <TextBlock Text="Firmaer og kunder" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,2" />
-          <TextBlock Text="Organisationer, I taler om" Style="{StaticResource Underskrift}" Margin="0,0,0,8" />
-          <Grid Height="270">
+        <Grid Grid.Column="1" Margin="8,0,0,0">
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+          </Grid.RowDefinitions>
+          <TextBlock Grid.Row="0" Text="Firmaer og kunder" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,2" />
+          <TextBlock Grid.Row="1" Text="Organisationer, I taler om" Style="{StaticResource Underskrift}" Margin="0,0,0,8" />
+          <Grid Grid.Row="2" MinHeight="150">
             <TextBox x:Name="Firmaer" AcceptsReturn="True" TextWrapping="Wrap"
                      VerticalScrollBarVisibility="Auto" FontSize="14" Padding="12,10"
                      VerticalContentAlignment="Top" TextChanged="Felt_Changed" />
@@ -150,7 +166,7 @@
               Nordby Kommune<LineBreak />Kernesys<LineBreak /><LineBreak />ét navn pr. linje
             </TextBlock>
           </Grid>
-        </StackPanel>
+        </Grid>
       </Grid>
 
       <TextBlock Grid.Row="2" Style="{StaticResource Underskrift}" Margin="0,12,0,0"

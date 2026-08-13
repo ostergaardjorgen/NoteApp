@@ -1,9 +1,12 @@
 <Window x:Class="NoteApp.Desktop.Documents.NewDocumentWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Opret dokument" Height="560" Width="640"
-        WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
+        Title="Opret dokument" Height="600" Width="640" MinHeight="440" MinWidth="520"
+        WindowStartupLocation="CenterOwner" ResizeMode="CanResize"
         Background="{StaticResource Baggrund}">
+  <!-- Vinduet kan ændres i størrelse. Med NoResize og en fast højde er der
+       ingen vej ud, hvis indholdet ikke passer — og det gør det ikke ved en
+       anden skriftstørrelse eller skalering end den, det blev prøvet på. -->
 
   <Grid Margin="24">
     <Grid.RowDefinitions>

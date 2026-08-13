@@ -3,12 +3,15 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              Background="{StaticResource Baggrund}">
 
+  <!-- Skærmen er fire paneler under hinanden. Uden en ScrollViewer blev det
+       nederste klippet på en lav skærm, og der var ingen vej til det. -->
+  <ScrollViewer VerticalScrollBarVisibility="Auto">
   <Grid Margin="24,20,24,20">
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
       <RowDefinition Height="Auto" />
       <RowDefinition Height="Auto" />
-      <RowDefinition Height="*" />
+      <RowDefinition Height="Auto" MinHeight="140" />
       <RowDefinition Height="Auto" />
     </Grid.RowDefinitions>
 
@@ -35,7 +38,7 @@
         </StackPanel>
         <StackPanel Grid.Column="1" VerticalAlignment="Center">
           <Button Content="Skift mappe…" Click="SkiftData_Click" MinWidth="130" />
-          <Button Content="Åbn mappen" Click="AabnData_Click" Margin="0,8,0,0" MinWidth="130" />
+          <Button Content=".bn mappen" Click="AabnData_Click" Margin="0,8,0,0" MinWidth="130" />
         </StackPanel>
       </Grid>
     </Border>
@@ -128,4 +131,5 @@
 
     <TextBlock Grid.Row="4" x:Name="Status" Style="{StaticResource Underskrift}" Margin="0,12,0,0" />
   </Grid>
+  </ScrollViewer>
 </UserControl>
