@@ -112,6 +112,51 @@ public partial class DictionaryView : UserControl
         Indlaes();
     }
 
+    /// <summary>
+    /// Opret et ord ved at tale det ind.
+    ///
+    /// Det giver to ting på én gang: ordet, og den form Whisper hører det som.
+    /// Den sidste er den værdifulde — den kan man ikke gætte sig til, og den
+    /// er præcis dét, en rettelse skal bruge.
+    /// </summary>
+    private void Tal_Click(object sender, RoutedEventArgs e)
+    {
+        var vindue = new SpeakWordWindow(FeltOrd.Text.Trim()) { Owner = Window.GetWindow(this) };
+        if (vindue.ShowDialog() != true) return;
+
+        try
+        {
+            if (vindue.HarRettelse)
+            {
+                // Baade ordet og rettelsen i een handling.
+                _store.LearnCorrection(vindue.Forkert, vindue.Stavning, engineId: "indtalt");
+                MessageBox.Show(
+                    $"«{vindue.Stavning}» er gemt.\n\n" +
+                    $"Whisper hørte det som «{vindue.Forkert}», og det bliver rettet automatisk fremover.",
+                    "Lært", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            else
+            {
+                if (_store.FindTermId(vindue.Stavning) is null)
+                    _store.AddTerm(vindue.Stavning, "fagterm");
+
+                MessageBox.Show(
+                    $"«{vindue.Stavning}» er gemt i ordbogen.\n\n" +
+                    "Whisper hørte ordet rigtigt, så der er ikke noget at rette — ordet bruges til at " +
+                    "stave rigtigt i dine dokumenter.",
+                    "Gemt", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+
+            Ryd_Click(sender, e);
+            Indlaes();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Ordet kunne ikke gemmes.\n\n{ex.Message}", "Kunne ikke gemme",
+                MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+    }
+
     /// <summary>Forslag mens man skriver — så det samme ord ikke oprettes to gange.</summary>
     private void Ord_Changed(object sender, TextChangedEventArgs e)
     {

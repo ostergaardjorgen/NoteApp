@@ -1,0 +1,86 @@
+<Window x:Class="NoteApp.Desktop.Dictionary.SpeakWordWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Tal ordet ind" Width="560" SizeToContent="Height" MinHeight="380"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
+        Background="{StaticResource Baggrund}">
+
+  <StackPanel Margin="26">
+    <TextBlock Text="Sig ordet, som du siger det i et møde" FontSize="18" FontWeight="SemiBold" />
+    <TextBlock Style="{StaticResource Underskrift}" Margin="0,8,0,0" TextWrapping="Wrap" LineHeight="20"
+               Text="Sig ordet alene — og derefter en kort sætning med det i. Et ord for sig lyder anderledes end det samme ord midt i en sætning, og det er sætningen, der gælder i et rigtigt møde." />
+
+    <!-- Et konkret eksempel. «Sig en sætning» er en instruktion, man skal
+         oversætte selv; en sætning, der står klar, kan man bare læse op. -->
+    <Border Background="#FF1D2530" BorderBrush="{StaticResource Accent}" BorderThickness="1"
+            CornerRadius="8" Padding="16,13" Margin="0,14,0,0">
+      <StackPanel>
+        <TextBlock Text="SIG DETTE" FontSize="11" FontWeight="SemiBold"
+                   Foreground="{StaticResource Accent}" />
+        <TextBlock x:Name="Eksempel" FontSize="15.5" Margin="0,7,0,0" TextWrapping="Wrap"
+                   LineHeight="24" Foreground="{StaticResource Tekst}" />
+        <TextBlock x:Name="EksempelHjaelp" FontSize="12" Margin="0,7,0,0" TextWrapping="Wrap"
+                   Foreground="{StaticResource TekstMeget}"
+                   Text="Skriv ordet nedenfor først, så laver appen sætningen til dig." />
+      </StackPanel>
+    </Border>
+
+    <!-- Optagelsen -->
+    <Border Background="#FF181B22" BorderBrush="{StaticResource PanelKant}" BorderThickness="1"
+            CornerRadius="10" Padding="20,16" Margin="0,18,0,0">
+      <StackPanel>
+        <Grid>
+          <Button x:Name="OptagKnap" Click="Optag_Click" HorizontalAlignment="Left"
+                  Padding="0" BorderThickness="0" Background="Transparent" Cursor="Hand">
+            <Border x:Name="OptagFlade" CornerRadius="8" Background="{StaticResource Optager}" Padding="22,11">
+              <TextBlock x:Name="OptagTekst" Text="● Optag" FontSize="14.5" FontWeight="SemiBold"
+                         Foreground="#FFFFFFFF" />
+            </Border>
+          </Button>
+
+          <TextBlock x:Name="Ur" HorizontalAlignment="Right" VerticalAlignment="Center"
+                     FontSize="20" FontFamily="Consolas" Text="0,0 sek" />
+        </Grid>
+
+        <Border Height="8" CornerRadius="4" Background="#FF2A303A" Margin="0,14,0,0">
+          <Grid HorizontalAlignment="Stretch">
+            <Border x:Name="Niveau" HorizontalAlignment="Left" CornerRadius="4" Width="0"
+                    Background="{StaticResource Godkendt}" />
+          </Grid>
+        </Border>
+
+        <TextBlock x:Name="OptagStatus" FontSize="12" Margin="0,10,0,0" TextWrapping="Wrap"
+                   LineHeight="19" Foreground="{StaticResource TekstMeget}"
+                   Text="Måleren skal røre sig, mens du taler. Gør den ikke det, hører mikrofonen dig ikke." />
+      </StackPanel>
+    </Border>
+
+    <!-- Ordet skrives FØR man taler: eksempelsætningen bygges af det. -->
+    <TextBlock Text="Ordet" Style="{StaticResource Underskrift}" Margin="0,16,0,0" />
+    <TextBox x:Name="FeltStavning" Margin="0,4,0,0" FontSize="15" Padding="12,10"
+             TextChanged="Ord_Changed" />
+
+    <!-- Resultatet -->
+    <StackPanel x:Name="ResultatPanel" Margin="0,18,0,0" Visibility="Collapsed">
+      <TextBlock Text="Whisper hørte" Style="{StaticResource Underskrift}" />
+      <Border Background="#FF181B22" BorderBrush="{StaticResource Advarsel}" BorderThickness="1"
+              CornerRadius="8" Padding="14,11" Margin="0,4,0,0">
+        <TextBlock x:Name="Hoert" FontSize="14.5" TextWrapping="Wrap" />
+      </Border>
+
+      <TextBlock Text="Den forkerte del — det er den, der bliver rettet" Style="{StaticResource Underskrift}"
+                 Margin="0,14,0,0" />
+      <TextBox x:Name="FeltForkert" Margin="0,4,0,0" FontSize="15" Padding="12,10" />
+      <TextBlock FontSize="12" Margin="2,6,0,0" TextWrapping="Wrap" LineHeight="19"
+                 Foreground="{StaticResource TekstMeget}"
+                 Text="Appen gætter på den del, der ikke passer. Ret feltet, hvis gættet er skævt — der skal kun stå det, der blev hørt forkert, ikke hele sætningen." />
+    </StackPanel>
+
+    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,22,0,0">
+      <Button Content="Annullér" Click="Annuller_Click" Padding="18,9" Margin="0,0,10,0" IsCancel="True" />
+      <Button x:Name="GemKnap" Content="Gem ordet" Click="Gem_Click" Padding="22,9" IsDefault="True"
+              IsEnabled="False" Background="{StaticResource Accent}" Foreground="#FF0B1220"
+              BorderThickness="0" FontWeight="SemiBold" />
+    </StackPanel>
+  </StackPanel>
+</Window>

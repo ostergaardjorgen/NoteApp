@@ -155,10 +155,18 @@
           <CheckBox x:Name="FeltAktiv" Content="Aktiv" IsChecked="True" Foreground="{StaticResource Tekst}"
                     Margin="0,0,0,16" />
 
-          <StackPanel Orientation="Horizontal" Margin="0,0,0,18">
+          <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
             <Button Content="Gem" Click="Gem_Click" Style="{StaticResource Primaer}" Margin="0,0,8,0" />
             <Button Content="Ryd" Click="Ryd_Click" />
           </StackPanel>
+
+          <!-- Taler man ordet ind, finder appen SELV ud af, hvordan Whisper
+               hører det forkert. Den del kan man ikke gætte, og før måtte man
+               opdage den ved at læse en transskription igennem. -->
+          <Button Content="🎤  Tal ordet ind — så finder appen fejlen" Click="Tal_Click"
+                  Padding="12,10" Margin="0,0,0,18" HorizontalContentAlignment="Left"
+                  Background="#FF1D2530" BorderBrush="{StaticResource Accent}" BorderThickness="1"
+                  Cursor="Hand" FontSize="12.5" />
 
           <!-- Prompten er den eneste måde at se, om ordbogen faktisk virker.
                Whisper har ~224 tokens; overfyldes den, skriver modellen
