@@ -55,8 +55,8 @@ public sealed class RecordingSession : IDisposable
     public static RecordingSession Create(MeetingType type, string? title,
                                           DeviceInfo microphone, DeviceInfo? renderDevice)
     {
-        if (type == MeetingType.Online && renderDevice is null)
-            throw new ArgumentException("Onlinemøde kræver en afspilningsenhed at optage loopback fra.", nameof(renderDevice));
+        // Ingen afspilningsenhed er ikke en fejl laengere: saa optages der kun
+        // mikrofonen, og det er praecis, hvad et fysisk moede er.
 
         UserDataPaths.EnsureCreated();
 
@@ -82,9 +82,19 @@ public sealed class RecordingSession : IDisposable
                                                () => session._clock.Elapsed.TotalSeconds);
         session._tracks.Add(session.Microphone);
 
-        if (type == MeetingType.Online)
+        // Højttalersporet tages med, hver gang der ER en afspilningsenhed —
+        // ikke kun når nogen har sagt, at mødet er online.
+        //
+        // Grunden er, at valget ikke kan træffes rigtigt på forhånd. Et
+        // onlinemøde, hvor ingen taler i det øjeblik, man trykker optag, ser
+        // ud som et fysisk møde; vælger man forkert, mangler alle de andre
+        // deltagere, og det opdages først bagefter.
+        //
+        // Er sporet tavst hele vejen igennem, bliver det slettet i Stop() —
+        // dér findes hele optagelsen, og svaret kan måles i stedet for gættes.
+        if (renderDevice is not null)
         {
-            session.Loopback = new TrackRecorder(TrackKind.Loopback, renderDevice!.Id, dir,
+            session.Loopback = new TrackRecorder(TrackKind.Loopback, renderDevice.Id, dir,
                                                  () => session._clock.Elapsed.TotalSeconds);
             session._tracks.Add(session.Loopback);
         }
@@ -153,11 +163,80 @@ public sealed class RecordingSession : IDisposable
             }
         }
 
+        // Var der ingen i den anden ende, var det et fysisk møde — og så skal
+        // et tomt spor ikke ligge og fylde. Det afgøres HER, hvor hele
+        // optagelsen findes, ikke ved en stikprøve før den begyndte.
+        //
+        // Det er dét, der gør, at brugeren ikke skal vælge mellem «fysisk» og
+        // «online»: gættet er væk, og svaret er målt på det hele.
+        if (filer.TryGetValue(TrackKind.Loopback.ToString().ToLowerInvariant(), out var loopbackFil) ||
+            filer.TryGetValue("loopback", out loopbackFil))
+        {
+            if (ErTavs(loopbackFil))
+            {
+                try
+                {
+                    File.Delete(loopbackFil);
+                    filer.Remove("loopback");
+                    Meta.Tracks.Remove("loopback");
+                    Meta.LoopbackDeviceName = null;
+                    Meta.Type = MeetingType.Physical;
+                }
+                catch (IOException)
+                {
+                    // Kan filen ikke slettes, bliver den liggende. Et tavst
+                    // spor er spildplads, ikke en fejl.
+                }
+            }
+        }
+
         Meta.EndedAt = DateTimeOffset.Now;
         Meta.DurationSeconds = Math.Round(_clock.Elapsed.TotalSeconds, 1);
         MeetingStore.Save(SessionDir, Meta);
 
         return filer;
+    }
+
+    /// <summary>
+    /// Er sporet tavst hele vejen igennem?
+    ///
+    /// Der læses i spring frem for hele filen: en times lyd er 111 MB, og
+    /// spørgsmålet er kun, om der NOGENSINDE var lyd. Findes én prøve over
+    /// tærsklen, er svaret nej, og resten er ligegyldig.
+    ///
+    /// Tærsklen er den samme som alle andre steder i appen. To forskellige
+    /// grænser for «stilhed» ville før eller siden være uenige.
+    /// </summary>
+    private static bool ErTavs(string wav)
+    {
+        try
+        {
+            using var fs = File.OpenRead(wav);
+            if (fs.Length < 4096) return true;
+
+            var buffer = new byte[8192];
+            var spring = Math.Max(buffer.Length, (fs.Length - 46) / 400);   // ~400 stikproever
+            var graense = (short)(AudioDevices.SilenceThreshold * short.MaxValue);
+
+            for (var pos = 46L; pos < fs.Length - buffer.Length; pos += spring)
+            {
+                fs.Position = pos;
+                var læst = fs.Read(buffer, 0, buffer.Length);
+
+                for (var i = 0; i + 1 < læst; i += 2)
+                {
+                    var prøve = Math.Abs(BitConverter.ToInt16(buffer, i));
+                    if (prøve > graense) return false;
+                }
+            }
+
+            return true;
+        }
+        catch (IOException)
+        {
+            // Kan filen ikke laeses, roeres den ikke.
+            return false;
+        }
     }
 
     public IReadOnlyList<TrackIncident> AllIncidents =>

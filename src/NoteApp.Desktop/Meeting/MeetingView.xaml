@@ -80,12 +80,13 @@
                      Margin="13,0,0,0" VerticalAlignment="Center" Foreground="{StaticResource TekstMeget}"
                      Text="Hvad handler mødet om? (kan vente)" />
 
-          <StackPanel Grid.Column="1" Orientation="Horizontal">
-            <RadioButton x:Name="TypeFysisk" GroupName="type" IsChecked="True" Content="Fysisk"
-                         Style="{StaticResource Typevalg}" Checked="Type_Valgt" />
-            <RadioButton x:Name="TypeOnline" GroupName="type" Content="Online" Margin="8,0,0,0"
-                         Style="{StaticResource Typevalg}" Checked="Type_Valgt" />
-          </StackPanel>
+          <!-- Fysisk/online-valget er væk. Det kunne ikke træffes rigtigt på
+               forhånd: et onlinemøde, hvor ingen taler i det øjeblik man
+               trykker, ser ud som et fysisk møde — og vælger man forkert,
+               mangler alle de andre deltagere.
+               Nu optages højttaleren altid, og er sporet tavst hele vejen
+               igennem, slettes det bagefter. Svaret måles i stedet for at
+               blive gættet. -->
         </Grid>
 
         <!-- Under optagelsen: notefeltet -->

@@ -29,7 +29,7 @@ public sealed class MeetingMetadata
     public Guid Id { get; init; } = Guid.NewGuid();
 
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public MeetingType Type { get; init; }
+    public MeetingType Type { get; set; }
 
     public DateTimeOffset StartedAt { get; init; }
     public DateTimeOffset? EndedAt { get; set; }
@@ -39,7 +39,7 @@ public sealed class MeetingMetadata
     public string MicDeviceName { get; init; } = "";
 
     /// <summary>Null ved fysiske møder — det er også flaget fase 2 læser for at springe fletningen over.</summary>
-    public string? LoopbackDeviceName { get; init; }
+    public string? LoopbackDeviceName { get; set; }
 
     public int SampleRate { get; init; } = AudioFormat.SampleRate;
     public int Channels { get; init; } = 1;

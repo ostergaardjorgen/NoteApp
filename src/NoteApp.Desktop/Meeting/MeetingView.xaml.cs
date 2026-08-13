@@ -43,7 +43,6 @@ public partial class MeetingView : UserControl
 
         VisGenvej(null, "endnu ikke registreret");
 
-        VisType();
     }
 
     public bool IsRecording => _session?.IsRecording == true;
@@ -113,70 +112,21 @@ public partial class MeetingView : UserControl
                 ? Visibility.Visible : Visibility.Collapsed;
     }
 
-    // ------------------------------------------------------------- mødetype
-
-    private void Type_Valgt(object sender, RoutedEventArgs e) => VisType();
-
-    private void VisType()
-    {
-        if (Status is null || IsRecording) return;
-
-        Status.Text = TypeOnline.IsChecked == true
-            ? "Online: mikrofon + højttaler, så de andre deltagere kommer med"
-            : "Fysisk: kun mikrofonen. Sæt den midt på bordet, hvis I er flere";
-    }
 
     // ------------------------------------------------------------- optagelse
 
     private void Start_Click(object sender, RoutedEventArgs e) => Start();
 
     /// <summary>
-    /// Lynstart fra genvejstasten: find selv ud af, om det er et onlinemøde.
+    /// Lynstart fra genvejstasten. Den gør nu nøjagtig det samme som knappen.
     ///
-    /// Reglen er den enkle og den rigtige: kommer der lyd ud af højttaleren,
-    /// er der nogen i den anden ende, og så skal det spor med. Er der stille,
-    /// er det et fysisk møde, og så optages kun mikrofonen.
-    ///
-    /// Der måles i 700 ms. Længere ville udskyde optagelsen, og det, der
-    /// bliver sagt i de første sekunder, er tit dagsordenen. Er højttaleren
-    /// tavs netop dér — ingen taler lige nu — bliver det optaget som et fysisk
-    /// møde, og DET SKAL SIGES, så man kan stoppe og starte forfra.
+    /// Før målte den højttaleren i 700 ms for at gætte, om mødet var online.
+    /// Det gæt er væk: er ingen begyndt at tale i netop det øjeblik, ser et
+    /// onlinemøde ud som et fysisk, og så mangler alle de andre deltagere.
+    /// Højttalersporet tages altid med, og er det tavst hele vejen igennem,
+    /// slettes det, når optagelsen stoppes.
     /// </summary>
-    public void Lynstart()
-    {
-        if (IsRecording) return;
-
-        var højttaler = AudioDevices.ResolveSpeaker(AppSettings.Current.SpeakerId, out _);
-        var online = false;
-        var måltNiveau = 0f;
-
-        if (højttaler is not null)
-        {
-            try
-            {
-                måltNiveau = AudioDevices.MeasureLoopbackPeak(højttaler.Id, TimeSpan.FromMilliseconds(700));
-                online = måltNiveau > AudioDevices.SilenceThreshold;
-            }
-            catch (Exception)
-            {
-                // Kan der ikke maales, optages der som fysisk moede. Det er den
-                // sikre fejl: mikrofonen kommer altid med.
-            }
-        }
-
-        TypeOnline.IsChecked = online;
-        TypeFysisk.IsChecked = !online;
-
-        Start();
-
-        if (!IsRecording) return;
-
-        Status.Text = online
-            ? $"Der kom lyd fra {højttaler!.FriendlyName} — optager som onlinemøde med begge spor. Skift til «Fysisk møde» og start forfra, hvis det er forkert."
-            : (højttaler is null
-                ? "Ingen afspilningsenhed — optager kun mikrofonen."
-                : "Der var stille i højttaleren, så det optages som fysisk møde. Er du på et onlinemøde, hvor ingen talte netop nu, så stop, vælg «Onlinemøde» og start forfra.");
-    }
+    public void Lynstart() => Start();
 
     /// <summary>Kaldes både fra knappen og fra genvejstasten.</summary>
     public void Start()
@@ -191,23 +141,10 @@ public partial class MeetingView : UserControl
             return;
         }
 
-        var online = TypeOnline.IsChecked == true;
-        _varOnline = online;
-        DeviceInfo? højttaler = null;
-
-        if (online)
-        {
-            højttaler = AudioDevices.ResolveSpeaker(AppSettings.Current.SpeakerId, out _);
-            if (højttaler is null)
-            {
-                MessageBox.Show(
-                    "Der er ingen afspilningsenhed at optage fra.\n\n" +
-                    "Et onlinemøde optages fra det, højttaleren afspiller. Vælg en enhed under Indstillinger, " +
-                    "eller optag som fysisk møde — så optages kun din mikrofon.",
-                    "Kan ikke optage onlinemøde", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-        }
+        // Højttaleren tages med, hvis der er en. Er der ingen, optages kun
+        // mikrofonen — og det er ikke en fejl, det er et fysisk møde.
+        var højttaler = AudioDevices.ResolveSpeaker(AppSettings.Current.SpeakerId, out _);
+        _varOnline = højttaler is not null;
 
         if (fallback)
         {
@@ -222,7 +159,7 @@ public partial class MeetingView : UserControl
         try
         {
             _session = RecordingSession.Create(
-                online ? MeetingType.Online : MeetingType.Physical, titel, mik, højttaler);
+                højttaler is not null ? MeetingType.Online : MeetingType.Physical, titel, mik, højttaler);
         }
         catch (Exception ex)
         {
@@ -250,7 +187,7 @@ public partial class MeetingView : UserControl
 
         // Kun ÉT budskab. Foerste udgave satte Status to gange, og stien til
         // mappen overskrev det, der faktisk betoed noget: hvad der optages.
-        Status.Text = online ? "Optager mikrofon + højttaler" : "Optager kun mikrofonen";
+        Status.Text = højttaler is not null ? "Optager · mikrofon og højttaler" : "Optager · kun mikrofon";
         Status.ToolTip = $"Gemmes i {_session.SessionDir}";
 
         VisPladsholdere();
@@ -324,7 +261,7 @@ public partial class MeetingView : UserControl
         Status.Text = $"Gemt: {længde:hh\\:mm\\:ss} lyd, {noter} noter.";
 
         Historik.Skriv(HaendelseType.Optagelse, $"Møde optaget: {titel ?? "uden titel"}",
-            $"{længde:hh\\:mm\\:ss} lyd · {noter} noter · " + (_varOnline ? "online, begge spor" : "fysisk, kun mikrofon"),
+            $"{længde:hh\\:mm\\:ss} lyd · {noter} noter · " + (_varOnline ? "begge spor" : "kun mikrofon"),
             længde < TimeSpan.FromSeconds(10) ? Udfald.SeEfter : Udfald.Fuldført,
             sti: mappe, sekunder: længde.TotalSeconds);
 

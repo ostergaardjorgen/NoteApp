@@ -244,8 +244,13 @@ public partial class ReadAloudView : UserControl
             // een tekst. Den taeller som den danske — optagelsen er lavet, og
             // den skal ikke forsvinde fra taellingen, fordi navngivningen er
             // aendret bagefter.
+            // Der læses BÅDE «Oplæsning-» og den gamle «Oplaesning-». Titlen
+            // blev skrevet uden æ indtil 13. august, og en optagelse må ikke
+            // forsvinde fra tællingen, fordi stavemåden er rettet bagefter.
             var gammel = meta.Title.Equals("Fase0-oplaesning", StringComparison.OrdinalIgnoreCase);
-            if (!gammel && !meta.Title.StartsWith("Oplaesning", StringComparison.OrdinalIgnoreCase))
+            if (!gammel &&
+                !meta.Title.StartsWith("Oplæsning", StringComparison.OrdinalIgnoreCase) &&
+                !meta.Title.StartsWith("Oplaesning", StringComparison.OrdinalIgnoreCase))
                 continue;
 
             minutter += meta.DurationSeconds / 60.0;
@@ -294,7 +299,11 @@ public partial class ReadAloudView : UserControl
         // ikke vise, hvad der mangler — og saa er de tre kort bare tre knapper.
         _session = RecordingSession.Create(
             MeetingType.Physical,
-            "Oplaesning-" + ScriptDocument.Available[ValgtIndex].Key,
+            // Titlen er det, brugeren SER i listen over optagelser, og derfor
+            // staves den med æ. At den samtidig bruges til at genkende, hvilken
+            // tekst der blev læst, er en teknisk detalje — den må ikke koste
+            // en stavefejl på skærmen.
+            "Oplæsning-" + ScriptDocument.Available[ValgtIndex].Key,
             mik, null);
         _session.IncidentOccurred += i => Dispatcher.Invoke(() =>
             Status.Text = $"Hændelse ved {TimeSpan.FromSeconds(i.AtSeconds):mm\\:ss}: {i.What}");
