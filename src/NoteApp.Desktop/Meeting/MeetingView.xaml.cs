@@ -44,6 +44,25 @@ public partial class MeetingView : UserControl
     }
 
     public bool IsRecording => _session?.IsRecording == true;
+    public bool IsPaused => _session?.IsPaused == true;
+    public TimeSpan Elapsed => _session?.Elapsed ?? TimeSpan.Zero;
+    public IReadOnlyList<NoteVisning> Noter => _noter;
+    public string Titel => FeltTitel.Text.Trim();
+
+    /// <summary>Rejses når en optagelse begynder — så appen kan blive til mødet.</summary>
+    public event Action? Startet;
+
+    /// <summary>Rejses ved hver ændring under optagelsen: ur, pause, ny note.</summary>
+    public event Action? Opdateret;
+
+    /// <summary>Tilføjer en note udefra — fra mødeskærmen.</summary>
+    public void TilføjNoteUdefra(string tekst) => TilføjNote(tekst);
+
+    /// <summary>Pause og fortsæt udefra.</summary>
+    public void SkiftPause() => Pause_Click(this, new RoutedEventArgs());
+
+    /// <summary>Stop udefra.</summary>
+    public void StopUdefra() => Stop();
 
     /// <summary>
     /// Fortæller om genvejstasten virker. <paramref name="fejl"/> er null, når
@@ -64,11 +83,31 @@ public partial class MeetingView : UserControl
                 : $"Eller tryk {tast}. {bemærkning}";
     }
 
-    /// <summary>Pladsholderen i titelfeltet skjules, når der står noget.</summary>
-    private void Titel_Changed(object sender, TextChangedEventArgs e)
+    // ---------------------------------------------------------- pladsholdere
+
+    /// <summary>
+    /// Pladsholderteksten skjules, så snart der står noget i feltet.
+    ///
+    /// Begge felter går gennem den SAMME metode. Første udgave havde to
+    /// forskellige veje — titlen blev skjult ved TextChanged, noten kun når man
+    /// havde trykket Enter. Resultatet var, at man skrev en note oven i den grå
+    /// tekst og ikke kunne læse, hvad man skrev.
+    ///
+    /// To felter, der gør det samme, skal ikke have hver sin kode.
+    /// </summary>
+    private void Titel_Changed(object sender, TextChangedEventArgs e) => VisPladsholdere();
+
+    private void Note_Changed(object sender, TextChangedEventArgs e) => VisPladsholdere();
+
+    private void VisPladsholdere()
     {
-        if (TitelPladsholder is null) return;
-        TitelPladsholder.Visibility = FeltTitel.Text.Length == 0 ? Visibility.Visible : Visibility.Collapsed;
+        if (TitelPladsholder is not null && FeltTitel is not null)
+            TitelPladsholder.Visibility = FeltTitel.Text.Length == 0
+                ? Visibility.Visible : Visibility.Collapsed;
+
+        if (NotePladsholder is not null && FeltNote is not null)
+            NotePladsholder.Visibility = FeltNote.Text.Length == 0
+                ? Visibility.Visible : Visibility.Collapsed;
     }
 
     // ------------------------------------------------------------- mødetype
@@ -205,14 +244,14 @@ public partial class MeetingView : UserControl
         StopKnap.Visibility = Visibility.Visible;
         OptagerPrik.Fill = (Brush)FindResource("Optager");
 
-        Status.Text = online ? "Optager · mikrofon + højttaler" : "Optager · kun mikrofon";
+        // Kun ÉT budskab. Foerste udgave satte Status to gange, og stien til
+        // mappen overskrev det, der faktisk betoed noget: hvad der optages.
+        Status.Text = online ? "Optager mikrofon + højttaler" : "Optager kun mikrofonen";
+        Status.ToolTip = $"Gemmes i {_session.SessionDir}";
 
-        Status.Text = $"Gemmes i {_session.SessionDir}";
+        VisPladsholdere();
 
-        // Fokus i notefeltet, saa man kan skrive med det samme. Undtagen naar
-        // lynstarten har noget at fortaelle om, hvad den valgte — saa staar
-        // beskeden, indtil man selv klikker.
-        FeltNote.Focus();
+        Startet?.Invoke();
     }
 
     private void Pause_Click(object sender, RoutedEventArgs e)
@@ -327,8 +366,13 @@ public partial class MeetingView : UserControl
 
         _session.Notebook.Add(tekst);
         _noter.Insert(0, new NoteVisning(_session.Elapsed.ToString(@"hh\:mm\:ss"), tekst));
-        NoteTaeller.Text = _noter.Count == 1 ? "1 note" : $"{_noter.Count} noter";
-        NotePladsholder.Visibility = Visibility.Visible;   // feltet er tømt igen
+
+        // Kvitteringen: tidspunktet, noten fik. Uden den ved man ikke, om der
+        // skete noget, da man trykkede Enter — feltet bliver jo bare tomt igen.
+        NoteTaeller.Text = $"✓ {_noter[0].Tid} · {_noter.Count}";
+        NoteTaeller.ToolTip = string.Join("\n", _noter.Take(12).Select(n => $"{n.Tid}  {n.Tekst}"));
+
+        VisPladsholdere();
     }
 
     // ------------------------------------------------------------------- ur
@@ -339,5 +383,6 @@ public partial class MeetingView : UserControl
 
         Ur.Text = _session.Elapsed.ToString(@"hh\:mm\:ss");
         UrUnder.Text = _session.IsPaused ? "på pause" : "optager";
+        Opdateret?.Invoke();
     }
 }

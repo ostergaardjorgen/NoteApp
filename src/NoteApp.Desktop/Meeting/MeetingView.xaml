@@ -91,19 +91,26 @@
         <!-- Under optagelsen: notefeltet -->
         <Grid x:Name="OptagFelter" Visibility="Collapsed">
           <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="Auto" />
           </Grid.ColumnDefinitions>
 
-          <TextBox x:Name="FeltNote" Grid.Column="0" FontSize="13.5" Padding="10,8"
-                   VerticalAlignment="Center" KeyDown="Note_KeyDown"
-                   ToolTip="Skriv en note og tryk Enter. Den bliver tidsstemplet. Ctrl+B sætter et bogmærke uden tekst." />
-          <TextBlock x:Name="NotePladsholder" Grid.Column="0" IsHitTestVisible="False" FontSize="13.5"
-                     Margin="13,0,0,0" VerticalAlignment="Center" Foreground="{StaticResource TekstMeget}"
-                     Text="Note + Enter · Ctrl+B for bogmærke" />
+          <!-- Etiketten er ikke pynt. Uden den var feltet bare en kasse i en
+               bjælke, og man skulle gætte, at det var dér, noterne skulle. -->
+          <TextBlock Grid.Column="0" Text="NOTE" FontSize="11" FontWeight="SemiBold"
+                     VerticalAlignment="Center" Margin="0,0,10,0"
+                     Foreground="{StaticResource Accent}" />
 
-          <TextBlock x:Name="NoteTaeller" Grid.Column="1" VerticalAlignment="Center" Margin="14,0,0,0"
-                     FontSize="12" Foreground="{StaticResource TekstMeget}" />
+          <TextBox x:Name="FeltNote" Grid.Column="1" FontSize="13.5" Padding="10,8"
+                   VerticalAlignment="Center" KeyDown="Note_KeyDown" TextChanged="Note_Changed"
+                   ToolTip="Skriv en note og tryk Enter. Den bliver tidsstemplet, så den kan flettes ind i udskriften det rigtige sted. Ctrl+B sætter et bogmærke uden tekst." />
+          <TextBlock x:Name="NotePladsholder" Grid.Column="1" IsHitTestVisible="False" FontSize="13.5"
+                     Margin="13,0,0,0" VerticalAlignment="Center" Foreground="{StaticResource TekstMeget}"
+                     Text="Skriv en note her og tryk Enter — den bliver tidsstemplet" />
+
+          <TextBlock x:Name="NoteTaeller" Grid.Column="2" VerticalAlignment="Center" Margin="14,0,0,0"
+                     FontSize="12" Foreground="{StaticResource Accent}" FontWeight="SemiBold" />
         </Grid>
       </Grid>
 

@@ -31,6 +31,7 @@ public partial class MainWindow : Window
     /// <summary>Id på det dokument, en kørsel netop har lavet.</summary>
     private string? _færdigtDokument;
 
+
     // ------------------------------------------------------------ kørselsbjælken
 
     /// <summary>
@@ -99,6 +100,14 @@ public partial class MainWindow : Window
             _aabnOptagelse = sti;
             if (NavTransskriber.IsChecked == true) Nav_Changed(this, new RoutedEventArgs());
             else NavTransskriber.IsChecked = true;
+        };
+
+        // Når et møde begynder, BLIVER appen mødet. Alt andet er ligegyldigt i
+        // den periode: man skal kunne skrive noter og se, at der optages — og
+        // der skal være plads til at skrive, ikke et felt i en bjælke.
+        _moede.Startet += () =>
+        {
+            Indhold.Content = new MeetingLiveView(_moede);
         };
 
         // Efter et møde peger appen samme vej som efter en oplæsning: hen til
