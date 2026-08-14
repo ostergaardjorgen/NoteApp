@@ -1,4 +1,4 @@
-using System.Windows;
+﻿using System.Windows;
 
 namespace NoteApp.Desktop.Transcribe;
 
@@ -64,8 +64,7 @@ public partial class RenameWindow : Window
     {
         if (NytNavn.Length == 0)
         {
-            MessageBox.Show("Navnet må ikke være tomt.", "Mangler navn",
-                MessageBoxButton.OK, MessageBoxImage.Information);
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Mangler navn", "Navnet må ikke være tomt.", Dialogs.Slags.Valg);
             Felt.Focus();
             return;
         }
@@ -77,11 +76,12 @@ public partial class RenameWindow : Window
     {
         // Der spoerges. Det er den eneste handling i vinduet, der ikke kan
         // fortrydes — lyden er vaek bagefter.
-        var svar = MessageBox.Show(
-            "Kassér optagelsen?\n\nLyden og noterne slettes, og det kan ikke fortrydes.",
-            "Kassér", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+        var ja = Dialogs.AppDialog.Spoerg(this, "Kassér optagelsen?",
+            "Lyden og noterne slettes, og det kan ikke fortrydes.",
+            godkend: "Kassér den", annuller: "Behold den",
+            slags: Dialogs.Slags.Fejl, godkendErStandard: false);
 
-        if (svar != MessageBoxResult.Yes) return;
+        if (!ja) return;
 
         Kasseret = true;
         DialogResult = true;

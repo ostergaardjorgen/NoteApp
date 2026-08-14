@@ -52,13 +52,17 @@
           <RadioButton x:Name="NavOplaesning" GroupName="nav" Content="Start her"
                        Checked="Nav_Changed" IsChecked="True"
                        Style="{StaticResource NavKnap}" />
-          <!-- «Din ordbog» ligger nr. 2, lige under «Start her»: det er den, der
-               tilpasser appen til dine ord, og dermed det næste skridt efter
-               den første indtaling — ikke noget, der hører til langt nede blandt
-               indstillingerne. -->
-          <RadioButton x:Name="NavOrdbog" GroupName="nav" Content="Din ordbog"
+          <!-- «Dine rettelser» — ikke «Din ordbog». Navnet er ændret, fordi
+               indholdet er: der var en ordliste, man kunne skrive i, og den
+               gjorde målt ingen forskel. Tilbage er det, der virker. -->
+          <RadioButton x:Name="NavOrdbog" GroupName="nav" Content="Dine rettelser"
                        Checked="Nav_Changed"
                        Style="{StaticResource NavKnap}" />
+          <!-- Her lå «Træning» som eget punkt. Det viste resultatet af de tre
+               oplæsninger — men de tre oplæsninger står på «Start her», så man
+               skulle skifte skærm for at se, hvad ens egen oplæsning gav, og de
+               to skærme kunne sige noget forskelligt om det samme. Resultatet
+               ligger nu under den boks, det hører til. -->
           <!-- «Optagelser» frem for «Transskribér»: menupunktet siger, hvad man
                finder derinde. Handlingen står på selve skærmen, ved den
                optagelse den hører til. -->

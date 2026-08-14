@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -131,8 +131,7 @@ public partial class DocumentsView : UserControl
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Navnet kunne ikke gemmes.\n\n{ex.Message}", "Kunne ikke omdøbe",
-                MessageBoxButton.OK, MessageBoxImage.Warning);
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Kunne ikke omdøbe", $"Navnet kunne ikke gemmes.\n\n{ex.Message}", Dialogs.Slags.Pas_paa);
         }
     }
 
@@ -150,8 +149,7 @@ public partial class DocumentsView : UserControl
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Beskrivelsen kunne ikke gemmes.\n\n{ex.Message}", "Kunne ikke gemme",
-                MessageBoxButton.OK, MessageBoxImage.Warning);
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Kunne ikke gemme", $"Beskrivelsen kunne ikke gemmes.\n\n{ex.Message}", Dialogs.Slags.Pas_paa);
         }
     }
 
@@ -162,8 +160,7 @@ public partial class DocumentsView : UserControl
         var fil = DocumentStore.Path_(_valgt);
         if (!File.Exists(fil))
         {
-            MessageBox.Show("Filen findes ikke længere.", "Kan ikke åbne",
-                MessageBoxButton.OK, MessageBoxImage.Information);
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Kan ikke åbne", "Filen findes ikke længere.", Dialogs.Slags.Valg);
             return;
         }
 
@@ -173,10 +170,8 @@ public partial class DocumentsView : UserControl
         }
         catch (Exception ex)
         {
-            MessageBox.Show(
-                $"Dokumentet kunne ikke åbnes.\n\n{ex.Message}\n\n" +
-                "Er der ikke noget program til .odt-filer, kan Word åbne dem — vælg «Åbn med».",
-                "Kunne ikke åbne", MessageBoxButton.OK, MessageBoxImage.Information);
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Kunne ikke åbne", $"Dokumentet kunne ikke åbnes.\n\n{ex.Message}\n\n" +
+                "Er der ikke noget program til .odt-filer, kan Word åbne dem — vælg «Åbn med».", Dialogs.Slags.Valg);
         }
     }
 
@@ -184,12 +179,14 @@ public partial class DocumentsView : UserControl
     {
         if (_valgt is null) return;
 
-        var svar = MessageBox.Show(
-            $"Slet «{_valgt.Title}»?\n\nSelve optagelsen og udskriften bliver liggende — det er kun " +
-            "dokumentet, der slettes. Du kan lave et nyt af den samme optagelse.",
-            "Slet dokument", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+        var ja = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
+            $"Slet «{_valgt.Title}»?",
+            "Selve optagelsen og udskriften bliver liggende — det er kun dokumentet, der slettes. " +
+            "Du kan lave et nyt af den samme optagelse.",
+            godkend: "Slet dokumentet", annuller: "Behold det",
+            slags: Dialogs.Slags.Pas_paa, godkendErStandard: false);
 
-        if (svar != MessageBoxResult.Yes) return;
+        if (!ja) return;
 
         try
         {
@@ -199,8 +196,7 @@ public partial class DocumentsView : UserControl
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Dokumentet kunne ikke slettes.\n\n{ex.Message}", "Kunne ikke slette",
-                MessageBoxButton.OK, MessageBoxImage.Warning);
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Kunne ikke slette", $"Dokumentet kunne ikke slettes.\n\n{ex.Message}", Dialogs.Slags.Pas_paa);
         }
     }
 

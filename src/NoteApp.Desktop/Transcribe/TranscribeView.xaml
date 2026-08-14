@@ -26,12 +26,27 @@
       <Grid>
         <Grid.RowDefinitions>
           <RowDefinition Height="Auto" />
+          <RowDefinition Height="Auto" />
           <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Text="Dine optagelser" FontSize="15" FontWeight="SemiBold" Margin="16,14,16,8" />
+        <!-- To grupper, ikke én lang liste. Møder, der stadig mangler noget,
+             ligger fremme; det færdige ligger i arkivet. Uden opdelingen
+             drukner det møde, der mangler et referat, mellem tres, der er
+             helt færdige. Træningsoptagelser er ingen af stederne — de hører
+             under «Træning». -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="16,14,16,10">
+          <RadioButton x:Name="FaneMoeder" GroupName="gruppe" Content="Møder" IsChecked="True"
+                       Click="Fane_Klik" Style="{StaticResource Fanevalg}" />
+          <RadioButton x:Name="FaneArkiv" GroupName="gruppe" Content="Arkiv"
+                       Click="Fane_Klik" Style="{StaticResource Fanevalg}" Margin="6,0,0,0" />
+        </StackPanel>
 
-        <ListBox x:Name="Optagelser" Grid.Row="1" Background="Transparent" BorderThickness="0"
+        <TextBlock x:Name="TraeningsNote" Grid.Row="1" Margin="16,0,16,8" FontSize="11.5"
+                   TextWrapping="Wrap" LineHeight="17" Visibility="Collapsed"
+                   Foreground="{StaticResource TekstMeget}" />
+
+        <ListBox x:Name="Optagelser" Grid.Row="2" Background="Transparent" BorderThickness="0"
                  Margin="8,0,8,10" SelectionChanged="Optagelse_Valgt"
                  ScrollViewer.HorizontalScrollBarVisibility="Disabled">
           <ListBox.ItemContainerStyle>
@@ -80,35 +95,10 @@
           <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <!-- Målingerne. RTF er det tal, hele Fase 0 handler om. -->
-        <Grid x:Name="Maalinger" Grid.Row="0" Margin="18,16,18,8" Visibility="Collapsed">
-          <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="*" />
-          </Grid.ColumnDefinitions>
-
-          <StackPanel Grid.Column="0">
-            <TextBlock x:Name="TalLyd" FontSize="22" FontWeight="SemiBold" FontFamily="Consolas" />
-            <TextBlock Text="lyd" Style="{StaticResource Underskrift}" />
-          </StackPanel>
-          <StackPanel Grid.Column="1">
-            <TextBlock x:Name="TalTid" FontSize="22" FontWeight="SemiBold" FontFamily="Consolas" />
-            <TextBlock Text="tid brugt" Style="{StaticResource Underskrift}" />
-          </StackPanel>
-          <StackPanel Grid.Column="2">
-            <TextBlock x:Name="TalRtf" FontSize="22" FontWeight="SemiBold" FontFamily="Consolas" />
-            <TextBlock Text="realtidsfaktor" Style="{StaticResource Underskrift}" />
-          </StackPanel>
-          <StackPanel Grid.Column="3">
-            <TextBlock x:Name="TalOrd" FontSize="22" FontWeight="SemiBold" FontFamily="Consolas" />
-            <TextBlock Text="ord" Style="{StaticResource Underskrift}" />
-          </StackPanel>
-        </Grid>
-
-        <TextBlock x:Name="RtfForklaring" Grid.Row="0" VerticalAlignment="Bottom" Margin="18,0,18,4"
-                   Style="{StaticResource Underskrift}" />
+        <!-- Her stod fire store tal: lyd, tid brugt, realtidsfaktor og ord.
+             Realtidsfaktoren var udviklertelemetri — ingen handler på «0,42».
+             Det, man skal vide, står nu i statuslinjen nederst, og tallene
+             ligger stadig i Historik. -->
 
         <!-- Forklaringen. Den fylder feltet, indtil der er en tekst at vise.
              Et tomt felt under en fremdriftslinje fortæller ikke, om man
@@ -238,6 +228,8 @@
 
       <StackPanel Grid.Column="1" Orientation="Horizontal">
         <Button x:Name="OmdoebKnap" Content="Omdøb" Click="Omdoeb_Click" IsEnabled="False"
+                Margin="0,0,8,0" />
+        <Button x:Name="ArkivKnap" Content="Arkivér" Click="Arkiver_Click" IsEnabled="False"
                 Margin="0,0,8,0" />
         <Button x:Name="SletKnap" Content="Slet optagelse" Click="Slet_Click" IsEnabled="False"
                 Margin="0,0,8,0" />

@@ -1,4 +1,4 @@
-using NoteApp.Core;
+﻿using NoteApp.Core;
 
 // Kommandolinjeværktøj til de ting, der ikke hører hjemme i en optageknap:
 // initialisering af ordbogen, genopretning efter crash, og et hurtigt kig på
@@ -14,9 +14,7 @@ try
     {
         "status"    => Status(),
         "init"      => Init(),
-        "prompt"    => VisPrompt(args.Skip(1).FirstOrDefault()),
-        "tilfoej"   => Tilfoej(args.Skip(1).ToArray()),
-        "eksport"   => Eksport(args.Skip(1).FirstOrDefault()),
+        "rettelser" => Rettelser(args.Skip(1).ToArray()),
         "motor"     => Motor(),
         "hent"      => await Hent(args.Skip(1).ToArray()),
         "hentmotor" => await HentMotor(args.Skip(1).ToArray()),
@@ -27,6 +25,8 @@ try
         "laer"      => Laer(args.Skip(1).ToArray()),
         "dokument"  => Dokument(args.Skip(1).ToArray()),
         "score"     => Score(args.Skip(1).ToArray()),
+        "traening"  => Traening(args.Skip(1).ToArray()),
+        "llmret"    => await LlmRet(args.Skip(1).ToArray()),
         "mikrofontest" => Mikrofontest(args.Skip(1).ToArray()),
         "recover"   => Genopret(),
         "hjaelp" or "--help" or "-h" => Hjælp(),
@@ -45,12 +45,8 @@ static int Hjælp()
         noteapp <kommando>
 
           status    Viser hvor dine data ligger og hvad de indeholder
-          init      Opretter ordbogen og indlæser ordliste.txt
-          tilfoej   Lægger et ord i ordbogen:
-                      noteapp tilfoej "Malene" person [vaegt] [kunde]
-                    Kategorier: person, organisation, produkt, fagterm, forkortelse
-          prompt    Viser den ordliste der sendes til Whisper (valgfrit: <kunde>)
-          eksport   Skriver ordlisten til ordliste.txt, som Fase 0-scriptet læser
+          init      Opretter databasen til dine rettelser
+          rettelser Viser de rettelser, der anvendes af sig selv (valgfrit: <søgeord>)
           motor     Viser hvilken Whisper-motor og model der er i brug
           transskriber  Transskriberer en optagelse:
                       noteapp transskriber <mappe-eller-wav> [--cpu]
@@ -83,7 +79,7 @@ static int Status()
 
     Console.WriteLine($"Datamappe   : {UserDataPaths.Root}");
     Console.WriteLine($"Møder       : {UserDataPaths.Meetings}");
-    Console.WriteLine($"Ordbog      : {UserDataPaths.LearningDatabase}");
+    Console.WriteLine($"Rettelser   : {UserDataPaths.LearningDatabase}");
     Console.WriteLine();
 
     var møder = Directory.Exists(UserDataPaths.Meetings)
@@ -94,7 +90,7 @@ static int Status()
     if (File.Exists(UserDataPaths.LearningDatabase))
     {
         using var store = new LearningStore();
-        Console.WriteLine($"Termer      : {store.TermCount()}");
+        Console.WriteLine($"Rettelser   : {store.ListRettelser().Count} aktive");
 
         var pr = store.CorrectionsByEngine();
         if (pr.Count > 0)
@@ -135,73 +131,67 @@ static int Init()
     UserDataPaths.AssertOutsideRepository(AppContext.BaseDirectory);
 
     using var store = new LearningStore();
-    Console.WriteLine($"Ordbog oprettet: {store.Path}");
+    Console.WriteLine($"Database oprettet: {store.Path}");
 
-    if (File.Exists(UserDataPaths.Vocabulary))
-    {
-        var antal = store.ImportVocabularyFile(UserDataPaths.Vocabulary);
-        Console.WriteLine($"Indlæste {antal} termer fra {UserDataPaths.Vocabulary}");
-    }
-    else
-    {
-        Console.WriteLine($"Ingen ordliste fundet på {UserDataPaths.Vocabulary} — ordbogen er tom.");
-    }
+    // Indlaesning fra ordliste.txt er fjernet sammen med ordlisten. Filen
+    // fyldte termer i databasen, som blev sendt til Whisper som ledetraad —
+    // maalt til nul forskel.
+    var ryddet = store.RydOrdliste();
+    if (ryddet > 0)
+        Console.WriteLine($"Ryddet {ryddet} gamle ord vaek fra den tidligere ordliste.");
 
-    Console.WriteLine($"Termer i alt: {store.TermCount()}");
+    Console.WriteLine($"Rettelser: {store.ListRettelser().Count}");
     return 0;
 }
 
-/// <summary>
-/// Lægger ét ord i ordbogen. Findes, fordi UI'et er rigtigt til at gå en
-/// ordbog igennem, men klodset når man skal hælde en håndfuld navne ind på
-/// én gang — fx alle deltagerne fra ét møde.
-/// </summary>
-static int Tilfoej(string[] a)
-{
-    if (a.Length < 2)
-    {
-        Console.Error.WriteLine("Brug: noteapp tilfoej \"<ord>\" <kategori> [vaegt] [kunde]");
-        Console.Error.WriteLine($"Kategorier: {string.Join(", ", TermCategories.All)}");
-        return 2;
-    }
-
-    var ord = a[0];
-    var kategori = a[1].ToLowerInvariant();
-
-    if (!TermCategories.All.Contains(kategori))
-    {
-        Console.Error.WriteLine($"Ukendt kategori: {kategori}");
-        Console.Error.WriteLine($"Vælg mellem: {string.Join(", ", TermCategories.All)}");
-        return 2;
-    }
-
-    var vægt = a.Length > 2 && double.TryParse(a[2],
-        System.Globalization.NumberStyles.Any,
-        System.Globalization.CultureInfo.InvariantCulture, out var v) ? v : 1.0;
-    var kunde = a.Length > 3 ? a[3] : null;
-
-    using var store = new LearningStore();
-    store.AddTerm(ord, kategori, vægt, kunde);
-
-    Console.WriteLine($"Tilføjet: {ord} ({TermCategories.Label(kategori)}, vægt {vægt:0.0}" +
-                      (kunde is null ? "" : $", kunde {kunde}") + ")");
-    Console.WriteLine($"Termer i alt: {store.TermCount()}");
-    return 0;
-}
+// HER LÅ «tilfoej», «eksport» OG «prompt».
+//
+// De tre kommandoer hørte til ordlisten: læg et ord ind, skriv listen ud til
+// ordliste.txt, se den prompt Whisper fik. Prompten er målt til NUL forskel og
+// er fjernet fra appen — så kommandoerne styrede noget, der ikke længere
+// findes.
+//
+// «rettelser» viser i stedet det, der virker.
 
 /// <summary>
-/// Skriver ordbogens prompt til ordliste.txt. Ordbogen er kilden; filen er et
-/// øjebliksbillede af den, og det er filen, Fase 0-scriptet læser. Uden dette
-/// trin måler gaten på en ordliste, der kan være uger gammel.
+/// Viser de rettelser, appen anvender af sig selv på hver udskrift.
+///
+/// Det er hele den lokale læring. Ikke en ordliste — en liste over fejl, der
+/// er set én gang og bliver rettet hver gang siden.
 /// </summary>
-static int Eksport(string? kunde)
+static int Rettelser(string[] a)
 {
     using var store = new LearningStore();
-    var sti = store.ExportVocabularyFile(scope: kunde);
 
-    Console.WriteLine($"Skrevet : {sti}");
-    Console.WriteLine($"Termer  : {store.TermCount()} i ordbogen");
-    Console.WriteLine($"Tokens  : {LearningStore.EstimateTokens(File.ReadAllText(sti))} af budgettet på 200");
+    // --slet slaar en regel fra. Den findes, fordi en daarlig regel gaelder
+    // ALLE fremtidige moeder, og saa skal den kunne fjernes uden at aabne
+    // databasen med et andet program.
+    if (a.Length >= 2 && a[0] == "--slet")
+    {
+        foreach (var hoert in a.Skip(1))
+        {
+            store.SletRettelse(LearningStore.Normalize(hoert));
+            Console.WriteLine($"Slaaet fra: {hoert}");
+        }
+        Console.WriteLine($"Tilbage: {store.ListRettelser().Count} rettelser");
+        return 0;
+    }
+
+    var liste = store.ListRettelser(a.Length > 0 ? a[0] : null);
+
+    if (liste.Count == 0)
+    {
+        Console.WriteLine("Der er ingen rettelser endnu.");
+        Console.WriteLine("De kommer, naar du retter et ord i en udskrift i appen.");
+        return 0;
+    }
+
+    Console.WriteLine($"{liste.Count} rettelser:");
+    Console.WriteLine();
+
+    foreach (var r in liste)
+        Console.WriteLine($"  {r.Hørt,-32} -> {r.Rigtigt,-28} ({r.Gange} gange)");
+
     return 0;
 }
 
@@ -388,11 +378,11 @@ static async Task<int> Udkast(string[] a)
         ["varighed"] = "",
         ["noter"] = "",
         ["sprog"] = sprog,
-        // Ordbogen sendes som en ren liste. BuildWhisperPrompt formulerer den
-        // som "Vi taler om ..." fordi Whisper konditionerer paa sprogtone —
-        // en sprogmodel skal bare have ordene.
-        ["ordbog"] = store.BuildWhisperPrompt(tokenBudget: 2000)
-            .Replace("Vi taler om ", "").TrimEnd('.')
+        // De rigtige stavemaader fra dine rettelser. Den gaar til
+        // SPROGMODELLEN, ikke til Whisper.
+        ["ordbog"] = string.Join(", ", store.ListRettelser()
+            .Select(r => r.Rigtigt)
+            .Distinct(StringComparer.OrdinalIgnoreCase))
     };
 
     Console.WriteLine($"Skabelon : {skabelon.Name}");
@@ -583,16 +573,12 @@ static async Task<int> Transskriber(string[] a)
     var wav = Directory.Exists(input) ? Path.Combine(input, "mikrofon.wav") : input;
     if (!File.Exists(wav)) { Console.Error.WriteLine($"Findes ikke: {wav}"); return 1; }
 
-    using var store = new LearningStore();
-    var prompt = store.BuildWhisperPrompt();
-
     var udBase = Path.Combine(Path.GetDirectoryName(wav)!,
         Path.GetFileNameWithoutExtension(wav) + "_" +
         Path.GetFileNameWithoutExtension(s.ModelPath!).Replace("ggml-", ""));
 
     Console.WriteLine($"Lyd     : {wav} ({Transcriber.WavSeconds(wav):0.0} sek)");
     Console.WriteLine($"Model   : {s.ModelFileName}  ({s.Engine})");
-    Console.WriteLine($"Ordliste: {LearningStore.EstimateTokens(prompt)} tokens");
     Console.WriteLine();
 
     var motor = new Transcriber(s.WhisperCli!);
@@ -612,7 +598,7 @@ static async Task<int> Transskriber(string[] a)
     var ønsketSprog = i >= 0 && i + 1 < a.Length ? a[i + 1] : "auto";
 
     var r = await motor.RunAsync(
-        new TranscriptionRequest(wav, s.ModelPath!, udBase, ønsketSprog, prompt, a.Contains("--cpu")),
+        new TranscriptionRequest(wav, s.ModelPath!, udBase, ønsketSprog, "", a.Contains("--cpu")),
         fremdrift);
 
     Console.WriteLine();
@@ -645,7 +631,8 @@ static async Task<int> Transskriber(string[] a)
 
     // Efterretning: de fejl, du allerede har rettet een gang, rettes nu af sig
     // selv. Det er DEN vej, appen laerer — ordlisten i Whispers initial_prompt
-    // er maalt til ingen forskel at goere (se doc/findings.md 8).
+    // var maalt til ingen forskel og er fjernet (se doc/findings.md 8).
+    using var store = new LearningStore();
     var retter = TranscriptCorrector.FromStore(store);
     var ændringer = retter.ApplyToFile(r.TextPath);
     if (ændringer.Count > 0)
@@ -773,6 +760,216 @@ static int Dokument(string[] a)
 /// Det er den eneste rigtige måling appen har: ved en oplæsning findes facit.
 /// Tallet er dét, der skal flytte sig, når ordbogen bliver bedre.
 /// </summary>
+/// <summary>
+/// Måler en træningsmappe sætning for sætning — den samme måling, som
+/// træningsvisningen laver.
+///
+/// Kommandoen findes for at kunne efterprøve tallene UDEN FOR appen. Et tal,
+/// der kun kan ses ét sted, kan man ikke opdage er forkert; det var præcis
+/// sådan, den første udgave nåede at sige 37 % i to omgange.
+/// </summary>
+/// <summary>
+/// FORSØG: kan sprogmodellen rette Whispers fejl?
+///
+/// SPØRGSMÅLET
+///
+/// Whisper skriver «hvor vi ikke har et cybernummer at slå op på». Et menneske,
+/// der læser sætningen, ved med det samme, at der stod cpr-nummer — af
+/// sammenhængen. En sprogmodel læser også sammenhæng. Kan den så rette det?
+///
+/// HVORFOR DET KAN AFGØRES HER
+///
+/// Ved en oplæsning findes facit. Udskriften måles før og efter, mod det
+/// samme manuskript, med den samme måling. Går tallet op, virker det. Går det
+/// ned, retter modellen ting, der var rigtige — og så er svaret nej, uanset
+/// hvor rigtigt det lyder.
+///
+/// HVAD DER IKKE TESTES
+///
+/// Lyden. Qwen er en ren tekstmodel og har ingen lyd-encoder; en wav-fil kan
+/// ikke fodres ind i den. Det ville kræve en multimodal model.
+/// </summary>
+static async Task<int> LlmRet(string[] a)
+{
+    if (a.Length < 2)
+    {
+        Console.WriteLine("Brug: noteapp llmret <mappe> <manuskript.md> [--gem]");
+        return 0;
+    }
+
+    if (!Directory.Exists(a[0]) || !File.Exists(a[1]))
+    {
+        Console.Error.WriteLine("Mappen eller manuskriptet findes ikke.");
+        return 1;
+    }
+
+    var model = NoteApp.Core.Llm.LlmRunner.InstalledModels().FirstOrDefault();
+    if (model is null) { Console.Error.WriteLine("Ingen sprogmodel hentet."); return 1; }
+
+    var json = NoteApp.Core.Traeningsmaaling.FindJson(a[0]);
+    if (json is null) { Console.Error.WriteLine("Mappen er ikke skrevet ud."); return 1; }
+
+    // Der maales paa den RAA udskrift fra Whisper, ikke paa .txt-filen: den er
+    // gaaet gennem rettelserne, og saa ville forsoeget maale to ting paa een
+    // gang.
+    var stykker = NoteApp.Core.Traeningsmaaling.Laes(
+        a[0], File.ReadAllText(a[1], System.Text.Encoding.UTF8));
+
+    if (stykker is null) { Console.Error.WriteLine("Kunne ikke maale mappen."); return 1; }
+
+    var manus = File.ReadAllText(a[1], System.Text.Encoding.UTF8);
+    var foer = string.Join(" ", stykker.Saetninger.Select(s => s.Hørt));
+
+    Console.WriteLine($"Model      : {Path.GetFileName(model)}");
+    Console.WriteLine($"Saetninger : {stykker.Saetninger.Count}");
+    Console.WriteLine($"FOER       : {stykker.Procent:0.0} %  ({stykker.Forkerte} forkerte af {stykker.Ord})");
+    Console.WriteLine();
+
+    // Der deles op i stykker. Et 15-minutters manuskript fylder mere end
+    // modellen kan holde i kontekst paa eet kort, og delegraenser laegges ved
+    // saetninger, saa der ikke klippes midt i noget.
+    const int saetningerPrStykke = 12;
+    var dele = stykker.Saetninger
+        .Select((s, i) => (s, i))
+        .GroupBy(x => x.i / saetningerPrStykke)
+        .Select(g => string.Join(" ", g.Select(x => x.s.Hørt)))
+        .ToList();
+
+    var skabelon = new NoteApp.Core.Llm.PromptTemplate
+    {
+        Name = "rettelse",
+        Temperature = 0.0,
+        MaxTokens = 1400,
+        SystemPrompt =
+            "Du retter fejl i en maskinskrevet udskrift af dansk tale. " +
+            "Ret KUN ord, der aabenlyst er hoert forkert, ud fra sammenhaengen. " +
+            "Bevar alt andet ordret: samme ord, samme raekkefoelge, samme talemaade. " +
+            "Tilfoej intet, fjern intet, omskriv ingen saetninger. " +
+            "Svar med den rettede tekst og intet andet.",
+        UserPrompt = "{{transskription}}"
+    };
+
+    var cli = NoteApp.Core.Llm.LlmRunner.FindCli();
+    if (cli is null) { Console.Error.WriteLine("llama-cli.exe blev ikke fundet."); return 1; }
+
+    var runner = new NoteApp.Core.Llm.LlmRunner(cli);
+    var ud = new System.Text.StringBuilder();
+    var ur = System.Diagnostics.Stopwatch.StartNew();
+
+    for (var i = 0; i < dele.Count; i++)
+    {
+        Console.Write($"  stykke {i + 1} af {dele.Count} … ");
+
+        try
+        {
+            var r = await runner.RunAsync(model, skabelon,
+                skabelon.UserPrompt.Replace("{{transskription}}", dele[i]));
+
+            var svar = r.Text.Trim();
+
+            // Et svar, der er meget kortere end det, der gik ind, betyder at
+            // modellen har droppet indhold. Saa bruges originalen: en maaling
+            // paa en halveret tekst er ikke en maaling af rettelser.
+            if (svar.Length < dele[i].Length * 0.6)
+            {
+                Console.WriteLine($"tabte indhold ({svar.Length} mod {dele[i].Length} tegn) — original brugt");
+                ud.Append(dele[i]).Append(' ');
+                continue;
+            }
+
+            ud.Append(svar).Append(' ');
+            Console.WriteLine("ok");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"fejl: {ex.Message}");
+            ud.Append(dele[i]).Append(' ');
+        }
+    }
+
+    ur.Stop();
+
+    var efter = ud.ToString();
+    var manusTekst = NoteApp.Core.ReadAloudScore.ManuskriptTekst(manus);
+
+    var (ordF, ramtF, _) = NoteApp.Core.ReadAloudScore.Sammenlign(manusTekst, foer);
+    var (ordE, ramtE, _) = NoteApp.Core.ReadAloudScore.Sammenlign(manusTekst, efter);
+
+    var pF = 100.0 * ramtF / ordF;
+    var pE = 100.0 * ramtE / ordE;
+
+    Console.WriteLine();
+    Console.WriteLine($"Tid brugt  : {ur.Elapsed:mm\\:ss}");
+    Console.WriteLine($"FOER       : {pF:0.0} %  ({ordF - ramtF} forkerte)");
+    Console.WriteLine($"EFTER      : {pE:0.0} %  ({ordE - ramtE} forkerte)");
+    Console.WriteLine($"AENDRING   : {pE - pF:+0.0;-0.0;0.0} procentpoint");
+    Console.WriteLine();
+    // Der skelnes mellem «bedre», «uændret» og «værre». Et uændret tal er ikke
+    // det samme som et daarligere, og at kalde det det ville vaere at pynte paa
+    // maalingen i den anden retning.
+    var forskel = (ordE - ramtE) - (ordF - ramtF);
+
+    Console.WriteLine(forskel switch
+    {
+        < 0 => $"Sprogmodellen rettede {-forskel} ord netto.",
+        0 => "Sprogmodellen aendrede ingenting netto. Lige saa mange fejl som foer.",
+        _ => $"Sprogmodellen lavede {forskel} ord VAERRE. Ideen holder ikke."
+    });
+
+    if (a.Contains("--gem"))
+    {
+        var sti = Path.Combine(a[0], "llm-rettet.txt");
+        File.WriteAllText(sti, efter, new System.Text.UTF8Encoding(false));
+        Console.WriteLine($"Gemt       : {sti}");
+    }
+
+    return 0;
+}
+
+static int Traening(string[] a)
+{
+    if (a.Length < 2)
+    {
+        Console.WriteLine("Brug: noteapp traening <mappe> <manuskript.md> [--fejl]");
+        return 0;
+    }
+
+    if (!Directory.Exists(a[0]) || !File.Exists(a[1]))
+    {
+        Console.Error.WriteLine("Mappen eller manuskriptet findes ikke.");
+        return 1;
+    }
+
+    var m = NoteApp.Core.Traeningsmaaling.Laes(
+        a[0], File.ReadAllText(a[1], System.Text.Encoding.UTF8));
+
+    if (m is null) { Console.Error.WriteLine("Der er ikke noget at maale paa i mappen."); return 1; }
+
+    Console.WriteLine($"Ord i alt   : {m.Ord}");
+    Console.WriteLine($"Forkerte    : {m.Forkerte}");
+    Console.WriteLine($"Rigtige     : {m.Ramt}  ({m.Procent:0.0} %)");
+    Console.WriteLine($"Saetninger  : {m.Saetninger.Count}  ({m.Saetninger.Count(s => s.Fejler)} med fejl)");
+    Console.WriteLine($"Lyd         : {Path.GetFileName(m.LydFil)}");
+
+    if (!a.Contains("--fejl")) return 0;
+
+    Console.WriteLine();
+
+    foreach (var s in m.Saetninger.Where(s => s.Fejler))
+    {
+        Console.WriteLine($"[{s.Nummer,3}]  {s.Fra:mm\\:ss}-{s.Til:mm\\:ss}  {s.Procent:0} %");
+        Console.WriteLine($"       hoert   : {s.Hørt}");
+        Console.WriteLine($"       manus   : {s.Forventet}");
+
+        foreach (var f in s.Afvigelser)
+            Console.WriteLine($"         {f.Forventet,-26} -> {(f.Hørt.Length == 0 ? "(manglede)" : f.Hørt)}");
+
+        Console.WriteLine();
+    }
+
+    return 0;
+}
+
 static int Score(string[] a)
 {
     if (a.Length < 2)
@@ -869,22 +1066,6 @@ static int Mikrofontest(string[] a)
         Console.WriteLine("ADVARSEL: der kom stort set ingen lyd. Er det den rigtige mikrofon?");
 
     Console.WriteLine($"Klippet : {fil}");
-    return 0;
-}
-
-static int VisPrompt(string? kunde)
-{
-    using var store = new LearningStore();
-    var prompt = store.BuildWhisperPrompt(kunde);
-
-    Console.WriteLine($"Kunde/scope : {kunde ?? "(alle globale termer)"}");
-    Console.WriteLine($"Tokens brugt: {LearningStore.EstimateTokens(prompt)} af budgettet på 200");
-    Console.WriteLine($"Termer i alt: {store.TermCount()}");
-    Console.WriteLine();
-    Console.WriteLine(string.IsNullOrEmpty(prompt) ? "(tom — kør 'noteapp init')" : prompt);
-    Console.WriteLine();
-    Console.WriteLine("Kommer alle termer ikke med, er det med vilje: Whisper har kun plads til");
-    Console.WriteLine("ca. 224 tokens, og overfyldes prompten, skriver den den ind i transskriptionen.");
     return 0;
 }
 

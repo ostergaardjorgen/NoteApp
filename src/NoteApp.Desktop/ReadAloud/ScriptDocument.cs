@@ -99,17 +99,27 @@ public sealed class ScriptDocument
     /// igennem med det samme, uden at appen skal bygges om. Ellers bruges den
     /// indlejrede kopi, så appen også virker på en maskine uden repoet.
     /// </summary>
-    public static ScriptDocument Load(string fileName = DefaultFile)
+    public static ScriptDocument Load(string fileName = DefaultFile) => Parse(RåTekst(fileName));
+
+    /// <summary>
+    /// Teksten, som den står i filen — uden fortolkning.
+    ///
+    /// Målingen skal have den rå udgave: den skal selv afgøre, hvad der læses
+    /// højt, og hvad der er vejledning. Gik den gennem <see cref="Parse"/>
+    /// først, ville de to have hver sin mening om det, og facit ville afhænge
+    /// af, hvem der blev spurgt.
+    /// </summary>
+    public static string RåTekst(string fileName = DefaultFile)
     {
         var sti = DiskPath(fileName);
-        if (sti is not null) return Parse(File.ReadAllText(sti, Encoding.UTF8));
+        if (sti is not null) return File.ReadAllText(sti, Encoding.UTF8);
 
         using var stream = Assembly.GetExecutingAssembly()
             .GetManifestResourceStream("NoteApp.Desktop." + fileName)
             ?? throw new InvalidOperationException(
                 $"Oplæsningsteksten «{fileName}» findes hverken på disken eller i appen.");
         using var reader = new StreamReader(stream, Encoding.UTF8);
-        return Parse(reader.ReadToEnd());
+        return reader.ReadToEnd();
     }
 
     public static ScriptDocument Parse(string markdown)

@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -74,13 +74,14 @@ public partial class FilesView : UserControl
         var valgt = VaelgMappe("Vælg hvor NoteApps filer skal ligge", UserDataPaths.Root);
         if (valgt is null) return;
 
-        var svar = MessageBox.Show(
-            $"Flyt dine filer hertil?\n\n{valgt}\n\n" +
+        var ja = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
+            "Flyt dine filer hertil?",
+            $"{valgt}\n\n" +
             $"Alt i {UserDataPaths.Root} kopieres derover, og det gamle sted ryddes bagefter. " +
-            "Optagelser, noter, ordbog og indlærte rettelser følger med.",
-            "Flyt datamappen", MessageBoxButton.OKCancel, MessageBoxImage.Question);
+            "Optagelser, noter og indlærte rettelser følger med.",
+            godkend: "Flyt filerne", annuller: "Bliv hvor de er");
 
-        if (svar != MessageBoxResult.OK) return;
+        if (!ja) return;
 
         try
         {
@@ -90,7 +91,7 @@ public partial class FilesView : UserControl
         }
         catch (Exception ex)
         {
-            MessageBox.Show(ex.Message, "Kunne ikke flytte", MessageBoxButton.OK, MessageBoxImage.Warning);
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Kunne ikke flytte", ex.Message, Dialogs.Slags.Pas_paa);
         }
     }
 
@@ -108,20 +109,22 @@ public partial class FilesView : UserControl
         if (BackupService.LeavesMachine(valgt))
         {
             var lokale = string.Join(", ", BackupService.LocalDrives());
-            var svar = MessageBox.Show(
-                "STOP — den mappe ligger uden for denne maskine.\n\n" +
+            var ja = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
+                "Den mappe ligger uden for denne maskine",
                 $"{valgt}\n\n" +
-                "Hvad du er ved at beslutte:\n" +
-                "  • Arkivet indeholder ALT: mødeoptagelser som lyd, transskriptioner,\n" +
-                "    dine noter og ordbogen med indlærte rettelser.\n" +
-                "  • Zip-filen er IKKE krypteret — hverken undervejs eller når den ligger der.\n" +
-                "  • Alle med adgang til mappen kan åbne den, også administratorer og\n" +
-                "    backup af det system, den lander på.\n" +
-                "  • Mødedeltagerne har ikke sagt ja til dette.\n" +
-                "  • Det kan ikke fortrydes. En kopi, der først er ude, er ude.\n\n" +
-                $"Lokale drev lige nu: {lokale}\n\n" +
-                "Vil du alligevel bruge den mappe?",
-                "Destinationen forlader maskinen", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+                "Hvad du er ved at beslutte:\n\n" +
+                "• Arkivet indeholder ALT: mødeoptagelser som lyd, transskriptioner, " +
+                "dine noter og dine indlærte rettelser.\n" +
+                "• Zip-filen er IKKE krypteret — hverken undervejs eller når den ligger der.\n" +
+                "• Alle med adgang til mappen kan åbne den, også administratorer og " +
+                "backup af det system, den lander på.\n" +
+                "• Mødedeltagerne har ikke sagt ja til dette.\n" +
+                "• Det kan ikke fortrydes. En kopi, der først er ude, er ude.\n\n" +
+                $"Lokale drev lige nu: {lokale}",
+                godkend: "Brug den alligevel", annuller: "Vælg et lokalt drev",
+                slags: Dialogs.Slags.Fejl, godkendErStandard: false);
+
+            var svar = ja ? MessageBoxResult.OK : MessageBoxResult.Cancel;
 
             if (svar != MessageBoxResult.OK) return;
 
@@ -158,7 +161,7 @@ public partial class FilesView : UserControl
         catch (Exception ex)
         {
             Status.Text = "Sikkerhedskopien fejlede.";
-            MessageBox.Show(ex.Message, "Kunne ikke tage backup", MessageBoxButton.OK, MessageBoxImage.Warning);
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Kunne ikke tage backup", ex.Message, Dialogs.Slags.Pas_paa);
         }
         finally
         {
@@ -208,26 +211,27 @@ public partial class FilesView : UserControl
             var i = RestoreService.Inspect(sti);
             var udpakket = RestoreService.TestRestore(sti);
 
-            var svar = MessageBox.Show(
-                $"Prøvekørsel gennemført. Dine nuværende data er IKKE rørt.\n\n" +
+            var ja = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
+                "Prøvekørsel gennemført",
+                "Dine nuværende data er IKKE rørt.\n\n" +
                 $"Arkivet: {valgt.Navn}\n" +
-                $"Indhold: {i.Files} filer, {i.MegaBytes:0.0} MB\n" +
-                $"         {i.Summary}\n" +
+                $"Indhold: {i.Files} filer, {i.MegaBytes:0.0} MB — {i.Summary}\n" +
                 (i.HasDictionary
-                    ? "Ordbogen er med og er en gyldig databasefil.\n"
-                    : "BEMÆRK: der er ingen ordbog i arkivet.\n") +
+                    ? "Rettelserne er med og er en gyldig databasefil.\n"
+                    : "BEMÆRK: der er ingen rettelser i arkivet.\n") +
                 (i.AudioFiles == 0
                     ? "Der er ingen lyd i arkivet — optagelserne kan ikke afspilles efter en gendannelse.\n"
                     : "") +
-                $"\nUdpakket til:\n{udpakket}\n\nÅbn mappen?",
-                "Prøvekørsel", MessageBoxButton.YesNo, MessageBoxImage.Information);
+                $"\nUdpakket til:\n{udpakket}",
+                godkend: "Åbn mappen", annuller: "Luk",
+                slags: Dialogs.Slags.Godt);
 
-            if (svar == MessageBoxResult.Yes) Aabn(udpakket);
+            if (ja) Aabn(udpakket);
             Status.Text = $"Prøvekørsel af {valgt.Navn} gennemført.";
         }
         catch (Exception ex)
         {
-            MessageBox.Show(ex.Message, "Prøvekørslen fejlede", MessageBoxButton.OK, MessageBoxImage.Warning);
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Prøvekørslen fejlede", ex.Message, Dialogs.Slags.Pas_paa);
         }
     }
 
@@ -240,43 +244,40 @@ public partial class FilesView : UserControl
         try { i = RestoreService.Inspect(sti); }
         catch (Exception ex)
         {
-            MessageBox.Show(ex.Message, "Kan ikke læse arkivet", MessageBoxButton.OK, MessageBoxImage.Warning);
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Kan ikke læse arkivet", ex.Message, Dialogs.Slags.Pas_paa);
             return;
         }
 
-        var svar = MessageBox.Show(
-            $"Gendan fra {valgt.Navn}?\n\n" +
-            $"Fra {i.Created:dd/MM/yyyy HH:mm}\n" +
-            $"Indhold: {i.Summary}\n\n" +
+        var ja = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
+            $"Gendan fra {valgt.Navn}?",
+            $"Fra {i.Created:dd/MM/yyyy HH:mm} · {i.Summary}\n\n" +
             $"Filerne skrives ind i {UserDataPaths.Root} og overskriver dem, der hedder det samme.\n\n" +
             (i.AudioFiles == 0
                 ? "Arkivet indeholder ingen lyd. Eksisterende lydfiler bliver liggende — de bliver ikke slettet.\n\n"
                 : "") +
-            "Der tages automatisk et sikkerhedsarkiv af dine nuværende data først, så du kan fortryde.\n\n" +
-            "Gendan nu?",
-            "Gendan fra sikkerhedskopi", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+            "Der tages automatisk et sikkerhedsarkiv af dine nuværende data først, så du kan fortryde.",
+            godkend: "Gendan nu", annuller: "Lad være",
+            slags: Dialogs.Slags.Pas_paa, godkendErStandard: false);
 
-        if (svar != MessageBoxResult.OK) return;
+        if (!ja) return;
 
         try
         {
             var r = RestoreService.Restore(sti);
 
-            MessageBox.Show(
-                $"{r.FilesWritten} filer gendannet.\n\n" +
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Gendannet", $"{r.FilesWritten} filer gendannet.\n\n" +
                 (r.SafetyArchive is null
                     ? "Der blev ikke taget et fortrydelsesarkiv — datamappen var tom, så der var intet at sikre.\n\n"
                     : $"Dine tidligere data ligger som:\n{r.SafetyArchive}\n\n") +
                 "LUK OG START APPEN IGEN, så ordbogen genindlæses. Indtil da viser " +
-                "appen stadig det, den havde i hukommelsen.",
-                "Gendannet", MessageBoxButton.OK, MessageBoxImage.Information);
+                "appen stadig det, den havde i hukommelsen.", Dialogs.Slags.Valg);
 
             Status.Text = $"Gendannet fra {valgt.Navn}. Genstart appen.";
             Opdater();
         }
         catch (Exception ex)
         {
-            MessageBox.Show(ex.Message, "Gendannelsen fejlede", MessageBoxButton.OK, MessageBoxImage.Warning);
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Gendannelsen fejlede", ex.Message, Dialogs.Slags.Pas_paa);
         }
     }
 

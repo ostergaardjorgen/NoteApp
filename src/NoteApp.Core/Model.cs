@@ -61,6 +61,19 @@ public sealed class MeetingMetadata
     public string? ReadAloudScript { get; set; }
 
     /// <summary>
+    /// Hvornår mødet blev lagt i arkivet. Null, så længe det ligger fremme.
+    ///
+    /// Arkivet er ikke en papirkurv. Det er stedet, et FÆRDIGBEHANDLET møde
+    /// flyttes hen, så listen forrest kun viser det, der stadig mangler noget.
+    /// Uden den opdeling vokser listen for hvert møde, og den, der er skrevet
+    /// ud men mangler et referat, drukner mellem tres, der er helt færdige.
+    ///
+    /// Datoen gemmes frem for et flag, fordi «hvornår blev det lagt væk» er
+    /// det, man spørger om, når noget skal findes frem igen.
+    /// </summary>
+    public DateTimeOffset? ArchivedAt { get; set; }
+
+    /// <summary>
     /// Sproget mødet blev holdt på, som Whisper fandt det. Null indtil mødet
     /// er transskriberet.
     ///

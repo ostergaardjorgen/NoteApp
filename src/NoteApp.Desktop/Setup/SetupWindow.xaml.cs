@@ -1,49 +1,31 @@
-using System.IO;
+﻿using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using NoteApp.Core;
 
 namespace NoteApp.Desktop.Setup;
 
-public sealed class BrancheVisning
-{
-    public BrancheVisning(IndustryTemplate t)
-    {
-        Id = t.Id;
-        Name = t.Name;
-        Description = t.Description;
-        AntalTekst = t.Count == 0 ? "" : $"{t.Count} ord";
-    }
-
-    public string Id { get; }
-    public string Name { get; }
-    public string Description { get; }
-    public string AntalTekst { get; }
-}
-
 /// <summary>
 /// Opsætning ved første start.
 ///
-/// Tre trin, ikke flere. Formålet er, at appen kender brugerens fagområde og
-/// navne, før det første møde — ikke at samle oplysninger. En tom ordbog gør
-/// de første møder dårligere end nødvendigt, og navne er dem, Whisper oftest
-/// staver forkert.
+/// TO trin: velkomst, og hent motoren. Ikke flere.
 ///
-/// Modellen hentes IKKE her. Det sker på skærmen Motor og model, hvor
-/// størrelse, fordele og ulemper står ved hvert valg — at trække en 2,9 GB
-/// hentning ind i et velkomstforløb ville gøre valget til noget, man klikker
-/// sig forbi.
+/// Der var fire. To af dem — «hvad handler dine møder om» og «hvem holder du
+/// møder med» — fyldte en ordbog op med fagord og navne, som blev sendt med
+/// til Whisper som ledetråd. Det blev målt: forskellen var NUL. To skærme
+/// spørgsmål, før man havde set appen, for at fylde noget op, der ikke gjorde
+/// nogen forskel.
+///
+/// Modellen hentes til gengæld HER. Uden den kan appen ikke skrive et eneste
+/// møde ud, og det er det eneste, en ny bruger virkelig skal have på plads.
 /// </summary>
 public partial class SetupWindow : Window
 {
     private int _trin;
-    private string _branche = "ingen";
 
     private static readonly (string Titel, string Under)[] Trin =
     {
         ("Velkommen til NoteApp", "Møde-noter der bliver på din egen maskine"),
-        ("Hvad handler dine møder om?", "Så starter ordbogen med de rigtige fagord"),
-        ("Hvem holder du møder med?", "Navne er dem, Whisper oftest staver forkert"),
         ("Sidste trin: hent Whisper", "Motoren og en sprogmodel, så appen kan skrive dine møder ud")
     };
 
@@ -57,8 +39,6 @@ public partial class SetupWindow : Window
         InitializeComponent();
 
         DataSti.Text = UserDataPaths.Root;
-        Brancher.ItemsSource = IndustryTemplates.All.Select(t => new BrancheVisning(t)).ToList();
-
         VisTrin(0);
     }
 
@@ -67,24 +47,16 @@ public partial class SetupWindow : Window
         _trin = nr;
 
         Trin1.Visibility = nr == 0 ? Visibility.Visible : Visibility.Collapsed;
-        Trin2.Visibility = nr == 1 ? Visibility.Visible : Visibility.Collapsed;
-        Trin3.Visibility = nr == 2 ? Visibility.Visible : Visibility.Collapsed;
-        Trin4.Visibility = nr == 3 ? Visibility.Visible : Visibility.Collapsed;
+        Trin4.Visibility = nr == 1 ? Visibility.Visible : Visibility.Collapsed;
 
         TrinTitel.Text = Trin[nr].Titel;
         TrinUnder.Text = Trin[nr].Under;
         TrinTaeller.Text = $"Trin {nr + 1} af {Trin.Length}";
 
         TilbageKnap.Visibility = nr == 0 ? Visibility.Collapsed : Visibility.Visible;
-        NaesteKnap.Content = nr switch
-        {
-            0 => "Kom i gang",
-            1 => "Næste",
-            2 => "Næste",
-            _ => "Hent og afslut"
-        };
+        NaesteKnap.Content = nr == 0 ? "Kom i gang" : "Hent og afslut";
 
-        if (nr == 3) _ = ForberedHentning();
+        if (nr == 1) _ = ForberedHentning();
     }
 
     // ------------------------------------------------------- motor og model
@@ -189,27 +161,8 @@ public partial class SetupWindow : Window
         }
         catch (Exception ex)
         {
-            MessageBox.Show(ex.Message, "Kunne ikke skifte mappe",
-                            MessageBoxButton.OK, MessageBoxImage.Warning);
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Kunne ikke skifte mappe", ex.Message, Dialogs.Slags.Pas_paa);
         }
-    }
-
-    private void Branche_Valgt(object sender, RoutedEventArgs e)
-    {
-        if (sender is RadioButton { Tag: string id }) _branche = id;
-    }
-
-    /// <summary>
-    /// Pladsholderen forsvinder, så snart der står noget. WPF's TextBox har
-    /// ingen indbygget pladsholder, og eksemplet i feltet er her ikke pynt:
-    /// det er dét, der fortæller, at der skal skiftes linje mellem hvert navn.
-    /// </summary>
-    private void Felt_Changed(object sender, TextChangedEventArgs e)
-    {
-        if (NavnePladsholder is null || FirmaerPladsholder is null) return;
-
-        NavnePladsholder.Visibility = Navne.Text.Length == 0 ? Visibility.Visible : Visibility.Collapsed;
-        FirmaerPladsholder.Visibility = Firmaer.Text.Length == 0 ? Visibility.Visible : Visibility.Collapsed;
     }
 
     private void Tilbage_Click(object sender, RoutedEventArgs e) => VisTrin(Math.Max(0, _trin - 1));
@@ -224,9 +177,10 @@ public partial class SetupWindow : Window
             return;
         }
 
-        // Ordbogen gemmes FOERST. Gaar hentningen galt, eller afbryder
-        // brugeren, skal fagomraade og navne ikke vaere tabt.
-        GemOrdbog();
+        // Markeres FOERST. Gaar hentningen galt, eller afbryder brugeren, skal
+        // velkomstforloebet ikke komme igen ved naeste start.
+        AppSettings.Current.SetupCompleted = true;
+        AppSettings.Current.Save();
 
         if (_motorValg is not null || _modelValg is not null)
         {
@@ -280,11 +234,8 @@ public partial class SetupWindow : Window
         }
         catch (Exception ex)
         {
-            MessageBox.Show(
-                $"Hentningen blev ikke færdig.\n\n{ex.Message}\n\n" +
-                "Din ordbog er gemt, og opsætningen afsluttes. Du kan hente motor og model " +
-                "senere under «Motor og model».",
-                "Kunne ikke hente", MessageBoxButton.OK, MessageBoxImage.Warning);
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Kunne ikke hente", $"Hentningen blev ikke færdig.\n\n{ex.Message}\n\n" +
+                "Opsætningen afsluttes. Du kan hente motor og model senere under «AI-modeller».", Dialogs.Slags.Pas_paa);
 
             Afslut(visKvittering: false);
             return false;
@@ -298,27 +249,6 @@ public partial class SetupWindow : Window
         }
     }
 
-    private int _fraSkabelon, _navne, _firmaer;
-
-    private void GemOrdbog()
-    {
-        using var store = new LearningStore();
-
-        var skabelon = IndustryTemplates.ById(_branche);
-        _fraSkabelon = skabelon is null ? 0 : IndustryTemplates.Apply(store, skabelon);
-        _navne = IndustryTemplates.AddNames(store, Navne.Text);
-        _firmaer = IndustryTemplates.AddNames(store, Firmaer.Text, TermCategories.Organisation);
-
-        // Ordlisten skrives med det samme. Ellers ville ordbogen vaere fyldt,
-        // men filen Whisper faktisk laeser vaere tom indtil naeste gang nogen
-        // huskede at trykke eksportér.
-        store.ExportVocabularyFile();
-
-        AppSettings.Current.SetupCompleted = true;
-        AppSettings.Current.Industry = _branche;
-        AppSettings.Current.Save();
-    }
-
     private void Afslut(bool visKvittering = true)
     {
         if (visKvittering)
@@ -327,14 +257,12 @@ public partial class SetupWindow : Window
 
             var klar = install.IsComplete
                 ? $"Whisper er klar: {install.ModelFileName} på {install.Engine}."
-                : "Motor eller model mangler stadig — hent dem under «Motor og model».";
+                : "Motor eller model mangler stadig — hent dem under «AI-modeller».";
 
-            MessageBox.Show(
-                $"Ordbogen er sat op med {_fraSkabelon + _navne + _firmaer} ord: " +
-                $"{_fraSkabelon} fra skabelonen, {_navne} navne og {_firmaer} firmaer.\n\n" +
-                klar + "\n\n" +
-                "Første opgave er at læse testteksten højt. Den står klar på skærmen «Oplæsning».",
-                "Klar", MessageBoxButton.OK, MessageBoxImage.Information);
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Klar", klar + "\n\n" +
+                "Tryk «Optag møde», når dit næste møde begynder — så er du i gang.\n\n" +
+                "Vil du vide, hvor godt appen rammer netop din stemme, kan du læse en prøvetekst " +
+                "op under «Start her». Det er frivilligt.", Dialogs.Slags.Valg);
         }
 
         DialogResult = true;

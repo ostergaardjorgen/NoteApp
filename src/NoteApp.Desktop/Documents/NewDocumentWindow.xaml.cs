@@ -1,4 +1,4 @@
-using System.IO;
+﻿using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using NoteApp.Core.Llm;
@@ -72,22 +72,20 @@ public partial class NewDocumentWindow : Window
     {
         if (Skabeloner.SelectedItem is not PromptTemplate t)
         {
-            MessageBox.Show("Vælg en skabelon.", "Mangler valg", MessageBoxButton.OK, MessageBoxImage.Information);
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Mangler valg", "Vælg en skabelon.", Dialogs.Slags.Valg);
             return;
         }
 
         if (Titel.Length == 0)
         {
-            MessageBox.Show("Dokumentet skal have en titel.", "Mangler titel",
-                MessageBoxButton.OK, MessageBoxImage.Information);
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Mangler titel", "Dokumentet skal have en titel.", Dialogs.Slags.Valg);
             FeltTitel.Focus();
             return;
         }
 
         if (ModelSti.Length == 0)
         {
-            MessageBox.Show("Der er ingen sprogmodel at lave dokumentet med. Hent en under «AI-modeller».",
-                "Mangler sprogmodel", MessageBoxButton.OK, MessageBoxImage.Information);
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Mangler sprogmodel", "Der er ingen sprogmodel at lave dokumentet med. Hent en under «AI-modeller».", Dialogs.Slags.Valg);
             return;
         }
 

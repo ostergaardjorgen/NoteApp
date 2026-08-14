@@ -1,288 +1,177 @@
-using System.Globalization;
-using System.IO;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
 using NoteApp.Core;
 
 namespace NoteApp.Desktop.Dictionary;
 
-/// <summary>En række, som gitteret kan vise — med kategorien skrevet på dansk.</summary>
-public sealed class TermVisning
+/// <summary>Én rettelse, som den vises i gitteret.</summary>
+public sealed class RettelseVisning
 {
-    public TermVisning(TermRow r)
+    public RettelseVisning(Rettelse r)
     {
         Row = r;
-        KategoriTekst = TermCategories.Label(r.Category);
-        AktivTekst = r.Active ? "ja" : "nej";
+        Hørt = r.Hørt;
+        Rigtigt = r.Rigtigt;
+        Gange = r.Gange;
+
+        Sidst = DateTime.TryParse(r.SidstSet, out var d) ? d.ToString("dd/MM yyyy") : "";
     }
 
-    public TermRow Row { get; }
-    public long Id => Row.Id;
-    public string Canonical => Row.Canonical;
-    public double Weight => Row.Weight;
-    public string? Scope => Row.Scope;
-    public int AliasCount => Row.AliasCount;
-    public string KategoriTekst { get; }
-    public string AktivTekst { get; }
+    public Rettelse Row { get; }
+    public string Hørt { get; }
+    public string Rigtigt { get; }
+    public int Gange { get; }
+    public string Sidst { get; }
 }
 
 /// <summary>
-/// Vedligehold af den lokale ordbog.
+/// Dine rettelser.
 ///
-/// Kategorierne er de fem, skemaet allerede kender, og der er ikke opfundet
-/// flere: en kategori tjener kun et formål her, nemlig at afgøre hvem der
-/// kommer med i Whispers prompt, når ordbogen er større end de ~224 tokens.
-/// Personer og organisationer først, fordi navne er dem, modellen oftest
-/// staver forkert. En kategori uden den konsekvens ville kun være mere
-/// arbejde ved indtastning.
+/// HVAD DER LÅ HER FØR
+///
+/// Skærmen hed «Din ordbog» og havde en ordliste: man skrev sine fagord og
+/// navne ind, valgte kategori og vægt, og listen blev sendt med til Whisper
+/// som ledetråd. Det blev målt. Forskellen var NUL — samme lyd gav samme
+/// udskrift, med og uden. Og den kunne gøre skade: Whisper skrev ledetråden
+/// ind i teksten under pauser, 372 af 388 linjer blev til den samme sætning.
+///
+/// 41 ord, der ikke gjorde noget, og en brugerflade, der fik det til at se ud,
+/// som om appen blev skarpere for hvert ord, man skrev. Det er væk.
+///
+/// HVAD DER ER TILBAGE
+///
+/// Rettelserne. De virker målbart, fordi de arbejder på TEKSTEN bagefter og
+/// ikke på modellen. Whisper kan ikke trænes — vægtene ligger fast i den fil,
+/// der er hentet — men det, den skrev forkert, kan rettes én gang og blive
+/// ved med at være rettet.
 /// </summary>
 public partial class DictionaryView : UserControl
 {
-    private readonly LearningStore _store;
-    private long? _redigerer;
+    private readonly LearningStore _store = new();
 
     public DictionaryView()
     {
         InitializeComponent();
 
-        _store = new LearningStore();
+        Gitter.SelectionChanged += (_, _) => SletKnap.IsEnabled = Gitter.SelectedItem is not null;
+        Unloaded += (_, _) => _store.Dispose();
 
-        Indlaes();
-    }
-
-    // ---------------------------------------------------------------- listen
-
-    private void Indlaes()
-    {
-        var rækker = _store.ListTerms(Soeg.Text);
-        Gitter.ItemsSource = rækker.Select(r => new TermVisning(r)).ToList();
-
-        SoegPladsholder.Visibility = string.IsNullOrEmpty(Soeg.Text)
-            ? Visibility.Visible : Visibility.Collapsed;
-
-        Antal.Text = $"{_store.TermCount()} ord i ordbogen";
-
-        OpdaterPrompt();
-    }
-
-    private void Soeg_Changed(object sender, TextChangedEventArgs e) => Indlaes();
-
-    private void Filter_Changed(object sender, SelectionChangedEventArgs e) => Indlaes();
-
-    private void Gitter_SelectionChanged(object sender, SelectionChangedEventArgs e)
-    {
-        SletKnap.IsEnabled = Gitter.SelectedItem is TermVisning;
-        if (Gitter.SelectedItem is not TermVisning v) return;
-
-        _redigerer = v.Row.Id;
-        FormTitel.Text = $"Redigerer «{v.Canonical}»";
-        FeltOrd.Text = v.Row.Canonical;
-        FeltUdtale.Text = v.Row.Hint ?? "";
-        FeltKunde.Text = v.Row.Scope ?? "";
-        FeltAktiv.IsChecked = v.Row.Active;
-    }
-
-    // ------------------------------------------------------------ redigering
-
-    private void Gem_Click(object sender, RoutedEventArgs e)
-    {
-        var ord = FeltOrd.Text.Trim();
-        if (ord.Length == 0)
-        {
-            MessageBox.Show("Skriv et ord først.", "Mangler ord", MessageBoxButton.OK, MessageBoxImage.Information);
-            return;
-        }
-
-        // Vægten er ikke længere et felt på skærmen. Den bruges kun, når
-        // ordlisten skal skæres til for at være i et budget, og det sker ikke:
-        // budgettet er 2000 tokens mod under hundrede ord.
-        const double vægt = 1.0;
-
-        var udtale = Tom(FeltUdtale.Text);
-        var kunde = Tom(FeltKunde.Text);
-        var aktiv = FeltAktiv.IsChecked == true;
-
-        if (_redigerer is long id)
-            _store.UpdateTerm(id, ord, "fagterm", vægt, kunde, udtale, aktiv);
-        else
-            _store.AddTerm(ord, "fagterm", vægt, kunde, udtale);
-
-        Ryd_Click(sender, e);
+        RydOpEnGang();
         Indlaes();
     }
 
     /// <summary>
-    /// Opret et ord ved at tale det ind.
+    /// Rydder de gamle ord op — dem, der ikke bærer nogen rettelse.
     ///
-    /// Det giver to ting på én gang: ordet, og den form Whisper hører det som.
-    /// Den sidste er den værdifulde — den kan man ikke gætte sig til, og den
-    /// er præcis dét, en rettelse skal bruge.
+    /// De gør ingenting, men de tæller med i «Termer: 41» og får det til at se
+    /// ud, som om der ligger noget derinde, der virker. Ryddes de ikke, står
+    /// de tilbage som et spøgelse af en funktion, der er fjernet.
+    ///
+    /// Det sker én gang og siges i statuslinjen. Der spørges ikke: der er
+    /// ikke noget at miste, og et spørgsmål om noget, brugeren ikke længere
+    /// kan se, kan ikke besvares meningsfuldt.
+    /// </summary>
+    private void RydOpEnGang()
+    {
+        try
+        {
+            var fjernet = _store.RydOrdliste();
+            if (fjernet == 0) return;
+
+            _oprydning = $"{fjernet} gamle ord fra den tidligere ordliste er ryddet væk. " +
+                         "De blev sendt med til Whisper som ledetråd, og det er målt til ingen forskel.";
+        }
+        catch (Exception ex)
+        {
+            _oprydning = $"Kunne ikke rydde de gamle ord op: {ex.Message}";
+        }
+    }
+
+    private string _oprydning = "";
+
+    private void Indlaes()
+    {
+        var rækker = _store.ListRettelser(Soeg.Text)
+            .Select(r => new RettelseVisning(r))
+            .ToList();
+
+        Gitter.ItemsSource = rækker;
+        Antal.Text = rækker.Count == 1 ? "1 rettelse" : $"{rækker.Count} rettelser";
+
+        if (_oprydning.Length > 0)
+        {
+            Status.Text = _oprydning;
+            _oprydning = "";
+            return;
+        }
+
+        Status.Text = rækker.Count > 0
+            ? ""
+            : "Der er ingen rettelser endnu. De kommer, når du retter et ord i en udskrift under " +
+              "«Optagelser» eller i «Træning» — eller når du taler en ind her.";
+    }
+
+    private void Soeg_Changed(object sender, TextChangedEventArgs e)
+    {
+        if (SoegPladsholder is null) return;
+
+        SoegPladsholder.Visibility = Soeg.Text.Length == 0 ? Visibility.Visible : Visibility.Collapsed;
+        Indlaes();
+    }
+
+    /// <summary>
+    /// Lær en rettelse ved at TALE ordet ind.
+    ///
+    /// Det, man ikke kan gætte sig til, er hvordan Whisper hører ordet — og
+    /// det er præcis dét, en rettelse skal bruge. Taler man det ind, kommer
+    /// den fejlhørte form af sig selv.
     /// </summary>
     private void Tal_Click(object sender, RoutedEventArgs e)
     {
-        var vindue = new SpeakWordWindow(FeltOrd.Text.Trim()) { Owner = Window.GetWindow(this) };
+        var vindue = new SpeakWordWindow() { Owner = Window.GetWindow(this) };
         if (vindue.ShowDialog() != true) return;
+
+        // Blev ordet hørt RIGTIGT, er der ikke noget at rette. Før blev det
+        // gemt som et ord i ordlisten alligevel — altså gemt som noget, der
+        // ikke gjorde noget. Nu siges det, som det er.
+        if (!vindue.HarRettelse)
+        {
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Intet at rette", $"Whisper hørte «{vindue.Stavning}» rigtigt.\n\n" +
+                "Så er der ikke noget at rette, og der bliver ikke gemt noget. " +
+                "Det er faktisk den bedste udgang — ordet rammer allerede.", Dialogs.Slags.Valg);
+            return;
+        }
 
         try
         {
-            if (vindue.HarRettelse)
-            {
-                // Baade ordet og rettelsen i een handling.
-                _store.LearnCorrection(vindue.Forkert, vindue.Stavning, engineId: "indtalt");
-                MessageBox.Show(
-                    $"«{vindue.Stavning}» er gemt.\n\n" +
-                    $"Whisper hørte det som «{vindue.Forkert}», og det bliver rettet automatisk fremover.",
-                    "Lært", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
-            else
-            {
-                if (_store.FindTermId(vindue.Stavning) is null)
-                    _store.AddTerm(vindue.Stavning, "fagterm");
+            _store.LearnCorrection(vindue.Forkert, vindue.Stavning, engineId: "indtalt");
 
-                MessageBox.Show(
-                    $"«{vindue.Stavning}» er gemt i ordbogen.\n\n" +
-                    "Whisper hørte ordet rigtigt, så der er ikke noget at rette — ordet bruges til at " +
-                    "stave rigtigt i dine dokumenter.",
-                    "Gemt", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
+            Historik.Skriv(HaendelseType.Rettelser,
+                $"Rettelse lært: {vindue.Forkert} → {vindue.Stavning}", "Talt ind");
 
-            Ryd_Click(sender, e);
+            Status.Text = $"Lært: «{vindue.Forkert}» rettes til «{vindue.Stavning}» fremover.";
             Indlaes();
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Ordet kunne ikke gemmes.\n\n{ex.Message}", "Kunne ikke gemme",
-                MessageBoxButton.OK, MessageBoxImage.Warning);
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Kunne ikke gemme", $"Rettelsen kunne ikke gemmes.\n\n{ex.Message}", Dialogs.Slags.Pas_paa);
         }
-    }
-
-    /// <summary>Forslag mens man skriver — så det samme ord ikke oprettes to gange.</summary>
-    private void Ord_Changed(object sender, TextChangedEventArgs e)
-    {
-        if (Forslag is null) return;
-
-        var skrevet = FeltOrd.Text.Trim();
-        var fundne = skrevet.Length < 2
-            ? Array.Empty<string>()
-            : _store.Foreslaa(skrevet).Where(f => !f.Equals(skrevet, StringComparison.OrdinalIgnoreCase)).ToArray();
-
-        Forslag.ItemsSource = fundne;
-
-        // Staar ordet der ALLEREDE, er det ikke et forslag — det er en advarsel.
-        var findes = skrevet.Length > 0 && _store.FindTermId(skrevet) is not null && _redigerer is null;
-        ForslagTekst.Text = findes ? $"«{skrevet}» står allerede i ordbogen." : "";
-        ForslagTekst.Visibility = findes ? Visibility.Visible : Visibility.Collapsed;
-    }
-
-    private void Forslag_Click(object sender, RoutedEventArgs e)
-    {
-        if (sender is Button b && b.Content is string ord) FeltOrd.Text = ord;
-    }
-
-    /// <summary>
-    /// Slår ord sammen, der står flere gange. Dubletterne stammer fra
-    /// kategorierne: det samme ord kunne oprettes én gang som fagterm og én
-    /// gang som produkt, uden at nogen kunne se det.
-    /// </summary>
-    private void Dubletter_Click(object sender, RoutedEventArgs e)
-    {
-        var antal = _store.SlaaDubletterSammen();
-
-        MessageBox.Show(
-            antal == 0
-                ? "Der er ingen dubletter i ordbogen."
-                : $"{antal} dubletter slået sammen.\n\nDen ældste post er beholdt, og de øvriges " +
-                  "varianter er flyttet over på den — en variant, der er hørt flere gange, må ikke " +
-                  "gå tabt, fordi posten forsvinder.",
-            "Dubletter", MessageBoxButton.OK, MessageBoxImage.Information);
-
-        Indlaes();
     }
 
     private void Slet_Click(object sender, RoutedEventArgs e)
     {
-        if (Gitter.SelectedItem is not TermVisning v) return;
+        if (Gitter.SelectedItem is not RettelseVisning v) return;
 
-        var svar = MessageBox.Show(
-            $"Slet «{v.Canonical}» fra ordbogen?\n\n" +
-            "Rettelser, du allerede har lavet i tidligere møder, bevares — de er " +
-            "kendsgerninger om de møder og slettes ikke med ordet.",
-            "Slet ord", MessageBoxButton.YesNo, MessageBoxImage.Question);
+        var ja = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
+            "Slå rettelsen fra?",
+            $"«{v.Hørt}» bliver ikke længere rettet til «{v.Rigtigt}».\n\n" +
+            "Udskrifter, der allerede ER rettet, bliver ikke lavet om.",
+            godkend: "Slå fra", annuller: "Behold den");
 
-        if (svar != MessageBoxResult.Yes) return;
+        if (!ja) return;
 
-        _store.DeleteTerm(v.Row.Id);
-        Ryd_Click(sender, e);
+        _store.SletRettelse(v.Row.Normalized);
+        Status.Text = $"«{v.Hørt}» rettes ikke længere.";
         Indlaes();
-    }
-
-    private void Ryd_Click(object sender, RoutedEventArgs e)
-    {
-        _redigerer = null;
-        FormTitel.Text = "Nyt ord";
-        FeltOrd.Text = "";
-        FeltUdtale.Text = "";
-        FeltKunde.Text = "";
-        FeltAktiv.IsChecked = true;
-        Gitter.SelectedItem = null;
-        FeltOrd.Focus();
-    }
-
-    private static string? Tom(string s) => string.IsNullOrWhiteSpace(s) ? null : s.Trim();
-
-    // ---------------------------------------------------------------- prompt
-
-    private void OpdaterPrompt()
-    {
-        var prompt = _store.BuildWhisperPrompt();
-        PromptTekst.Text = prompt.Length == 0
-            ? "(tom — ordbogen har ingen aktive ord endnu)"
-            : prompt;
-
-        var tokens = LearningStore.EstimateTokens(prompt);
-        var medtaget = prompt.Length == 0 ? 0 : prompt.Count(c => c == ',') + 1;
-        var ialt = _store.TermCount();
-
-        PromptTal.Text = $"~{tokens} af 224 tokens · {medtaget} af {ialt} ord med";
-
-        // Kommer ikke alle med, er det ikke en fejl — det er budgettet, der
-        // virker. Men brugeren skal vide det, for så er det vægten, der afgør
-        // hvem der ryger ud.
-        PromptTal.Foreground = medtaget < ialt
-            ? (Brush)FindResource("Advarsel")
-            : (Brush)FindResource("TekstSvag");
-    }
-
-    private void Eksport_Click(object sender, RoutedEventArgs e)
-    {
-        var sti = _store.ExportVocabularyFile();
-        MessageBox.Show(
-            $"Ordlisten er gemt som:\n{sti}\n\nDet er den fil, Fase 0-scriptet læser.",
-            "Gemt", MessageBoxButton.OK, MessageBoxImage.Information);
-    }
-
-    private void Import_Click(object sender, RoutedEventArgs e)
-    {
-        // Den gamle statiske ordliste kan ligge to steder: i datamappen, eller
-        // i repoet fra før ordbogen fandtes. Tag den, der findes.
-        var fil = File.Exists(UserDataPaths.Vocabulary)
-            ? UserDataPaths.Vocabulary
-            : RepoFiles.Find("ordliste.txt");
-        if (fil is null)
-        {
-            MessageBox.Show("Fandt ingen ordliste.txt at importere fra.", "Ingen fil",
-                            MessageBoxButton.OK, MessageBoxImage.Information);
-            return;
-        }
-
-        var antal = _store.ImportVocabularyFile(fil);
-        Indlaes();
-
-        MessageBox.Show(
-            $"{antal} ord læst ind fra:\n{fil}\n\n" +
-            "De er sat som fagtermer og forkortelser. Gå dem igennem og flyt navnene " +
-            "til kategorien Person — de bliver valgt først til prompten.",
-            "Importeret", MessageBoxButton.OK, MessageBoxImage.Information);
     }
 }

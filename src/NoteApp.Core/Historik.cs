@@ -12,6 +12,13 @@ public enum HaendelseType
     Rettelser,
     Hentning,
     Backup,
+
+    /// <summary>Et møde er lagt væk som færdigbehandlet.</summary>
+    Arkiveret,
+
+    /// <summary>Et arkiveret møde er hentet frem igen.</summary>
+    HentetFrem,
+
     Andet
 }
 

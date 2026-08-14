@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Windows;
@@ -188,8 +188,7 @@ public partial class TemplatesView : UserControl
 
         if (string.IsNullOrWhiteSpace(FeltNavn.Text))
         {
-            MessageBox.Show("Skabelonen skal have et navn.", "Mangler navn",
-                MessageBoxButton.OK, MessageBoxImage.Warning);
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Mangler navn", "Skabelonen skal have et navn.", Dialogs.Slags.Pas_paa);
             return;
         }
 
@@ -198,33 +197,32 @@ public partial class TemplatesView : UserControl
         // bruges — og saa staar man med et moede, der skal skrives i haanden.
         if (!TryTal(FeltTemperatur.Text, out var temp) || temp < 0 || temp > 2)
         {
-            MessageBox.Show("Temperatur skal være et tal mellem 0 og 2. Til referater er 0,2 et fornuftigt sted.",
-                "Temperaturen kan ikke bruges", MessageBoxButton.OK, MessageBoxImage.Warning);
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Temperaturen kan ikke bruges", "Temperatur skal være et tal mellem 0 og 2. Til referater er 0,2 et fornuftigt sted.", Dialogs.Slags.Pas_paa);
             return;
         }
 
         if (!int.TryParse(FeltMaksTokens.Text, out var maks) || maks < 128 || maks > 32768)
         {
-            MessageBox.Show("Maks. længde skal være et helt tal mellem 128 og 32768. 2048 rækker til et fyldigt referat.",
-                "Længden kan ikke bruges", MessageBoxButton.OK, MessageBoxImage.Warning);
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Længden kan ikke bruges", "Maks. længde skal være et helt tal mellem 128 og 32768. 2048 rækker til et fyldigt referat.", Dialogs.Slags.Pas_paa);
             return;
         }
 
         if (string.IsNullOrWhiteSpace(FeltSystem.Text))
         {
-            MessageBox.Show("Instruktionen til modellen må ikke være tom — det er den, der afgør, hvad der kommer ud.",
-                "Mangler instruktion", MessageBoxButton.OK, MessageBoxImage.Warning);
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Mangler instruktion", "Instruktionen til modellen må ikke være tom — det er den, der afgør, hvad der kommer ud.", Dialogs.Slags.Pas_paa);
             return;
         }
 
         if (!FeltBruger.Text.Contains("{{transskription}}"))
         {
-            var svar = MessageBox.Show(
-                "Feltet {{transskription}} står ikke i teksten forneden.\n\n" +
-                "Uden det får modellen ikke selve mødet at se, og udkastet bliver skrevet ud af ingenting.\n\n" +
-                "Gem alligevel?",
-                "Mødet mangler", MessageBoxButton.YesNo, MessageBoxImage.Warning);
-            if (svar != MessageBoxResult.Yes) return;
+            var ja = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
+                "Mødet mangler i skabelonen",
+                "Feltet {{transskription}} står ikke i teksten forneden. Uden det får modellen ikke " +
+                "selve mødet at se, og udkastet bliver skrevet ud af ingenting.",
+                godkend: "Gem alligevel", annuller: "Tilbage til teksten",
+                slags: Dialogs.Slags.Pas_paa, godkendErStandard: false);
+
+            if (!ja) return;
         }
 
         var gammelSti = _valgt.Path;
@@ -254,8 +252,7 @@ public partial class TemplatesView : UserControl
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Skabelonen kunne ikke gemmes.\n\n{ex.Message}", "Kunne ikke gemme",
-                MessageBoxButton.OK, MessageBoxImage.Error);
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Kunne ikke gemme", $"Skabelonen kunne ikke gemmes.\n\n{ex.Message}", Dialogs.Slags.Fejl);
         }
     }
 
@@ -302,8 +299,7 @@ public partial class TemplatesView : UserControl
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Skabelonen kunne ikke oprettes.\n\n{ex.Message}", "Kunne ikke oprette",
-                MessageBoxButton.OK, MessageBoxImage.Error);
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Kunne ikke oprette", $"Skabelonen kunne ikke oprettes.\n\n{ex.Message}", Dialogs.Slags.Fejl);
         }
     }
 
@@ -311,17 +307,18 @@ public partial class TemplatesView : UserControl
     {
         if (_valgt?.Path is null)
         {
-            MessageBox.Show("Der er ingen fil at slette — skabelonen er indbygget.", "Kan ikke slettes",
-                MessageBoxButton.OK, MessageBoxImage.Information);
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Kan ikke slettes", "Der er ingen fil at slette — skabelonen er indbygget.", Dialogs.Slags.Valg);
             return;
         }
 
-        var svar = MessageBox.Show(
-            $"Slet skabelonen «{_valgt.Name}»?\n\n{_valgt.Path}\n\n" +
-            "Filen slettes. Har du brugt den til udkast tidligere, ligger de udkast stadig hvor de er.",
-            "Slet skabelon", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+        var ja = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
+            $"Slet skabelonen «{_valgt.Name}»?",
+            $"{_valgt.Path}\n\nFilen slettes. Har du brugt den til udkast tidligere, ligger de " +
+            "udkast stadig hvor de er.",
+            godkend: "Slet skabelonen", annuller: "Behold den",
+            slags: Dialogs.Slags.Pas_paa, godkendErStandard: false);
 
-        if (svar != MessageBoxResult.Yes) return;
+        if (!ja) return;
 
         try
         {
@@ -331,8 +328,7 @@ public partial class TemplatesView : UserControl
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Skabelonen kunne ikke slettes.\n\n{ex.Message}", "Kunne ikke slette",
-                MessageBoxButton.OK, MessageBoxImage.Error);
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Kunne ikke slette", $"Skabelonen kunne ikke slettes.\n\n{ex.Message}", Dialogs.Slags.Fejl);
         }
     }
 

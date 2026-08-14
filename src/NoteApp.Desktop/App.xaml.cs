@@ -1,4 +1,4 @@
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Threading;
 using NoteApp.Core;
 
@@ -53,10 +53,11 @@ public partial class App : Application
     /// </summary>
     private void VisFejl(object sender, DispatcherUnhandledExceptionEventArgs e)
     {
-        MessageBox.Show(
-            $"{e.Exception.Message}\n\n{e.Exception.GetType().Name}",
-            "Der gik noget galt",
-            MessageBoxButton.OK, MessageBoxImage.Warning);
+        // Hovedvinduet som ejer, ikke «this» — App er ikke et vindue. Findes
+        // det ikke endnu (fejl under opstart), staar dialogen for sig selv.
+        Dialogs.AppDialog.Vis(MainWindow, "Der gik noget galt",
+            $"{e.Exception.Message}\n\n{e.Exception.GetType().Name}", Dialogs.Slags.Fejl);
+
         e.Handled = true;
     }
 }

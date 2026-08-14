@@ -4,63 +4,33 @@ using Microsoft.Data.Sqlite;
 
 namespace NoteApp.Core;
 
-public sealed record PromptTerm(string Canonical, string Category, string? Hint);
-
 public sealed record AliasRule(string Normalized, string Canonical, int WordCount);
 
-/// <summary>En række i ordbogen, som den vises og redigeres i UI'et.</summary>
-public sealed record TermRow(
-    long Id,
-    string Canonical,
-    string Category,
-    double Weight,
-    string? Scope,
-    string? Hint,
-    bool Active,
-    int AliasCount);
+/// <summary>
+/// Én rettelse, som den vises: «det her hørte appen» → «det her skal der stå».
+///
+/// Det er den eneste form for læring i appen, der er målt til at virke.
+/// Ordlisten, der lå her før, gjorde beviseligt ingenting.
+/// </summary>
+public sealed record Rettelse(
+    string Normalized,
+    string Hørt,
+    string Rigtigt,
+    int Gange,
+    string? SidstSet,
+    int Ordantal);
 
 /// <summary>
-/// De fem kategorier fra skemaet, med de navne et menneske genkender.
+/// Kategorien på en term.
 ///
-/// Kategorien er ikke en etiket til at sortere efter — den STYRER, hvad der
-/// kommer med i Whispers prompt, når ordbogen er større end de ca. 224 tokens
-/// der er plads til. Personer og organisationer vælges først, fordi det er
-/// navne, modellen oftest staver forkert. Derfor er der heller ikke flere
-/// kategorier end disse: en kategori uden konsekvens for udvælgelsen ville
-/// kun være ekstra arbejde ved indtastning.
+/// Der var engang fem, og de STYREDE, hvad der kom med i Whispers prompt, når
+/// ordbogen var større end der var plads til. Prompten er væk — den blev målt
+/// til ingen forskel — og dermed er kategorien uden konsekvens. Den ene
+/// tilbage findes kun, fordi skemaets kolonne er NOT NULL.
 /// </summary>
 public static class TermCategories
 {
-    public const string Person = "person";
-    public const string Organisation = "organisation";
-    public const string Produkt = "produkt";
     public const string Fagterm = "fagterm";
-    public const string Forkortelse = "forkortelse";
-
-    public static readonly IReadOnlyList<string> All = new[]
-    {
-        Person, Organisation, Produkt, Fagterm, Forkortelse
-    };
-
-    public static string Label(string category) => category switch
-    {
-        Person => "Person",
-        Organisation => "Organisation",
-        Produkt => "Produkt",
-        Fagterm => "Fagterm",
-        Forkortelse => "Forkortelse",
-        _ => category
-    };
-
-    public static string Explanation(string category) => category switch
-    {
-        Person => "Kollegaer, kunder, mødedeltagere. Vælges FØRST til prompten — navne er dem, Whisper oftest staver forkert.",
-        Organisation => "Firmaer, myndigheder, afdelinger. Vælges næst efter personer.",
-        Produkt => "Produkt- og systemnavne, fx Entra ID.",
-        Fagterm => "Fagudtryk i din branche, fx provisionering, attestering.",
-        Forkortelse => "SCIM, IAM, JML. Udtales tit som ord og bliver derfor stavet forkert.",
-        _ => ""
-    };
 }
 
 /// <summary>
@@ -105,8 +75,28 @@ public sealed class LearningStore : IDisposable
     }
 
     // ------------------------------------------------------------- ordbogen
+    //
+    // HVAD DER BLEV AF ORDLISTEN
+    //
+    // Der var engang en ordbog her: man skrev sine fagord og navne ind, og de
+    // blev sendt med til Whisper som en ledetråd. Det blev målt, og forskellen
+    // var NUL — den samme optagelse gav den samme udskrift, med og uden. Værre
+    // endnu skrev Whisper prompten ind i teksten under pauser: 372 af 388
+    // linjer blev til den samme sætning om og om igen.
+    //
+    // Ordlisten er derfor væk som funktion. En app må ikke tilbyde et
+    // håndtag, der ikke er forbundet til noget — 41 ord, der intet gjorde,
+    // så ud som om appen blev bedre, hver gang man skrev et til.
+    //
+    // Termen findes stadig HERINDE, men kun som den ene halvdel af en
+    // rettelse: den rigtige stavemåde, et alias peger hen på. Det, der virker,
+    // er rettelserne, og det er dem, brugeren ser.
 
-    public long AddTerm(string canonical, string category, double weight = 1.0, string? scope = null, string? hint = null)
+    /// <summary>
+    /// Den rigtige stavemåde bag en rettelse. Oprettes af
+    /// <see cref="LearnCorrection"/> og har ingen selvstændig brugerflade.
+    /// </summary>
+    internal long AddTerm(string canonical, string category, double weight = 1.0, string? scope = null, string? hint = null)
     {
         using var cmd = _db.CreateCommand();
         cmd.CommandText = @"
@@ -126,96 +116,65 @@ public sealed class LearningStore : IDisposable
     }
 
     /// <summary>
-    /// Hele ordbogen til redigering. Inaktive termer kommer med, så de kan
-    /// aktiveres igen — en term man har slået fra, er sjældent en fejl man
-    /// vil have slettet.
+    /// Alle rettelser, nyeste først: hvad der blev hørt, hvad det bliver
+    /// rettet til, og hvor mange gange den fejl er set.
+    ///
+    /// Det er hele det, brugeren har at skrue på. Alt andet i denne fil er
+    /// enten historik eller den plumbing, rettelserne står på.
     /// </summary>
-    public IReadOnlyList<TermRow> ListTerms(string? search = null, string? category = null)
+    public IReadOnlyList<Rettelse> ListRettelser(string? søg = null)
     {
         using var cmd = _db.CreateCommand();
         cmd.CommandText = @"
-            SELECT t.id, t.canonical, t.category, t.weight, t.scope,
-                   t.pronunciation_hint, t.active,
-                   (SELECT COUNT(*) FROM alias a WHERE a.term_id = t.id)
-            FROM term t
-            WHERE ($q IS NULL OR t.canonical LIKE '%' || $q || '%')
-              AND ($k IS NULL OR t.category = $k)
-            ORDER BY
-                CASE t.category
-                    WHEN 'person' THEN 0 WHEN 'organisation' THEN 1 ELSE 2 END,
-                t.canonical COLLATE NOCASE;";
-        cmd.Parameters.AddWithValue("$q", string.IsNullOrWhiteSpace(search) ? DBNull.Value : search);
-        cmd.Parameters.AddWithValue("$k", string.IsNullOrWhiteSpace(category) ? DBNull.Value : category);
+            SELECT a.normalized, a.heard, t.canonical, a.occurrences, a.last_seen_at, a.word_count
+            FROM alias a JOIN term t ON t.id = a.term_id
+            WHERE a.auto_apply = 1
+              AND ($q IS NULL OR a.heard LIKE '%' || $q || '%' OR t.canonical LIKE '%' || $q || '%')
+            ORDER BY a.last_seen_at DESC, t.canonical COLLATE NOCASE;";
+        cmd.Parameters.AddWithValue("$q", string.IsNullOrWhiteSpace(søg) ? DBNull.Value : søg);
 
-        var liste = new List<TermRow>();
+        var liste = new List<Rettelse>();
         using var r = cmd.ExecuteReader();
         while (r.Read())
         {
-            liste.Add(new TermRow(
-                r.GetInt64(0), r.GetString(1), r.GetString(2), r.GetDouble(3),
-                r.IsDBNull(4) ? null : r.GetString(4),
-                r.IsDBNull(5) ? null : r.GetString(5),
-                r.GetInt32(6) == 1,
-                r.GetInt32(7)));
+            liste.Add(new Rettelse(
+                r.GetString(0), r.GetString(1), r.GetString(2), r.GetInt32(3),
+                r.IsDBNull(4) ? null : r.GetString(4), r.GetInt32(5)));
         }
         return liste;
     }
 
-    public void UpdateTerm(long id, string canonical, string category, double weight,
-                           string? scope, string? hint, bool active)
+    /// <summary>
+    /// Slår en rettelse fra.
+    ///
+    /// Rækken slettes ikke — <c>auto_apply</c> sættes til 0. En rettelse, der
+    /// viste sig at ramme forkert, er værd at kunne se, at man HAR haft; en
+    /// tom database fortæller ikke, hvorfor man holdt op med at bruge den.
+    /// Termen bliver også liggende, hvis den bærer andre rettelser.
+    /// </summary>
+    public void SletRettelse(string normalized)
+    {
+        using var cmd = _db.CreateCommand();
+        cmd.CommandText = "UPDATE alias SET auto_apply = 0 WHERE normalized = $n;";
+        cmd.Parameters.AddWithValue("$n", normalized);
+        cmd.ExecuteNonQuery();
+    }
+
+    /// <summary>
+    /// Rydder de termer op, der ikke bærer nogen rettelse.
+    ///
+    /// De er efterladt fra dengang, ordbogen var en ordliste, man skrev i. De
+    /// gør ingenting — hverken godt eller skidt — men de tæller med i
+    /// «Termer: 41» og får det til at se ud, som om der er noget derinde, der
+    /// virker. Returnerer, hvor mange der blev fjernet.
+    /// </summary>
+    public int RydOrdliste()
     {
         using var cmd = _db.CreateCommand();
         cmd.CommandText = @"
-            UPDATE term
-               SET canonical = $c, category = $k, weight = $w,
-                   scope = $s, pronunciation_hint = $h, active = $a
-             WHERE id = $id;";
-        cmd.Parameters.AddWithValue("$c", canonical);
-        cmd.Parameters.AddWithValue("$k", category);
-        cmd.Parameters.AddWithValue("$w", weight);
-        cmd.Parameters.AddWithValue("$s", (object?)scope ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("$h", (object?)hint ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("$a", active ? 1 : 0);
-        cmd.Parameters.AddWithValue("$id", id);
-        cmd.ExecuteNonQuery();
-    }
-
-    /// <summary>
-    /// Sletter en term og dens aliaser. Rettelseshistorikken bevares —
-    /// correction.term_id er ON DELETE SET NULL, fordi en rettelse er en
-    /// kendsgerning om et bestemt møde og skal kunne læses tilbage, også
-    /// efter ordbogen er ryddet op.
-    /// </summary>
-    public void DeleteTerm(long id)
-    {
-        using var cmd = _db.CreateCommand();
-        cmd.CommandText = "DELETE FROM term WHERE id = $id;";
-        cmd.Parameters.AddWithValue("$id", id);
-        cmd.ExecuteNonQuery();
-    }
-
-    public IReadOnlyDictionary<string, int> CountByCategory()
-    {
-        using var cmd = _db.CreateCommand();
-        cmd.CommandText = "SELECT category, COUNT(*) FROM term WHERE active = 1 GROUP BY category;";
-        var d = new Dictionary<string, int>();
-        using var r = cmd.ExecuteReader();
-        while (r.Read()) d[r.GetString(0)] = r.GetInt32(1);
-        return d;
-    }
-
-    /// <summary>
-    /// Skriver den prompt, Whisper faktisk skal bruge, til en fil. Det er
-    /// filen, Fase 0-scriptet læser — ordbogen er kilden, filen er et
-    /// øjebliksbillede af den.
-    /// </summary>
-    public string ExportVocabularyFile(string? path = null, string? scope = null, int tokenBudget = 200)
-    {
-        var mål = path ?? UserDataPaths.Vocabulary;
-        var prompt = BuildWhisperPrompt(scope, tokenBudget);
-        Directory.CreateDirectory(System.IO.Path.GetDirectoryName(mål)!);
-        File.WriteAllText(mål, prompt, new UTF8Encoding(false));
-        return mål;
+            DELETE FROM term
+             WHERE id NOT IN (SELECT DISTINCT term_id FROM alias);";
+        return cmd.ExecuteNonQuery();
     }
 
     /// <summary>
@@ -438,73 +397,18 @@ public sealed class LearningStore : IDisposable
         return liste;
     }
 
-    // ------------------------------------------------------- Whispers prompt
-
-    /// <summary>
-    /// Bygger ordlisten til Whispers initial_prompt.
-    ///
-    /// Whisper har kun plads til omkring 224 tokens, og overfyldes prompten,
-    /// begynder modellen at skrive den ind i transskriptionen under pauser.
-    /// Derfor vælges der: navne først, så vægt, så hvad der senest har været
-    /// i brug — indtil budgettet er brugt.
-    ///
-    /// Token-loftet gælder kun denne vej ud af ordbogen. Lokale forbrugere —
-    /// efterbehandling, autocomplete i navngivnings-UI'et — kan læse hele
-    /// datalaget direkte og skal ikke igennem prioriteringen her.
-    /// </summary>
-    public string BuildWhisperPrompt(string? scope = null, int tokenBudget = 200)
-    {
-        using var cmd = _db.CreateCommand();
-        cmd.CommandText = @"
-            SELECT canonical, category, pronunciation_hint, scope
-            FROM prompt_kandidat
-            WHERE scope IS NULL OR scope = $s;";
-        cmd.Parameters.AddWithValue("$s", (object?)scope ?? DBNull.Value);
-
-        var kandidater = new List<(string Canonical, string Category, string? Hint, string? Scope)>();
-        using (var r = cmd.ExecuteReader())
-        {
-            while (r.Read())
-                kandidater.Add((r.GetString(0), r.GetString(1),
-                                r.IsDBNull(2) ? null : r.GetString(2),
-                                r.IsDBNull(3) ? null : r.GetString(3)));
-        }
-
-        // En term kan findes både globalt og pr. kunde. Uden denne udluftning
-        // optager samme ord to pladser i et budget, der i forvejen er for
-        // lille. Den kundespecifikke vinder.
-        var valgte = kandidater
-            .GroupBy(k => k.Canonical, StringComparer.OrdinalIgnoreCase)
-            .Select(g => g.OrderByDescending(k => k.Scope is not null).First())
-            .ToList();
-
-        var sb = new StringBuilder("Vi taler om ");
-        var brugt = EstimateTokens(sb.ToString());
-        var tilføjet = 0;
-
-        foreach (var k in valgte)
-        {
-            var stykke = k.Hint is null ? k.Canonical : $"{k.Canonical} ({k.Hint})";
-            var pris = EstimateTokens(stykke) + 1;
-            if (brugt + pris > tokenBudget) break;
-
-            if (tilføjet > 0) sb.Append(", ");
-            sb.Append(stykke);
-            brugt += pris;
-            tilføjet++;
-        }
-
-        if (tilføjet == 0) return string.Empty;
-        sb.Append('.');
-        return sb.ToString();
-    }
-
-    /// <summary>
-    /// Groft skøn: dansk tekst lander omkring 3 tegn pr. token hos Whisper.
-    /// Bevidst konservativt — at underudnytte budgettet koster lidt kvalitet,
-    /// at overskride det kan få modellen til at hallucinere prompten.
-    /// </summary>
-    public static int EstimateTokens(string text) => (int)Math.Ceiling(text.Length / 3.0);
+    // ---------------------------------------------- ordlisten til Whisper: væk
+    //
+    // Her stod BuildWhisperPrompt: den byggede en ledetråd af ordbogen og
+    // sendte den med til Whisper, med et token-budget, en prioritering af
+    // navne først, og en udluftning af dubletter pr. kunde.
+    //
+    // Den blev målt. Forskellen var NUL — samme lyd, samme udskrift, med og
+    // uden. Og prompten kunne gøre skade: Whisper skrev den ind i teksten
+    // under pauser, 372 af 388 linjer blev den samme sætning.
+    //
+    // Halvfjerds linjer omhyggelig kode, der ikke gjorde noget. Den er væk,
+    // så ingen bygger videre på den i troen på, at den virker.
 
     public static string Normalize(string text)
     {

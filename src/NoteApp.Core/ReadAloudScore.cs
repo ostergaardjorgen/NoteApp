@@ -3,8 +3,31 @@ using System.Text.RegularExpressions;
 
 namespace NoteApp.Core;
 
-/// <summary>Ét sted, hvor udskriften ikke svarer til manuskriptet.</summary>
-public sealed record Afvigelse(int Position, string Forventet, string Hørt);
+/// <summary>
+/// Ét sted, hvor udskriften ikke svarer til manuskriptet.
+///
+/// Der er TO positioner, og de er ikke det samme. <see cref="Position"/> er
+/// pladsen i manuskriptet — den bruges til at sige hvad der skulle have stået.
+/// <see cref="UdskriftPosition"/> er pladsen i udskriften, og den findes, fordi
+/// udskriften er den eneste vej tilbage til LYDEN: Whisper leverer et tidsrum
+/// pr. sætning, og uden at vide hvilket ord i udskriften afvigelsen sad ved,
+/// kan man ikke finde det tidsrum og spille sætningen igen.
+/// </summary>
+public sealed record Afvigelse(int Position, string Forventet, string Hørt, int UdskriftPosition = 0);
+
+/// <summary>
+/// Den færdige opstilling af manuskript mod udskrift.
+///
+/// <see cref="TilManuskript"/> har ét tal pr. ord i udskriften: hvilket ord i
+/// manuskriptet det blev stillet op imod. Den bruges til at oversætte et
+/// stykke af udskriften — fx én sætning fra Whisper — til det stykke af
+/// manuskriptet, der skulle have stået der.
+/// </summary>
+public sealed record Opstilling(
+    int Ialt,
+    int Ramt,
+    IReadOnlyList<Afvigelse> Afvigelser,
+    IReadOnlyList<int> TilManuskript);
 
 /// <summary>
 /// Hvor tæt er udskriften på det, der faktisk blev læst op?
@@ -52,9 +75,19 @@ public static class ReadAloudScore
     /// <summary>
     /// Ordene i en tekst, gjort sammenlignelige: små bogstaver, ingen
     /// tegnsætning, talord som cifre.
+    ///
+    /// TEGN, DER ER ORD. Whisper skriver «6%» og «kr.»; manuskriptet skriver
+    /// «6 procent» og «kroner». Uden en oversættelse ville tegnsætningen blive
+    /// smidt væk, og ordet i manuskriptet ville stå som manglende — 22 fejl,
+    /// hvoraf ingen var fejl. Det er den samme faldgrube som talordene, og den
+    /// koster på præcis samme måde: et tal, man aldrig kan rette sig ud af.
     /// </summary>
     public static List<string> Ord(string tekst)
     {
+        tekst = tekst
+            .Replace("%", " procent ")
+            .Replace("&", " og ");
+
         var rå = Regex.Split(tekst.Replace("**", ""), @"[^\p{L}\p{N}]+")
             .Where(o => o.Length > 0)
             .Select(o => o.ToLowerInvariant())
@@ -183,10 +216,24 @@ public static class ReadAloudScore
     public static (int Ialt, int Ramt, IReadOnlyList<Afvigelse> Afvigelser) Sammenlign(
         string manuskript, string udskrift, int maksAfvigelser = 400)
     {
-        var a = Ord(manuskript);
-        var b = Ord(udskrift);
+        var r = StilOp(Ord(manuskript), Ord(udskrift), maksAfvigelser);
+        return (r.Ialt, r.Ramt, r.Afvigelser);
+    }
 
-        if (a.Count == 0) return (0, 0, Array.Empty<Afvigelse>());
+    /// <summary>
+    /// Samme opstilling, men på ord der allerede er delt op — og med vejen
+    /// tilbage til udskriften bevaret.
+    ///
+    /// Overloaden findes, fordi træningsvisningen deler udskriften op PR.
+    /// SÆTNING, før den måler. Kaldte den <see cref="Ord"/> på den samlede
+    /// tekst i stedet, kunne taldelingen løbe hen over en sætningsgrænse
+    /// («fire hundrede» delt over to sætninger), og så passede ordnumrene ikke
+    /// længere med de tidsrum, sætningerne skal spilles fra.
+    /// </summary>
+    public static Opstilling StilOp(
+        IReadOnlyList<string> a, IReadOnlyList<string> b, int maksAfvigelser = 400)
+    {
+        if (a.Count == 0) return new Opstilling(0, 0, Array.Empty<Afvigelse>(), Array.Empty<int>());
 
         // RIGTIG OPSTILLING, IKKE GRAADIG SOEGNING.
         //
@@ -249,6 +296,11 @@ public static class ReadAloudScore
         var x = n;
         var y = m;
 
+        // Ét tal pr. ord i UDSKRIFTEN: hvor i manuskriptet det hører hjemme.
+        // Fyldes undervejs baglæns, så der ikke skal gås gennem tabellen to
+        // gange.
+        var tilManuskript = new int[m];
+
         while (x > 0 || y > 0)
         {
             var r = retning[x * (m + 1) + y];
@@ -257,21 +309,27 @@ public static class ReadAloudScore
             {
                 case 1:
                     ramt++;
+                    tilManuskript[y - 1] = x - 1;
                     x--; y--;
                     break;
 
                 case 4:
-                    fundne.Add(new Afvigelse(x - 1, a[x - 1], b[y - 1]));
+                    fundne.Add(new Afvigelse(x - 1, a[x - 1], b[y - 1], y - 1));
+                    tilManuskript[y - 1] = x - 1;
                     x--; y--;
                     break;
 
                 case 2:
-                    fundne.Add(new Afvigelse(x - 1, a[x - 1], ""));
+                    // Ordet blev sagt i manuskriptet, men står ikke i
+                    // udskriften. Der er intet udskriftsord at pege på, så
+                    // afvigelsen hænges på det næste — dér vil man lede.
+                    fundne.Add(new Afvigelse(x - 1, a[x - 1], "", Math.Min(y, Math.Max(0, m - 1))));
                     x--;
                     break;
 
                 default:
-                    fundne.Add(new Afvigelse(Math.Max(0, x - 1), "", b[y - 1]));
+                    fundne.Add(new Afvigelse(Math.Max(0, x - 1), "", b[y - 1], y - 1));
+                    tilManuskript[y - 1] = Math.Max(0, x - 1);
                     y--;
                     break;
             }
@@ -300,6 +358,6 @@ public static class ReadAloudScore
             if (afvigelser.Count < maksAfvigelser) afvigelser.Add(f);
         }
 
-        return (a.Count, ramt, afvigelser);
+        return new Opstilling(a.Count, ramt, afvigelser, tilManuskript);
     }
 }

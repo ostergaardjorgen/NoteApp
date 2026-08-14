@@ -1,4 +1,4 @@
-using System.Windows;
+﻿using System.Windows;
 
 namespace NoteApp.Desktop.Transcribe;
 
@@ -15,11 +15,18 @@ public partial class CorrectionWindow : Window
     public string Hørt => FeltHoert.Text.Trim();
     public string Rigtigt => FeltRigtigt.Text.Trim();
 
-    public CorrectionWindow(string markeret, int antalIUdskriften)
+    /// <summary>
+    /// <paramref name="forslag"/> udfyldes på forhånd, når appen VED, hvad der
+    /// skulle have stået — det gør den ved en oplæsning, hvor manuskriptet er
+    /// facit. Feltet er stadig til at rette i: forslaget er det normaliserede
+    /// ord, og der kan mangle et stort begyndelsesbogstav eller en bindestreg.
+    /// </summary>
+    public CorrectionWindow(string markeret, int antalIUdskriften, string? forslag = null)
     {
         InitializeComponent();
 
         FeltHoert.Text = markeret;
+        FeltRigtigt.Text = forslag ?? "";
 
         Konsekvens.Text = antalIUdskriften switch
         {
@@ -28,22 +35,24 @@ public partial class CorrectionWindow : Window
             _ => $"Ordet står {antalIUdskriften} steder i denne udskrift og bliver rettet alle steder med det samme."
         };
 
-        Loaded += (_, _) => FeltRigtigt.Focus();
+        Loaded += (_, _) =>
+        {
+            FeltRigtigt.Focus();
+            FeltRigtigt.SelectAll();
+        };
     }
 
     private void Gem_Click(object sender, RoutedEventArgs e)
     {
         if (Hørt.Length == 0 || Rigtigt.Length == 0)
         {
-            MessageBox.Show("Begge felter skal udfyldes.", "Mangler noget",
-                MessageBoxButton.OK, MessageBoxImage.Information);
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Mangler noget", "Begge felter skal udfyldes.", Dialogs.Slags.Valg);
             return;
         }
 
         if (string.Equals(Hørt, Rigtigt, StringComparison.Ordinal))
         {
-            MessageBox.Show("De to felter er ens — så er der ikke noget at rette.",
-                "Ingen forskel", MessageBoxButton.OK, MessageBoxImage.Information);
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Ingen forskel", "De to felter er ens — så er der ikke noget at rette.", Dialogs.Slags.Valg);
             FeltRigtigt.Focus();
             return;
         }

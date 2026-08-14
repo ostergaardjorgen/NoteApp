@@ -1,0 +1,83 @@
+<Window x:Class="NoteApp.Desktop.Dialogs.AppDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Width="620" SizeToContent="Height" ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent">
+
+  <!-- Egen ramme frem for Windows' egen. MessageBox tegner en grå kasse med et
+       gult trekant-ikon, der råber «kritisk fejl» — også når beskeden bare er
+       et valg. Den ligner ikke resten af appen, og den skræmmer mere, end
+       indholdet giver anledning til. -->
+  <Border Background="{StaticResource Panel}" CornerRadius="12"
+          BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+    <Border.Effect>
+      <DropShadowEffect BlurRadius="28" ShadowDepth="6" Opacity="0.45" Color="#FF000000" />
+    </Border.Effect>
+
+    <Grid Margin="0">
+      <Grid.RowDefinitions>
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="Auto" />
+      </Grid.RowDefinitions>
+
+      <!-- Farvestriben er hele signalet. Et ikon i beskeden gør den til en
+           begivenhed; en stribe i kanten siger, hvad det handler om, uden at
+           tage plads fra teksten. -->
+      <Border x:Name="Stribe" Grid.Row="0" Height="4" CornerRadius="12,12,0,0"
+              Background="{StaticResource Accent}" />
+
+      <StackPanel Grid.Row="1" Margin="30,26,30,0">
+        <TextBlock x:Name="Overskrift" FontSize="17" FontWeight="SemiBold"
+                   TextWrapping="Wrap" Foreground="{StaticResource Tekst}" />
+        <TextBlock x:Name="Brodtekst" FontSize="13.5" Margin="0,12,0,0" TextWrapping="Wrap"
+                   LineHeight="23" Foreground="{StaticResource TekstSvag}" />
+
+        <!-- GRUNDLAGET, foldet ud. Et tal — «43 gange, 3 forkerte» — siger, at
+             man skal træffe et valg, men ikke hvad valget er. Linjerne viser
+             det: er de tre fejl den samme fejl, der gentager sig, eller er de
+             tre tilfældige steder blandt fyrre rigtige? -->
+        <Border x:Name="ListePanel" Visibility="Collapsed" Margin="0,16,0,0"
+                Background="#FF181B22" CornerRadius="8"
+                BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+          <ItemsControl x:Name="Liste" MaxHeight="260" Padding="4,6,4,6">
+            <ItemsControl.Template>
+              <ControlTemplate TargetType="ItemsControl">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="{TemplateBinding Padding}">
+                  <ItemsPresenter />
+                </ScrollViewer>
+              </ControlTemplate>
+            </ItemsControl.Template>
+          </ItemsControl>
+        </Border>
+      </StackPanel>
+
+      <!-- Den tredje knap står for sig i venstre side. Den er vejen UDENOM
+           valget, ikke en tredje mulighed i rækken — og med tre knapper klods
+           op ad hinanden blev den længste klippet over. -->
+      <Grid Grid.Row="2" Margin="30,24,30,26">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="Auto" />
+          <ColumnDefinition Width="*" MinWidth="16" />
+          <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+
+        <StackPanel Grid.Column="0" Orientation="Horizontal">
+          <Button x:Name="ListeKnap" Click="Liste_Click" Padding="16,10" Margin="0,0,10,0"
+                  Visibility="Collapsed" />
+          <Button x:Name="TredjeKnap" Click="Tredje_Click" Padding="16,10"
+                  Visibility="Collapsed" />
+        </StackPanel>
+
+        <StackPanel Grid.Column="2" Orientation="Horizontal">
+          <Button x:Name="AnnullerKnap" Click="Annuller_Click" Padding="20,10" Margin="0,0,10,0"
+                  IsCancel="True" MinWidth="104" Content="Annullér" />
+          <Button x:Name="GodkendKnap" Click="Godkend_Click" Padding="22,10" MinWidth="124"
+                  IsDefault="True" BorderThickness="0" FontWeight="SemiBold"
+                  Foreground="#FF0B1220" Background="{StaticResource Accent}" />
+        </StackPanel>
+      </Grid>
+    </Grid>
+  </Border>
+</Window>

@@ -118,6 +118,37 @@
       </Setter>
     </Style>
 
+    <!-- Fanevalg: to eller tre grupper ved siden af hinanden inde på en
+         skærm. Mindre og fladere end menuen i venstre side, så det er
+         tydeligt, at man skifter udsnit og ikke skifter skærm. -->
+    <Style x:Key="Fanevalg" TargetType="RadioButton">
+      <Setter Property="Foreground" Value="{StaticResource TekstMeget}" />
+      <Setter Property="FontFamily" Value="Segoe UI" />
+      <Setter Property="FontSize" Value="12.5" />
+      <Setter Property="Cursor" Value="Hand" />
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="RadioButton">
+            <Border x:Name="kant" CornerRadius="14" Background="Transparent" Padding="14,6"
+                    BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+              <ContentPresenter VerticalAlignment="Center" />
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="kant" Property="Background" Value="#FF2C323D" />
+              </Trigger>
+              <Trigger Property="IsChecked" Value="True">
+                <Setter TargetName="kant" Property="Background" Value="#FF33405A" />
+                <Setter TargetName="kant" Property="BorderBrush" Value="{StaticResource Accent}" />
+                <Setter Property="Foreground" Value="{StaticResource Tekst}" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
     <!-- Tooltips: WPF's standard er en smal, lys strimmel med én linje, der
          bliver klippet. Når et kort er for lille til hele teksten, er det
          tooltippen, der skal bære den — så den skal kunne rumme et afsnit og

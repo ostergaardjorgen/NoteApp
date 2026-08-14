@@ -4,187 +4,99 @@
              Background="{StaticResource Baggrund}">
 
   <Grid Margin="24,20,24,20">
-    <Grid.ColumnDefinitions>
-      <ColumnDefinition Width="*" />
-      <ColumnDefinition Width="360" />
-    </Grid.ColumnDefinitions>
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
       <RowDefinition Height="*" />
+      <RowDefinition Height="Auto" />
     </Grid.RowDefinitions>
 
-    <!-- ============================ Overskrift ========================== -->
-    <StackPanel Grid.Row="0" Grid.ColumnSpan="2" Margin="0,0,0,14">
-      <TextBlock Text="Din ordbog" Style="{StaticResource Overskrift}" />
-      <TextBlock Style="{StaticResource Underskrift}"
-                 Text="Dine navne og fagord. De retter teksten bagefter og staver rigtigt i dine dokumenter." />
-
-      <!-- Teksten her stod tidligere som «ordene sendes til Whisper, så den
-           ved hvad den skal lytte efter». Det var forkert, og det var målt
-           forkert: samme lyd med og uden ordlisten gav byte-identisk resultat.
-           En forklaring, der lover noget, der ikke sker, er værre end ingen. -->
-      <Border Background="#FF181B22" BorderBrush="{StaticResource PanelKant}" BorderThickness="1"
-              CornerRadius="10" Padding="20,16" Margin="0,12,0,0">
-        <Grid>
-          <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="*" />
-          </Grid.ColumnDefinitions>
-
-          <StackPanel Grid.Column="0" Margin="0,0,18,0">
-            <TextBlock Text="HVAD ORDBOGEN GØR" FontSize="11" FontWeight="SemiBold"
-                       Foreground="{StaticResource Godkendt}" />
-            <TextBlock FontSize="12.5" LineHeight="20" Margin="0,8,0,0" TextWrapping="Wrap"
-                       Foreground="{StaticResource TekstSvag}"
-                       Text="Retter kendte hørefejl i udskriften, efter den er lavet. Har du én gang rettet «søv» til «syv», sker det af sig selv hver gang derefter." />
-            <TextBlock FontSize="12.5" LineHeight="20" Margin="0,8,0,0" TextWrapping="Wrap"
-                       Foreground="{StaticResource TekstSvag}"
-                       Text="Følger med til sprogmodellen, når der laves et dokument, så navne og fagord staves rigtigt i referatet." />
-          </StackPanel>
-
-          <StackPanel Grid.Column="1" Margin="18,0,0,0">
-            <TextBlock Text="HVAD DEN IKKE GØR" FontSize="11" FontWeight="SemiBold"
-                       Foreground="{StaticResource Advarsel}" />
-            <TextBlock FontSize="12.5" LineHeight="20" Margin="0,8,0,0" TextWrapping="Wrap"
-                       Foreground="{StaticResource TekstSvag}"
-                       Text="Den gør ikke Whisper bedre til at høre efter. Det blev prøvet: samme optagelse med og uden ordbogen gav nøjagtig samme tekst — og ved én indstilling fik den Whisper til at gentage sig selv i en time." />
-            <TextBlock x:Name="HvorforIkke" FontSize="12.5" LineHeight="20" Margin="0,8,0,0"
-                       TextWrapping="Wrap" Foreground="{StaticResource TekstMeget}"
-                       Cursor="Help"
-                       Text="Whisper kan ikke læres noget — hold musen her for at se hvorfor.">
-              <TextBlock.ToolTip>
-                <TextBlock MaxWidth="460" TextWrapping="Wrap" LineHeight="21">Whisper er en færdigtrænet model. Den kan i princippet efteruddannes, men ikke her, og af fire grunde:<LineBreak /><LineBreak />
-                  <Run FontWeight="SemiBold">1. Det kræver materiale.</Run> Timer af din tale med en kontrolleret udskrift til hver. Du har halvanden time i alt; der skal typisk titalls timer til.<LineBreak /><LineBreak />
-                  <Run FontWeight="SemiBold">2. Det kræver et større grafikkort.</Run> Modellen har 1,5 milliarder parametre. Selv den lette metode kræver 16–24 GB; dit kort har 6.<LineBreak /><LineBreak />
-                  <Run FontWeight="SemiBold">3. Den eneste overkommelige vej går udenom maskinen.</Run> Skulle det ske i skyen, skulle dine møder sendes derop — og det er præcis dét, hele løsningen er bygget for at undgå.<LineBreak /><LineBreak />
-                  <Run FontWeight="SemiBold">4. Det ville ikke løse de fejl, vi har.</Run> Fejlene er navne og tal. Dem retter en regel med det samme, gratis, og den kan fortrydes. En efteruddannet model kan ingen af delene.</TextBlock>
-              </TextBlock.ToolTip>
-            </TextBlock>
-          </StackPanel>
-        </Grid>
-      </Border>
+    <StackPanel Grid.Row="0" Margin="0,0,0,14">
+      <TextBlock Text="Dine rettelser" Style="{StaticResource Overskrift}" />
+      <TextBlock Style="{StaticResource Underskrift}" TextWrapping="Wrap" MaxWidth="900"
+                 HorizontalAlignment="Left"
+                 Text="Hører appen et ord forkert, retter du det én gang — så bliver det rettet af sig selv i alle senere udskrifter." />
     </StackPanel>
 
-    <!-- ============================ Listen ============================== -->
-    <Grid Grid.Row="1" Grid.Column="0" Margin="0,0,18,0">
-      <Grid.RowDefinitions>
-        <RowDefinition Height="Auto" />
-        <RowDefinition Height="*" />
-        <RowDefinition Height="Auto" />
-      </Grid.RowDefinitions>
+    <!-- HVAD DETTE ER, OG HVAD DET IKKE ER.
+         Skærmen hed før «Din ordbog» og havde en ordliste, man kunne skrive
+         i. Den blev sendt med til Whisper som ledetråd, og det blev målt til
+         nul forskel. Teksten her siger, hvad der faktisk sker, frem for at
+         lade brugeren tro, at flere ord giver bedre genkendelse. -->
+    <Border Grid.Row="1" Background="#FF1D2530" BorderBrush="{StaticResource PanelKant}"
+            BorderThickness="1" CornerRadius="10" Padding="20,16" Margin="0,0,0,14">
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
 
-      <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
-        <TextBox x:Name="Soeg" Width="220" TextChanged="Soeg_Changed" />
-        <TextBlock Text="Søg" Style="{StaticResource Underskrift}" Margin="-212,0,0,0"
-                   VerticalAlignment="Center" IsHitTestVisible="False"
-                   x:Name="SoegPladsholder" Foreground="{StaticResource TekstMeget}" />
-        <TextBlock x:Name="Antal" Style="{StaticResource Underskrift}" Margin="14,0,0,0"
-                   VerticalAlignment="Center" />
-      </StackPanel>
+        <StackPanel Grid.Column="0" Margin="0,0,20,0">
+          <TextBlock Text="Hvad en rettelse gør" FontSize="13.5" FontWeight="SemiBold"
+                     Foreground="{StaticResource Godkendt}" />
+          <TextBlock FontSize="12.5" LineHeight="20" Margin="0,6,0,0" TextWrapping="Wrap"
+                     Foreground="{StaticResource TekstSvag}"
+                     Text="Den retter teksten BAGEFTER. Skrev Whisper «cybernummer», hvor der skulle stå «cpr-nummer», bliver det byttet om i udskriften — hver gang, uden at du skal gøre noget. Det virker på tværs af møder, og det bliver ved med at virke, selvom du skifter til en nyere model." />
+        </StackPanel>
 
-      <DataGrid x:Name="Gitter" Grid.Row="1"
-                AutoGenerateColumns="False" IsReadOnly="True"
-                HeadersVisibility="Column" GridLinesVisibility="Horizontal"
-                Background="{StaticResource Panel}" Foreground="{StaticResource Tekst}"
-                RowBackground="{StaticResource Panel}" AlternatingRowBackground="#FF262B34"
-                HorizontalGridLinesBrush="#FF343B48" BorderBrush="{StaticResource PanelKant}"
-                BorderThickness="1" SelectionMode="Single"
-                SelectionChanged="Gitter_SelectionChanged"
-                RowHeaderWidth="0" FontSize="13">
-        <DataGrid.Columns>
-          <DataGridTextColumn Header="Ord" Binding="{Binding Canonical}" Width="*" />
-          <DataGridTextColumn Header="Kunde" Binding="{Binding Scope}" Width="110" />
-          <DataGridTextColumn Header="Hørt som" Binding="{Binding AliasCount}" Width="80" />
-          <DataGridTextColumn Header="Aktiv" Binding="{Binding AktivTekst}" Width="55" />
-        </DataGrid.Columns>
-      </DataGrid>
+        <StackPanel Grid.Column="1">
+          <TextBlock Text="Hvad den ikke gør" FontSize="13.5" FontWeight="SemiBold"
+                     Foreground="{StaticResource Advarsel}" />
+          <TextBlock FontSize="12.5" LineHeight="20" Margin="0,6,0,0" TextWrapping="Wrap"
+                     Foreground="{StaticResource TekstSvag}"
+                     Text="Den lærer ikke Whisper at HØRE bedre. Modellen kan ikke trænes — dens vægte ligger fast i den fil, du har hentet, og at træne dem kræver tusindvis af timers lyd og et regnecenter. Appen hører altså det samme næste gang; den skriver bare det rigtige." />
+        </StackPanel>
+      </Grid>
+    </Border>
 
-      <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,12,0,0">
-        <Button Content="Importér fra ordliste.txt" Click="Import_Click" Margin="0,0,8,0" />
-        <Button x:Name="SletKnap" Content="Slet valgte" Click="Slet_Click" IsEnabled="False" Margin="0,0,8,0" />
-        <Button Content="Slå dubletter sammen" Click="Dubletter_Click" />
+    <Border Grid.Row="2" Background="{StaticResource Panel}" CornerRadius="10"
+            BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+      <Grid>
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Margin="16,14,16,10">
+          <TextBox x:Name="Soeg" Width="280" HorizontalAlignment="Left" Padding="10,7"
+                   TextChanged="Soeg_Changed" />
+          <TextBlock x:Name="SoegPladsholder" Text="Søg …" IsHitTestVisible="False"
+                     HorizontalAlignment="Left" VerticalAlignment="Center" Margin="12,0,0,0"
+                     Foreground="{StaticResource TekstMeget}" />
+          <TextBlock x:Name="Antal" HorizontalAlignment="Right" VerticalAlignment="Center"
+                     Style="{StaticResource Underskrift}" />
+        </Grid>
+
+        <DataGrid x:Name="Gitter" Grid.Row="1" AutoGenerateColumns="False" IsReadOnly="True"
+                  Background="Transparent" BorderThickness="0" GridLinesVisibility="Horizontal"
+                  HeadersVisibility="Column" RowBackground="Transparent"
+                  AlternatingRowBackground="#FF242A33" Margin="8,0,8,10"
+                  HorizontalGridLinesBrush="#FF2C323D">
+          <DataGrid.Columns>
+            <DataGridTextColumn Header="Appen hørte" Binding="{Binding Hørt}" Width="*" />
+            <DataGridTextColumn Header="Rettes til" Binding="{Binding Rigtigt}" Width="*" />
+            <DataGridTextColumn Header="Set" Binding="{Binding Gange}" Width="70" />
+            <DataGridTextColumn Header="Sidst" Binding="{Binding Sidst}" Width="120" />
+          </DataGrid.Columns>
+        </DataGrid>
+      </Grid>
+    </Border>
+
+    <Grid Grid.Row="3" Margin="0,14,0,0">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*" />
+        <ColumnDefinition Width="Auto" />
+      </Grid.ColumnDefinitions>
+
+      <TextBlock Grid.Column="0" x:Name="Status" Style="{StaticResource Underskrift}"
+                 VerticalAlignment="Center" TextWrapping="Wrap" Margin="0,0,16,0" />
+
+      <StackPanel Grid.Column="1" Orientation="Horizontal">
+        <Button x:Name="SletKnap" Content="Slet rettelse" Click="Slet_Click" IsEnabled="False"
+                Margin="0,0,8,0" />
+        <Button Content="🎤 Tal en rettelse ind" Click="Tal_Click" Style="{StaticResource Primaer}"
+                MinWidth="180" />
       </StackPanel>
     </Grid>
-
-    <!-- ============================ Redigering ========================== -->
-    <Border Grid.Row="1" Grid.Column="1" Background="{StaticResource Panel}" CornerRadius="10"
-            BorderBrush="{StaticResource PanelKant}" BorderThickness="1" Padding="18">
-      <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <StackPanel>
-
-          <TextBlock x:Name="FormTitel" Text="Nyt ord" FontSize="15" FontWeight="SemiBold" Margin="0,0,0,14" />
-
-          <TextBlock Text="Ord" Style="{StaticResource Underskrift}" />
-          <TextBox x:Name="FeltOrd" Margin="0,4,0,0" TextChanged="Ord_Changed" />
-
-          <!-- Forslag mens man skriver. Ordbogen havde tre ord stående to
-               gange, fordi man ikke kunne se, at de var der i forvejen. Et
-               opslag, der først sker ved «Gem», er for sent. -->
-          <ItemsControl x:Name="Forslag" Margin="0,6,0,0">
-            <ItemsControl.ItemTemplate>
-              <DataTemplate>
-                <Button Content="{Binding}" Click="Forslag_Click" HorizontalContentAlignment="Left"
-                        Padding="10,6" Margin="0,0,0,3" Cursor="Hand" FontSize="12.5"
-                        Background="#FF1D2530" BorderBrush="{StaticResource PanelKant}"
-                        BorderThickness="1" HorizontalAlignment="Stretch" />
-              </DataTemplate>
-            </ItemsControl.ItemTemplate>
-          </ItemsControl>
-
-          <TextBlock x:Name="ForslagTekst" FontSize="12" Margin="2,6,0,0" TextWrapping="Wrap"
-                     Foreground="{StaticResource Advarsel}" Visibility="Collapsed" />
-
-          <!-- KATEGORIEN ER FJERNET.
-               Den havde én funktion: at bestemme rækkefølgen, når ordlisten
-               skulle skæres til for at være i et budget. Listen går ikke
-               længere til Whisper, og til sprogmodellen er budgettet 2000
-               tokens mod under hundrede ord — den skæres aldrig til.
-               Til gengæld skabte den dubletter: det samme ord kunne oprettes
-               én gang som fagterm og én gang som produkt.
-               Feltet står stadig i databasen, fordi «person» kan blive brugbar
-               igen, når talere skal navngives. Det er bare ikke noget, brugeren
-               skal forholde sig til nu. -->
-
-          <TextBlock Text="Udtale (valgfri), fx: udtales 'skim'" Style="{StaticResource Underskrift}"
-                     Margin="0,14,0,0" />
-          <TextBox x:Name="FeltUdtale" Margin="0,4,0,12" />
-
-          <TextBlock Text="Kunde (valgfri) — ordet vælges kun til møder om dem" Style="{StaticResource Underskrift}" />
-          <TextBox x:Name="FeltKunde" Margin="0,4,0,12" />
-
-          <CheckBox x:Name="FeltAktiv" Content="Aktiv" IsChecked="True" Foreground="{StaticResource Tekst}"
-                    Margin="0,0,0,16" />
-
-          <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-            <Button Content="Gem" Click="Gem_Click" Style="{StaticResource Primaer}" Margin="0,0,8,0" />
-            <Button Content="Ryd" Click="Ryd_Click" />
-          </StackPanel>
-
-          <!-- Taler man ordet ind, finder appen SELV ud af, hvordan Whisper
-               hører det forkert. Den del kan man ikke gætte, og før måtte man
-               opdage den ved at læse en transskription igennem. -->
-          <Button Content="🎤  Tal ordet ind — så finder appen fejlen" Click="Tal_Click"
-                  Padding="12,10" Margin="0,0,0,18" HorizontalContentAlignment="Left"
-                  Background="#FF1D2530" BorderBrush="{StaticResource Accent}" BorderThickness="1"
-                  Cursor="Hand" FontSize="12.5" />
-
-          <!-- Prompten er den eneste måde at se, om ordbogen faktisk virker.
-               Whisper har ~224 tokens; overfyldes den, skriver modellen
-               prompten ind i transskriptionen. Derfor står tallet her. -->
-          <Border Background="#FF181B22" CornerRadius="6" Padding="12" BorderThickness="1"
-                  BorderBrush="{StaticResource PanelKant}">
-            <StackPanel>
-              <TextBlock Text="Sådan ser ordlisten ud til sprogmodellen" FontSize="13" FontWeight="SemiBold"
-                         Margin="0,0,0,8" />
-              <TextBlock x:Name="PromptTekst" FontSize="12" Foreground="{StaticResource TekstSvag}"
-                         LineHeight="18" MaxHeight="150" />
-              <TextBlock x:Name="PromptTal" Style="{StaticResource Underskrift}" Margin="0,10,0,0" />
-              <Button Content="Gem ordlisten til Whisper" Click="Eksport_Click" Margin="0,12,0,0" />
-            </StackPanel>
-          </Border>
-
-        </StackPanel>
-      </ScrollViewer>
-    </Border>
   </Grid>
 </UserControl>

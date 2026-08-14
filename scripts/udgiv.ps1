@@ -78,6 +78,32 @@ Get-Process -Name NoteApp -ErrorAction SilentlyContinue |
 
 Start-Sleep -Milliseconds 800
 
+# --- Ryd foerst ------------------------------------------------------------
+#
+# Mappen toemmes, foer der udgives i den. Det lyder overfloedigt — dotnet
+# publish skriver jo filerne — men det er det ikke:
+#
+# Skrives der oven i en exe, der lige har koert, kan Windows stadig holde fat i
+# filen. Publiceringen melder saa "faerdig", mens en eller flere filer i
+# virkeligheden ikke blev skiftet. Resultatet er en exe, der ser rigtig ud og
+# har det rigtige tidsstempel, men falder med "DllNotFoundException" i WPF's
+# native lag, saa snart den aabner et vindue. Det skete 14. august 2026, og
+# fejlen peger ingen steder hen — man leder i sin egen kode efter en fejl, der
+# ligger i pakken.
+#
+# En tom mappe kan ikke vaere halvt opdateret.
+if (Test-Path $udgivTil) {
+    try {
+        Remove-Item (Join-Path $udgivTil '*') -Recurse -Force -ErrorAction Stop
+        Write-Host "Ryddede $udgivTil"
+    }
+    catch {
+        # Kan mappen ikke ryddes, koerer der stadig noget. Sig det frem for at
+        # udgive oven i — det er praecis den situation, rydningen findes for.
+        throw "Kunne ikke rydde $udgivTil — koerer appen stadig? ($($_.Exception.Message))"
+    }
+}
+
 Write-Host "Bygger og udgiver til $udgivTil ..."
 & dotnet publish $csproj -c Release -r win-x64 --self-contained true `
     -p:PublishSingleFile=true -o $udgivTil --nologo -v q | Out-Null
@@ -100,6 +126,27 @@ Write-Host ("  version {0}, {1:N1} MB, {2}" -f $ver, ($fil.Length/1MB), $fil.Las
 
 if ($ver -notlike "$fuld*") {
     Write-Warning "Filens version ($ver) svarer ikke til den, der blev sat ($fuld). Byggede den overhovedet om?"
+}
+
+# --- Hvad koerer der EGENTLIG -----------------------------------------------
+#
+# Versionen kommer fra seneste commit-besked. Udgives der flere gange uden en
+# commit imellem — hvilket er det normale under en arbejdsdag — faar alle
+# build's det SAMME nummer. Aabner man saa appen og laeser "v0.54", ved man
+# ikke, om det er formiddagens eller den nyeste.
+#
+# Derfor staar tidsstemplet altid, og der advares, naar der ligger uommitede
+# aendringer: saa er nummeret ikke et svar paa "hvad kigger jeg paa".
+$snavset = $false
+try { $snavset = [bool](git -C $Rod status --porcelain 2>$null) } catch { }
+
+Write-Host ""
+Write-Host ("PRODUKTION: v{0} · bygget {1:dd-MM HH:mm}" -f $fuld, $fil.LastWriteTime) -ForegroundColor Cyan
+
+if ($snavset) {
+    Write-Host ("  Bemaerk: der er uommitede aendringer. Versionsnummeret staar stille," +
+                " indtil der commites med en ny 'vX.YY:'-besked — brug tidsstemplet til" +
+                " at se, hvad der koerer.") -ForegroundColor Yellow
 }
 
 # Genvejen paa skrivebordet peger paa en FAST sti, saa den behoever ikke

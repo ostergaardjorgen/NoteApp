@@ -1,4 +1,4 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Reflection;
 using System.Windows;
 using NoteApp.Core;
@@ -86,11 +86,12 @@ public partial class MainWindow : Window
 
     private void JobAfbryd_Click(object sender, RoutedEventArgs e)
     {
-        var svar = MessageBox.Show(
-            "Afbryd kørslen?\n\nDer bliver ikke gemt noget dokument, og arbejdet skal gøres om.",
-            "Afbryd", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+        var ja = Dialogs.AppDialog.Spoerg(this, "Afbryd kørslen?",
+            "Der bliver ikke gemt noget dokument, og arbejdet skal gøres om.",
+            godkend: "Afbryd", annuller: "Lad den køre færdig",
+            slags: Dialogs.Slags.Pas_paa, godkendErStandard: false);
 
-        if (svar == MessageBoxResult.Yes) BackgroundJobs.Afbryd();
+        if (ja) BackgroundJobs.Afbryd();
     }
 
     public MainWindow()
@@ -159,6 +160,13 @@ public partial class MainWindow : Window
             TilslutGenvej();
         };
     }
+
+    /// <summary>
+    /// Går til oplæsningsskærmen. Kaldes fra træningen, når en sætning skal
+    /// læses op igen — dér er vejen videre ikke en knap på samme skærm, men et
+    /// andet sted i appen.
+    /// </summary>
+    public void GaaTilOplaesning() => NavOplaesning.IsChecked = true;
 
     /// <summary>
     /// Registrerer genvejen og fortæller mødeskærmen, hvad der blev til noget.

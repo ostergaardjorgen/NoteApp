@@ -1,4 +1,4 @@
-<UserControl x:Class="NoteApp.Desktop.ReadAloud.ReadAloudView"
+﻿<UserControl x:Class="NoteApp.Desktop.ReadAloud.ReadAloudView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              Background="{StaticResource Baggrund}"
@@ -195,18 +195,14 @@
              at laese en anden. Hvert kort svarer paa eet spoergsmaal med to
              linjer. -->
         <Grid x:Name="VejledningPanel" Grid.Row="0" Margin="36,26,36,20">
-          <!-- Alle raekker er Auto paa naer den tomme. Med en *-raekke om
-               oplysningskortene fik de "hvad der var tilbage", og naar det ikke
-               var nok, blev teksten klippet midt i en saetning. Nu faar hver
-               raekke den hoejde, den har brug for, og luften ligger samlet i
-               raekke 4. -->
+          <!-- Alt fylder det, det har brug for, og luften ligger i bunden.
+               Sætningslisten lå her engang og krævede en *-række; den ligger nu
+               i sit eget vindue, og så er der ikke noget her, der skal strækkes. -->
           <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" MinHeight="0" />
-            <RowDefinition Height="Auto" />
           </Grid.RowDefinitions>
 
           <!-- ============ Overskrift ============ -->
@@ -217,11 +213,14 @@
                        Foreground="{StaticResource TekstSvag}" />
           </StackPanel>
 
-          <!-- ============ De tre indtalinger ============
-               Bokse frem for en rulleliste: de tre er ikke en indstilling, man
-               saetter een gang, men tre stykker arbejde, der bygger oven paa
-               hinanden. En rulleliste skjuler to af dem og goer det umuligt at
-               se, at der er en raekkefoelge. -->
+          <!-- ============ De tre tekster ============
+               Boksene ER fanerne. Man vælger en, og alt om den står nedenunder
+               — hvorfor den er værd at læse, eller hvad den gav. Tallet står
+               på boksen selv, så man kan se på ét blik, hvor man er.
+
+               Beskrivelsen er flyttet ned i detaljen. Tre bokse, der hver
+               bærer fire linjer tekst, er ikke et overblik; det er en side,
+               man skal læse for at kunne vælge. -->
           <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
               <ColumnDefinition Width="*" />
@@ -231,131 +230,130 @@
 
             <RadioButton x:Name="Valg0" Grid.Column="0" GroupName="tekst" IsChecked="True"
                          Style="{StaticResource Tekstkort}" Margin="0,0,7,0" Checked="Tekst_Valgt" Tag="0">
-              <StackPanel>
-                <TextBlock Text="1 · GRUNDLAGET" FontSize="11" FontWeight="SemiBold"
-                           Foreground="{StaticResource Accent}" />
-                <TextBlock Text="Dansk" FontSize="19" FontWeight="SemiBold" Margin="0,7,0,0" />
-                <TextBlock Text="20 minutter" FontSize="12" Foreground="{StaticResource TekstMeget}" Margin="0,2,0,0" />
-                <TextBlock FontSize="13" LineHeight="20" Margin="0,12,0,0" TextWrapping="Wrap"
-                           Foreground="{StaticResource TekstSvag}"
-                           Text="Nok materiale til at måle, hvor godt dine ord bliver ramt — og til at se, om en senere opdatering hjalp." />
-                <TextBlock x:Name="Status0" FontSize="12" Margin="0,10,0,0" FontWeight="SemiBold"
-                           Foreground="{StaticResource Godkendt}" />
-                <Button x:Name="Start0" Tag="0" Click="KortStart_Click" Style="{StaticResource Kortknap}" />
-              </StackPanel>
+              <Grid>
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="*" />
+                  <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0">
+                  <TextBlock Text="1 · DANSK" FontSize="11" FontWeight="SemiBold"
+                             Foreground="{StaticResource Accent}" />
+                  <TextBlock Text="Grundlaget" FontSize="18" FontWeight="SemiBold" Margin="0,6,0,0" />
+                  <TextBlock x:Name="Status0" FontSize="12" Margin="0,4,0,0" TextWrapping="Wrap" />
+                </StackPanel>
+                <TextBlock x:Name="Tal0" Grid.Column="1" FontSize="21" FontWeight="SemiBold"
+                           VerticalAlignment="Center" Margin="8,0,0,0" />
+              </Grid>
             </RadioButton>
 
             <RadioButton x:Name="Valg1" Grid.Column="1" GroupName="tekst"
                          Style="{StaticResource Tekstkort}" Margin="7,0,7,0" Checked="Tekst_Valgt" Tag="1">
-              <StackPanel>
-                <TextBlock Text="2 · SPROGSKIFT" FontSize="11" FontWeight="SemiBold"
-                           Foreground="{StaticResource Accent}" />
-                <TextBlock Text="Blandet" FontSize="19" FontWeight="SemiBold" Margin="0,7,0,0" />
-                <TextBlock Text="5 minutter" FontSize="12" Foreground="{StaticResource TekstMeget}" Margin="0,2,0,0" />
-                <TextBlock FontSize="13" LineHeight="20" Margin="0,12,0,0" TextWrapping="Wrap"
-                           Foreground="{StaticResource TekstSvag}"
-                           Text="Dansk møde, hvor en engelsk kollega kobler sig på. Viser, hvad et sprogskifte midt i mødet koster." />
-                <TextBlock x:Name="Status1" FontSize="12" Margin="0,10,0,0" FontWeight="SemiBold"
-                           Foreground="{StaticResource Godkendt}" />
-                <Button x:Name="Start1" Tag="1" Click="KortStart_Click" Style="{StaticResource Kortknap}" />
-              </StackPanel>
+              <Grid>
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="*" />
+                  <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0">
+                  <TextBlock Text="2 · SPROGSKIFT" FontSize="11" FontWeight="SemiBold"
+                             Foreground="{StaticResource TekstMeget}" />
+                  <TextBlock Text="Blandet" FontSize="18" FontWeight="SemiBold" Margin="0,6,0,0" />
+                  <TextBlock x:Name="Status1" FontSize="12" Margin="0,4,0,0" TextWrapping="Wrap" />
+                </StackPanel>
+                <TextBlock x:Name="Tal1" Grid.Column="1" FontSize="21" FontWeight="SemiBold"
+                           VerticalAlignment="Center" Margin="8,0,0,0" />
+              </Grid>
             </RadioButton>
 
             <RadioButton x:Name="Valg2" Grid.Column="2" GroupName="tekst"
                          Style="{StaticResource Tekstkort}" Margin="7,0,0,0" Checked="Tekst_Valgt" Tag="2">
-              <StackPanel>
-                <TextBlock Text="3 · ACCENT" FontSize="11" FontWeight="SemiBold"
-                           Foreground="{StaticResource Accent}" />
-                <TextBlock Text="Engelsk" FontSize="19" FontWeight="SemiBold" Margin="0,7,0,0" />
-                <TextBlock Text="5 minutter" FontSize="12" Foreground="{StaticResource TekstMeget}" Margin="0,2,0,0" />
-                <TextBlock FontSize="13" LineHeight="20" Margin="0,12,0,0" TextWrapping="Wrap"
-                           Foreground="{StaticResource TekstSvag}"
-                           Text="Dit engelske mødesprog med dansk accent. Det er dér, genkendelsen har sværest ved at følge med." />
-                <TextBlock x:Name="Status2" FontSize="12" Margin="0,10,0,0" FontWeight="SemiBold"
-                           Foreground="{StaticResource Godkendt}" />
-                <Button x:Name="Start2" Tag="2" Click="KortStart_Click" Style="{StaticResource Kortknap}" />
-              </StackPanel>
+              <Grid>
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="*" />
+                  <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0">
+                  <TextBlock Text="3 · ACCENT" FontSize="11" FontWeight="SemiBold"
+                             Foreground="{StaticResource TekstMeget}" />
+                  <TextBlock Text="Engelsk" FontSize="18" FontWeight="SemiBold" Margin="0,6,0,0" />
+                  <TextBlock x:Name="Status2" FontSize="12" Margin="0,4,0,0" TextWrapping="Wrap" />
+                </StackPanel>
+                <TextBlock x:Name="Tal2" Grid.Column="1" FontSize="21" FontWeight="SemiBold"
+                           VerticalAlignment="Center" Margin="8,0,0,0" />
+              </Grid>
             </RadioButton>
           </Grid>
 
-          <!-- ============ Hvor langt er du ============
-               Maaleren viser noget, der faktisk er maalt: minutter optaget og
-               ord i din ordbog. Den lover ikke, at Whisper "laerer din stemme"
-               — det goer den ikke. Det, der bliver skarpere, er ordbogen og
-               sikkerheden i maalingen, og det er ogsaa det, der staar. -->
-          <Border Grid.Row="2" Margin="0,18,0,0" Background="#FF181B22" CornerRadius="10"
-                  BorderBrush="{StaticResource PanelKant}" BorderThickness="1" Padding="22,16">
-            <StackPanel>
+          <!-- ==================== Detaljer for den valgte ====================
+               Hele indholdet om ÉN tekst ligger her, under den boks, det hører
+               til. Før lå det på en selvstændig skærm, «Træning», ved siden af
+               denne: man skulle skifte skærm for at se resultatet af sin egen
+               oplæsning, og de to skærme kunne stå og sige noget forskelligt om
+               det samme.
+
+               Der er tre tilstande, og de er de tre trin i arbejdet:
+                 1. ikke læst op    → hvorfor teksten er værd at læse + knap
+                 2. læst, ikke skrevet ud → én knap: skriv den ud
+                 3. målt            → tallet og hver sætning, med det gule
+               Kun én af dem vises ad gangen. -->
+
+          <Grid Grid.Row="2" Margin="0,18,0,0">
+
+            <!-- 1 · Ikke læst op endnu -->
+            <Border x:Name="TrinLaes" Background="#FF181B22" CornerRadius="10"
+                    BorderBrush="{StaticResource PanelKant}" BorderThickness="1"
+                    Padding="24,20" VerticalAlignment="Top">
               <Grid>
-                <TextBlock Text="Hvor skarp er den på dig" FontSize="14" FontWeight="SemiBold" />
-                <TextBlock x:Name="SkarpTal" HorizontalAlignment="Right" FontSize="14"
-                           FontWeight="SemiBold" Foreground="{StaticResource Accent}" />
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="*" />
+                  <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Margin="0,0,24,0">
+                  <TextBlock x:Name="HvorforOverskrift" FontSize="16" FontWeight="SemiBold" />
+                  <TextBlock x:Name="HvorforLaengde" FontSize="13" Margin="0,8,0,0" TextWrapping="Wrap"
+                             LineHeight="21" Foreground="{StaticResource TekstSvag}" />
+                  <TextBlock x:Name="HvorforFuld" FontSize="13" Margin="0,8,0,0" TextWrapping="Wrap"
+                             LineHeight="21" Foreground="{StaticResource TekstMeget}" />
+
+                  <TextBlock FontSize="12.5" Margin="0,14,0,0" TextWrapping="Wrap" LineHeight="20"
+                             Foreground="{StaticResource TekstMeget}"
+                             Text="Sådan gør du: der står ét afsnit ad gangen. Læs det, tryk mellemrum, læs det næste. Tal som til en kollega — pauser og tøvelyde hører med. Du kan sætte på pause når som helst, og intet går tabt." />
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                  <Button x:Name="StartKnap" Content="● Start oplæsning" Click="StartValgte_Click"
+                          Style="{StaticResource Primaer}" Padding="22,12" FontSize="14" MinWidth="190" />
+                  <TextBlock x:Name="StartUnder" FontSize="11.5" Margin="0,8,0,0"
+                             HorizontalAlignment="Center" Foreground="{StaticResource TekstMeget}" />
+                </StackPanel>
               </Grid>
-
-              <Border Height="7" CornerRadius="4" Background="#FF2A303A" Margin="0,12,0,0">
-                <Grid HorizontalAlignment="Stretch">
-                  <Border x:Name="SkarpBjaelke" HorizontalAlignment="Left" CornerRadius="4"
-                          Background="{StaticResource Accent}" Width="0" />
-                </Grid>
-              </Border>
-
-              <TextBlock x:Name="SkarpTekst" FontSize="12.5" Margin="0,11,0,0" TextWrapping="Wrap"
-                         LineHeight="19" Foreground="{StaticResource TekstSvag}" />
-            </StackPanel>
-          </Border>
-
-          <!-- ============ Det praktiske ============ -->
-          <!-- Tre korte kort. Hele teksten ligger i tooltippen: der er ikke
-               altid plads til den paa skaermen, og en tekst, der bliver klippet
-               midt i en saetning, er vaerre end en, der staar kort og kan
-               foldes ud ved at pege paa den. -->
-          <Grid Grid.Row="3" VerticalAlignment="Top" Margin="0,16,0,0">
-            <Grid.ColumnDefinitions>
-              <ColumnDefinition Width="*" />
-              <ColumnDefinition Width="*" />
-              <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
-
-            <Border Grid.Column="0" Style="{StaticResource Infokort}" Margin="0,0,7,0">
-              <Border.ToolTip>
-                <TextBlock TextWrapping="Wrap" LineHeight="22">Der står ét afsnit på skærmen ad gangen. Læs kun det — når du er færdig, henter mellemrum det næste.<LineBreak /><LineBreak />Tal som til en kollega. Pauser og tøvelyde hører med; de er det, der gør optagelsen ægte i stedet for en oplæsning.</TextBlock>
-              </Border.ToolTip>
-              <StackPanel>
-                <TextBlock Text="Sådan gør du" FontSize="14" FontWeight="SemiBold" />
-                <TextBlock FontSize="12.5" Margin="0,7,0,0" TextTrimming="CharacterEllipsis"
-                           Foreground="{StaticResource TekstSvag}"
-                           Text="Ét afsnit ad gangen. Tal som til en kollega." />
-              </StackPanel>
             </Border>
 
-            <Border Grid.Column="1" Style="{StaticResource Infokort}" Margin="7,0,7,0">
-              <Border.ToolTip>
-                <TextBlock x:Name="HvorforFuld" TextWrapping="Wrap" LineHeight="22" />
-              </Border.ToolTip>
-              <StackPanel>
-                <TextBlock x:Name="HvorforOverskrift" Text="Hvorfor lige den her" FontSize="14"
-                           FontWeight="SemiBold" />
-                <TextBlock x:Name="HvorforLaengde" FontSize="12.5" Margin="0,7,0,0"
-                           TextTrimming="CharacterEllipsis" Foreground="{StaticResource TekstSvag}" />
-              </StackPanel>
+            <!-- 2 · Læst op, men ikke skrevet ud -->
+            <Border x:Name="TrinSkrivUd" Background="#FF181B22" CornerRadius="10"
+                    BorderBrush="{StaticResource Advarsel}" BorderThickness="1"
+                    Padding="24,20" VerticalAlignment="Top" Visibility="Collapsed">
+              <Grid>
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="*" />
+                  <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Margin="0,0,24,0">
+                  <TextBlock Text="Optagelsen er ikke skrevet ud endnu" FontSize="16" FontWeight="SemiBold" />
+                  <TextBlock x:Name="SkrivUdTekst" FontSize="13" Margin="0,8,0,0" TextWrapping="Wrap"
+                             LineHeight="21" Foreground="{StaticResource TekstSvag}" />
+                </StackPanel>
+
+                <Button Grid.Column="1" Content="Skriv ud til tekst  →" Click="SkrivUd_Click"
+                        Style="{StaticResource Primaer}" Padding="22,12" FontSize="14"
+                        VerticalAlignment="Center" MinWidth="190" />
+              </Grid>
             </Border>
 
-            <Border Grid.Column="2" Style="{StaticResource Infokort}" Margin="7,0,0,0"
-                    Background="#334CBE72" BorderBrush="{StaticResource Godkendt}">
-              <Border.ToolTip>
-                <TextBlock TextWrapping="Wrap" LineHeight="22">Kommer der nogen ind ad døren? Tryk Pause — så optages der intet, før du selv fortsætter.<LineBreak /><LineBreak />Stopper du midtvejs, bliver det du nåede gemt. Går appen ned, koster det højst 30 sekunder.</TextBlock>
-              </Border.ToolTip>
-              <StackPanel>
-                <TextBlock Text="Du bestemmer" FontSize="14" FontWeight="SemiBold" />
-                <TextBlock FontSize="12.5" Margin="0,7,0,0" TextTrimming="CharacterEllipsis"
-                           Foreground="{StaticResource Tekst}"
-                           Text="Pause når som helst. Intet går tabt." />
-              </StackPanel>
-            </Border>
+            <!-- 3 · Målt -->
+            <ContentControl x:Name="TrinResultat" Visibility="Collapsed" />
           </Grid>
-
-          <TextBlock Grid.Row="5" x:Name="Praktisk" FontSize="12" Margin="0,16,0,0"
-                     Foreground="{StaticResource TekstMeget}" />
         </Grid>
 
 
@@ -467,12 +465,11 @@
           <TextBlock x:Name="MikrofonNavn" Style="{StaticResource Underskrift}" Margin="12,0,0,0"
                      VerticalAlignment="Center" MaxWidth="360" TextTrimming="CharacterEllipsis" />
         </StackPanel>
-        <StackPanel Orientation="Horizontal">
-          <CheckBox x:Name="FoelgMed" Content="Skift afsnit automatisk, når jeg har læst det"
-                    Click="FoelgMed_Klik" FontSize="12" Margin="0,0,10,0" />
-          <TextBlock x:Name="FoelgStatus" Style="{StaticResource Underskrift}"
-                     VerticalAlignment="Center" Foreground="{StaticResource TekstMeget}" />
-        </StackPanel>
+        <!-- Her stod «Skift afsnit automatisk, når jeg har læst det». Den
+             lyttede med under oplæsningen med en ekstra model og en ekstra
+             exe, havde en vagthund fordi den kunne køre uden at høre noget,
+             og kunne dø undervejs. Alt sammen for at spare et tryk på
+             mellemrum — og den åbnede mikrofonen ved siden af optagelsen. -->
         <TextBlock x:Name="Status" Style="{StaticResource Underskrift}" Margin="0,4,0,0" />
       </StackPanel>
 

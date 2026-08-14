@@ -1,4 +1,4 @@
-using System.IO;
+﻿using System.IO;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Threading;
@@ -159,8 +159,7 @@ public partial class SpeakWordWindow : Window
         var mik = AudioDevices.ResolveMicrophone(AppSettings.Current.MicrophoneId, out _);
         if (mik is null)
         {
-            MessageBox.Show("Ingen mikrofon fundet.", "Kan ikke optage",
-                MessageBoxButton.OK, MessageBoxImage.Warning);
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Kan ikke optage", "Ingen mikrofon fundet.", Dialogs.Slags.Pas_paa);
             return;
         }
 
@@ -174,8 +173,7 @@ public partial class SpeakWordWindow : Window
         catch (Exception ex)
         {
             _optager = null;
-            MessageBox.Show($"Optagelsen kunne ikke startes.\n\n{ex.Message}", "Kunne ikke optage",
-                MessageBoxButton.OK, MessageBoxImage.Warning);
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Kunne ikke optage", $"Optagelsen kunne ikke startes.\n\n{ex.Message}", Dialogs.Slags.Pas_paa);
             return;
         }
 
@@ -323,8 +321,7 @@ public partial class SpeakWordWindow : Window
     {
         if (Stavning.Length == 0)
         {
-            MessageBox.Show("Skriv, hvordan ordet staves.", "Mangler stavemåde",
-                MessageBoxButton.OK, MessageBoxImage.Information);
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Mangler stavemåde", "Skriv, hvordan ordet staves.", Dialogs.Slags.Valg);
             FeltStavning.Focus();
             return;
         }

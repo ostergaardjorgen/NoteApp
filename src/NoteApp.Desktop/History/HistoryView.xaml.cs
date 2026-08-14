@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -134,8 +134,7 @@ public partial class HistoryView : UserControl
     {
         if (!File.Exists(Historik.Path))
         {
-            MessageBox.Show("Der er ingen logfil endnu — der er ikke sket noget at skrive ned.",
-                "Ingen logfil", MessageBoxButton.OK, MessageBoxImage.Information);
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Ingen logfil", "Der er ingen logfil endnu — der er ikke sket noget at skrive ned.", Dialogs.Slags.Valg);
             return;
         }
 

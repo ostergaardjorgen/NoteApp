@@ -1,4 +1,4 @@
-using System.IO;
+﻿using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -193,8 +193,7 @@ public partial class MeetingView : UserControl
         var mik = AudioDevices.ResolveMicrophone(AppSettings.Current.MicrophoneId, out var fallback);
         if (mik is null)
         {
-            MessageBox.Show("Ingen mikrofon fundet.", "Kan ikke optage",
-                MessageBoxButton.OK, MessageBoxImage.Warning);
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Kan ikke optage", "Ingen mikrofon fundet.", Dialogs.Slags.Pas_paa);
             return;
         }
 
@@ -205,10 +204,14 @@ public partial class MeetingView : UserControl
 
         if (fallback)
         {
-            var svar = MessageBox.Show(
-                $"Den mikrofon, du havde valgt, er ikke tilsluttet.\n\nDer optages i stedet fra:\n{mik.FriendlyName}\n\nFortsæt?",
-                "Mikrofonen er skiftet", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
-            if (svar != MessageBoxResult.OK) return;
+            var ja = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
+                "Mikrofonen er skiftet",
+                "Den mikrofon, du havde valgt, er ikke tilsluttet. Der optages i stedet fra:\n\n" +
+                mik.FriendlyName,
+                godkend: "Optag med den", annuller: "Stop — jeg retter det",
+                slags: Dialogs.Slags.Pas_paa);
+
+            if (!ja) return;
         }
 
 
@@ -219,8 +222,7 @@ public partial class MeetingView : UserControl
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Optagelsen kunne ikke startes.\n\n{ex.Message}", "Kunne ikke optage",
-                MessageBoxButton.OK, MessageBoxImage.Error);
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Kunne ikke optage", $"Optagelsen kunne ikke startes.\n\n{ex.Message}", Dialogs.Slags.Fejl);
             return;
         }
 
@@ -356,12 +358,17 @@ public partial class MeetingView : UserControl
     {
         if (_session is null) return true;
 
-        var svar = MessageBox.Show(
-            $"Der optages lige nu ({_session.Elapsed:hh\\:mm\\:ss}).\n\nStop og gem, før du lukker?",
-            "Optagelsen kører", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning);
+        // Tre udgange, og «bliv her» har fokus: at lukke ved et uheld og miste
+        // et møde er værre end et ekstra klik.
+        var valg = Dialogs.AppDialog.SpoergTre(Window.GetWindow(this),
+            "Der optages lige nu",
+            $"Mødet har kørt i {_session.Elapsed:hh\\:mm\\:ss}. Stopper du nu, bliver det, der er " +
+            "optaget indtil videre, gemt.",
+            godkend: "Stop og gem", tredje: "Luk uden at gemme", annuller: "Bliv her",
+            slags: Dialogs.Slags.Pas_paa);
 
-        if (svar == MessageBoxResult.Cancel) return false;
-        if (svar == MessageBoxResult.Yes) Stop();
+        if (valg < 0) return false;
+        if (valg == 0) Stop();
         return true;
     }
 

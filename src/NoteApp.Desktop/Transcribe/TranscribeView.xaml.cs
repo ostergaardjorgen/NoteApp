@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -16,6 +16,9 @@ public sealed class OptagelseVisning
         Mappe = mappe;
         var meta = MeetingStore.Load(mappe);
         var wav = Path.Combine(mappe, "mikrofon.wav");
+
+        Gruppe = Optagelsesgruppe.Af(mappe, meta);
+        Traeningsnoegle = Optagelsesgruppe.Traeningsnoegle(mappe, meta);
 
         Titel = meta?.Title ?? Path.GetFileName(mappe);
         Sekunder = File.Exists(wav) ? Transcriber.WavSeconds(wav) : 0;
@@ -48,6 +51,15 @@ public sealed class OptagelseVisning
     public double Sekunder { get; }
     public bool HarLyd { get; }
     public long Bytes { get; }
+
+    public Gruppe Gruppe { get; }
+
+    /// <summary>Hvilken prøvetekst der blev læst op. Null for rigtige møder.</summary>
+    public string? Traeningsnoegle { get; }
+
+    /// <summary>Er der en udskrift? Det afgør, om mødet overhovedet kan være færdigbehandlet.</summary>
+    public bool ErSkrevetUd => Directory.EnumerateFiles(Mappe, "*.txt")
+        .Any(f => !f.EndsWith(".raa.txt", StringComparison.OrdinalIgnoreCase));
 
     public double MegaBytes => Bytes / 1024.0 / 1024.0;
 }
@@ -106,18 +118,25 @@ public partial class TranscribeView : UserControl
         if (!optagelse.HarLyd) return;
 
         var minutter = optagelse.Sekunder / 60.0;
-        var svar = MessageBox.Show(
-            $"Skriv «{optagelse.Titel}» ud til tekst nu?\n\n" +
-            $"Længde: {TimeSpan.FromSeconds(optagelse.Sekunder):mm\\:ss}\n" +
+
+        var ja = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
+            $"Skriv «{optagelse.Titel}» ud til tekst nu?",
+            $"Længde: {TimeSpan.FromSeconds(optagelse.Sekunder):mm\\:ss}. " +
             $"Det tager typisk {Math.Max(1, Math.Round(minutter * 0.3)):0} til {Math.Max(2, Math.Round(minutter * 0.5)):0} minutter " +
             "på denne maskine.\n\n" +
             "Du kan roligt lave noget andet imens — også optage et nyt møde.",
-            "Klar til at skrive ud", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            godkend: "Skriv ud nu",
+            annuller: "Ikke nu");
 
-        if (svar == MessageBoxResult.Yes) Koer_Click(this, new RoutedEventArgs());
+        if (ja) Koer_Click(this, new RoutedEventArgs());
     }
 
-    private void IndlaesOptagelser()
+    /// <summary>
+    /// Alle optagelser på disken, uanset gruppe. Læses én gang og deles ud
+    /// bagefter, så et skift mellem møder og arkiv ikke koster en ny tur
+    /// gennem filsystemet.
+    /// </summary>
+    private static List<OptagelseVisning> Alle()
     {
         var mapper = new List<string>();
 
@@ -130,18 +149,117 @@ public partial class TranscribeView : UserControl
             mapper.AddRange(Directory.EnumerateDirectories(rod));
         }
 
-        Optagelser.ItemsSource = mapper
+        return mapper
             .Select(m => new OptagelseVisning(m))
             .OrderByDescending(o => Directory.GetLastWriteTime(o.Mappe))
             .ToList();
+    }
 
-        if (Optagelser.Items.Count == 0)
+    /// <summary>Viser arkivet frem for de møder, der ligger fremme.</summary>
+    private bool _viserArkiv;
+
+    /// <summary>
+    /// Fylder listen med den valgte gruppe.
+    ///
+    /// Træningsoptagelser er IKKE med nogen af stederne. En oplæsning af en
+    /// prøvetekst er ikke et møde, og når den ligger i mødelisten, skal man
+    /// hver gang læse forbi den for at finde det, man kom efter. Den hører
+    /// under «Træning», hvor der er noget at gøre ved den.
+    /// </summary>
+    private void IndlaesOptagelser()
+    {
+        var alle = Alle();
+
+        var moeder = alle.Count(o => o.Gruppe == Gruppe.Moede);
+        var arkiv = alle.Count(o => o.Gruppe == Gruppe.Arkiv);
+        var traening = alle.Count(o => o.Gruppe == Gruppe.Traening);
+
+        var oensket = _viserArkiv ? Gruppe.Arkiv : Gruppe.Moede;
+
+        Optagelser.ItemsSource = alle.Where(o => o.Gruppe == oensket).ToList();
+
+        FaneMoeder.Content = $"Møder ({moeder})";
+        FaneArkiv.Content = $"Arkiv ({arkiv})";
+        FaneMoeder.IsChecked = !_viserArkiv;
+        FaneArkiv.IsChecked = _viserArkiv;
+
+        // Træningen ligger et andet sted, og det skal siges HER — ellers ser
+        // det ud, som om oplæsningerne er forsvundet.
+        TraeningsNote.Text = traening == 0
+            ? ""
+            : $"{traening} træningsoptagelse{(traening == 1 ? "" : "r")} ligger under «Træning».";
+        TraeningsNote.Visibility = traening == 0 ? Visibility.Collapsed : Visibility.Visible;
+
+        if (Optagelser.Items.Count > 0) return;
+
+        if (_viserArkiv)
         {
-            Status.Text = "Ingen optagelser endnu.";
-            ForklaringOverskrift.Text = "Der er ingen optagelser endnu";
+            Status.Text = "Arkivet er tomt.";
+            ForklaringOverskrift.Text = "Der ligger ikke noget i arkivet";
             ForklaringUnder.Text =
-                "Gå til «Start her» og læs en af teksterne op. Så har du en optagelse, du kan skrive ud til tekst her.";
+                "Når du er færdig med et møde — skrevet ud, dokument lavet — kan du lægge det i arkivet. " +
+                "Så bliver listen forrest ved med kun at vise det, der stadig mangler noget.";
+            return;
         }
+
+        Status.Text = "Ingen møder endnu.";
+        ForklaringOverskrift.Text = "Der ligger ingen møder her";
+        ForklaringUnder.Text = traening > 0
+            ? "Dine oplæsninger ligger under «Træning». Tryk «Optag møde» øverst, når du skal holde et rigtigt møde."
+            : "Tryk «Optag møde» øverst, når mødet begynder. Optagelsen dukker op her bagefter.";
+    }
+
+    private void Fane_Klik(object sender, RoutedEventArgs e)
+    {
+        if (Optagelser is null) return;
+
+        var arkiv = FaneArkiv.IsChecked == true;
+        if (arkiv == _viserArkiv) return;
+
+        _viserArkiv = arkiv;
+        IndlaesOptagelser();
+    }
+
+    /// <summary>
+    /// Lægger et møde væk — eller henter det frem igen.
+    ///
+    /// Der advares, når mødet ikke er skrevet ud. Arkivering er ikke farlig,
+    /// men den flytter noget ud af syne, og et møde, der aldrig blev skrevet
+    /// ud, er ikke færdigt.
+    /// </summary>
+    private void Arkiver_Click(object sender, RoutedEventArgs e)
+    {
+        if (Optagelser.SelectedItem is not OptagelseVisning valgt) return;
+
+        var tilArkiv = valgt.Gruppe == Gruppe.Moede;
+
+        if (tilArkiv && !valgt.ErSkrevetUd)
+        {
+            var ja = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
+                $"«{valgt.Titel}» er ikke skrevet ud endnu",
+                "Lægger du den i arkivet nu, ligger lyden der stadig — men den er ikke med i listen forrest, " +
+                "og så er der ingen, der får skrevet den ud.",
+                godkend: "Læg i arkivet alligevel",
+                annuller: "Behold den fremme",
+                slags: Dialogs.Slags.Pas_paa,
+                godkendErStandard: false);
+
+            if (!ja) return;
+        }
+
+        Optagelsesgruppe.Arkiver(valgt.Mappe, tilArkiv);
+
+        Historik.Skriv(
+            tilArkiv ? HaendelseType.Arkiveret : HaendelseType.HentetFrem,
+            valgt.Titel,
+            tilArkiv ? "Lagt i arkivet" : "Hentet frem fra arkivet",
+            sti: valgt.Mappe);
+
+        Status.Text = tilArkiv
+            ? $"«{valgt.Titel}» er lagt i arkivet."
+            : $"«{valgt.Titel}» er hentet frem igen.";
+
+        IndlaesOptagelser();
     }
 
     private void Optagelse_Valgt(object sender, SelectionChangedEventArgs e)
@@ -150,6 +268,11 @@ public partial class TranscribeView : UserControl
         KoerKnap.IsEnabled = valgt?.HarLyd == true && _afbryd is null;
         AabnKnap.IsEnabled = valgt is not null;
         SletKnap.IsEnabled = valgt is not null && _afbryd is null;
+
+        // Knappen siger, hvad der SKER — ikke hvor man er. «Arkivér» i
+        // arkivet ville lyde som at gøre det samme to gange.
+        ArkivKnap.IsEnabled = valgt is not null && _afbryd is null;
+        ArkivKnap.Content = valgt?.Gruppe == Gruppe.Arkiv ? "Hent frem" : "Arkivér";
 
         if (_afbryd is not null) return;   // der koeres — forklaringen staar om det
 
@@ -171,7 +294,6 @@ public partial class TranscribeView : UserControl
 
         Forklaring.Visibility = Visibility.Visible;
         ResultatRude.Visibility = Visibility.Collapsed;
-        Maalinger.Visibility = Visibility.Collapsed;
 
         if (valgt is { HarLyd: false })
         {
@@ -226,6 +348,32 @@ public partial class TranscribeView : UserControl
             Resultat.Text, System.Text.RegularExpressions.Regex.Escape(markeret),
             System.Text.RegularExpressions.RegexOptions.IgnoreCase).Count;
 
+        // SPÆRREN. En regel gaelder ALLE fremtidige moeder og skelner ikke
+        // mellem de steder, ordet var forkert, og de steder det var rigtigt.
+        //
+        // Uden den blev der laert regler paa almindelige ord — «at»→«af»,
+        // «af»→«er». Proevet af paa tre almindelige saetninger lavede fire
+        // saadanne regler 15 aendringer, alle forkerte, og de koerer efter
+        // hinanden paa samme tekst, saa de kaeder sig sammen.
+        //
+        // Graensen er sat ved fem: staar ordet saa mange gange i EN udskrift,
+        // er det et almindeligt ord, uanset hvad det saa er.
+        if (antal >= 5)
+        {
+            var ok = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
+                $"«{markeret}» står {antal} gange i teksten",
+                "En rettelse er en regel, der gælder alle fremtidige møder, og den skelner ikke: " +
+                "den retter hver eneste gang ordet optræder — også de gange, det var rigtigt.\n\n" +
+                "Rettelser hører til navne og fagord, som «cpr-nummer» eller «SCIM». Er dette et " +
+                "almindeligt ord, gør en regel mere skade end gavn.",
+                godkend: "Ret det alligevel",
+                annuller: "Lad være",
+                slags: Dialogs.Slags.Pas_paa,
+                godkendErStandard: false);
+
+            if (!ok) return;
+        }
+
         var vindue = new CorrectionWindow(markeret, antal) { Owner = Window.GetWindow(this) };
         if (vindue.ShowDialog() != true) return;
 
@@ -251,8 +399,7 @@ public partial class TranscribeView : UserControl
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Rettelsen kunne ikke gemmes.\n\n{ex.Message}", "Kunne ikke lære",
-                MessageBoxButton.OK, MessageBoxImage.Warning);
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Kunne ikke lære", $"Rettelsen kunne ikke gemmes.\n\n{ex.Message}", Dialogs.Slags.Pas_paa);
         }
     }
 
@@ -279,14 +426,10 @@ public partial class TranscribeView : UserControl
 
         var nyt = vindue.NytNavn;
 
-        if (meta is null)
-        {
-            MessageBox.Show(
-                "Der er ingen oplysninger gemt om den optagelse (meeting.json mangler), " +
-                "så navnet kan ikke ændres. Mappenavnet står tilbage som det er.",
-                "Kan ikke omdøbe", MessageBoxButton.OK, MessageBoxImage.Information);
-            return;
-        }
+        // Mangler meeting.json, laves den. En optagelse, man ikke kan omdøbe,
+        // fordi appen selv aldrig fik skrevet sin egen fil, er ikke brugerens
+        // problem at forstå.
+        meta ??= Optagelsesgruppe.Nødmetadata(valgt.Mappe);
 
         try
         {
@@ -303,8 +446,7 @@ public partial class TranscribeView : UserControl
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Navnet kunne ikke gemmes.\n\n{ex.Message}", "Kunne ikke omdøbe",
-                MessageBoxButton.OK, MessageBoxImage.Warning);
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Kunne ikke omdøbe", $"Navnet kunne ikke gemmes.\n\n{ex.Message}", Dialogs.Slags.Pas_paa);
         }
     }
 
@@ -325,8 +467,7 @@ public partial class TranscribeView : UserControl
         var tekstFil = FindTekst(valgt.Mappe);
         if (tekstFil is null)
         {
-            MessageBox.Show("Optagelsen er ikke skrevet ud endnu. Tryk «Transskribér» først.",
-                "Ingen tekst at arbejde med", MessageBoxButton.OK, MessageBoxImage.Information);
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Ingen tekst at arbejde med", "Optagelsen er ikke skrevet ud endnu. Tryk «Transskribér» først.", Dialogs.Slags.Valg);
             return;
         }
 
@@ -335,12 +476,10 @@ public partial class TranscribeView : UserControl
 
         if (cli is null || modeller.Count == 0)
         {
-            MessageBox.Show(
-                "Der er ingen sprogmodel klar endnu.\n\n" +
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Mangler en sprogmodel", "Der er ingen sprogmodel klar endnu.\n\n" +
                 "Et referat laves af en model, der kører her på maskinen. Hent en under «AI-modeller» — " +
                 "så virker knappen her.\n\n" +
-                "Alt det andet i appen virker uændret uden.",
-                "Mangler en sprogmodel", MessageBoxButton.OK, MessageBoxImage.Information);
+                "Alt det andet i appen virker uændret uden.", Dialogs.Slags.Valg);
             return;
         }
 
@@ -352,8 +491,7 @@ public partial class TranscribeView : UserControl
         }
         if (skabeloner.Count == 0)
         {
-            MessageBox.Show("Der er ingen skabeloner. Opret en under «Skabeloner».",
-                "Ingen skabelon", MessageBoxButton.OK, MessageBoxImage.Information);
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Ingen skabelon", "Der er ingen skabeloner. Opret en under «Skabeloner».", Dialogs.Slags.Valg);
             return;
         }
 
@@ -378,8 +516,13 @@ public partial class TranscribeView : UserControl
                 ["varighed"] = TimeSpan.FromSeconds(valgt.Sekunder).ToString(@"h\:mm"),
                 ["noter"] = LaesNoter(valgt.Mappe),
                 ["sprog"] = meta?.Language is null ? "ikke registreret" : Transcriber.LanguageName(meta.Language),
-                ["ordbog"] = ordbog.BuildWhisperPrompt(tokenBudget: 2000)
-                    .Replace("Vi taler om ", "").TrimEnd('.')
+                // De rigtige stavemaader fra dine rettelser. Den gaar til
+                // SPROGMODELLEN, ikke til Whisper — en sprogmodel laeser en
+                // liste og retter sig efter den, og det er maalt. Whisper
+                // gjorde ikke, og derfor er den vej fjernet.
+                ["ordbog"] = string.Join(", ", ordbog.ListRettelser()
+                    .Select(r => r.Rigtigt)
+                    .Distinct(StringComparer.OrdinalIgnoreCase))
             };
         }
 
@@ -436,18 +579,13 @@ public partial class TranscribeView : UserControl
         var install = WhisperInstall.Locate(AppSettings.Current.PreferredModel);
         if (!install.IsComplete)
         {
-            MessageBox.Show(
-                install.WhisperCli is null
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Mangler motor eller model", install.WhisperCli is null
                     ? "Whisper-motoren er ikke installeret endnu."
-                    : "Der er ingen model hentet endnu.\n\nGå til Motor og model og hent en.",
-                "Mangler motor eller model", MessageBoxButton.OK, MessageBoxImage.Information);
+                    : "Der er ingen model hentet endnu.\n\nGå til Motor og model og hent en.", Dialogs.Slags.Valg);
             return;
         }
 
         var wav = Path.Combine(valgt.Mappe, "mikrofon.wav");
-
-        using var store = new LearningStore();
-        var prompt = store.BuildWhisperPrompt();
 
         var modelNavn = Path.GetFileNameWithoutExtension(install.ModelPath!).Replace("ggml-", "");
         var udBase = Path.Combine(valgt.Mappe, $"mikrofon_{modelNavn}");
@@ -457,7 +595,6 @@ public partial class TranscribeView : UserControl
         AfbrydKnap.Visibility = Visibility.Visible;
         Fremdrift.Visibility = Visibility.Visible;
         Fremdrift.Value = 0;
-        Maalinger.Visibility = Visibility.Collapsed;
         Resultat.Text = "";
 
         // Forklaringen bliver staaende, mens der koeres. Det er praecis dér,
@@ -482,12 +619,12 @@ public partial class TranscribeView : UserControl
                 // "auto": Whisper finder selv sproget. Møder holdes ikke altid
                 // på dansk, og et engelsk møde tvunget gennem dansk giver
                 // volapyk frem for en fejl — og volapyk ligner et resultat.
-                new TranscriptionRequest(wav, install.ModelPath!, udBase, "auto", prompt),
+                new TranscriptionRequest(wav, install.ModelPath!, udBase, "auto"),
                 fremdrift, _afbryd.Token);
 
             // Efterretning: de fejl, du allerede har rettet én gang, rettes nu
-            // af sig selv. Det er DEN vej, appen lærer — ordlisten i Whispers
-            // initial_prompt er målt til ingen forskel at gøre.
+            // af sig selv. Det er DEN vej, appen lærer. Ordlisten i Whispers
+            // initial_prompt er målt til ingen forskel og er fjernet.
             IReadOnlyList<AppliedCorrection> rettelser = Array.Empty<AppliedCorrection>();
             try
             {
@@ -509,14 +646,16 @@ public partial class TranscribeView : UserControl
             // der ender i «du mangler noget», er ikke et tilbud.
             if (LlmRunner.FindCli() is not null && LlmRunner.InstalledModels().Count > 0)
             {
-                var svar = MessageBox.Show(
-                    $"«{valgt.Titel}» er skrevet ud.\n\n" +
+                var ja = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
+                    $"«{valgt.Titel}» er skrevet ud",
                     "Vil du lave et dokument ud af den nu — et referat, en opgaveliste eller " +
                     "hvad du selv har lavet af skabeloner?\n\n" +
                     "Du kan også gøre det senere med knappen «Opret dokument».",
-                    "Teksten er klar", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                    godkend: "Lav et dokument",
+                    annuller: "Ikke nu",
+                    slags: Dialogs.Slags.Godt);
 
-                if (svar == MessageBoxResult.Yes) Referat_Click(this, new RoutedEventArgs());
+                if (ja) Referat_Click(this, new RoutedEventArgs());
             }
             _sidsteMappe = valgt.Mappe;
         }
@@ -527,7 +666,7 @@ public partial class TranscribeView : UserControl
         catch (Exception ex)
         {
             Status.Text = "Transskriptionen fejlede.";
-            MessageBox.Show(ex.Message, "Fejl", MessageBoxButton.OK, MessageBoxImage.Warning);
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Fejl", ex.Message, Dialogs.Slags.Pas_paa);
         }
         finally
         {
@@ -544,21 +683,12 @@ public partial class TranscribeView : UserControl
         var tekst = r.Text.Trim();
         var ord = tekst.Split(' ', '\n', '\r').Count(s => s.Length > 0);
 
-        TalLyd.Text = TimeSpan.FromSeconds(r.AudioSeconds).ToString(@"mm\:ss");
-        TalTid.Text = TimeSpan.FromSeconds(r.ElapsedSeconds).ToString(@"mm\:ss");
-        TalRtf.Text = r.RealTimeFactor.ToString("0.00");
-        TalOrd.Text = ord.ToString();
-
-        // Over 1,0 betyder, at transskriptionen tager laengere tid end moedet
-        // varede. Det aendrer, hvordan appen skal se ud: et natjob frem for
-        // noget man venter paa. Derfor staar tallet stort og forklaret.
-        var langsom = r.RealTimeFactor > 1.0;
-        TalRtf.Foreground = langsom ? (Brush)FindResource("Advarsel") : (Brush)FindResource("Godkendt");
-        RtfForklaring.Text = langsom
-            ? $"Over 1,0: transskriptionen tog længere tid end lyden varer. Et 90-minutters møde ville tage cirka {r.RealTimeFactor * 90:0} minutter — planlæg det som natjob."
-            : $"Under 1,0: hurtigere end realtid. Et 90-minutters møde ville tage cirka {r.RealTimeFactor * 90:0} minutter.";
-
-        Maalinger.Visibility = Visibility.Visible;
+        // HER STOD FIRE STORE TAL: lyd, tid brugt, realtidsfaktor og ord.
+        //
+        // Realtidsfaktoren var udviklertelemetri. Ingen bruger handler på
+        // «0,42» — man ser den, nikker, og går videre. Det, man skal vide, er
+        // hvor lang tid det tog, og det står i én linje nedenfor. Tallene
+        // ligger stadig i Historik, hvor de hører hjemme.
         Forklaring.Visibility = Visibility.Collapsed;
         ResultatRude.Visibility = Visibility.Visible;
         Resultat.Text = tekst.Length == 0 ? "(tom transskription — var der lyd på optagelsen?)" : tekst;
@@ -579,7 +709,7 @@ public partial class TranscribeView : UserControl
         if (rettelser is { Count: > 0 })
         {
             var antal = rettelser.Sum(x => x.Count);
-            rettet = $" · {antal} rettet fra din ordbog";
+            rettet = $" · {antal} rettet automatisk";
         }
 
         // Historikken. Et usikkert sprogvalg skal stå som «se efter», ikke som
@@ -595,7 +725,12 @@ public partial class TranscribeView : UserControl
             usikker ? Udfald.SeEfter : Udfald.Fuldført,
             r.EngineId, r.TextPath, r.ElapsedSeconds);
 
-        Status.Text = $"Færdig · {sprog}{rettet} · {r.EngineId} · gemt som {Path.GetFileName(r.TextPath)}";
+        // Den ene linje, der erstattede de fire store tal. Den siger, hvad man
+        // faktisk skal vide: hvor meget lyd, hvor lang tid det tog, og hvad
+        // sproget blev.
+        Status.Text =
+            $"Færdig · {TimeSpan.FromSeconds(r.AudioSeconds):mm\\:ss} lyd skrevet ud på " +
+            $"{TimeSpan.FromSeconds(r.ElapsedSeconds):mm\\:ss} · {ord} ord · {sprog}{rettet}";
         AabnKnap.IsEnabled = true;
     }
 
@@ -622,19 +757,19 @@ public partial class TranscribeView : UserControl
         if (transskriptioner > 0) hvad.Add($"{transskriptioner} transskriptioner");
         if (noter) hvad.Add("noter og blokmærker");
 
-        var svar = MessageBox.Show(
-            $"Slet «{valgt.Titel}»?\n\n" +
-            $"{valgt.Detaljer}\n" +
-            $"Fylder: {valgt.MegaBytes:0.0} MB\n" +
-            $"Mappe : {valgt.Mappe}\n\n" +
-            (hvad.Count > 0 ? $"Følgende slettes: {string.Join(", ", hvad)}.\n\n" : "") +
-            "Det kan ikke fortrydes. Mødet kan ikke optages om.\n\n" +
+        var ja = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
+            $"Slet «{valgt.Titel}»?",
+            $"{valgt.Detaljer} · {valgt.MegaBytes:0.0} MB\n" +
+            (hvad.Count > 0 ? $"Følgende slettes: {string.Join(", ", hvad)}.\n" : "") +
+            "\nDet kan ikke fortrydes. Mødet kan ikke optages om.\n\n" +
             "Ligger optagelsen i en sikkerhedskopi, findes den stadig der — men " +
             "backup uden lyd indeholder kun teksten.",
-            "Slet optagelse", MessageBoxButton.YesNo, MessageBoxImage.Warning,
-            MessageBoxResult.No);
+            godkend: "Slet for altid",
+            annuller: "Behold den",
+            slags: Dialogs.Slags.Fejl,
+            godkendErStandard: false);
 
-        if (svar != MessageBoxResult.Yes) return;
+        if (!ja) return;
 
         try
         {
@@ -645,10 +780,8 @@ public partial class TranscribeView : UserControl
         }
         catch (Exception ex)
         {
-            MessageBox.Show(
-                $"Kunne ikke slette:\n\n{ex.Message}\n\n" +
-                "Er filen åben i et andet program, så luk det og prøv igen.",
-                "Sletning fejlede", MessageBoxButton.OK, MessageBoxImage.Warning);
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Sletning fejlede", $"Kunne ikke slette:\n\n{ex.Message}\n\n" +
+                "Er filen åben i et andet program, så luk det og prøv igen.", Dialogs.Slags.Pas_paa);
         }
     }
 
