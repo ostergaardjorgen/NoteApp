@@ -155,6 +155,7 @@ public partial class ReadAloudView : UserControl
     {
         var status = new[] { Status0, Status1, Status2 };
         var tal = new[] { Tal0, Tal1, Tal2 };
+        var forvent = new[] { Forvent0, Forvent1, Forvent2 };
 
         for (var i = 0; i < ScriptDocument.Available.Count && i < 3; i++)
         {
@@ -172,7 +173,45 @@ public partial class ReadAloudView : UserControl
                                         : ("valgfri · 5 min", "TekstMeget");
 
             status[i].Foreground = (Brush)FindResource(farve);
+
+            forvent[i].Text = Forventning(i, t.Maaling);
         }
+    }
+
+    /// <summary>
+    /// Hvad man kan forvente — FØR man læser op.
+    ///
+    /// HVORFOR DET SKAL STÅ DÉR
+    ///
+    /// Uden et pejlemærke er 92 % skuffende. Man har lige brugt tyve minutter
+    /// på at læse tydeligt op, og så mangler der stadig 180 ord — det ligner
+    /// noget, der gik galt. Med tallet på forhånd er 92 % dét, der skulle ske.
+    ///
+    /// HVORFOR TALLENE ER OMTRENTLIGE
+    ///
+    /// De kommer fra faktiske målinger: dansk 92,3 %, engelsk 90,5 %, blandet
+    /// 83,1 %. Men det er MÅLT PÅ ÉN STEMME, én mikrofon og én maskine. Et
+    /// præcist tal ville være en påstand om noget, der ikke er målt på
+    /// brugerens stemme — derfor et interval, og derfor ordet «typisk».
+    ///
+    /// Er teksten allerede målt, står forklaringen i stedet: dér er der ikke
+    /// længere brug for et skøn, for tallet står ved siden af.
+    /// </summary>
+    private static string Forventning(int index, Traeningsmaaling? målt)
+    {
+        if (målt is not null)
+        {
+            return målt.Procent >= 90 ? "som forventet — så godt bliver det"
+                 : målt.Procent >= 80 ? "lidt under det typiske — se sætningerne"
+                 : "under det forventede — tjek mikrofonen";
+        }
+
+        return index switch
+        {
+            0 => "typisk 90-93 %",
+            1 => "typisk 80-85 % — sprogskiftet koster",
+            _ => "typisk 88-92 %"
+        };
     }
 
     /// <summary>Optagelsen og målingen for en af de tre tekster, hvis de findes.</summary>
@@ -254,7 +293,18 @@ public partial class ReadAloudView : UserControl
         TrinLaes.Visibility = Visibility.Visible;
         HvorforOverskrift.Text = $"Hvorfor «{valgt.Name}»";
         HvorforLaengde.Text = valgt.Why;
-        HvorforFuld.Text = valgt.Next;
+
+        // FORVENTNINGEN, saa tallet ikke kommer som en skuffelse.
+        //
+        // 92 % lyder som en daarlig karakter, hvis man tror, 100 er maalet. Det
+        // er det ikke: to mennesker, der skriver den samme optagelse ned, er
+        // heller ikke enige om hvert ord. Staar det FOER man laeser op, er 92 %
+        // en bekraeftelse i stedet for et nederlag.
+        HvorforFuld.Text = valgt.Next + "\n\n" +
+            $"Hvad du kan forvente: {Forventning(ValgtIndex, null)}. " +
+            "Hundrede procent findes ikke — heller ikke mellem to mennesker, der skriver " +
+            "den samme optagelse ned. Det, der flytter tallet, er mikrofonen og afstanden " +
+            "til den, ikke hvor tydeligt du artikulerer.";
 
         StartKnap.IsEnabled = OptagKnap.IsEnabled;
         StartUnder.Text = $"{_script.TotalWords} ord · cirka {minutter} minutter";

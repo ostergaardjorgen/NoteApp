@@ -220,13 +220,54 @@ public sealed class Traeningsmaaling
         return ud;
     }
 
-    /// <summary>Nyeste udskrift fra Whisper. Der kan ligge flere, hvis mappen er skrevet ud med to modeller.</summary>
-    public static string? FindJson(string mappe) =>
-        !Directory.Exists(mappe) ? null
-        : Directory.GetFiles(mappe, "*.json")
-            .Where(f => !Path.GetFileName(f).Equals("meeting.json", StringComparison.OrdinalIgnoreCase))
-            .OrderByDescending(File.GetLastWriteTimeUtc)
-            .FirstOrDefault();
+    /// <summary>
+    /// Nyeste udskrift fra Whisper. Der kan ligge flere, hvis mappen er skrevet
+    /// ud med to modeller.
+    ///
+    /// INDHOLDET AFGØR, IKKE NAVNET.
+    ///
+    /// Første udgave tog den nyeste json, der ikke hed meeting.json. Så kom der
+    /// en afklaret.json i mappen — den er nyere, og pludselig kunne en optagelse,
+    /// der var skrevet ud for to dage siden, ikke måles. Skærmen sagde «ikke
+    /// skrevet ud endnu» om noget, der var skrevet ud, og fejlen pegede ingen
+    /// steder hen.
+    ///
+    /// En liste over navne, der skal springes over, ville have samme fejl igen,
+    /// næste gang appen får en ny fil at gemme. Derfor spørges der om indholdet:
+    /// en udskrift fra Whisper har en «transcription»-liste. Ingen andre af
+    /// appens filer har det.
+    /// </summary>
+    public static string? FindJson(string mappe)
+    {
+        if (!Directory.Exists(mappe)) return null;
+
+        foreach (var fil in Directory.GetFiles(mappe, "*.json")
+                     .OrderByDescending(File.GetLastWriteTimeUtc))
+        {
+            try
+            {
+                // Kun begyndelsen laeses. En udskrift af et langt moede fylder
+                // en halv megabyte, og der er ingen grund til at laese den
+                // igennem for at afgoere, hvad det er for en fil.
+                using var strøm = File.OpenRead(fil);
+                using var doc = JsonDocument.Parse(strøm);
+
+                if (doc.RootElement.ValueKind == JsonValueKind.Object &&
+                    doc.RootElement.TryGetProperty("transcription", out var t) &&
+                    t.ValueKind == JsonValueKind.Array)
+                {
+                    return fil;
+                }
+            }
+            catch (Exception)
+            {
+                // Ikke gyldig json, eller kan ikke laeses. Saa er det ikke den,
+                // vi leder efter — proev den naeste.
+            }
+        }
+
+        return null;
+    }
 
     /// <summary>Mikrofonsporet. Det er dét, der blev læst op i — højttalersporet er tomt ved en oplæsning.</summary>
     public static string? FindLyd(string mappe)

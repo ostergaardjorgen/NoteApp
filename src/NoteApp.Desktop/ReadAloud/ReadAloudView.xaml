@@ -240,6 +240,8 @@
                              Foreground="{StaticResource Accent}" />
                   <TextBlock Text="Grundlaget" FontSize="18" FontWeight="SemiBold" Margin="0,6,0,0" />
                   <TextBlock x:Name="Status0" FontSize="12" Margin="0,4,0,0" TextWrapping="Wrap" />
+                  <TextBlock x:Name="Forvent0" FontSize="11.5" Margin="0,3,0,0" TextWrapping="Wrap"
+                             Foreground="{StaticResource TekstMeget}" />
                 </StackPanel>
                 <TextBlock x:Name="Tal0" Grid.Column="1" FontSize="21" FontWeight="SemiBold"
                            VerticalAlignment="Center" Margin="8,0,0,0" />
@@ -258,6 +260,8 @@
                              Foreground="{StaticResource TekstMeget}" />
                   <TextBlock Text="Blandet" FontSize="18" FontWeight="SemiBold" Margin="0,6,0,0" />
                   <TextBlock x:Name="Status1" FontSize="12" Margin="0,4,0,0" TextWrapping="Wrap" />
+                  <TextBlock x:Name="Forvent1" FontSize="11.5" Margin="0,3,0,0" TextWrapping="Wrap"
+                             Foreground="{StaticResource TekstMeget}" />
                 </StackPanel>
                 <TextBlock x:Name="Tal1" Grid.Column="1" FontSize="21" FontWeight="SemiBold"
                            VerticalAlignment="Center" Margin="8,0,0,0" />
@@ -276,6 +280,8 @@
                              Foreground="{StaticResource TekstMeget}" />
                   <TextBlock Text="Engelsk" FontSize="18" FontWeight="SemiBold" Margin="0,6,0,0" />
                   <TextBlock x:Name="Status2" FontSize="12" Margin="0,4,0,0" TextWrapping="Wrap" />
+                  <TextBlock x:Name="Forvent2" FontSize="11.5" Margin="0,3,0,0" TextWrapping="Wrap"
+                             Foreground="{StaticResource TekstMeget}" />
                 </StackPanel>
                 <TextBlock x:Name="Tal2" Grid.Column="1" FontSize="21" FontWeight="SemiBold"
                            VerticalAlignment="Center" Margin="8,0,0,0" />
