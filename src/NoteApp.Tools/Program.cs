@@ -27,6 +27,7 @@ try
         "score"     => Score(args.Skip(1).ToArray()),
         "traening"  => Traening(args.Skip(1).ToArray()),
         "llmret"    => await LlmRet(args.Skip(1).ToArray()),
+        "sky"       => await Sky(args.Skip(1).ToArray()),
         "forventning" => Forventning(args.Skip(1).ToArray()),
         "mikrofontest" => Mikrofontest(args.Skip(1).ToArray()),
         "recover"   => Genopret(),
@@ -409,6 +410,149 @@ static async Task<int> Udkast(string[] a)
     Console.WriteLine();
     Console.WriteLine($"Tid      : {r.Elapsed.TotalSeconds:0.0} sek");
     Console.WriteLine($"Tokens   : {r.PromptTokens} ind, {r.ResponseTokens} ud  ({r.TokensPerSecond:0.0}/sek)");
+    Console.WriteLine($"Gemt     : {sti}");
+    return 0;
+}
+
+/// <summary>
+/// Kører en skabelon hos en europæisk sky-model.
+///
+///   noteapp sky                                    — hvad der er sat op
+///   noteapp sky modeller                           — de id'er, nøglen kan bruge
+///   noteapp sky referat &lt;mappe-eller-fil&gt; &lt;model&gt; [skabelon]
+///
+/// HVORFOR DEN LIGGER I EN EGEN KOMMANDO
+///
+/// «noteapp udkast» lover, at intet forlader maskinen. Den kommando skal blive
+/// ved med at betyde det. At sende udskriften afsted er et andet valg, og det
+/// skal man skrive et andet ord for — ikke sætte et flag på det, man plejer
+/// at køre.
+/// </summary>
+static async Task<int> Sky(string[] a)
+{
+    var underkommando = a.Length > 0 ? a[0].ToLowerInvariant() : "status";
+
+    var noegle = NoteApp.Core.Llm.SkyNoegle.Hent();
+
+    if (underkommando is "status")
+    {
+        Console.WriteLine("SKY — bearbejdning hos en europæisk leverandør");
+        Console.WriteLine();
+        Console.WriteLine($"  Nøgle : {(noegle is null ? "mangler" : "fundet (" + noegle.Length + " tegn)")}");
+        Console.WriteLine();
+        Console.WriteLine("Modeller:");
+        foreach (var m in NoteApp.Core.Llm.SkyKatalog.Kendte)
+            Console.WriteLine($"  {m.Id,-16} {m.Navn,-20} {m.Leverandoer} ({m.Hjemland})  " +
+                              $"${m.PrisIndPrMTok}/${m.PrisUdPrMTok} pr. MTok");
+        Console.WriteLine();
+
+        if (noegle is null) Console.WriteLine(NoteApp.Core.Llm.SkyNoegle.Vejledning);
+        else Console.WriteLine("Brug: noteapp sky referat <mappe-eller-tekstfil> <model> [skabelon]");
+
+        return 0;
+    }
+
+    if (noegle is null) { Console.Error.WriteLine(NoteApp.Core.Llm.SkyNoegle.Vejledning); return 1; }
+
+    var sky = new NoteApp.Core.Llm.SkyRunner(noegle);
+
+    // Model-id'erne staar ikke i den offentlige dokumentation. Frem for at
+    // gaette og faa en 422'er, der ikke siger hvorfor, kan listen hentes.
+    if (underkommando is "modeller")
+    {
+        Console.WriteLine("Spørger Mistral, hvilke modeller nøglen kan bruge ...");
+        Console.WriteLine();
+        foreach (var id in await sky.ModellerAsync()) Console.WriteLine($"  {id}");
+        return 0;
+    }
+
+    if (underkommando is not "referat" || a.Length < 3)
+    {
+        Console.Error.WriteLine("Brug: noteapp sky referat <mappe-eller-tekstfil> <model> [skabelon]");
+        return 1;
+    }
+
+    var model = NoteApp.Core.Llm.SkyKatalog.Find(a[2]);
+    if (model is null)
+    {
+        Console.Error.WriteLine($"Ukendt model: {a[2]}");
+        Console.Error.WriteLine("Kendte: " + string.Join(", ", NoteApp.Core.Llm.SkyKatalog.Kendte.Select(m => m.Id)));
+        return 1;
+    }
+
+    NoteApp.Core.Llm.DraftStore.SeedTemplates();
+
+    // Kilden: enten en moedemappe eller en ren tekstfil. Samme regler som
+    // «noteapp udkast», saa de to kan sammenlignes paa det samme materiale.
+    string tekst, moedeMappe, titel;
+    if (Directory.Exists(a[1]))
+    {
+        moedeMappe = a[1];
+        var txt = Directory.GetFiles(moedeMappe, "*.txt")
+            .Where(f => !Path.GetFileName(f).Contains("gaet", StringComparison.OrdinalIgnoreCase))
+            .OrderByDescending(File.GetLastWriteTime).FirstOrDefault();
+        if (txt is null) { Console.Error.WriteLine("Fandt ingen transskription (.txt) i mappen."); return 1; }
+        tekst = File.ReadAllText(txt);
+        titel = MeetingStore.Load(moedeMappe)?.Title ?? Path.GetFileName(moedeMappe);
+    }
+    else if (File.Exists(a[1]))
+    {
+        tekst = File.ReadAllText(a[1]);
+        moedeMappe = Path.GetDirectoryName(Path.GetFullPath(a[1]))!;
+        titel = Path.GetFileNameWithoutExtension(a[1]);
+    }
+    else { Console.Error.WriteLine($"Findes ikke: {a[1]}"); return 1; }
+
+    var skabeloner = NoteApp.Core.Llm.PromptTemplate.LoadAll();
+    if (skabeloner.Count == 0) { Console.Error.WriteLine($"Ingen skabeloner i {NoteApp.Core.Llm.PromptTemplate.Directory}"); return 1; }
+
+    var skabelon = a.Length > 3
+        ? skabeloner.FirstOrDefault(s => s.Name.Contains(a[3], StringComparison.OrdinalIgnoreCase)) ?? skabeloner[0]
+        : skabeloner[0];
+
+    using var store = new LearningStore();
+
+    var felter = new Dictionary<string, string?>
+    {
+        ["transskription"] = tekst,
+        ["titel"] = titel,
+        ["dato"] = DateTime.Now.ToString("d. MMMM yyyy"),
+        ["varighed"] = "",
+        ["noter"] = "",
+        ["sprog"] = "dansk",
+        ["ordbog"] = string.Join(", ", store.ListRettelser()
+            .Select(r => r.Rigtigt)
+            .Distinct(StringComparer.OrdinalIgnoreCase))
+    };
+
+    // DET HER SKAL STAA, HVER GANG. Kommandoen sender moedeudskriften til en
+    // server i Frankrig, og det er ikke noget, man skal kunne komme til at
+    // glemme, fordi man har koert den foer.
+    Console.WriteLine("SENDES UD AF MASKINEN");
+    Console.WriteLine($"  Modtager : {model.Leverandoer}, {model.Hjemland} ({model.Navn})");
+    Console.WriteLine($"  Indhold  : hele udskriften, {tekst.Length:N0} tegn");
+    Console.WriteLine($"  Skabelon : {skabelon.Name}");
+    Console.WriteLine();
+
+    var sidst = "";
+    var fremdrift = new Progress<NoteApp.Core.Llm.LlmProgress>(p =>
+    {
+        if (p.Message != sidst) { sidst = p.Message; Console.WriteLine($"  {p.Message}"); }
+    });
+
+    // HELE MOEDET I EEN KOERSEL. Referatbygger deler op, fordi et 6 GB-kort
+    // ikke kan rumme mere — det er en noedloesning, ikke en fordel, og den
+    // kostede os deltagernavnene. En sky-model har plads til hele moedet, og
+    // saa er der ingen grund til at klippe det i stykker.
+    var r = await sky.KoerAsync(model, skabelon, skabelon.Render(felter), fremdrift);
+
+    var sti = NoteApp.Core.Llm.DraftStore.Save(
+        moedeMappe, skabelon, r.SomLlmResult(), motor: $"{model.Leverandoer} ({model.Hjemland})");
+
+    Console.WriteLine();
+    Console.WriteLine($"Tid      : {r.Forloebet.TotalSeconds:0.0} sek");
+    Console.WriteLine($"Tokens   : {r.TokensInd:N0} ind, {r.TokensUd:N0} ud  ({r.TokensPrSekund:0.0}/sek)");
+    Console.WriteLine($"Pris     : ${r.PrisUsd:0.0000}  (ca. {r.PrisUsd * 6.5m:0.00} kr.)");
     Console.WriteLine($"Gemt     : {sti}");
     return 0;
 }

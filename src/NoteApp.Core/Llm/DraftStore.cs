@@ -19,11 +19,20 @@ public static class DraftStore
 {
     public static string DirectoryFor(string meetingDir) => Path.Combine(meetingDir, "udkast");
 
+    /// <summary>
+    /// Gemmer et udkast med proveniens.
+    ///
+    /// <paramref name="motor"/> skal siges, når det ikke er llama.cpp. Et udkast
+    /// lavet i skyen, der har «motor: llama.cpp» i hovedet, er en forkert
+    /// oplysning i den ene fil, der findes for at kunne svare på, hvad der
+    /// lavede teksten — og en forkert proveniens er værre end ingen.
+    /// </summary>
     public static string Save(
         string meetingDir,
         PromptTemplate template,
         LlmResult result,
-        string? engineVersion = null)
+        string? engineVersion = null,
+        string motor = "llama.cpp")
     {
         var mappe = DirectoryFor(meetingDir);
         Directory.CreateDirectory(mappe);
@@ -36,7 +45,7 @@ public static class DraftStore
         sb.AppendLine("---");
         sb.AppendLine($"skabelon: {template.Name}");
         sb.AppendLine($"model: {result.ModelFile}");
-        sb.AppendLine($"motor: llama.cpp{(engineVersion is null ? "" : " " + engineVersion)}");
+        sb.AppendLine($"motor: {motor}{(engineVersion is null ? "" : " " + engineVersion)}");
         sb.AppendLine($"temperatur: {template.Temperature.ToString(System.Globalization.CultureInfo.InvariantCulture)}");
         sb.AppendLine($"lavet: {DateTimeOffset.Now:yyyy-MM-dd HH:mm}");
         sb.AppendLine($"tid: {result.Elapsed.TotalSeconds:0.0} sek");

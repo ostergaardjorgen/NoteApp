@@ -20,11 +20,25 @@ selv med mødet delt op i blokke tager det tid. Uden en besked skal man selv
 huske at kigge efter — og så opdager man det først dagen efter. Jobbjælken
 nederst virker kun, mens man har appen fremme.
 
-### API til en online sprogmodel som valgfrit alternativ
-*Foreslået 16-08-2026*
+### Bearbejdning hos en europæisk sky-model
+*Foreslået 16-08-2026 · under arbejde*
 
-Whisper bliver lokalt. Referatet kan valgfrit sendes til den sky-model, brugeren
-i forvejen abonnerer på — Claude først, da det er den, der er i brug.
+**Budskabet:** Mødeoptagelse og transskription 100 % lokalt. Bearbejdning af
+indhold og dokumentskabeloner 100 % europæisk.
+
+Det er en skarpere position end «valgfrit sky-tilvalg», og den gør noget ved
+valget af leverandør: Claude og ChatGPT kan ikke bruges til bearbejdningen, for
+så holder anden halvdel af sætningen ikke. Mistral (Frankrig) er den eneste af
+de undersøgte, hvor «europæisk» og «brugerens egen nøgle» kan være sandt
+samtidig. Se `sky-api-priser.md`.
+
+Claude bliver derfor ikke et produkt-tilvalg, men **målestokken**: facit i
+`reference.txt` er lavet af Claude, og hver europæisk model måles op mod det.
+
+**Det, der skal efterprøves, før budskabet må bruges:** at Mistral faktisk
+hoster i EU, og at der findes en databehandleraftale. «100 % europæisk» er en
+compliance-påstand, ikke en markedsføringsvending — den skal stå på skrift fra
+leverandøren, før den står i appen.
 
 **Hvorfor:** Den lokale 8B-model rammer et loft, der ikke er til at prompte sig
 ud af. Målt på et rigtigt møde mod et facit lavet af en stor model: 68 % af
