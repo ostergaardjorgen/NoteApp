@@ -357,10 +357,32 @@ public sealed class LlmRunner
     private static string Sidste(string tekst, int linjer) =>
         string.Join('\n', tekst.Split('\n').Where(l => l.Trim().Length > 0).TakeLast(linjer));
 
+    /// <summary>
+    /// Konteksten, afrundet OPAD til nærmeste 1024.
+    ///
+    /// HVORFOR IKKE NÆRMESTE TOPOTENS
+    ///
+    /// Den rundede før op til 2048, 4096, 8192 … Det er pænt, men det spilder
+    /// hukommelse i store spring: et møde, der har brug for 17.300 tokens, fik
+    /// 32.768 — næsten det dobbelte. Hver token koster plads i KV-cachen, og
+    /// på et 6 GB-kort er det forskellen på at ligge på grafikkortet og at
+    /// blive skubbet over på processoren, hvor det tager ti gange så lang tid.
+    ///
+    /// Målt 14. august 2026 med et 61-minutters møde: 5.795 MiB af 6.144 brugt
+    /// — 94 %. Der var ikke plads til at være rundhåndet.
+    ///
+    /// 1024 er stadig et rundt tal for llama.cpp, og forskellen mellem 17.408
+    /// og 17.300 betyder ingenting.
+    /// </summary>
     private static int Naermeste2Potens(int n)
     {
-        var v = 2048;
-        while (v < n && v < 131072) v *= 2;
-        return v;
+        const int trin = 1024;
+        const int mindst = 2048;
+        const int mest = 131072;
+
+        if (n <= mindst) return mindst;
+
+        var v = (n + trin - 1) / trin * trin;
+        return Math.Min(v, mest);
     }
 }

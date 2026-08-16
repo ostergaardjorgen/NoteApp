@@ -124,6 +124,13 @@
             <TextBlock x:Name="JobBesked" FontSize="12" Margin="0,2,0,0" TextWrapping="Wrap"
                        Foreground="{StaticResource TekstSvag}" />
 
+            <!-- Hvad der laves, hvornår det begyndte, og hvor det lander.
+                 Det står fast, mens beskeden ovenover skifter — og
+                 starttidspunktet er dét, man leder efter, når man har kigget
+                 væk et stykke tid og er i tvivl, om den stadig arbejder. -->
+            <TextBlock x:Name="JobDetaljer" FontSize="11" Margin="0,3,0,0" TextWrapping="Wrap"
+                       Foreground="{StaticResource TekstMeget}" />
+
             <!-- Bjælken er ord skrevet mod skabelonens loft. Den når sjældent
                  helt ud — modellen stopper af sig selv — og derfor står de
                  rigtige tal ovenover. Det, man vil vide, er om den stadig

@@ -540,13 +540,88 @@ public partial class TranscribeView : UserControl
             FileName = DocumentStore.FileNameFor(dialog.Titel, skabelon.Name)
         };
 
+        // HVOR LANG TID DET TAGER — FØR man trykker.
+        //
+        // Et referat af et langt møde kan tage en halv time. Det er i orden,
+        // men kun hvis man ved det på forhånd: uden et tal sidder man og venter
+        // på noget, man tror er gået i stå, og trykker afbryd efter fem
+        // minutter. Målt 14. august 2026 tog et 61-minutters møde 28 minutter i
+        // én kørsel.
+        var (blokke, skøn) = Referatbygger.Forventning(felter["transskription"] ?? "");
+
+        // ER DER PLADS PÅ GRAFIKKORTET LIGE NU?
+        //
+        // llama.cpp afgør ved INDLÆSNINGEN, hvor mange lag der kan ligge på
+        // kortet. Er der optaget plads af noget andet — en video, et spil,
+        // overvågningssoftware — lægges resten på processoren, og det gælder
+        // hele kørslen. Lukker man videoen bagefter, bliver den ikke hurtigere.
+        //
+        // Målt 14. august 2026: 0,7 tokens i sekundet med video kørende mod
+        // 20-30 forventede. Fyrre gange langsommere, uden en fejlmeddelelse —
+        // og man leder efter fejlen i appen.
+        var langsom = false;
+        var plads = Grafikhukommelse.HarPlads(new FileInfo(model).Length);
+
+        if (plads is { Plads: false } p)
+        {
+            langsom = true;
+
+            var ok = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
+                "Der er ikke plads på grafikkortet lige nu",
+                $"Modellen har brug for {Grafikhukommelse.Gigabyte(p.Kraevet)}, og der er " +
+                $"{Grafikhukommelse.Gigabyte(p.Fri)} ledigt.\n\n" +
+                "Starter du nu, lægger en del af modellen sig på processoren i stedet, og så tager " +
+                $"det omkring {Math.Round(skøn.TotalMinutes * 4 / 5.0) * 5:0} minutter i stedet for " +
+                $"{Math.Round(skøn.TotalMinutes / 5.0) * 5:0}. Det afgøres, når modellen indlæses — " +
+                "lukker du videoen bagefter, bliver kørslen ikke hurtigere.\n\n" +
+                "Video, spil og programmer med levende billeder bruger kortet. Luk dem, og prøv igen.",
+                godkend: "Start alligevel",
+                annuller: "Jeg lukker først noget",
+                slags: Dialogs.Slags.Pas_paa,
+                godkendErStandard: false);
+
+            if (!ok) return;
+        }
+
+        var minutter = langsom ? skøn.TotalMinutes * 4 : skøn.TotalMinutes;
+
+        var tid = minutter < 2
+            ? "et par minutter"
+            : $"omkring {Math.Round(minutter / 5.0) * 5:0} minutter";
+
+        if (!langsom)
+        {
+            // TIDEN SKAL VÆRE KONKRET, OG DER SKAL STÅ, AT MAN IKKE SKAL
+            // HOLDE ØJE.
+            //
+            // Målt 14. august 2026: et 61-minutters møde tog 43 minutter, og
+            // appen havde lovet 10. Brugeren sad og troede, den var gået i stå.
+            // Det er i orden, at det tager lang tid — men kun hvis tallet
+            // passer, og kun hvis man ved, at man får besked.
+            var faerdig = DateTime.Now.Add(skøn);
+
+            var ja = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
+                $"«{dialog.Titel}» laves nu",
+                $"Det tager {tid}" +
+                (blokke > 1 ? $" — mødet er langt, så det læses igennem i {blokke} dele" : "") +
+                $". Forventet færdig omkring kl. {faerdig:HH:mm}.\n\n" +
+                "Du skal ikke holde øje med det. Klokken øverst til højre giver besked, når " +
+                "dokumentet er klar, og det ligger under «Dokumenter».\n\n" +
+                "Imens kan du roligt bruge appen til alt andet — også optage et nyt møde.",
+                godkend: "Sæt i gang",
+                annuller: "Ikke nu",
+                slags: Dialogs.Slags.Valg);
+
+            if (!ja) return;
+        }
+
         // Koerslen sendes til baggrunden og slippes her. Laa den i denne
         // skaerm, ville den doe, naar man klikkede paa et andet menupunkt:
         // skaermene bygges om ved hvert skift. Fremdriften vises i bjaelken
         // nederst i vinduet, som altid er fremme.
         Jobs.BackgroundJobs.LavDokument(cli, model, skabelon, felter, info, valgt.Mappe);
 
-        Status.Text = "Dokumentet laves. Du kan roligt gaa videre — fremdriften staar nederst i vinduet.";
+        Status.Text = $"Dokumentet laves — {tid}. Du får besked på klokken øverst, når det er klar.";
     }
 
     /// <summary>Noterne fra mødet som ren tekst, så de kan gå med til modellen.</summary>
@@ -724,6 +799,7 @@ public partial class TranscribeView : UserControl
             $" · RTF {r.RealTimeFactor:0.00}{rettet}",
             usikker ? Udfald.SeEfter : Udfald.Fuldført,
             r.EngineId, r.TextPath, r.ElapsedSeconds);
+        Notifikationer.Meld();
 
         // Den ene linje, der erstattede de fire store tal. Den siger, hvad man
         // faktisk skal vide: hvor meget lyd, hvor lang tid det tog, og hvad

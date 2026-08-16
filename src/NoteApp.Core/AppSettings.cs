@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 using System.Text.Json;
 
 namespace NoteApp.Core;
@@ -63,6 +63,14 @@ public sealed class AppSettings
     /// ikke kan lade sig gøre, er ingen genvej.
     /// </summary>
     public string? HotkeyId { get; set; }
+
+    /// <summary>
+    /// Hvornår klokken sidst blev åbnet. Alt nyere end det er ulæst.
+    ///
+    /// Sættes kun, når man ÅBNER klokken — ikke ved opstart. En besked, man
+    /// aldrig nåede at se, skal ikke forsvinde, fordi man genstartede appen.
+    /// </summary>
+    public DateTimeOffset NotifikationerSetTil { get; set; } = DateTimeOffset.MinValue;
 
     private static string Path => System.IO.Path.Combine(UserDataPaths.Root, "indstillinger.json");
 

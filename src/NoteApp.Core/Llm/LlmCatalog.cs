@@ -91,16 +91,21 @@ public static class LlmCatalog
             "Apache 2.0", LicenseClass.FriTilSalg, null,
             "Mellemklasse. Kræver, at en del af modellen ligger i almindelig RAM.",
             "Mærkbart bedre til lange, sammenhængende referater end en 8B. Apache 2.0.",
-            "Fylder 14 GB og passer ikke på et 6 GB-kort.",
+            "Fylder 14 GB og kan ikke køre på en maskine med 32 GB RAM.",
             Rejected:
-                "Prøvet af 12. august 2026 på et 6 GB-kort (RTX 2060, 32 GB RAM) og fravalgt. " +
-                "To kørsler på den samme testtekst — 20 minutters møde, 4.481 tokens — blev afbrudt " +
-                "efter henholdsvis 50 og 20 minutter uden at have skrevet et referat færdigt. " +
-                "Qwen3-8B klarer den samme tekst på 160 sekunder. " +
-                "Årsagen er ikke modellens kvalitet, men størrelsen: 14 GB på et 6 GB-kort betyder, " +
-                "at llama.cpp lægger det, der kan være, på kortet og resten i RAM, og de lag, der " +
-                "ligger i RAM, sætter tempoet. Målt under kørslen: 5,8 GB på kortet og 14,1 GB i RAM. " +
-                "Et referat, man venter en time på, bliver ikke lavet — man skriver det selv i mellemtiden."),
+                "Prøvet af to gange og fravalgt begge gange.\n\n" +
+                "12. august 2026: to kørsler på 4.481 tokens blev afbrudt efter 50 og 20 minutter " +
+                "uden at blive færdige. Målt under kørslen: 5,8 GB på kortet og 14,1 GB i RAM.\n\n" +
+                "16. august 2026 blev fravalget ophævet for at prøve igen — denne gang med mødet " +
+                "delt i stykker på 2.500 tokens, altså en femtedel af den oprindelige belastning. " +
+                "Det hjalp ikke: modellen nåede ikke længere end til at finde deltagerne, før den " +
+                "fysiske hukommelse var nede på 0,4 GB af 32, og kørslen måtte stoppes hårdt for " +
+                "ikke at lægge hele maskinen ned.\n\n" +
+                "Årsagen er ikke prompten eller opdelingen, men filen: llama.cpp hukommelses-mapper " +
+                "modellen, og de 13,3 GB skal være i den fysiske hukommelse, uanset hvor små de " +
+                "enkelte kørsler er. En maskine med 32 GB, hvor Windows og en browser i forvejen " +
+                "bruger halvdelen, har ikke plads.\n\n" +
+                "Skal den ind igen, kræver det mere RAM — ikke en bedre prompt."),
 
         new LlmModelInfo(
             "muse-glimmer-30b", "unsloth/Muse-Glimmer-30B-GGUF",

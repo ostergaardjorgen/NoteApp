@@ -49,6 +49,10 @@ public partial class MainWindow : Window
             JobHvad.Text = s.Kører ? $"{s.Hvad} laves …" : s.Hvad + " færdigt";
             JobBesked.Text = s.Besked;
 
+            JobDetaljer.Text = s.Detaljer;
+            JobDetaljer.Visibility = s.Detaljer.Length == 0
+                ? Visibility.Collapsed : Visibility.Visible;
+
             // Bjaelken vises kun, naar der ER noget at maale. Under
             // modelindlaesningen staar der ingen procent, og en bjaelke paa nul
             // i et halvt minut ligner en, der har haengt sig — dér er en
@@ -167,6 +171,9 @@ public partial class MainWindow : Window
     /// andet sted i appen.
     /// </summary>
     public void GaaTilOplaesning() => NavOplaesning.IsChecked = true;
+
+    /// <summary>Går til historikken — hele listen bag klokkens beskeder.</summary>
+    public void GaaTilHistorik() => NavHistorik.IsChecked = true;
 
     /// <summary>
     /// Registrerer genvejen og fortæller mødeskærmen, hvad der blev til noget.

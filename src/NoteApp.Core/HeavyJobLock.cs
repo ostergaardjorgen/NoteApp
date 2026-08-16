@@ -81,6 +81,28 @@ public static class Arbejdshukommelse
     /// </summary>
     public static (bool Plads, long KrævetBytes, long FriBytes) HarPlads(long modelBytes)
     {
+        // HELE MODELLEN TÆLLER MED — OGSÅ DEN DEL, DER LIGGER PÅ KORTET.
+        //
+        // Der blev 16. august 2026 lavet en «forbedring» her: de lag, der
+        // lægges på grafikkortet, blev trukket fra kravet, fordi de jo ikke
+        // ligger i RAM. Det lyder rigtigt og er forkert.
+        //
+        // llama.cpp hukommelses-mapper modelfilen. Windows holder den i sin
+        // filcache, mens den læses, og de sider tæller med i den fysiske
+        // hukommelse — uanset hvor mange lag der bagefter er kopieret over på
+        // kortet. Målt umiddelbart efter ændringen: en 13,3 GB-model blev
+        // sluppet igennem med 16,2 GB fri, og fem sekunder senere var der
+        // 0,4 GB tilbage af 31,7. Maskinen var på vej i knæ og måtte stoppes
+        // hårdt.
+        //
+        // Tillægget på 40 % er ikke taget ud af luften: de målte kørsler brugte
+        // 14,1 GB RAM til en 14,3 GB-model, der lå delvist på kortet, og
+        // 18,9 GB til en 12,4 GB-model, der ikke gjorde. Konteksten,
+        // tokenbufferne og selve programmet kommer oven i vægtene.
+        //
+        // Der skal desuden blive 2 GB tilbage til Windows og til appen selv.
+        // Uden den margen swapper maskinen, og så er det ikke kun modellen,
+        // der bliver langsom.
         var krævet = (long)(modelBytes * 1.4) + 2L * 1024 * 1024 * 1024;
         var fri = Fri();
 

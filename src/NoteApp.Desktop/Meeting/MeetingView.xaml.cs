@@ -38,6 +38,12 @@ public partial class MeetingView : UserControl
         _ur = new DispatcherTimer(DispatcherPriority.Render) { Interval = TimeSpan.FromMilliseconds(250) };
         _ur.Tick += (_, _) => Opdater();
 
+        // Klokken. Den lyttter paa Notifikationer, saa tallet opdaterer sig,
+        // uden at nogen skal huske at kalde noget — ogsaa naar man staar paa en
+        // helt anden skaerm.
+        Notifikationer.Nyt += () => Dispatcher.Invoke(VisKlokke);
+        Loaded += (_, _) => VisKlokke();
+
                 var mik = AudioDevices.ResolveMicrophone(AppSettings.Current.MicrophoneId, out _);
         StartKnap.IsEnabled = mik is not null;
         if (mik is null) Status.Text = "Ingen mikrofon fundet";
@@ -416,5 +422,54 @@ public partial class MeetingView : UserControl
         Ur.Text = _session.Elapsed.ToString(@"hh\:mm\:ss");
         UrUnder.Text = _session.IsPaused ? "på pause" : "optager";
         Opdateret?.Invoke();
+    }
+
+    // ------------------------------------------------------------- klokken
+
+    /// <summary>
+    /// Tallet paa klokken. Kun ULAESTE taeller — en klokke, der viser hvor
+    /// mange beskeder der findes i alt, holder aldrig op med at raabe, og saa
+    /// holder man op med at kigge.
+    /// </summary>
+    private void VisKlokke()
+    {
+        if (KlokkeBadge is null) return;
+
+        int nye;
+        try { nye = Notifikationer.Ulaeste(); }
+        catch (Exception) { return; }
+
+        KlokkeBadge.Visibility = nye == 0 ? Visibility.Collapsed : Visibility.Visible;
+        KlokkeTal.Text = nye > 9 ? "9+" : nye.ToString();
+    }
+
+    private void Klokke_Click(object sender, RoutedEventArgs e)
+    {
+        var panel = new Notifications.NotificationPopup();
+
+        var pop = new System.Windows.Controls.Primitives.Popup
+        {
+            PlacementTarget = KlokkeKnap,
+            Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom,
+            HorizontalOffset = -400,
+            VerticalOffset = 6,
+            StaysOpen = false,
+            AllowsTransparency = true,
+            PopupAnimation = System.Windows.Controls.Primitives.PopupAnimation.Fade,
+            Child = panel
+        };
+
+        panel.HistorikOenskes += () =>
+        {
+            pop.IsOpen = false;
+            if (Window.GetWindow(this) is MainWindow hoved) hoved.GaaTilHistorik();
+        };
+
+        pop.IsOpen = true;
+
+        // Markeres som set, NAAR den aabnes — ikke naar appen starter. En
+        // besked, man aldrig naaede at se, skal ikke forsvinde, fordi man
+        // genstartede.
+        Notifikationer.MarkerSet();
     }
 }

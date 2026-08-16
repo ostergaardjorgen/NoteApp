@@ -115,6 +115,43 @@
         <Button x:Name="StopKnap" Content="■ Stop og gem" Click="Stop_Click" Padding="18,9"
                 Visibility="Collapsed" Background="{StaticResource Optager}" Foreground="#FFFFFFFF"
                 BorderThickness="0" FontWeight="SemiBold" />
+
+        <!-- ========================= Klokken =========================
+             Den ligger i topbjælken, fordi den er det ENESTE sted i appen, der
+             altid er fremme. Et referat af et langt møde tager fyrre minutter,
+             og uden en besked skal man selv huske at kigge efter — så opdager
+             man det dagen efter. -->
+        <Button x:Name="KlokkeKnap" Click="Klokke_Click" Margin="14,0,0,0"
+                Padding="0" BorderThickness="0" Background="Transparent" Cursor="Hand"
+                ToolTip="Beskeder om det, appen har lavet færdigt">
+          <Button.Template>
+            <ControlTemplate TargetType="Button">
+              <Border x:Name="flade" CornerRadius="8" Background="Transparent" Padding="9,7">
+                <ContentPresenter />
+              </Border>
+              <ControlTemplate.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                  <Setter TargetName="flade" Property="Background" Value="#FF2C323D" />
+                </Trigger>
+              </ControlTemplate.Triggers>
+            </ControlTemplate>
+          </Button.Template>
+
+          <Grid>
+            <TextBlock Text="🔔" FontSize="17" VerticalAlignment="Center" />
+
+            <!-- Tallet sidder PÅ klokken. En klokke uden tal siger, at der
+                 findes beskeder; en med tal siger, at der er nye — og det er
+                 forskellen på at kigge og at lade være. -->
+            <Border x:Name="KlokkeBadge" Background="{StaticResource Optager}" CornerRadius="8"
+                    MinWidth="16" Height="16" Padding="4,0" Visibility="Collapsed"
+                    HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-5,-7,0">
+              <TextBlock x:Name="KlokkeTal" FontSize="10" FontWeight="SemiBold"
+                         Foreground="#FFFFFFFF" HorizontalAlignment="Center"
+                         VerticalAlignment="Center" />
+            </Border>
+          </Grid>
+        </Button>
       </StackPanel>
     </Grid>
   </Border>

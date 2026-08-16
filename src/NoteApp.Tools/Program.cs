@@ -27,6 +27,7 @@ try
         "score"     => Score(args.Skip(1).ToArray()),
         "traening"  => Traening(args.Skip(1).ToArray()),
         "llmret"    => await LlmRet(args.Skip(1).ToArray()),
+        "forventning" => Forventning(args.Skip(1).ToArray()),
         "mikrofontest" => Mikrofontest(args.Skip(1).ToArray()),
         "recover"   => Genopret(),
         "hjaelp" or "--help" or "-h" => Hjælp(),
@@ -397,7 +398,11 @@ static async Task<int> Udkast(string[] a)
         if (p.Message != sidstBesked) { sidstBesked = p.Message; Console.WriteLine($"  {p.Message}"); }
     });
 
-    var r = await runner.RunAsync(model, skabelon, skabelon.Render(felter), fremdrift);
+    // Samme vej som appen: Referatbygger deler lange moeder op, saa de kan
+    // ligge paa grafikkortet. Koerer CLI'en noget andet end appen, maaler man
+    // paa noget, brugeren ikke faar.
+    var bygger = new NoteApp.Core.Llm.Referatbygger(runner);
+    var r = await bygger.ByggAsync(model, skabelon, felter, fremdrift);
 
     var sti = NoteApp.Core.Llm.DraftStore.Save(moedeMappe, skabelon, r);
 
@@ -922,6 +927,67 @@ static async Task<int> LlmRet(string[] a)
         File.WriteAllText(sti, efter, new System.Text.UTF8Encoding(false));
         Console.WriteLine($"Gemt       : {sti}");
     }
+
+    return 0;
+}
+
+/// <summary>
+/// Hvor mange blokke et møde deles i, og hvor lang tid det cirka tager.
+///
+/// Findes for at kunne efterprøve tallet, appen viser, FØR man sætter en kørsel
+/// i gang. Et skøn, der kun kan ses ét sted, kan man ikke opdage er forkert.
+/// </summary>
+static int Forventning(string[] a)
+{
+    if (a.Length == 0)
+    {
+        Console.WriteLine("Brug: noteapp forventning <mappe-eller-tekstfil>");
+        return 0;
+    }
+
+    var fil = Directory.Exists(a[0])
+        ? Directory.GetFiles(a[0], "*.txt")
+            .Where(f => !f.EndsWith(".raa.txt", StringComparison.OrdinalIgnoreCase))
+            .OrderByDescending(File.GetLastWriteTimeUtc).FirstOrDefault()
+        : a[0];
+
+    if (fil is null || !File.Exists(fil)) { Console.Error.WriteLine("Fandt ingen tekst."); return 1; }
+
+    var tekst = File.ReadAllText(fil, System.Text.Encoding.UTF8);
+    var (blokke, skoen) = NoteApp.Core.Llm.Referatbygger.Forventning(tekst);
+
+    Console.WriteLine($"Tekst   : {tekst.Length} tegn (~{tekst.Length / 3} tokens)");
+    Console.WriteLine($"Blokke  : {blokke}");
+    Console.WriteLine($"Skoen   : {skoen.TotalMinutes:0} minutter");
+    Console.WriteLine(blokke == 1
+        ? "Koeres i een omgang — moedet er kort nok til at ligge i modellen paa een gang."
+        : "Deles op, saa hver blok kan ligge helt paa grafikkortet.");
+
+    // Grafikkortet lige nu. Er der optaget plads, koerer modellen delvist paa
+    // processoren, og skoennet ovenfor holder ikke.
+    Console.WriteLine();
+
+    var kort = Grafikhukommelse.Laes();
+    if (kort is null)
+    {
+        Console.WriteLine("Grafikkort: kan ikke aflaeses (ingen nvidia-smi).");
+        return 0;
+    }
+
+    Console.WriteLine($"Grafikkort: {Grafikhukommelse.Gigabyte(kort.Value.Fri)} ledigt " +
+                      $"af {Grafikhukommelse.Gigabyte(kort.Value.Ialt)}");
+
+    var model = NoteApp.Core.Llm.LlmRunner.InstalledModels().FirstOrDefault();
+    if (model is null) return 0;
+
+    var plads = Grafikhukommelse.HarPlads(new FileInfo(model).Length);
+    if (plads is null) return 0;
+
+    Console.WriteLine($"Modellen kraever: {Grafikhukommelse.Gigabyte(plads.Value.Kraevet)}");
+    Console.WriteLine(plads.Value.Plads
+        ? "Der er plads — modellen kommer helt paa kortet."
+        : "IKKE plads. En del af modellen lander paa processoren, og saa tager det " +
+          "cirka fire gange saa lang tid. Luk video og andet, der bruger kortet.");
 
     return 0;
 }

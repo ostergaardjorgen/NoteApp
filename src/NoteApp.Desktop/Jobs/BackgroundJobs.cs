@@ -1,4 +1,4 @@
-using System.IO;
+﻿using System.IO;
 using System.Windows;
 using NoteApp.Core;
 using NoteApp.Core.Documents;
@@ -13,7 +13,8 @@ namespace NoteApp.Desktop.Jobs;
 /// — under modelindlæsningen ved ingen, hvor lang tid der er tilbage, og en
 /// bjælke, der står på nul i et halvt minut, ligner en, der har hængt sig.
 /// </summary>
-public sealed record JobStatus(string Hvad, string Besked, bool Kører, double Procent = -1);
+public sealed record JobStatus(string Hvad, string Besked, bool Kører, double Procent = -1,
+                               string Detaljer = "");
 
 /// <summary>
 /// De lange kørsler, der skal overleve, at man går et andet sted hen i appen.
@@ -73,17 +74,42 @@ public static class BackgroundJobs
         _afbryd = new CancellationTokenSource();
         HvadKører = $"«{skabelonInfo.Title}»";
 
+        var startet = DateTime.Now;
+        _detaljer =
+            $"«{skabelonInfo.Title}» · skabelon: {skabelon.Name} · startet {startet:HH:mm} · " +
+            "lander under «Dokumenter»";
+
         Meld("Starter sprogmodellen …");
 
         try
         {
+            // Tiden staar i beskeden. En besked, der har staaet uaendret i ti
+            // minutter, kan ikke skelnes fra en, der haenger — med et ur, der
+            // taeller, kan den.
             var fremdrift = new Progress<LlmProgress>(p =>
-                Meld(p.Ord > 0
-                        ? $"{p.Ord} ord skrevet · {p.Forloebet.TotalSeconds:0} sek"
-                        : p.Message,
-                     procent: p.Ord > 0 ? p.Percent : -1));
-            var runner = new LlmRunner(cli);
-            var r = await runner.RunAsync(model, skabelon, skabelon.Render(felter), fremdrift, _afbryd.Token);
+            {
+                var gaaet = DateTime.Now - startet;
+                var ur = gaaet.TotalMinutes < 1
+                    ? $"{gaaet.TotalSeconds:0} sek"
+                    : $"{gaaet.TotalMinutes:0} min";
+
+                var besked = p.Ord > 0
+                    ? $"{p.Ord} ord skrevet · {ur}"
+                    : $"{p.Message} · {ur}";
+
+                Meld(besked, procent: p.Ord > 0 ? p.Percent : p.Percent > 0 ? p.Percent : -1);
+            });
+
+            // Referatbygger frem for LlmRunner direkte. Den deler lange møder
+            // op, saa de kan ligge paa grafikkortet — et 61-minutters moede tog
+            // 28 minutter i een koersel, fordi modellen blev skubbet over paa
+            // processoren. Korte moeder koerer den stadig i een omgang.
+            //
+            // Brugeren ser ikke opdelingen: fremdriften er eet tal, og
+            // beskederne siger hvad der sker, ikke hvilket stykke der arbejdes
+            // paa.
+            var bygger = new Referatbygger(new LlmRunner(cli));
+            var r = await bygger.ByggAsync(model, skabelon, felter, fremdrift, _afbryd.Token);
 
             // Udkastet gemmes raat ved siden af optagelsen — arbejdsdokumentet.
             // Dokumentet er det, man sender videre.
@@ -95,6 +121,7 @@ public static class BackgroundJobs
             Historik.Skriv(HaendelseType.Dokument, $"Dokument oprettet: {skabelonInfo.Title}",
                 $"Skabelon «{skabelon.Name}» · {r.ResponseTokens} tokens · {r.TokensPerSecond:0.0}/sek",
                 Udfald.Fuldført, skabelonInfo.Model, odt, r.Elapsed.TotalSeconds);
+            Notifikationer.Meld();
 
             Meld($"Færdigt: {Path.GetFileName(odt)} · {r.Elapsed.TotalSeconds:0} sek", kører: false);
             DokumentFærdigt?.Invoke(skabelonInfo.Id);
@@ -103,6 +130,7 @@ public static class BackgroundJobs
         {
             Historik.Skriv(HaendelseType.Dokument, $"Dokument afbrudt: {skabelonInfo.Title}",
                 "Brugeren stoppede kørslen", Udfald.Afbrudt, skabelonInfo.Model);
+            Notifikationer.Meld();
 
             Meld("Afbrudt. Der blev ikke gemt noget dokument.", kører: false);
         }
@@ -110,6 +138,7 @@ public static class BackgroundJobs
         {
             Historik.Skriv(HaendelseType.Dokument, $"Dokument fejlede: {skabelonInfo.Title}",
                 ex.Message, Udfald.Fejlet, skabelonInfo.Model);
+            Notifikationer.Meld();
 
             Meld($"Dokumentet blev ikke lavet: {ex.Message}", kører: false);
 
@@ -125,6 +154,19 @@ public static class BackgroundJobs
         }
     }
 
+    /// <summary>
+    /// Hvad kørslen laver, hvornår den begyndte, og hvor resultatet lander.
+    ///
+    /// Det står fast under fremdriftslinjen, mens der arbejdes. Grunden er
+    /// målt: en kørsel, der var skønnet til ti minutter, tog femogtyve — og
+    /// uden noget at holde fast i så det ud, som om den var gået i stå.
+    ///
+    /// Starttidspunktet er det vigtigste af det. Med det kan man selv se, at
+    /// der ER gået fire minutter og ikke fyrre, og det er dét spørgsmål, man
+    /// stiller, når man har kigget væk et stykke tid.
+    /// </summary>
+    private static string _detaljer = "";
+
     private static void Meld(string besked, bool kører = true, double procent = -1) =>
-        Ændret?.Invoke(new JobStatus("Dokument", besked, kører, procent));
+        Ændret?.Invoke(new JobStatus("Dokument", besked, kører, procent, _detaljer));
 }
