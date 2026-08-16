@@ -53,6 +53,9 @@ static int Hjælp()
           transskriber  Transskriberer en optagelse:
                       noteapp transskriber <mappe-eller-wav> [--cpu]
           recover   Samler møder der aldrig blev lukket ordentligt
+          udkast    Laver et referat med en lokal model — intet forlader maskinen
+          sky       Laver et referat hos en europæisk leverandør:
+                      SENDER UDSKRIFTEN UD AF MASKINEN. Se «noteapp sky».
 
         Dine data ligger i C:\AppNoter — eller den mappe, du har valgt i
         appen under Filer og backup. Miljøvariablen NOTEAPP_DATA vinder over
