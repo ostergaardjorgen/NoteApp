@@ -90,6 +90,15 @@ public sealed class MeetingMetadata
     /// </summary>
     public double? LanguageProbability { get; set; }
 
+    /// <summary>
+    /// Brugerens egen mappe. Null eller tom betyder «uden mappe».
+    ///
+    /// Findes, fordi kundemateriale ikke skal ligge blandet med interne møder
+    /// i én lang liste. Det er et felt og ikke en rigtig mappe på disken — se
+    /// <see cref="NoteApp.Core.Mapper"/> for hvorfor.
+    /// </summary>
+    public string? Mappe { get; set; }
+
     public Dictionary<string, string> Tracks { get; init; } = new();
 }
 

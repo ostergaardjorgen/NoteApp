@@ -143,7 +143,11 @@ public partial class MainWindow : Window
         // eneste sted, de kan ses fra — derfor bor den i vinduet og ikke i en
         // skærm, der bliver bygget om, hver gang man skifter menupunkt.
         BackgroundJobs.Ændret += VisJob;
-        BackgroundJobs.DokumentFærdigt += id => _færdigtDokument = id;
+        BackgroundJobs.DokumentFærdigt += id =>
+        {
+            _færdigtDokument = id;
+            TilbydAtAabne(id);
+        };
 
         // Optagebjælken ligger fast øverst og er den samme, uanset hvilken
         // skærm der vises. Den bygges én gang og bliver siddende — en optagelse
@@ -164,6 +168,53 @@ public partial class MainWindow : Window
             _genvej.Trykket += LynstartOptagelse;
             TilslutGenvej();
         };
+    }
+
+    /// <summary>
+    /// Siger, at dokumentet er klart, og tilbyder at åbne det.
+    ///
+    /// HVORFOR DET IKKE ER NOK MED BJÆLKEN NEDERST
+    ///
+    /// Et referat tager fra tyve sekunder til en halv time. Man laver noget
+    /// andet imens — også noget uden for appen. En knap, der dukker op i en
+    /// bjælke, man ikke kigger på, bliver fundet en time senere, hvis den
+    /// bliver fundet.
+    ///
+    /// Vinduet kommer derfor til brugeren. Det er det ene sted i appen, hvor
+    /// en afbrydelse er rigtig: man har selv sat noget i gang og ventet på det.
+    /// </summary>
+    private void TilbydAtAabne(string id)
+    {
+        // Fyres fra en baggrundstraad. Uden Dispatcher rejser WPF en
+        // InvalidOperationException i stedet for at vise noget.
+        Dispatcher.Invoke(() =>
+        {
+            var doc = NoteApp.Core.Documents.DocumentStore.LoadAll().FirstOrDefault(d => d.Id == id);
+            if (doc is null) return;
+
+            var sti = NoteApp.Core.Documents.DocumentStore.Path_(doc);
+            if (!System.IO.File.Exists(sti)) return;
+
+            var aabn = Dialogs.AppDialog.Spoerg(this,
+                "Dokumentet er klar",
+                $"«{doc.Title}» er lavet og gemt under Dokumenter.",
+                godkend: "Åbn dokumentet",
+                annuller: "Senere",
+                slags: Dialogs.Slags.Valg);
+
+            if (!aabn) return;
+
+            try
+            {
+                System.Diagnostics.Process.Start(
+                    new System.Diagnostics.ProcessStartInfo(sti) { UseShellExecute = true });
+            }
+            catch (Exception ex)
+            {
+                Dialogs.AppDialog.Vis(this, "Kunne ikke åbne dokumentet",
+                    $"{ex.Message}\n\nFilen ligger her:\n{sti}", Dialogs.Slags.Valg);
+            }
+        });
     }
 
     /// <summary>

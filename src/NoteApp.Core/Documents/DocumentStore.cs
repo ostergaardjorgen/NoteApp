@@ -45,6 +45,14 @@ public sealed class DocumentInfo
     /// <summary>Filnavnet, uden sti — mappen kan flyttes.</summary>
     public string FileName { get; init; } = "";
 
+    /// <summary>
+    /// Brugerens egen mappe. Null eller tom betyder «uden mappe».
+    ///
+    /// Det er et felt og ikke en rigtig mappe på disken — se
+    /// <see cref="NoteApp.Core.Mapper"/> for hvorfor.
+    /// </summary>
+    public string? Mappe { get; set; }
+
     public string Markdown { get; set; } = "";
 }
 
@@ -176,11 +184,20 @@ public static class DocumentStore
     /// Et filnavn, der kan læses af et menneske og skrives af Windows.
     /// Tidsstemplet sikrer, at to referater af samme møde ikke overskriver
     /// hinanden — man kan have god grund til at lave det om.
+    ///
+    /// SKABELONNAVNET HÆNGES IKKE PÅ. Det gjorde det før, og resultatet var
+    /// «Nyt-møde-referat-fra-Cloudworks-mødet-Mødereferat_2026-08-17_1157»:
+    /// brugeren havde allerede skrevet, hvad dokumentet var, og så kom
+    /// «Mødereferat» ovenpå en gang til. Titlen ER navnet — det er den, man
+    /// skrev i feltet, og den skal ikke laves om bagefter.
+    ///
+    /// <paramref name="skabelon"/> står stadig i signaturen, fordi den bruges
+    /// som nødnavn, når titlen er tom.
     /// </summary>
     public static string FileNameFor(string titel, string skabelon)
     {
         var rent = new StringBuilder();
-        foreach (var c in $"{titel} - {skabelon}")
+        foreach (var c in titel.Trim().Length > 0 ? titel : skabelon)
         {
             if (char.IsLetterOrDigit(c) || c is 'æ' or 'ø' or 'å' or 'Æ' or 'Ø' or 'Å') rent.Append(c);
             else if (rent.Length > 0 && rent[^1] != '-') rent.Append('-');
