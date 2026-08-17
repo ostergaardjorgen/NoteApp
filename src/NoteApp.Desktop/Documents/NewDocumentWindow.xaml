@@ -73,6 +73,16 @@
           </CheckBox>
           <TextBlock x:Name="SkyTekst" FontSize="12" Margin="24,6,0,0" TextWrapping="Wrap"
                      LineHeight="18" Foreground="{StaticResource TekstMeget}" />
+
+          <!-- Uden noegle staar der ikke et slukket hak, men en vej ind. Et
+               hak, man ikke kan saette, er en reklame; en knap er et tilbud. -->
+          <Button x:Name="SkySaetOp" Content="Sæt europæisk bearbejdning op …"
+                  Click="SkySaetOp_Click" HorizontalAlignment="Left"
+                  Padding="12,7" Visibility="Collapsed" />
+          <TextBlock x:Name="SkySaetOpTekst" Visibility="Collapsed" FontSize="12"
+                     Margin="2,8,0,0" TextWrapping="Wrap" LineHeight="18"
+                     Foreground="{StaticResource TekstMeget}"
+                     Text="Referatet kan sendes til en europæisk leverandør, som skriver det på under et minut i stedet for en halv time. Optagelse og udskrift bliver på maskinen uanset hvad." />
         </StackPanel>
       </Border>
     </StackPanel>

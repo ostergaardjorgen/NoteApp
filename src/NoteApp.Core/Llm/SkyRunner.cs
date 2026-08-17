@@ -141,6 +141,24 @@ public static class SkyNoegle
         return null;
     }
 
+    /// <summary>
+    /// Gemmer nøglen i datamappen.
+    ///
+    /// Filen ligger uden for git-checkouten pr. konstruktion — se
+    /// <see cref="UserDataPaths"/>. Der findes ingen .gitignore-fejl, der kan
+    /// lække den, fordi den ikke er inde i arbejdstræet til at begynde med.
+    /// </summary>
+    public static void Gem(string noegle)
+    {
+        Directory.CreateDirectory(UserDataPaths.Root);
+        File.WriteAllText(Fil, noegle.Trim(), new UTF8Encoding(false));
+    }
+
+    public static void Slet()
+    {
+        try { if (File.Exists(Fil)) File.Delete(Fil); } catch (IOException) { }
+    }
+
     /// <summary>Beskeden, når der ikke er nogen nøgle. Skal kunne handles på.</summary>
     public static string Vejledning =>
         $"Der er ingen API-nøgle til Mistral.\n\n" +

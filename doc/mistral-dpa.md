@@ -49,30 +49,65 @@ tilgængelige på EU-endepunktet.
 
 ## Det, der kræver præcision i formuleringen
 
-### Underdatabehandlerne
+### Underdatabehandlerne — hele listen
 
-Fra Trust Center, 17-08-2026:
+Der er **25**. Fra Trust Center, 17-08-2026. Her er de, der kan røre et
+mødereferat sendt til `api.eu.mistral.ai`:
 
-| Underdatabehandler | Rolle | Placering |
-|---|---|---|
-| Mistral Compute | Infrastruktur | Frankrig |
-| Microsoft Inc. | Infrastruktur | Sverige, **Norge** |
-| Google LLC | Infrastruktur | Holland, Belgien, **USA (US-endepunktet)** |
-| Ory Corp. | Godkendelse af brugere | Belgien, Tyskland |
+| Underdatabehandler | Rolle | Placering | Ejerskab |
+|---|---|---|---|
+| Mistral Compute | Infrastruktur | Frankrig | fransk |
+| Microsoft Inc. | Infrastruktur (Azure) | Sverige, **Norge** | **amerikansk** |
+| CoreWeave Inc. | Inferens | EØS | **amerikansk** |
+| Cloudflare Inc. | Trafikstyring (CDN) | **Verdensomspændende** | **amerikansk** |
+| Kong Inc. | API-sikkerhed | EØS | **amerikansk** |
+| Sentry | Fejlhåndtering | EØS | **amerikansk** |
+| Wiz, CrowdStrike | Sikkerhed | EØS (CrowdStrike også USA) | **amerikanske** |
+| Ory Corp. | Godkendelse af brugere | Belgien, Tyskland | tysk |
 
-To ting at bemærke:
+Og på kontoen, uden om selve referatet: Stripe (betaling, **USA**), Twilio
+(telefonbekræftelse, **USA**), Lago og Intercom og Resend (Irland).
 
-**Norge er EØS, ikke EU.** «100 % europæisk» er rigtigt. «100 % EU» ville ikke
-være det.
+**Google LLC** står med Holland, Belgien og «USA (US-endepunktet)», og
+produktkolonnen siger «Studio/API (US API)». Deres USA-rolle er altså knyttet
+til det amerikanske endepunkt, som vi ikke bruger.
 
-**Google LLC og Microsoft Inc. er amerikansk ejede** — også når serverne står i
-Sverige og Holland. Diskussionen om CLOUD Act gælder derfor stadig. Deres
-USA-placering er knyttet til US-endepunktet, som vi ikke bruger, men ejerskabet
-forsvinder ikke af, at hardwaren står i Europa.
+Ikke i vores vej: Brave (websøgning), Blackforest Labs (billeder), E2B
+(kodefortolker), Merge (Vibe-connectors), OVH/Vultr/Megaport/Backblaze (Vibe
+Code Web).
 
-Vil man kunne sige «ingen amerikansk virksomhed rører data», holder det ikke.
-Vil man sige «bearbejdningen sker i Europa hos en europæisk leverandør», holder
+### Hvad det betyder — og hvad det ikke betyder
+
+**Er problemet kun det globale endepunkt? Nej.**
+
+Det globale endepunkt afgør, hvor bearbejdningen GEOGRAFISK sker, og det er en
+reel og vigtig forskel. Men amerikansk EJEDE virksomheder er i kæden også på
+EU-endepunktet: Microsoft driver infrastrukturen i Sverige, CoreWeave leverer
+inferens i EØS, Cloudflare styrer trafikken.
+
+Det er ikke særligt for Mistral — det er sådan set hele den europæiske
+cloud-virkelighed. Men det betyder, at der er tre forskellige påstande, og kun
+de to første holder:
+
+| Påstand | Holder? |
+|---|---|
+| «Bearbejdningen sker i Europa» | **Ja** — med EU-endepunktet |
+| «Leverandøren er europæisk» | **Ja** — Mistral er fransk |
+| «Ingen amerikansk virksomhed er involveret» | **Nej** |
+
+**Norge er desuden EØS, ikke EU.** «Europæisk» er rigtigt; «EU» ville ikke være
 det.
+
+### Hvis den tredje påstand skal holde
+
+Så er Mistral ikke vejen — og det er ikke sikkert, nogen vej er det. Det ville
+kræve en leverandør, der kører åbne modeller på egen europæisk-ejet
+infrastruktur: Scaleway (fransk), IONOS eller STACKIT (tyske), OVHcloud
+(fransk). De kører åbne vægte frem for egne frontier-modeller, så det ville
+koste kvalitet — hvor meget er ikke målt.
+
+Det er en beslutning om, hvor stramt «ægte EU» skal forstås, ikke en teknisk
+detalje.
 
 ### Privatlivspolitikkens forbehold
 

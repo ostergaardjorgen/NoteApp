@@ -474,7 +474,14 @@ public partial class TranscribeView : UserControl
         var cli = LlmRunner.FindCli();
         var modeller = LlmRunner.InstalledModels();
 
-        if (cli is null || modeller.Count == 0)
+        // Mangler den lokale model, er der stadig en vej: den europaeiske
+        // bearbejdning kraever ingen model paa maskinen. Blokeres der her,
+        // kommer en bruger, der kun vil bruge den vej, aldrig frem til
+        // opsaetningen - og faar at vide, at han mangler noget, han ikke
+        // skal bruge.
+        var harSkyNoegle = NoteApp.Core.Llm.SkyNoegle.Hent() is not null;
+
+        if ((cli is null || modeller.Count == 0) && !harSkyNoegle)
         {
             Dialogs.AppDialog.Vis(Window.GetWindow(this), "Mangler en sprogmodel", "Der er ingen sprogmodel klar endnu.\n\n" +
                 "Et referat laves af en model, der kører her på maskinen. Hent en under «AI-modeller» — " +
@@ -572,6 +579,17 @@ public partial class TranscribeView : UserControl
             if (!sendOk) return;
 
             Jobs.BackgroundJobs.LavDokumentISkyen(skyModel, skabelon, felter, info, valgt.Mappe);
+            return;
+        }
+
+        // Herfra og ned handler alt om at koere en model paa DENNE maskine.
+        // Er der ingen, er skyvejen ovenfor den eneste - og saa skal det
+        // siges frem for at fejle paa en tom filsti.
+        if (cli is null || model.Length == 0)
+        {
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Der er ingen model på maskinen",
+                "Sæt hakket ved «Lav referatet i Europa», eller hent en sprogmodel under " +
+                "«AI-modeller», hvis referatet skal laves lokalt.", Dialogs.Slags.Valg);
             return;
         }
 

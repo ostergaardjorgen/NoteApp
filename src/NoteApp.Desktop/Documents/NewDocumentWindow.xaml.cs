@@ -42,15 +42,8 @@ public partial class NewDocumentWindow : Window
         // Tilvalget vises kun, naar der ER en noegle. Uden en noegle ville et
         // slukket hak vaere en reklame for noget, brugeren ikke kan bruge - og
         // en paamindelse om skyen hver gang man laver et referat.
-        if (SkyNoegle.Hent() is not null)
-        {
-            SkyBoks.Visibility = Visibility.Visible;
-
-            // Teksten skal staa der fra begyndelsen, ogsaa naar hakket er
-            // slukket. Et tomt felt under et slukket hak siger ingenting om,
-            // hvad hakket goer.
-            Sky_Skiftet(this, new RoutedEventArgs());
-        }
+        SkyBoks.Visibility = Visibility.Visible;
+        VisSkyTilstand();
 
         Skabeloner.ItemsSource = skabeloner;
         if (skabeloner.Count > 0) Skabeloner.SelectedIndex = 0;
@@ -85,6 +78,41 @@ public partial class NewDocumentWindow : Window
             FeltTitel.Text = $"{_optagelse} — {t.Name}";
 
         Valgt = t;
+    }
+
+    /// <summary>
+    /// Viser enten hakket eller vejen ind, alt efter om der er en nøgle.
+    /// Kaldes igen efter opsætningen, så vinduet ikke skal lukkes og åbnes.
+    /// </summary>
+    private void VisSkyTilstand()
+    {
+        var harNoegle = SkyNoegle.Hent() is not null;
+
+        SkyHak.Visibility = harNoegle ? Visibility.Visible : Visibility.Collapsed;
+        SkyTekst.Visibility = harNoegle ? Visibility.Visible : Visibility.Collapsed;
+        SkySaetOp.Visibility = harNoegle ? Visibility.Collapsed : Visibility.Visible;
+        SkySaetOpTekst.Visibility = harNoegle ? Visibility.Collapsed : Visibility.Visible;
+
+        if (harNoegle)
+        {
+            // Teksten skal staa der fra begyndelsen, ogsaa naar hakket er
+            // slukket. Et tomt felt under et slukket hak siger ingenting om,
+            // hvad hakket goer.
+            Sky_Skiftet(this, new RoutedEventArgs());
+        }
+        else
+        {
+            // Fjernes noeglen midt i det hele, maa valget ikke blive haengende.
+            SkyHak.IsChecked = false;
+            SkyValgt = null;
+            OpretKnap.Content = "Opret dokument";
+        }
+    }
+
+    private void SkySaetOp_Click(object sender, RoutedEventArgs e)
+    {
+        new SkySetupWindow { Owner = this }.ShowDialog();
+        VisSkyTilstand();
     }
 
     /// <summary>
