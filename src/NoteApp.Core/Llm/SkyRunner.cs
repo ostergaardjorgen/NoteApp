@@ -81,6 +81,42 @@ public static class SkyKatalog
     /// </summary>
     public const decimal EuTillaeg = 1.1m;
 
+    /// <summary>Den ENESTE vært, appen må sende mødetekst til.</summary>
+    public const string TilladtVaert = "api.eu.mistral.ai";
+
+    /// <summary>
+    /// Kaster, hvis en adresse ikke er det europæiske endepunkt.
+    ///
+    /// HVORFOR DET IKKE ER NOK, AT KONSTANTEN OVENFOR ER RIGTIG
+    ///
+    /// Den var forkert indtil 17-08-2026. Der stod api.mistral.ai — det, der
+    /// står i alle kodeeksempler — og alt virkede: kaldene gik igennem,
+    /// målingerne var gode, og bearbejdningen kunne være foregået hvor som
+    /// helst. Ingen test slog fejl, fordi der ikke var noget at slå fejl på.
+    ///
+    /// En konstant, der er rigtig i dag, er ikke det samme som en, der bliver
+    /// ved med at være det. Den her kontrol gør et skift til det globale eller
+    /// det amerikanske endepunkt til noget, der stopper med en fejl frem for
+    /// noget, der bare sker.
+    ///
+    /// Skal appen en dag kunne bruge en anden leverandør, er det ikke DEN her
+    /// linje, der skal rettes — det er et bevidst valg om en ny leverandør,
+    /// og så skal både den, priserne og teksten til brugeren følge med.
+    /// </summary>
+    public static void KraevEuropa(string url)
+    {
+        var vaert = Uri.TryCreate(url, UriKind.Absolute, out var u) ? u.Host : "";
+
+        if (!vaert.Equals(TilladtVaert, StringComparison.OrdinalIgnoreCase))
+            throw new InvalidOperationException(
+                $"Afvist: appen sender kun til det europæiske endepunkt.\n\n" +
+                $"Forsøgt: {(vaert.Length > 0 ? vaert : url)}\n" +
+                $"Tilladt: {TilladtVaert}\n\n" +
+                "Mistrals globale endepunkt (api.mistral.ai) forpligter sig ikke på nogen " +
+                "geografi, og det amerikanske ligger i USA. Ingen af dem må bruges — " +
+                "løftet om europæisk bearbejdning står og falder med det.");
+    }
+
     public static readonly IReadOnlyList<SkyModel> Kendte = new[]
     {
         new SkyModel(
@@ -299,6 +335,11 @@ public sealed class SkyRunner
     private async Task<HttpResponseMessage> SendAsync(
         HttpMethod metode, string url, string? json, CancellationToken ct)
     {
+        // Kontrollen ligger HER, paa det ene sted alt gaar igennem, frem for
+        // ved kaldstederne. Et nyt kaldsted kan glemme en kontrol; det kan
+        // ikke undgaa den her.
+        SkyKatalog.KraevEuropa(url);
+
         using var anmodning = new HttpRequestMessage(metode, url);
         anmodning.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _noegle);
         anmodning.Headers.UserAgent.ParseAdd("NoteApp");

@@ -449,6 +449,24 @@ static async Task<int> Sky(string[] a)
         Console.WriteLine($"  Endepunkt: {NoteApp.Core.Llm.SkyKatalog.Endpoint}");
         Console.WriteLine($"             EU-bundet. Priserne nedenfor er med " +
                           $"{(NoteApp.Core.Llm.SkyKatalog.EuTillaeg - 1) * 100:0}% EU-tillæg.");
+
+        // SPAERRINGEN EFTERPROEVES, den vises ikke bare som en paastand.
+        // De to adresser her er dem, der ville vaere lette at komme til at
+        // bruge: den globale staar i alle kodeeksempler, og den amerikanske
+        // ligner den europaeiske paa eet bogstav.
+        foreach (var forsoeg in new[] { "https://api.mistral.ai/v1/models",
+                                        "https://api.us.mistral.ai/v1/models" })
+        {
+            try
+            {
+                NoteApp.Core.Llm.SkyKatalog.KraevEuropa(forsoeg);
+                Console.WriteLine($"  ADVARSEL : {new Uri(forsoeg).Host} blev IKKE afvist. Spærringen virker ikke.");
+            }
+            catch (InvalidOperationException)
+            {
+                Console.WriteLine($"  Spærret  : {new Uri(forsoeg).Host}");
+            }
+        }
         Console.WriteLine();
         Console.WriteLine("Modeller:");
         foreach (var m in NoteApp.Core.Llm.SkyKatalog.Kendte)
