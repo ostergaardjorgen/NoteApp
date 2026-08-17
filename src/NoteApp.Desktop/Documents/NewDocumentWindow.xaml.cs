@@ -56,11 +56,15 @@ public partial class NewDocumentWindow : Window
             ? null
             : SkyKatalog.Kendte.FirstOrDefault(m => m.Id == "mistral-medium") ?? SkyKatalog.Kendte[0];
 
-        // Hvor referatet laves, staar som en OPLYSNING i een linje - ikke som
-        // et valg. Den, der har sat det op, skal kunne se det uden at aabne
-        // indstillinger; den, der ikke har, skal ikke mindes om det.
-        Kilde.Text = $"Bygges på «{optagelsesTitel}». Gemmes som Word-dokument (.docx)." +
-                     (SkyValgt is null ? "" : $" Referatet laves i Europa ({SkyValgt.Leverandoer}).");
+        // HER STOD "Referatet laves i Europa (Mistral AI)".
+        //
+        // Det ryger, og ikke kun fordi det fylder. Det kan VILDLEDE: skrevet
+        // paa hvert dokument ligner det noget, der varierer fra gang til gang.
+        // Det goer det ikke. Loesningen ER lokal transskription efterfulgt af
+        // bearbejdning i EU - det er arkitekturen, ikke en egenskab ved det
+        // enkelte referat. Man ved det, naar man vaelger loesningen, og faar
+        // det bekraeftet i opsaetningen.
+        Kilde.Text = $"Bygges på «{optagelsesTitel}». Gemmes som Word-dokument (.docx).";
 
         Skabeloner.ItemsSource = skabeloner;
         if (skabeloner.Count > 0) Skabeloner.SelectedIndex = 0;

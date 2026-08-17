@@ -222,12 +222,19 @@ public partial class MainWindow : Window
     /// </summary>
     public void OpdaterDataLoefte()
     {
-        // Kort. Den staar i en sidebjaelke, ikke i en aftale — og den laenge
-        // udgave fyldte fire linjer om noget, der allerede staar i
-        // opsaetningen og under AI-modeller.
+        // DET ENE STED, ARKITEKTUREN HOERER HJEMME.
+        //
+        // Den staar her frem for i dokumentdialogen, fordi det er en egenskab
+        // ved INSTALLATIONEN, ikke ved det enkelte referat. Skrevet paa hvert
+        // dokument ligner det noget, der varierer; skrevet her, hvor "Dine
+        // data" i forvejen staar, er det det, det er.
+        //
+        // Begge halvdele skal med. "Optagelser bliver her" alene fortier den
+        // ene halvdel af loesningen, og en halv sandhed om databehandling er
+        // den slags, der bliver opdaget af en anden end en selv.
         DataLoefte.Text = NoteApp.Core.Llm.SkyNoegle.Hent() is null
             ? "Intet forlader denne pc. Appen har ingen netværkskald."
-            : "Optagelser og udskrifter forlader aldrig denne pc.";
+            : "Optagelser og udskrifter bliver på denne pc. Referater bearbejdes i EU.";
     }
 
     private void Nav_Changed(object sender, RoutedEventArgs e)
