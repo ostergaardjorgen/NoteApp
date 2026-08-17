@@ -41,10 +41,17 @@ compliance-påstand, ikke en markedsføringsvending — den skal stå på skrift
 leverandøren, før den står i appen.
 
 **Hvorfor:** Den lokale 8B-model rammer et loft, der ikke er til at prompte sig
-ud af. Målt på et rigtigt møde mod et facit lavet af en stor model: 68 % af
-facits længde, 26 af 34 tal, og **35 opfundne navne** — «Entropic» for
-Anthropic, «Nomada» for Omada, «Savion», «Healthspot». Ordet «Qwen3» endte i
-selve referatet.
+ud af. Målt på et rigtigt møde mod et facit lavet af en stor model: 66 % af
+facits længde, 10 af 34 tal fundet, og omkring **ni opfundne navne** —
+«Entropic» for Anthropic, «Nomada» for Omada, «Savion», «Healthspot»,
+«BioTrust», «Joachim», «Peng».
+
+**RETTELSE 17-08-2026.** Her stod tidligere «35 opfundne navne» og «ordet
+Qwen3 endte i selve referatet». Begge dele var forkerte, og fejlen var min
+måling, ikke modellen: bedømmelsen læste udkastets frontmatter med, hvor
+modellens eget navn står som proveniens. Facit har ingen frontmatter, så
+fejlen ramte kun den ene side af sammenligningen. Qwen3 stod aldrig i
+referatet. De ni navne ovenfor er efterprøvet i selve teksten.
 
 **Hvad det koster:** Løftet. Appen siger «Intet forlader denne pc», og det er
 hele compliance-vinklen. Sender man udskrifter afsted, gælder det ikke længere —

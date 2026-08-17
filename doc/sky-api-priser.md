@@ -3,9 +3,8 @@
 *Slået op 16-08-2026. Priserne ændrer sig — tallene skal kontrolleres, før de
 bruges til noget bindende.*
 
-Baggrunden er den målte begrænsning i den lokale 8B-model: 68 % af facits
-længde, 26 af 34 tal, og 35 opfundne navne. Se `roadmap.md` under «API til en
-online sprogmodel som valgfrit alternativ».
+Baggrunden er den målte begrænsning i den lokale 8B-model. Se `roadmap.md` og
+`maaling-sky.md` for, hvad de europæiske modeller så gjorde ved den.
 
 ---
 

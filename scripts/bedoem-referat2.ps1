@@ -31,6 +31,28 @@ if (-not (Test-Path $Facit))   { throw "Findes ikke: $Facit" }
 $r = Get-Content $Referat -Raw -Encoding UTF8
 $f = Get-Content $Facit   -Raw -Encoding UTF8
 
+# FRONTMATTER TAELLER IKKE MED.
+#
+# Udkast gemmes med proveniens oeverst: model, motor, temperatur, tid. Blev
+# den laest med, taltes modellens EGET navn som et opfundet navn i referatet
+# — «Qwen3», «Mistral», «Frankrig» — og maalingen anklagede modellerne for en
+# fejl, de ikke havde lavet. Det kostede en forkert konklusion i doc/roadmap.md,
+# der stod i to dage, foer den blev opdaget.
+#
+# Facit har ingen frontmatter, saa fejlen ramte kun den ene side af
+# sammenligningen. Det er den slags, der ikke ser forkert ud i et tal.
+function UdenFrontmatter($t) {
+    $n = $t -replace "`r`n", "`n"
+    $graenser = [regex]::Matches($n, '(?m)^---\s*$')
+    if ($graenser.Count -ge 2 -and $graenser[0].Index -le 3) {
+        return $n.Substring($graenser[1].Index + $graenser[1].Length).Trim()
+    }
+    return $n
+}
+
+$r = UdenFrontmatter $r
+$f = UdenFrontmatter $f
+
 function Ord($t) { ($t -split '\s+' | Where-Object { $_ }).Count }
 
 Write-Host ""
