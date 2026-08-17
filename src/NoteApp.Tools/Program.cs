@@ -441,7 +441,14 @@ static async Task<int> Sky(string[] a)
     {
         Console.WriteLine("SKY — bearbejdning hos en europæisk leverandør");
         Console.WriteLine();
-        Console.WriteLine($"  Nøgle : {(noegle is null ? "mangler" : "fundet (" + noegle.Length + " tegn)")}");
+        Console.WriteLine($"  Nøgle    : {(noegle is null ? "mangler" : "fundet (" + noegle.Length + " tegn)")}");
+
+        // Endepunktet skal staa her. Det er den ene oplysning, hele
+        // EU-paastanden hviler paa, og forskellen mellem api.eu.mistral.ai og
+        // api.mistral.ai kan ikke ses paa noget andet.
+        Console.WriteLine($"  Endepunkt: {NoteApp.Core.Llm.SkyKatalog.Endpoint}");
+        Console.WriteLine($"             EU-bundet. Priserne nedenfor er med " +
+                          $"{(NoteApp.Core.Llm.SkyKatalog.EuTillaeg - 1) * 100:0}% EU-tillæg.");
         Console.WriteLine();
         Console.WriteLine("Modeller:");
         foreach (var m in NoteApp.Core.Llm.SkyKatalog.Kendte)

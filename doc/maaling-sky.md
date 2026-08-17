@@ -19,7 +19,15 @@ Kør selv: `powershell -File scripts\maal-sky.ps1 -Moede <mødemappe>`
 | Af facits 34 tal fundet | 10 | **23** | 20 | 34 |
 | Opfundne navne | ~9 | **0** | **0** | — |
 | Tid | 59 min | **21 sek** | 58 sek | — |
-| Pris | 0 kr. | 0,18 kr. | **0,04 kr.** | — |
+| Pris | 0 kr. | 0,21 kr. | **0,05 kr.** | — |
+
+*Priserne er på EU-endepunktet, som koster 10 % mere end det globale. Se
+`mistral-dpa.md` — det globale endepunkt forpligter sig ikke på nogen geografi,
+og de 2 øre er prisen for at kunne sige det, vi siger.*
+
+**Bemærk variationen mellem kørsler.** Den samme udskrift kørt to gange gav
+101 % og 111 % længde hos Medium. Tallene i tabellen er én kørsel, ikke et
+gennemsnit — retningen er entydig, men en enkelt decimal er det ikke.
 
 De to «fundet»-rækker tæller, hvor meget af facits indhold der er nået med —
 ikke hvor mange navne udkastet indeholder i alt. Det sidste ville belønne en
@@ -99,15 +107,13 @@ efterprøvet.
 
 ## Det, der stadig mangler, før budskabet må bruges
 
-Budskabet er: **optagelse og transskription 100 % lokalt, bearbejdning af
-indhold og dokumentskabeloner 100 % europæisk.**
+Målingen viser, at bearbejdning i Europa kan lade sig gøre uden at gå på
+kompromis med kvaliteten — den er tværtimod bedre end den lokale.
 
-Målingen viser, at anden halvdel kan lade sig gøre uden at gå på kompromis med
-kvaliteten — den er tværtimod bedre end den lokale. Men to ting skal på skrift
-fra Mistral, før påstanden må stå i appen:
+Vilkårene er gennemgået i `mistral-dpa.md`. Kort fortalt: databehandleraftalen
+gælder automatisk, leverandøren er fransk, og EU-endepunktet binder
+bearbejdningen til Europa. Det, der krævede en rettelse i koden, var, at vi
+kaldte det globale endepunkt, som ikke forpligter sig på nogen geografi.
 
-1. **Hosting i EU** for det API, der faktisk kaldes.
-2. **Databehandleraftale**, og at data fra den valgte plan ikke bruges til
-   træning. Gratisplanen «Experiment» skal især efterses her.
-
-«100 % europæisk» er en compliance-påstand, ikke en markedsføringsvending.
+Den formulering, der kan dokumenteres hele vejen, står i `mistral-dpa.md` under
+«Anbefalet formulering».

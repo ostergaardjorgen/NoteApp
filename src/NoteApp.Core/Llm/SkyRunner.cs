@@ -31,9 +31,13 @@ public sealed record SkyModel(
     /// <summary>
     /// Hvad én kørsel kostede, i dollar. Regnet på de tokens, leverandøren
     /// selv oplyser — ikke på et skøn over teksten.
+    ///
+    /// EU-tillægget på 10 % er ganget på. Uden det ville prisen se rigtig ud
+    /// og være for lav, og et budget lagt på tallet ville skride.
     /// </summary>
     public decimal Pris(int tokensInd, int tokensUd) =>
-        tokensInd / 1_000_000m * PrisIndPrMTok + tokensUd / 1_000_000m * PrisUdPrMTok;
+        (tokensInd / 1_000_000m * PrisIndPrMTok + tokensUd / 1_000_000m * PrisUdPrMTok)
+        * SkyKatalog.EuTillaeg;
 }
 
 /// <summary>
@@ -50,8 +54,32 @@ public sealed record SkyModel(
 /// </summary>
 public static class SkyKatalog
 {
-    public const string Endpoint = "https://api.mistral.ai/v1/chat/completions";
-    public const string ModelListeEndpoint = "https://api.mistral.ai/v1/models";
+    /// <summary>
+    /// EU-ENDEPUNKTET. IKKE api.mistral.ai.
+    ///
+    /// Det her er hele forskellen på, om budskabet holder. Mistral har tre
+    /// endepunkter: api.eu.mistral.ai, api.us.mistral.ai og api.mistral.ai.
+    /// Det sidste er det GLOBALE, og om det skriver Mistral ordret, at de
+    /// «ikke forpligter sig på en bestemt geografi for anmodninger sendt til
+    /// dette endepunkt».
+    ///
+    /// Her stod api.mistral.ai indtil 17-08-2026, fordi det er det, der står i
+    /// alle kodeeksempler. Det virkede fint, målingerne var gode, og
+    /// bearbejdningen kunne være foregået hvor som helst. En påstand om
+    /// europæisk bearbejdning ville have været usand — uden at noget så
+    /// forkert ud.
+    ///
+    /// EU-endepunktet koster 10 % mere. Det er prisen for at kunne sige det,
+    /// vi siger, og den er 2 øre pr. referat.
+    /// </summary>
+    public const string Endpoint = "https://api.eu.mistral.ai/v1/chat/completions";
+    public const string ModelListeEndpoint = "https://api.eu.mistral.ai/v1/models";
+
+    /// <summary>
+    /// Tillægget for at binde bearbejdningen til Europa. Ganges på alle
+    /// tokenpriser — se <see cref="SkyModel.Pris"/>.
+    /// </summary>
+    public const decimal EuTillaeg = 1.1m;
 
     public static readonly IReadOnlyList<SkyModel> Kendte = new[]
     {
