@@ -104,7 +104,7 @@ public partial class DocumentsView : UserControl
     }
 
     /// <summary>
-    /// Omdøber dokumentet. Titlen skrives ind i selve .odt-filen, så den
+    /// Omdøber dokumentet. Titlen skrives ind i selve Word-filen, så den
     /// følger med, når filen sendes videre.
     ///
     /// FILNAVNET røres ikke. Filen kan allerede være sendt eller åbnet af
@@ -171,7 +171,7 @@ public partial class DocumentsView : UserControl
         catch (Exception ex)
         {
             Dialogs.AppDialog.Vis(Window.GetWindow(this), "Kunne ikke åbne", $"Dokumentet kunne ikke åbnes.\n\n{ex.Message}\n\n" +
-                "Er der ikke noget program til .odt-filer, kan Word åbne dem — vælg «Åbn med».", Dialogs.Slags.Valg);
+                "Er der ikke noget program til .docx-filer, kan de åbnes i Word, LibreOffice eller Google Docs.", Dialogs.Slags.Valg);
         }
     }
 

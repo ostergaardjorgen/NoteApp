@@ -875,11 +875,11 @@ static int Laer(string[] a)
 }
 
 /// <summary>
-/// Laver et OpenDocument-dokument ud af et udkast, der allerede findes.
+/// Laver et Word-dokument ud af et udkast, der allerede findes.
 ///
-/// Formatet er .odt — en åben ISO-standard, som Word, LibreOffice og Google
-/// Docs alle kan læse. Et referat skal kunne sendes til en kollega uden at
-/// spørge, hvad de har installeret.
+/// Formatet er .docx. Modtageren af et mødereferat åbner det i Word, og et
+/// dokument, der er konverteret på vej ind, taber det, konverteringen ikke kan
+/// oversætte. LibreOffice og Google Docs læser det også.
 /// </summary>
 static int Dokument(string[] a)
 {
@@ -927,7 +927,7 @@ static int Dokument(string[] a)
 
     var sti = NoteApp.Core.Documents.DocumentStore.Save(info);
     Console.WriteLine($"Gemt: {sti}");
-    Console.WriteLine($"      {new FileInfo(sti).Length:N0} byte · åbnes i Word, LibreOffice og Google Docs");
+    Console.WriteLine($"      {new FileInfo(sti).Length:N0} byte · Word-dokument");
     return 0;
 }
 

@@ -15,7 +15,7 @@
       <TextBlock Text="AI-modeller" Style="{StaticResource Overskrift}" />
       <TextBlock Style="{StaticResource Underskrift}" TextWrapping="Wrap" MaxWidth="900"
                  HorizontalAlignment="Left"
-                 Text="Appen bruger to slags modeller, og de gør hver sit. Alle kører lokalt på denne pc." />
+                 Text="Appen bruger to slags modeller, og de gør hver sit. Whisper kører altid her på maskinen. Referatet kan du vælge at lave i Europa i stedet." />
 
       <!-- Rollefordelingen står øverst, fordi den er forudsætningen for at
            forstå resten af skærmen. Uden den ligner det bare en liste over
@@ -146,7 +146,7 @@
             <TextBlock Text="Fra tekst til referat" FontSize="16" FontWeight="SemiBold" Margin="0,7,0,0" />
             <TextBlock FontSize="12.5" LineHeight="20" Margin="0,8,0,0" TextWrapping="Wrap"
                        Foreground="{StaticResource TekstSvag}"
-                       Text="En sprogmodel læser den færdige tekst og laver et udkast ud af den — et referat, en opgaveliste, et tilbud. Hvad den skal lave, bestemmer du under «Skabeloner». Hele det lag er frivilligt." />
+                       Text="En sprogmodel læser den færdige tekst og laver et udkast ud af den — et referat, en opgaveliste, et tilbud. Hvad den skal lave, bestemmer du under «Skabeloner». Hele det lag er frivilligt, og det er det eneste, der kan sendes ud af maskinen." />
             <TextBlock x:Name="HintSprog" FontSize="11.5" Margin="0,9,0,0"
                        Foreground="{StaticResource Accent}" />
           </StackPanel>
@@ -170,6 +170,45 @@
           <TextBlock x:Name="ListeOverskrift" Text="Modeller" FontSize="15" FontWeight="SemiBold" />
           <TextBlock x:Name="ListeUnder" FontSize="12" Margin="0,3,0,0" TextWrapping="Wrap"
                      Foreground="{StaticResource TekstMeget}" />
+
+          <!-- DEN EUROPAEISKE VEJ STAAR SAMMEN MED DE LOKALE MODELLER.
+               Den hoerer til her, fordi det er det samme valg: hvem skriver
+               referatet. Laa den under Indstillinger, ville man skulle vide,
+               at den fandtes, for at finde den - og saa er den i praksis
+               skjult for alle andre end den, der byggede den.
+
+               Den staar UNDER listen af lokale modeller, ikke over. Lokalt er
+               forvalget, og raekkefoelgen paa skaermen er ogsaa en anbefaling. -->
+          <Border x:Name="SkyPanel" Visibility="Collapsed" Margin="0,14,0,4"
+                  Padding="14,12" CornerRadius="8"
+                  Background="#FF181B22" BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+            <Grid>
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+              </Grid.ColumnDefinitions>
+
+              <StackPanel Grid.Column="0" Margin="0,0,16,0">
+                <StackPanel Orientation="Horizontal">
+                  <TextBlock Text="Mistral — i Europa" FontSize="14" FontWeight="SemiBold" />
+                  <Border Background="{StaticResource Accent}" CornerRadius="3"
+                          Padding="6,1" Margin="9,1,0,0" VerticalAlignment="Center">
+                    <TextBlock Text="EU" FontSize="10" FontWeight="SemiBold" Foreground="#FF0B1220" />
+                  </Border>
+                </StackPanel>
+
+                <TextBlock FontSize="12.5" LineHeight="20" Margin="0,8,0,0" TextWrapping="Wrap"
+                           Foreground="{StaticResource TekstSvag}"
+                           Text="Referatet skrives hos Mistral AI i Frankrig i stedet for her. Det tager under et minut i stedet for en halv time, og det bliver fyldigere — målt på et rigtigt møde. Optagelsen og udskriften bliver på maskinen; kun teksten sendes, og kun når du sætter hakket ved det enkelte dokument." />
+
+                <TextBlock x:Name="SkyStatus" FontSize="11.5" Margin="0,9,0,0" TextWrapping="Wrap"
+                           Foreground="{StaticResource Accent}" />
+              </StackPanel>
+
+              <Button Grid.Column="1" x:Name="SkyKnap" Click="Sky_Klik" VerticalAlignment="Top"
+                      Padding="16,8" MinWidth="130" />
+            </Grid>
+          </Border>
         </StackPanel>
 
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="18,0,18,16">

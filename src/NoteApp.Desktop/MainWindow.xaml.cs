@@ -107,6 +107,7 @@ public partial class MainWindow : Window
         Version.Text = "v" + (Assembly.GetExecutingAssembly()
             .GetName().Version?.ToString(2) ?? "0.0");
         DataSti.Text = UserDataPaths.Root;
+        OpdaterDataLoefte();
 
         // Efter en oplæsning peger kvitteringen videre til transskription.
         // Skærmskiftet skal ske her, fordi det er MainWindow, der ejer
@@ -204,6 +205,27 @@ public partial class MainWindow : Window
         Activate();
 
         _moede.Lynstart();
+    }
+
+    /// <summary>
+    /// Løftet nederst i sidebjælken. Skal sige det, der faktisk gælder.
+    ///
+    /// «Intet forlader denne pc» stod fast, og det var rigtigt, så længe der
+    /// ikke fandtes en vej ud. Der gør der nu — og et løfte, koden selv kan
+    /// bryde, koster mere end det, det vinder. Derfor to tekster, og den ene
+    /// er lige så præcis som den anden.
+    ///
+    /// Bemærk, at teksten IKKE siger «dine data sendes til Frankrig». Det ville
+    /// være lige så forkert den anden vej: der sendes intet, før man sætter et
+    /// hak på et bestemt dokument. Den siger, hvad der KAN ske, og hvad der
+    /// skal til.
+    /// </summary>
+    public void OpdaterDataLoefte()
+    {
+        DataLoefte.Text = NoteApp.Core.Llm.SkyNoegle.Hent() is null
+            ? "Intet forlader denne pc. Appen har ingen netværkskald."
+            : "Optagelser og udskrifter forlader aldrig denne pc. Referater kan sendes " +
+              "til Europa — kun når du vælger det på det enkelte dokument.";
     }
 
     private void Nav_Changed(object sender, RoutedEventArgs e)

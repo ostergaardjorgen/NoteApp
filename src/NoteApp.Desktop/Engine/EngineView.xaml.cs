@@ -174,6 +174,11 @@ public partial class EngineView : UserControl
             return;
         }
 
+        // Den europaeiske vej hoerer kun til under sprogmodellerne. Whisper
+        // kan ikke koeres andre steder end her, og at vise valget ved siden af
+        // den ville antyde, at lyden ogsaa kunne sendes afsted.
+        SkyPanel.Visibility = Visibility.Collapsed;
+
         ListeOverskrift.Text = "Whisper-modeller";
         ListeUnder.Text = "Den, der lytter optagelsen igennem. Én ad gangen — den valgte bruges til alle transskriptioner.";
 
@@ -205,6 +210,9 @@ public partial class EngineView : UserControl
             "Den, der laver et udkast ud af den færdige tekst. Laget er frivilligt — " +
             "uden en sprogmodel får du stadig transskriptionen, bare ingen dokumenter.";
 
+        SkyPanel.Visibility = Visibility.Visible;
+        VisSkyStatus();
+
         // Hentet = filen ligger i sprogmodel-mappen. Der spørges paa disken
         // frem for i en indstilling: en indstilling kan pege paa en fil, der
         // er slettet, og saa staar der «hentet» om noget, der er vaek.
@@ -235,6 +243,33 @@ public partial class EngineView : UserControl
         var foerste = LlmRunner.InstalledModels().FirstOrDefault();
         return foerste is not null &&
                Path.GetFileName(foerste).Equals(filnavn, StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// Tilstanden for den europæiske vej — slået til eller ikke.
+    ///
+    /// Der står, hvad der ER sat op, ikke hvad man kunne. «Ikke sat op» er en
+    /// oplysning; «prøv vores skyløsning» er en reklame, og den hører ikke
+    /// hjemme i en oversigt over, hvad appen kører på.
+    /// </summary>
+    private void VisSkyStatus()
+    {
+        var tilsluttet = SkyNoegle.Hent() is not null;
+
+        SkyKnap.Content = tilsluttet ? "Ret opsætning …" : "Sæt op …";
+
+        SkyStatus.Text = tilsluttet
+            ? $"Tilsluttet. Referater kan sendes til {new Uri(SkyKatalog.Endpoint).Host} — " +
+              "men kun når du sætter hakket ved det enkelte dokument."
+            : "Ikke sat op. Alle referater laves her på maskinen.";
+    }
+
+    private void Sky_Klik(object sender, RoutedEventArgs e)
+    {
+        new Documents.SkySetupWindow { Owner = Window.GetWindow(this) }.ShowDialog();
+
+        // Loeftet i sidebjaelken opdaterer vinduet selv - se SkySetupWindow.Luk.
+        VisSkyStatus();
     }
 
     private void Lag_Klik(object sender, RoutedEventArgs e)

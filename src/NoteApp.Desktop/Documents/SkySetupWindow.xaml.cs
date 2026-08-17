@@ -92,7 +92,7 @@ public partial class SkySetupWindow : Window
             }
 
             SkyNoegle.Gem(noegle);
-            DialogResult = true;
+            Luk();
         }
         catch (Exception ex)
         {
@@ -113,6 +113,21 @@ public partial class SkySetupWindow : Window
         if (!ok) return;
 
         SkyNoegle.Slet();
+        Luk();
+    }
+
+    /// <summary>
+    /// Lukker og opdaterer løftet i sidebjælken.
+    ///
+    /// Det sker HER frem for hos den, der åbnede vinduet. Der er to veje ind —
+    /// «AI-modeller» og dokumentdialogen — og en tredje kommer før eller
+    /// siden. Ligger opdateringen hos kalderen, er det den nye vej, der
+    /// glemmer den, og så står der «intet forlader denne pc», efter man lige
+    /// har tilsluttet noget, der kan.
+    /// </summary>
+    private void Luk()
+    {
+        (Application.Current.MainWindow as MainWindow)?.OpdaterDataLoefte();
         DialogResult = true;
     }
 

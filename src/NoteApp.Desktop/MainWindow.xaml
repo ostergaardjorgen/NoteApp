@@ -94,9 +94,14 @@
           <TextBlock Text="Dine data" Style="{StaticResource Underskrift}" Margin="6,0,0,3" />
           <TextBlock x:Name="DataSti" Style="{StaticResource Underskrift}"
                      Foreground="{StaticResource TekstMeget}" Margin="6,0,0,10" FontSize="11" />
-          <TextBlock Style="{StaticResource Underskrift}" Foreground="{StaticResource TekstMeget}"
-                     FontSize="11" Margin="6,0,0,0"
-                     Text="Intet forlader denne pc. Appen har ingen netværkskald." />
+          <!-- LØFTET SKAL FØLGE VIRKELIGHEDEN.
+               Her stod «Intet forlader denne pc. Appen har ingen netværkskald.»
+               fast. Det var sandt, indtil appen fik en europæisk vej — og en
+               påstand, koden selv kan bryde, er værre end ingen påstand.
+               Teksten sættes nu af OpdaterDataLoefte(). -->
+          <TextBlock x:Name="DataLoefte" Style="{StaticResource Underskrift}"
+                     Foreground="{StaticResource TekstMeget}" TextWrapping="Wrap"
+                     FontSize="11" Margin="6,0,6,0" />
         </StackPanel>
       </DockPanel>
     </Border>

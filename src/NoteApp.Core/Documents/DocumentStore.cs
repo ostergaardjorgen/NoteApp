@@ -42,7 +42,7 @@ public sealed class DocumentInfo
     public string Model { get; init; } = "";
     public double Seconds { get; init; }
 
-    /// <summary>Filnavnet på .odt-filen, uden sti — mappen kan flyttes.</summary>
+    /// <summary>Filnavnet, uden sti — mappen kan flyttes.</summary>
     public string FileName { get; init; } = "";
 
     public string Markdown { get; set; } = "";
@@ -56,7 +56,7 @@ public sealed class DocumentInfo
 /// ikke lydfilerne, og et referat skal kunne findes uden at vide hvilket møde
 /// det kom fra.
 ///
-/// Hvert dokument er to filer: en .odt, der kan åbnes i Word, og en .json med
+/// Hvert dokument er to filer: en .docx, der åbnes i Word, og en .json med
 /// hvor det kommer fra. Bliver .json væk, er dokumentet stadig et dokument.
 /// </summary>
 public static class DocumentStore
@@ -70,7 +70,7 @@ public static class DocumentStore
     };
 
     /// <summary>
-    /// Gemmer et dokument som .odt plus metadata. Returnerer stien til .odt'en.
+    /// Gemmer et dokument som .docx plus metadata. Returnerer stien til .docx'en.
     /// </summary>
     public static string Save(DocumentInfo info)
     {
@@ -87,15 +87,15 @@ public static class DocumentStore
         if (!string.IsNullOrWhiteSpace(info.Description))
             forside.Add(("Beskrivelse", info.Description));
 
-        var odt = Path.Combine(Directory, info.FileName);
-        OdtWriter.Write(odt, info.Title, info.Markdown, forside);
+        var fil = Path.Combine(Directory, info.FileName);
+        DocxWriter.Write(fil, info.Title, info.Markdown, forside);
 
         File.WriteAllText(MetaSti(info), JsonSerializer.Serialize(info, Options), Encoding.UTF8);
-        return odt;
+        return fil;
     }
 
     /// <summary>
-    /// Opdaterer beskrivelsen og skriver .odt'en om, så forsiden følger med.
+    /// Opdaterer beskrivelsen og skriver dokumentet om, så forsiden følger med.
     /// Ellers ville dokumentet, man sender videre, sige noget andet end appen.
     /// </summary>
     public static string UpdateDescription(DocumentInfo info, string beskrivelse)
@@ -190,6 +190,6 @@ public static class DocumentStore
         if (navn.Length > 70) navn = navn[..70].TrimEnd('-');
         if (navn.Length == 0) navn = "dokument";
 
-        return $"{navn}_{DateTime.Now:yyyy-MM-dd_HHmm}.odt";
+        return $"{navn}_{DateTime.Now:yyyy-MM-dd_HHmm}.docx";
     }
 }

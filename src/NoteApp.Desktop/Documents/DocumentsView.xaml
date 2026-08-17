@@ -13,7 +13,7 @@
     <StackPanel Grid.Row="0" Margin="0,0,0,14">
       <TextBlock Text="Dokumenter" Style="{StaticResource Overskrift}" />
       <TextBlock Style="{StaticResource Underskrift}"
-                 Text="De færdige tekster. Gemt som .odt — åbnes i Word, LibreOffice og Google Docs." />
+                 Text="De færdige tekster. Gemt som Word-dokumenter (.docx)." />
     </StackPanel>
 
     <Grid Grid.Row="1">

@@ -569,8 +569,7 @@ public partial class TranscribeView : UserControl
                 $"og bearbejdes af {skyModel.Navn} på deres europæiske servere.\n\n" +
                 $"DET SENDES:  hele den udskrevne tekst — {(felter["transskription"] ?? "").Length:N0} tegn.\n" +
                 $"DET GØR IKKE:  lydfilen, dine noter om andre møder, eller noget andet i appen.\n\n" +
-                "Det er også mødedeltagernes ord, ikke kun dine. Er det et fortroligt møde, " +
-                "så lav referatet lokalt i stedet — det tager længere tid og bliver på maskinen.",
+                "Det er også mødedeltagernes ord, ikke kun dine.",
                 godkend: $"Send til {skyModel.Hjemland}",
                 annuller: "Nej, behold det lokalt",
                 slags: Dialogs.Slags.Pas_paa,

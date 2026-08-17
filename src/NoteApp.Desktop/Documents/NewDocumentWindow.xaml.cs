@@ -37,7 +37,7 @@ public partial class NewDocumentWindow : Window
 
         _modeller = modeller;
         _optagelse = optagelsesTitel;
-        Kilde.Text = $"Bygges på «{optagelsesTitel}». Dokumentet gemmes som .odt og kan åbnes i Word.";
+        Kilde.Text = $"Bygges på «{optagelsesTitel}». Dokumentet gemmes som et Word-dokument (.docx).";
 
         // Tilvalget vises kun, naar der ER en noegle. Uden en noegle ville et
         // slukket hak vaere en reklame for noget, brugeren ikke kan bruge - og
@@ -157,9 +157,14 @@ public partial class NewDocumentWindow : Window
             return;
         }
 
-        if (ModelSti.Length == 0)
+        // Kravet om en lokal model gaelder kun den lokale vej. Er Europa valgt,
+        // er der ingen model paa maskinen at mangle.
+        if (ModelSti.Length == 0 && SkyValgt is null)
         {
-            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Mangler sprogmodel", "Der er ingen sprogmodel at lave dokumentet med. Hent en under «AI-modeller».", Dialogs.Slags.Valg);
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Mangler sprogmodel",
+                "Der er ingen sprogmodel at lave dokumentet med.\n\n" +
+                "Hent en under «AI-modeller», eller sæt hakket ved «Lav referatet i Europa».",
+                Dialogs.Slags.Valg);
             return;
         }
 
