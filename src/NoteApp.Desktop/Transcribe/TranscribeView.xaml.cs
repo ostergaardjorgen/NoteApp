@@ -557,26 +557,18 @@ public partial class TranscribeView : UserControl
         // vaere forkert at vise det.
         if (dialog.SkyValgt is { } skyModel)
         {
-            // SIDSTE STOP FØR DET FORLADER MASKINEN.
+            // INGEN BEKRAEFTELSE HER.
             //
-            // Hakket i dialogen er valget. Det her er bekraeftelsen, og de to
-            // er med vilje ikke det samme tryk: et hak kan saettes ved et uheld
-            // og et vindue lukkes uden at laese. Der staar hvem, hvad og hvor -
-            // ikke "er du sikker".
-            var sendOk = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
-                $"Mødet sendes til {skyModel.Hjemland}",
-                $"«{valgt.Titel}» sendes til {skyModel.Leverandoer} i {skyModel.Hjemland} " +
-                $"og bearbejdes af {skyModel.Navn} på deres europæiske servere.\n\n" +
-                $"DET SENDES:  hele den udskrevne tekst — {(felter["transskription"] ?? "").Length:N0} tegn.\n" +
-                $"DET GØR IKKE:  lydfilen, dine noter om andre møder, eller noget andet i appen.\n\n" +
-                "Det er også mødedeltagernes ord, ikke kun dine.",
-                godkend: $"Send til {skyModel.Hjemland}",
-                annuller: "Nej, behold det lokalt",
-                slags: Dialogs.Slags.Pas_paa,
-                godkendErStandard: false);
-
-            if (!sendOk) return;
-
+            // Der stod et "er du sikker"-vindue med hvem, hvad og hvor. Det er
+            // rigtigt EEN gang - og det sker i opsaetningen, hvor man tilslutter
+            // sig, laeser efter og saetter et hak paa, at traening er slaaet
+            // fra. Gentaget ved hvert dokument bliver det noget, man klikker
+            // vaek uden at laese, og saa beskytter det ingen.
+            //
+            // Samtykket ligger derfor tre steder, der hver goer noget:
+            //   opsaetningen  - den informerede beslutning, een gang
+            //   hakket        - pr. dokument, slukket hver gang
+            //   knapteksten   - "Send og opret dokument", lige foer trykket
             Jobs.BackgroundJobs.LavDokumentISkyen(skyModel, skabelon, felter, info, valgt.Mappe);
             return;
         }

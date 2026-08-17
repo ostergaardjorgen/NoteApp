@@ -222,10 +222,12 @@ public partial class MainWindow : Window
     /// </summary>
     public void OpdaterDataLoefte()
     {
+        // Kort. Den staar i en sidebjaelke, ikke i en aftale — og den laenge
+        // udgave fyldte fire linjer om noget, der allerede staar i
+        // opsaetningen og under AI-modeller.
         DataLoefte.Text = NoteApp.Core.Llm.SkyNoegle.Hent() is null
             ? "Intet forlader denne pc. Appen har ingen netværkskald."
-            : "Optagelser og udskrifter forlader aldrig denne pc. Referater kan sendes " +
-              "til Europa — kun når du vælger det på det enkelte dokument.";
+            : "Optagelser og udskrifter forlader aldrig denne pc.";
     }
 
     private void Nav_Changed(object sender, RoutedEventArgs e)

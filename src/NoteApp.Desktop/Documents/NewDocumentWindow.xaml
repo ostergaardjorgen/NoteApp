@@ -66,23 +66,21 @@
               Padding="12,10" CornerRadius="6"
               Background="{StaticResource Panel}"
               BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+        <!-- ÉN LINJE. IKKE ET AFSNIT.
+             Her stod en forklaring paa, hvad valget betoed, plus en
+             bekraeftelse bagefter. Det hoerer til i opsaetningen, hvor man
+             tilslutter sig een gang og laeser efter. I daglig brug skal
+             dialogen kunne betjenes uden at blive laest - man laver det
+             tiende referat paa den samme uge. -->
         <StackPanel>
-          <CheckBox x:Name="SkyHak" Checked="Sky_Skiftet" Unchecked="Sky_Skiftet">
-            <TextBlock Text="Lav referatet i Europa i stedet (hurtigere og fyldigere)"
-                       TextWrapping="Wrap" FontWeight="SemiBold" />
-          </CheckBox>
-          <TextBlock x:Name="SkyTekst" FontSize="12" Margin="24,6,0,0" TextWrapping="Wrap"
-                     LineHeight="18" Foreground="{StaticResource TekstMeget}" />
+          <CheckBox x:Name="SkyHak" Checked="Sky_Skiftet" Unchecked="Sky_Skiftet"
+                    Content="Lav referatet i Europa — hurtigere og fyldigere" />
 
           <!-- Uden noegle staar der ikke et slukket hak, men en vej ind. Et
                hak, man ikke kan saette, er en reklame; en knap er et tilbud. -->
-          <Button x:Name="SkySaetOp" Content="Sæt europæisk bearbejdning op …"
+          <Button x:Name="SkySaetOp" Content="Lav referater i Europa …"
                   Click="SkySaetOp_Click" HorizontalAlignment="Left"
                   Padding="12,7" Visibility="Collapsed" />
-          <TextBlock x:Name="SkySaetOpTekst" Visibility="Collapsed" FontSize="12"
-                     Margin="2,8,0,0" TextWrapping="Wrap" LineHeight="18"
-                     Foreground="{StaticResource TekstMeget}"
-                     Text="Referatet kan sendes til en europæisk leverandør, som skriver det på under et minut i stedet for en halv time. Optagelse og udskrift bliver på maskinen uanset hvad." />
         </StackPanel>
       </Border>
     </StackPanel>

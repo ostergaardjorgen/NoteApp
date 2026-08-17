@@ -66,11 +66,23 @@ public partial class NewDocumentWindow : Window
 
         ModelSti = model ?? (_modeller.Count > 0 ? _modeller[0] : "");
 
-        ModelTekst.Text = ModelSti.Length == 0
-            ? "Der er ingen sprogmodel hentet. Hent en under «AI-modeller»."
-            : model is not null || ønsket is null
-                ? $"Sprogmodel: {Path.GetFileNameWithoutExtension(ModelSti)}. Tager typisk to til fire minutter."
-                : $"Sprogmodel: {Path.GetFileNameWithoutExtension(ModelSti)} — skabelonen foretrækker «{ønsket}», som ikke er hentet.";
+        // MODELLEN VAELGES AUTOMATISK, OG SAA SKAL DEN IKKE STAA DER.
+        //
+        // Her stod "Sprogmodel: Qwen3-8B-Q4_K_M. Tager typisk to til fire
+        // minutter." hver gang. Det ligner et valg, brugeren skal traeffe, og
+        // det er det ikke - appen vaelger selv. En oplysning, man ikke kan
+        // handle paa, er stoej i en dialog, man aabner ti gange om ugen.
+        //
+        // Linjen bliver derfor kun til noget, naar der ER noget at handle paa:
+        // modellen mangler, eller skabelonen oenskede en anden.
+        var problem = ModelSti.Length == 0
+            ? "Der er ingen sprogmodel hentet. Hent en under «AI-modeller», eller lav referatet i Europa."
+            : model is null && ønsket is not null
+                ? $"Skabelonen foretrækker «{ønsket}», som ikke er hentet. Bruger {Path.GetFileNameWithoutExtension(ModelSti)} i stedet."
+                : "";
+
+        ModelTekst.Text = problem;
+        ModelTekst.Visibility = problem.Length == 0 ? Visibility.Collapsed : Visibility.Visible;
 
         // Dokumentets navn er optagelsens navn plus skabelonens. Saadan kan man se
         // i listen, hvad det er, uden at aabne det.
@@ -89,24 +101,14 @@ public partial class NewDocumentWindow : Window
         var harNoegle = SkyNoegle.Hent() is not null;
 
         SkyHak.Visibility = harNoegle ? Visibility.Visible : Visibility.Collapsed;
-        SkyTekst.Visibility = harNoegle ? Visibility.Visible : Visibility.Collapsed;
         SkySaetOp.Visibility = harNoegle ? Visibility.Collapsed : Visibility.Visible;
-        SkySaetOpTekst.Visibility = harNoegle ? Visibility.Collapsed : Visibility.Visible;
 
-        if (harNoegle)
-        {
-            // Teksten skal staa der fra begyndelsen, ogsaa naar hakket er
-            // slukket. Et tomt felt under et slukket hak siger ingenting om,
-            // hvad hakket goer.
-            Sky_Skiftet(this, new RoutedEventArgs());
-        }
-        else
-        {
-            // Fjernes noeglen midt i det hele, maa valget ikke blive haengende.
-            SkyHak.IsChecked = false;
-            SkyValgt = null;
-            OpretKnap.Content = "Opret dokument";
-        }
+        if (harNoegle) return;
+
+        // Fjernes noeglen midt i det hele, maa valget ikke blive haengende.
+        SkyHak.IsChecked = false;
+        SkyValgt = null;
+        OpretKnap.Content = "Opret dokument";
     }
 
     private void SkySaetOp_Click(object sender, RoutedEventArgs e)
@@ -116,29 +118,23 @@ public partial class NewDocumentWindow : Window
     }
 
     /// <summary>
-    /// Hakket er sat eller fjernet. Teksten skal sige præcis, hvad valget
-    /// betyder — begge veje.
+    /// Hakket er sat eller fjernet.
     ///
-    /// Der står IKKE «sikkert» eller «GDPR-godkendt». Det er vurderinger, og
-    /// de hører ikke til i en afkrydsningsboks. Der står, hvad der sker: hvad
-    /// der sendes, hvorhen, og hvem der er modtager.
+    /// MODELLEN VÆLGES AF APPEN. Der er målt på begge: Medium 3.5 ramte 101 %
+    /// af facits længde mod Large 3's 97 %, og fandt flere navne og tal. At
+    /// lade brugeren vælge mellem dem ville være at flytte en beslutning, vi
+    /// har målt os frem til, over på en, der ikke har tallene.
     /// </summary>
     private void Sky_Skiftet(object sender, RoutedEventArgs e)
     {
-        var model = SkyKatalog.Kendte.FirstOrDefault(m => m.Id == "mistral-medium")
-                    ?? SkyKatalog.Kendte[0];
-
-        SkyValgt = SkyHak.IsChecked == true ? model : null;
-
-        SkyTekst.Text = SkyValgt is null
-            ? "Referatet laves her på maskinen. Intet forlader din pc."
-            : $"Hele mødeudskriften sendes til {model.Leverandoer} i {model.Hjemland} " +
-              $"({model.Navn}) og bearbejdes på deres europæiske servere. " +
-              "Lyden og optagelsen sendes ikke — kun teksten.\n\n" +
-              "Tager typisk under et minut i stedet for en halv time.";
+        SkyValgt = SkyHak.IsChecked == true
+            ? SkyKatalog.Kendte.FirstOrDefault(m => m.Id == "mistral-medium") ?? SkyKatalog.Kendte[0]
+            : null;
 
         // Knappens tekst skal foelge med. Trykker man "Opret dokument", og der
-        // ryger et moede til Frankrig, er det ikke det, knappen lovede.
+        // ryger et moede til Frankrig, er det ikke det, knappen lovede. Det er
+        // den ENE oplysning, der bliver tilbage i daglig brug - og den staar
+        // paa knappen, hvor man ser den uden at laese noget.
         OpretKnap.Content = SkyValgt is null ? "Opret dokument" : "Send og opret dokument";
     }
 
