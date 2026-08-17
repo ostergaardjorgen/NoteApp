@@ -56,6 +56,25 @@
 
       <TextBlock x:Name="ModelTekst" FontSize="12" Margin="2,12,0,0" TextWrapping="Wrap"
                  LineHeight="19" Foreground="{StaticResource TekstMeget}" />
+
+      <!-- Sky-tilvalget staar SLUKKET hver gang.
+           Det er ikke en indstilling, man saetter een gang og glemmer: hver
+           enkelt dokument er et selvstaendigt valg om at sende et moede ud af
+           maskinen. Et hak, der huskes, ville goere det til noget, der sker af
+           sig selv - og saa er samtykket vaek. -->
+      <Border x:Name="SkyBoks" Visibility="Collapsed" Margin="0,14,0,0"
+              Padding="12,10" CornerRadius="6"
+              Background="{StaticResource Panel}"
+              BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+        <StackPanel>
+          <CheckBox x:Name="SkyHak" Checked="Sky_Skiftet" Unchecked="Sky_Skiftet">
+            <TextBlock Text="Lav referatet i Europa i stedet (hurtigere og fyldigere)"
+                       TextWrapping="Wrap" FontWeight="SemiBold" />
+          </CheckBox>
+          <TextBlock x:Name="SkyTekst" FontSize="12" Margin="24,6,0,0" TextWrapping="Wrap"
+                     LineHeight="18" Foreground="{StaticResource TekstMeget}" />
+        </StackPanel>
+      </Border>
     </StackPanel>
 
     <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,18,0,0">

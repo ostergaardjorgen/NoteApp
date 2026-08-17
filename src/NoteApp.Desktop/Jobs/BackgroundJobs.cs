@@ -49,6 +49,98 @@ public static class BackgroundJobs
     public static void Afbryd() => _afbryd?.Cancel();
 
     /// <summary>
+    /// Laver et dokument hos den europæiske leverandør i stedet for lokalt.
+    ///
+    /// HVORFOR DEN IKKE BARE ER ET FLAG PÅ <see cref="LavDokument"/>
+    ///
+    /// De to kørsler har intet til fælles ud over resultatet. Den lokale
+    /// beslaglægger grafikkortet, deler mødet i blokke og tager en halv time.
+    /// Denne sender én anmodning ud af huset og er tilbage på tyve sekunder.
+    ///
+    /// Et flag ville have skjult, at det er dét, der er forskellen — og den
+    /// linje er ikke en teknisk detalje, det er den, hele produktløftet står
+    /// på. Den skal kunne ses i koden uden at følge en boolsk værdi gennem tre
+    /// metoder.
+    /// </summary>
+    public static async void LavDokumentISkyen(
+        SkyModel model, PromptTemplate skabelon,
+        IReadOnlyDictionary<string, string?> felter,
+        DocumentInfo skabelonInfo, string mødeMappe)
+    {
+        if (Kører)
+        {
+            Dialogs.AppDialog.Vis(null, "Én ad gangen",
+                $"Der kører allerede en opgave: {HvadKører}", Dialogs.Slags.Valg);
+            return;
+        }
+
+        var noegle = SkyNoegle.Hent();
+        if (noegle is null)
+        {
+            Dialogs.AppDialog.Vis(null, "Der mangler en nøgle", SkyNoegle.Vejledning, Dialogs.Slags.Valg);
+            return;
+        }
+
+        _afbryd = new CancellationTokenSource();
+        HvadKører = $"«{skabelonInfo.Title}»";
+
+        var startet = DateTime.Now;
+        _detaljer = $"«{skabelonInfo.Title}» · {model.Navn} i {model.Hjemland} · " +
+                    $"startet {startet:HH:mm} · lander under «Dokumenter»";
+
+        Meld($"Sender til {model.Hjemland} …");
+
+        try
+        {
+            var fremdrift = new Progress<LlmProgress>(p =>
+                Meld($"{p.Message} · {(DateTime.Now - startet).TotalSeconds:0} sek"));
+
+            var r = await new SkyRunner(noegle).KoerAsync(
+                model, skabelon, skabelon.Render(felter), fremdrift, _afbryd.Token);
+
+            DraftStore.Save(mødeMappe, skabelon, r.SomLlmResult(),
+                motor: $"{model.Leverandoer} ({model.Hjemland})");
+
+            skabelonInfo.Markdown = r.Tekst.Trim();
+            var odt = DocumentStore.Save(skabelonInfo);
+
+            // PROVENIENSEN SKAL VISE, AT DET GIK UD AF HUSET. Historikken er
+            // det eneste sted, man bagefter kan svare paa, hvilke moeder der er
+            // sendt afsted - og det spoergsmaal kommer, den dag nogen spoerger.
+            Historik.Skriv(HaendelseType.Dokument, $"Dokument oprettet i {model.Hjemland}: {skabelonInfo.Title}",
+                $"Skabelon «{skabelon.Name}» · {model.Navn} hos {model.Leverandoer} · " +
+                $"{r.TokensInd} tokens sendt, {r.TokensUd} modtaget · ${r.PrisUsd:0.0000}",
+                Udfald.Fuldført, model.Navn, odt, r.Forloebet.TotalSeconds);
+            Notifikationer.Meld();
+
+            Meld($"Færdigt: {Path.GetFileName(odt)} · {r.Forloebet.TotalSeconds:0} sek", kører: false);
+            DokumentFærdigt?.Invoke(skabelonInfo.Id);
+        }
+        catch (OperationCanceledException)
+        {
+            Historik.Skriv(HaendelseType.Dokument, $"Dokument afbrudt: {skabelonInfo.Title}",
+                "Brugeren stoppede kørslen", Udfald.Afbrudt, model.Navn);
+            Notifikationer.Meld();
+
+            Meld("Afbrudt. Der blev ikke gemt noget dokument.", kører: false);
+        }
+        catch (Exception ex)
+        {
+            Historik.Skriv(HaendelseType.Dokument, $"Dokument fejlede: {skabelonInfo.Title}",
+                ex.Message, Udfald.Fejlet, model.Navn);
+            Notifikationer.Meld();
+
+            Meld($"Det gik galt: {ex.Message}", kører: false);
+        }
+        finally
+        {
+            _afbryd?.Dispose();
+            _afbryd = null;
+            HvadKører = null;
+        }
+    }
+
+    /// <summary>
     /// Laver et dokument. Kaldes og glemmes — resultatet kommer via
     /// <see cref="DokumentFærdigt"/>.
     ///

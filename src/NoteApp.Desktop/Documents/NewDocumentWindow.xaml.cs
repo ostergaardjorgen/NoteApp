@@ -21,6 +21,12 @@ public partial class NewDocumentWindow : Window
     public string Beskrivelse => FeltBeskrivelse.Text.Trim();
     public string ModelSti { get; private set; } = "";
 
+    /// <summary>
+    /// Den europæiske model, hvis brugeren har valgt den til. Null betyder
+    /// lokalt — og det er forvalget hver eneste gang.
+    /// </summary>
+    public SkyModel? SkyValgt { get; private set; }
+
     private readonly IReadOnlyList<string> _modeller;
     private readonly string _optagelse;
 
@@ -32,6 +38,19 @@ public partial class NewDocumentWindow : Window
         _modeller = modeller;
         _optagelse = optagelsesTitel;
         Kilde.Text = $"Bygges på «{optagelsesTitel}». Dokumentet gemmes som .odt og kan åbnes i Word.";
+
+        // Tilvalget vises kun, naar der ER en noegle. Uden en noegle ville et
+        // slukket hak vaere en reklame for noget, brugeren ikke kan bruge - og
+        // en paamindelse om skyen hver gang man laver et referat.
+        if (SkyNoegle.Hent() is not null)
+        {
+            SkyBoks.Visibility = Visibility.Visible;
+
+            // Teksten skal staa der fra begyndelsen, ogsaa naar hakket er
+            // slukket. Et tomt felt under et slukket hak siger ingenting om,
+            // hvad hakket goer.
+            Sky_Skiftet(this, new RoutedEventArgs());
+        }
 
         Skabeloner.ItemsSource = skabeloner;
         if (skabeloner.Count > 0) Skabeloner.SelectedIndex = 0;
@@ -66,6 +85,33 @@ public partial class NewDocumentWindow : Window
             FeltTitel.Text = $"{_optagelse} — {t.Name}";
 
         Valgt = t;
+    }
+
+    /// <summary>
+    /// Hakket er sat eller fjernet. Teksten skal sige præcis, hvad valget
+    /// betyder — begge veje.
+    ///
+    /// Der står IKKE «sikkert» eller «GDPR-godkendt». Det er vurderinger, og
+    /// de hører ikke til i en afkrydsningsboks. Der står, hvad der sker: hvad
+    /// der sendes, hvorhen, og hvem der er modtager.
+    /// </summary>
+    private void Sky_Skiftet(object sender, RoutedEventArgs e)
+    {
+        var model = SkyKatalog.Kendte.FirstOrDefault(m => m.Id == "mistral-medium")
+                    ?? SkyKatalog.Kendte[0];
+
+        SkyValgt = SkyHak.IsChecked == true ? model : null;
+
+        SkyTekst.Text = SkyValgt is null
+            ? "Referatet laves her på maskinen. Intet forlader din pc."
+            : $"Hele mødeudskriften sendes til {model.Leverandoer} i {model.Hjemland} " +
+              $"({model.Navn}) og bearbejdes på deres europæiske servere. " +
+              "Lyden og optagelsen sendes ikke — kun teksten.\n\n" +
+              "Tager typisk under et minut i stedet for en halv time.";
+
+        // Knappens tekst skal foelge med. Trykker man "Opret dokument", og der
+        // ryger et moede til Frankrig, er det ikke det, knappen lovede.
+        OpretKnap.Content = SkyValgt is null ? "Opret dokument" : "Send og opret dokument";
     }
 
     private void Opret_Click(object sender, RoutedEventArgs e)

@@ -536,9 +536,44 @@ public partial class TranscribeView : UserControl
             SourceRecording = valgt.Mappe,
             SourceTitle = valgt.Titel,
             Template = skabelon.Name,
-            Model = Path.GetFileNameWithoutExtension(model),
+            // Modellen skal staa rigtigt fra begyndelsen. Bliver referatet
+            // lavet i Europa, er det ikke den lokale gguf-fil, der lavede det.
+            Model = dialog.SkyValgt?.Navn ?? Path.GetFileNameWithoutExtension(model),
             FileName = DocumentStore.FileNameFor(dialog.Titel, skabelon.Name)
         };
+
+        // SKYVEJEN. Her deler de to sig helt.
+        //
+        // Alt nedenfor - skoennet, pladsen paa grafikkortet, advarslen om en
+        // halv times ventetid - handler om at koere en model paa DENNE maskine.
+        // Intet af det gaelder, naar arbejdet sker et andet sted, og det ville
+        // vaere forkert at vise det.
+        if (dialog.SkyValgt is { } skyModel)
+        {
+            // SIDSTE STOP FØR DET FORLADER MASKINEN.
+            //
+            // Hakket i dialogen er valget. Det her er bekraeftelsen, og de to
+            // er med vilje ikke det samme tryk: et hak kan saettes ved et uheld
+            // og et vindue lukkes uden at laese. Der staar hvem, hvad og hvor -
+            // ikke "er du sikker".
+            var sendOk = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
+                $"Mødet sendes til {skyModel.Hjemland}",
+                $"«{valgt.Titel}» sendes til {skyModel.Leverandoer} i {skyModel.Hjemland} " +
+                $"og bearbejdes af {skyModel.Navn} på deres europæiske servere.\n\n" +
+                $"DET SENDES:  hele den udskrevne tekst — {(felter["transskription"] ?? "").Length:N0} tegn.\n" +
+                $"DET GØR IKKE:  lydfilen, dine noter om andre møder, eller noget andet i appen.\n\n" +
+                "Det er også mødedeltagernes ord, ikke kun dine. Er det et fortroligt møde, " +
+                "så lav referatet lokalt i stedet — det tager længere tid og bliver på maskinen.",
+                godkend: $"Send til {skyModel.Hjemland}",
+                annuller: "Nej, behold det lokalt",
+                slags: Dialogs.Slags.Pas_paa,
+                godkendErStandard: false);
+
+            if (!sendOk) return;
+
+            Jobs.BackgroundJobs.LavDokumentISkyen(skyModel, skabelon, felter, info, valgt.Mappe);
+            return;
+        }
 
         // HVOR LANG TID DET TAGER — FØR man trykker.
         //
