@@ -151,6 +151,8 @@ public partial class DocumentsView : UserControl
             ? "(ukendt)"
             : kildeFindes ? d.SourceTitle : $"{d.SourceTitle} — optagelsen er slettet";
 
+        MappeNavn.Text = string.IsNullOrWhiteSpace(d.Mappe) ? "(ingen)" : d.Mappe;
+
         var fil = DocumentStore.Path_(d);
         var findes = File.Exists(fil);
         Filnavn.Text = findes ? d.FileName : $"{d.FileName} — filen mangler";

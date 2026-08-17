@@ -55,6 +55,30 @@
                     <Run Text=" · " />
                     <Run Text="{Binding Template, Mode=OneWay}" />
                   </TextBlock>
+
+                  <!-- MAPPEN SKAL KUNNE SES PAA RAEKKEN.
+                       Uden den skete der ingenting synligt, naar man flyttede
+                       noget: filteret stod paa "Alle mapper", listen saa ens ud
+                       foer og efter, og den eneste kvittering var en statuslinje
+                       nederst, man ikke kigger paa. Flytningen VIRKEDE - man
+                       kunne bare ikke se det. -->
+                  <Border HorizontalAlignment="Left" Margin="0,4,0,0" Padding="6,1"
+                          CornerRadius="3" Background="{StaticResource Accent}">
+                    <Border.Style>
+                      <Style TargetType="Border">
+                        <Style.Triggers>
+                          <DataTrigger Binding="{Binding Mappe}" Value="{x:Null}">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                          </DataTrigger>
+                          <DataTrigger Binding="{Binding Mappe}" Value="">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                          </DataTrigger>
+                        </Style.Triggers>
+                      </Style>
+                    </Border.Style>
+                    <TextBlock Text="{Binding Mappe}" FontSize="10" FontWeight="SemiBold"
+                               Foreground="#FF0B1220" />
+                  </Border>
                 </StackPanel>
               </DataTemplate>
             </ListBox.ItemTemplate>
@@ -96,6 +120,7 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                   </Grid.RowDefinitions>
 
                   <TextBlock Grid.Row="0" Grid.Column="0" Text="Lavet" Margin="0,0,24,0"
@@ -119,6 +144,11 @@
                              FontSize="12.5" Foreground="{StaticResource TekstMeget}" />
                   <TextBlock Grid.Row="4" Grid.Column="1" x:Name="Filnavn" FontSize="12.5" Margin="0,7,0,0"
                              TextWrapping="Wrap" Foreground="{StaticResource TekstMeget}" />
+
+                  <TextBlock Grid.Row="5" Grid.Column="0" Text="Mappe" Margin="0,7,24,0"
+                             FontSize="12.5" Foreground="{StaticResource TekstMeget}" />
+                  <TextBlock Grid.Row="5" Grid.Column="1" x:Name="MappeNavn" FontSize="12.5"
+                             Margin="0,7,0,0" TextWrapping="Wrap" />
                 </Grid>
               </Border>
 

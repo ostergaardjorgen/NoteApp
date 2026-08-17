@@ -94,6 +94,26 @@
                 <TextBlock Text="{Binding Titel}" FontSize="13" Foreground="{StaticResource Tekst}" />
                 <TextBlock Text="{Binding Detaljer}" FontSize="11" Foreground="{StaticResource TekstSvag}"
                            Margin="0,2,0,0" />
+
+                <!-- Mappen skal kunne ses paa raekken. Uden den skete der
+                     ingenting synligt, naar man flyttede noget. -->
+                <Border HorizontalAlignment="Left" Margin="0,4,0,0" Padding="6,1"
+                        CornerRadius="3" Background="{StaticResource Accent}">
+                  <Border.Style>
+                    <Style TargetType="Border">
+                      <Style.Triggers>
+                        <DataTrigger Binding="{Binding Emnemappe}" Value="{x:Null}">
+                          <Setter Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Emnemappe}" Value="">
+                          <Setter Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
+                      </Style.Triggers>
+                    </Style>
+                  </Border.Style>
+                  <TextBlock Text="{Binding Emnemappe}" FontSize="10" FontWeight="SemiBold"
+                             Foreground="#FF0B1220" />
+                </Border>
               </StackPanel>
             </DataTemplate>
           </ListBox.ItemTemplate>
