@@ -22,10 +22,20 @@ public partial class NewDocumentWindow : Window
     public string ModelSti { get; private set; } = "";
 
     /// <summary>
-    /// Den europæiske model, hvis brugeren har valgt den til. Null betyder
-    /// lokalt — og det er forvalget hver eneste gang.
+    /// Den europæiske model, når der er tilsluttet en. Null betyder lokalt.
+    ///
+    /// DET ER IKKE ET VALG I DENNE DIALOG.
+    ///
+    /// Her stod et hak, man skulle sætte pr. dokument. Det var forkert tænkt:
+    /// beslutningen om, hvor referater laves, træffes ÉN gang i opsætningen —
+    /// bevidst, med hosting og databehandleraftale foran sig. At stille den
+    /// igen ved hvert dokument gør ikke samtykket stærkere; det gør det til
+    /// et hak, man sætter uden at læse, og det er det modsatte.
+    ///
+    /// Er der tilsluttet en europæisk model, bruges den. Er der ikke, laves
+    /// referatet på maskinen. Der er ikke noget at spørge om.
     /// </summary>
-    public SkyModel? SkyValgt { get; private set; }
+    public SkyModel? SkyValgt { get; }
 
     private readonly IReadOnlyList<string> _modeller;
     private readonly string _optagelse;
@@ -37,13 +47,20 @@ public partial class NewDocumentWindow : Window
 
         _modeller = modeller;
         _optagelse = optagelsesTitel;
-        Kilde.Text = $"Bygges på «{optagelsesTitel}». Dokumentet gemmes som et Word-dokument (.docx).";
 
-        // Tilvalget vises kun, naar der ER en noegle. Uden en noegle ville et
-        // slukket hak vaere en reklame for noget, brugeren ikke kan bruge - og
-        // en paamindelse om skyen hver gang man laver et referat.
-        SkyBoks.Visibility = Visibility.Visible;
-        VisSkyTilstand();
+        // MODELLEN VAELGES AF APPEN. Der er maalt paa begge europaeiske:
+        // Medium 3.5 ramte 101 % af facits laengde mod Large 3's 97 % og fandt
+        // flere navne og tal. At lade brugeren vaelge ville flytte en
+        // beslutning, vi har tal paa, over paa en, der ikke har dem.
+        SkyValgt = SkyNoegle.Hent() is null
+            ? null
+            : SkyKatalog.Kendte.FirstOrDefault(m => m.Id == "mistral-medium") ?? SkyKatalog.Kendte[0];
+
+        // Hvor referatet laves, staar som en OPLYSNING i een linje - ikke som
+        // et valg. Den, der har sat det op, skal kunne se det uden at aabne
+        // indstillinger; den, der ikke har, skal ikke mindes om det.
+        Kilde.Text = $"Bygges på «{optagelsesTitel}». Gemmes som Word-dokument (.docx)." +
+                     (SkyValgt is null ? "" : $" Referatet laves i Europa ({SkyValgt.Leverandoer}).");
 
         Skabeloner.ItemsSource = skabeloner;
         if (skabeloner.Count > 0) Skabeloner.SelectedIndex = 0;
@@ -90,52 +107,6 @@ public partial class NewDocumentWindow : Window
             FeltTitel.Text = $"{_optagelse} — {t.Name}";
 
         Valgt = t;
-    }
-
-    /// <summary>
-    /// Viser enten hakket eller vejen ind, alt efter om der er en nøgle.
-    /// Kaldes igen efter opsætningen, så vinduet ikke skal lukkes og åbnes.
-    /// </summary>
-    private void VisSkyTilstand()
-    {
-        var harNoegle = SkyNoegle.Hent() is not null;
-
-        SkyHak.Visibility = harNoegle ? Visibility.Visible : Visibility.Collapsed;
-        SkySaetOp.Visibility = harNoegle ? Visibility.Collapsed : Visibility.Visible;
-
-        if (harNoegle) return;
-
-        // Fjernes noeglen midt i det hele, maa valget ikke blive haengende.
-        SkyHak.IsChecked = false;
-        SkyValgt = null;
-        OpretKnap.Content = "Opret dokument";
-    }
-
-    private void SkySaetOp_Click(object sender, RoutedEventArgs e)
-    {
-        new SkySetupWindow { Owner = this }.ShowDialog();
-        VisSkyTilstand();
-    }
-
-    /// <summary>
-    /// Hakket er sat eller fjernet.
-    ///
-    /// MODELLEN VÆLGES AF APPEN. Der er målt på begge: Medium 3.5 ramte 101 %
-    /// af facits længde mod Large 3's 97 %, og fandt flere navne og tal. At
-    /// lade brugeren vælge mellem dem ville være at flytte en beslutning, vi
-    /// har målt os frem til, over på en, der ikke har tallene.
-    /// </summary>
-    private void Sky_Skiftet(object sender, RoutedEventArgs e)
-    {
-        SkyValgt = SkyHak.IsChecked == true
-            ? SkyKatalog.Kendte.FirstOrDefault(m => m.Id == "mistral-medium") ?? SkyKatalog.Kendte[0]
-            : null;
-
-        // Knappens tekst skal foelge med. Trykker man "Opret dokument", og der
-        // ryger et moede til Frankrig, er det ikke det, knappen lovede. Det er
-        // den ENE oplysning, der bliver tilbage i daglig brug - og den staar
-        // paa knappen, hvor man ser den uden at laese noget.
-        OpretKnap.Content = SkyValgt is null ? "Opret dokument" : "Send og opret dokument";
     }
 
     private void Opret_Click(object sender, RoutedEventArgs e)

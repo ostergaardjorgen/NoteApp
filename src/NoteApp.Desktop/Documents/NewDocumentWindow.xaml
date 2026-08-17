@@ -57,32 +57,6 @@
       <TextBlock x:Name="ModelTekst" FontSize="12" Margin="2,12,0,0" TextWrapping="Wrap"
                  LineHeight="19" Foreground="{StaticResource TekstMeget}" />
 
-      <!-- Sky-tilvalget staar SLUKKET hver gang.
-           Det er ikke en indstilling, man saetter een gang og glemmer: hver
-           enkelt dokument er et selvstaendigt valg om at sende et moede ud af
-           maskinen. Et hak, der huskes, ville goere det til noget, der sker af
-           sig selv - og saa er samtykket vaek. -->
-      <Border x:Name="SkyBoks" Visibility="Collapsed" Margin="0,14,0,0"
-              Padding="12,10" CornerRadius="6"
-              Background="{StaticResource Panel}"
-              BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
-        <!-- ÉN LINJE. IKKE ET AFSNIT.
-             Her stod en forklaring paa, hvad valget betoed, plus en
-             bekraeftelse bagefter. Det hoerer til i opsaetningen, hvor man
-             tilslutter sig een gang og laeser efter. I daglig brug skal
-             dialogen kunne betjenes uden at blive laest - man laver det
-             tiende referat paa den samme uge. -->
-        <StackPanel>
-          <CheckBox x:Name="SkyHak" Checked="Sky_Skiftet" Unchecked="Sky_Skiftet"
-                    Content="Lav referatet i Europa — hurtigere og fyldigere" />
-
-          <!-- Uden noegle staar der ikke et slukket hak, men en vej ind. Et
-               hak, man ikke kan saette, er en reklame; en knap er et tilbud. -->
-          <Button x:Name="SkySaetOp" Content="Lav referater i Europa …"
-                  Click="SkySaetOp_Click" HorizontalAlignment="Left"
-                  Padding="12,7" Visibility="Collapsed" />
-        </StackPanel>
-      </Border>
     </StackPanel>
 
     <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,18,0,0">
