@@ -60,6 +60,19 @@ public partial class RenameWindow : Window
         "Titlen står øverst i selve dokumentet, ikke kun i listen — så den følger med, når du sender filen videre.",
         "Filen på disken beholder sit nuværende navn. Den er allerede sendt eller åbnet af nogen, og et filnavn, der skifter under hånden, kan ikke findes igen.");
 
+    /// <summary>
+    /// Til en ny mappe. Genbruger det her vindue frem for at få et vindue mere
+    /// med ét tekstfelt — de ville komme til at se forskellige ud, og det er
+    /// den slags, der gør en app rodet uden at nogen kan sige hvorfor.
+    /// </summary>
+    public static RenameWindow TilNyMappe() => new(
+        "",
+        "Hvad skal mappen hedde?",
+        "Fx et kundenavn. Mapper holder materiale adskilt, så kundens møder ikke ligger blandt de interne.",
+        "Mappen findes kun inde i appen. Filerne bliver liggende, hvor de er — så gemte stier og sikkerhedskopier stadig virker.",
+        knap: "Opret mappen",
+        titel: "Ny mappe");
+
     private void Gem_Click(object sender, RoutedEventArgs e)
     {
         if (NytNavn.Length == 0)

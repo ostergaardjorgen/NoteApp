@@ -19,6 +19,7 @@ public sealed class OptagelseVisning
 
         Gruppe = Optagelsesgruppe.Af(mappe, meta);
         Traeningsnoegle = Optagelsesgruppe.Traeningsnoegle(mappe, meta);
+        Emnemappe = meta?.Mappe;
 
         Titel = meta?.Title ?? Path.GetFileName(mappe);
         Sekunder = File.Exists(wav) ? Transcriber.WavSeconds(wav) : 0;
@@ -45,7 +46,18 @@ public sealed class OptagelseVisning
         catch (IOException) { Bytes = 0; }
     }
 
+    /// <summary>Stien på disken. IKKE brugerens mappe — se <see cref="Emnemappe"/>.</summary>
     public string Mappe { get; }
+
+    /// <summary>
+    /// Brugerens egen mappe, fx et kundenavn. Null betyder «uden mappe».
+    ///
+    /// Hedder ikke «Mappe», fordi det navn allerede er stien på disken — og
+    /// to felter, der hedder næsten det samme og betyder noget vidt
+    /// forskelligt, er en fejl, der venter på at ske.
+    /// </summary>
+    public string? Emnemappe { get; set; }
+
     public string Titel { get; }
     public string Detaljer { get; }
     public double Sekunder { get; }
@@ -176,7 +188,19 @@ public partial class TranscribeView : UserControl
 
         var oensket = _viserArkiv ? Gruppe.Arkiv : Gruppe.Moede;
 
-        Optagelser.ItemsSource = alle.Where(o => o.Gruppe == oensket).ToList();
+        // En mappe, der er i brug, skal staa paa listen - ogsaa hvis
+        // mapper.json er gaaet tabt.
+        NoteApp.Core.Mapper.SikrFindes(NoteApp.Core.Mapper.Slags.Optagelser, alle.Select(o => o.Emnemappe));
+        FyldMappeFilter(alle);
+
+        var iGruppen = alle.Where(o => o.Gruppe == oensket).ToList();
+        var valgtMappe = MappeFilter.SelectedItem as string;
+
+        Optagelser.ItemsSource = valgtMappe is null or AlleMapper
+            ? iGruppen
+            : valgtMappe == NoteApp.Core.Mapper.Ingen
+                ? iGruppen.Where(o => string.IsNullOrWhiteSpace(o.Emnemappe)).ToList()
+                : iGruppen.Where(o => valgtMappe.Equals(o.Emnemappe, StringComparison.CurrentCultureIgnoreCase)).ToList();
 
         FaneMoeder.Content = $"Møder ({moeder})";
         FaneArkiv.Content = $"Arkiv ({arkiv})";
@@ -207,6 +231,94 @@ public partial class TranscribeView : UserControl
         ForklaringUnder.Text = traening > 0
             ? "Dine oplæsninger ligger under «Træning». Tryk «Optag møde» øverst, når du skal holde et rigtigt møde."
             : "Tryk «Optag møde» øverst, når mødet begynder. Optagelsen dukker op her bagefter.";
+    }
+
+    private const string AlleMapper = "Alle mapper";
+    private bool _fylder;
+
+    /// <summary>
+    /// Fylder mappevælgeren uden at fyre SelectionChanged undervejs — den
+    /// ville kalde IndlaesOptagelser igen midt i IndlaesOptagelser.
+    /// </summary>
+    private void FyldMappeFilter(IReadOnlyList<OptagelseVisning> alle)
+    {
+        var valgt = MappeFilter.SelectedItem as string ?? AlleMapper;
+
+        _fylder = true;
+
+        var punkter = new List<string> { AlleMapper };
+        punkter.AddRange(NoteApp.Core.Mapper.Alle(NoteApp.Core.Mapper.Slags.Optagelser));
+        if (alle.Any(o => string.IsNullOrWhiteSpace(o.Emnemappe))) punkter.Add(NoteApp.Core.Mapper.Ingen);
+
+        MappeFilter.ItemsSource = punkter;
+        MappeFilter.SelectedItem = punkter.Contains(valgt) ? valgt : AlleMapper;
+
+        _fylder = false;
+    }
+
+    private void MappeFilter_Changed(object sender, SelectionChangedEventArgs e)
+    {
+        if (_fylder || Optagelser is null) return;
+        IndlaesOptagelser();
+    }
+
+    private void NyMappe_Click(object sender, RoutedEventArgs e)
+    {
+        var vindue = RenameWindow.TilNyMappe();
+        vindue.Owner = Window.GetWindow(this);
+
+        if (vindue.ShowDialog() != true) return;
+
+        if (!NoteApp.Core.Mapper.Opret(NoteApp.Core.Mapper.Slags.Optagelser, vindue.NytNavn))
+        {
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Den findes allerede",
+                $"Der er allerede en mappe, der hedder «{vindue.NytNavn}».", Dialogs.Slags.Valg);
+            return;
+        }
+
+        IndlaesOptagelser();
+        MappeFilter.SelectedItem = vindue.NytNavn;
+    }
+
+    /// <summary>
+    /// Flytter optagelsen til en mappe. Kun feltet i meeting.json ændrer sig —
+    /// mappen på disken bliver liggende, så dokumenter, der allerede peger på
+    /// den, stadig finder tilbage.
+    /// </summary>
+    private void Flyt_Click(object sender, RoutedEventArgs e)
+    {
+        if (Optagelser.SelectedItem is not OptagelseVisning valgt) return;
+
+        var vindue = new Dialogs.MappeVaelger(
+            NoteApp.Core.Mapper.Slags.Optagelser, valgt.Emnemappe, "optagelsen")
+        { Owner = Window.GetWindow(this) };
+
+        if (vindue.ShowDialog() != true) return;
+
+        var meta = MeetingStore.Load(valgt.Mappe);
+        if (meta is null)
+        {
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Kunne ikke flytte",
+                "Der er ingen meeting.json i optagelsens mappe, så mappevalget kan ikke gemmes.",
+                Dialogs.Slags.Pas_paa);
+            return;
+        }
+
+        meta.Mappe = vindue.Valgt;
+        MeetingStore.Save(valgt.Mappe, meta);
+
+        var sti = valgt.Mappe;
+        IndlaesOptagelser();
+
+        // Optagelsen kan vaere filtreret vaek af mappevaelgeren nu. Findes den
+        // ikke i listen, staar der ingen markering - og det er rigtigt: den
+        // ligger et andet sted end det, der vises.
+        Optagelser.SelectedItem = Optagelser.Items.Cast<OptagelseVisning>()
+            .FirstOrDefault(o => o.Mappe == sti);
+
+        Status.Text = vindue.Valgt is null
+            ? "Optagelsen ligger nu uden mappe."
+            : $"Flyttet til «{vindue.Valgt}».";
     }
 
     private void Fane_Klik(object sender, RoutedEventArgs e)
@@ -281,6 +393,7 @@ public partial class TranscribeView : UserControl
         var færdig = valgt is null ? null : FindTekst(valgt.Mappe);
         ReferatKnap.IsEnabled = færdig is not null && _afbryd is null;
         OmdoebKnap.IsEnabled = valgt is not null && _afbryd is null;
+        FlytKnap.IsEnabled = valgt is not null && _afbryd is null;
 
         if (færdig is not null)
         {

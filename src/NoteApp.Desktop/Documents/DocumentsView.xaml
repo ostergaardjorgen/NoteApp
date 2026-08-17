@@ -29,6 +29,21 @@
           <TextBlock DockPanel.Dock="Top" x:Name="Antal" Margin="16,14,16,8"
                      FontSize="13" FontWeight="SemiBold" />
 
+          <!-- MAPPERNE STAAR NEDERST, ikke oeverst.
+               Listen er det, man er kommet efter; mapperne er den maade, man
+               indsnaevrer den paa. Laa vaelgeren oeverst, ville den vaere det
+               foerste, man skulle forholde sig til hver gang - ogsaa naar man
+               ingen mapper har. -->
+          <Border DockPanel.Dock="Bottom" BorderBrush="{StaticResource PanelKant}"
+                  BorderThickness="0,1,0,0" Padding="10,8">
+            <DockPanel>
+              <Button DockPanel.Dock="Right" x:Name="NyMappe" Content="Ny mappe …"
+                      Click="NyMappe_Click" Padding="10,5" Margin="6,0,0,0" FontSize="12" />
+              <ComboBox x:Name="MappeFilter" SelectionChanged="MappeFilter_Changed"
+                        FontSize="12" Padding="8,5" />
+            </DockPanel>
+          </Border>
+
           <ListBox x:Name="Liste" Margin="8,0,8,8" BorderThickness="0" Background="Transparent"
                    SelectionChanged="Valgt_Changed">
             <ListBox.ItemTemplate>
@@ -132,6 +147,8 @@
                  Foreground="{StaticResource TekstMeget}" TextWrapping="Wrap" />
 
       <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+        <Button x:Name="FlytKnap" Content="Flyt til mappe" Click="Flyt_Click" IsEnabled="False"
+                Margin="0,0,8,0" Padding="14,8" />
         <Button x:Name="OmdoebKnap" Content="Omdøb" Click="Omdoeb_Click" IsEnabled="False"
                 Margin="0,0,8,0" Padding="14,8" />
         <Button x:Name="SletKnap" Content="Slet dokument" Click="Slet_Click" IsEnabled="False"

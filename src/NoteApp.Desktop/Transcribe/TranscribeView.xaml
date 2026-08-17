@@ -28,6 +28,7 @@
           <RowDefinition Height="Auto" />
           <RowDefinition Height="Auto" />
           <RowDefinition Height="*" />
+          <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
         <!-- To grupper, ikke én lang liste. Møder, der stadig mangler noget,
@@ -45,6 +46,20 @@
         <TextBlock x:Name="TraeningsNote" Grid.Row="1" Margin="16,0,16,8" FontSize="11.5"
                    TextWrapping="Wrap" LineHeight="17" Visibility="Collapsed"
                    Foreground="{StaticResource TekstMeget}" />
+
+        <!-- MAPPERNE NEDERST. Listen er det, man er kommet efter; mapperne er
+             den maade, man indsnaevrer den paa. Fanerne oeverst (Moeder/Arkiv)
+             siger, hvor langt et moede er; mappen siger, hvem det handler om.
+             De to ting er uafhaengige og maa ikke slaas sammen. -->
+        <Border Grid.Row="3" BorderBrush="{StaticResource PanelKant}"
+                BorderThickness="0,1,0,0" Padding="10,8">
+          <DockPanel>
+            <Button DockPanel.Dock="Right" x:Name="NyMappe" Content="Ny mappe …"
+                    Click="NyMappe_Click" Padding="10,5" Margin="6,0,0,0" FontSize="12" />
+            <ComboBox x:Name="MappeFilter" SelectionChanged="MappeFilter_Changed"
+                      FontSize="12" Padding="8,5" />
+          </DockPanel>
+        </Border>
 
         <ListBox x:Name="Optagelser" Grid.Row="2" Background="Transparent" BorderThickness="0"
                  Margin="8,0,8,10" SelectionChanged="Optagelse_Valgt"
@@ -227,6 +242,8 @@
       </StackPanel>
 
       <StackPanel Grid.Column="1" Orientation="Horizontal">
+        <Button x:Name="FlytKnap" Content="Flyt til mappe" Click="Flyt_Click" IsEnabled="False"
+                Margin="0,0,8,0" />
         <Button x:Name="OmdoebKnap" Content="Omdøb" Click="Omdoeb_Click" IsEnabled="False"
                 Margin="0,0,8,0" />
         <Button x:Name="ArkivKnap" Content="Arkivér" Click="Arkiver_Click" IsEnabled="False"

@@ -69,6 +69,7 @@ public static class DocxWriter
             Skriv(zip, "_rels/.rels", Rels());
             Skriv(zip, "docProps/core.xml", Core(title));
             Skriv(zip, "word/_rels/document.xml.rels", DokumentRels());
+            Skriv(zip, "word/settings.xml", Settings());
             Skriv(zip, "word/styles.xml", Styles());
             Skriv(zip, "word/numbering.xml", Numbering());
             Skriv(zip, "word/document.xml", Document(title, markdown, forside));
@@ -91,6 +92,7 @@ public static class DocxWriter
           <Default Extension="xml" ContentType="application/xml"/>
           <Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
           <Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/>
+          <Override PartName="/word/settings.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.settings+xml"/>
           <Override PartName="/word/numbering.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml"/>
           <Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/>
         </Types>
@@ -109,7 +111,33 @@ public static class DocxWriter
         <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
           <Relationship Id="rId1" Type="{NsRel}/styles" Target="styles.xml"/>
           <Relationship Id="rId2" Type="{NsRel}/numbering" Target="numbering.xml"/>
+          <Relationship Id="rId3" Type="{NsRel}/settings" Target="settings.xml"/>
         </Relationships>
+        """;
+
+    /// <summary>
+    /// Indstillingerne — og dermed hvilken Word-udgave dokumentet ER.
+    ///
+    /// UDEN DENNE FIL SPØRGER WORD, OM DU VIL OPDATERE FILFORMATET.
+    ///
+    /// Mangler settings.xml, antager Word kompatibilitetstilstand 12 — altså
+    /// Word 2007. Dokumentet åbner fint, men i «kompatibilitetstilstand», og
+    /// første gang man gemmer, bliver man spurgt, om det skal opdateres. Det
+    /// er et spørgsmål, ingen kan svare rigtigt på, om et referat, de lige har
+    /// fået lavet — og det ser ud, som om filen er gammel eller forkert.
+    ///
+    /// compatibilityMode 15 er Word 2013 og frem. Så er den ny fra begyndelsen,
+    /// og der bliver ikke spurgt om noget.
+    /// </summary>
+    private static string Settings() => $"""
+        <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+        <w:settings xmlns:w="{NsW}">
+          <w:compat>
+            <w:compatSetting w:name="compatibilityMode"
+                             w:uri="http://schemas.microsoft.com/office/word"
+                             w:val="15"/>
+          </w:compat>
+        </w:settings>
         """;
 
     private static string Core(string title) => $"""
@@ -189,9 +217,14 @@ public static class DocxWriter
             <w:pPr><w:ind w:left="720"/><w:contextualSpacing/><w:spacing w:after="60"/></w:pPr>
           </w:style>
 
+          <!-- Forsidelinjerne staar taet sammen. De er een blok oplysninger,
+               ikke fem afsnit, og med almindelig afstand fyldte de en
+               tredjedel af foerste side. contextualSpacing slaar afstanden fra
+               MELLEM linjer af samme slags, men beholder den efter den sidste
+               - saa blokken haenger sammen og slipper teksten under sig. -->
           <w:style w:type="paragraph" w:styleId="Kilde">
             <w:name w:val="Kilde"/><w:basedOn w:val="Normal"/>
-            <w:pPr><w:spacing w:after="0"/></w:pPr>
+            <w:pPr><w:spacing w:after="200"/><w:contextualSpacing/></w:pPr>
             <w:rPr><w:sz w:val="18"/><w:szCs w:val="18"/><w:color w:val="666666"/></w:rPr>
           </w:style>
         </w:styles>
@@ -230,24 +263,35 @@ public static class DocxWriter
         // dokumentet, ikke kun i appen — et referat, der er sendt videre, skal
         // stadig kunne svare paa, hvad det er lavet af.
         if (forside is { Count: > 0 })
-        {
             foreach (var (navn, værdi) in forside)
                 krop.Append(Afsnit("Kilde", Løb($"{navn}: {værdi}")));
 
-            krop.Append(Afsnit("Kilde", ""));
-        }
-
+        // TOMME LINJER BLIVER IKKE TIL TOMME AFSNIT.
+        //
+        // Det gjorde de, og resultatet var et dokument, der var alt for luftigt.
+        // Markdown bruger den tomme linje som skilletegn mellem afsnit; Word
+        // bruger afstand EFTER hvert afsnit. Oversaetter man den ene til den
+        // anden, faar man begge dele — et helt tomt afsnit oveni afstanden,
+        // altsaa dobbelt luft hele vejen ned.
+        //
+        // Den tomme linje har gjort sit arbejde, naar den har afsluttet
+        // afsnittet. Den skal ikke med over.
+        //
+        // Vandrette streger (---) ryger ogsaa. En sprogmodel saetter dem som
+        // afsnitsskel i markdown, og i et Word-dokument med rigtige
+        // overskrifter er de stoej.
         foreach (var rå in markdown.Replace("\r\n", "\n").Split('\n'))
         {
-            var linje = rå.TrimEnd();
+            var linje = rå.Trim();
+
+            if (linje.Length == 0) continue;
+            if (linje.All(c => c == '-' || c == '*' || c == '_') && linje.Length >= 3) continue;
 
             if (linje.StartsWith("- ") || linje.StartsWith("* "))
             {
                 krop.Append(Punkt(Indhold(linje[2..])));
                 continue;
             }
-
-            if (linje.Length == 0) { krop.Append(Afsnit("Normal", "")); continue; }
 
             if (linje.StartsWith("### ")) { krop.Append(Afsnit("Heading3", Indhold(linje[4..]))); continue; }
             if (linje.StartsWith("## ")) { krop.Append(Afsnit("Heading2", Indhold(linje[3..]))); continue; }

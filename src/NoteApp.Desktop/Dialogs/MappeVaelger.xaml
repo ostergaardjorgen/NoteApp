@@ -1,0 +1,33 @@
+<Window x:Class="NoteApp.Desktop.Dialogs.MappeVaelger"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Flyt til mappe" Width="460" SizeToContent="Height" MinHeight="300"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
+        Background="{StaticResource Baggrund}" Foreground="{StaticResource Tekst}">
+
+  <StackPanel Margin="24">
+    <TextBlock x:Name="Overskrift" FontSize="18" FontWeight="SemiBold" TextWrapping="Wrap" />
+    <TextBlock x:Name="Forklaring" Style="{StaticResource Underskrift}" Margin="0,8,0,0"
+               TextWrapping="Wrap" />
+
+    <ListBox x:Name="Liste" Margin="0,16,0,0" MaxHeight="260" FontSize="14"
+             BorderBrush="{StaticResource PanelKant}" Background="{StaticResource Panel}"
+             MouseDoubleClick="Liste_DobbeltKlik">
+      <ListBox.ItemTemplate>
+        <DataTemplate>
+          <TextBlock Text="{Binding}" Margin="6,7" />
+        </DataTemplate>
+      </ListBox.ItemTemplate>
+    </ListBox>
+
+    <Button x:Name="NyKnap" Content="Ny mappe …" Click="Ny_Click"
+            HorizontalAlignment="Left" Margin="0,10,0,0" Padding="12,6" FontSize="12" />
+
+    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+      <Button Content="Annullér" Click="Annuller_Click" Padding="18,9" Margin="0,0,10,0" />
+      <Button Content="Flyt" Click="Flyt_Click" Padding="22,9" IsDefault="True"
+              Background="{StaticResource Accent}" Foreground="#FF0B1220"
+              BorderThickness="0" FontWeight="SemiBold" />
+    </StackPanel>
+  </StackPanel>
+</Window>

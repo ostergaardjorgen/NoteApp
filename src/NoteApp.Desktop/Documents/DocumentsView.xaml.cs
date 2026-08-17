@@ -29,30 +29,98 @@ public partial class DocumentsView : UserControl
         Indlæs(aabnId);
     }
 
+    /// <summary>Alle mapper plus «Alle» øverst. Null = vis alt.</summary>
+    private const string AlleMapper = "Alle mapper";
+
     private void Indlæs(string? vælgId = null)
     {
         _alle = DocumentStore.LoadAll().ToList();
 
-        Liste.ItemsSource = null;
-        Liste.ItemsSource = _alle;
+        // En mappe, der er i brug, skal staa paa listen - ogsaa hvis
+        // mapper.json er gaaet tabt. Ellers ville dokumenterne falde ud af
+        // deres mappe uden at nogen havde flyttet dem.
+        NoteApp.Core.Mapper.SikrFindes(NoteApp.Core.Mapper.Slags.Dokumenter, _alle.Select(d => d.Mappe));
 
-        Antal.Text = _alle.Count switch
+        FyldMappeFilter();
+
+        var valgtMappe = MappeFilter.SelectedItem as string;
+
+        var vist = valgtMappe is null or AlleMapper
+            ? _alle
+            : valgtMappe == NoteApp.Core.Mapper.Ingen
+                ? _alle.Where(d => string.IsNullOrWhiteSpace(d.Mappe)).ToList()
+                : _alle.Where(d => valgtMappe.Equals(d.Mappe, StringComparison.CurrentCultureIgnoreCase)).ToList();
+
+        Liste.ItemsSource = null;
+        Liste.ItemsSource = vist;
+
+        Antal.Text = vist.Count switch
         {
             0 => "Ingen dokumenter",
             1 => "1 dokument",
-            _ => $"{_alle.Count} dokumenter"
+            _ => $"{vist.Count} dokumenter"
         };
 
-        TomPanel.Visibility = _alle.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+        TomPanel.Visibility = vist.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
         Detaljer.Visibility = Visibility.Collapsed;
 
-        if (_alle.Count == 0)
+        if (vist.Count == 0)
         {
-            Status.Text = $"Dokumenter gemmes i {DocumentStore.Directory}";
+            Status.Text = _alle.Count == 0
+                ? $"Dokumenter gemmes i {DocumentStore.Directory}"
+                : "Ingen dokumenter i denne mappe.";
             return;
         }
 
-        Liste.SelectedItem = _alle.FirstOrDefault(d => d.Id == vælgId) ?? _alle[0];
+        Liste.SelectedItem = vist.FirstOrDefault(d => d.Id == vælgId) ?? vist[0];
+    }
+
+    /// <summary>
+    /// Fylder mappevælgeren uden at fyre SelectionChanged undervejs — den
+    /// ville kalde Indlæs igen midt i Indlæs.
+    /// </summary>
+    private bool _fylder;
+
+    private void FyldMappeFilter()
+    {
+        var valgt = MappeFilter.SelectedItem as string ?? AlleMapper;
+
+        _fylder = true;
+
+        var punkter = new List<string> { AlleMapper };
+        punkter.AddRange(NoteApp.Core.Mapper.Alle(NoteApp.Core.Mapper.Slags.Dokumenter));
+        if (_alle.Any(d => string.IsNullOrWhiteSpace(d.Mappe))) punkter.Add(NoteApp.Core.Mapper.Ingen);
+
+        MappeFilter.ItemsSource = punkter;
+        MappeFilter.SelectedItem = punkter.Contains(valgt) ? valgt : AlleMapper;
+
+        _fylder = false;
+    }
+
+    private void MappeFilter_Changed(object sender, SelectionChangedEventArgs e)
+    {
+        if (_fylder) return;
+        Indlæs();
+    }
+
+    private void NyMappe_Click(object sender, RoutedEventArgs e)
+    {
+        var vindue = Transcribe.RenameWindow.TilNyMappe();
+        vindue.Owner = Window.GetWindow(this);
+
+        if (vindue.ShowDialog() != true) return;
+
+        var navn = vindue.NytNavn;
+
+        if (!NoteApp.Core.Mapper.Opret(NoteApp.Core.Mapper.Slags.Dokumenter, navn))
+        {
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Den findes allerede",
+                $"Der er allerede en mappe, der hedder «{navn.Trim()}».", Dialogs.Slags.Valg);
+            return;
+        }
+
+        FyldMappeFilter();
+        MappeFilter.SelectedItem = navn.Trim();
     }
 
     private void Valgt_Changed(object sender, SelectionChangedEventArgs e)
@@ -60,7 +128,7 @@ public partial class DocumentsView : UserControl
         if (Liste.SelectedItem is not DocumentInfo d)
         {
             _valgt = null;
-            SletKnap.IsEnabled = AabnKnap.IsEnabled = GemKnap.IsEnabled = OmdoebKnap.IsEnabled = false;
+            SletKnap.IsEnabled = AabnKnap.IsEnabled = GemKnap.IsEnabled = OmdoebKnap.IsEnabled = FlytKnap.IsEnabled = false;
             return;
         }
 
@@ -93,6 +161,7 @@ public partial class DocumentsView : UserControl
 
         SletKnap.IsEnabled = true;
         OmdoebKnap.IsEnabled = true;
+        FlytKnap.IsEnabled = true;
         AabnKnap.IsEnabled = findes;
         GemKnap.IsEnabled = false;
         Status.Text = findes ? fil : "Dokumentfilen findes ikke længere — kun oplysningerne om den.";
@@ -132,6 +201,39 @@ public partial class DocumentsView : UserControl
         catch (Exception ex)
         {
             Dialogs.AppDialog.Vis(Window.GetWindow(this), "Kunne ikke omdøbe", $"Navnet kunne ikke gemmes.\n\n{ex.Message}", Dialogs.Slags.Pas_paa);
+        }
+    }
+
+    /// <summary>
+    /// Flytter dokumentet til en mappe. Kun feltet ændrer sig — filen bliver
+    /// liggende, hvor den er, så gemte stier og sikkerhedskopier stadig virker.
+    /// </summary>
+    private void Flyt_Click(object sender, RoutedEventArgs e)
+    {
+        if (_valgt is null) return;
+
+        var vindue = new Dialogs.MappeVaelger(
+            NoteApp.Core.Mapper.Slags.Dokumenter, _valgt.Mappe, "dokumentet")
+        { Owner = Window.GetWindow(this) };
+
+        if (vindue.ShowDialog() != true) return;
+
+        try
+        {
+            _valgt.Mappe = vindue.Valgt;
+            DocumentStore.Save(_valgt);
+
+            var id = _valgt.Id;
+            Indlæs(id);
+
+            Status.Text = vindue.Valgt is null
+                ? "Dokumentet ligger nu uden mappe."
+                : $"Flyttet til «{vindue.Valgt}».";
+        }
+        catch (Exception ex)
+        {
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Kunne ikke flytte",
+                ex.Message, Dialogs.Slags.Pas_paa);
         }
     }
 
