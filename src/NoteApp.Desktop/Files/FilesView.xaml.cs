@@ -144,15 +144,50 @@ public partial class FilesView : UserControl
         Opdater();
     }
 
-    private void Koer_Click(object sender, RoutedEventArgs e)
+    /// <summary>
+    /// Tager sikkerhedskopien — på en baggrundstråd.
+    ///
+    /// HVORFOR DET IKKE MAA KOERE HER
+    ///
+    /// Foer laa BackupService.Run() direkte i denne handler, altsaa paa
+    /// UI-traaden. Med et par hundrede megabyte gik det upaafaldende. Da
+    /// datamappen voksede, holdt vinduet op med at tegne sig selv, og Windows
+    /// skrev «Svarer ikke» i titelbjaelken, mens kopien koerte helt fint.
+    ///
+    /// Det er den vaerste slags fejl i netop denne funktion: en bruger, der
+    /// tror, appen er gaaet ned, lukker den — og saa ER sikkerhedskopien
+    /// afbrudt. Fejlen skabte det nedbrud, den lignede.
+    ///
+    /// Task.Run holder traaden fri, saa vinduet tegner og knappen kan vise,
+    /// at der arbejdes.
+    /// </summary>
+    private async void Koer_Click(object sender, RoutedEventArgs e)
     {
         KoerKnap.IsEnabled = false;
+        var oprindeligTekst = KoerKnap.Content;
+        KoerKnap.Content = "Tager kopi …";
+
         var medLyd = AppSettings.Current.BackupIncludeAudio;
-        Status.Text = "Tager sikkerhedskopi …";
+        var start = DateTime.Now;
+
+        // Et ur, der taeller. En besked, der har staaet uaendret i to
+        // minutter, kan ikke skelnes fra en, der haenger.
+        var ur = new System.Windows.Threading.DispatcherTimer
+        {
+            Interval = TimeSpan.FromSeconds(1)
+        };
+        ur.Tick += (_, _) =>
+        {
+            var gaaet = DateTime.Now - start;
+            Status.Text = $"Tager sikkerhedskopi … {gaaet.TotalSeconds:0} sek. " +
+                          "Du kan roligt lave noget andet imens.";
+        };
+        ur.Start();
 
         try
         {
-            var r = BackupService.Run(Destination, includeAudio: medLyd);
+            var r = await Task.Run(() => BackupService.Run(Destination, includeAudio: medLyd));
+
             Status.Text = $"Færdig: {r.Files} filer, {r.MegaBytes:0.0} MB " +
                           $"({(medLyd ? "med lyd" : "uden lyd")}) på {r.Elapsed.TotalSeconds:0.0} sek. " +
                           $"{r.Kept} arkiver gemt.";
@@ -165,6 +200,8 @@ public partial class FilesView : UserControl
         }
         finally
         {
+            ur.Stop();
+            KoerKnap.Content = oprindeligTekst;
             KoerKnap.IsEnabled = true;
         }
     }

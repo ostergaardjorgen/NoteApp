@@ -1,4 +1,4 @@
-using System.IO.Compression;
+﻿using System.IO.Compression;
 using System.Text;
 
 namespace NoteApp.Core;
@@ -83,6 +83,8 @@ public static class BackupService
             long størrelse;
             try { størrelse = new FileInfo(f).Length; } catch (IOException) { continue; }
 
+            if (ErMotorfil(f)) continue;
+
             alt += størrelse;
             if (IsAudio(f)) lydFiler++;
             else udenLyd += størrelse;
@@ -108,13 +110,14 @@ public static class BackupService
         if (!Directory.Exists(kilde))
             throw new DirectoryNotFoundException($"Datamappen findes ikke: {kilde}");
 
-        if (!File.Exists(UserDataPaths.LearningDatabase) && !Directory.Exists(UserDataPaths.Meetings))
+        if (!Directory.Exists(UserDataPaths.Meetings) && !Directory.Exists(Documents.DocumentStore.Directory))
             throw new InvalidOperationException(
-                $"Datamappen {kilde} indeholder hverken ordbog eller optagelser. Det ligner den forkerte mappe.");
+                $"Datamappen {kilde} indeholder hverken optagelser eller dokumenter. Det ligner den forkerte mappe.");
 
         Directory.CreateDirectory(destination);
 
         var filer = Directory.GetFiles(kilde, "*", SearchOption.AllDirectories)
+            .Where(f => !ErMotorfil(f))
             .Where(f => includeAudio || !IsAudio(f))
             .ToArray();
 
@@ -125,14 +128,27 @@ public static class BackupService
                     : $"Der er kun lydfiler i {kilde}, og lyd er slået fra. Slå lyd til, eller kør appen først.");
 
         var arkiv = Path.Combine(destination, $"noteapp-data_{DateTime.Now:yyyy-MM-dd_HHmm}.zip");
+
+        // ARKIVET BYGGES UNDER ET ANDET NAVN OG DOEBES OM TIL SIDST.
+        //
+        // Existing() finder arkiver paa moenstret noteapp-data_*.zip. Byggede
+        // vi direkte paa det navn, ville en afbrudt koersel - appen lukket,
+        // strommen vaek, disken fuld - efterlade en halv zip, der staar i
+        // listen som en rigtig sikkerhedskopi. Man opdager det den dag, man
+        // skal bruge den. Maalt 18-08-2026: en afbrudt koersel efterlod
+        // noteapp-data_2026-08-18_1547.zip paa 870 MB, som saa gyldig ud.
+        //
+        // .part matcher ikke moenstret, saa en halv fil er usynlig for baade
+        // listen og rotationen.
+        var undervejs = arkiv + ".part";
         var ur = System.Diagnostics.Stopwatch.StartNew();
 
-        if (File.Exists(arkiv)) File.Delete(arkiv);
+        if (File.Exists(undervejs)) File.Delete(undervejs);
 
         // Arkivet bygges fil for fil frem for med CreateFromDirectory, netop
         // for at kunne udelade lyden. Stierne gemmes relativt til datamappen,
         // saa gendannelse lander samme sted, uanset hvor mappen ligger.
-        using (var zip = ZipFile.Open(arkiv, ZipArchiveMode.Create))
+        using (var zip = ZipFile.Open(undervejs, ZipArchiveMode.Create))
         {
             foreach (var f in filer)
             {
@@ -143,21 +159,30 @@ public static class BackupService
         }
         ur.Stop();
 
-        // Krav 1: aabn arkivet med det samme.
+        // Krav 1: aabn arkivet med det samme. Det sker MENS det hedder .part,
+        // saa en fil, der ikke kan aabnes, aldrig naar at faa det rigtige navn.
         int iArkiv;
         try
         {
-            using var zip = ZipFile.OpenRead(arkiv);
+            using var zip = ZipFile.OpenRead(undervejs);
             iArkiv = zip.Entries.Count;
         }
         catch (Exception ex)
         {
+            Ryd(undervejs);
             throw new InvalidOperationException($"Arkivet kunne ikke åbnes efter oprettelse: {ex.Message}");
         }
 
         if (iArkiv < filer.Length)
+        {
+            Ryd(undervejs);
             throw new InvalidOperationException(
                 $"Arkivet indeholder {iArkiv} poster, men der skulle have været {filer.Length}.");
+        }
+
+        // Foerst her bliver den til en sikkerhedskopi.
+        if (File.Exists(arkiv)) File.Delete(arkiv);
+        File.Move(undervejs, arkiv);
 
         Rotate(destination, keep);
 
@@ -170,6 +195,38 @@ public static class BackupService
             $"{(includeAudio ? "MED lyd" : "uden lyd")}  fra {kilde}  -> {Path.GetFileName(arkiv)}");
 
         return new BackupResult(arkiv, filer.Length, bytes, ur.Elapsed, Existing(destination).Count());
+    }
+
+    /// <summary>
+    /// Motoren og modellerne — whisper.cpp, llama.cpp og modelfilerne.
+    ///
+    /// DE SKAL IKKE MED I EN SIKKERHEDSKOPI.
+    ///
+    /// De ligger i datamappen, fordi de er brugerens installation og ikke
+    /// kodens — men de er ikke brugerens DATA. De kan hentes igen med et
+    /// klik, de er identiske på enhver maskine, og de fylder alt.
+    ///
+    /// Målt 18-08-2026 på en almindelig installation: motormappen var 6,9 GB
+    /// af datamappens 7,1 GB. Sikkerhedskopien var altså 97 % filer, man kan
+    /// hente igen — og den tog så lang tid, at Windows skrev «Svarer ikke»
+    /// på vinduet, mens den kørte. En sikkerhedskopi, der ligner et nedbrud,
+    /// bliver ikke taget.
+    ///
+    /// 4,7 GB af det var oven i købet sprogmodeller til den lokale vej, som
+    /// blev fjernet fra appen 18-08-2026. Filer til en funktion, der ikke
+    /// findes, blev sikret hver uge.
+    /// </summary>
+    private static bool ErMotorfil(string sti)
+    {
+        var relativ = Path.GetRelativePath(UserDataPaths.Root, sti)
+            .Replace('\\', '/');
+
+        return relativ.StartsWith("motor/", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static void Ryd(string sti)
+    {
+        try { if (File.Exists(sti)) File.Delete(sti); } catch (IOException) { }
     }
 
     private static void Rotate(string destination, int keep)
