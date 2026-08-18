@@ -12,7 +12,7 @@ hvorfor, eller vil efterprøve det.
 | | Hvad | Hvor |
 |---|---|---|
 | Motor | whisper.cpp, CUDA-udgaven hvis maskinen har et NVIDIA-kort | `%LOCALAPPDATA%\NoteApp\motor\whisper` |
-| Model | Røst v3 (dansk) eller large-v3-turbo (øvrige sprog) | `%LOCALAPPDATA%\NoteApp\motor\modeller` |
+| Model | large-v3 (standard) eller large-v3-turbo | `%LOCALAPPDATA%\NoteApp\motor\modeller` |
 | Version | I `manifest.json` ved siden af motoren | skrives af appen ved installation |
 
 Er datamappen flyttet, ligger begge dele under den mappe i stedet.
@@ -29,10 +29,11 @@ ringere:
 |---|---|
 | `medium`, `small` | Mærkbart dårligere dansk. Negationer forsvinder, og det er den fejl, der vender betydningen om |
 | `small.en`, `base.en` | Kan **ikke** dansk. Bruges de til et dansk møde, kommer der volapyk ud — ikke en fejlmeddelelse |
-| `large-v3` | Afløst af Røst v3, som er den samme model finjusteret på dansk |
 
-Tilbage står to, og det ene er ikke et kompromis mod det andet: Røst til
-danske møder, `large-v3-turbo` når mødet holdes på et andet sprog.
+Tilbage står `large-v3` som standard — den eneste, der faktisk er målt i dette
+projekt (10,0 % ordfejlrate, 11 af 17 negationer bevaret) — og
+`large-v3-turbo` til en maskine, der ikke kan holde den store. Turbo er
+**ikke** målt her; det står også i kataloget.
 
 ---
 
@@ -119,39 +120,25 @@ en enkelt kørsel kan pege forkert.
 
 ---
 
-## Røst v3 — hvad den er, og hvad den koster
+## Røst v3 — prøvet af, og fravalgt
 
-`CoRal-project/roest-v3-whisper-1.5b` er OpenAI's Whisper large-v3,
-finjusteret på CoRal-v3: dansk samtale og oplæsning på tværs af aldre, køn og
-dialekter. Den er lavet af Alexandra Instituttet / Alvenir ApS.
+`CoRal-project/roest-v3-whisper-1.5b` er Whisper large-v3, finjusteret på
+dansk tale. CoRal måler den klart bedre end originalen, og den blev derfor
+undersøgt som standardmodel 18-08-2026.
 
-Appen henter en GGML-konvertering (`q8_0`, 1,66 GB), fordi whisper.cpp ikke
-kan læse safetensors. Den officielle udgivelse er kun safetensors.
+**Den kan ikke bruges gennem whisper.cpp.** Modellen er finjusteret til at
+køre uden tidsstempler; whisper.cpp beder altid om dem. Med tidsstempler
+løber afkodningen i ring, uden dem bliver hvert vindue klippet over. Målt på
+den samme oplæsning: 48,5 % ordfejlrate mod large-v3's 10,0 %, og 12 af 17
+negationer tabt.
 
-**Filen er verificeret på SHA-256** mod den, konverteringens udgiver har
-offentliggjort:
+Hele målingen med tal og forklaring står i `maaling-whisper.md`. Skal den
+bruges en dag, kræver det faster-whisper (CTranslate2) i stedet for
+whisper.cpp — altså en anden motor, ikke en indstilling.
 
-```
-aa2239e350f6296b23b0cae91b1db1c4f21cdb8501d7b343a912ebea0dd7b501
-```
-
-Det viser, at filen ikke er ændret undervejs. Det viser **ikke**, at
-konverteringen er lavet rigtigt — det gør kun en måling, og den står i
-`doc/maaling-whisper.md`.
-
-Vil man konvertere selv, ligger fremgangsmåden i whisper.cpp:
-
-```bash
-python models/convert-h5-to-ggml.py <hf-model-mappe> <whisper-repo> <ud-mappe>
-```
-
-### Licensen skal med videre
-
-Røst er under **OpenRAIL-M**, ikke MIT eller Apache. Kommerciel brug er
-tilladt, men licensen har brugsbaserede begrænsninger i Attachment A, og
-**de skal videregives til dem, der får produktet.** Det er en anden slags
-forpligtelse end de øvrige modeller i projektet, og den skal håndteres i
-leverancen — ikke kun i koden.
+Bemærk også licensen, hvis det bliver aktuelt: Røst er under **OpenRAIL-M**,
+ikke MIT eller Apache. Kommerciel brug er tilladt, men de brugsbaserede
+begrænsninger i Attachment A skal videregives til dem, der får produktet.
 
 ---
 

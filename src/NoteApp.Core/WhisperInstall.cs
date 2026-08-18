@@ -11,13 +11,7 @@ public enum ModelLanguages
     Multilingual,
 
     /// <summary>KUN engelsk. Vælges den til et dansk møde, kommer der volapyk ud.</summary>
-    EnglishOnly,
-
-    /// <summary>
-    /// KUN dansk. En model, der er finjusteret på ét sprog, kan i praksis
-    /// kun det ene — resten af Whispers sprog er trænet væk igen.
-    /// </summary>
-    Danish
+    EnglishOnly
 }
 
 public sealed record WhisperModel(
@@ -36,7 +30,7 @@ public sealed record WhisperModel(
         ? $"{GigaBytes:0.0} GB"
         : $"{Bytes / 1024.0 / 1024.0:0} MB";
 
-    public bool SupportsDanish => Languages is ModelLanguages.Multilingual or ModelLanguages.Danish;
+    public bool SupportsDanish => Languages == ModelLanguages.Multilingual;
 }
 
 public sealed record InstallState(
@@ -89,17 +83,25 @@ public static class WhisperInstall
     ///
     /// Katalogget havde large-v3, large-v3-turbo, medium, small, small.en og
     /// base.en med fordele og ulemper ved hver. Det saa ud som et oplyst valg
-    /// og var en faelde: alle de smaa er maerkbart daarligere paa dansk, og de
-    /// to engelske kan slet ikke dansk — de giver volapyk frem for en fejl.
-    /// Et valg, hvor hvert alternativ goer loesningen ringere, er ikke et
-    /// valg. Fjernet 18-08-2026.
+    /// og var en faelde: de smaa er maerkbart daarligere paa dansk, og de to
+    /// engelske kan slet ikke dansk - de giver volapyk frem for en fejl. Et
+    /// valg, hvor hvert alternativ goer loesningen ringere, er ikke et valg.
+    /// Fjernet 18-08-2026.
     ///
-    /// Tilbage staar de to, der er vaerd at have:
+    /// ROEST V3 BLEV PROEVET OG ER IKKE MED. Se doc/maaling-whisper.md.
+    /// Modellen er en dansk finjustering af large-v3, og CoRal maaler den
+    /// klart bedre end originalen - men den er finjusteret til at koere UDEN
+    /// tidsstempler (forced_decoder_ids peger paa notimestamps, og
+    /// suppress_tokens er tom). whisper.cpp beder altid om tidsstempler, og
+    /// saa loeber afkodningen i ring. Slaar man dem fra med -nt, holder den
+    /// op med at loebe i ring og begynder i stedet at klippe hvert vindue
+    /// over paa midten. Maalt paa den samme oplaesning: 48,5 % ordfejlrate
+    /// mod large-v3's 10,0 %, og 12 af 17 negationer tabt.
     ///
-    ///   · Roest v3 — en Whisper large-v3, der er finjusteret paa dansk tale
-    ///     af CoRal-projektet. Standardvalget.
-    ///   · large-v3-turbo — OpenAI's egen, flersproget. Reserven, naar moedet
-    ///     ikke holdes paa dansk.
+    /// Det er ikke modellen, der er daarlig. Det er GGML-vejen ind i
+    /// whisper.cpp, der ikke baerer dens afkodningsopsaetning med. Vil man
+    /// bruge den, skal det vaere gennem faster-whisper (CTranslate2), og det
+    /// er en anden motor end den, appen har.
     ///
     /// Stoerrelserne er de faktiske filstoerrelser, maalt med et HEAD-kald.
     /// Tallet er ikke pynt: Downloader bruger det til at afgoere, om en fil,
@@ -109,20 +111,20 @@ public static class WhisperInstall
     public static readonly IReadOnlyList<WhisperModel> Models = new[]
     {
         new WhisperModel(
-            "roest-v3", "roest-v3-q8_0.bin", 1_656_538_283L,
-            "https://huggingface.co/alfanova/roest-v3-whisper-ggml/resolve/main/roest-v3-q8_0.bin",
-            ModelLanguages.Danish,
-            "Whisper large-v3, finjusteret paa dansk tale. Standardvalget.",
-            "Trænet på CoRal-v3: dansk samtale og oplæsning på tværs af aldre, køn og dialekter. Bygger på den samme large-v3, som ellers ville være valget — men med dansk oveni.",
-            "Kun dansk. Holdes mødet på engelsk, skal der skiftes til large-v3-turbo. Licensen er OpenRAIL-M med brugsbegrænsninger, der skal følge med videre."),
+            "large-v3", "ggml-large-v3.bin", 3_095_033_483L,
+            "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v3.bin",
+            ModelLanguages.Multilingual,
+            "Standardvalget. Den eneste, der er målt på dansk her i projektet.",
+            "Målt til 10,0 % ordfejlrate på en oplæsning på 2.365 ord, 12 af 19 fagtermer og 11 af 17 negationer bevaret. Femten minutters lyd tager fire en halv minut på et RTX 2060.",
+            "Fylder 2,9 GB og kræver godt 3 GB på grafikkortet. På ren CPU er den for langsom til daglig brug."),
 
         new WhisperModel(
             "large-v3-turbo", "ggml-large-v3-turbo.bin", 1_624_555_275L,
             "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v3-turbo.bin",
             ModelLanguages.Multilingual,
-            "OpenAI's egen, flersproget. Til møder, der ikke holdes på dansk.",
-            "Kan alle de sprog, Whisper kan, og finder selv ud af hvilket. Næsten large-v3's kvalitet på omtrent det halve af tiden.",
-            "Ringere på dansk end Roest, som er trænet netop på det. Vælg den, når mødet ikke er dansk.")
+            "Halv størrelse, omtrent dobbelt hastighed. Til en maskine, der ikke kan holde large-v3.",
+            "Bruger det halve af grafikkortet og er mærkbart hurtigere. Bedste kompromis, hvis du venter på udskriften frem for at lade den køre om natten.",
+            "IKKE MÅLT i dette projekt — tallene ovenfor gælder large-v3, ikke den her. Rygtet siger «næsten lige så god»; det er ikke det samme som målt."),
     };
 
     /// <summary>
