@@ -70,23 +70,65 @@ public partial class TemplatesView : UserControl
         _skabeloner.Clear();
         _skabeloner.AddRange(PromptTemplate.LoadAll());
 
-        Liste.ItemsSource = null;
-        Liste.ItemsSource = _skabeloner;
+        // Traeet bygges forfra. Skabeloner har hverken mapper eller arkiv, saa
+        // der er eet bibliotek og ingen undermapper - formen er den samme som
+        // paa de to andre skaerme, indholdet er bare fladere.
+        _byggerTrae = true;
+
+        var varUdfoldet = _rod?.ErUdfoldet ?? true;
+
+        _rod = Biblioteker.Biblioteksnode.Bibliotek("Skabeloner", "", Transcribe.Gruppe.Moede);
+        _rod.Antal = _skabeloner.Count;
+        foreach (var t in _skabeloner)
+            _rod.Boern.Add(Biblioteker.Biblioteksnode.Skabelonnode(t));
+
+        Trae.ItemsSource = new[] { _rod };
+        _rod.ErUdfoldet = varUdfoldet;
+
+        _byggerTrae = false;
 
         if (_skabeloner.Count == 0)
         {
             Status.Text = $"Ingen skabeloner i {PromptTemplate.Directory}. Tryk «Ny skabelon» for at lave den første.";
             Detaljer.IsEnabled = false;
+            SletKnap.IsEnabled = false;
             return;
         }
 
         Detaljer.IsEnabled = true;
-        Liste.SelectedItem = _skabeloner.FirstOrDefault(t => t.Name == vælgNavn) ?? _skabeloner[0];
+
+        var valgt = _rod.Boern.FirstOrDefault(k => k.Skabelon?.Name == vælgNavn) ?? _rod.Boern[0];
+        valgt.ErValgt = true;
+        Vis(valgt.Skabelon);
     }
 
-    private void Liste_Valgt(object sender, SelectionChangedEventArgs e)
+    private Biblioteker.Biblioteksnode? _rod;
+    private bool _byggerTrae;
+
+    private void Trae_Valgt(object sender, RoutedPropertyChangedEventArgs<object> e)
     {
-        if (Liste.SelectedItem is not PromptTemplate t) return;
+        if (_byggerTrae) return;
+        if (e.NewValue is not Biblioteker.Biblioteksnode knude) return;
+
+        Vis(knude.Skabelon);
+    }
+
+    /// <summary>
+    /// Saetter redigeringsruden efter det, der er valgt. Kaldes ogsaa med
+    /// null, naar markeringen staar paa biblioteket - saa er der ikke noget
+    /// at redigere, og «Slet» skal vaere graa.
+    /// </summary>
+    private void Vis(PromptTemplate? valgtSkabelon)
+    {
+        SletKnap.IsEnabled = valgtSkabelon is not null;
+
+        if (valgtSkabelon is not { } t)
+        {
+            Detaljer.IsEnabled = false;
+            return;
+        }
+
+        Detaljer.IsEnabled = true;
 
         _indlæser = true;
         _valgt = t;

@@ -29,78 +29,117 @@ public partial class DocumentsView : UserControl
         Indlæs(aabnId);
     }
 
-    /// <summary>Alle mapper plus «Alle» øverst. Null = vis alt.</summary>
-    private const string AlleMapper = "Alle mapper";
+    /// <summary>Den valgte knude i træet. Null indtil træet er bygget.</summary>
+    private Biblioteker.Biblioteksnode? _valgtKnude;
 
+    private Biblioteker.Biblioteksnode _rod = null!;
+    private bool _byggerTrae;
+
+    /// <summary>
+    /// Bygger træet og vælger et dokument.
+    ///
+    /// Samme opbygning som «Optagelser» — se TranscribeView for hvorfor
+    /// træet bygges forfra hver gang, og hvad der skal sættes tilbage
+    /// bagefter.
+    ///
+    /// Der er ét bibliotek, ikke to. Dokumenter har ikke et arkiv: et
+    /// dokument er færdigt i det øjeblik, det er lavet.
+    /// </summary>
     private void Indlæs(string? vælgId = null)
     {
         _alle = DocumentStore.LoadAll().ToList();
 
-        // En mappe, der er i brug, skal staa paa listen - ogsaa hvis
+        // En mappe, der er i brug, skal staa i traeet - ogsaa hvis
         // mapper.json er gaaet tabt. Ellers ville dokumenterne falde ud af
-        // deres mappe uden at nogen havde flyttet dem.
+        // deres mappe, uden at nogen havde flyttet dem.
         NoteApp.Core.Mapper.SikrFindes(NoteApp.Core.Mapper.Slags.Dokumenter, _alle.Select(d => d.Mappe));
 
-        FyldMappeFilter();
+        _byggerTrae = true;
 
-        var valgtMappe = MappeFilter.SelectedItem as string;
+        var udfoldet = AlleKnuder().Where(k => k.ErUdfoldet).Select(Noegle).ToHashSet();
+        var varValgt = vælgId is not null ? "d:" + vælgId
+                     : _valgtKnude is not null ? Noegle(_valgtKnude)
+                     : null;
 
-        var vist = valgtMappe is null or AlleMapper
-            ? _alle
-            : valgtMappe == NoteApp.Core.Mapper.Ingen
-                ? _alle.Where(d => string.IsNullOrWhiteSpace(d.Mappe)).ToList()
-                : _alle.Where(d => valgtMappe.Equals(d.Mappe, StringComparison.CurrentCultureIgnoreCase)).ToList();
+        _rod = Biblioteker.Biblioteksnode.Bibliotek("Dokumenter", "\uE8F1", Transcribe.Gruppe.Moede);
+        _rod.Antal = _alle.Count;
 
-        Liste.ItemsSource = null;
-        Liste.ItemsSource = vist;
-
-        Antal.Text = vist.Count switch
+        foreach (var m in NoteApp.Core.Mapper.Alle(NoteApp.Core.Mapper.Slags.Dokumenter))
         {
-            0 => "Ingen dokumenter",
-            1 => "1 dokument",
-            _ => $"{vist.Count} dokumenter"
-        };
+            var mappe = Biblioteker.Biblioteksnode.Mappenode(m, Transcribe.Gruppe.Moede);
+            foreach (var d in _alle.Where(d => m.Equals(d.Mappe, StringComparison.CurrentCultureIgnoreCase)))
+                mappe.Boern.Add(Biblioteker.Biblioteksnode.Dokumentnode(d));
 
-        TomPanel.Visibility = vist.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
-        Detaljer.Visibility = Visibility.Collapsed;
+            mappe.Antal = mappe.Boern.Count;
+            _rod.Boern.Add(mappe);
+        }
 
-        if (vist.Count == 0)
+        foreach (var d in _alle.Where(d => string.IsNullOrWhiteSpace(d.Mappe)))
+            _rod.Boern.Add(Biblioteker.Biblioteksnode.Dokumentnode(d));
+
+        Trae.ItemsSource = new[] { _rod };
+
+        foreach (var k in AlleKnuder().Where(k => k.ErBeholder))
+            k.ErUdfoldet = udfoldet.Contains(Noegle(k));
+
+        var igen = varValgt is null ? null : AlleKnuder().FirstOrDefault(k => Noegle(k) == varValgt);
+
+        _valgtKnude = igen;
+        if (igen is not null)
         {
-            Status.Text = _alle.Count == 0
-                ? $"Dokumenter gemmes i {DocumentStore.Directory}"
-                : "Ingen dokumenter i denne mappe.";
+            igen.ErValgt = true;
+            foreach (var f in Forfaedre(igen)) f.ErUdfoldet = true;
+        }
+
+        _byggerTrae = false;
+
+        TomPanel.Visibility = _alle.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+
+        if (_alle.Count == 0)
+        {
+            Detaljer.Visibility = Visibility.Collapsed;
+            Status.Text = $"Dokumenter gemmes i {DocumentStore.Directory}";
             return;
         }
 
-        Liste.SelectedItem = vist.FirstOrDefault(d => d.Id == vælgId) ?? vist[0];
+        Vis(_valgtKnude?.Dokument);
     }
 
     /// <summary>
-    /// Fylder mappevælgeren uden at fyre SelectionChanged undervejs — den
-    /// ville kalde Indlæs igen midt i Indlæs.
+    /// En knudes identitet paa tvaers af to opbygninger af traeet. Objekterne
+    /// er nye hver gang, saa referencer duer ikke.
     /// </summary>
-    private bool _fylder;
+    private static string Noegle(Biblioteker.Biblioteksnode k) =>
+        k.Dokument is { } d ? "d:" + d.Id : "b:" + (k.Mappe ?? "");
 
-    private void FyldMappeFilter()
+    private IEnumerable<Biblioteker.Biblioteksnode> AlleKnuder() =>
+        Trae.ItemsSource is null
+            ? Enumerable.Empty<Biblioteker.Biblioteksnode>()
+            : Trae.Items.OfType<Biblioteker.Biblioteksnode>().SelectMany(r => r.MedBoern());
+
+    private IEnumerable<Biblioteker.Biblioteksnode> Forfaedre(Biblioteker.Biblioteksnode k)
     {
-        var valgt = MappeFilter.SelectedItem as string ?? AlleMapper;
+        foreach (var rod in Trae.Items.OfType<Biblioteker.Biblioteksnode>())
+        {
+            if (rod.Boern.Contains(k)) { yield return rod; yield break; }
 
-        _fylder = true;
-
-        var punkter = new List<string> { AlleMapper };
-        punkter.AddRange(NoteApp.Core.Mapper.Alle(NoteApp.Core.Mapper.Slags.Dokumenter));
-        if (_alle.Any(d => string.IsNullOrWhiteSpace(d.Mappe))) punkter.Add(NoteApp.Core.Mapper.Ingen);
-
-        MappeFilter.ItemsSource = punkter;
-        MappeFilter.SelectedItem = punkter.Contains(valgt) ? valgt : AlleMapper;
-
-        _fylder = false;
+            foreach (var mappe in rod.Boern.Where(b => b.ErBeholder))
+            {
+                if (!mappe.Boern.Contains(k)) continue;
+                yield return rod;
+                yield return mappe;
+                yield break;
+            }
+        }
     }
 
-    private void MappeFilter_Changed(object sender, SelectionChangedEventArgs e)
+    private void Trae_Valgt(object sender, RoutedPropertyChangedEventArgs<object> e)
     {
-        if (_fylder) return;
-        Indlæs();
+        if (_byggerTrae) return;
+        if (e.NewValue is not Biblioteker.Biblioteksnode knude) return;
+
+        _valgtKnude = knude;
+        Vis(knude.Dokument);
     }
 
     private void NyMappe_Click(object sender, RoutedEventArgs e)
@@ -119,13 +158,105 @@ public partial class DocumentsView : UserControl
             return;
         }
 
-        FyldMappeFilter();
-        MappeFilter.SelectedItem = navn.Trim();
+        _valgtKnude = null;
+        Indlæs();
+
+        // Den nye mappe foldes ud og markeres. Den er tom, og det skal man
+        // kunne se - ellers ligner det, at der ikke skete noget.
+        var ny = AlleKnuder().FirstOrDefault(k => k.ErBeholder && k.Mappe == navn.Trim());
+        if (ny is null) return;
+
+        _rod.ErUdfoldet = true;
+        _valgtKnude = ny;
+        ny.ErValgt = true;
+        Vis(null);
     }
 
-    private void Valgt_Changed(object sender, SelectionChangedEventArgs e)
+    // --------------------------------------------------------- traek og slip
+
+    private System.Windows.Point _traekStart;
+
+    private void Trae_MusNed(object sender, System.Windows.Input.MouseButtonEventArgs e) =>
+        _traekStart = e.GetPosition(null);
+
+    private void Trae_MusBevaeget(object sender, System.Windows.Input.MouseEventArgs e)
     {
-        if (Liste.SelectedItem is not DocumentInfo d)
+        if (e.LeftButton != System.Windows.Input.MouseButtonState.Pressed) return;
+
+        var flyttet = e.GetPosition(null) - _traekStart;
+        if (Math.Abs(flyttet.X) < SystemParameters.MinimumHorizontalDragDistance &&
+            Math.Abs(flyttet.Y) < SystemParameters.MinimumVerticalDragDistance) return;
+
+        if (e.OriginalSource is not DependencyObject kilde) return;
+        if (FindOpad<TreeViewItem>(kilde) is not { } punkt) return;
+        if (punkt.DataContext is not Biblioteker.Biblioteksnode { Dokument: { } d }) return;
+
+        DragDrop.DoDragDrop(punkt, new DataObject(typeof(DocumentInfo), d), DragDropEffects.Move);
+    }
+
+    private static T? FindOpad<T>(DependencyObject? d) where T : DependencyObject
+    {
+        while (d is not null and not T) d = System.Windows.Media.VisualTreeHelper.GetParent(d);
+        return d as T;
+    }
+
+    private void Trae_TraekOver(object sender, DragEventArgs e)
+    {
+        var maal = MaalUnderMusen(e);
+        foreach (var k in AlleKnuder()) k.ErDropmaal = ReferenceEquals(k, maal);
+
+        e.Effects = maal is null ? DragDropEffects.None : DragDropEffects.Move;
+        e.Handled = true;
+    }
+
+    private void Trae_TraekForlod(object sender, DragEventArgs e) => RydDropmaal();
+
+    private void RydDropmaal()
+    {
+        foreach (var k in AlleKnuder()) k.ErDropmaal = false;
+    }
+
+    private Biblioteker.Biblioteksnode? MaalUnderMusen(DragEventArgs e)
+    {
+        if (!e.Data.GetDataPresent(typeof(DocumentInfo))) return null;
+
+        var ramt = Trae.InputHitTest(e.GetPosition(Trae)) as DependencyObject;
+        var knude = FindOpad<TreeViewItem>(ramt)?.DataContext as Biblioteker.Biblioteksnode;
+
+        return knude is { ErBeholder: true } ? knude : null;
+    }
+
+    /// <summary>
+    /// Slipper et dokument i en mappe — eller i roden, som tager det ud af
+    /// den mappe, det lå i. Samme regler som i «Optagelser».
+    /// </summary>
+    private void Trae_Slip(object sender, DragEventArgs e)
+    {
+        RydDropmaal();
+
+        var maal = MaalUnderMusen(e);
+        if (maal is null) return;
+        if (e.Data.GetData(typeof(DocumentInfo)) is not DocumentInfo d) return;
+
+        d.Mappe = maal.Mappe;
+        DocumentStore.Save(d);
+
+        maal.ErUdfoldet = true;
+        Indlæs(d.Id);
+
+        Status.Text = maal.Mappe is null
+            ? $"«{d.Title}» ligger nu uden mappe."
+            : $"«{d.Title}» er flyttet til «{maal.Navn}».";
+    }
+
+    /// <summary>
+    /// Saetter skaermen efter det, der er valgt i traeet. Kaldes ogsaa med
+    /// null, naar markeringen staar paa en mappe - saa skal knapperne blive
+    /// graa, og detaljeruden skal vaek.
+    /// </summary>
+    private void Vis(DocumentInfo? valgtDokument)
+    {
+        if (valgtDokument is not { } d)
         {
             _valgt = null;
             SletKnap.IsEnabled = AabnKnap.IsEnabled = GemKnap.IsEnabled = OmdoebKnap.IsEnabled = FlytKnap.IsEnabled = false;

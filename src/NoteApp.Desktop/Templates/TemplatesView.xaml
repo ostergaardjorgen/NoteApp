@@ -3,16 +3,25 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              Background="{StaticResource Baggrund}">
 
+  <!-- Samme opbygning som «Optagelser» og «Dokumenter»: vaerktoejslinje med
+       ikoner oeverst, bibliotekstrae til venstre, indhold til hoejre.
+
+       Skabeloner har ingen mapper og intet arkiv - de er faa, og de er alle
+       sammen i brug. Traeet har derfor eet bibliotek uden undermapper, og der
+       er ikke noget at traekke nogen steder hen. Formen er den samme
+       alligevel: skaermene skal kunne genkendes, ogsaa naar den ene har
+       mindre at vise end de andre. -->
+
   <Grid Margin="24,20,24,20">
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
       <RowDefinition Height="Auto" />
-      <RowDefinition Height="*" />
       <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
     </Grid.RowDefinitions>
 
-    <!-- ============================ Topbjælke ============================ -->
-    <StackPanel Grid.Row="0" Margin="0,0,0,14">
+    <StackPanel Grid.Row="0" Margin="0,0,0,12">
       <TextBlock Text="Skabeloner" Style="{StaticResource Overskrift}" />
       <TextBlock Style="{StaticResource Underskrift}"
                  Text="Hvad der skal laves ud af en optagelse" />
@@ -31,40 +40,112 @@
       </StackPanel>
     </Border>
 
-    <!-- ===================== Liste + redigering ===================== -->
-    <Grid Grid.Row="2">
+
+    <Border Grid.Row="2" Background="{StaticResource Panel}" CornerRadius="8"
+            BorderBrush="{StaticResource PanelKant}" BorderThickness="1" Padding="8,6">
+      <DockPanel>
+        <Button DockPanel.Dock="Right" x:Name="GemKnap" Content="Gem ændringer" Click="Gem_Click"
+                Style="{StaticResource Primaer}" MinWidth="150" IsEnabled="False"
+                ToolTip="Gem det, du har rettet i skabelonen" />
+
+        <Border DockPanel.Dock="Right" Width="1" Margin="10,4,14,4"
+                Background="{StaticResource PanelKant}" />
+
+        <Button DockPanel.Dock="Left" x:Name="NyKnap" Style="{StaticResource IkonKnap}"
+                Click="Ny_Click" AutomationProperties.Name="Ny skabelon"
+                ToolTip="Ny skabelon — start fra en tom og skriv din egen">
+          <TextBlock Text="&#xE710;" FontFamily="Segoe MDL2 Assets" />
+        </Button>
+
+        <Border DockPanel.Dock="Left" Width="1" Margin="6,4,8,4"
+                Background="{StaticResource PanelKant}" />
+
+        <Button DockPanel.Dock="Left" x:Name="MappeKnap" Style="{StaticResource IkonKnap}"
+                Click="Mappe_Click" AutomationProperties.Name="Åbn skabelonmappen"
+                ToolTip="Åbn skabelonmappen på disken">
+          <TextBlock Text="&#xE838;" FontFamily="Segoe MDL2 Assets" />
+        </Button>
+
+        <Border DockPanel.Dock="Left" Width="1" Margin="6,4,8,4"
+                Background="{StaticResource PanelKant}" />
+
+        <Button DockPanel.Dock="Left" x:Name="SletKnap" Style="{StaticResource IkonKnapFare}"
+                Click="Slet_Click" IsEnabled="False" AutomationProperties.Name="Slet skabelon"
+                ToolTip="Slet den valgte skabelon. Kan ikke fortrydes">
+          <TextBlock Text="&#xE74D;" FontFamily="Segoe MDL2 Assets" />
+        </Button>
+
+        <Grid />
+      </DockPanel>
+    </Border>
+
+    <Grid Grid.Row="3" Margin="2,8,2,10">
+      <TextBlock x:Name="Status" Style="{StaticResource Underskrift}" VerticalAlignment="Bottom" />
+    </Grid>
+
+    <Grid Grid.Row="4">
       <Grid.ColumnDefinitions>
-        <ColumnDefinition Width="250" />
+        <ColumnDefinition Width="300" />
+        <ColumnDefinition Width="Auto" />
         <ColumnDefinition Width="*" />
       </Grid.ColumnDefinitions>
 
-      <!-- Venstre: skabelonerne -->
       <Border Grid.Column="0" Background="{StaticResource Panel}" CornerRadius="10"
-              BorderBrush="{StaticResource PanelKant}" BorderThickness="1" Margin="0,0,10,0">
+              BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
         <DockPanel>
-          <StackPanel DockPanel.Dock="Bottom" Margin="12,8,12,12">
-            <Button x:Name="NyKnap" Content="+ Ny skabelon" Click="Ny_Click" Padding="10,7" />
-            <Button x:Name="SletKnap" Content="Slet den valgte" Click="Slet_Click"
-                    Padding="10,7" Margin="0,6,0,0" />
-          </StackPanel>
+          <TextBlock DockPanel.Dock="Top" Text="BIBLIOTEKER" FontSize="10.5" FontWeight="SemiBold"
+                     Margin="16,14,16,8" Foreground="{StaticResource TekstMeget}" />
 
-          <ListBox x:Name="Liste" DockPanel.Dock="Top" Margin="8" BorderThickness="0"
-                   Background="Transparent" SelectionChanged="Liste_Valgt">
-            <ListBox.ItemTemplate>
-              <DataTemplate>
-                <StackPanel Margin="4,6">
-                  <TextBlock Text="{Binding Name}" FontSize="14" FontWeight="SemiBold" />
-                  <TextBlock Text="{Binding Description}" FontSize="11.5" TextTrimming="CharacterEllipsis"
-                             Foreground="{StaticResource TekstMeget}" />
-                </StackPanel>
-              </DataTemplate>
-            </ListBox.ItemTemplate>
-          </ListBox>
+          <TreeView x:Name="Trae" Background="Transparent" BorderThickness="0"
+                    Margin="6,0,6,10" SelectedItemChanged="Trae_Valgt"
+                    ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+
+            <TreeView.ItemContainerStyle>
+              <Style TargetType="TreeViewItem">
+                <Setter Property="Padding" Value="2,1" />
+                <Setter Property="Foreground" Value="{StaticResource TekstSvag}" />
+                <Setter Property="IsExpanded" Value="{Binding ErUdfoldet, Mode=TwoWay}" />
+                <Setter Property="IsSelected" Value="{Binding ErValgt, Mode=TwoWay}" />
+              </Style>
+            </TreeView.ItemContainerStyle>
+
+            <TreeView.ItemTemplate>
+              <HierarchicalDataTemplate ItemsSource="{Binding Boern}">
+                <Border x:Name="rk" CornerRadius="5" Padding="6,4" Background="Transparent"
+                        AutomationProperties.Name="{Binding Visning}">
+                  <Border.ToolTip>
+                    <StackPanel MaxWidth="360">
+                      <TextBlock Text="{Binding Navn}" FontWeight="SemiBold" FontSize="13"
+                                 TextWrapping="Wrap" Margin="0,0,0,6" />
+                      <TextBlock Text="{Binding Linje1}" FontSize="12.5" TextWrapping="Wrap" />
+                      <TextBlock Text="{Binding Linje2}" FontSize="12.5" Margin="0,3,0,0"
+                                 TextWrapping="Wrap" />
+                    </StackPanel>
+                  </Border.ToolTip>
+                  <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="{Binding Glyf}" FontFamily="Segoe MDL2 Assets" FontSize="13"
+                               VerticalAlignment="Center" Margin="0,0,9,0"
+                               Foreground="{StaticResource Accent}" />
+                    <TextBlock Text="{Binding Visning}" FontSize="12.5" VerticalAlignment="Center"
+                               TextTrimming="CharacterEllipsis" />
+                  </StackPanel>
+                </Border>
+                <HierarchicalDataTemplate.Triggers>
+                  <DataTrigger Binding="{Binding ErBeholder}" Value="True">
+                    <Setter TargetName="rk" Property="ToolTipService.IsEnabled" Value="False" />
+                  </DataTrigger>
+                </HierarchicalDataTemplate.Triggers>
+              </HierarchicalDataTemplate>
+            </TreeView.ItemTemplate>
+          </TreeView>
         </DockPanel>
       </Border>
 
+      <GridSplitter Grid.Column="1" Width="10" HorizontalAlignment="Stretch"
+                    Background="Transparent" />
+
       <!-- Højre: den valgte skabelon -->
-      <Border Grid.Column="1" Background="{StaticResource Panel}" CornerRadius="10"
+      <Border Grid.Column="2" Background="{StaticResource Panel}" CornerRadius="10"
               BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
         <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="22,18">
           <StackPanel x:Name="Detaljer">
@@ -124,19 +205,6 @@
           </StackPanel>
         </ScrollViewer>
       </Border>
-    </Grid>
-
-    <!-- ============================ Bundlinje ============================ -->
-    <Grid Grid.Row="3" Margin="0,14,0,0">
-      <TextBlock x:Name="Status" VerticalAlignment="Center" FontSize="12"
-                 Foreground="{StaticResource TekstMeget}" TextWrapping="Wrap" />
-
-      <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-        <Button x:Name="MappeKnap" Content="Åbn skabelonmappen" Click="Mappe_Click" Padding="14,8" />
-        <Button x:Name="GemKnap" Content="Gem ændringer" Click="Gem_Click" Margin="10,0,0,0"
-                Padding="18,8" IsEnabled="False"
-                Background="{StaticResource Accent}" Foreground="#FF0B1220" BorderThickness="0" />
-      </StackPanel>
     </Grid>
   </Grid>
 </UserControl>

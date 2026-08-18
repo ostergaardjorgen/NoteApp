@@ -594,6 +594,18 @@ public partial class TranscribeView : UserControl
         // Findes teksten allerede, vises den frem for forklaringen. Det er den,
         // man er kommet efter, naar optagelsen er skrevet ud een gang.
         var færdig = valgt is null ? null : FindTekst(valgt.Mappe);
+
+        // KNAPPEN SIGER, HVAD DER SKER - IKKE HVAD DEN HEDDER.
+        //
+        // «Transskribér» var det samme ord, uanset om optagelsen aldrig var
+        // skrevet ud, eller om man var ved at goere det om. Forskellen er
+        // vaerd at vide: den ene gang faar man noget nyt, den anden gang
+        // overskriver man en udskrift, man maaske har rettet i.
+        KoerKnap.Content = færdig is null ? "Opret transskription" : "Opdatér transskription";
+        KoerKnap.ToolTip = færdig is null
+            ? "Skriv lyden ud til tekst her på maskinen"
+            : "Skriv lyden ud igen. Den nuværende udskrift bliver overskrevet";
+
         ReferatKnap.IsEnabled = færdig is not null && _afbryd is null;
         OmdoebKnap.IsEnabled = valgt is not null && _afbryd is null;
         FlytKnap.IsEnabled = valgt is not null && _afbryd is null;
@@ -604,7 +616,7 @@ public partial class TranscribeView : UserControl
             Resultat.Visibility = Visibility.Visible;
             Resultat.Text = File.ReadAllText(færdig, System.Text.Encoding.UTF8).Trim();
             Resultat.Foreground = (Brush)FindResource("Tekst");
-            Status.Text = "Skrevet ud tidligere. Tryk «Transskribér» for at gøre det igen.";
+            Status.Text = "Skrevet ud tidligere. Tryk «Opdatér transskription» for at gøre det om.";
             return;
         }
 
@@ -622,8 +634,8 @@ public partial class TranscribeView : UserControl
 
         ForklaringOverskrift.Text = "Fra lyd til tekst";
         ForklaringUnder.Text = valgt is null
-            ? "Fold «Møder» ud i træet til venstre, vælg en optagelse, og tryk «Transskribér» øverst. Så skriver appen alt det talte ud som tekst, du kan læse, søge i og rette."
-            : $"«{valgt.Titel}» er klar. Tryk «Transskribér» øverst, så skriver appen alt det talte ud som tekst, du kan læse, søge i og rette.";
+            ? "Fold «Møder» ud i træet til venstre, vælg en optagelse, og tryk «Opret transskription» øverst. Så skriver appen alt det talte ud som tekst, du kan læse, søge i og rette."
+            : $"«{valgt.Titel}» er klar. Tryk «Opret transskription» øverst, så skriver appen alt det talte ud som tekst, du kan læse, søge i og rette.";
         Status.Text = "";
     }
 
@@ -690,7 +702,7 @@ public partial class TranscribeView : UserControl
         var tekstFil = FindTekst(valgt.Mappe);
         if (tekstFil is null)
         {
-            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Ingen tekst at arbejde med", "Optagelsen er ikke skrevet ud endnu. Tryk «Transskribér» først.", Dialogs.Slags.Valg);
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Ingen tekst at arbejde med", "Optagelsen er ikke skrevet ud endnu. Tryk «Opret transskription» først.", Dialogs.Slags.Valg);
             return;
         }
 

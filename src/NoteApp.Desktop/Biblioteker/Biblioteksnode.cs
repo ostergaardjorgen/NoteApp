@@ -46,11 +46,19 @@ public sealed class Biblioteksnode : INotifyPropertyChanged
     public static Biblioteksnode Mappenode(string navn, Transcribe.Gruppe gruppe) =>
         new(Slags.Mappe, navn, "\uE8B7", gruppe, navn);
 
+    /// <summary>Et dokument. Kan trækkes, men ikke slippes noget i.</summary>
+    public static Biblioteksnode Dokumentnode(NoteApp.Core.Documents.DocumentInfo d) =>
+        new(Slags.Optagelse, d.Title, "\uE8A5", Transcribe.Gruppe.Moede, d.Mappe) { Emne = d };
+
+    /// <summary>En skabelon. Samme rolle som et dokument i træet.</summary>
+    public static Biblioteksnode Skabelonnode(NoteApp.Core.Llm.PromptTemplate t) =>
+        new(Slags.Optagelse, t.Name, "\uE8A5", Transcribe.Gruppe.Moede, null) { Emne = t };
+
     /// <summary>En optagelse. Kan trækkes, men ikke slippes noget i.</summary>
     public static Biblioteksnode Optagelsesnode(Transcribe.OptagelseVisning o) =>
         new(Slags.Optagelse, o.Titel, o.ErSkrevetUd ? "\uE8A5" : "\uE720", o.Gruppe, o.Emnemappe)
         {
-            Optagelse = o
+            Emne = o
         };
 
     public Slags Art { get; }
@@ -66,8 +74,18 @@ public sealed class Biblioteksnode : INotifyPropertyChanged
     /// </summary>
     public string? Mappe { get; }
 
-    /// <summary>Sat på optagelsesknuder, null på alt andet.</summary>
-    public Transcribe.OptagelseVisning? Optagelse { get; private init; }
+    /// <summary>
+    /// Det, knuden står for: en optagelse, et dokument eller en skabelon.
+    ///
+    /// Én slags knude til tre skærme. Alternativet var tre næsten ens træer,
+    /// og så ville en rettelse i det ene skulle laves tre gange — det er den
+    /// slags, der ender med tre skærme, der opfører sig lidt forskelligt.
+    /// </summary>
+    public object? Emne { get; private init; }
+
+    public Transcribe.OptagelseVisning? Optagelse => Emne as Transcribe.OptagelseVisning;
+    public NoteApp.Core.Documents.DocumentInfo? Dokument => Emne as NoteApp.Core.Documents.DocumentInfo;
+    public NoteApp.Core.Llm.PromptTemplate? Skabelon => Emne as NoteApp.Core.Llm.PromptTemplate;
 
     public bool ErBeholder => Art != Slags.Optagelse;
 
@@ -88,7 +106,30 @@ public sealed class Biblioteksnode : INotifyPropertyChanged
     /// </summary>
     public string Visning => Art == Slags.Optagelse ? Navn : $"{Navn} ({Antal})";
 
+    /// <summary>Den lille linje under navnet. Kun optagelser har en.</summary>
     public string? Under => Optagelse?.Detaljer;
+
+    /// <summary>
+    /// Foerste linje i hjaelpeteksten. Hver slags emne svarer paa det samme
+    /// spoergsmaal med sit eget: hvornaar er det her fra?
+    /// </summary>
+    public string Linje1 => Emne switch
+    {
+        Transcribe.OptagelseVisning o => o.Tidsrum,
+        NoteApp.Core.Documents.DocumentInfo d => $"Lavet {d.Created.LocalDateTime:dddd d. MMMM yyyy  ·  HH:mm}",
+        NoteApp.Core.Llm.PromptTemplate t => t.Description ?? "Ingen beskrivelse",
+        _ => ""
+    };
+
+    /// <summary>Anden linje: hvor stort, hvor langt, hvad det bygger paa.</summary>
+    public string Linje2 => Emne switch
+    {
+        Transcribe.OptagelseVisning o => o.Varighed,
+        NoteApp.Core.Documents.DocumentInfo d =>
+            $"Skabelon: {(string.IsNullOrWhiteSpace(d.Template) ? "ukendt" : d.Template)}",
+        NoteApp.Core.Llm.PromptTemplate t => $"Længde: op til {t.MaxTokens} tokens",
+        _ => ""
+    };
 
     private bool _erUdfoldet;
 

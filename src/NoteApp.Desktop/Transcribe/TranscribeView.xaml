@@ -63,8 +63,8 @@
                 Visibility="Collapsed" Margin="8,0,0,0" />
 
         <Button DockPanel.Dock="Right" x:Name="KoerKnap" Click="Koer_Click"
-                Style="{StaticResource Primaer}" MinWidth="140" IsEnabled="False"
-                Content="Transskribér"
+                Style="{StaticResource Primaer}" MinWidth="178" IsEnabled="False"
+                Content="Opret transskription"
                 ToolTip="Skriv lyden ud til tekst her på maskinen" />
 
         <Border DockPanel.Dock="Right" Width="1" Margin="10,4,14,4"
@@ -245,7 +245,7 @@
                          TextWrapping="Wrap" Text="Fra lyd til tekst" />
               <TextBlock x:Name="ForklaringUnder" FontSize="13.5" LineHeight="22" Margin="0,10,0,0"
                          TextWrapping="Wrap" Foreground="{StaticResource TekstSvag}"
-                         Text="Fold «Møder» ud i træet til venstre, vælg en optagelse, og tryk «Transskribér» øverst. Så skriver appen alt det talte ud som tekst, du kan læse, søge i og rette." />
+                         Text="Fold «Møder» ud i træet til venstre, vælg en optagelse, og tryk «Opret transskription» øverst. Så skriver appen alt det talte ud som tekst, du kan læse, søge i og rette." />
 
               <StackPanel Margin="0,22,0,0">
                 <Grid Margin="0,0,0,14">
