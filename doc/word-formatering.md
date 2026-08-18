@@ -71,6 +71,33 @@ mere tekst pr. side, uden at linjerne bliver for lange til at læse.
 standard, som på en maskine med amerikansk regionsopsætning er Letter — og så
 falder sidebrud et andet sted, end man har set dem.
 
+## Sidefod
+
+Centreret sidetal med en tankestreg på hver side:
+
+```
+— 3 —
+```
+
+Grå, 9 pt. Intet andet.
+
+**Der står ikke «Side» eller «Page».** Et referat af et engelsk møde skrives af
+et dansk program — skrev der «Side 3», ville det stå på de engelske dokumenter
+også. Et tal mellem to streger betyder det samme på begge sprog og skal ikke
+oversættes.
+
+**«af 7» er fravalgt.** Det kræver et `NUMPAGES`-felt mere, og et referat er
+ikke et dokument, man samler fra en printerbakke.
+
+Tallet er et **felt** (`PAGE`), ikke en tekst. Word regner det ud pr. side.
+
+To ting, der er lette at få galt i halsen:
+
+- `footerReference` skal stå **først** i `sectPr`, før `pgSz`. Bytter man om,
+  afviser Word hele filen med «kan ikke åbnes» og siger ikke hvorfor.
+- `document.xml` skal have `xmlns:r` erklæret, for `footerReference` peger på
+  en relation.
+
 ## Afsnit
 
 | | |

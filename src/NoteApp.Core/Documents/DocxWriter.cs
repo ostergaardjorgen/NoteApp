@@ -72,6 +72,7 @@ public static class DocxWriter
             Skriv(zip, "word/settings.xml", Settings());
             Skriv(zip, "word/styles.xml", Styles());
             Skriv(zip, "word/numbering.xml", Numbering());
+            Skriv(zip, "word/footer1.xml", Footer());
             Skriv(zip, "word/document.xml", Document(title, markdown, forside));
         }
 
@@ -94,6 +95,7 @@ public static class DocxWriter
           <Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/>
           <Override PartName="/word/settings.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.settings+xml"/>
           <Override PartName="/word/numbering.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml"/>
+          <Override PartName="/word/footer1.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml"/>
           <Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/>
         </Types>
         """;
@@ -112,7 +114,40 @@ public static class DocxWriter
           <Relationship Id="rId1" Type="{NsRel}/styles" Target="styles.xml"/>
           <Relationship Id="rId2" Type="{NsRel}/numbering" Target="numbering.xml"/>
           <Relationship Id="rId3" Type="{NsRel}/settings" Target="settings.xml"/>
+          <Relationship Id="rId4" Type="{NsRel}/footer" Target="footer1.xml"/>
         </Relationships>
+        """;
+
+    /// <summary>
+    /// Sidefoden: sidetallet, centreret, med en tankestreg på hver side.
+    ///
+    /// HVORFOR DER IKKE STÅR «SIDE» ELLER «AF»
+    ///
+    /// Et referat af et engelsk møde skrives af et dansk program. Skrev der
+    /// «Side 3», ville det stå på engelske dokumenter også — og «Page 3» ville
+    /// stå på de danske. Et tal mellem to strege betyder det samme på begge
+    /// sprog og skal ikke oversættes.
+    ///
+    /// «af 7» er også fravalgt. Det kræver et NUMPAGES-felt mere, og et
+    /// referat er ikke et dokument, man samler fra en printerbakke.
+    ///
+    /// Tallet er et FELT, ikke en tekst. Word regner det ud pr. side; «1» i
+    /// filen er kun den værdi, der vises, indtil Word har regnet efter.
+    /// </summary>
+    private static string Footer() => $"""
+        <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+        <w:ftr xmlns:w="{NsW}">
+          <w:p>
+            <w:pPr><w:pStyle w:val="Footer"/><w:jc w:val="center"/></w:pPr>
+            <w:r><w:t xml:space="preserve">— </w:t></w:r>
+            <w:r><w:fldChar w:fldCharType="begin"/></w:r>
+            <w:r><w:instrText xml:space="preserve"> PAGE </w:instrText></w:r>
+            <w:r><w:fldChar w:fldCharType="separate"/></w:r>
+            <w:r><w:t>1</w:t></w:r>
+            <w:r><w:fldChar w:fldCharType="end"/></w:r>
+            <w:r><w:t xml:space="preserve"> —</w:t></w:r>
+          </w:p>
+        </w:ftr>
         """;
 
     /// <summary>
@@ -248,6 +283,14 @@ public static class DocxWriter
                tredjedel af foerste side. contextualSpacing slaar afstanden fra
                MELLEM linjer af samme slags, men beholder den efter den sidste
                - saa blokken haenger sammen og slipper teksten under sig. -->
+          <!-- Sidefoden. Graa og lille, saa sidetallet kan ses uden at
+               konkurrere med teksten over det. -->
+          <w:style w:type="paragraph" w:styleId="Footer">
+            <w:name w:val="footer"/><w:basedOn w:val="Normal"/><w:uiPriority w:val="99"/>
+            <w:pPr><w:spacing w:after="0" w:line="240" w:lineRule="auto"/></w:pPr>
+            <w:rPr><w:sz w:val="18"/><w:szCs w:val="18"/><w:color w:val="666666"/></w:rPr>
+          </w:style>
+
           <w:style w:type="paragraph" w:styleId="Kilde">
             <w:name w:val="Kilde"/><w:basedOn w:val="Normal"/>
             <w:pPr><w:spacing w:after="200"/><w:contextualSpacing/></w:pPr>
@@ -331,13 +374,18 @@ public static class DocxWriter
         // Letter — og saa falder sidebrud et andet sted end forventet.
         return $"""
             <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-            <w:document xmlns:w="{NsW}">
+            <w:document xmlns:w="{NsW}" xmlns:r="{NsRel}">
               <w:body>{krop}
                 <!-- A4 med referencedokumentets margener: 1,5 cm foroven og
                      forneden, knap 2 cm i siderne. Det er smallere end Words
                      standard paa 2,5 cm hele vejen rundt og giver plads til
-                     mere tekst pr. side uden at linjerne bliver for lange. -->
+                     mere tekst pr. side uden at linjerne bliver for lange.
+
+                     RAEKKEFOELGEN I sectPr ER BINDENDE: footerReference skal
+                     staa FOER pgSz. Bytter man om, afviser Word hele filen
+                     med "kan ikke aabnes" og siger ikke hvorfor. -->
                 <w:sectPr>
+                  <w:footerReference w:type="default" r:id="rId4"/>
                   <w:pgSz w:w="11906" w:h="16838"/>
                   <w:pgMar w:top="850" w:right="1100" w:bottom="850" w:left="1100"
                            w:header="708" w:footer="708" w:gutter="0"/>
