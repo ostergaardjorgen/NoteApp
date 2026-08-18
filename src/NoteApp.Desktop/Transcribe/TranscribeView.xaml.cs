@@ -2,6 +2,7 @@
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using NoteApp.Core;
 using NoteApp.Core.Documents;
@@ -102,13 +103,13 @@ public partial class TranscribeView : UserControl
 
         if (aabnMappe is null) return;
 
-        var match = Optagelser.Items.Cast<OptagelseVisning>()
-            .FirstOrDefault(o => string.Equals(o.Mappe.TrimEnd('\\'), aabnMappe.TrimEnd('\\'),
-                                               StringComparison.OrdinalIgnoreCase));
-        if (match is null) return;
+        VaelgOptagelse(AlleKnuder()
+            .Select(k => k.Optagelse?.Mappe)
+            .FirstOrDefault(m => m is not null &&
+                                 string.Equals(m.TrimEnd('\\'), aabnMappe.TrimEnd('\\'),
+                                               StringComparison.OrdinalIgnoreCase)));
 
-        Optagelser.SelectedItem = match;
-        Optagelser.ScrollIntoView(match);
+        if (Valgt is not { } match) return;
 
         // Spoerg foerst, naar vinduet er tegnet. En dialog fra en konstruktoer
         // aabner over en halvfaerdig skaerm, og saa kan man ikke se, hvad man
@@ -163,90 +164,290 @@ public partial class TranscribeView : UserControl
             .ToList();
     }
 
-    /// <summary>Viser arkivet frem for de møder, der ligger fremme.</summary>
-    private bool _viserArkiv;
+    /// <summary>Den valgte knude. Null indtil træet er bygget.</summary>
+    private Biblioteker.Biblioteksnode? _valgtKnude;
 
     /// <summary>
-    /// Fylder listen med den valgte gruppe.
+    /// Den valgte optagelse — eller null, hvis markeringen står på et
+    /// bibliotek eller en mappe.
     ///
-    /// Træningsoptagelser er IKKE med nogen af stederne. En oplæsning af en
-    /// prøvetekst er ikke et møde, og når den ligger i mødelisten, skal man
-    /// hver gang læse forbi den for at finde det, man kom efter. Den hører
-    /// under «Træning», hvor der er noget at gøre ved den.
+    /// Erstatter den gamle listes SelectedItem. Alt, der før spurgte listen,
+    /// spørger nu her, så der er ét sted, der ved, hvad «det valgte» er.
+    /// </summary>
+    private OptagelseVisning? Valgt => _valgtKnude?.Optagelse;
+
+    private Biblioteker.Biblioteksnode _rodMoeder = null!;
+    private Biblioteker.Biblioteksnode _rodArkiv = null!;
+    private bool _byggerTrae;
+
+    /// <summary>
+    /// Bygger hele træet: biblioteker, mapper og optagelser.
+    ///
+    /// Træet bygges FORFRA hver gang frem for at blive rettet til. Det koster
+    /// ingenting ved den her størrelse, og det fjerner hele klassen af fejl,
+    /// hvor en mappe bliver slettet ét sted og bliver stående et andet.
+    ///
+    /// Til gengæld skal to ting sættes tilbage bagefter, fordi objekterne er
+    /// nye: hvad der var foldet ud, og hvad der var valgt. Uden det klapper
+    /// træet sammen, hver gang man flytter noget.
     /// </summary>
     private void IndlaesOptagelser()
     {
         var alle = Alle();
 
-        var moeder = alle.Count(o => o.Gruppe == Gruppe.Moede);
-        var arkiv = alle.Count(o => o.Gruppe == Gruppe.Arkiv);
-
-        var oensket = _viserArkiv ? Gruppe.Arkiv : Gruppe.Moede;
-
-        // En mappe, der er i brug, skal staa paa listen - ogsaa hvis
+        // En mappe, der er i brug, skal staa i traeet - ogsaa hvis
         // mapper.json er gaaet tabt.
-        NoteApp.Core.Mapper.SikrFindes(NoteApp.Core.Mapper.Slags.Optagelser, alle.Select(o => o.Emnemappe));
-        FyldMappeFilter(alle);
+        NoteApp.Core.Mapper.SikrFindes(NoteApp.Core.Mapper.Slags.Optagelser,
+                                       alle.Select(o => o.Emnemappe));
 
-        var iGruppen = alle.Where(o => o.Gruppe == oensket).ToList();
-        var valgtMappe = MappeFilter.SelectedItem as string;
+        _byggerTrae = true;
 
-        Optagelser.ItemsSource = valgtMappe is null or AlleMapper
-            ? iGruppen
-            : valgtMappe == NoteApp.Core.Mapper.Ingen
-                ? iGruppen.Where(o => string.IsNullOrWhiteSpace(o.Emnemappe)).ToList()
-                : iGruppen.Where(o => valgtMappe.Equals(o.Emnemappe, StringComparison.CurrentCultureIgnoreCase)).ToList();
+        var udfoldet = AlleKnuder().Where(k => k.ErUdfoldet).Select(Noegle).ToHashSet();
+        var varValgt = _valgtKnude is null ? null : Noegle(_valgtKnude);
 
-        FaneMoeder.Content = $"Møder ({moeder})";
-        FaneArkiv.Content = $"Arkiv ({arkiv})";
-        FaneMoeder.IsChecked = !_viserArkiv;
-        FaneArkiv.IsChecked = _viserArkiv;
+        _rodMoeder = Biblioteker.Biblioteksnode.Bibliotek("Møder", "\uE8F1", Gruppe.Moede);
+        _rodArkiv = Biblioteker.Biblioteksnode.Bibliotek("Arkiv", "\uE7B8", Gruppe.Arkiv);
 
+        var mapper = NoteApp.Core.Mapper.Alle(NoteApp.Core.Mapper.Slags.Optagelser);
 
-        if (Optagelser.Items.Count > 0) return;
-
-        if (_viserArkiv)
+        foreach (var rod in new[] { _rodMoeder, _rodArkiv })
         {
-            Status.Text = "Arkivet er tomt.";
-            ForklaringOverskrift.Text = "Der ligger ikke noget i arkivet";
-            ForklaringUnder.Text =
-                "Når du er færdig med et møde — skrevet ud, dokument lavet — kan du lægge det i arkivet. " +
-                "Så bliver listen forrest ved med kun at vise det, der stadig mangler noget.";
-            return;
+            var iGruppen = alle.Where(o => o.Gruppe == rod.Gruppe).ToList();
+            rod.Antal = iGruppen.Count;
+
+            // Mapperne foerst, saa optagelserne uden mappe. Samme orden som
+            // Stifinder: beholdere over indhold.
+            foreach (var m in mapper)
+            {
+                var mappe = Biblioteker.Biblioteksnode.Mappenode(m, rod.Gruppe);
+                foreach (var o in iGruppen.Where(o => m.Equals(o.Emnemappe, StringComparison.CurrentCultureIgnoreCase)))
+                    mappe.Boern.Add(Biblioteker.Biblioteksnode.Optagelsesnode(o));
+
+                mappe.Antal = mappe.Boern.Count;
+                rod.Boern.Add(mappe);
+            }
+
+            foreach (var o in iGruppen.Where(o => string.IsNullOrWhiteSpace(o.Emnemappe)))
+                rod.Boern.Add(Biblioteker.Biblioteksnode.Optagelsesnode(o));
         }
+
+        Trae.ItemsSource = new[] { _rodMoeder, _rodArkiv };
+
+        // Alt starter foldet sammen. Kun det, der VAR foldet ud, foldes ud
+        // igen - og foerste gang er der ingenting i den maengde.
+        foreach (var k in AlleKnuder().Where(k => k.ErBeholder))
+            k.ErUdfoldet = udfoldet.Contains(Noegle(k));
+
+        var igen = varValgt is null
+            ? null
+            : AlleKnuder().FirstOrDefault(k => Noegle(k) == varValgt);
+
+        _valgtKnude = igen;
+        if (igen is not null)
+        {
+            igen.ErValgt = true;
+            foreach (var f in Forfaedre(igen)) f.ErUdfoldet = true;
+        }
+
+        _byggerTrae = false;
+
+        VisTomBesked();
+    }
+
+    /// <summary>
+    /// En knudes identitet på tværs af to opbygninger af træet.
+    ///
+    /// Objekterne er nye hver gang, så referencer duer ikke. En optagelse
+    /// kendes på sin sti; en beholder på gruppe og navn.
+    /// </summary>
+    private static string Noegle(Biblioteker.Biblioteksnode k) =>
+        k.Optagelse is { } o ? "o:" + o.Mappe : $"b:{k.Gruppe}:{k.Mappe ?? ""}";
+
+    private IEnumerable<Biblioteker.Biblioteksnode> Forfaedre(Biblioteker.Biblioteksnode k)
+    {
+        foreach (var rod in AlleRoedder())
+        {
+            if (rod.Boern.Contains(k)) { yield return rod; yield break; }
+
+            foreach (var mappe in rod.Boern.Where(b => b.ErBeholder))
+            {
+                if (!mappe.Boern.Contains(k)) continue;
+                yield return rod;
+                yield return mappe;
+                yield break;
+            }
+        }
+    }
+
+    private IEnumerable<Biblioteker.Biblioteksnode> AlleRoedder() =>
+        Trae.ItemsSource is null
+            ? Enumerable.Empty<Biblioteker.Biblioteksnode>()
+            : Trae.Items.OfType<Biblioteker.Biblioteksnode>();
+
+    private IEnumerable<Biblioteker.Biblioteksnode> AlleKnuder() =>
+        AlleRoedder().SelectMany(r => r.MedBoern());
+
+    private void Bibliotek_Valgt(object sender, RoutedPropertyChangedEventArgs<object> e)
+    {
+        if (_byggerTrae) return;
+        if (e.NewValue is not Biblioteker.Biblioteksnode knude) return;
+
+        _valgtKnude = knude;
+        OpdaterValg();
+    }
+
+    /// <summary>
+    /// Beskeden, når der ikke er nogen optagelser overhovedet. Den skal sige,
+    /// hvad man gør — et tomt træ siger kun, at der ikke er noget.
+    /// </summary>
+    private void VisTomBesked()
+    {
+        if (_rodMoeder.Antal > 0 || _rodArkiv.Antal > 0) return;
 
         Status.Text = "Ingen møder endnu.";
         ForklaringOverskrift.Text = "Der ligger ingen møder her";
         ForklaringUnder.Text = "Tryk «Optag møde» øverst, når mødet begynder. Optagelsen dukker op her bagefter.";
     }
 
-    private const string AlleMapper = "Alle mapper";
-    private bool _fylder;
+    // --------------------------------------------------------- traek og slip
+
+    private Point _traekStart;
+
+    private void Trae_MusNed(object sender, MouseButtonEventArgs e) =>
+        _traekStart = e.GetPosition(null);
 
     /// <summary>
-    /// Fylder mappevælgeren uden at fyre SelectionChanged undervejs — den
-    /// ville kalde IndlaesOptagelser igen midt i IndlaesOptagelser.
+    /// Starter et træk, når musen er flyttet langt nok med knappen nede.
+    ///
+    /// Grænsen er Windows' egen. Uden den ville et almindeligt klik med en let
+    /// rystende hånd starte et træk, og så kan man ikke vælge noget i træet.
+    /// Kun optagelser kan trækkes — en mappe, man kunne slæbe ind i sig selv,
+    /// er en fejl, der venter.
     /// </summary>
-    private void FyldMappeFilter(IReadOnlyList<OptagelseVisning> alle)
+    private void Trae_MusBevaeget(object sender, MouseEventArgs e)
     {
-        var valgt = MappeFilter.SelectedItem as string ?? AlleMapper;
+        if (e.LeftButton != MouseButtonState.Pressed) return;
+        if (_afbryd is not null) return;             // der koeres - flyt ikke noget
 
-        _fylder = true;
+        var flyttet = e.GetPosition(null) - _traekStart;
 
-        var punkter = new List<string> { AlleMapper };
-        punkter.AddRange(NoteApp.Core.Mapper.Alle(NoteApp.Core.Mapper.Slags.Optagelser));
-        if (alle.Any(o => string.IsNullOrWhiteSpace(o.Emnemappe))) punkter.Add(NoteApp.Core.Mapper.Ingen);
+        if (Math.Abs(flyttet.X) < SystemParameters.MinimumHorizontalDragDistance &&
+            Math.Abs(flyttet.Y) < SystemParameters.MinimumVerticalDragDistance) return;
 
-        MappeFilter.ItemsSource = punkter;
-        MappeFilter.SelectedItem = punkter.Contains(valgt) ? valgt : AlleMapper;
+        if (e.OriginalSource is not DependencyObject kilde) return;
+        if (FindOpad<TreeViewItem>(kilde) is not { } punkt) return;
+        if (punkt.DataContext is not Biblioteker.Biblioteksnode { Optagelse: { } o }) return;
 
-        _fylder = false;
+        DragDrop.DoDragDrop(punkt, new DataObject(typeof(OptagelseVisning), o), DragDropEffects.Move);
     }
 
-    private void MappeFilter_Changed(object sender, SelectionChangedEventArgs e)
+    private static T? FindOpad<T>(DependencyObject? d) where T : DependencyObject
     {
-        if (_fylder || Optagelser is null) return;
+        while (d is not null and not T) d = VisualTreeHelper.GetParent(d);
+        return d as T;
+    }
+
+    private void Trae_TraekOver(object sender, DragEventArgs e)
+    {
+        var maal = MaalUnderMusen(e);
+
+        foreach (var k in AlleKnuder()) k.ErDropmaal = ReferenceEquals(k, maal);
+
+        e.Effects = maal is null ? DragDropEffects.None : DragDropEffects.Move;
+        e.Handled = true;
+    }
+
+    private void Trae_TraekForlod(object sender, DragEventArgs e) => RydDropmaal();
+
+    private void RydDropmaal()
+    {
+        foreach (var k in AlleKnuder()) k.ErDropmaal = false;
+    }
+
+    /// <summary>
+    /// Knuden under musen — men kun hvis der kan slippes noget i den.
+    ///
+    /// Optagelser er ikke beholdere. Slipper man en optagelse på en anden
+    /// optagelse, sker der ingenting, og musen viser det ved ikke at
+    /// fremhæve noget.
+    /// </summary>
+    private Biblioteker.Biblioteksnode? MaalUnderMusen(DragEventArgs e)
+    {
+        if (!e.Data.GetDataPresent(typeof(OptagelseVisning))) return null;
+
+        var ramt = Trae.InputHitTest(e.GetPosition(Trae)) as DependencyObject;
+        var knude = FindOpad<TreeViewItem>(ramt)?.DataContext as Biblioteker.Biblioteksnode;
+
+        return knude is { ErBeholder: true } ? knude : null;
+    }
+
+    /// <summary>
+    /// Slipper en optagelse i en knude.
+    ///
+    /// REGLERNE ER STIFINDERENS: at slippe noget i en beholder lægger det i
+    /// den beholder. Knuden bærer selv både gruppe og mappe, så:
+    ///
+    ///   · en mappe under «Møder»  → hent frem af arkivet OG sæt mappen
+    ///   · «Møder» eller «Arkiv»   → skift gruppe, og tag den ud af mappen
+    ///
+    /// Det sidste er med vilje: biblioteket ER roden, og at trække noget op i
+    /// roden er den måde, man tager det ud af en mappe igen.
+    ///
+    /// Der flyttes ingen filer. Kun meeting.json ændrer sig, så en flytning
+    /// ikke kan gå galt halvvejs og efterlade en optagelse et sted, ingen
+    /// leder.
+    /// </summary>
+    private void Trae_Slip(object sender, DragEventArgs e)
+    {
+        RydDropmaal();
+
+        var maal = MaalUnderMusen(e);
+        if (maal is null) return;
+        if (e.Data.GetData(typeof(OptagelseVisning)) is not OptagelseVisning flyttet) return;
+
+        var meta = MeetingStore.Load(flyttet.Mappe) ?? Optagelsesgruppe.Nødmetadata(flyttet.Mappe);
+
+        var skiftedeGruppe = flyttet.Gruppe != maal.Gruppe;
+        if (skiftedeGruppe)
+            meta.ArchivedAt = maal.Gruppe == Gruppe.Arkiv ? DateTimeOffset.Now : null;
+
+        meta.Mappe = maal.Mappe;      // null paa et bibliotek = ud af mappen
+        MeetingStore.Save(flyttet.Mappe, meta);
+
+        if (skiftedeGruppe)
+        {
+            Historik.Skriv(
+                maal.Gruppe == Gruppe.Arkiv ? HaendelseType.Arkiveret : HaendelseType.HentetFrem,
+                flyttet.Titel,
+                maal.Gruppe == Gruppe.Arkiv ? "Lagt i arkivet" : "Hentet frem fra arkivet",
+                sti: flyttet.Mappe);
+        }
+
+        var sti = flyttet.Mappe;
+        maal.ErUdfoldet = true;
         IndlaesOptagelser();
+        VaelgOptagelse(sti);
+
+        Status.Text = maal.Mappe is null
+            ? $"«{flyttet.Titel}» ligger nu under {maal.Navn}."
+            : $"«{flyttet.Titel}» er flyttet til «{maal.Navn}».";
+    }
+
+    /// <summary>
+    /// Markerer optagelsen med den sti — og folder ud, så den kan ses.
+    /// </summary>
+    private void VaelgOptagelse(string? sti)
+    {
+        if (sti is null) return;
+
+        var knude = AlleKnuder().FirstOrDefault(k => k.Optagelse?.Mappe == sti);
+        if (knude is null) return;
+
+        foreach (var f in Forfaedre(knude)) f.ErUdfoldet = true;
+
+        _valgtKnude = knude;
+        knude.ErValgt = true;
+        OpdaterValg();
     }
 
     private void NyMappe_Click(object sender, RoutedEventArgs e)
@@ -263,8 +464,22 @@ public partial class TranscribeView : UserControl
             return;
         }
 
+        // Den nye mappe vaelges med det samme - man oprettede den for at
+        // laegge noget i den.
+        _valgtKnude = null;
         IndlaesOptagelser();
-        MappeFilter.SelectedItem = vindue.NytNavn;
+
+        // Den nye mappe foldes ud og markeres. Den er tom, og det skal man
+        // kunne se - ellers ligner det, at der ikke skete noget.
+        var ny = AlleKnuder().FirstOrDefault(
+            k => k.ErBeholder && k.Gruppe == Gruppe.Moede && k.Mappe == vindue.NytNavn);
+
+        if (ny is null) return;
+
+        _rodMoeder.ErUdfoldet = true;
+        _valgtKnude = ny;
+        ny.ErValgt = true;
+        OpdaterValg();
     }
 
     /// <summary>
@@ -274,7 +489,7 @@ public partial class TranscribeView : UserControl
     /// </summary>
     private void Flyt_Click(object sender, RoutedEventArgs e)
     {
-        if (Optagelser.SelectedItem is not OptagelseVisning valgt) return;
+        if (Valgt is not { } valgt) return;
 
         var vindue = new Dialogs.MappeVaelger(
             NoteApp.Core.Mapper.Slags.Optagelser, valgt.Emnemappe, "optagelsen")
@@ -300,24 +515,15 @@ public partial class TranscribeView : UserControl
         // Optagelsen kan vaere filtreret vaek af mappevaelgeren nu. Findes den
         // ikke i listen, staar der ingen markering - og det er rigtigt: den
         // ligger et andet sted end det, der vises.
-        Optagelser.SelectedItem = Optagelser.Items.Cast<OptagelseVisning>()
-            .FirstOrDefault(o => o.Mappe == sti);
+        VaelgOptagelse(sti);
 
         Status.Text = vindue.Valgt is null
             ? "Optagelsen ligger nu uden mappe."
             : $"Flyttet til «{vindue.Valgt}».";
     }
 
-    private void Fane_Klik(object sender, RoutedEventArgs e)
-    {
-        if (Optagelser is null) return;
-
-        var arkiv = FaneArkiv.IsChecked == true;
-        if (arkiv == _viserArkiv) return;
-
-        _viserArkiv = arkiv;
-        IndlaesOptagelser();
-    }
+    // HER LAA Fane_Klik. Fanerne «Møder» og «Arkiv» er blevet til de to
+    // rodknuder i bibliotekstraeet, og skiftet sker nu i Bibliotek_Valgt.
 
     /// <summary>
     /// Lægger et møde væk — eller henter det frem igen.
@@ -328,7 +534,7 @@ public partial class TranscribeView : UserControl
     /// </summary>
     private void Arkiver_Click(object sender, RoutedEventArgs e)
     {
-        if (Optagelser.SelectedItem is not OptagelseVisning valgt) return;
+        if (Valgt is not { } valgt) return;
 
         var tilArkiv = valgt.Gruppe == Gruppe.Moede;
 
@@ -361,17 +567,27 @@ public partial class TranscribeView : UserControl
         IndlaesOptagelser();
     }
 
-    private void Optagelse_Valgt(object sender, SelectionChangedEventArgs e)
+    /// <summary>
+    /// Sætter skærmen efter det, der er valgt i træet.
+    ///
+    /// Hed før Optagelse_Valgt og hang på listens SelectionChanged. Nu kaldes
+    /// den også, når der markeres en mappe — så skal knapperne blive grå, og
+    /// forklaringen skal frem igen.
+    /// </summary>
+    private void OpdaterValg()
     {
-        var valgt = Optagelser.SelectedItem as OptagelseVisning;
+        var valgt = Valgt;
         KoerKnap.IsEnabled = valgt?.HarLyd == true && _afbryd is null;
         AabnKnap.IsEnabled = valgt is not null;
         SletKnap.IsEnabled = valgt is not null && _afbryd is null;
 
-        // Knappen siger, hvad der SKER — ikke hvor man er. «Arkivér» i
-        // arkivet ville lyde som at gøre det samme to gange.
+        // Ikonet er det samme begge veje; det er forklaringen, der skifter.
+        // «Arkivér» som TEKST i arkivet ville lyde som at goere det samme to
+        // gange - som ikon med et tooltip kan den sige praecis, hvad den goer.
         ArkivKnap.IsEnabled = valgt is not null && _afbryd is null;
-        ArkivKnap.Content = valgt?.Gruppe == Gruppe.Arkiv ? "Hent frem" : "Arkivér";
+        ArkivKnap.ToolTip = valgt?.Gruppe == Gruppe.Arkiv
+            ? "Hent frem — læg mødet tilbage i listen over møder"
+            : "Arkivér — læg mødet væk, når der ikke er mere at gøre ved det";
 
         if (_afbryd is not null) return;   // der koeres — forklaringen staar om det
 
@@ -385,7 +601,7 @@ public partial class TranscribeView : UserControl
         if (færdig is not null)
         {
             Forklaring.Visibility = Visibility.Collapsed;
-            ResultatRude.Visibility = Visibility.Visible;
+            Resultat.Visibility = Visibility.Visible;
             Resultat.Text = File.ReadAllText(færdig, System.Text.Encoding.UTF8).Trim();
             Resultat.Foreground = (Brush)FindResource("Tekst");
             Status.Text = "Skrevet ud tidligere. Tryk «Transskribér» for at gøre det igen.";
@@ -393,7 +609,7 @@ public partial class TranscribeView : UserControl
         }
 
         Forklaring.Visibility = Visibility.Visible;
-        ResultatRude.Visibility = Visibility.Collapsed;
+        Resultat.Visibility = Visibility.Collapsed;
 
         if (valgt is { HarLyd: false })
         {
@@ -406,8 +622,8 @@ public partial class TranscribeView : UserControl
 
         ForklaringOverskrift.Text = "Fra lyd til tekst";
         ForklaringUnder.Text = valgt is null
-            ? "Vælg en optagelse i listen til venstre og tryk «Transskribér» nederst til højre. Så skriver appen alt det talte ud som tekst, du kan læse, søge i og rette."
-            : $"«{valgt.Titel}» er klar. Tryk «Transskribér» nederst til højre, så skriver appen alt det talte ud som tekst, du kan læse, søge i og rette.";
+            ? "Fold «Møder» ud i træet til venstre, vælg en optagelse, og tryk «Transskribér» øverst. Så skriver appen alt det talte ud som tekst, du kan læse, søge i og rette."
+            : $"«{valgt.Titel}» er klar. Tryk «Transskribér» øverst, så skriver appen alt det talte ud som tekst, du kan læse, søge i og rette.";
         Status.Text = "";
     }
 
@@ -423,7 +639,7 @@ public partial class TranscribeView : UserControl
     /// </summary>
     private void Omdoeb_Click(object sender, RoutedEventArgs e)
     {
-        if (Optagelser.SelectedItem is not OptagelseVisning valgt) return;
+        if (Valgt is not { } valgt) return;
 
         var meta = MeetingStore.Load(valgt.Mappe);
         var nu = meta?.Title ?? valgt.Titel;
@@ -447,8 +663,7 @@ public partial class TranscribeView : UserControl
             var gemtMappe = valgt.Mappe;
             IndlaesOptagelser();
 
-            Optagelser.SelectedItem = Optagelser.Items.Cast<OptagelseVisning>()
-                .FirstOrDefault(o => o.Mappe == gemtMappe);
+            VaelgOptagelse(gemtMappe);
 
             Status.Text = $"Omdøbt til «{nyt}».";
         }
@@ -470,7 +685,7 @@ public partial class TranscribeView : UserControl
     /// </summary>
     private void Referat_Click(object sender, RoutedEventArgs e)
     {
-        if (Optagelser.SelectedItem is not OptagelseVisning valgt) return;
+        if (Valgt is not { } valgt) return;
 
         var tekstFil = FindTekst(valgt.Mappe);
         if (tekstFil is null)
@@ -601,7 +816,7 @@ public partial class TranscribeView : UserControl
 
     private async void Koer_Click(object sender, RoutedEventArgs e)
     {
-        if (Optagelser.SelectedItem is not OptagelseVisning valgt) return;
+        if (Valgt is not { } valgt) return;
 
         var install = WhisperInstall.Locate(AppSettings.Current.PreferredModel);
         if (!install.IsComplete)
@@ -628,7 +843,7 @@ public partial class TranscribeView : UserControl
         // den er noget vaerd: den svarer paa "hvor lang tid tager det" og
         // "maa jeg lave noget andet imens".
         Forklaring.Visibility = Visibility.Visible;
-        ResultatRude.Visibility = Visibility.Collapsed;
+        Resultat.Visibility = Visibility.Collapsed;
         ForklaringOverskrift.Text = "Skriver lyden ud …";
         ForklaringUnder.Text =
             "Fremdriften står nederst. Teksten dukker op her, når den er færdig, og bliver gemt automatisk.";
@@ -701,7 +916,7 @@ public partial class TranscribeView : UserControl
             AfbrydKnap.Visibility = Visibility.Collapsed;
             _afbryd?.Dispose();
             _afbryd = null;
-            KoerKnap.IsEnabled = Optagelser.SelectedItem is OptagelseVisning { HarLyd: true };
+            KoerKnap.IsEnabled = Valgt is { HarLyd: true };
         }
     }
 
@@ -717,7 +932,7 @@ public partial class TranscribeView : UserControl
         // hvor lang tid det tog, og det står i én linje nedenfor. Tallene
         // ligger stadig i Historik, hvor de hører hjemme.
         Forklaring.Visibility = Visibility.Collapsed;
-        ResultatRude.Visibility = Visibility.Visible;
+        Resultat.Visibility = Visibility.Visible;
         Resultat.Text = tekst.Length == 0 ? "(tom transskription — var der lyd på optagelsen?)" : tekst;
         Resultat.Foreground = (Brush)FindResource("Tekst");
 
@@ -763,7 +978,7 @@ public partial class TranscribeView : UserControl
     /// </summary>
     private void Slet_Click(object sender, RoutedEventArgs e)
     {
-        if (Optagelser.SelectedItem is not OptagelseVisning valgt) return;
+        if (Valgt is not { } valgt) return;
 
         var transskriptioner = Directory.Exists(valgt.Mappe)
             ? Directory.GetFiles(valgt.Mappe, "*.txt").Length
@@ -807,7 +1022,7 @@ public partial class TranscribeView : UserControl
 
     private void Aabn_Click(object sender, RoutedEventArgs e)
     {
-        var mappe = _sidsteMappe ?? (Optagelser.SelectedItem as OptagelseVisning)?.Mappe;
+        var mappe = _sidsteMappe ?? Valgt?.Mappe;
         if (mappe is null) return;
         Process.Start(new ProcessStartInfo("explorer.exe", $"\"{mappe}\"") { UseShellExecute = true });
     }

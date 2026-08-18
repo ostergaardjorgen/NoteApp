@@ -3,279 +3,298 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              Background="{StaticResource Baggrund}">
 
+  <!-- ======================== LAYOUTET, OG HVORFOR =======================
+
+       To spalter, som i Stifinder: træet til venstre, indholdet til højre.
+
+       HER LÅ TRE. Træ, liste, tekst. Den midterste var overflødig — når et
+       bibliotek kan foldes ud, hører dets optagelser til DERINDE, ikke i en
+       spalte for sig. Filerne ligger nu i træet, hvor de hører hjemme, og
+       teksten har fået den plads, listen tog.
+
+       HER LÅ OTTE KNAPPER NEDERST. «Flyt til mappe», «Omdøb», «Arkivér»,
+       «Slet optagelse», «Åbn mappen», «Opret dokument», «Transskribér» — én
+       bred række, som øjet faldt på, og hvor fire af dem handler om at rydde
+       op frem for at komme videre.
+
+       Alt ligger nu i ÉN værktøjslinje øverst: oprydningen som ikoner til
+       venstre, de to handlinger, der fører arbejdet videre, til højre. De to
+       står i den rækkefølge, arbejdet går — «Transskribér», så «Opret
+       dokument» — og den anden kan først bruges, når den første er gjort.
+       Det er hele guidningen, og den koster ikke en linje tekst.
+
+       IKONERNE SKAL HAVE FontFamily SAT LOKALT. App.xaml har en implicit stil
+       for TextBlock med Segoe UI. Den slår igennem på den TextBlock, en
+       ContentPresenter selv laver ud af en tekststreng — en stil-setter
+       vinder over nedarvning — og så bliver hver eneste glyf til en tom
+       firkant. Det skete, og det er derfor glyfferne står i en TextBlock med
+       sin egen FontFamily. -->
+
   <Grid Margin="24,20,24,20">
-    <Grid.ColumnDefinitions>
-      <ColumnDefinition Width="380" />
-      <ColumnDefinition Width="*" />
-    </Grid.ColumnDefinitions>
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
-      <RowDefinition Height="*" />
       <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
     </Grid.RowDefinitions>
 
-    <StackPanel Grid.Row="0" Grid.ColumnSpan="2" Margin="0,0,0,14">
+    <StackPanel Grid.Row="0" Margin="0,0,0,12">
       <TextBlock Text="Optagelser" Style="{StaticResource Overskrift}" />
       <TextBlock Style="{StaticResource Underskrift}"
-                 Text="Vælg en optagelse, og skriv den ud til tekst. Det sker på denne pc — ingen lyd forlader maskinen." />
+                 Text="Vælg en optagelse i træet, og skriv den ud til tekst. Det sker på denne pc — ingen lyd forlader maskinen." />
     </StackPanel>
 
-    <!-- ========================= Optagelser ============================ -->
-    <Border Grid.Row="1" Grid.Column="0" Background="{StaticResource Panel}" CornerRadius="10"
-            BorderBrush="{StaticResource PanelKant}" BorderThickness="1" Margin="0,0,16,0">
-      <Grid>
-        <Grid.RowDefinitions>
-          <RowDefinition Height="Auto" />
-          <RowDefinition Height="Auto" />
-          <RowDefinition Height="*" />
-          <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
+    <!-- ========================= Værktøjslinje ========================== -->
+    <Border Grid.Row="1" Background="{StaticResource Panel}" CornerRadius="8"
+            BorderBrush="{StaticResource PanelKant}" BorderThickness="1" Padding="8,6">
+      <DockPanel>
 
-        <!-- To grupper, ikke én lang liste. Møder, der stadig mangler noget,
-             ligger fremme; det færdige ligger i arkivet. Uden opdelingen
-             drukner det møde, der mangler et referat, mellem tres, der er
-             helt færdige. Træningsoptagelser er ingen af stederne — de hører
-             under «Træning». -->
-        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="16,14,16,10">
-          <RadioButton x:Name="FaneMoeder" GroupName="gruppe" Content="Møder" IsChecked="True"
-                       Click="Fane_Klik" Style="{StaticResource Fanevalg}" />
-          <RadioButton x:Name="FaneArkiv" GroupName="gruppe" Content="Arkiv"
-                       Click="Fane_Klik" Style="{StaticResource Fanevalg}" Margin="6,0,0,0" />
-        </StackPanel>
+        <!-- Til højre: vejen videre. De to eneste handlinger, der flytter
+             arbejdet fremad, står yderst — hvor øjet ender. -->
+        <Button DockPanel.Dock="Right" x:Name="ReferatKnap" Click="Referat_Click"
+                MinWidth="150" IsEnabled="False" Padding="14,7" Content="Opret dokument"
+                ToolTip="Lav et referat eller et andet dokument ud af udskriften" />
 
+        <TextBlock DockPanel.Dock="Right" Text="&#xE76C;" FontFamily="Segoe MDL2 Assets"
+                   FontSize="11" VerticalAlignment="Center" Margin="10,0"
+                   Foreground="{StaticResource PanelKant}" />
 
-        <!-- MAPPERNE NEDERST. Listen er det, man er kommet efter; mapperne er
-             den maade, man indsnaevrer den paa. Fanerne oeverst (Moeder/Arkiv)
-             siger, hvor langt et moede er; mappen siger, hvem det handler om.
-             De to ting er uafhaengige og maa ikke slaas sammen. -->
-        <Border Grid.Row="3" BorderBrush="{StaticResource PanelKant}"
-                BorderThickness="0,1,0,0" Padding="10,8">
-          <DockPanel>
-            <Button DockPanel.Dock="Right" x:Name="NyMappe" Content="Ny mappe …"
-                    Click="NyMappe_Click" Padding="10,5" Margin="6,0,0,0" FontSize="12" />
-            <ComboBox x:Name="MappeFilter" SelectionChanged="MappeFilter_Changed"
-                      FontSize="12" Padding="8,5" />
-          </DockPanel>
-        </Border>
+        <Button DockPanel.Dock="Right" x:Name="AfbrydKnap" Content="Afbryd" Click="Afbryd_Click"
+                Visibility="Collapsed" Margin="8,0,0,0" />
 
-        <ListBox x:Name="Optagelser" Grid.Row="2" Background="Transparent" BorderThickness="0"
-                 Margin="8,0,8,10" SelectionChanged="Optagelse_Valgt"
-                 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-          <ListBox.ItemContainerStyle>
-            <Style TargetType="ListBoxItem">
-              <Setter Property="Padding" Value="10,8" />
-              <Setter Property="Margin" Value="0,0,0,2" />
-              <Setter Property="Template">
-                <Setter.Value>
-                  <ControlTemplate TargetType="ListBoxItem">
-                    <Border x:Name="kant" CornerRadius="6" Background="Transparent"
-                            Padding="{TemplateBinding Padding}">
-                      <ContentPresenter />
-                    </Border>
-                    <ControlTemplate.Triggers>
-                      <Trigger Property="IsMouseOver" Value="True">
-                        <Setter TargetName="kant" Property="Background" Value="#FF2C323D" />
-                      </Trigger>
-                      <Trigger Property="IsSelected" Value="True">
-                        <Setter TargetName="kant" Property="Background" Value="#FF33405A" />
-                      </Trigger>
-                    </ControlTemplate.Triggers>
-                  </ControlTemplate>
-                </Setter.Value>
-              </Setter>
-            </Style>
-          </ListBox.ItemContainerStyle>
-          <ListBox.ItemTemplate>
-            <DataTemplate>
-              <StackPanel>
-                <TextBlock Text="{Binding Titel}" FontSize="13" Foreground="{StaticResource Tekst}" />
-                <TextBlock Text="{Binding Detaljer}" FontSize="11" Foreground="{StaticResource TekstSvag}"
-                           Margin="0,2,0,0" />
+        <Button DockPanel.Dock="Right" x:Name="KoerKnap" Click="Koer_Click"
+                Style="{StaticResource Primaer}" MinWidth="140" IsEnabled="False"
+                Content="Transskribér"
+                ToolTip="Skriv lyden ud til tekst her på maskinen" />
 
-                <!-- Mappen skal kunne ses paa raekken. Uden den skete der
-                     ingenting synligt, naar man flyttede noget. -->
-                <Border HorizontalAlignment="Left" Margin="0,4,0,0" Padding="6,1"
-                        CornerRadius="3" Background="{StaticResource Accent}">
-                  <Border.Style>
-                    <Style TargetType="Border">
-                      <Style.Triggers>
-                        <DataTrigger Binding="{Binding Emnemappe}" Value="{x:Null}">
-                          <Setter Property="Visibility" Value="Collapsed" />
-                        </DataTrigger>
-                        <DataTrigger Binding="{Binding Emnemappe}" Value="">
-                          <Setter Property="Visibility" Value="Collapsed" />
-                        </DataTrigger>
-                      </Style.Triggers>
-                    </Style>
-                  </Border.Style>
-                  <TextBlock Text="{Binding Emnemappe}" FontSize="10" FontWeight="SemiBold"
-                             Foreground="#FF0B1220" />
-                </Border>
-              </StackPanel>
-            </DataTemplate>
-          </ListBox.ItemTemplate>
-        </ListBox>
-      </Grid>
+        <Border DockPanel.Dock="Right" Width="1" Margin="10,4,14,4"
+                Background="{StaticResource PanelKant}" />
+
+        <!-- Til venstre: oprydningen. «Ny mappe» står først og alene, fordi
+             den er den eneste, der virker uden et valg. -->
+        <Button DockPanel.Dock="Left" x:Name="NyMappeKnap" Style="{StaticResource IkonKnap}"
+                Click="NyMappe_Click" AutomationProperties.Name="Ny mappe"
+                ToolTip="Ny mappe — til fx en kunde eller et projekt">
+          <TextBlock Text="&#xE8F4;" FontFamily="Segoe MDL2 Assets" />
+        </Button>
+
+        <Border DockPanel.Dock="Left" Width="1" Margin="6,4,8,4"
+                Background="{StaticResource PanelKant}" />
+
+        <Button DockPanel.Dock="Left" x:Name="FlytKnap" Style="{StaticResource IkonKnap}"
+                Click="Flyt_Click" IsEnabled="False" AutomationProperties.Name="Flyt til mappe"
+                ToolTip="Flyt til mappe — eller træk optagelsen hen på en mappe i træet">
+          <TextBlock Text="&#xE8DE;" FontFamily="Segoe MDL2 Assets" />
+        </Button>
+
+        <Button DockPanel.Dock="Left" x:Name="OmdoebKnap" Style="{StaticResource IkonKnap}"
+                Click="Omdoeb_Click" IsEnabled="False" AutomationProperties.Name="Omdøb"
+                ToolTip="Omdøb optagelsen">
+          <TextBlock Text="&#xE8AC;" FontFamily="Segoe MDL2 Assets" />
+        </Button>
+
+        <Button DockPanel.Dock="Left" x:Name="ArkivKnap" Style="{StaticResource IkonKnap}"
+                Click="Arkiver_Click" IsEnabled="False" AutomationProperties.Name="Arkivér"
+                ToolTip="Arkivér — læg mødet væk, når der ikke er mere at gøre ved det">
+          <TextBlock Text="&#xE7B8;" FontFamily="Segoe MDL2 Assets" />
+        </Button>
+
+        <Button DockPanel.Dock="Left" x:Name="AabnKnap" Style="{StaticResource IkonKnap}"
+                Click="Aabn_Click" IsEnabled="False" AutomationProperties.Name="Åbn mappen"
+                ToolTip="Åbn mappen på disken">
+          <TextBlock Text="&#xE838;" FontFamily="Segoe MDL2 Assets" />
+        </Button>
+
+        <Border DockPanel.Dock="Left" Width="1" Margin="6,4,8,4"
+                Background="{StaticResource PanelKant}" />
+
+        <Button DockPanel.Dock="Left" x:Name="SletKnap" Style="{StaticResource IkonKnapFare}"
+                Click="Slet_Click" IsEnabled="False" AutomationProperties.Name="Slet optagelse"
+                ToolTip="Slet optagelsen med lyd og udskrift. Kan ikke fortrydes">
+          <TextBlock Text="&#xE74D;" FontFamily="Segoe MDL2 Assets" />
+        </Button>
+
+        <Grid />
+      </DockPanel>
     </Border>
 
-    <!-- =========================== Resultat ============================ -->
-    <Border Grid.Row="1" Grid.Column="1" Background="{StaticResource Panel}" CornerRadius="10"
-            BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
-      <Grid>
-        <Grid.RowDefinitions>
-          <RowDefinition Height="Auto" />
-          <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
+    <!-- Status og fremdrift. Én linje under værktøjslinjen, i fuld bredde —
+         den hører til begge spalter og skal ikke tage plads fra nogen af dem. -->
+    <Grid Grid.Row="2" Margin="2,8,2,10">
+      <ProgressBar x:Name="Fremdrift" Height="4" Minimum="0" Maximum="100" Visibility="Collapsed"
+                   VerticalAlignment="Top" Margin="0,0,0,6"
+                   Background="#FF2C323D" Foreground="{StaticResource Accent}" BorderThickness="0" />
+      <TextBlock x:Name="Status" Style="{StaticResource Underskrift}" VerticalAlignment="Bottom" />
+    </Grid>
 
-        <!-- Her stod fire store tal: lyd, tid brugt, realtidsfaktor og ord.
-             Realtidsfaktoren var udviklertelemetri — ingen handler på «0,42».
-             Det, man skal vide, står nu i statuslinjen nederst, og tallene
-             ligger stadig i Historik. -->
-
-        <!-- Forklaringen. Den fylder feltet, indtil der er en tekst at vise.
-             Et tomt felt under en fremdriftslinje fortæller ikke, om man
-             venter på noget godt, hvor længe det tager, eller hvad man må
-             gøre imens — og så sidder man og ser på det i stedet for at
-             lave noget andet. -->
-        <ScrollViewer x:Name="Forklaring" Grid.Row="1" Padding="26,20,26,18"
-                      VerticalScrollBarVisibility="Auto">
-          <StackPanel MaxWidth="560" HorizontalAlignment="Left">
-
-            <TextBlock x:Name="ForklaringOverskrift" FontSize="19" FontWeight="SemiBold"
-                       TextWrapping="Wrap" Text="Fra lyd til tekst" />
-            <TextBlock x:Name="ForklaringUnder" FontSize="13.5" LineHeight="22" Margin="0,10,0,0"
-                       TextWrapping="Wrap" Foreground="{StaticResource TekstSvag}"
-                       Text="Vælg en optagelse i listen til venstre og tryk «Transskribér» nederst til højre. Så skriver appen alt det talte ud som tekst, du kan læse, søge i og rette." />
-
-            <!-- Tre trin. Ikke fordi det er teknisk interessant, men fordi det
-                 svarer på "hvor lang tid tager det" og "hvad sker der nu". -->
-            <StackPanel Margin="0,22,0,0">
-              <Grid Margin="0,0,0,14">
-                <Grid.ColumnDefinitions>
-                  <ColumnDefinition Width="30" />
-                  <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" Text="1" FontSize="15" FontWeight="SemiBold"
-                           Foreground="{StaticResource Accent}" />
-                <StackPanel Grid.Column="1">
-                  <TextBlock Text="Modellen indlæses" FontSize="13.5" FontWeight="SemiBold" />
-                  <TextBlock FontSize="12.5" LineHeight="19" TextWrapping="Wrap" Margin="0,3,0,0"
-                             Foreground="{StaticResource TekstMeget}"
-                             Text="Tager typisk et halvt minut første gang. Der sker ikke noget på skærmen imens — det er normalt." />
-                </StackPanel>
-              </Grid>
-
-              <Grid Margin="0,0,0,14">
-                <Grid.ColumnDefinitions>
-                  <ColumnDefinition Width="30" />
-                  <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" Text="2" FontSize="15" FontWeight="SemiBold"
-                           Foreground="{StaticResource Accent}" />
-                <StackPanel Grid.Column="1">
-                  <TextBlock Text="Lyden skrives ud" FontSize="13.5" FontWeight="SemiBold" />
-                  <TextBlock FontSize="12.5" LineHeight="19" TextWrapping="Wrap" Margin="0,3,0,0"
-                             Foreground="{StaticResource TekstMeget}"
-                             Text="Fremdriften står nederst. Med grafikkort går det hurtigere end lyden varer; uden tager det længere tid end selve mødet." />
-                </StackPanel>
-              </Grid>
-
-              <Grid>
-                <Grid.ColumnDefinitions>
-                  <ColumnDefinition Width="30" />
-                  <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" Text="3" FontSize="15" FontWeight="SemiBold"
-                           Foreground="{StaticResource Accent}" />
-                <StackPanel Grid.Column="1">
-                  <TextBlock Text="Teksten står her" FontSize="13.5" FontWeight="SemiBold" />
-                  <TextBlock FontSize="12.5" LineHeight="19" TextWrapping="Wrap" Margin="0,3,0,0"
-                             Foreground="{StaticResource TekstMeget}"
-                             Text="Den gemmes automatisk ved siden af optagelsen. Du skal ikke gemme noget selv." />
-                </StackPanel>
-              </Grid>
-            </StackPanel>
-
-            <Border Background="#334CBE72" BorderBrush="{StaticResource Godkendt}" BorderThickness="1"
-                    CornerRadius="10" Padding="16,13" Margin="0,22,0,0">
-              <StackPanel>
-                <TextBlock Text="Du kan roligt lave noget andet imens" FontSize="13"
-                           FontWeight="SemiBold" Foreground="{StaticResource Tekst}" />
-                <TextBlock FontSize="12.5" LineHeight="20" Margin="0,6,0,0" TextWrapping="Wrap"
-                           Foreground="{StaticResource Tekst}"
-                           Text="Du kan lukke skærmen, skifte til en anden fane — og du kan optage et nyt møde, mens det forrige bliver skrevet ud. Optagelse bruger hverken grafikkort eller nævneværdig plads, og den kan derfor aldrig blive blokeret af det her." />
-              </StackPanel>
-            </Border>
-
-            <TextBlock FontSize="12.5" LineHeight="20" Margin="2,18,0,0" TextWrapping="Wrap"
-                       Foreground="{StaticResource TekstMeget}"
-                       Text="Teksten bliver ikke perfekt. Navne og fagord er det, der oftest rammes forkert. Du kan rette direkte i udskriften, før du laver et dokument ud af den." />
-          </StackPanel>
-        </ScrollViewer>
-
-        <!-- Teksten er en TextBox, ikke en TextBlock. Grunden er ikke kosmetisk:
-             man skal kunne MARKERE et ord, der er hørt forkert, og lære appen
-             det rigtige. Uden det er «appen lærer af dine rettelser» en
-             påstand, der ikke kan indfries. -->
-        <Grid x:Name="ResultatRude" Grid.Row="1" Visibility="Collapsed">
-          <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-          </Grid.RowDefinitions>
-
-          <Border Grid.Row="0" Background="#FF1D2530" BorderBrush="{StaticResource PanelKant}"
-                  BorderThickness="0,0,0,1" Padding="18,10">
-            <Grid>
-              <TextBlock x:Name="RetTekst" VerticalAlignment="Center" FontSize="12.5"
-                         TextWrapping="Wrap" Foreground="{StaticResource TekstMeget}"
-                         Text="Er et ord hørt forkert? Markér det i teksten og tryk «Ret ordet» — så retter appen det af sig selv i alle fremtidige udskrifter." />
-            </Grid>
-          </Border>
-
-          <!-- TextBox har ingen LineHeight; linjeafstanden kommer fra
-               skrifttypen. Det er den eneste pris for at kunne markere. -->
-          <TextBox x:Name="Resultat" Grid.Row="1" FontSize="13"
-                   Foreground="{StaticResource TekstSvag}" Background="Transparent"
-                   BorderThickness="0" IsReadOnly="True" TextWrapping="Wrap"
-                   VerticalScrollBarVisibility="Auto" Padding="18,10,18,16"
-                   />
-        </Grid>
-      </Grid>
-    </Border>
-
-    <!-- ========================== Bundbjælke =========================== -->
-    <Grid Grid.Row="2" Grid.ColumnSpan="2" Margin="0,14,0,0">
+    <!-- ======================= Træ · indhold =========================== -->
+    <Grid Grid.Row="3">
       <Grid.ColumnDefinitions>
-        <ColumnDefinition Width="*" />
+        <ColumnDefinition Width="300" />
         <ColumnDefinition Width="Auto" />
+        <ColumnDefinition Width="*" />
       </Grid.ColumnDefinitions>
 
-      <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,16,0">
-        <ProgressBar x:Name="Fremdrift" Height="6" Minimum="0" Maximum="100" Visibility="Collapsed"
-                     Background="#FF2C323D" Foreground="{StaticResource Accent}" BorderThickness="0" />
-        <TextBlock x:Name="Status" Style="{StaticResource Underskrift}" Margin="0,6,0,0" />
-      </StackPanel>
+      <!-- =========================== Biblioteker ====================== -->
+      <Border Grid.Column="0" Background="{StaticResource Panel}" CornerRadius="10"
+              BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+        <DockPanel>
+          <TextBlock DockPanel.Dock="Top" Text="BIBLIOTEKER" FontSize="10.5" FontWeight="SemiBold"
+                     Margin="16,14,16,8" Foreground="{StaticResource TekstMeget}" />
 
-      <StackPanel Grid.Column="1" Orientation="Horizontal">
-        <Button x:Name="FlytKnap" Content="Flyt til mappe" Click="Flyt_Click" IsEnabled="False"
-                Margin="0,0,8,0" />
-        <Button x:Name="OmdoebKnap" Content="Omdøb" Click="Omdoeb_Click" IsEnabled="False"
-                Margin="0,0,8,0" />
-        <Button x:Name="ArkivKnap" Content="Arkivér" Click="Arkiver_Click" IsEnabled="False"
-                Margin="0,0,8,0" />
-        <Button x:Name="SletKnap" Content="Slet optagelse" Click="Slet_Click" IsEnabled="False"
-                Margin="0,0,8,0" />
-        <Button x:Name="AabnKnap" Content="Åbn mappen" Click="Aabn_Click" IsEnabled="False" Margin="0,0,8,0" />
-        <Button x:Name="AfbrydKnap" Content="Afbryd" Click="Afbryd_Click" Visibility="Collapsed" Margin="0,0,8,0" />
+          <TextBlock DockPanel.Dock="Bottom" Margin="16,8,16,12" FontSize="11" TextWrapping="Wrap"
+                     LineHeight="17" Foreground="{StaticResource TekstMeget}"
+                     Text="Træk en optagelse hen på en mappe for at flytte den." />
 
-        <!-- Vejen videre. Den er der først, når der ER en tekst — et dokument
-             kan ikke laves af lyd, kun af det, lyden er skrevet ud til. -->
-        <Button x:Name="ReferatKnap" Content="Opret dokument  →" Click="Referat_Click"
-                Margin="0,0,8,0" MinWidth="160" IsEnabled="False" Padding="14,8" />
+          <TreeView x:Name="Trae" Background="Transparent" BorderThickness="0"
+                    Margin="6,0,6,0" SelectedItemChanged="Bibliotek_Valgt"
+                    AllowDrop="True" DragOver="Trae_TraekOver" DragLeave="Trae_TraekForlod"
+                    Drop="Trae_Slip"
+                    PreviewMouseLeftButtonDown="Trae_MusNed"
+                    PreviewMouseMove="Trae_MusBevaeget"
+                    ScrollViewer.HorizontalScrollBarVisibility="Disabled">
 
-        <Button x:Name="KoerKnap" Content="Transskribér" Click="Koer_Click" Style="{StaticResource Primaer}"
-                MinWidth="150" IsEnabled="False" />
-      </StackPanel>
+            <TreeView.ItemContainerStyle>
+              <Style TargetType="TreeViewItem">
+                <Setter Property="Padding" Value="2,1" />
+                <Setter Property="AllowDrop" Value="True" />
+                <Setter Property="Foreground" Value="{StaticResource TekstSvag}" />
+                <!-- Tovejsbinding: knuden husker selv, om den er foldet ud og
+                     valgt, saa traeet ikke klapper sammen og mister sin
+                     markering, hver gang det bygges forfra. -->
+                <Setter Property="IsExpanded" Value="{Binding ErUdfoldet, Mode=TwoWay}" />
+                <Setter Property="IsSelected" Value="{Binding ErValgt, Mode=TwoWay}" />
+              </Style>
+            </TreeView.ItemContainerStyle>
+
+            <TreeView.ItemTemplate>
+              <HierarchicalDataTemplate ItemsSource="{Binding Boern}">
+                <!-- Rammen er dropmaalet. Den lyser op, naar man holder noget
+                     hen over den, saa man kan se HVOR man slipper. -->
+                <Border x:Name="rk" CornerRadius="5" Padding="6,4" Background="Transparent"
+                        AutomationProperties.Name="{Binding Visning}"
+                        BorderThickness="1" BorderBrush="Transparent">
+                  <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="{Binding Glyf}" FontFamily="Segoe MDL2 Assets" FontSize="13"
+                               VerticalAlignment="Center" Margin="0,0,9,0"
+                               Foreground="{StaticResource Accent}" />
+                    <StackPanel VerticalAlignment="Center">
+                      <TextBlock Text="{Binding Visning}" FontSize="12.5"
+                                 TextTrimming="CharacterEllipsis" />
+                      <TextBlock Text="{Binding Under}" FontSize="10.5" Margin="0,1,0,0"
+                                 Foreground="{StaticResource TekstMeget}">
+                        <TextBlock.Style>
+                          <Style TargetType="TextBlock">
+                            <Style.Triggers>
+                              <DataTrigger Binding="{Binding Under}" Value="{x:Null}">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                              </DataTrigger>
+                            </Style.Triggers>
+                          </Style>
+                        </TextBlock.Style>
+                      </TextBlock>
+                    </StackPanel>
+                  </StackPanel>
+                </Border>
+                <HierarchicalDataTemplate.Triggers>
+                  <DataTrigger Binding="{Binding ErDropmaal}" Value="True">
+                    <Setter TargetName="rk" Property="Background" Value="#FF33405A" />
+                    <Setter TargetName="rk" Property="BorderBrush" Value="{StaticResource Accent}" />
+                  </DataTrigger>
+                </HierarchicalDataTemplate.Triggers>
+              </HierarchicalDataTemplate>
+            </TreeView.ItemTemplate>
+          </TreeView>
+        </DockPanel>
+      </Border>
+
+      <GridSplitter Grid.Column="1" Width="10" HorizontalAlignment="Stretch"
+                    Background="Transparent" />
+
+      <!-- ============================= Indholdet ====================== -->
+      <Border Grid.Column="2" Background="{StaticResource Panel}" CornerRadius="10"
+              BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+        <Grid>
+          <ScrollViewer x:Name="Forklaring" Padding="26,20,26,18"
+                        VerticalScrollBarVisibility="Auto">
+            <StackPanel MaxWidth="620" HorizontalAlignment="Left">
+
+              <TextBlock x:Name="ForklaringOverskrift" FontSize="19" FontWeight="SemiBold"
+                         TextWrapping="Wrap" Text="Fra lyd til tekst" />
+              <TextBlock x:Name="ForklaringUnder" FontSize="13.5" LineHeight="22" Margin="0,10,0,0"
+                         TextWrapping="Wrap" Foreground="{StaticResource TekstSvag}"
+                         Text="Fold «Møder» ud i træet til venstre, vælg en optagelse, og tryk «Transskribér» øverst. Så skriver appen alt det talte ud som tekst, du kan læse, søge i og rette." />
+
+              <StackPanel Margin="0,22,0,0">
+                <Grid Margin="0,0,0,14">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="30" />
+                    <ColumnDefinition Width="*" />
+                  </Grid.ColumnDefinitions>
+                  <TextBlock Grid.Column="0" Text="1" FontSize="15" FontWeight="SemiBold"
+                             Foreground="{StaticResource Accent}" />
+                  <StackPanel Grid.Column="1">
+                    <TextBlock Text="Modellen indlæses" FontSize="13.5" FontWeight="SemiBold" />
+                    <TextBlock FontSize="12.5" LineHeight="19" TextWrapping="Wrap" Margin="0,3,0,0"
+                               Foreground="{StaticResource TekstMeget}"
+                               Text="Tager typisk et halvt minut første gang. Der sker ikke noget på skærmen imens — det er normalt." />
+                  </StackPanel>
+                </Grid>
+
+                <Grid Margin="0,0,0,14">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="30" />
+                    <ColumnDefinition Width="*" />
+                  </Grid.ColumnDefinitions>
+                  <TextBlock Grid.Column="0" Text="2" FontSize="15" FontWeight="SemiBold"
+                             Foreground="{StaticResource Accent}" />
+                  <StackPanel Grid.Column="1">
+                    <TextBlock Text="Lyden skrives ud" FontSize="13.5" FontWeight="SemiBold" />
+                    <TextBlock FontSize="12.5" LineHeight="19" TextWrapping="Wrap" Margin="0,3,0,0"
+                               Foreground="{StaticResource TekstMeget}"
+                               Text="Fremdriften står under værktøjslinjen. Med grafikkort går det hurtigere end lyden varer; uden tager det længere tid end selve mødet." />
+                  </StackPanel>
+                </Grid>
+
+                <Grid>
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="30" />
+                    <ColumnDefinition Width="*" />
+                  </Grid.ColumnDefinitions>
+                  <TextBlock Grid.Column="0" Text="3" FontSize="15" FontWeight="SemiBold"
+                             Foreground="{StaticResource Accent}" />
+                  <StackPanel Grid.Column="1">
+                    <TextBlock Text="Teksten står her" FontSize="13.5" FontWeight="SemiBold" />
+                    <TextBlock FontSize="12.5" LineHeight="19" TextWrapping="Wrap" Margin="0,3,0,0"
+                               Foreground="{StaticResource TekstMeget}"
+                               Text="Den gemmes automatisk ved siden af optagelsen. Du skal ikke gemme noget selv." />
+                  </StackPanel>
+                </Grid>
+              </StackPanel>
+
+              <Border Background="#334CBE72" BorderBrush="{StaticResource Godkendt}" BorderThickness="1"
+                      CornerRadius="10" Padding="16,13" Margin="0,22,0,0">
+                <StackPanel>
+                  <TextBlock Text="Du kan roligt lave noget andet imens" FontSize="13"
+                             FontWeight="SemiBold" Foreground="{StaticResource Tekst}" />
+                  <TextBlock FontSize="12.5" LineHeight="20" Margin="0,6,0,0" TextWrapping="Wrap"
+                             Foreground="{StaticResource Tekst}"
+                             Text="Du kan lukke skærmen, skifte til en anden fane — og du kan optage et nyt møde, mens det forrige bliver skrevet ud. Optagelse bruger hverken grafikkort eller nævneværdig plads, og den kan derfor aldrig blive blokeret af det her." />
+                </StackPanel>
+              </Border>
+
+              <TextBlock FontSize="12.5" LineHeight="20" Margin="2,18,0,0" TextWrapping="Wrap"
+                         Foreground="{StaticResource TekstMeget}"
+                         Text="Teksten bliver ikke perfekt. Navne og fagord er det, der oftest rammes forkert. Du kan rette direkte i udskriften, før du laver et dokument ud af den." />
+            </StackPanel>
+          </ScrollViewer>
+
+          <TextBox x:Name="Resultat" FontSize="13" Visibility="Collapsed"
+                   Foreground="{StaticResource TekstSvag}" Background="Transparent"
+                   BorderThickness="0" IsReadOnly="True" TextWrapping="Wrap"
+                   VerticalScrollBarVisibility="Auto" Padding="22,18,22,18" />
+        </Grid>
+      </Border>
     </Grid>
   </Grid>
 </UserControl>

@@ -93,6 +93,70 @@
       <Setter Property="FontWeight" Value="SemiBold" />
     </Style>
 
+    <!-- ====================== Ikonknap i vaerktoejslinjen ==============
+         Kvadratisk, gennemsigtig, med en glyf fra Segoe MDL2 Assets. Skriften
+         foelger med Windows 10 og 11 - der er ingen billedfiler at holde styr
+         paa, og ikonerne skalerer med skaermen.
+
+         Glyfferne er efterproevet mod skrifttypens cmap-tabel, ikke gaettet.
+         Et manglende tegn bliver til en tom firkant, og det opdager man ikke
+         ved at laese koden.
+
+         Deaktiveret staar den graa og reagerer ikke paa musen. Det er hele
+         pointen med at samle dem her: man kan se, hvad der kan lade sig goere
+         med det, der er valgt - foer man klikker. -->
+    <Style x:Key="IkonKnap" TargetType="Button">
+      <Setter Property="Width" Value="38" />
+      <Setter Property="Height" Value="34" />
+      <Setter Property="Margin" Value="0,0,2,0" />
+      <Setter Property="Cursor" Value="Hand" />
+      <Setter Property="FontFamily" Value="Segoe MDL2 Assets" />
+      <Setter Property="FontSize" Value="15" />
+      <Setter Property="Foreground" Value="{StaticResource TekstSvag}" />
+      <Setter Property="ToolTipService.InitialShowDelay" Value="350" />
+      <Setter Property="ToolTipService.ShowDuration" Value="20000" />
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="Button">
+            <Border x:Name="kant" CornerRadius="6" Background="Transparent" Padding="0">
+              <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="kant" Property="Background" Value="#FF2C323D" />
+                <Setter Property="Foreground" Value="{StaticResource Tekst}" />
+              </Trigger>
+              <Trigger Property="IsPressed" Value="True">
+                <Setter TargetName="kant" Property="Background" Value="#FF33405A" />
+              </Trigger>
+              <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Foreground" Value="#FF4A515E" />
+                <Setter Property="Cursor" Value="Arrow" />
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
+    <!-- Samme knap, men roed naar den kan bruges. Kun til sletning: den er
+         den eneste handling i vaerktoejslinjen, der ikke kan fortrydes. -->
+    <Style x:Key="IkonKnapFare" TargetType="Button" BasedOn="{StaticResource IkonKnap}">
+      <Style.Triggers>
+        <Trigger Property="IsEnabled" Value="True">
+          <Setter Property="Foreground" Value="{StaticResource FejlTekst}" />
+        </Trigger>
+      </Style.Triggers>
+    </Style>
+
+    <!-- ======================= Bibliotekstraeet ========================= -->
+    <Style x:Key="Biblioteksknude" TargetType="TreeViewItem">
+      <Setter Property="IsExpanded" Value="True" />
+      <Setter Property="Padding" Value="4,3" />
+      <Setter Property="Foreground" Value="{StaticResource TekstSvag}" />
+      <Setter Property="AllowDrop" Value="True" />
+    </Style>
+
     <Style x:Key="Fare" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
       <Setter Property="Background" Value="{StaticResource Optager}" />
       <Setter Property="BorderBrush" Value="{StaticResource Optager}" />
