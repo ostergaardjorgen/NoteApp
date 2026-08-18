@@ -36,6 +36,94 @@
                   HorizontalScrollBarVisibility="Disabled">
       <StackPanel>
 
+        <!-- ============ Det, vi ved, og det, vi ikke ved =============
+             Den staar OEVERST og ikke som en fodnote. En compliance-side, der
+             foerst opregner alt det betryggende og saa til sidst tager
+             forbehold, er skrevet for at berolige. Tvivlen hoerer til dér,
+             hvor man laeser foerst.
+
+             At leverandoeren er europaeisk er ikke det samme som, at
+             databehandlingen ER efterproevet europaeisk. Det er hele
+             forskellen, og den skal staa. -->
+        <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20,16"
+                BorderBrush="{StaticResource Advarsel}" BorderThickness="2" Margin="0,0,0,14">
+          <StackPanel>
+            <TextBlock Text="LÆS DETTE FØRST" FontSize="10.5" FontWeight="SemiBold"
+                       Foreground="{StaticResource Advarsel}" Margin="0,0,0,8" />
+
+            <TextBlock FontSize="13.5" LineHeight="22" TextWrapping="Wrap" FontWeight="SemiBold"
+                       Text="Leverandøren er europæisk. Det er ikke det samme som, at databehandlingen er efterprøvet europæisk." />
+
+            <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,8,0,0"
+                       Foreground="{StaticResource TekstSvag}"
+                       Text="Mistral AI er fransk og underlagt GDPR direkte. Men de to dokumenter, der juridisk binder — databehandleraftalen og de kommercielle vilkår — forpligter ikke behandlingen til et bestemt område, og de skelner ikke mellem de tre endepunkter. Derfor står der herunder både, hvad der er efterprøvet, og hvad der ikke er." />
+
+            <Grid Margin="0,16,0,0">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="16" />
+                <ColumnDefinition Width="*" />
+              </Grid.ColumnDefinitions>
+
+              <Border Grid.Column="0" Background="#FF16241C" BorderBrush="{StaticResource Godkendt}"
+                      BorderThickness="1" CornerRadius="8" Padding="16,13">
+                <StackPanel>
+                  <TextBlock Text="DET, VI VED" FontSize="11" FontWeight="SemiBold"
+                             Foreground="{StaticResource Godkendt}" Margin="0,0,0,10" />
+                  <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap"
+                             Foreground="{StaticResource TekstSvag}"
+                             Text="Lyd og udskrift forlader aldrig maskinen. Det er vores egen kode, og den kan efterprøves." />
+                  <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
+                             Foreground="{StaticResource TekstSvag}"
+                             Text="Appen kan kun kalde det europæiske endepunkt. Det er spærret i koden, ikke en indstilling." />
+                  <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
+                             Foreground="{StaticResource TekstSvag}"
+                             Text="Mistral AI er et fransk selskab, underlagt GDPR direkte og ikke via en aftalekonstruktion." />
+                  <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
+                             Foreground="{StaticResource TekstSvag}"
+                             Text="Databehandleraftalen gælder automatisk. Den skal hverken bestilles eller underskrives." />
+                  <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
+                             Foreground="{StaticResource TekstSvag}"
+                             Text="Træning på dine data kan fravælges, og fravalget er dit eget. Aftalen siger det udtrykkeligt." />
+                  <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
+                             Foreground="{StaticResource TekstSvag}"
+                             Text="ISO/IEC 27001, ISO/IEC 27701 og SOC 2 Type II. Attesterne ligger i Trust Center." />
+                </StackPanel>
+              </Border>
+
+              <Border Grid.Column="2" Background="#FF2A1A1A" BorderBrush="{StaticResource FejlTekst}"
+                      BorderThickness="1" CornerRadius="8" Padding="16,13">
+                <StackPanel>
+                  <TextBlock Text="DET, VI IKKE VED" FontSize="11" FontWeight="SemiBold"
+                             Foreground="{StaticResource FejlTekst}" Margin="0,0,0,10" />
+                  <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap"
+                             Foreground="{StaticResource TekstSvag}"
+                             Text="Om behandlingen KONTRAKTLIGT er bundet til Europa. Det står ikke i de to bindende dokumenter — kun i produktdokumentationen, som er en beskrivelse, ikke et løfte." />
+                  <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
+                             Foreground="{StaticResource TekstSvag}"
+                             Text="Hvilke af de femogtyve underdatabehandlere der indgår, når det europæiske endepunkt bruges. Aftalen skelner ikke mellem endepunkter." />
+                  <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
+                             Foreground="{StaticResource TekstSvag}"
+                             Text="Om listen har ændret sig siden 17-08-2026. Mistral varsler ændringer med ti dages frist, men der er ikke abonneret på varsler." />
+                  <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
+                             Foreground="{StaticResource TekstSvag}"
+                             Text="Hvor længe den enkelte API-anmodning opbevares. Der står kun noget om, hvad der sker, når aftalen ophører." />
+                  <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
+                             Foreground="{StaticResource TekstSvag}"
+                             Text="Hvad der faktisk sker hos de amerikansk ejede underleverandører i kæden. Det kan ikke efterprøves udefra." />
+                </StackPanel>
+              </Border>
+            </Grid>
+
+            <Border Background="#FF181B22" CornerRadius="8" Padding="16,12" Margin="0,14,0,0"
+                    BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+              <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap"
+                         Foreground="{StaticResource Tekst}"
+                         Text="Hvad det betyder i praksis: løsningen er et velbegrundet valg, og den er bedre stillet end en amerikansk tjeneste. Men den er ikke en efterprøvet garanti for, at data bliver i Europa — og den forskel skal frem, INDEN nogen skriver det i et tilbud. Vil du kunne stå på mål for det, skal leverandøren bekræfte det skriftligt." />
+            </Border>
+          </StackPanel>
+        </Border>
+
         <!-- ==================== Datastrømmen ========================= -->
         <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20,16"
                 BorderBrush="{StaticResource PanelKant}" BorderThickness="1" Margin="0,0,0,14">
