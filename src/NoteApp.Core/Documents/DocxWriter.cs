@@ -227,15 +227,18 @@ public static class DocxWriter
             <w:name w:val="Normal"/><w:qFormat/>
           </w:style>
 
-          <!-- Titlen er SORT, ikke blaa. Det er den, referencedokumentet
-               bruger, og en farvet titel over farvede overskrifter goer, at
-               ingen af dem skiller sig ud. -->
+          <!-- Titlen har SAMME FARVE som overskrifterne.
+               Her stod den sort, fordi referencedokumentet har den sort. Set i
+               et faerdigt referat var det forkert: en sort titel over blaa
+               overskrifter ser ud som om den hoerer til et andet dokument.
+               Stoerrelsen holder den adskilt fra Overskrift 1; farven binder
+               den sammen med resten. -->
           <w:style w:type="paragraph" w:styleId="Title">
             <w:name w:val="Title"/><w:basedOn w:val="Normal"/><w:qFormat/>
             <w:pPr><w:spacing w:after="240"/><w:contextualSpacing/></w:pPr>
             <w:rPr>
               <w:rFonts w:ascii="{SkriftOverskrift}" w:hAnsi="{SkriftOverskrift}"/>
-              <w:sz w:val="56"/><w:szCs w:val="56"/>
+              <w:sz w:val="56"/><w:szCs w:val="56"/><w:color w:val="{FarveOverskrift}"/>
             </w:rPr>
           </w:style>
 

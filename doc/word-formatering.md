@@ -43,14 +43,17 @@ Word regner i **halve point**. Tallet i XML er altså det dobbelte af punkter.
 
 | Element | Farve | |
 |---|---|---|
-| Titel | sort (arvet) | |
+| Titel | `#2E74B5` | samme som overskrifterne |
 | Overskrift 1 og 2 | `#2E74B5` | mellemblå |
 | Overskrift 3 | `#1F4D78` | mørkere blå |
 | Brødtekst | sort (arvet) | |
 | Proveniens («Kilde») | `#666666` | grå, 9 pt |
 
-**Titlen er sort.** Det er referencedokumentets valg og et rigtigt et: en
-farvet titel over farvede overskrifter gør, at ingen af dem skiller sig ud.
+**Titlen har samme farve som overskrifterne.** Her stod den sort, fordi
+referencedokumentet har den sort — men set i et færdigt referat ser en sort
+titel over blå overskrifter ud, som om den hører til et andet dokument.
+Størrelsen holder den adskilt fra Overskrift 1; farven binder den sammen med
+resten.
 
 **Overskrifter er ikke fede.** De skiller sig ud på størrelse og farve. Fed
 oveni gør dem tunge i et langt referat.
