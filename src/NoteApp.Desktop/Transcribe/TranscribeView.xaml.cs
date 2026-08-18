@@ -38,6 +38,33 @@ public sealed class OptagelseVisning
         HarLyd = File.Exists(wav) && Sekunder > 0;
         if (!HarLyd) Detaljer += " · ingen lyd";
 
+        // HELE TIDSRUMMET, TIL HJAELPETEKSTEN.
+        //
+        // Raekken i traeet er smal og viser en forkortet dato. Naar man skal
+        // finde ud af, HVILKET af to moeder paa samme dag man leder efter, er
+        // det klokkeslaettet fra og til, der afgoer det - og den oplysning er
+        // der ikke plads til paa raekken.
+        //
+        // Sluttidspunktet regnes ud af laengden frem for at blive laest fra
+        // meeting.json. EndedAt mangler paa optagelser fra konsolprogrammet
+        // og paa dem, hvor appen doede undervejs, og et tomt "til"-felt er
+        // vaerre end et regnet et: lyden ER der, og den varer det, den varer.
+        var slut = dato.AddSeconds(Sekunder);
+
+        Tidsrum = Sekunder > 0
+            ? $"{dato:dddd d. MMMM yyyy}  ·  {dato:HH:mm}–{slut:HH:mm}"
+            : $"{dato:dddd d. MMMM yyyy}  ·  {dato:HH:mm}";
+
+        Varighed = Sekunder <= 0
+            ? "Ingen lyd i optagelsen"
+            : længde.TotalMinutes < 1
+                ? $"Varighed: {længde.TotalSeconds:0} sekunder"
+                : længde.TotalHours < 1
+                    ? $"Varighed: {længde.TotalMinutes:0} minutter"
+                    : længde.Minutes == 0
+                        ? $"Varighed: {(int)længde.TotalHours} {((int)længde.TotalHours == 1 ? "time" : "timer")}"
+                        : $"Varighed: {(int)længde.TotalHours} t. {længde.Minutes} min.";
+
         try
         {
             Bytes = Directory.EnumerateFiles(mappe, "*", SearchOption.AllDirectories)
@@ -45,6 +72,12 @@ public sealed class OptagelseVisning
         }
         catch (IOException) { Bytes = 0; }
     }
+
+    /// <summary>Dato og klokkeslæt fra og til. Til hjælpeteksten i træet.</summary>
+    public string Tidsrum { get; } = "";
+
+    /// <summary>Hvor længe mødet varede, skrevet ud. Til hjælpeteksten i træet.</summary>
+    public string Varighed { get; } = "";
 
     /// <summary>Stien på disken. IKKE brugerens mappe — se <see cref="Emnemappe"/>.</summary>
     public string Mappe { get; }
@@ -525,47 +558,16 @@ public partial class TranscribeView : UserControl
     // HER LAA Fane_Klik. Fanerne «Møder» og «Arkiv» er blevet til de to
     // rodknuder i bibliotekstraeet, og skiftet sker nu i Bibliotek_Valgt.
 
-    /// <summary>
-    /// Lægger et møde væk — eller henter det frem igen.
-    ///
-    /// Der advares, når mødet ikke er skrevet ud. Arkivering er ikke farlig,
-    /// men den flytter noget ud af syne, og et møde, der aldrig blev skrevet
-    /// ud, er ikke færdigt.
-    /// </summary>
-    private void Arkiver_Click(object sender, RoutedEventArgs e)
-    {
-        if (Valgt is not { } valgt) return;
-
-        var tilArkiv = valgt.Gruppe == Gruppe.Moede;
-
-        if (tilArkiv && !valgt.ErSkrevetUd)
-        {
-            var ja = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
-                $"«{valgt.Titel}» er ikke skrevet ud endnu",
-                "Lægger du den i arkivet nu, ligger lyden der stadig — men den er ikke med i listen forrest, " +
-                "og så er der ingen, der får skrevet den ud.",
-                godkend: "Læg i arkivet alligevel",
-                annuller: "Behold den fremme",
-                slags: Dialogs.Slags.Pas_paa,
-                godkendErStandard: false);
-
-            if (!ja) return;
-        }
-
-        Optagelsesgruppe.Arkiver(valgt.Mappe, tilArkiv);
-
-        Historik.Skriv(
-            tilArkiv ? HaendelseType.Arkiveret : HaendelseType.HentetFrem,
-            valgt.Titel,
-            tilArkiv ? "Lagt i arkivet" : "Hentet frem fra arkivet",
-            sti: valgt.Mappe);
-
-        Status.Text = tilArkiv
-            ? $"«{valgt.Titel}» er lagt i arkivet."
-            : $"«{valgt.Titel}» er hentet frem igen.";
-
-        IndlaesOptagelser();
-    }
+    // HER LAA Arkiver_Click, og med den «Arkivér»-ikonet i vaerktoejslinjen.
+    //
+    // Den gjorde praecis det samme som at traekke optagelsen hen paa «Arkiv»
+    // i traeet. To veje til den samme handling er ikke et valg - det er
+    // noget, man skal laere at se bort fra. Fjernet 18-08-2026.
+    //
+    // EEN TING GIK MED: en advarsel, naar man arkiverede et moede, der ikke
+    // var skrevet ud endnu. Den er droppet med vilje. Arkivering flytter
+    // ingen filer og kan fortrydes ved at traekke tilbage - en dialog ved
+    // hvert traek ville goere den nemme vej til den langsomme.
 
     /// <summary>
     /// Sætter skærmen efter det, der er valgt i træet.
@@ -581,13 +583,11 @@ public partial class TranscribeView : UserControl
         AabnKnap.IsEnabled = valgt is not null;
         SletKnap.IsEnabled = valgt is not null && _afbryd is null;
 
-        // Ikonet er det samme begge veje; det er forklaringen, der skifter.
-        // «Arkivér» som TEKST i arkivet ville lyde som at goere det samme to
-        // gange - som ikon med et tooltip kan den sige praecis, hvad den goer.
-        ArkivKnap.IsEnabled = valgt is not null && _afbryd is null;
-        ArkivKnap.ToolTip = valgt?.Gruppe == Gruppe.Arkiv
-            ? "Hent frem — læg mødet tilbage i listen over møder"
-            : "Arkivér — læg mødet væk, når der ikke er mere at gøre ved det";
+        // HER SAD «Arkivér»-ikonet. Det gjorde praecis det samme som at
+        // traekke optagelsen hen paa «Arkiv» i traeet. To veje til den samme
+        // handling er ikke et valg - det er noget, man skal laere at se bort
+        // fra. Arkiver_Click staar stadig; den kaldes bare ikke laengere fra
+        // vaerktoejslinjen.
 
         if (_afbryd is not null) return;   // der koeres — forklaringen staar om det
 

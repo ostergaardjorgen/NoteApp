@@ -93,11 +93,11 @@
           <TextBlock Text="&#xE8AC;" FontFamily="Segoe MDL2 Assets" />
         </Button>
 
-        <Button DockPanel.Dock="Left" x:Name="ArkivKnap" Style="{StaticResource IkonKnap}"
-                Click="Arkiver_Click" IsEnabled="False" AutomationProperties.Name="Arkivér"
-                ToolTip="Arkivér — læg mødet væk, når der ikke er mere at gøre ved det">
-          <TextBlock Text="&#xE7B8;" FontFamily="Segoe MDL2 Assets" />
-        </Button>
+        <!-- HER LAA «Arkivér».
+             Den gjorde praecis det samme som at traekke optagelsen hen paa
+             «Arkiv» i traeet, og traek og slip er den vej, man alligevel
+             tager. To knapper til den samme handling er ikke et valg, det er
+             noget, man skal laere at se bort fra. Fjernet 18-08-2026. -->
 
         <Button DockPanel.Dock="Left" x:Name="AabnKnap" Style="{StaticResource IkonKnap}"
                 Click="Aabn_Click" IsEnabled="False" AutomationProperties.Name="Åbn mappen"
@@ -174,6 +174,23 @@
                 <Border x:Name="rk" CornerRadius="5" Padding="6,4" Background="Transparent"
                         AutomationProperties.Name="{Binding Visning}"
                         BorderThickness="1" BorderBrush="Transparent">
+                  <!-- Hjaelpeteksten staar KUN paa optagelser - se
+                       udloeseren for ErBeholder nedenfor. En mappe har ikke
+                       noget tidsrum, og en tom boble er stoej.
+
+                       To linjer: hvornaar, og hvor laenge. Raekken selv har
+                       kun plads til en forkortet dato, og naar der ligger to
+                       moeder paa samme dag, er det klokkeslaettet fra og til,
+                       der afgoer, hvilket man leder efter. -->
+                  <Border.ToolTip>
+                    <StackPanel MaxWidth="360">
+                      <TextBlock Text="{Binding Navn}" FontWeight="SemiBold" FontSize="13"
+                                 TextWrapping="Wrap" Margin="0,0,0,6" />
+                      <TextBlock Text="{Binding Optagelse.Tidsrum}" FontSize="12.5" />
+                      <TextBlock Text="{Binding Optagelse.Varighed}" FontSize="12.5"
+                                 Margin="0,3,0,0" />
+                    </StackPanel>
+                  </Border.ToolTip>
                   <StackPanel Orientation="Horizontal">
                     <TextBlock Text="{Binding Glyf}" FontFamily="Segoe MDL2 Assets" FontSize="13"
                                VerticalAlignment="Center" Margin="0,0,9,0"
@@ -197,6 +214,11 @@
                   </StackPanel>
                 </Border>
                 <HierarchicalDataTemplate.Triggers>
+                  <!-- Beholdere har ingen hjaelpetekst: en mappe har intet
+                       tidsrum, og en tom boble er stoej. -->
+                  <DataTrigger Binding="{Binding ErBeholder}" Value="True">
+                    <Setter TargetName="rk" Property="ToolTipService.IsEnabled" Value="False" />
+                  </DataTrigger>
                   <DataTrigger Binding="{Binding ErDropmaal}" Value="True">
                     <Setter TargetName="rk" Property="Background" Value="#FF33405A" />
                     <Setter TargetName="rk" Property="BorderBrush" Value="{StaticResource Accent}" />
