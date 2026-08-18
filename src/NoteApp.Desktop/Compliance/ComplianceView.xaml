@@ -101,7 +101,7 @@
                              Text="Om behandlingen KONTRAKTLIGT er bundet til Europa. Det står ikke i de to bindende dokumenter — kun i produktdokumentationen, som er en beskrivelse, ikke et løfte." />
                   <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
                              Foreground="{StaticResource TekstSvag}"
-                             Text="Hvilke af de femogtyve underdatabehandlere der indgår, når det europæiske endepunkt bruges. Aftalen skelner ikke mellem endepunkter." />
+                             Text="Om Cloudflares «Worldwide» og CrowdStrikes «United States» i praksis betyder, at data kan ligge uden for EØS. Begge gælder alle produkter." />
                   <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
                              Foreground="{StaticResource TekstSvag}"
                              Text="Om listen har ændret sig siden 17-08-2026. Mistral varsler ændringer med ti dages frist, men der er ikke abonneret på varsler." />
@@ -247,27 +247,23 @@
 
             <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap"
                        Foreground="{StaticResource TekstSvag}"
-                       Text="Mistral er fransk og hoster i Europa, men bruger underleverandører. Listen i deres Trust Center havde 17-08-2026 femogtyve navne, heriblandt Mistral Compute (Frankrig), Microsoft Azure (Sverige og Norge), CoreWeave (EØS), Cloudflare (verdensomspændende), Kong, Sentry, Wiz og CrowdStrike (EØS) samt Ory (Belgien og Tyskland)." />
+                       Text="Listen i Trust Center er gennemgået navn for navn 18-08-2026. Den opdeler efter PRODUKT — Vibe, Studio/API, Vibe Code Web — og det kan bruges: ni af de femogtyve hører til Vibe eller Vibe Code Web og er ude af billedet, fordi appen kun kalder API'et. Fem mere rører kun konto og betaling, ikke mødeindhold." />
 
             <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,10,0,0"
-                       Foreground="{StaticResource Advarsel}"
-                       Text="DATABEHANDLERAFTALEN SKELNER IKKE MELLEM ENDEPUNKTER. Læst 18-08-2026: den henviser samlet til listen i Trust Center og opregner hverken underdatabehandlere eller datalokationer pr. endepunkt. Man kan altså ikke af aftalen udlede, at et bestemt navn på listen er ude af billedet, fordi EU-endepunktet bruges." />
+                       Foreground="{StaticResource TekstSvag}"
+                       Text="Tilbage i selve behandlingskæden: Mistral Compute (Frankrig) og Mistral AI Affiliates; Microsoft som infrastruktur i Sverige og Norge; CoreWeave, som leverer selve inferensen, i EØS; Ory til brugergodkendelse i Belgien og Tyskland; samt Kong, Sentry og Wiz i EØS. Google står med Holland og Belgien — deres amerikanske placering er udtrykkeligt knyttet til «US API endpoint», som appen hverken bruger eller kan bruge." />
 
             <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,10,0,0"
                        Foreground="{StaticResource FejlTekst}" FontWeight="SemiBold"
-                       Text="DEN GEOGRAFISKE BINDING ER IKKE FUNDET I DE BINDENDE DOKUMENTER. Gennemgået 18-08-2026: hverken databehandleraftalen eller de kommercielle vilkår nævner regionale endepunkter eller forpligter behandlingen til et bestemt område. Aftalen tillader tværtimod overførsel til lande, Kommissionen har erklæret sikre, og internationale overførsler på standardkontraktbestemmelser (SCC)." />
+                       Text="TO UNDTAGELSER ER VÆRD AT KENDE. CrowdStrike står med «EØS, United States» og gælder alle produkter — altså en amerikansk placering i vores kæde, ikke kun amerikansk ejerskab. Cloudflare står med «Worldwide», dog med bemærkningen «Local to Customer», hvilket peger på, at trafikken føres til nærmeste knudepunkt." />
 
             <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,10,0,0"
                        Foreground="{StaticResource TekstSvag}"
-                       Text="Det, der findes, er leverandørens produktdokumentation om, hvad de tre endepunkter gør. Det er en beskrivelse af tjenesten — ikke en kontraktbestemmelse, man kan holde nogen fast på. Skal «bearbejdningen sker i Europa» bruges i et tilbud eller en databehandlerfortegnelse, bør det bekræftes skriftligt af leverandøren først." />
-
-            <TextBlock FontSize="11.5" LineHeight="19" TextWrapping="Wrap" Margin="0,8,0,0"
-                       Foreground="{StaticResource TekstMeget}"
-                       Text="Bemærk også: vilkårene for forbrugere i EØS gælder IKKE her. De undtager udtrykkeligt API-adgang. Det, der gælder, er de kommercielle vilkår sammen med databehandleraftalen." />
+                       Text="Bortset fra Google skelner listen ikke mellem endepunkter, kun mellem produkter. At bruge det europæiske endepunkt fjerner altså ikke i sig selv et navn fra listen — og databehandleraftalen opdeler dem heller ikke." />
 
             <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,10,0,0"
                        Foreground="{StaticResource TekstSvag}"
-                       Text="Flere af dem er amerikansk ejede — også når serverne står i Europa. Det er dét, der gør, at «ingen amerikansk virksomhed er involveret» ikke kan siges, uanset endepunkt. Google er den ene, hvis rolle med sikkerhed er henført til det amerikanske endepunkt, som appen hverken bruger eller kan bruge." />
+                       Text="Ejerskabet er den anden halvdel: Microsoft, CoreWeave, Cloudflare, Kong, Sentry, Wiz og CrowdStrike er amerikansk ejede, også når serverne står i EØS. Derfor kan «ingen amerikansk virksomhed er involveret» ikke siges — uanset endepunkt." />
 
             <Border Background="#FF181B22" CornerRadius="8" Padding="16,13" Margin="0,14,0,0"
                     BorderBrush="{StaticResource PanelKant}" BorderThickness="1">

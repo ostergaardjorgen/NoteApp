@@ -220,3 +220,58 @@ vilkår** sammen med databehandleraftalen.
 | Træning | «unless Customer is or has opted-out of training». Fravalget er brugerens eget, som antaget. Feedback-funktioner giver derudover samtykke til træning på input og output. |
 | Opbevaring | Punkt 10.1: personoplysninger er utilgængelige senest tredive dage efter aftalens ophør. Der står fortsat ingen opbevaringstid for den enkelte API-anmodning. |
 | Labs og Preview | Egne vilkår: her MÅ data bruges til træning. Appen kalder ikke sådanne modeller. |
+
+---
+
+## Underdatabehandlerne, gennemgået navn for navn — 18-08-2026
+
+*Listen fra `trust.mistral.ai/subprocessors`. Den er offentlig; grunden til at
+den ikke kunne hentes automatisk er, at siden bygges med JavaScript.*
+
+Listen opdeler efter **produkt** — Vibe, Studio/API, Vibe Code Web — ikke efter
+endepunkt. Kun Google har en endepunktsangivelse. Produktopdelingen kan bruges:
+appen kalder alene API'et, og det tager ni navne ud.
+
+### I behandlingskæden for API'et
+
+| Navn | Rolle | Placering | Ejerskab |
+|---|---|---|---|
+| Mistral Compute | Infrastruktur | Frankrig | fransk |
+| Mistral AI Affiliates | — | — | fransk |
+| **CoreWeave Inc.** | **Inferens** | EØS | **amerikansk** |
+| Microsoft Inc. | Infrastruktur | Sverige, Norge | **amerikansk** |
+| Ory Corp. | Brugergodkendelse | Belgien, Tyskland | tysk |
+| Kong Inc. | API-sikkerhed | EØS | **amerikansk** |
+| Functional Software (Sentry) | Fejlhåndtering | EØS | **amerikansk** |
+| Wiz Inc. | Sikkerhed | EØS | **amerikansk** |
+| **CrowdStrike Inc.** | Sikkerhed | **EØS, United States** | **amerikansk** |
+| **Cloudflare Inc.** | CDN og trafikstyring | **Worldwide** («Local to Customer») | **amerikansk** |
+| Google LLC | Infrastruktur | Holland, Belgien | **amerikansk** |
+
+Googles amerikanske placering står udtrykkeligt som «United States (US API
+endpoint)» med produktet «Studio/API (US API)». Den hører til det amerikanske
+endepunkt, som appen hverken bruger eller kan bruge.
+
+### De to, der stikker ud
+
+**CrowdStrike** er opført med «EØS, United States» for *alle* produkter. Det er
+ikke kun amerikansk ejerskab — det er en amerikansk **placering** i kæden.
+
+**Cloudflare** er opført «Worldwide» med bemærkningen «Local to Customer». Det
+peger på, at trafikken føres til nærmeste knudepunkt, men ordet i tabellen er
+«Worldwide».
+
+Ingen af de to kan efterprøves udefra. De er det stærkeste argument for, at
+«data bliver i Europa» ikke kan siges uden en skriftlig bekræftelse.
+
+### Ude af billedet — hører til andre produkter
+
+Blackforest Labs (billeder), Brave (websøgning), Foundrylabs/E2B
+(kodefortolker) og Merge API (Vibe-connectors) hører til Vibe og Studio/API's
+øvrige funktioner, som appen ikke bruger. Scaleway, Megaport, OVH, Backblaze
+og The Constant Company/Vultr hører alle til **Vibe Code Web**.
+
+### Kun konto og betaling — ikke mødeindhold
+
+Get Lago (Irland), Stripe (**USA**), Twilio (**USA**), Resend (Irland) og
+Intercom (Irland).
