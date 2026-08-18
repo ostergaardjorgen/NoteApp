@@ -37,8 +37,18 @@ public static class DraftStore
         var mappe = DirectoryFor(meetingDir);
         Directory.CreateDirectory(mappe);
 
+        // SEKUNDER MED. Uden dem havde to udkast af samme moede med samme model
+        // inden for det samme MINUT noejagtig samme filnavn, og det andet
+        // overskrev det foerste uden et ord.
+        //
+        // Opdaget 18-08-2026 under en maaling med tre koersler i traek: der kom
+        // kun to filer ud af tre, og den tredje maaling saa ud som om den var
+        // fejlet. Den var koert - resultatet var bare vaek.
+        //
+        // Det er ikke en teoretisk kant. En koersel i skyen tager tyve sekunder,
+        // saa to i samme minut er det normale, naar man sammenligner noget.
         var navn = $"{Filnavn(template.Name)}_{Filnavn(Path.GetFileNameWithoutExtension(result.ModelFile))}" +
-                   $"_{DateTime.Now:yyyy-MM-dd_HHmm}.md";
+                   $"_{DateTime.Now:yyyy-MM-dd_HHmmss}.md";
         var sti = Path.Combine(mappe, navn);
 
         var sb = new StringBuilder();

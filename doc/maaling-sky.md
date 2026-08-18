@@ -25,9 +25,34 @@ Kør selv: `powershell -File scripts\maal-sky.ps1 -Moede <mødemappe>`
 `mistral-dpa.md` — det globale endepunkt forpligter sig ikke på nogen geografi,
 og de 2 øre er prisen for at kunne sige det, vi siger.*
 
-**Bemærk variationen mellem kørsler.** Den samme udskrift kørt to gange gav
-101 % og 111 % længde hos Medium. Tallene i tabellen er én kørsel, ikke et
-gennemsnit — retningen er entydig, men en enkelt decimal er det ikke.
+---
+
+## Tre kørsler af hver — hvad der er signal, og hvad der er støj
+
+*Målt 18-08-2026. Samme udskrift, samme skabelon, samme facit, tre gange hver.*
+
+| Kørsel | Længde | Navnetab | Tid | Pris |
+|---|---|---|---|---|
+| **Medium 3.5** #1 | 111 % | 23 % | 25,5 s | 0,21 kr. |
+| **Medium 3.5** #2 | 111 % | 23 % | 23,9 s | 0,21 kr. |
+| **Medium 3.5** #3 | 110 % | 24 % | 25,0 s | 0,21 kr. |
+| **Large 3** #1 | 98 % | 35 % | 54,6 s | 0,04 kr. |
+| **Large 3** #2 | 111 % | 28 % | 61,6 s | 0,05 kr. |
+| **Large 3** #3 | 99 % | 30 % | 55,7 s | 0,04 kr. |
+| **Lokal 8B** (én kørsel) | 66 % | 72 % | 59 min | 0 kr. |
+
+**Medium er ikke bare bedre — den er stabil.** Længden varierer 1 procentpoint
+over tre kørsler, navnetabet ét. Large svinger 13 procentpoint på længde og 7
+på navnetab. Ved en enkelt kørsel kan Large ligne Medium; over tre gør den det
+ikke.
+
+**Afstanden til den lokale model kan ikke bortforklares med variation.**
+Navnetabet er 72 % lokalt mod 23-24 % hos Medium. Spredningen inden for Medium
+er ét procentpoint. De to tal er ikke i nærheden af hinanden.
+
+Den lokale model er kun kørt én gang, fordi hver kørsel tager en time. Det er
+en reel svaghed ved målingen — men den ville skulle variere med 45
+procentpoint for at ændre konklusionen.
 
 De to «fundet»-rækker tæller, hvor meget af facits indhold der er nået med —
 ikke hvor mange navne udkastet indeholder i alt. Det sidste ville belønne en
@@ -82,7 +107,32 @@ opfundne navne hos begge. Tallet i tabellen er det gennemgåede, ikke rålisten.
 **«Navne fundet» straffer skabelonforskelle.** Facit har en hovedblok med
 Emne, Dato, Form og Referent og tabeller med Ansvarlig og Frist. De ord tælles
 som manglende navne hos alle tre, uden at der er tabt indhold. Det er derfor
-26 % «navnetab» hos Medium ikke betyder, at hver fjerde person mangler.
+23 % «navnetab» hos Medium ikke betyder, at hver fjerde person mangler.
+
+---
+
+## Det, målingen IKKE kan svare på
+
+Tre ting, og den sidste er den vigtigste.
+
+**1. Facit er selv en modeltekst.** Den er lavet af Claude ud fra den samme
+udskrift. Den er god, men den er ikke sandheden — den er en fjerde models
+mening om, hvad der blev sagt. Vi måler afstand til den, ikke til mødet.
+
+**2. Kun ét møde.** Alle tal stammer fra Cloudworks-mødet. En anden mødetype —
+teknisk gennemgang, forhandling, mange deltagere — kan give et andet billede.
+
+**3. HVEM SAGDE HVAD måles slet ikke.** Og det var dét, der gjorde det første
+referat ubrugeligt: «det citerer Espen for at sige ting, som jeg selv har
+sagt». Bedømmelsen tæller, om et navn er nævnt — ikke om det står det rigtige
+sted. Et referat kan score højt på alle tal ovenfor og stadig tillægge den ene
+deltager den andens ord.
+
+**Det er hullet, der er værd at lukke.** Metoden findes allerede i projektet:
+ved oplæsning måles udskriften mod en facitliste, sætning for sætning. Det
+samme kan gøres her — en håndlavet liste over udsagn med hvem der sagde dem,
+og så tælles der rigtige og forkerte tilskrivninger pr. model. Det er
+manuelt arbejde én gang og en målbar tabel hver gang derefter.
 
 ---
 
