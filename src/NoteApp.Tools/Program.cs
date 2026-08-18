@@ -197,6 +197,23 @@ static int Rettelser(string[] a)
     foreach (var r in liste)
         Console.WriteLine($"  {r.Hørt,-32} -> {r.Rigtigt,-28} ({r.Gange} gange)");
 
+    // HVAD SPROGMODELLEN FAKTISK FAAR.
+    //
+    // Ikke det samme som listen ovenfor, og det skal kunne ses. Efter et par
+    // oplaesninger af den blandede proevetekst stod der "do not", "or we" og
+    // "where are" i den liste, modellen fik som "fagord og navne, der kan
+    // optraede" - og det opdagede ingen, fordi der ikke var noget sted at
+    // kigge. Se LearningStore.Ordbogsord for filteret.
+    var ordbog = store.Ordbogsord();
+
+    Console.WriteLine();
+    Console.WriteLine($"Af dem gaar {ordbog.Count} videre til sprogmodellen som fagord:");
+    Console.WriteLine();
+    Console.WriteLine("  " + (ordbog.Count == 0 ? "(ingen)" : string.Join(", ", ordbog)));
+    Console.WriteLine();
+    Console.WriteLine("  Resten er sat fra: for korte, eller flere smaa ord i traek.");
+    Console.WriteLine("  De bliver staaende som rettelser — de gaar bare ikke videre.");
+
     return 0;
 }
 
@@ -385,9 +402,7 @@ static async Task<int> Udkast(string[] a)
         ["sprog"] = sprog,
         // De rigtige stavemaader fra dine rettelser. Den gaar til
         // SPROGMODELLEN, ikke til Whisper.
-        ["ordbog"] = string.Join(", ", store.ListRettelser()
-            .Select(r => r.Rigtigt)
-            .Distinct(StringComparer.OrdinalIgnoreCase))
+        ["ordbog"] = string.Join(", ", store.Ordbogsord())
     };
 
     Console.WriteLine($"Skabelon : {skabelon.Name}");
@@ -538,9 +553,15 @@ static async Task<int> Sky(string[] a)
     var skabeloner = NoteApp.Core.Llm.PromptTemplate.LoadAll();
     if (skabeloner.Count == 0) { Console.Error.WriteLine($"Ingen skabeloner i {NoteApp.Core.Llm.PromptTemplate.Directory}"); return 1; }
 
-    var skabelon = a.Length > 3
+    var skabelon = a.Length > 3 && !a[3].StartsWith("--")
         ? skabeloner.FirstOrDefault(s => s.Name.Contains(a[3], StringComparison.OrdinalIgnoreCase)) ?? skabeloner[0]
         : skabeloner[0];
+
+    // MAALEFLAG. Findes for at kunne svare paa, om ordbogen overhovedet
+    // aendrer resultatet - det samme moede koert med og uden, og saa bedoemt.
+    // Uden et flag skulle man rette i koden for at maale, og saa bliver det
+    // ikke maalt.
+    var udenOrdbog = a.Any(x => x.Equals("--uden-ordbog", StringComparison.OrdinalIgnoreCase));
 
     using var store = new LearningStore();
 
@@ -552,9 +573,7 @@ static async Task<int> Sky(string[] a)
         ["varighed"] = "",
         ["noter"] = "",
         ["sprog"] = "dansk",
-        ["ordbog"] = string.Join(", ", store.ListRettelser()
-            .Select(r => r.Rigtigt)
-            .Distinct(StringComparer.OrdinalIgnoreCase))
+        ["ordbog"] = udenOrdbog ? "" : string.Join(", ", store.Ordbogsord())
     };
 
     // DET HER SKAL STAA, HVER GANG. Kommandoen sender moedeudskriften til en

@@ -19,6 +19,17 @@ public enum HaendelseType
     /// <summary>Et arkiveret møde er hentet frem igen.</summary>
     HentetFrem,
 
+    /// <summary>
+    /// Træning: en sætning læst op igen, en fejl markeret.
+    ///
+    /// Står for sig selv frem for som <see cref="Transskription"/>, selvom der
+    /// også skrives tekst ud undervejs. Forskellen er ikke teknisk, den er,
+    /// hvem der venter: en træningskørsel står man selv og ser på i et vindue,
+    /// man selv har åbnet. Den skal i historikken, men den skal ikke ringe med
+    /// en klokke.
+    /// </summary>
+    Traening,
+
     Andet
 }
 

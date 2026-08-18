@@ -640,9 +640,7 @@ public partial class TranscribeView : UserControl
                 // SPROGMODELLEN, ikke til Whisper — en sprogmodel laeser en
                 // liste og retter sig efter den, og det er maalt. Whisper
                 // gjorde ikke, og derfor er den vej fjernet.
-                ["ordbog"] = string.Join(", ", ordbog.ListRettelser()
-                    .Select(r => r.Rigtigt)
-                    .Distinct(StringComparer.OrdinalIgnoreCase))
+                ["ordbog"] = string.Join(", ", ordbog.Ordbogsord())
             };
         }
 

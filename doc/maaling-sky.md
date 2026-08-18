@@ -192,6 +192,41 @@ efterprøvet.
 
 ---
 
+---
+
+## Hjælper ordbogen fra træningen overhovedet?
+
+*Målt 18-08-2026. Samme møde, samme model, to kørsler med og to uden.*
+
+Skabelonen giver modellen en linje: «Fagord og navne, der kan optræde: …».
+Ordene kommer fra de rettelser, brugeren har lavet under træningen. Det er
+det eneste sted, træningens output rører det færdige referat.
+
+| | Længde | Navnetab | Dækning | Forkert tilskrevet |
+|---|---|---|---|---|
+| Med ordbog #1 | 110 % | 23 % | 100 % | 0 |
+| Med ordbog #2 | 107 % | 26 % | 100 % | 0 |
+| **Uden** ordbog #1 | 112 % | 23 % | 100 % | 0 |
+| **Uden** ordbog #2 | 112 % | 23 % | 100 % | 0 |
+
+**Ingen forskel.** Forskellene er mindre end variationen mellem to kørsler af
+den samme opsætning — og kørslerne uden ordbog er en anelse mere ensartede
+end dem med.
+
+Det er **tredje** håndtag i dette projekt, der måler nul:
+
+| Håndtag | Målt | Udfald |
+|---|---|---|
+| Ordliste til Whisper | 41 termer, nul effekt | Fjernet |
+| Sprogmodel retter udskriften | 2 ord ud af 3.418 | Fravalgt |
+| **Ordbog til sprogmodellen** | **ingen målbar forskel** | **skal besluttes** |
+
+Kør selv:
+
+```
+noteapp sky referat <mødemappe> mistral-medium --uden-ordbog
+```
+
 ## Det, der stadig mangler, før budskabet må bruges
 
 Målingen viser, at bearbejdning i Europa kan lade sig gøre uden at gå på

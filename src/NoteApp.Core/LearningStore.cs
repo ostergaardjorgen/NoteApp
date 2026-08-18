@@ -122,6 +122,60 @@ public sealed class LearningStore : IDisposable
     /// Det er hele det, brugeren har at skrue på. Alt andet i denne fil er
     /// enten historik eller den plumbing, rettelserne står på.
     /// </summary>
+    /// <summary>
+    /// De af dine rettelser, der giver mening at give videre til sprogmodellen
+    /// som «fagord og navne, der kan optræde».
+    ///
+    /// HVORFOR IKKE BARE ALLE SAMMEN
+    ///
+    /// Det var det, den gjorde. Efter et par oplæsninger af den blandede
+    /// prøvetekst — dansk og engelsk mellem hinanden — så listen sådan ud:
+    ///
+    ///   rows, eight, sixty four, connector at, build the, 100 and, do not,
+    ///   or we, the short, we on, where are, det, trak, inden, syv …
+    ///
+    /// Modellen fik altså at vide, at «do not» og «where are» var fagord, der
+    /// kunne forventes i et dansk mødereferat. Det er værre end at give den
+    /// ingen liste: den prøver at bruge dem.
+    ///
+    /// Rettelserne bliver ALDRIG anvendt på selve udskriften — den vej blev
+    /// fjernet, da ordlisten til Whisper blev målt til nul effekt. Her er der
+    /// tale om, hvad modellen får at vide, ikke om at rette i teksten.
+    ///
+    /// FILTERET
+    ///
+    /// Et ord kommer med, hvis det ligner et navn eller en fagterm:
+    ///   - har et stort bogstav et sted (SCIM, MitID Erhverv, Entra ID), ELLER
+    ///   - er ÉT ord på mindst seks tegn (styregruppemødet, modtagersystemer)
+    ///
+    /// Det er groft, og prisen er kendt: «cpr nummer» ryger ud, fordi det er
+    /// to små ord, og «selvom» og «større» slipper igennem, fordi de er lange
+    /// nok. Den afvejning er valgt med vilje — et manglende fagord koster
+    /// ingenting, modellen kender det i forvejen, mens et opfundet fagord
+    /// bliver skrevet ind i referatet.
+    /// </summary>
+    public IReadOnlyList<string> Ordbogsord()
+    {
+        return ListRettelser()
+            .Select(r => r.Rigtigt.Trim())
+            .Where(ErFagord)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+    }
+
+    private static bool ErFagord(string ord)
+    {
+        if (ord.Length == 0) return false;
+
+        // Et stort bogstav hvor som helst: navn, produkt eller forkortelse.
+        if (ord.Any(char.IsUpper)) return true;
+
+        // Ellers skal det vaere EET ord og laengere end de smaa ord, der
+        // baerer en saetning. "do not" og "or we" falder paa mellemrummet;
+        // "det", "trak" og "syv" paa laengden.
+        return !ord.Contains(' ') && ord.Length >= 6;
+    }
+
     public IReadOnlyList<Rettelse> ListRettelser(string? søg = null)
     {
         using var cmd = _db.CreateCommand();

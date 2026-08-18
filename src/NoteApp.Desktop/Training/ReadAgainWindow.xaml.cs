@@ -254,7 +254,7 @@ public partial class ReadAgainWindow : Window
 
             Resultat = Genlaesninger.Gem(_optagelse, _nummer, _manuskript, hørt, ord, ramt, _klip);
 
-            Historik.Skriv(HaendelseType.Transskription,
+            Historik.Skriv(HaendelseType.Traening,
                 $"Sætning {_nummer} læst op igen",
                 $"{ramt} af {ord} ord ramt", model: install.ModelFileName ?? "", sti: _optagelse,
                 sekunder: _sekunder);

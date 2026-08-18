@@ -29,12 +29,36 @@ public static class Notifikationer
     public static void Meld() => Nyt?.Invoke();
 
     /// <summary>
-    /// Hændelser, der er værd at give besked om. Se klassens forklaring —
-    /// resten er ting, brugeren selv stod og gjorde.
+    /// Hændelser, der er værd at give besked om.
+    ///
+    /// PRÆCIS TO TING: en optagelse, der er skrevet ud, og et dokument, der er
+    /// lavet. Det er dem, man sætter i gang og går væk fra.
+    ///
+    /// Her stod også sikkerhedskopier og ALT, der fejlede. Klokken kom til at
+    /// vise seks beskeder om sætninger, der var læst op igen — noget brugeren
+    /// stod og så på i et vindue, han selv havde åbnet. En klokke, der ringer
+    /// ved ting, man allerede ved, bliver en klokke, man holder op med at
+    /// åbne, og så virker den heller ikke til det, den var til.
+    ///
+    /// Fejl på de to slags kommer stadig med: de har typen med sig, og en
+    /// transskription, der gik galt, er lige så meget værd at vide som en, der
+    /// lykkedes. Fejl på ALT ANDET gør ikke — de står i historikken.
     /// </summary>
     private static bool Vaerd(Haendelse h) =>
-        h.Udfald is Udfald.Fejlet or Udfald.SeEfter ||
-        h.Slags is HaendelseType.Transskription or HaendelseType.Dokument or HaendelseType.Backup;
+        h.Slags is HaendelseType.Transskription or HaendelseType.Dokument
+        && !ErGammelTraening(h);
+
+    /// <summary>
+    /// Træningskørsler fra før <see cref="HaendelseType.Traening"/> fandtes.
+    ///
+    /// De ligger i historikken som «Transskription», fordi der ikke var en
+    /// bedre type dengang, og de ville blive ved med at ringe med klokken,
+    /// indtil de var rullet ud af de seneste 300 hændelser. Genkendes på
+    /// teksten — grimt, men det er en overgang, ikke en regel.
+    /// </summary>
+    private static bool ErGammelTraening(Haendelse h) =>
+        h.Hvad.StartsWith("Sætning ", StringComparison.Ordinal) &&
+        h.Hvad.Contains("læst op igen", StringComparison.Ordinal);
 
     /// <summary>De nyeste beskeder, uanset om de er læst.</summary>
     public static IReadOnlyList<Haendelse> Seneste(int maks = 30) =>
