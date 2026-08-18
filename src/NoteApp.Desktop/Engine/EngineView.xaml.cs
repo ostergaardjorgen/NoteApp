@@ -1,4 +1,4 @@
-using System.IO;
+﻿using System.IO;
 using System.Windows;
 using System.Windows.Media;
 using NoteApp.Core;
@@ -43,7 +43,17 @@ public partial class EngineView : System.Windows.Controls.UserControl
         var model = WhisperInstall.Model(AppSettings.Current.PreferredModel ?? "")
                     ?? WhisperInstall.Standard;
 
-        LydModel.Text = model.Id;
+        // DER STAAR DEN FIL, DER FAKTISK INDLAESES - IKKE INDSTILLINGEN.
+        //
+        // De to kan vaere forskellige, og forskellen er ikke teoretisk:
+        // modeller soeges tre steder, og en fil i repoets models-mappe vinder
+        // over ingenting i datamappen. Stod der bare, hvad indstillingen
+        // oenskede, ville skaermen svare paa et andet spoergsmaal end det,
+        // man har - og man ville ikke opdage, at filen laa et andet sted.
+        LydModel.Text = s.ModelPath is null
+            ? $"{model.Id} — ikke hentet"
+            : Path.GetFileNameWithoutExtension(s.ModelPath).Replace("ggml-", "");
+
         LydResume.Text = model.Summary + " " + model.Pros;
 
         MotorNavn.Text = s.WhisperCli is null ? "ikke installeret" : "whisper.cpp";
@@ -63,16 +73,17 @@ public partial class EngineView : System.Windows.Controls.UserControl
             ? $"Motoren hentes til {WhisperInstall.EngineDirectory}"
             : $"{s.WhisperCli}\nModeller: {WhisperInstall.ModelDirectory}";
 
-        var hentet = WhisperInstall.Installed().Any(m => m.Id == model.Id);
-
-        LydKnap.Content = hentet ? "Hent igen" : $"Hent {model.SizeText}";
+        LydKnap.Content = s.ModelPath is null ? $"Hent {model.SizeText}" : "Hent igen";
         MotorKnap.IsEnabled = s.WhisperCli is not null;
 
-        LydStatus.Text = !hentet
-            ? $"Modellen mangler. Uden den kan appen ikke skrive optagelser ud — motoren følger med hentningen."
+        // Hvor filen ligger, staar fremme og ikke i en foldbar. Ligger den i
+        // repoets models-mappe frem for datamappen, er det vaerd at vide -
+        // den flytter ikke med en sikkerhedskopi.
+        LydStatus.Text = s.ModelPath is null
+            ? "Modellen er ikke hentet. Uden den kan appen ikke skrive optagelser ud — motoren følger med hentningen."
             : s.WhisperCli is null
                 ? "Motoren mangler. Tryk «Hent igen», så følger den med."
-                : "";
+                : $"I brug: {s.ModelPath}";
 
         Status.Text = "";
         VisSkyStatus();

@@ -118,14 +118,21 @@ public partial class SetupWindow : Window
         }
         else
         {
-            // large-v3 paa en GPU-maskine, ellers den lille. Kvaliteten paa
-            // dansk er markant bedre med den store, men uden GPU er den
-            // ubrugelig langsom.
+            // large-v3 paa en GPU-maskine, ellers turbo. Kvaliteten paa dansk
+            // er bedst med den store, men uden GPU er den ubrugelig langsom.
+            //
+            // Her stod Model("small") i den ene gren. Da katalogget blev
+            // skaaret ned til to modeller 18-08-2026, holdt "small" op med at
+            // findes, og opslaget begyndte at give null - som saa blev
+            // dereferencet to linjer nede. Opsaetningen ville vaelte paa
+            // enhver maskine uden NVIDIA-kort, altsaa praecis dem, grenen er
+            // til for. Derfor slaas der nu op i katalogget frem for paa et
+            // navn skrevet i haanden.
             _modelValg = EngineInstaller.HasNvidiaGpu()
-                ? WhisperInstall.Model("large-v3")
-                : WhisperInstall.Model("small");
+                ? WhisperInstall.Standard
+                : WhisperInstall.Model("large-v3-turbo") ?? WhisperInstall.Standard;
 
-            ModelValg.Text = $"{_modelValg!.Id}  ({_modelValg.SizeText})";
+            ModelValg.Text = $"{_modelValg.Id}  ({_modelValg.SizeText})";
             ModelBegrundelse.Text = _modelValg.Summary + " Du kan skifte model senere under Motor og model.";
         }
 

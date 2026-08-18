@@ -51,8 +51,12 @@ public sealed class AppSettings
     /// </summary>
     public bool AutoAdvance { get; set; }
 
-    /// <summary>Model til live-lytningen. Den store bruges til den rigtige transskription.</summary>
-    public string LiveModel { get; set; } = "small";
+    // HER LAA LiveModel = "small".
+    //
+    // Feltet blev aldrig laest. Der er ingen live-lytning i appen, og der har
+    // ikke vaeret det. Det stod og lignede en forklaring paa, hvorfor
+    // ggml-small.bin laa i modelmappen - og den forklaring var forkert.
+    // Fjernet 18-08-2026.
 
     /// <summary>
     /// Den genvejstast, der lynstarter en optagelse — gemt som id, ikke som
