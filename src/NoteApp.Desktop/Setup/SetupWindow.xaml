@@ -29,16 +29,16 @@
       <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20"
               BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
         <StackPanel>
-          <TextBlock Text="Alt bliver på denne pc" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,10" />
+          <TextBlock Text="Lyden bliver her. Teksten bliver i Europa." FontSize="16" FontWeight="SemiBold" Margin="0,0,0,10" />
           <TextBlock FontSize="13" LineHeight="22" Foreground="{StaticResource TekstSvag}"
-                     Text="NoteApp optager dine møder, skriver dem ud og lærer dine fagord. Optagelser, noter og ordbog forlader aldrig maskinen — der er ingen sky, ingen konto og ingen telemetri." />
+                     Text="NoteApp optager dine møder og skriver dem ud her på maskinen. Skal der laves et referat eller et andet dokument ud af teksten, sker det hos Mistral AI i Frankrig — og det er kun teksten, der sendes." />
           <TextBlock FontSize="13" LineHeight="22" Margin="0,12,0,0" Foreground="{StaticResource TekstSvag}"
-                     Text="Selve transskriptionen laves af Whisper, som kører lokalt. Motoren og sprogmodellen skal hentes én gang — det er det eneste, appen bruger internettet til, og du bliver spurgt først." />
+                     Text="Selve transskriptionen laves af Whisper, som kører lokalt. Lydfilerne forlader aldrig maskinen — heller ikke når der laves et dokument. Motoren og modellen skal hentes én gang, og du bliver spurgt først." />
 
           <Border Background="#334CBE72" BorderBrush="{StaticResource Godkendt}" BorderThickness="1"
                   CornerRadius="6" Padding="14,10" Margin="0,16,0,0">
             <TextBlock FontSize="12" Foreground="{StaticResource Tekst}" LineHeight="19"
-                       Text="Retningen er det afgørende: der hentes NED til maskinen, og der sendes aldrig noget OP. Appen har ingen kode, der kan sende en optagelse nogen steder hen." />
+                       Text="Optagelsen kan ikke sendes nogen steder hen. Appen har ingen kode, der kan det — kun den færdige tekst kan sendes, og kun til det europæiske endepunkt. Du sætter det selv op om lidt, og du kan lade være." />
           </Border>
         </StackPanel>
       </Border>

@@ -148,111 +148,18 @@ public static class BackgroundJobs
         }
     }
 
-    /// <summary>
-    /// Laver et dokument. Kaldes og glemmes — resultatet kommer via
-    /// <see cref="DokumentFærdigt"/>.
-    ///
-    /// Der køres kun ét ad gangen. To sprogmodeller samtidig ville ikke være
-    /// dobbelt så hurtigt; de ville slås om det samme grafikkort og begge
-    /// blive langsommere.
-    /// </summary>
-    public static async void LavDokument(
-        string cli, string model, PromptTemplate skabelon,
-        IReadOnlyDictionary<string, string?> felter,
-        DocumentInfo skabelonInfo, string mødeMappe)
-    {
-        if (Kører)
-        {
-            MessageBox.Show(
-                $"Der kører allerede en opgave: {HvadKører}\n\n" +
-                "Der køres kun én ad gangen — to sprogmodeller samtidig ville ikke være dobbelt så " +
-                "hurtigt, de ville slås om det samme grafikkort og begge blive langsommere.",
-                "Én ad gangen", MessageBoxButton.OK, MessageBoxImage.Information);
-            return;
-        }
-
-        _afbryd = new CancellationTokenSource();
-        HvadKører = $"«{skabelonInfo.Title}»";
-
-        var startet = DateTime.Now;
-        _detaljer =
-            $"«{skabelonInfo.Title}» · skabelon: {skabelon.Name} · startet {startet:HH:mm} · " +
-            "lander under «Dokumenter»";
-
-        Meld("Starter sprogmodellen …");
-
-        try
-        {
-            // Tiden staar i beskeden. En besked, der har staaet uaendret i ti
-            // minutter, kan ikke skelnes fra en, der haenger — med et ur, der
-            // taeller, kan den.
-            var fremdrift = new Progress<LlmProgress>(p =>
-            {
-                var gaaet = DateTime.Now - startet;
-                var ur = gaaet.TotalMinutes < 1
-                    ? $"{gaaet.TotalSeconds:0} sek"
-                    : $"{gaaet.TotalMinutes:0} min";
-
-                var besked = p.Ord > 0
-                    ? $"{p.Ord} ord skrevet · {ur}"
-                    : $"{p.Message} · {ur}";
-
-                Meld(besked, procent: p.Ord > 0 ? p.Percent : p.Percent > 0 ? p.Percent : -1);
-            });
-
-            // Referatbygger frem for LlmRunner direkte. Den deler lange møder
-            // op, saa de kan ligge paa grafikkortet — et 61-minutters moede tog
-            // 28 minutter i een koersel, fordi modellen blev skubbet over paa
-            // processoren. Korte moeder koerer den stadig i een omgang.
-            //
-            // Brugeren ser ikke opdelingen: fremdriften er eet tal, og
-            // beskederne siger hvad der sker, ikke hvilket stykke der arbejdes
-            // paa.
-            var bygger = new Referatbygger(new LlmRunner(cli));
-            var r = await bygger.ByggAsync(model, skabelon, felter, fremdrift, _afbryd.Token);
-
-            // Udkastet gemmes raat ved siden af optagelsen — arbejdsdokumentet.
-            // Dokumentet er det, man sender videre.
-            DraftStore.Save(mødeMappe, skabelon, r);
-
-            skabelonInfo.Markdown = r.Text.Trim();
-            var odt = DocumentStore.Save(skabelonInfo);
-
-            Historik.Skriv(HaendelseType.Dokument, $"Dokument oprettet: {skabelonInfo.Title}",
-                $"Skabelon «{skabelon.Name}» · {r.ResponseTokens} tokens · {r.TokensPerSecond:0.0}/sek",
-                Udfald.Fuldført, skabelonInfo.Model, odt, r.Elapsed.TotalSeconds);
-            Notifikationer.Meld();
-
-            Meld($"Færdigt: {Path.GetFileName(odt)} · {r.Elapsed.TotalSeconds:0} sek", kører: false);
-            DokumentFærdigt?.Invoke(skabelonInfo.Id);
-        }
-        catch (OperationCanceledException)
-        {
-            Historik.Skriv(HaendelseType.Dokument, $"Dokument afbrudt: {skabelonInfo.Title}",
-                "Brugeren stoppede kørslen", Udfald.Afbrudt, skabelonInfo.Model);
-            Notifikationer.Meld();
-
-            Meld("Afbrudt. Der blev ikke gemt noget dokument.", kører: false);
-        }
-        catch (Exception ex)
-        {
-            Historik.Skriv(HaendelseType.Dokument, $"Dokument fejlede: {skabelonInfo.Title}",
-                ex.Message, Udfald.Fejlet, skabelonInfo.Model);
-            Notifikationer.Meld();
-
-            Meld($"Dokumentet blev ikke lavet: {ex.Message}", kører: false);
-
-            MessageBox.Show(
-                $"Dokumentet kunne ikke laves.\n\n{ex.Message}",
-                "Kunne ikke lave dokument", MessageBoxButton.OK, MessageBoxImage.Warning);
-        }
-        finally
-        {
-            _afbryd?.Dispose();
-            _afbryd = null;
-            HvadKører = null;
-        }
-    }
+    // HER LAA LavDokument - den lokale vej.
+    //
+    // Den koerte llama.cpp paa denne maskine gennem Referatbygger, med
+    // opdeling i blokke, fordi et 61-minutters moede ellers blev skubbet over
+    // paa processoren. Fjernet 18-08-2026: maalt paa det samme moede tabte
+    // den 72 % af navnene og brugte 59 minutter, hvor LavDokumentISkyen
+    // ovenfor bruger 25 sekunder og taber 23 %. Se doc/maaling-sky.md.
+    //
+    // LlmRunner og Referatbygger ligger stadig i Core og bruges fra
+    // kommandolinjen (noteapp referat). Det er dér, sammenligningen mellem
+    // lokalt og Europa skal kunne koeres igen - en maaling, man ikke kan
+    // gentage, er en paastand.
 
     /// <summary>
     /// Hvad kørslen laver, hvornår den begyndte, og hvor resultatet lander.

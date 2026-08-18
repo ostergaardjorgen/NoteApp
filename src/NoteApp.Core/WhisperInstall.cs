@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -11,7 +11,13 @@ public enum ModelLanguages
     Multilingual,
 
     /// <summary>KUN engelsk. Vælges den til et dansk møde, kommer der volapyk ud.</summary>
-    EnglishOnly
+    EnglishOnly,
+
+    /// <summary>
+    /// KUN dansk. En model, der er finjusteret på ét sprog, kan i praksis
+    /// kun det ene — resten af Whispers sprog er trænet væk igen.
+    /// </summary>
+    Danish
 }
 
 public sealed record WhisperModel(
@@ -30,7 +36,7 @@ public sealed record WhisperModel(
         ? $"{GigaBytes:0.0} GB"
         : $"{Bytes / 1024.0 / 1024.0:0} MB";
 
-    public bool SupportsDanish => Languages == ModelLanguages.Multilingual;
+    public bool SupportsDanish => Languages is ModelLanguages.Multilingual or ModelLanguages.Danish;
 }
 
 public sealed record InstallState(
@@ -77,71 +83,56 @@ public static class WhisperInstall
     public static string EngineDirectory => Path.Combine(Root, "whisper");
 
     /// <summary>
-    /// Modellerne, appen kan hente. Fordele og ulemper står ved hver enkelt,
-    /// fordi valget ikke kan træffes fornuftigt uden dem: den mindste model
-    /// er ti gange hurtigere OG mærkbart dårligere, og hvad der er det rigtige
-    /// afhænger af, om man holder møder på dansk eller engelsk, og om der er
-    /// et NVIDIA-kort i maskinen.
+    /// Modellerne, appen kan hente.
     ///
-    /// Størrelserne er de faktiske filstørrelser fra Hugging Face, målt med
-    /// et HEAD-kald 10. august 2026. De vises, FØR brugeren siger ja til at
-    /// hente — ikke bagefter.
+    /// HER LAA SEKS. NU LIGGER DER TO.
     ///
-    /// Tallet er ikke pynt: Downloader bruger det til at afgøre, om en fil,
+    /// Katalogget havde large-v3, large-v3-turbo, medium, small, small.en og
+    /// base.en med fordele og ulemper ved hver. Det saa ud som et oplyst valg
+    /// og var en faelde: alle de smaa er maerkbart daarligere paa dansk, og de
+    /// to engelske kan slet ikke dansk — de giver volapyk frem for en fejl.
+    /// Et valg, hvor hvert alternativ goer loesningen ringere, er ikke et
+    /// valg. Fjernet 18-08-2026.
+    ///
+    /// Tilbage staar de to, der er vaerd at have:
+    ///
+    ///   · Roest v3 — en Whisper large-v3, der er finjusteret paa dansk tale
+    ///     af CoRal-projektet. Standardvalget.
+    ///   · large-v3-turbo — OpenAI's egen, flersproget. Reserven, naar moedet
+    ///     ikke holdes paa dansk.
+    ///
+    /// Stoerrelserne er de faktiske filstoerrelser, maalt med et HEAD-kald.
+    /// Tallet er ikke pynt: Downloader bruger det til at afgoere, om en fil,
     /// der allerede ligger der, er hel. Er tallet forkert, hentes modellen
-    /// igen hver eneste gang. To af dem var gættet forkert i første udgave,
-    /// og det viste sig kun, fordi hentningen blev afprøvet.
+    /// igen hver eneste gang.
     /// </summary>
     public static readonly IReadOnlyList<WhisperModel> Models = new[]
     {
         new WhisperModel(
-            "large-v3", "ggml-large-v3.bin", 3_095_033_483L,
-            "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v3.bin",
-            ModelLanguages.Multilingual,
-            "Bedst på dansk. Standardvalget, hvis maskinen har et NVIDIA-kort.",
-            "Klart bedst til danske navne, fagtermer og negationer. Den eneste, der er god nok til at sende et referat videre uden at læse lyden efter.",
-            "Fylder 2,9 GB og kræver knap 3,1 GB VRAM. På ren CPU er den for langsom til daglig brug — regn med flere timer for et langt møde."),
+            "roest-v3", "roest-v3-q8_0.bin", 1_656_538_283L,
+            "https://huggingface.co/alfanova/roest-v3-whisper-ggml/resolve/main/roest-v3-q8_0.bin",
+            ModelLanguages.Danish,
+            "Whisper large-v3, finjusteret paa dansk tale. Standardvalget.",
+            "Trænet på CoRal-v3: dansk samtale og oplæsning på tværs af aldre, køn og dialekter. Bygger på den samme large-v3, som ellers ville være valget — men med dansk oveni.",
+            "Kun dansk. Holdes mødet på engelsk, skal der skiftes til large-v3-turbo. Licensen er OpenRAIL-M med brugsbegrænsninger, der skal følge med videre."),
 
         new WhisperModel(
             "large-v3-turbo", "ggml-large-v3-turbo.bin", 1_624_555_275L,
             "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v3-turbo.bin",
             ModelLanguages.Multilingual,
-            "Næsten large-v3's kvalitet på omtrent det halve af tiden.",
-            "Markant hurtigere end large-v3 og halvt så stor. Bedste kompromis, hvis du venter på transskriptionen i stedet for at lade den køre om natten.",
-            "En smule ringere end large-v3 på svær lyd — flere talere i munden på hinanden, kraftig dialekt, dårlig mikrofon."),
-
-        new WhisperModel(
-            "medium", "ggml-medium.bin", 1_533_763_059L,
-            "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-medium.bin",
-            ModelLanguages.Multilingual,
-            "Mellemvejen. Brugbar på dansk, kører på en pc uden GPU.",
-            "Halv størrelse af large-v3 og mærkbart hurtigere på CPU. God nok til at forstå, hvad der blev sagt.",
-            "Taber navne og fagtermer, som large-v3 fanger. Ordlisten betyder mere her, ikke mindre."),
-
-        new WhisperModel(
-            "small", "ggml-small.bin", 487_601_967L,
-            "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.bin",
-            ModelLanguages.Multilingual,
-            "Til en pc uden GPU og uden tålmodighed.",
-            "Under 500 MB og hurtig selv på CPU. Fin til at finde ud af, hvad et møde handlede om.",
-            "Mærkbart dårligere dansk. Negationer forsvinder, og det er den fejl, der vender betydningen om."),
-
-        new WhisperModel(
-            "small.en", "ggml-small.en.bin", 487_614_201L,
-            "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.en.bin",
-            ModelLanguages.EnglishOnly,
-            "Kun engelsk. Bedre engelsk end small til samme størrelse.",
-            "Al kapacitet er brugt på ét sprog, så den slår den flersprogede small klart på engelske møder. Lille og hurtig.",
-            "KAN IKKE DANSK. Vælges den til et dansk møde, kommer der volapyk ud — ikke en fejlmeddelelse."),
-
-        new WhisperModel(
-            "base.en", "ggml-base.en.bin", 147_964_211L,
-            "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.en.bin",
-            ModelLanguages.EnglishOnly,
-            "Kun engelsk, letvægt. 148 MB.",
-            "Henter på sekunder og kører på hvad som helst. Nok til engelske møder, hvor man bare skal kunne søge bagefter.",
-            "KAN IKKE DANSK. Og selv på engelsk taber den navne og tal, som de større modeller rammer.")
+            "OpenAI's egen, flersproget. Til møder, der ikke holdes på dansk.",
+            "Kan alle de sprog, Whisper kan, og finder selv ud af hvilket. Næsten large-v3's kvalitet på omtrent det halve af tiden.",
+            "Ringere på dansk end Roest, som er trænet netop på det. Vælg den, når mødet ikke er dansk.")
     };
+
+    /// <summary>
+    /// Den model, appen bruger, hvis brugeren ikke har valgt andet.
+    ///
+    /// Staar ET sted, saa den kan skiftes ET sted. Baade opsaetningen,
+    /// AI-modeller-skaermen og reserveopslaget i <see cref="FindModel"/>
+    /// spoerger her.
+    /// </summary>
+    public static WhisperModel Standard => Models[0];
 
     public static WhisperModel? Model(string id) =>
         Models.FirstOrDefault(m => m.Id.Equals(id, StringComparison.OrdinalIgnoreCase));

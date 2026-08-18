@@ -479,23 +479,31 @@ public partial class TranscribeView : UserControl
             return;
         }
 
-        var cli = LlmRunner.FindCli();
-        var modeller = LlmRunner.InstalledModels();
-
-        // Mangler den lokale model, er der stadig en vej: den europaeiske
-        // bearbejdning kraever ingen model paa maskinen. Blokeres der her,
-        // kommer en bruger, der kun vil bruge den vej, aldrig frem til
-        // opsaetningen - og faar at vide, at han mangler noget, han ikke
-        // skal bruge.
-        var harSkyNoegle = NoteApp.Core.Llm.SkyNoegle.Hent() is not null;
-
-        if ((cli is null || modeller.Count == 0) && !harSkyNoegle)
+        // KUN EUROPA.
+        //
+        // Her stod et valg mellem en lokal sprogmodel og den europaeiske vej.
+        // Det er fjernet 18-08-2026, fordi maalingen ikke efterlader et valg:
+        // den lokale model tabte 72 % af navnene og brugte 59 minutter paa et
+        // moede, Mistral Medium 3.5 klarede paa 25 sekunder med 23 % tab -
+        // for 21 oere. Se doc/maaling-sky.md.
+        //
+        // Manglende noegle er ikke en fejl, men et manglende trin i
+        // opsaetningen. Derfor peges der derhen frem for at sige nej.
+        if (SkyNoegle.Hent() is null)
         {
-            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Mangler en sprogmodel", "Der er ingen sprogmodel klar endnu.\n\n" +
-                "Et referat laves af en model, der kører her på maskinen. Hent en under «AI-modeller» — " +
-                "så virker knappen her.\n\n" +
-                "Alt det andet i appen virker uændret uden.", Dialogs.Slags.Valg);
-            return;
+            var opsaet = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
+                "Opsætningen mangler et trin",
+                "Dokumenter laves af en sprogmodel i Europa, og den er ikke sat op endnu.\n\n" +
+                "Det tager et minut: du henter en nøgle hos Mistral og sætter den ind. " +
+                "Optagelse og udskrift virker uændret uden.",
+                godkend: "Sæt op nu",
+                annuller: "Senere",
+                slags: Dialogs.Slags.Valg);
+
+            if (opsaet)
+                new Documents.SkySetupWindow { Owner = Window.GetWindow(this) }.ShowDialog();
+
+            if (SkyNoegle.Hent() is null) return;
         }
 
         var skabeloner = PromptTemplate.LoadAll();
@@ -510,13 +518,12 @@ public partial class TranscribeView : UserControl
             return;
         }
 
-        var dialog = new Documents.NewDocumentWindow(valgt.Titel, skabeloner, modeller)
+        var dialog = new Documents.NewDocumentWindow(valgt.Titel, skabeloner)
         { Owner = Window.GetWindow(this) };
 
         if (dialog.ShowDialog() != true || dialog.Valgt is null) return;
 
         var skabelon = dialog.Valgt;
-        var model = dialog.ModelSti;
 
         var meta = MeetingStore.Load(valgt.Mappe);
 
@@ -548,127 +555,25 @@ public partial class TranscribeView : UserControl
             Template = skabelon.Name,
             // Modellen skal staa rigtigt fra begyndelsen. Bliver referatet
             // lavet i Europa, er det ikke den lokale gguf-fil, der lavede det.
-            Model = dialog.SkyValgt?.Navn ?? Path.GetFileNameWithoutExtension(model),
+            Model = SkyKatalog.Standard.Navn,
             FileName = DocumentStore.FileNameFor(dialog.Titel, skabelon.Name)
         };
 
-        // SKYVEJEN. Her deler de to sig helt.
+        // HER LAA DEN LOKALE VEJ.
         //
-        // Alt nedenfor - skoennet, pladsen paa grafikkortet, advarslen om en
-        // halv times ventetid - handler om at koere en model paa DENNE maskine.
-        // Intet af det gaelder, naar arbejdet sker et andet sted, og det ville
-        // vaere forkert at vise det.
-        if (dialog.SkyValgt is { } skyModel)
-        {
-            // INGEN BEKRAEFTELSE HER.
-            //
-            // Der stod et "er du sikker"-vindue med hvem, hvad og hvor. Det er
-            // rigtigt EEN gang - og det sker i opsaetningen, hvor man tilslutter
-            // sig, laeser efter og saetter et hak paa, at traening er slaaet
-            // fra. Gentaget ved hvert dokument bliver det noget, man klikker
-            // vaek uden at laese, og saa beskytter det ingen.
-            //
-            // Samtykket ligger derfor tre steder, der hver goer noget:
-            //   opsaetningen  - den informerede beslutning, een gang
-            //   hakket        - pr. dokument, slukket hver gang
-            //   knapteksten   - "Send og opret dokument", lige foer trykket
-            Jobs.BackgroundJobs.LavDokumentISkyen(skyModel, skabelon, felter, info, valgt.Mappe);
-            return;
-        }
-
-        // Herfra og ned handler alt om at koere en model paa DENNE maskine.
-        // Er der ingen, er skyvejen ovenfor den eneste - og saa skal det
-        // siges frem for at fejle paa en tom filsti.
-        if (cli is null || model.Length == 0)
-        {
-            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Der er ingen model på maskinen",
-                "Sæt hakket ved «Lav referatet i Europa», eller hent en sprogmodel under " +
-                "«AI-modeller», hvis referatet skal laves lokalt.", Dialogs.Slags.Valg);
-            return;
-        }
-
-        // HVOR LANG TID DET TAGER — FØR man trykker.
+        // Omkring hundrede linjer om skoen over ventetid, plads paa
+        // grafikkortet og en advarsel om en halv times koersel. Alt sammen
+        // handlede om at koere en model paa DENNE maskine, og intet af det
+        // gaelder, naar arbejdet sker et andet sted.
         //
-        // Et referat af et langt møde kan tage en halv time. Det er i orden,
-        // men kun hvis man ved det på forhånd: uden et tal sidder man og venter
-        // på noget, man tror er gået i stå, og trykker afbryd efter fem
-        // minutter. Målt 14. august 2026 tog et 61-minutters møde 28 minutter i
-        // én kørsel.
-        var (blokke, skøn) = Referatbygger.Forventning(felter["transskription"] ?? "");
+        // Der er ingen bekraeftelse her. Den hoerer til EEN gang - i
+        // opsaetningen, hvor man tilslutter sig og laeser efter. Gentaget ved
+        // hvert dokument bliver den noget, man klikker vaek uden at laese, og
+        // saa beskytter den ingen.
+        Jobs.BackgroundJobs.LavDokumentISkyen(SkyKatalog.Standard, skabelon, felter, info, valgt.Mappe);
 
-        // ER DER PLADS PÅ GRAFIKKORTET LIGE NU?
-        //
-        // llama.cpp afgør ved INDLÆSNINGEN, hvor mange lag der kan ligge på
-        // kortet. Er der optaget plads af noget andet — en video, et spil,
-        // overvågningssoftware — lægges resten på processoren, og det gælder
-        // hele kørslen. Lukker man videoen bagefter, bliver den ikke hurtigere.
-        //
-        // Målt 14. august 2026: 0,7 tokens i sekundet med video kørende mod
-        // 20-30 forventede. Fyrre gange langsommere, uden en fejlmeddelelse —
-        // og man leder efter fejlen i appen.
-        var langsom = false;
-        var plads = Grafikhukommelse.HarPlads(new FileInfo(model).Length);
-
-        if (plads is { Plads: false } p)
-        {
-            langsom = true;
-
-            var ok = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
-                "Der er ikke plads på grafikkortet lige nu",
-                $"Modellen har brug for {Grafikhukommelse.Gigabyte(p.Kraevet)}, og der er " +
-                $"{Grafikhukommelse.Gigabyte(p.Fri)} ledigt.\n\n" +
-                "Starter du nu, lægger en del af modellen sig på processoren i stedet, og så tager " +
-                $"det omkring {Math.Round(skøn.TotalMinutes * 4 / 5.0) * 5:0} minutter i stedet for " +
-                $"{Math.Round(skøn.TotalMinutes / 5.0) * 5:0}. Det afgøres, når modellen indlæses — " +
-                "lukker du videoen bagefter, bliver kørslen ikke hurtigere.\n\n" +
-                "Video, spil og programmer med levende billeder bruger kortet. Luk dem, og prøv igen.",
-                godkend: "Start alligevel",
-                annuller: "Jeg lukker først noget",
-                slags: Dialogs.Slags.Pas_paa,
-                godkendErStandard: false);
-
-            if (!ok) return;
-        }
-
-        var minutter = langsom ? skøn.TotalMinutes * 4 : skøn.TotalMinutes;
-
-        var tid = minutter < 2
-            ? "et par minutter"
-            : $"omkring {Math.Round(minutter / 5.0) * 5:0} minutter";
-
-        if (!langsom)
-        {
-            // TIDEN SKAL VÆRE KONKRET, OG DER SKAL STÅ, AT MAN IKKE SKAL
-            // HOLDE ØJE.
-            //
-            // Målt 14. august 2026: et 61-minutters møde tog 43 minutter, og
-            // appen havde lovet 10. Brugeren sad og troede, den var gået i stå.
-            // Det er i orden, at det tager lang tid — men kun hvis tallet
-            // passer, og kun hvis man ved, at man får besked.
-            var faerdig = DateTime.Now.Add(skøn);
-
-            var ja = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
-                $"«{dialog.Titel}» laves nu",
-                $"Det tager {tid}" +
-                (blokke > 1 ? $" — mødet er langt, så det læses igennem i {blokke} dele" : "") +
-                $". Forventet færdig omkring kl. {faerdig:HH:mm}.\n\n" +
-                "Du skal ikke holde øje med det. Klokken øverst til højre giver besked, når " +
-                "dokumentet er klar, og det ligger under «Dokumenter».\n\n" +
-                "Imens kan du roligt bruge appen til alt andet — også optage et nyt møde.",
-                godkend: "Sæt i gang",
-                annuller: "Ikke nu",
-                slags: Dialogs.Slags.Valg);
-
-            if (!ja) return;
-        }
-
-        // Koerslen sendes til baggrunden og slippes her. Laa den i denne
-        // skaerm, ville den doe, naar man klikkede paa et andet menupunkt:
-        // skaermene bygges om ved hvert skift. Fremdriften vises i bjaelken
-        // nederst i vinduet, som altid er fremme.
-        Jobs.BackgroundJobs.LavDokument(cli, model, skabelon, felter, info, valgt.Mappe);
-
-        Status.Text = $"Dokumentet laves — {tid}. Du får besked på klokken øverst, når det er klar.";
+        Status.Text = "Dokumentet laves — det tager typisk under et minut. " +
+                      "Du får besked på klokken øverst, når det er klar.";
     }
 
     /// <summary>Noterne fra mødet som ren tekst, så de kan gå med til modellen.</summary>
@@ -764,9 +669,9 @@ public partial class TranscribeView : UserControl
             // Vejen videre foreslås, frem for at man skal finde den selv. Det
             // er alligevel dét, man kom efter — teksten er sjældent målet.
             //
-            // Der spørges KUN, når der er en model at gøre det med. Et tilbud,
+            // Der spørges KUN, når der er en nøgle at gøre det med. Et tilbud,
             // der ender i «du mangler noget», er ikke et tilbud.
-            if (LlmRunner.FindCli() is not null && LlmRunner.InstalledModels().Count > 0)
+            if (SkyNoegle.Hent() is not null)
             {
                 var ja = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
                     $"«{valgt.Titel}» er skrevet ud",

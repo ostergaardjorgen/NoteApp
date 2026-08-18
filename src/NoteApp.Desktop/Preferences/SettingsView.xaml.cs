@@ -1,3 +1,4 @@
+﻿using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -34,7 +35,7 @@ public partial class SettingsView : UserControl
         _timer.Tick += (_, _) => OpdaterMaalere();
 
         Loaded += (_, _) => { Indlaes(); VisAutostart(); };
-        Unloaded += (_, _) => { _timer.Stop(); StopProber(); };
+        Unloaded += (_, _) => { _timer.Stop(); StopProber(); AfbrydTest(); };
     }
 
     // ---------------------------------------------------------- klar til møde
@@ -260,6 +261,205 @@ public partial class SettingsView : UserControl
 
         Tegn(_mikProbe, MikNiveau, MikStatus, "Sig noget — måleren skal røre sig");
         Tegn(_hoejtProbe, HoejtNiveau, HoejtStatus, "Afspil lyd — måleren skal røre sig");
+    }
+
+    // -------------------------------------------------------- mikrofontesten
+
+    private ShortClipRecorder? _testKlip;
+    private DispatcherTimer? _testUr;
+    private DateTime _testStart;
+    private string? _testMappe;
+
+    /// <summary>
+    /// Starter eller stopper testen.
+    ///
+    /// Den samme knap gør begge dele med vilje. En separat stopknap ville
+    /// stå og være grå det meste af tiden, og man skal kunne slutte, når man
+    /// er færdig med at læse — ikke vente på et ur.
+    /// </summary>
+    private async void Test_Click(object sender, RoutedEventArgs e)
+    {
+        if (_testKlip is not null) { await AfslutTest(); return; }
+
+        // Uden en motor er der intet at maale med. Det skal staa nu og ikke
+        // efter en oplaesning paa tredive sekunder.
+        var install = WhisperInstall.Locate(AppSettings.Current.PreferredModel);
+        if (!install.IsComplete)
+        {
+            TestStatus.Text = "Testen kræver, at Whisper er hentet. Det sker under «AI-modeller».";
+            return;
+        }
+
+        // To programmer om den samme mikrofon er sjaeldent gratis, og
+        // niveaumaaleren holder enheden aaben.
+        StopProber();
+
+        _testMappe = Path.Combine(Path.GetTempPath(), "noteapp-miktest-" + Guid.NewGuid().ToString("N")[..8]);
+        _testKlip = new ShortClipRecorder(Path.Combine(_testMappe, "proeve.wav"));
+
+        try
+        {
+            _testKlip.Start(AppSettings.Current.MicrophoneId);
+        }
+        catch (Exception ex)
+        {
+            _testKlip.Dispose();
+            _testKlip = null;
+            TestStatus.Text = $"Mikrofonen kunne ikke åbnes: {ex.Message}";
+            return;
+        }
+
+        _testStart = DateTime.Now;
+
+        TestTekst.Text = Mikrofontest.Proevetekst;
+        TestTrin.Text = "Læs højt — i almindeligt tempo";
+        TestRude.Visibility = Visibility.Visible;
+        TestSvar.Visibility = Visibility.Collapsed;
+        TestKnap.Content = "■ Jeg er færdig";
+        TestStatus.Text = "Optager. Læs teksten højt, og tryk «Jeg er færdig», når du er igennem.";
+
+        _testUr = new DispatcherTimer(DispatcherPriority.Background) { Interval = TimeSpan.FromMilliseconds(200) };
+        _testUr.Tick += TestUr_Tick;
+        _testUr.Start();
+    }
+
+    private async void TestUr_Tick(object? sender, EventArgs e)
+    {
+        if (_testKlip is null) return;
+
+        var gaaet = DateTime.Now - _testStart;
+        TestUr.Text = $"{gaaet.TotalSeconds:0} sek";
+
+        var bredde = TestNiveau.Parent is FrameworkElement f && f.ActualWidth > 0 ? f.ActualWidth : 300;
+        TestNiveau.Width = bredde * PeakMeter.ToMeterScale(_testKlip.Niveau);
+
+        // Optagelsen stopper af sig selv. Glemmer man knappen, skal
+        // mikrofonen ikke staa aaben resten af dagen.
+        if (gaaet > Mikrofontest.Maksimum) await AfslutTest();
+    }
+
+    /// <summary>
+    /// Stopper optagelsen, skriver den ud og bedømmer den.
+    /// </summary>
+    private async Task AfslutTest()
+    {
+        var klip = _testKlip;
+        var mappe = _testMappe;
+        if (klip is null) return;
+
+        _testKlip = null;
+        _testUr?.Stop();
+        _testUr = null;
+        TestNiveau.Width = 0;
+
+        double sekunder;
+        try { sekunder = klip.Stop(); }
+        finally { klip.Dispose(); }
+
+        TestKnap.IsEnabled = false;
+        TestKnap.Content = "▶ Start test";
+
+        if (sekunder < Mikrofontest.Mindstelaengde.TotalSeconds)
+        {
+            Ryd(mappe);
+            TestRude.Visibility = Visibility.Collapsed;
+            TestKnap.IsEnabled = true;
+            TestStatus.Text = sekunder <= 0
+                ? "Der kom ingen lyd ud af optagelsen. Tjek, at den rigtige mikrofon er valgt ovenfor."
+                : $"Optagelsen var kun {sekunder:0} sekunder. Læs hele teksten igennem, så der er nok at måle på.";
+            return;
+        }
+
+        TestTrin.Text = "Skriver lyden ud …";
+        TestUr.Text = "";
+        TestStatus.Text = "Det tager typisk et halvt minut.";
+
+        try
+        {
+            var install = WhisperInstall.Locate(AppSettings.Current.PreferredModel);
+            var motor = new Transcriber(install.WhisperCli!);
+
+            // Sproget er LAAST til dansk her, modsat moeder hvor det er
+            // "auto". Vi ved, hvad der blev sagt; et fejlgaettet sprog ville
+            // maale Whispers sproggenkendelse i stedet for mikrofonen.
+            var r = await motor.RunAsync(
+                new TranscriptionRequest(klip.Path, install.ModelPath!,
+                                         Path.Combine(mappe!, "proeve"), "da"),
+                null, CancellationToken.None);
+
+            VisTestsvar(Mikrofontest.Bedoem(r.Text, sekunder));
+        }
+        catch (Exception ex)
+        {
+            TestRude.Visibility = Visibility.Collapsed;
+            TestStatus.Text = $"Testen kunne ikke gennemføres: {ex.Message}";
+        }
+        finally
+        {
+            // Lyden er brugerens stemme. Den maa ikke blive liggende i en
+            // temp-mappe, naar den har gjort sit.
+            Ryd(mappe);
+            TestKnap.IsEnabled = true;
+        }
+    }
+
+    /// <summary>
+    /// Kaster testen væk uden at måle noget. Bruges, når man forlader
+    /// skærmen midt i en oplæsning — mikrofonen må ikke blive stående åben,
+    /// bare fordi man klikkede videre.
+    /// </summary>
+    private void AfbrydTest()
+    {
+        if (_testKlip is null) return;
+
+        var klip = _testKlip;
+        var mappe = _testMappe;
+        _testKlip = null;
+        _testUr?.Stop();
+        _testUr = null;
+
+        try { klip.Stop(); } catch (Exception) { }
+        klip.Dispose();
+        Ryd(mappe);
+    }
+
+    private static void Ryd(string? mappe)
+    {
+        try { if (mappe is not null && Directory.Exists(mappe)) Directory.Delete(mappe, recursive: true); }
+        catch (IOException) { }
+        catch (UnauthorizedAccessException) { }
+    }
+
+    private void VisTestsvar(Mikrofontest.Resultat r)
+    {
+        TestRude.Visibility = Visibility.Collapsed;
+        TestSvar.Visibility = Visibility.Visible;
+        TestStatus.Text = "";
+
+        TestTal.Text = $"{r.Procent:0} %";
+        TestTal.Foreground = (Brush)FindResource(r.Karakter switch
+        {
+            Mikrofontest.Bedoemmelse.God => "Godkendt",
+            Mikrofontest.Bedoemmelse.Brugbar => "Advarsel",
+            _ => "Optager"   // rød. Der findes ingen «Fejl»-farve i temaet.
+        });
+
+        TestDom.Text = $"{r.Ramt} af {r.Ialt} ord ramt · {r.Sekunder:0} sekunder";
+        TestRaad.Text = r.Raad;
+
+        // De faktiske fejl staar der, saa tallet kan efterproeves. Et tal, man
+        // ikke kan se grundlaget for, er et tal, man enten tror blindt paa
+        // eller afviser — begge dele er forkert.
+        TestFejl.Text = r.Afvigelser.Count == 0
+            ? "Ingen afvigelser."
+            : "Hørt forkert: " + string.Join(", ", r.Afvigelser
+                .Where(a => a.Forventet.Length > 0)
+                .Take(12)
+                .Select(a => a.Hørt.Length == 0
+                    ? $"«{a.Forventet}» blev ikke hørt"
+                    : $"«{a.Forventet}» → «{a.Hørt}»"));
+
+        TestUdskrift.Text = r.Udskrift;
     }
 
     private void Tegn(WasapiLevelProbe? probe, Border bjaelke, TextBlock status, string naarTavs)

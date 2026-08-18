@@ -1,188 +1,122 @@
-﻿<UserControl x:Class="NoteApp.Desktop.Engine.EngineView"
+<UserControl x:Class="NoteApp.Desktop.Engine.EngineView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              Background="{StaticResource Baggrund}">
 
+  <!-- ======================== HVORFOR SKÆRMEN ER TOM FOR VALG ============
+       Her lå to faner og en liste med seks Whisper-modeller og et katalog
+       af lokale sprogmodeller, man kunne hente og skifte imellem.
+
+       Det er væk 18-08-2026, og ikke for at gemme noget:
+
+       · Sprogmodellen. Målt på et rigtigt møde tabte den lokale model 72 %
+         af navnene og brugte 59 minutter. Mistral Medium 3.5 i Frankrig
+         tabte 23 % og brugte 25 sekunder, for 21 øre. Se doc/maaling-sky.md.
+         Et valg mellem de to er ikke et valg — det er en fælde.
+
+       · Whisper-modellerne. De små er hurtigere og mærkbart dårligere på
+         dansk, og «small.en» kan slet ikke dansk: den giver volapyk frem for
+         en fejl. Et valg, hvor alle alternativer er ringere, hjælper ingen.
+
+       Tilbage står, hvad der ER: to lag, hver med én model, og deres
+       tilstand. Vil man undersøge Whisper på egen hånd, står vejen i
+       doc/whisper.md. -->
+
   <Grid Margin="24,20,24,20">
     <Grid.RowDefinitions>
-      <RowDefinition Height="Auto" />
       <RowDefinition Height="Auto" />
       <RowDefinition Height="*" />
       <RowDefinition Height="Auto" />
     </Grid.RowDefinitions>
 
-    <StackPanel Grid.Row="0" Margin="0,0,0,14">
+    <StackPanel Grid.Row="0" Margin="0,0,0,16">
       <TextBlock Text="AI-modeller" Style="{StaticResource Overskrift}" />
       <TextBlock Style="{StaticResource Underskrift}" TextWrapping="Wrap" MaxWidth="900"
                  HorizontalAlignment="Left"
-                 Text="Appen bruger to slags modeller, og de gør hver sit. Whisper kører altid her på maskinen. Referatet kan du vælge at lave i Europa i stedet." />
-
-      <!-- Rollefordelingen står øverst, fordi den er forudsætningen for at
-           forstå resten af skærmen. Uden den ligner det bare en liste over
-           filer, man kan hente. -->
-      <Grid Margin="0,14,0,0">
-        <Grid.ColumnDefinitions>
-          <ColumnDefinition Width="*" />
-          <ColumnDefinition Width="*" />
-        </Grid.ColumnDefinitions>
-
-        <RadioButton Grid.Column="0" x:Name="FaneWhisper" GroupName="lag" IsChecked="True"
-                     Click="Lag_Klik" Margin="0,0,7,0" Cursor="Hand">
-          <RadioButton.Template>
-            <ControlTemplate TargetType="RadioButton">
-              <Border x:Name="kant" Background="#FF181B22" BorderBrush="{StaticResource PanelKant}"
-                      BorderThickness="1" CornerRadius="10" Padding="18,14">
-                <ContentPresenter />
-              </Border>
-              <ControlTemplate.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                  <Setter TargetName="kant" Property="Background" Value="#FF1F2530" />
-                </Trigger>
-                <Trigger Property="IsChecked" Value="True">
-                  <Setter TargetName="kant" Property="BorderBrush" Value="{StaticResource Accent}" />
-                  <Setter TargetName="kant" Property="Background" Value="#FF1D2530" />
-                </Trigger>
-              </ControlTemplate.Triggers>
-            </ControlTemplate>
-          </RadioButton.Template>
-
-          <Grid>
-            <Grid.ColumnDefinitions>
-              <ColumnDefinition Width="*" />
-              <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
-
-            <StackPanel Grid.Column="0">
-              <TextBlock Text="1 · WHISPER — HØRER EFTER" FontSize="11" FontWeight="SemiBold"
-                         Foreground="{StaticResource Accent}" />
-              <TextBlock Text="Fra lyd til tekst" FontSize="16" FontWeight="SemiBold" Margin="0,7,0,0" />
-              <TextBlock FontSize="12.5" LineHeight="20" Margin="0,8,0,0" TextWrapping="Wrap"
-                         Foreground="{StaticResource TekstSvag}"
-                         Text="Whisper lytter optagelsen igennem og skriver ordene ned. Det er fundamentet: bliver et navn hørt forkert her, står det forkert alle steder bagefter. Derfor er det den model, der betyder mest for kvaliteten." />
-              <TextBlock x:Name="HintWhisper" FontSize="11.5" Margin="0,9,0,0"
-                         Foreground="{StaticResource Accent}" />
-            </StackPanel>
-
-            <!-- Det tekniske ligger bag denne. Motor, version, beregning og
-                 stier er noget, man slår op den ene gang, noget driller — ikke
-                 noget, der skal fylde en fjerdedel af skærmen hver gang. -->
-            <Border Grid.Column="1" x:Name="InfoKnap" VerticalAlignment="Top" Margin="10,0,0,0"
-                    Width="24" Height="24" CornerRadius="12" Background="#FF262C36"
-                    BorderBrush="{StaticResource PanelKant}" BorderThickness="1" Cursor="Help"
-                    ToolTipService.InitialShowDelay="150" ToolTipService.ShowDuration="60000">
-              <Border.ToolTip>
-                <StackPanel MinWidth="330">
-                  <TextBlock Text="Det tekniske" FontWeight="SemiBold" Margin="0,0,0,10" />
-
-                  <Grid>
-                    <Grid.ColumnDefinitions>
-                      <ColumnDefinition Width="Auto" />
-                      <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                      <RowDefinition Height="Auto" />
-                      <RowDefinition Height="Auto" />
-                      <RowDefinition Height="Auto" />
-                      <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
-
-                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Motor" Margin="0,0,20,0"
-                               Foreground="{StaticResource TekstMeget}" FontSize="12.5" />
-                    <TextBlock Grid.Row="0" Grid.Column="1" x:Name="MotorNavn" HorizontalAlignment="Right" FontSize="12.5" />
-
-                    <TextBlock Grid.Row="1" Grid.Column="0" x:Name="AlderLabel" Text="Sidst opdateret"
-                               Margin="0,6,20,0" Foreground="{StaticResource TekstMeget}" FontSize="12.5" />
-                    <TextBlock Grid.Row="1" Grid.Column="1" x:Name="MotorVersion" HorizontalAlignment="Right"
-                               FontSize="12.5" Margin="0,6,0,0" />
-
-                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Beregning" Margin="0,6,20,0"
-                               Foreground="{StaticResource TekstMeget}" FontSize="12.5" />
-                    <TextBlock Grid.Row="2" Grid.Column="1" x:Name="MotorBeregning" HorizontalAlignment="Right"
-                               FontSize="12.5" Margin="0,6,0,0" />
-
-                    <TextBlock Grid.Row="3" Grid.Column="0" Text="Model i brug" Margin="0,6,20,0"
-                               Foreground="{StaticResource TekstMeget}" FontSize="12.5" />
-                    <TextBlock Grid.Row="3" Grid.Column="1" x:Name="ModelNavn" HorizontalAlignment="Right"
-                               FontSize="12.5" FontWeight="SemiBold" Margin="0,6,0,0" />
-                  </Grid>
-
-                  <TextBlock x:Name="MotorSti" Margin="0,12,0,0" FontSize="11" TextWrapping="Wrap"
-                             Foreground="{StaticResource TekstMeget}" />
-                </StackPanel>
-              </Border.ToolTip>
-
-              <TextBlock Text="i" FontSize="13" FontWeight="SemiBold" HorizontalAlignment="Center"
-                         VerticalAlignment="Center" Foreground="{StaticResource TekstSvag}" />
-            </Border>
-          </Grid>
-        </RadioButton>
-
-        <!-- Boksen er en KNAP, ikke en plakat. Den så ud som et valg, men
-             kunne ikke klikkes — og listen nedenunder viste kun Whisper, så
-             sprogmodellerne var usynlige i hele appen. -->
-        <RadioButton Grid.Column="1" x:Name="FaneSprog" GroupName="lag" Click="Lag_Klik"
-                     Margin="7,0,0,0" Cursor="Hand">
-          <RadioButton.Template>
-            <ControlTemplate TargetType="RadioButton">
-              <Border x:Name="kant" Background="#FF181B22" BorderBrush="{StaticResource PanelKant}"
-                      BorderThickness="1" CornerRadius="10" Padding="18,14">
-                <ContentPresenter />
-              </Border>
-              <ControlTemplate.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                  <Setter TargetName="kant" Property="Background" Value="#FF1F2530" />
-                </Trigger>
-                <Trigger Property="IsChecked" Value="True">
-                  <Setter TargetName="kant" Property="BorderBrush" Value="{StaticResource Accent}" />
-                  <Setter TargetName="kant" Property="Background" Value="#FF1D2530" />
-                </Trigger>
-              </ControlTemplate.Triggers>
-            </ControlTemplate>
-          </RadioButton.Template>
-
-          <StackPanel>
-            <TextBlock Text="2 · SPROGMODELLER — BEARBEJDER" FontSize="11" FontWeight="SemiBold"
-                       Foreground="{StaticResource TekstMeget}" />
-            <TextBlock Text="Fra tekst til referat" FontSize="16" FontWeight="SemiBold" Margin="0,7,0,0" />
-            <TextBlock FontSize="12.5" LineHeight="20" Margin="0,8,0,0" TextWrapping="Wrap"
-                       Foreground="{StaticResource TekstSvag}"
-                       Text="En sprogmodel læser den færdige tekst og laver et udkast ud af den — et referat, en opgaveliste, et tilbud. Hvad den skal lave, bestemmer du under «Skabeloner». Hele det lag er frivilligt, og det er det eneste, der kan sendes ud af maskinen." />
-            <TextBlock x:Name="HintSprog" FontSize="11.5" Margin="0,9,0,0"
-                       Foreground="{StaticResource Accent}" />
-          </StackPanel>
-        </RadioButton>
-      </Grid>
+                 Text="To lag, der gør hver sit. Lyden bliver til tekst her på maskinen. Teksten bliver til et dokument i Europa. Begge dele er valgt på forhånd — der er ikke noget at stille ind." />
     </StackPanel>
 
-    <!-- =========================== Modeller ============================
-         Rækken, det tekniske panel før optog, er givet til modellerne. Det er
-         dér, der er noget at vælge — og valget var det, der stod nederst og
-         skulle rulles frem. -->
-    <Border Grid.Row="1" Grid.RowSpan="2" Background="{StaticResource Panel}" CornerRadius="10"
-            BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
-      <Grid>
-        <Grid.RowDefinitions>
-          <RowDefinition Height="Auto" />
-          <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
+    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+      <StackPanel>
 
-        <StackPanel Grid.Row="0" Margin="18,16,18,4">
-          <TextBlock x:Name="ListeOverskrift" Text="Modeller" FontSize="15" FontWeight="SemiBold" />
-          <TextBlock x:Name="ListeUnder" FontSize="12" Margin="0,3,0,0" TextWrapping="Wrap"
-                     Foreground="{StaticResource TekstMeget}" />
+        <!-- ===================== 1 · Whisper ========================== -->
+        <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20" Margin="0,0,0,14"
+                BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+          <StackPanel>
+            <TextBlock Text="1 · LYD TIL TEKST — HER PÅ MASKINEN" FontSize="11" FontWeight="SemiBold"
+                       Foreground="{StaticResource Accent}" />
+            <Grid Margin="0,8,0,0">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+              </Grid.ColumnDefinitions>
 
-          <!-- DEN EUROPAEISKE VEJ STAAR SAMMEN MED DE LOKALE MODELLER.
-               Den hoerer til her, fordi det er det samme valg: hvem skriver
-               referatet. Laa den under Indstillinger, ville man skulle vide,
-               at den fandtes, for at finde den - og saa er den i praksis
-               skjult for alle andre end den, der byggede den.
+              <StackPanel Grid.Column="0" Margin="0,0,16,0">
+                <TextBlock x:Name="LydModel" FontSize="16" FontWeight="SemiBold" />
+                <TextBlock x:Name="LydResume" FontSize="12.5" LineHeight="20" Margin="0,8,0,0"
+                           TextWrapping="Wrap" MaxWidth="620" HorizontalAlignment="Left"
+                           Foreground="{StaticResource TekstSvag}" />
+                <TextBlock x:Name="LydStatus" FontSize="11.5" Margin="0,10,0,0" TextWrapping="Wrap"
+                           Foreground="{StaticResource Accent}" />
+              </StackPanel>
 
-               Den staar UNDER listen af lokale modeller, ikke over. Lokalt er
-               forvalget, og raekkefoelgen paa skaermen er ogsaa en anbefaling. -->
-          <Border x:Name="SkyPanel" Visibility="Collapsed" Margin="0,14,0,4"
-                  Padding="14,12" CornerRadius="8"
-                  Background="#FF181B22" BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
-            <Grid>
+              <StackPanel Grid.Column="1" VerticalAlignment="Top" MinWidth="150">
+                <Button x:Name="LydKnap" Click="Lyd_Klik" HorizontalAlignment="Stretch" Padding="16,8" />
+                <Button x:Name="MotorKnap" Content="Opdatér motoren" Click="Motor_Klik"
+                        HorizontalAlignment="Stretch" Padding="16,8" Margin="0,8,0,0" />
+              </StackPanel>
+            </Grid>
+
+            <!-- Det tekniske står i en foldbar. Man slår det op den ene gang,
+                 noget driller — det skal ikke fylde skærmen hver dag. -->
+            <Expander Header="Det tekniske" Margin="0,14,0,0" FontSize="12"
+                      Foreground="{StaticResource TekstMeget}">
+              <Grid Margin="0,10,0,0" MaxWidth="520" HorizontalAlignment="Left">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="Auto" />
+                  <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                  <RowDefinition Height="Auto" />
+                  <RowDefinition Height="Auto" />
+                  <RowDefinition Height="Auto" />
+                  <RowDefinition Height="Auto" />
+                  <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="Motor" Margin="0,0,24,0"
+                           Foreground="{StaticResource TekstMeget}" FontSize="12.5" />
+                <TextBlock Grid.Row="0" Grid.Column="1" x:Name="MotorNavn" HorizontalAlignment="Right" FontSize="12.5" />
+
+                <TextBlock Grid.Row="1" Grid.Column="0" x:Name="AlderLabel" Text="Sidst opdateret"
+                           Margin="0,6,24,0" Foreground="{StaticResource TekstMeget}" FontSize="12.5" />
+                <TextBlock Grid.Row="1" Grid.Column="1" x:Name="MotorVersion" HorizontalAlignment="Right"
+                           FontSize="12.5" Margin="0,6,0,0" />
+
+                <TextBlock Grid.Row="2" Grid.Column="0" Text="Beregning" Margin="0,6,24,0"
+                           Foreground="{StaticResource TekstMeget}" FontSize="12.5" />
+                <TextBlock Grid.Row="2" Grid.Column="1" x:Name="MotorBeregning" HorizontalAlignment="Right"
+                           FontSize="12.5" Margin="0,6,0,0" />
+
+                <TextBlock Grid.Row="3" Grid.Column="0" Text="Modelfil" Margin="0,6,24,0"
+                           Foreground="{StaticResource TekstMeget}" FontSize="12.5" />
+                <TextBlock Grid.Row="3" Grid.Column="1" x:Name="ModelNavn" HorizontalAlignment="Right"
+                           FontSize="12.5" FontWeight="SemiBold" Margin="0,6,0,0" />
+
+                <TextBlock Grid.Row="4" Grid.ColumnSpan="2" x:Name="MotorSti" Margin="0,12,0,0"
+                           FontSize="11" TextWrapping="Wrap" Foreground="{StaticResource TekstMeget}" />
+              </Grid>
+            </Expander>
+          </StackPanel>
+        </Border>
+
+        <!-- ===================== 2 · Mistral Europa =================== -->
+        <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20"
+                BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+          <StackPanel>
+            <TextBlock Text="2 · TEKST TIL DOKUMENT — I EUROPA" FontSize="11" FontWeight="SemiBold"
+                       Foreground="{StaticResource Accent}" />
+            <Grid Margin="0,8,0,0">
               <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
@@ -190,84 +124,33 @@
 
               <StackPanel Grid.Column="0" Margin="0,0,16,0">
                 <StackPanel Orientation="Horizontal">
-                  <TextBlock Text="Mistral — i Europa" FontSize="14" FontWeight="SemiBold" />
+                  <TextBlock x:Name="SkyModel" FontSize="16" FontWeight="SemiBold" />
                   <Border Background="{StaticResource Accent}" CornerRadius="3"
-                          Padding="6,1" Margin="9,1,0,0" VerticalAlignment="Center">
+                          Padding="6,1" Margin="10,2,0,0" VerticalAlignment="Center">
                     <TextBlock Text="EU" FontSize="10" FontWeight="SemiBold" Foreground="#FF0B1220" />
                   </Border>
                 </StackPanel>
 
                 <TextBlock FontSize="12.5" LineHeight="20" Margin="0,8,0,0" TextWrapping="Wrap"
+                           MaxWidth="620" HorizontalAlignment="Left"
                            Foreground="{StaticResource TekstSvag}"
-                           Text="Referatet skrives hos Mistral AI i Frankrig i stedet for her. Det tager under et minut i stedet for en halv time, og det bliver fyldigere — målt på et rigtigt møde. Optagelsen og udskriften bliver på maskinen; kun teksten sendes, og kun når du sætter hakket ved det enkelte dokument." />
+                           Text="Den færdige tekst bliver til et referat, en opgaveliste eller hvad du har lavet af skabeloner. Optagelsen og udskriften bliver på maskinen — kun teksten sendes, og kun til det europæiske endepunkt." />
 
-                <TextBlock x:Name="SkyStatus" FontSize="11.5" Margin="0,9,0,0" TextWrapping="Wrap"
+                <TextBlock x:Name="SkyStatus" FontSize="11.5" Margin="0,10,0,0" TextWrapping="Wrap"
                            Foreground="{StaticResource Accent}" />
               </StackPanel>
 
               <Button Grid.Column="1" x:Name="SkyKnap" Click="Sky_Klik" VerticalAlignment="Top"
-                      Padding="16,8" MinWidth="130" />
+                      Padding="16,8" MinWidth="150" />
             </Grid>
-          </Border>
-        </StackPanel>
+          </StackPanel>
+        </Border>
 
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="18,0,18,16">
-          <ItemsControl x:Name="Modeller">
-            <ItemsControl.ItemTemplate>
-              <DataTemplate>
-                <Border Background="#FF181B22" CornerRadius="8" Padding="16" Margin="0,0,0,10"
-                        BorderThickness="1" BorderBrush="{Binding KantFarve}">
-                  <Grid>
-                    <Grid.ColumnDefinitions>
-                      <ColumnDefinition Width="*" />
-                      <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-
-                    <StackPanel Grid.Column="0" Margin="0,0,16,0">
-                      <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="{Binding Navn}" FontSize="14" FontWeight="SemiBold" />
-                        <Border Background="{Binding MaerkatFarve}" CornerRadius="3" Padding="6,2" Margin="10,0,0,0"
-                                VerticalAlignment="Center">
-                          <TextBlock Text="{Binding Maerkat}" FontSize="10" Foreground="White" />
-                        </Border>
-                        <TextBlock Text="{Binding Stoerrelse}" Style="{StaticResource Underskrift}"
-                                   Margin="10,0,0,0" VerticalAlignment="Center" />
-                      </StackPanel>
-
-                      <TextBlock Text="{Binding Resume}" FontSize="12" Margin="0,8,0,0"
-                                 Foreground="{StaticResource TekstSvag}" />
-
-                      <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
-                        <TextBlock Text="+" FontSize="13" FontWeight="Bold" Width="14"
-                                   Foreground="{StaticResource Godkendt}" />
-                        <TextBlock Text="{Binding Fordele}" FontSize="12" Width="520"
-                                   Foreground="{StaticResource TekstSvag}" />
-                      </StackPanel>
-                      <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
-                        <TextBlock Text="–" FontSize="13" FontWeight="Bold" Width="14"
-                                   Foreground="{StaticResource Advarsel}" />
-                        <TextBlock Text="{Binding Ulemper}" FontSize="12" Width="520"
-                                   Foreground="{StaticResource TekstSvag}" />
-                      </StackPanel>
-                    </StackPanel>
-
-                    <StackPanel Grid.Column="1" VerticalAlignment="Center" MinWidth="130">
-                      <Button Content="{Binding KnapTekst}" Tag="{Binding Id}" Click="Model_Click"
-                              IsEnabled="{Binding KnapAktiv}" HorizontalAlignment="Stretch" />
-                      <TextBlock Text="{Binding Status}" Style="{StaticResource Underskrift}"
-                                 HorizontalAlignment="Center" Margin="0,6,0,0" />
-                    </StackPanel>
-                  </Grid>
-                </Border>
-              </DataTemplate>
-            </ItemsControl.ItemTemplate>
-          </ItemsControl>
-        </ScrollViewer>
-      </Grid>
-    </Border>
+      </StackPanel>
+    </ScrollViewer>
 
     <!-- ========================== Bundbjælke =========================== -->
-    <Grid Grid.Row="3" Margin="0,14,0,0">
+    <Grid Grid.Row="2" Margin="0,14,0,0">
       <Grid.ColumnDefinitions>
         <ColumnDefinition Width="*" />
         <ColumnDefinition Width="Auto" />
@@ -280,14 +163,7 @@
       </StackPanel>
 
       <StackPanel Grid.Column="1" Orientation="Horizontal">
-        <Button x:Name="AfbrydKnap" Content="Afbryd" Click="Afbryd_Click" Visibility="Collapsed" Margin="0,0,8,0" />
-
-        <!-- «Søg efter opdatering» er fjernet med vilje.
-             En nyere whisper.cpp kan ændre transskriptionen til det bedre ELLER
-             til det værre, og forskellen kan kun ses ved at måle den på en
-             oplæsning med facitliste. Det er ikke noget, en bruger skal opdage
-             midt i et arbejdsår. Motoren opdateres, når den er afprøvet, og
-             følger med en ny udgave af appen. -->
+        <Button x:Name="AfbrydKnap" Content="Afbryd" Click="Afbryd_Click" Visibility="Collapsed" />
       </StackPanel>
     </Grid>
   </Grid>

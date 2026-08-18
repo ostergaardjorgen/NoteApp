@@ -1,136 +1,32 @@
-﻿using System.IO;
+using System.IO;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Media;
 using NoteApp.Core;
 using NoteApp.Core.Llm;
 
 namespace NoteApp.Desktop.Engine;
 
-/// <summary>En modelrække, som listen kan vise.</summary>
-public sealed class ModelVisning
-{
-    public ModelVisning(WhisperModel m, bool installeret, bool iBrug)
-    {
-        Id = m.Id;
-        Navn = m.Id;
-        Stoerrelse = m.SizeText;
-        Resume = m.Summary;
-        Fordele = m.Pros;
-        Ulemper = m.Cons;
-
-        Maerkat = m.SupportsDanish ? "dansk" : "KUN ENGELSK";
-        MaerkatFarve = m.SupportsDanish ? new SolidColorBrush(Color.FromRgb(0x3D, 0xA3, 0x5D))
-                                        : new SolidColorBrush(Color.FromRgb(0xE0, 0xA0, 0x30));
-
-        if (iBrug)
-        {
-            KnapTekst = "I brug";
-            KnapAktiv = false;
-            Status = "aktiv nu";
-            KantFarve = new SolidColorBrush(Color.FromRgb(0x4C, 0x8D, 0xFF));
-        }
-        else if (installeret)
-        {
-            KnapTekst = "Brug denne";
-            KnapAktiv = true;
-            Status = "hentet";
-            KantFarve = new SolidColorBrush(Color.FromRgb(0x2A, 0x2F, 0x3A));
-        }
-        else
-        {
-            KnapTekst = $"Hent {m.SizeText}";
-            KnapAktiv = true;
-            Status = "ikke hentet";
-            KantFarve = new SolidColorBrush(Color.FromRgb(0x2A, 0x2F, 0x3A));
-        }
-    }
-
-    /// <summary>
-    /// Den samme række, men for en SPROGMODEL.
-    ///
-    /// Listen viser to slags modeller, og de har hver deres katalog. De deler
-    /// række-udseende, fordi valget er det samme slags valg: hvad koster den,
-    /// hvad kan den, og hvad giver man afkald på.
-    /// </summary>
-    public ModelVisning(LlmModelInfo m, bool installeret, bool iBrug)
-    {
-        Id = m.Id;
-        Navn = m.Id;
-        Stoerrelse = m.SizeText;
-        Resume = m.Summary;
-        Fordele = m.Pros;
-        Ulemper = m.Cons;
-
-        // Licensen er mærkatet her. Den er det, der afgør, om modellen må
-        // følge med et solgt produkt — og det er en dyrere fejl at opdage
-        // bagefter end en model, der er lidt langsom.
-        (Maerkat, MaerkatFarve) = m.LicenseClass switch
-        {
-            LicenseClass.FriTilSalg => ("fri", new SolidColorBrush(Color.FromRgb(0x3D, 0xA3, 0x5D))),
-            LicenseClass.BetingelserFoelgerMed => ("betingelser", new SolidColorBrush(Color.FromRgb(0xE0, 0xA0, 0x30))),
-            _ => ("ikke til salg", new SolidColorBrush(Color.FromRgb(0xE0, 0x60, 0x60)))
-        };
-
-        if (m.Rejected is not null)
-        {
-            KnapTekst = "Fravalgt";
-            KnapAktiv = false;
-            Status = "kan ikke hentes";
-            Ulemper = m.Rejected;
-            KantFarve = new SolidColorBrush(Color.FromRgb(0x2A, 0x2F, 0x3A));
-            return;
-        }
-
-        if (iBrug)
-        {
-            KnapTekst = "I brug";
-            KnapAktiv = false;
-            Status = "aktiv nu";
-            KantFarve = new SolidColorBrush(Color.FromRgb(0x4C, 0x8D, 0xFF));
-        }
-        else if (installeret)
-        {
-            KnapTekst = "Brug denne";
-            KnapAktiv = true;
-            Status = "hentet";
-            KantFarve = new SolidColorBrush(Color.FromRgb(0x2A, 0x2F, 0x3A));
-        }
-        else
-        {
-            KnapTekst = $"Hent {m.SizeText}";
-            KnapAktiv = true;
-            Status = "ikke hentet";
-            KantFarve = new SolidColorBrush(Color.FromRgb(0x2A, 0x2F, 0x3A));
-        }
-    }
-
-    public string Id { get; }
-    public string Navn { get; }
-    public string Stoerrelse { get; }
-    public string Resume { get; }
-    public string Fordele { get; }
-    public string Ulemper { get; }
-    public string Maerkat { get; }
-    public Brush MaerkatFarve { get; }
-    public Brush KantFarve { get; }
-    public string KnapTekst { get; }
-    public bool KnapAktiv { get; }
-    public string Status { get; }
-}
-
 /// <summary>
-/// Motor og model: hvad kører, hvilken version, og hvad kan skiftes ud.
+/// Hvad appen kører på — de to lag, og hvad der mangler.
 ///
-/// Skærmen findes, fordi valget af model er et reelt kompromis, brugeren skal
-/// kunne træffe selv — den mindste model er ti gange hurtigere og mærkbart
-/// dårligere, og en engelsk-only model kan slet ikke dansk. Fordele og ulemper
-/// står derfor ved hver enkelt frem for i en vejledning, ingen læser.
+/// SKÆRMEN VISER, DEN VÆLGER IKKE
 ///
-/// Hentning er det eneste sted i appen, der rører netværket. Det sker aldrig
-/// af sig selv: brugeren trykker, ser hvad der hentes og hvorfra, og siger ja.
+/// Her lå to faner: seks Whisper-modeller og et katalog af lokale
+/// sprogmodeller, med fordele og ulemper ved hver. Det er væk 18-08-2026.
+///
+/// Grunden er målt, ikke principiel. Den lokale sprogmodel tabte 72 % af
+/// navnene i et rigtigt møde og brugte 59 minutter; Mistral Medium 3.5 tabte
+/// 23 % og brugte 25 sekunder for 21 øre (doc/maaling-sky.md). De små
+/// Whisper-modeller er hurtigere og mærkbart dårligere på dansk, og de
+/// engelske kan slet ikke dansk. Et valg, hvor hvert alternativ gør
+/// resultatet ringere, hjælper ingen — det flytter bare ansvaret for en
+/// dårlig transskription over på den, der ikke har tallene.
+///
+/// Tilbage står hentning: motoren og modellen skal på maskinen, og det er
+/// stadig det eneste sted i appen, der rører netværket. Det sker aldrig af
+/// sig selv — brugeren trykker, ser hvad der hentes og hvorfra, og siger ja.
 /// </summary>
-public partial class EngineView : UserControl
+public partial class EngineView : System.Windows.Controls.UserControl
 {
     private readonly Downloader _downloader = new();
     private CancellationTokenSource? _afbryd;
@@ -144,6 +40,11 @@ public partial class EngineView : UserControl
     private void Opdater()
     {
         var s = WhisperInstall.Locate(AppSettings.Current.PreferredModel);
+        var model = WhisperInstall.Model(AppSettings.Current.PreferredModel ?? "")
+                    ?? WhisperInstall.Standard;
+
+        LydModel.Text = model.Id;
+        LydResume.Text = model.Summary + " " + model.Pros;
 
         MotorNavn.Text = s.WhisperCli is null ? "ikke installeret" : "whisper.cpp";
 
@@ -153,6 +54,7 @@ public partial class EngineView : UserControl
         var (label, vaerdi) = s.AgeLine;
         AlderLabel.Text = label;
         MotorVersion.Text = s.WhisperCli is null ? "—" : vaerdi;
+        MotorVersion.Foreground = (Brush)FindResource("Tekst");
 
         MotorBeregning.Text = s.WhisperCli is null ? "—" : s.Engine;
         ModelNavn.Text = s.ModelFileName ?? "ingen model hentet";
@@ -161,92 +63,25 @@ public partial class EngineView : UserControl
             ? $"Motoren hentes til {WhisperInstall.EngineDirectory}"
             : $"{s.WhisperCli}\nModeller: {WhisperInstall.ModelDirectory}";
 
-        MotorVersion.Foreground = (Brush)FindResource("Tekst");
+        var hentet = WhisperInstall.Installed().Any(m => m.Id == model.Id);
 
-        var installerede = WhisperInstall.Installed().Select(m => m.Id).ToHashSet(StringComparer.OrdinalIgnoreCase);
-        var iBrug = s.ModelFileName;
+        LydKnap.Content = hentet ? "Hent igen" : $"Hent {model.SizeText}";
+        MotorKnap.IsEnabled = s.WhisperCli is not null;
 
-        VisHint();
+        LydStatus.Text = !hentet
+            ? $"Modellen mangler. Uden den kan appen ikke skrive optagelser ud — motoren følger med hentningen."
+            : s.WhisperCli is null
+                ? "Motoren mangler. Tryk «Hent igen», så følger den med."
+                : "";
 
-        if (FaneSprog.IsChecked == true)
-        {
-            VisSprogmodeller();
-            return;
-        }
-
-        // Den europaeiske vej hoerer kun til under sprogmodellerne. Whisper
-        // kan ikke koeres andre steder end her, og at vise valget ved siden af
-        // den ville antyde, at lyden ogsaa kunne sendes afsted.
-        SkyPanel.Visibility = Visibility.Collapsed;
-
-        ListeOverskrift.Text = "Whisper-modeller";
-        ListeUnder.Text = "Den, der lytter optagelsen igennem. Én ad gangen — den valgte bruges til alle transskriptioner.";
-
-        Modeller.ItemsSource = WhisperInstall.Models
-            .Select(m => new ModelVisning(m, installerede.Contains(m.Id),
-                                          iBrug is not null && m.FileName.Equals(iBrug, StringComparison.OrdinalIgnoreCase)))
-            .ToList();
-
-        if (!s.IsComplete)
-            Status.Text = s.WhisperCli is null
-                ? "Whisper-motoren mangler. Hent en model nedenfor — motoren følger med."
-                : "Ingen model hentet endnu. Vælg en nedenfor.";
-        else
-            Status.Text = "";
-    }
-
-    /// <summary>
-    /// Sprogmodellerne.
-    ///
-    /// De var ikke synlige nogen steder i appen. Boksen øverst beskrev dem,
-    /// men kunne ikke klikkes, og listen nedenunder viste kun Whisper — så
-    /// «hvilken sprogmodel bruger den» var et spørgsmål, brugerfladen ikke
-    /// kunne svare på. Nu er boksen en fane.
-    /// </summary>
-    private void VisSprogmodeller()
-    {
-        ListeOverskrift.Text = "Sprogmodeller";
-        ListeUnder.Text =
-            "Den, der laver et udkast ud af den færdige tekst. Laget er frivilligt — " +
-            "uden en sprogmodel får du stadig transskriptionen, bare ingen dokumenter.";
-
-        SkyPanel.Visibility = Visibility.Visible;
+        Status.Text = "";
         VisSkyStatus();
-
-        // Hentet = filen ligger i sprogmodel-mappen. Der spørges paa disken
-        // frem for i en indstilling: en indstilling kan pege paa en fil, der
-        // er slettet, og saa staar der «hentet» om noget, der er vaek.
-        var hentede = LlmRunner.InstalledModels()
-            .Select(Path.GetFileName)
-            .ToHashSet(StringComparer.OrdinalIgnoreCase);
-
-        var liste = LlmCatalog.Default
-            .Concat(LlmCatalog.WithObligations)
-            .Concat(LlmCatalog.Rejected)
-            .Select(m =>
-            {
-                var erHentet = hentede.Contains(m.FileName);
-                return new ModelVisning(m, erHentet, erHentet && Aktiv(m.FileName));
-            })
-            .ToList();
-
-        Modeller.ItemsSource = liste;
-
-        Status.Text = hentede.Count == 0
-            ? "Der er ingen sprogmodel hentet. Uden en kan appen ikke lave dokumenter — men optagelse og transskription virker uændret."
-            : "";
     }
 
-    /// <summary>Er det den sprogmodel, dokumenter faktisk laves med?</summary>
-    private static bool Aktiv(string filnavn)
-    {
-        var foerste = LlmRunner.InstalledModels().FirstOrDefault();
-        return foerste is not null &&
-               Path.GetFileName(foerste).Equals(filnavn, StringComparison.OrdinalIgnoreCase);
-    }
+    // ---------------------------------------------------------------- Europa
 
     /// <summary>
-    /// Tilstanden for den europæiske vej — slået til eller ikke.
+    /// Tilstanden for den europæiske bearbejdning.
     ///
     /// Der står, hvad der ER sat op, ikke hvad man kunne. «Ikke sat op» er en
     /// oplysning; «prøv vores skyløsning» er en reklame, og den hører ikke
@@ -256,12 +91,12 @@ public partial class EngineView : UserControl
     {
         var tilsluttet = SkyNoegle.Hent() is not null;
 
+        SkyModel.Text = SkyKatalog.Standard.Navn;
         SkyKnap.Content = tilsluttet ? "Ret opsætning …" : "Sæt op …";
 
         SkyStatus.Text = tilsluttet
-            ? $"Tilsluttet. Referater kan sendes til {new Uri(SkyKatalog.Endpoint).Host} — " +
-              "men kun når du sætter hakket ved det enkelte dokument."
-            : "Ikke sat op. Alle referater laves her på maskinen.";
+            ? $"Tilsluttet {new Uri(SkyKatalog.Endpoint).Host}. Dokumenter laves her."
+            : "Ikke sat op endnu. Uden den kan appen optage og skrive ud, men ikke lave dokumenter.";
     }
 
     private void Sky_Klik(object sender, RoutedEventArgs e)
@@ -272,73 +107,149 @@ public partial class EngineView : UserControl
         VisSkyStatus();
     }
 
-    private void Lag_Klik(object sender, RoutedEventArgs e)
-    {
-        if (Modeller is null) return;   // Checked fyrer under InitializeComponent
-        Opdater();
-    }
-
-    /// <summary>
-    /// Opfordringen står kun på den boks, man IKKE er på.
-    ///
-    /// Stod «Klik for at se modellerne →» på den valgte boks, ville den ligne
-    /// et link, der skulle give mere at vide — og et klik ville ikke gøre
-    /// noget, fordi listen allerede står nedenunder. En opfordring til noget,
-    /// der allerede er sket, er en blindgyde.
-    /// </summary>
-    private void VisHint()
-    {
-        var paaWhisper = FaneWhisper.IsChecked == true;
-
-        HintWhisper.Text = paaWhisper ? "Vises nedenfor" : "Klik for at se modellerne  →";
-        HintSprog.Text = paaWhisper ? "Klik for at se modellerne  →" : "Vises nedenfor";
-
-        HintWhisper.Foreground = (Brush)FindResource(paaWhisper ? "TekstMeget" : "Accent");
-        HintSprog.Foreground = (Brush)FindResource(paaWhisper ? "Accent" : "TekstMeget");
-    }
-
     // -------------------------------------------------------------- hentning
 
-    private async void Model_Click(object sender, RoutedEventArgs e)
+    private async void Lyd_Klik(object sender, RoutedEventArgs e)
     {
-        if (sender is not Button b || b.Tag is not string id) return;
-        var model = WhisperInstall.Model(id);
-        if (model is null) return;
+        var model = WhisperInstall.Model(AppSettings.Current.PreferredModel ?? "")
+                    ?? WhisperInstall.Standard;
 
-        var destination = WhisperInstall.ModelDestination(model);
-        var alleredeHentet = WhisperInstall.Installed().Any(m => m.Id == model.Id);
-
-        if (alleredeHentet)
-        {
-            AppSettings.Current.PreferredModel = model.Id;
-            AppSettings.Current.Save();
-            Opdater();
-            Status.Text = $"{model.Id} er nu den model, transskriptionen bruger.";
-            return;
-        }
-
-        // Krav 3 fra datagrænsen: en informeret godkendelse. Hvad hentes,
-        // hvorfra, hvor meget — og hvad det betyder — F~R der spørges.
-        var advarsel = model.SupportsDanish
-            ? ""
-            : "\n\nADVARSEL: denne model kan KUN engelsk. Bruges den til et dansk møde, kommer der volapyk ud — ikke en fejlmeddelelse.\n";
-
+        // Krav 3 fra datagraensen: en informeret godkendelse. Hvad hentes,
+        // hvorfra, hvor meget - og hvad det betyder - FOER der spoerges.
         var ja = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
             $"Hent {model.Id}?",
             $"Fil: {model.FileName}\n" +
             $"Størrelse: {model.SizeText}\n" +
             $"Hentes fra: huggingface.co\n" +
-            $"Gemmes i: {WhisperInstall.ModelDirectory}\n" +
-            advarsel +
-            "\nDer sendes intet fra din maskine. Appen beder om en navngiven fil og " +
-            "modtager den; ingen optagelser, noter eller rettelser forlader pc'en.",
+            $"Gemmes i: {WhisperInstall.ModelDirectory}\n\n" +
+            "Der sendes intet fra din maskine. Appen beder om en navngiven fil og " +
+            "modtager den; ingen optagelser eller noter forlader pc'en.",
             godkend: $"Hent {model.SizeText}",
             annuller: "Ikke nu",
-            slags: model.SupportsDanish ? Dialogs.Slags.Valg : Dialogs.Slags.Pas_paa);
+            slags: Dialogs.Slags.Valg);
 
         if (!ja) return;
 
-        await HentAsync(model, destination);
+        await HentAsync(model, WhisperInstall.ModelDestination(model));
+    }
+
+    /// <summary>
+    /// Slår op, om der er en nyere whisper.cpp — og henter kun, hvis der er.
+    ///
+    /// DET KAN LADE SIG GØRE, OG DET BLEV ANTAGET AT DET IKKE KUNNE
+    ///
+    /// Antagelsen var, at man ikke kan spørge, om der er kommet en ny udgave,
+    /// og derfor må hente for at finde ud af det. Det passer ikke. whisper.cpp
+    /// udgives på github, og opslaget efter den seneste udgivelse er nogle få
+    /// kilobyte JSON med et versionsnummer i. Det, der IKKE kan lade sig gøre,
+    /// er at læse versionen ud af de filer, der allerede ligger på disken —
+    /// whisper.cpp stempler hverken sin exe eller sit output. Derfor skriver
+    /// appen selv et manifest, når den installerer, og det er det, der
+    /// sammenlignes med.
+    ///
+    /// Konsekvensen: er motoren lagt der i hånden, findes der intet manifest,
+    /// og så kan der ikke sammenlignes. Det siges, frem for at gætte.
+    ///
+    /// HVORFOR DER STADIG SPØRGES FØRST
+    ///
+    /// En nyere whisper.cpp kan ændre transskriptionen til det bedre ELLER
+    /// til det værre, og forskellen kan kun ses ved at måle den. Det er ikke
+    /// noget, appen skal gøre bag om ryggen på en, der har et møde i morgen.
+    /// </summary>
+    private async void Motor_Klik(object sender, RoutedEventArgs e)
+    {
+        var s = WhisperInstall.Locate(AppSettings.Current.PreferredModel);
+        var nuvaerende = s.EngineVersion;
+
+        MotorKnap.IsEnabled = false;
+        Status.Text = "Slår op, om der er en nyere udgave …";
+
+        EngineRelease nyeste;
+        try
+        {
+            nyeste = await EngineInstaller.FetchLatestAsync();
+        }
+        catch (Exception ex)
+        {
+            Status.Text = $"Kunne ikke slå op: {ex.Message}";
+            MotorKnap.IsEnabled = true;
+            return;
+        }
+        finally
+        {
+            MotorKnap.IsEnabled = true;
+        }
+
+        var build = EngineInstaller.Recommend(nyeste);
+        if (build is null)
+        {
+            Status.Text = $"Udgivelsen {nyeste.Version} har ingen udgave, der passer til denne maskine.";
+            return;
+        }
+
+        // Er versionen den samme, er der intet at hente, og det skal siges
+        // som et svar - ikke som en hentning, der "ikke gjorde noget".
+        if (nuvaerende is not null && nuvaerende == nyeste.Version)
+        {
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Motoren er den nyeste",
+                $"Du kører {nuvaerende}, og det er den seneste udgivelse af whisper.cpp.\n\n" +
+                "Der er ikke hentet noget.", Dialogs.Slags.Valg);
+            Status.Text = $"Motoren er den nyeste ({nuvaerende}).";
+            return;
+        }
+
+        var linje = nuvaerende is null
+            ? "Du kører en motor, appen ikke selv har installeret, så dens version kan ikke aflæses."
+            : $"Du kører: {nuvaerende}";
+
+        var ja = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
+            $"Hent {nyeste.Version}?",
+            $"{linje}\n" +
+            $"Nyeste udgivelse: {nyeste.Version}\n\n" +
+            $"Fil: {build.FileName}\n" +
+            $"Størrelse: {build.SizeText}\n" +
+            $"Hentes fra: github.com\n\n" +
+            "En ny motor kan ændre transskriptionen — til det bedre eller det værre. " +
+            "Vil du vide hvilket, skal det måles; fremgangsmåden står i doc/whisper.md.",
+            godkend: $"Hent {build.SizeText}",
+            annuller: "Ikke nu",
+            slags: Dialogs.Slags.Valg);
+
+        if (!ja) return;
+
+        _afbryd = new CancellationTokenSource();
+        Fremdrift.Visibility = Visibility.Visible;
+        AfbrydKnap.Visibility = Visibility.Visible;
+
+        try
+        {
+            var fremdrift = new Progress<DownloadProgress>(p =>
+            {
+                Fremdrift.Value = p.Percent;
+                Status.Text = $"Henter motoren: {p.BytesDone / 1024.0 / 1024.0:0} af {p.BytesTotal / 1024.0 / 1024.0:0} MB";
+            });
+
+            await EngineInstaller.InstallAsync(build, nyeste.Version, fremdrift,
+                new Progress<string>(m => Status.Text = m), _afbryd.Token);
+
+            Status.Text = $"Motoren er opdateret til {nyeste.Version}.";
+        }
+        catch (OperationCanceledException)
+        {
+            Status.Text = "Afbrudt. Motoren er uændret.";
+        }
+        catch (Exception ex)
+        {
+            Status.Text = $"Kunne ikke hente motoren: {ex.Message}";
+        }
+        finally
+        {
+            Fremdrift.Visibility = Visibility.Collapsed;
+            AfbrydKnap.Visibility = Visibility.Collapsed;
+            _afbryd?.Dispose();
+            _afbryd = null;
+            Opdater();
+        }
     }
 
     private async Task HentAsync(WhisperModel model, string destination)
@@ -363,7 +274,7 @@ public partial class EngineView : UserControl
             AppSettings.Current.PreferredModel = model.Id;
             AppSettings.Current.Save();
 
-            Status.Text = $"{model.Id} er hentet og er nu den model, transskriptionen bruger.";
+            Status.Text = $"{model.Id} er hentet og er den model, transskriptionen bruger.";
         }
         catch (OperationCanceledException)
         {
@@ -387,20 +298,4 @@ public partial class EngineView : UserControl
     }
 
     private void Afbryd_Click(object sender, RoutedEventArgs e) => _afbryd?.Cancel();
-
-    // ------------------------------------------------------------ opdatering
-    //
-    // «Søg efter opdatering» er fjernet fra skærmen, og opslaget mod github er
-    // fjernet med den.
-    //
-    // Begrundelsen er ikke, at det ikke virkede. En nyere whisper.cpp kan
-    // ændre transskriptionen til det bedre ELLER til det værre, og forskellen
-    // kan kun ses ved at måle den på en oplæsning med facitliste. Det er ikke
-    // noget, en bruger skal opdage midt i et arbejdsår, og det er ikke en
-    // beslutning, der kan tages ud fra et versionsnummer.
-    //
-    // Motoren opdateres, når den er afprøvet, og følger med en ny udgave af
-    // appen. Det er samtidig det eneste sted, appen ellers ville have ringet
-    // ud — nu gør den det kun ved hentning af motor og modeller.
 }
-

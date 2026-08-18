@@ -19,39 +19,20 @@ public partial class NewDocumentWindow : Window
     public PromptTemplate? Valgt { get; private set; }
     public string Titel => FeltTitel.Text.Trim();
     public string Beskrivelse => FeltBeskrivelse.Text.Trim();
-    public string ModelSti { get; private set; } = "";
-
-    /// <summary>
-    /// Den europæiske model, når der er tilsluttet en. Null betyder lokalt.
-    ///
-    /// DET ER IKKE ET VALG I DENNE DIALOG.
-    ///
-    /// Her stod et hak, man skulle sætte pr. dokument. Det var forkert tænkt:
-    /// beslutningen om, hvor referater laves, træffes ÉN gang i opsætningen —
-    /// bevidst, med hosting og databehandleraftale foran sig. At stille den
-    /// igen ved hvert dokument gør ikke samtykket stærkere; det gør det til
-    /// et hak, man sætter uden at læse, og det er det modsatte.
-    ///
-    /// Er der tilsluttet en europæisk model, bruges den. Er der ikke, laves
-    /// referatet på maskinen. Der er ikke noget at spørge om.
-    /// </summary>
-    public SkyModel? SkyValgt { get; }
-
-    private readonly IReadOnlyList<string> _modeller;
     private readonly string _optagelse;
 
-    public NewDocumentWindow(string optagelsesTitel, IReadOnlyList<PromptTemplate> skabeloner,
-                             IReadOnlyList<string> modeller)
+    public NewDocumentWindow(string optagelsesTitel, IReadOnlyList<PromptTemplate> skabeloner)
     {
         InitializeComponent();
 
-        _modeller = modeller;
         _optagelse = optagelsesTitel;
 
-        // MODELLEN VAELGES AF APPEN - se SkyKatalog.Standard for hvilken og
-        // hvorfor. At lade brugeren vaelge ville flytte en beslutning, vi har
-        // maalt os frem til, over paa en, der ikke har tallene.
-        SkyValgt = SkyNoegle.Hent() is null ? null : SkyKatalog.Standard;
+        // HER LAA ET VALG AF SPROGMODEL, OG FOER DET ET HAK PR. DOKUMENT.
+        //
+        // Begge dele er vaek. Modellen er den samme hver gang - se
+        // SkyKatalog.Standard for hvilken og hvorfor. At lade brugeren vaelge
+        // ville flytte en beslutning, vi har maalt os frem til, over paa en,
+        // der ikke har tallene.
 
         // HER STOD "Referatet laves i Europa (Mistral AI)".
         //
@@ -75,32 +56,16 @@ public partial class NewDocumentWindow : Window
     {
         if (Skabeloner.SelectedItem is not PromptTemplate t) return;
 
-        // Skabelonens foretrukne model, hvis den er hentet. Bliver der brugt en
-        // anden, SKAL det staa — ellers tror man, man fik den, der stod i
-        // skabelonen, og undrer sig over resultatet.
-        var ønsket = t.PreferredModel;
-        var model = _modeller.FirstOrDefault(m =>
-            ønsket is not null && Path.GetFileName(m).Contains(ønsket, StringComparison.OrdinalIgnoreCase));
-
-        ModelSti = model ?? (_modeller.Count > 0 ? _modeller[0] : "");
-
-        // MODELLEN VAELGES AUTOMATISK, OG SAA SKAL DEN IKKE STAA DER.
+        // HER STOD EN LINJE OM SPROGMODELLEN.
         //
-        // Her stod "Sprogmodel: Qwen3-8B-Q4_K_M. Tager typisk to til fire
-        // minutter." hver gang. Det ligner et valg, brugeren skal traeffe, og
-        // det er det ikke - appen vaelger selv. En oplysning, man ikke kan
-        // handle paa, er stoej i en dialog, man aabner ti gange om ugen.
+        // "Sprogmodel: Qwen3-8B-Q4_K_M. Tager typisk to til fire minutter."
+        // hver gang. Det ligner et valg, brugeren skal traeffe, og det er det
+        // ikke. En oplysning, man ikke kan handle paa, er stoej i en dialog,
+        // man aabner ti gange om ugen.
         //
-        // Linjen bliver derfor kun til noget, naar der ER noget at handle paa:
-        // modellen mangler, eller skabelonen oenskede en anden.
-        var problem = ModelSti.Length == 0
-            ? "Der er ingen sprogmodel hentet. Hent en under «AI-modeller», eller lav referatet i Europa."
-            : model is null && ønsket is not null
-                ? $"Skabelonen foretrækker «{ønsket}», som ikke er hentet. Bruger {Path.GetFileNameWithoutExtension(ModelSti)} i stedet."
-                : "";
-
-        ModelTekst.Text = problem;
-        ModelTekst.Visibility = problem.Length == 0 ? Visibility.Collapsed : Visibility.Visible;
+        // Skabelonens PreferredModel er der stadig i filformatet, men den
+        // peger paa lokale gguf-filer, som ikke bruges laengere. Den laeses
+        // ikke.
 
         // Dokumentets navn er optagelsens navn plus skabelonens. Saadan kan man se
         // i listen, hvad det er, uden at aabne det.
@@ -125,16 +90,9 @@ public partial class NewDocumentWindow : Window
             return;
         }
 
-        // Kravet om en lokal model gaelder kun den lokale vej. Er Europa valgt,
-        // er der ingen model paa maskinen at mangle.
-        if (ModelSti.Length == 0 && SkyValgt is null)
-        {
-            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Mangler sprogmodel",
-                "Der er ingen sprogmodel at lave dokumentet med.\n\n" +
-                "Hent en under «AI-modeller», eller sæt hakket ved «Lav referatet i Europa».",
-                Dialogs.Slags.Valg);
-            return;
-        }
+        // HER STOD ET KRAV OM EN LOKAL SPROGMODEL. Der er ikke laengere en
+        // lokal vej at mangle en model til, og noeglen er tjekket, foer
+        // dialogen overhovedet aabnes.
 
         Valgt = t;
         DialogResult = true;

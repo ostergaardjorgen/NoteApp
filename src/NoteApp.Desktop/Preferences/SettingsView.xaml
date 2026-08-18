@@ -14,6 +14,7 @@
       <RowDefinition Height="Auto" />
       <RowDefinition Height="Auto" />
       <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
     </Grid.RowDefinitions>
 
     <Grid Grid.Row="0" Margin="0,0,0,16">
@@ -112,8 +113,101 @@
       </StackPanel>
     </Border>
 
+    <!-- ====================== Er mikrofonen god nok? ====================
+         Måleren ovenfor siger, at mikrofonen VIRKER. Den siger ingenting om,
+         hvor godt den kan HØRES — og det er dét, hele appen står og falder
+         med. Her læses en tekst, appen kender i forvejen, op i en halv
+         minut, og udskriften sammenlignes ord for ord. Ét tal.
+
+         Testen er det eneste, der er beholdt fra træningen, som blev fjernet
+         18-08-2026. Resten målte nul; det her svarer på et spørgsmål, man
+         ellers først får svar på efter et møde på en time. -->
+    <Border Grid.Row="3" Background="{StaticResource Panel}" CornerRadius="10" Padding="20" Margin="0,0,0,14"
+            BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+      <StackPanel>
+        <Grid>
+          <StackPanel>
+            <TextBlock Text="Er mikrofonen god nok?" FontSize="15" FontWeight="SemiBold" />
+            <TextBlock Style="{StaticResource Underskrift}" Margin="0,3,0,0" TextWrapping="Wrap" MaxWidth="620"
+                       HorizontalAlignment="Left"
+                       Text="Læs en fast tekst op i cirka tredive sekunder. Appen kender teksten i forvejen og tæller, hvor mange ord den hørte rigtigt." />
+          </StackPanel>
+          <Button x:Name="TestKnap" Content="▶ Start test" Click="Test_Click"
+                  HorizontalAlignment="Right" VerticalAlignment="Top" Padding="16,9" MinWidth="150"
+                  Background="{StaticResource Accent}" Foreground="#FF0B1220" BorderThickness="0"
+                  FontWeight="SemiBold" />
+        </Grid>
+
+        <!-- Selve oplæsningen. Teksten skal fylde, mens den læses — man skal
+             kunne se den uden at læne sig frem. -->
+        <Border x:Name="TestRude" Background="#FF181B22" BorderBrush="{StaticResource PanelKant}"
+                BorderThickness="1" CornerRadius="8" Padding="16,14" Margin="0,14,0,0"
+                Visibility="Collapsed">
+          <StackPanel>
+            <Grid Margin="0,0,0,12">
+              <TextBlock x:Name="TestTrin" FontSize="13" FontWeight="SemiBold"
+                         Foreground="{StaticResource Accent}" Text="Læs højt — i almindeligt tempo" />
+              <TextBlock x:Name="TestUr" FontSize="13" HorizontalAlignment="Right"
+                         Foreground="{StaticResource TekstSvag}" FontFamily="Consolas" />
+            </Grid>
+
+            <TextBlock x:Name="TestTekst" FontSize="15.5" LineHeight="30" TextWrapping="Wrap"
+                       Foreground="{StaticResource Tekst}" />
+
+            <Grid Margin="0,14,0,0">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+              </Grid.ColumnDefinitions>
+              <TextBlock Grid.Column="0" Text="Niveau" Style="{StaticResource Underskrift}"
+                         VerticalAlignment="Center" Width="52" />
+              <Border Grid.Column="1" Height="10" Background="#FF2C323D" CornerRadius="5"
+                      VerticalAlignment="Center">
+                <Border x:Name="TestNiveau" HorizontalAlignment="Left" Width="0" Height="10"
+                        CornerRadius="5" Background="{StaticResource Godkendt}" />
+              </Border>
+            </Grid>
+          </StackPanel>
+        </Border>
+
+        <!-- Resultatet. Tallet står stort, fordi det er det, man kom efter;
+             rådet står under, fordi et tal uden en vej videre er ubrugeligt. -->
+        <Border x:Name="TestSvar" Background="#FF181B22" BorderBrush="{StaticResource PanelKant}"
+                BorderThickness="1" CornerRadius="8" Padding="16,14" Margin="0,14,0,0"
+                Visibility="Collapsed">
+          <StackPanel>
+            <Grid>
+              <StackPanel Orientation="Horizontal">
+                <TextBlock x:Name="TestTal" FontSize="30" FontWeight="SemiBold"
+                           VerticalAlignment="Center" />
+                <TextBlock x:Name="TestDom" FontSize="14" Margin="14,0,0,0" VerticalAlignment="Center"
+                           Foreground="{StaticResource TekstSvag}" />
+              </StackPanel>
+            </Grid>
+
+            <TextBlock x:Name="TestRaad" FontSize="12.5" LineHeight="21" TextWrapping="Wrap"
+                       Margin="0,10,0,0" Foreground="{StaticResource TekstSvag}" MaxWidth="640"
+                       HorizontalAlignment="Left" />
+
+            <Expander x:Name="TestDetalje" Header="Sådan hørte appen det" Margin="0,12,0,0"
+                      Foreground="{StaticResource TekstMeget}" FontSize="12">
+              <StackPanel Margin="0,10,0,0">
+                <TextBlock x:Name="TestFejl" FontSize="12.5" TextWrapping="Wrap" LineHeight="21"
+                           Foreground="{StaticResource TekstSvag}" Margin="0,0,0,10" />
+                <TextBlock x:Name="TestUdskrift" FontSize="12.5" TextWrapping="Wrap" LineHeight="21"
+                           FontFamily="Consolas" Foreground="{StaticResource TekstMeget}" />
+              </StackPanel>
+            </Expander>
+          </StackPanel>
+        </Border>
+
+        <TextBlock x:Name="TestStatus" FontSize="12" Margin="0,10,0,0" TextWrapping="Wrap"
+                   Foreground="{StaticResource TekstMeget}" />
+      </StackPanel>
+    </Border>
+
     <!-- ===================== Klar til næste møde ======================== -->
-    <Border Grid.Row="3" Background="{StaticResource Panel}" CornerRadius="10" Padding="20"
+    <Border Grid.Row="4" Background="{StaticResource Panel}" CornerRadius="10" Padding="20"
             BorderBrush="{StaticResource PanelKant}" BorderThickness="1" Margin="0,0,0,14"
             VerticalAlignment="Top">
       <StackPanel>
@@ -151,7 +245,7 @@
       </StackPanel>
     </Border>
 
-    <Grid Grid.Row="4" Margin="0,12,0,0">
+    <Grid Grid.Row="5" Margin="0,12,0,0">
       <Grid.ColumnDefinitions>
         <ColumnDefinition Width="*" />
         <ColumnDefinition Width="Auto" />

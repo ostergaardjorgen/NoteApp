@@ -47,73 +47,20 @@ public partial class TemplatesView : UserControl
         try { DraftStore.SeedTemplates(); } catch (Exception) { /* vises som tom liste */ }
 
         VisModelStatus();
-        FyldModeller();
         Indlæs();
     }
 
     // ------------------------------------------------------------- modeller
 
     /// <summary>
-    /// De hentede modeller, slået op i kataloget. Filnavnet alene siger ikke
-    /// nok — licens og hvad modellen egner sig til står i kataloget.
+    /// Hvad dokumenterne laves af. Der er ikke noget at vælge, så linjen
+    /// oplyser frem for at spørge.
     /// </summary>
-    private static IReadOnlyList<ModelValg> Modeller()
-    {
-        var hentede = LlmRunner.InstalledModels()
-            .Select(Path.GetFileName)
-            .Where(f => f is not null)
-            .ToHashSet(StringComparer.OrdinalIgnoreCase)!;
-
-        var liste = new List<ModelValg>
-        {
-            new(null, "Ingen — skabelonen bruges ikke til udkast",
-                "Skabelonen kan stadig redigeres og gemmes. Den kan bare ikke bruges til at lave et udkast, før der er valgt en model.",
-                true)
-        };
-
-        foreach (var m in LlmCatalog.Default)
-        {
-            var hentet = hentede.Contains(m.FileName);
-            liste.Add(new ModelValg(
-                m.Id,
-                hentet ? $"{m.Id}  ·  {m.SizeText}" : $"{m.Id}  ·  {m.SizeText}  (ikke hentet)",
-                hentet
-                    ? $"{m.Summary}\n\nFordel: {m.Pros}\nUlempe: {m.Cons}\nLicens: {m.License} — fri at sælge med."
-                    : $"Ikke hentet endnu. Hent den under «Motor og model», så fylder den {m.SizeText} på disken.\n\n{m.Summary}",
-                hentet));
-        }
-
-        // Modeller paa disken, der ikke staar i kataloget. De skal med — ellers
-        // ville en model, brugeren selv har lagt derind, se ud som om den ikke
-        // fandtes.
-        foreach (var fil in hentede)
-        {
-            if (LlmCatalog.Known.Any(m => m.FileName.Equals(fil, StringComparison.OrdinalIgnoreCase))) continue;
-            liste.Add(new ModelValg(Path.GetFileNameWithoutExtension(fil),
-                $"{Path.GetFileNameWithoutExtension(fil)}  ·  egen",
-                "Lagt i modelmappen uden om kataloget. Appen kan ikke sige noget om licens eller egnethed — det er dit eget valg.",
-                true));
-        }
-
-        return liste;
-    }
-
-    private void FyldModeller()
-    {
-        FeltModel.ItemsSource = Modeller();
-    }
-
     private void VisModelStatus()
     {
-        var hentede = LlmRunner.InstalledModels().Count;
-        var cli = LlmRunner.FindCli();
-
-        ModelStatus.Text = (hentede, cli) switch
-        {
-            (0, _) => "Der er ingen sprogmodeller hentet. Skabelonerne kan sættes op nu og bruges den dag, du henter en — under «Motor og model».",
-            (_, null) => $"{hentede} sprogmodel(ler) hentet, men llama.cpp mangler. Motoren hentes under «Motor og model».",
-            var (n, _) => $"{n} sprogmodel(ler) klar. Et udkast laves fra en optagelse under «Optagelser»."
-        };
+        ModelStatus.Text = SkyNoegle.Hent() is null
+            ? "Dokumenter laves af " + SkyKatalog.Standard.Navn + " i Europa. Den er ikke sat op endnu — det sker under «AI-modeller»."
+            : "Dokumenter laves af " + SkyKatalog.Standard.Navn + " i Europa. Skabelonen her bestemmer, hvad der kommer ud.";
     }
 
     // ------------------------------------------------------------ indlæsning
@@ -151,10 +98,9 @@ public partial class TemplatesView : UserControl
         FeltSystem.Text = t.SystemPrompt;
         FeltBruger.Text = t.UserPrompt;
 
-        var valg = (IReadOnlyList<ModelValg>)FeltModel.ItemsSource;
-        FeltModel.SelectedItem =
-            valg.FirstOrDefault(m => string.Equals(m.Id, t.PreferredModel, StringComparison.OrdinalIgnoreCase))
-            ?? valg[0];
+        // HER BLEV SKABELONENS PreferredModel LAEST IND I EN COMBOBOX.
+        // Feltet findes stadig i filformatet, saa gamle skabeloner kan laeses,
+        // men det peger paa lokale gguf-filer, som ikke bruges laengere.
 
         _indlæser = false;
         GemKnap.IsEnabled = false;
@@ -165,18 +111,6 @@ public partial class TemplatesView : UserControl
 
     private void Aendret(object sender, TextChangedEventArgs e)
     {
-        if (!_indlæser) GemKnap.IsEnabled = true;
-    }
-
-    private void Model_Valgt(object sender, SelectionChangedEventArgs e)
-    {
-        if (FeltModel.SelectedItem is ModelValg m)
-        {
-            ModelForklaring.Text = m.Forklaring;
-            ModelForklaring.Foreground = (System.Windows.Media.Brush)FindResource(
-                m.Hentet ? "TekstMeget" : "Advarsel");
-        }
-
         if (!_indlæser) GemKnap.IsEnabled = true;
     }
 
@@ -229,7 +163,6 @@ public partial class TemplatesView : UserControl
 
         _valgt.Name = FeltNavn.Text.Trim();
         _valgt.Description = string.IsNullOrWhiteSpace(FeltBeskrivelse.Text) ? null : FeltBeskrivelse.Text.Trim();
-        _valgt.PreferredModel = (FeltModel.SelectedItem as ModelValg)?.Id;
         _valgt.Temperature = temp;
         _valgt.MaxTokens = maks;
         _valgt.SystemPrompt = FeltSystem.Text.Trim();
