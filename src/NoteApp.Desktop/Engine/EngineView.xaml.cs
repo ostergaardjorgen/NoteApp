@@ -50,13 +50,24 @@ public partial class EngineView : System.Windows.Controls.UserControl
         // over ingenting i datamappen. Stod der bare, hvad indstillingen
         // oenskede, ville skaermen svare paa et andet spoergsmaal end det,
         // man har - og man ville ikke opdage, at filen laa et andet sted.
+        // "Whisper" foran modelnavnet. Uden det stod der bare "large-v3", og
+        // saa kunne skaermen ikke svare paa, HVAD der skriver lyden ud.
         LydModel.Text = s.ModelPath is null
-            ? $"{model.Id} — ikke hentet"
-            : Path.GetFileNameWithoutExtension(s.ModelPath).Replace("ggml-", "");
+            ? $"Whisper {model.Id} — ikke hentet"
+            : "Whisper " + Path.GetFileNameWithoutExtension(s.ModelPath).Replace("ggml-", "");
 
         LydResume.Text = model.Summary + " " + model.Pros;
 
         MotorNavn.Text = s.WhisperCli is null ? "ikke installeret" : "whisper.cpp";
+
+        // Motoren staar fremme, ikke kun i foldebjaelken. Det er to ting -
+        // programmet, der koerer modellen, og modelfilen selv - og begge har
+        // hver sin licens at goere rede for.
+        LydMotorLinje.Text = s.WhisperCli is null
+            ? "Motor: whisper.cpp — ikke installeret"
+            : $"Motor: whisper.cpp · {s.Engine}" +
+              (s.EngineVersion is { } v ? $" · {v}" : "");
+
 
         // Version hvis vi kender den, ellers datoen paa binaeren. Der staar
         // aldrig "ukendt": et felt, der ikke kan svare, skal stille et andet
