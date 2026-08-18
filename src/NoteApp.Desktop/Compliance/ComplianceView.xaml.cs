@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -71,14 +71,13 @@ public partial class ComplianceView : UserControl
                 "Tjeneste",
                 "Kører i Frankrig",
                 "Sprogmodellen, der laver et dokument ud af udskriften. Kører hos leverandøren — der hentes ingen vægte, og der installeres ingenting.",
-                "Det er en tjeneste, ikke en licens. Det, der gælder, er databehandleraftalen og vilkårene ovenfor."),
+                "Det er en tjeneste, ikke en licens. Det, der gælder, er databehandleraftalen og vilkårene ovenfor.")
 
-            new Komponent(
-                "Røst v3 (CoRal)",
-                "OpenRAIL-M",
-                "Ikke i brug",
-                "Dansk finjustering af Whisper large-v3. Undersøgt 18-08-2026 som standardmodel og fravalgt: den er trænet til at køre uden tidsstempler, og whisper.cpp kræver dem. Målt til 48,5 % ordfejlrate mod large-v3's 10,0 %.",
-                "Nævnt her, fordi licensen ville have krævet noget særligt: OpenRAIL-M tillader kommerciel brug, men har brugsbegrænsninger, der SKAL videregives til dem, der får produktet. Den forpligtelse er ikke aktuel, så længe modellen ikke er i brug.")
+            // HER STOD ROEST V3. Den er undersoegt og fravalgt, ikke i brug -
+            // og en liste over det, der KUNNE have vaeret brugt, hoerer ikke
+            // hjemme paa en compliance-side. Undersoegelsen staar i
+            // doc/maaling-whisper.md, og licensforholdet (OpenRAIL-M med
+            // brugsbegraensninger, der skal videregives) er noteret dér.
         };
     }
 
