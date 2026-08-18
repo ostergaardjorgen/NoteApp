@@ -103,6 +103,9 @@
               </Border>
             </Grid>
           </RadioButton>
+          <RadioButton x:Name="NavCompliance" GroupName="nav" Content="Compliance"
+                       Checked="Nav_Changed"
+                       Style="{StaticResource NavKnap}" />
           <RadioButton x:Name="NavHistorik" GroupName="nav" Content="Historik"
                        Checked="Nav_Changed"
                        Style="{StaticResource NavKnap}" />

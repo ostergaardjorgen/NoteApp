@@ -306,6 +306,12 @@ public partial class MainWindow : Window
         {
             Indhold.Content = new FilesView();
         }
+        else if (NavCompliance.IsChecked == true)
+        {
+            // Bygges hver gang: linjen om, hvor teksten sendes hen, skal
+            // foelge, om noeglen er sat op NU.
+            Indhold.Content = new Compliance.ComplianceView();
+        }
         else if (NavHistorik.IsChecked == true)
         {
             // Bygges hver gang: historikken skal vise det, der lige er sket.
