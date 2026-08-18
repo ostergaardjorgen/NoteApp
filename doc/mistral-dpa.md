@@ -164,3 +164,59 @@ holdes hele vejen, er dyrere end en, der siger lidt mindre.
 - Trust Center havde 14-05-2026 en sikkerhedshændelse (forsyningskædeangreb).
   Mistral oplyser, at hverken hostede tjenester eller kundedata blev berørt.
   Nævnt for fuldstændighedens skyld, ikke som en indvending.
+
+---
+
+## RETTELSE 18-08-2026 — de bindende dokumenter er læst
+
+*Læst direkte: `legal.mistral.ai/terms/data-processing-addendum`,
+`legal.mistral.ai/terms/commercial-terms-of-service` og
+`legal.mistral.ai/terms/eu-consumers-terms-of-service`.*
+
+Gennemgangen 17-08 byggede på Trust Center og produktdokumentationen. De
+bindende dokumenter er nu læst, og de ændrer tre ting.
+
+### 1. Den geografiske binding står ikke i aftalerne
+
+Hverken databehandleraftalen eller de kommercielle vilkår nævner regionale
+endepunkter eller forpligter behandlingen til et bestemt område.
+Databehandleraftalen tillader tværtimod udtrykkeligt overførsel til lande med
+et af Kommissionen anerkendt beskyttelsesniveau samt internationale
+overførsler på standardkontraktbestemmelser.
+
+Det, der findes om `api.eu.mistral.ai`, er en **beskrivelse af tjenesten** i
+produktdokumentationen — ikke en kontraktbestemmelse.
+
+**Konsekvens.** Formuleringen «bearbejdningen sker i Europa … under
+databehandleraftale» læses let, som om aftalen er dét, der binder geografien.
+Det gør den ikke. Skal påstanden bruges i et tilbud eller en fortegnelse over
+behandlingsaktiviteter, bør den bekræftes skriftligt af leverandøren først.
+
+### 2. Aftalen skelner ikke mellem endepunkter
+
+Spørgsmålet var, om de amerikansk ejede underdatabehandlere er opført som
+gældende for EU-endepunktet. Svaret er, at aftalen slet ikke opdeler dem:
+den henviser samlet til listen i Trust Center
+(`trust.mistral.ai/subprocessors`) og opregner hverken underdatabehandlere
+eller datalokationer pr. endepunkt.
+
+Man kan altså **ikke** af aftalen udlede, at et navn på listen er ude af
+billedet, fordi EU-endepunktet bruges. Afgrænsningen i tabellen ovenfor er en
+fortolkning fra 17-08 og skal læses som sådan.
+
+Selve listen kunne ikke hentes udefra — Trust Center kræver JavaScript.
+
+### 3. Forbrugervilkårene gælder ikke
+
+`eu-consumers-terms-of-service` undtager udtrykkeligt API-adgang: de dækker
+personlig brug af Vibe og øvrige tjenester, «but excluding Mistral AI Studio
+and access to any of our APIs». Det, der gælder her, er de **kommercielle
+vilkår** sammen med databehandleraftalen.
+
+### Det, der blev bekræftet
+
+| | |
+|---|---|
+| Træning | «unless Customer is or has opted-out of training». Fravalget er brugerens eget, som antaget. Feedback-funktioner giver derudover samtykke til træning på input og output. |
+| Opbevaring | Punkt 10.1: personoplysninger er utilgængelige senest tredive dage efter aftalens ophør. Der står fortsat ingen opbevaringstid for den enkelte API-anmodning. |
+| Labs og Preview | Egne vilkår: her MÅ data bruges til træning. Appen kalder ikke sådanne modeller. |

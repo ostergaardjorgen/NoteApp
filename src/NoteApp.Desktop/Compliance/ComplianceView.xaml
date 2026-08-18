@@ -104,6 +104,7 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
               </Grid.RowDefinitions>
 
               <TextBlock Grid.Row="0" Grid.Column="0" Text="Selskab" Margin="0,0,28,0"
@@ -126,11 +127,16 @@
               <TextBlock Grid.Row="3" Grid.Column="1" FontSize="12.5" Margin="0,9,0,0" TextWrapping="Wrap"
                          Text="ISO/IEC 27001, ISO/IEC 27701 og SOC 2 Type II. Attesterne ligger i deres Trust Center." />
 
-              <TextBlock Grid.Row="4" Grid.Column="0" Text="Træning på dine data" Margin="0,9,28,0"
+              <TextBlock Grid.Row="4" Grid.Column="0" Text="Opbevaring" Margin="0,9,28,0"
                          FontSize="12.5" Foreground="{StaticResource TekstMeget}" />
               <TextBlock Grid.Row="4" Grid.Column="1" FontSize="12.5" Margin="0,9,0,0" TextWrapping="Wrap"
+                         Text="Aftalens punkt 10.1: personoplysninger er utilgængelige senest tredive dage efter, aftalen ophører. Der står ingen opbevaringstid for den enkelte API-anmodning." />
+
+              <TextBlock Grid.Row="5" Grid.Column="0" Text="Træning på dine data" Margin="0,9,28,0"
+                         FontSize="12.5" Foreground="{StaticResource TekstMeget}" />
+              <TextBlock Grid.Row="5" Grid.Column="1" FontSize="12.5" Margin="0,9,0,0" TextWrapping="Wrap"
                          Foreground="{StaticResource Advarsel}"
-                         Text="Tilladt, MEDMINDRE du selv slår det fra på din konto. Det er en indstilling under Workspace → Data, og appen kan ikke sætte den for dig." />
+                         Text="Aftalen: Mistral må behandle oplysningerne som DATAANSVARLIG med henblik på at træne deres modeller, «unless Customer is or has opted-out of training». Slås fra på din konto. Det er en indstilling under Workspace → Data, og appen kan ikke sætte den for dig." />
             </Grid>
 
             <StackPanel Orientation="Horizontal" Margin="0,16,0,0">
@@ -157,7 +163,19 @@
 
             <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,10,0,0"
                        Foreground="{StaticResource Advarsel}"
-                       Text="VÆR OPMÆRKSOM: det er IKKE efterprøvet, hvilke af de femogtyve der faktisk indgår, når EU-endepunktet bruges. Listen har en produktkolonne — det var sådan, Googles rolle kunne henføres til det amerikanske endepunkt — men de øvrige navne er ikke gennemgået navn for navn mod den kolonne. Skal påstanden bruges over for en kunde eller en revisor, skal listen læses i Trust Center og holdes op mod databehandleraftalens egen opregning." />
+                       Text="DATABEHANDLERAFTALEN SKELNER IKKE MELLEM ENDEPUNKTER. Læst 18-08-2026: den henviser samlet til listen i Trust Center og opregner hverken underdatabehandlere eller datalokationer pr. endepunkt. Man kan altså ikke af aftalen udlede, at et bestemt navn på listen er ude af billedet, fordi EU-endepunktet bruges." />
+
+            <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,10,0,0"
+                       Foreground="{StaticResource FejlTekst}" FontWeight="SemiBold"
+                       Text="DEN GEOGRAFISKE BINDING ER IKKE FUNDET I DE BINDENDE DOKUMENTER. Gennemgået 18-08-2026: hverken databehandleraftalen eller de kommercielle vilkår nævner regionale endepunkter eller forpligter behandlingen til et bestemt område. Aftalen tillader tværtimod overførsel til lande, Kommissionen har erklæret sikre, og internationale overførsler på standardkontraktbestemmelser (SCC)." />
+
+            <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,10,0,0"
+                       Foreground="{StaticResource TekstSvag}"
+                       Text="Det, der findes, er leverandørens produktdokumentation om, hvad de tre endepunkter gør. Det er en beskrivelse af tjenesten — ikke en kontraktbestemmelse, man kan holde nogen fast på. Skal «bearbejdningen sker i Europa» bruges i et tilbud eller en databehandlerfortegnelse, bør det bekræftes skriftligt af leverandøren først." />
+
+            <TextBlock FontSize="11.5" LineHeight="19" TextWrapping="Wrap" Margin="0,8,0,0"
+                       Foreground="{StaticResource TekstMeget}"
+                       Text="Bemærk også: vilkårene for forbrugere i EØS gælder IKKE her. De undtager udtrykkeligt API-adgang. Det, der gælder, er de kommercielle vilkår sammen med databehandleraftalen." />
 
             <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,10,0,0"
                        Foreground="{StaticResource TekstSvag}"
@@ -170,10 +188,10 @@
                            FontWeight="SemiBold" Margin="0,0,0,8" />
                 <TextBlock FontSize="13" LineHeight="22" TextWrapping="Wrap"
                            Foreground="{StaticResource Tekst}"
-                           Text="«Optagelse og transskription forlader aldrig din pc. Bearbejdningen sker i Europa — hos Mistral AI i Frankrig, på deres EU-endepunkt, under databehandleraftale og GDPR.»" />
+                           Text="«Optagelse og transskription forlader aldrig din pc. Bearbejdningen sker hos Mistral AI, et fransk selskab underlagt GDPR og omfattet af databehandleraftale, og appen kalder alene deres europæiske endepunkt.»" />
                 <TextBlock FontSize="12" LineHeight="20" TextWrapping="Wrap" Margin="0,10,0,0"
                            Foreground="{StaticResource TekstMeget}"
-                           Text="«Ingen amerikansk virksomhed er involveret» holder IKKE. «100 % europæisk» er et absolut ord om noget, hvor leverandørens egne dokumenter tager forbehold — og en påstand, der ikke kan holdes hele vejen, er dyrere end en, der siger lidt mindre." />
+                           Text="«Ingen amerikansk virksomhed er involveret» holder IKKE, og «databehandleraftalen garanterer, at data bliver i Europa» holder heller ikke — den forpligtelse står ikke i aftalen. «100 % europæisk» er et absolut ord om noget, hvor leverandørens egne dokumenter tager forbehold — og en påstand, der ikke kan holdes hele vejen, er dyrere end en, der siger lidt mindre." />
               </StackPanel>
             </Border>
           </StackPanel>
