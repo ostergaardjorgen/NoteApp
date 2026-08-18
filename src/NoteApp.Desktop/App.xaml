@@ -55,6 +55,13 @@
     </Style>
 
     <Style TargetType="Button">
+      <!-- HJAELPETEKSTEN SKAL OGSAA VISES, NAAR KNAPPEN ER GRAA.
+           WPF skjuler som udgangspunkt ToolTip paa deaktiverede kontroller.
+           Det er praecis omvendt af, hvad man har brug for: en knap, man kan
+           trykke paa, kan man proeve; en graa knap kan man kun gaette om.
+           Med ikoner uden tekst var foelgen, at fem af seks ikoner slet ikke
+           kunne forklare sig selv. Fundet 18-08-2026. -->
+      <Setter Property="ToolTipService.ShowOnDisabled" Value="True" />
       <Setter Property="Foreground" Value="{StaticResource Tekst}" />
       <Setter Property="Background" Value="{StaticResource Panel}" />
       <Setter Property="BorderBrush" Value="{StaticResource PanelKant}" />
@@ -115,6 +122,17 @@
       <Setter Property="Foreground" Value="{StaticResource TekstSvag}" />
       <Setter Property="ToolTipService.InitialShowDelay" Value="350" />
       <Setter Property="ToolTipService.ShowDuration" Value="20000" />
+      <!-- Se den implicitte Button-stil ovenfor: uden den her er hjaelpe-
+           teksten vaek praecis paa de ikoner, der er graa. -->
+      <Setter Property="ToolTipService.ShowOnDisabled" Value="True" />
+
+      <!-- HJAELPETEKSTEN SKAL OP OVER RAEKKEN.
+           Som standard laegger WPF den under musen - altsaa hen over de
+           naeste ikoner i vaerktoejslinjen. Saa kan man ikke glide videre til
+           nabo-ikonet og faa DETS tekst: man rammer boblen i stedet.
+           Placement=Top loefter den fri af raekken. -->
+      <Setter Property="ToolTipService.Placement" Value="Top" />
+      <Setter Property="ToolTipService.VerticalOffset" Value="-6" />
       <Setter Property="Template">
         <Setter.Value>
           <ControlTemplate TargetType="Button">
