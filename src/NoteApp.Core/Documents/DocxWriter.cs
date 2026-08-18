@@ -166,12 +166,20 @@ public static class DocxWriter
     /// «Kilde» er vores egen og skal være det: der findes ikke en indbygget
     /// typografi for «hvor kommer det her dokument fra».
     /// </summary>
+    /// <summary>Brødtekstens skrift. Overskrifterne bruger <see cref="SkriftOverskrift"/>.</summary>
+    private const string SkriftBrød = "Aptos";
+    private const string SkriftOverskrift = "Aptos Display";
+
+    /// <summary>Overskriftsfarverne. Se doc/word-formatering.md for hvor de kommer fra.</summary>
+    private const string FarveOverskrift = "2E74B5";
+    private const string FarveOverskrift3 = "1F4D78";
+
     private static string Styles() => $"""
         <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
         <w:styles xmlns:w="{NsW}">
           <w:docDefaults>
             <w:rPrDefault><w:rPr>
-              <w:rFonts w:ascii="Calibri" w:hAnsi="Calibri" w:cs="Calibri"/>
+              <w:rFonts w:ascii="{SkriftBrød}" w:hAnsi="{SkriftBrød}" w:cs="{SkriftBrød}"/>
               <w:sz w:val="22"/><w:szCs w:val="22"/>
               <w:lang w:val="da-DK"/>
             </w:rPr></w:rPrDefault>
@@ -184,31 +192,49 @@ public static class DocxWriter
             <w:name w:val="Normal"/><w:qFormat/>
           </w:style>
 
+          <!-- Titlen er SORT, ikke blaa. Det er den, referencedokumentet
+               bruger, og en farvet titel over farvede overskrifter goer, at
+               ingen af dem skiller sig ud. -->
           <w:style w:type="paragraph" w:styleId="Title">
             <w:name w:val="Title"/><w:basedOn w:val="Normal"/><w:qFormat/>
             <w:pPr><w:spacing w:after="240"/><w:contextualSpacing/></w:pPr>
-            <w:rPr><w:sz w:val="56"/><w:szCs w:val="56"/><w:color w:val="1F3864"/></w:rPr>
+            <w:rPr>
+              <w:rFonts w:ascii="{SkriftOverskrift}" w:hAnsi="{SkriftOverskrift}"/>
+              <w:sz w:val="56"/><w:szCs w:val="56"/>
+            </w:rPr>
           </w:style>
 
+          <!-- Overskrifterne er IKKE fede. De skiller sig ud paa stoerrelse og
+               farve, saadan som referencedokumentet goer det. Fed oveni goer
+               dem tunge og gaar ud over laesbarheden i et langt referat. -->
           <w:style w:type="paragraph" w:styleId="Heading1">
             <w:name w:val="heading 1"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/>
             <w:qFormat/><w:uiPriority w:val="9"/>
             <w:pPr><w:outlineLvl w:val="0"/><w:keepNext/><w:spacing w:before="360" w:after="120"/></w:pPr>
-            <w:rPr><w:b/><w:sz w:val="32"/><w:szCs w:val="32"/><w:color w:val="1F3864"/></w:rPr>
+            <w:rPr>
+              <w:rFonts w:ascii="{SkriftOverskrift}" w:hAnsi="{SkriftOverskrift}"/>
+              <w:sz w:val="32"/><w:szCs w:val="32"/><w:color w:val="{FarveOverskrift}"/>
+            </w:rPr>
           </w:style>
 
           <w:style w:type="paragraph" w:styleId="Heading2">
             <w:name w:val="heading 2"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/>
             <w:qFormat/><w:uiPriority w:val="9"/>
             <w:pPr><w:outlineLvl w:val="1"/><w:keepNext/><w:spacing w:before="280" w:after="100"/></w:pPr>
-            <w:rPr><w:b/><w:sz w:val="26"/><w:szCs w:val="26"/><w:color w:val="2E5496"/></w:rPr>
+            <w:rPr>
+              <w:rFonts w:ascii="{SkriftOverskrift}" w:hAnsi="{SkriftOverskrift}"/>
+              <w:sz w:val="26"/><w:szCs w:val="26"/><w:color w:val="{FarveOverskrift}"/>
+            </w:rPr>
           </w:style>
 
           <w:style w:type="paragraph" w:styleId="Heading3">
             <w:name w:val="heading 3"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/>
             <w:qFormat/><w:uiPriority w:val="9"/>
             <w:pPr><w:outlineLvl w:val="2"/><w:keepNext/><w:spacing w:before="240" w:after="80"/></w:pPr>
-            <w:rPr><w:b/><w:sz w:val="24"/><w:szCs w:val="24"/><w:color w:val="2E5496"/></w:rPr>
+            <w:rPr>
+              <w:rFonts w:ascii="{SkriftOverskrift}" w:hAnsi="{SkriftOverskrift}"/>
+              <w:sz w:val="24"/><w:szCs w:val="24"/><w:color w:val="{FarveOverskrift3}"/>
+            </w:rPr>
           </w:style>
 
           <w:style w:type="paragraph" w:styleId="ListParagraph">
@@ -307,10 +333,14 @@ public static class DocxWriter
             <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
             <w:document xmlns:w="{NsW}">
               <w:body>{krop}
+                <!-- A4 med referencedokumentets margener: 1,5 cm foroven og
+                     forneden, knap 2 cm i siderne. Det er smallere end Words
+                     standard paa 2,5 cm hele vejen rundt og giver plads til
+                     mere tekst pr. side uden at linjerne bliver for lange. -->
                 <w:sectPr>
                   <w:pgSz w:w="11906" w:h="16838"/>
-                  <w:pgMar w:top="1418" w:right="1418" w:bottom="1418" w:left="1418"
-                           w:header="709" w:footer="709" w:gutter="0"/>
+                  <w:pgMar w:top="850" w:right="1100" w:bottom="850" w:left="1100"
+                           w:header="708" w:footer="708" w:gutter="0"/>
                 </w:sectPr>
               </w:body>
             </w:document>
