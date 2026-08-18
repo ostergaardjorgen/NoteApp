@@ -169,7 +169,10 @@
                        Text="Gå til «Optagelser», vælg en optagelse der er skrevet ud til tekst, og tryk «Opret dokument». Så vælger du en skabelon — referat, opgaveliste eller hvad du selv har lavet." />
           </StackPanel>
 
+          <!-- Se TranscribeView: uden Disabled maales indholdet med uendelig
+               bredde, og teksten ombrydes ikke. -->
           <ScrollViewer x:Name="Detaljer" Padding="24,20" VerticalScrollBarVisibility="Auto"
+                        HorizontalScrollBarVisibility="Disabled"
                         Visibility="Collapsed">
             <StackPanel>
               <TextBlock x:Name="Titel" FontSize="19" FontWeight="SemiBold" TextWrapping="Wrap" />

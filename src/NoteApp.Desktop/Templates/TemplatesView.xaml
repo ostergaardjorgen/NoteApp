@@ -147,7 +147,10 @@
       <!-- Højre: den valgte skabelon -->
       <Border Grid.Column="2" Background="{StaticResource Panel}" CornerRadius="10"
               BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
-        <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="22,18">
+        <!-- Se TranscribeView: uden Disabled maales indholdet med uendelig
+             bredde, og teksten ombrydes ikke. -->
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="22,18"
+                      HorizontalScrollBarVisibility="Disabled">
           <StackPanel x:Name="Detaljer">
 
             <TextBlock Text="Navn" Style="{StaticResource Underskrift}" />

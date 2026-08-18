@@ -85,19 +85,15 @@ public partial class HistoryView : UserControl
     {
         _alle = Historik.Laes();
 
-        var udgående = _alle.Count(a => a.DataForlodMaskinen);
-        UdgaaendeTal.Text = udgående.ToString();
-
-        // Farve og ordlyd foelger virkeligheden. Staar der nul, er det en
-        // bekraeftelse; staar der andet, er det ikke en advarsel, men en
-        // oplysning: hentning af modeller MODTAGER data, den sender ikke.
-        UdgaaendeOverskrift.Text = udgående == 0
-            ? "Intet har forladt denne pc"
-            : $"{udgående} hentninger fra internettet";
-
-        UdgaaendeTekst.Text = udgående == 0
-            ? "Ingen optagelse, udskrift eller note er sendt nogen steder hen. Alt er sket her på maskinen, med modeller der ligger på disken."
-            : "Hentning af motor og modeller er det eneste, der rører netværket. Appen beder om en navngiven fil og modtager den — der sendes intet med om dig eller dine møder.";
+        // HER BLEV «Intet har forladt denne pc» regnet ud og skrevet.
+        //
+        // Panelet er fjernet fra skaermen 18-08-2026. Paastanden holdt kun,
+        // saa laenge appen ikke havde et netvaerkskald i sig; dokumenter
+        // laves nu hos Mistral i Europa, og teksten SENDES.
+        //
+        // Feltet DataForlodMaskinen staar stadig paa hver post, og listen
+        // nedenfor viser det post for post. Det er dét, en revision kan
+        // bruge - en overskrift, der opsummerer, kan kun tage fejl.
 
         Vis();
         Status.Text = Historik.Path;

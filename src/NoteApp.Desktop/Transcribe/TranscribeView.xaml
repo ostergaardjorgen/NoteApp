@@ -237,9 +237,20 @@
       <Border Grid.Column="2" Background="{StaticResource Panel}" CornerRadius="10"
               BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
         <Grid>
+          <!-- HorizontalScrollBarVisibility="Disabled" er ikke pynt: uden den
+               maaler ScrollViewer sit indhold med UENDELIG bredde, og saa
+               ombrydes teksten slet ikke. Foer holdt en MaxWidth paa 620
+               teksten i en smal soejle og skjulte det - da den blev fjernet,
+               saa man fejlen. -->
           <ScrollViewer x:Name="Forklaring" Padding="26,20,26,18"
-                        VerticalScrollBarVisibility="Auto">
-            <StackPanel MaxWidth="620" HorizontalAlignment="Left">
+                        VerticalScrollBarVisibility="Auto"
+                        HorizontalScrollBarVisibility="Disabled">
+            <!-- Ingen MaxWidth. Der stod 620, og saa blev teksten staaende i
+                 en smal soejle, naar man trak spalten bredere - pladsen blev
+                 lavet, men ikke brugt. En laesekolonne paa en fast bredde er
+                 paen i en artikel; her er det brugeren, der bestemmer
+                 bredden ved at traekke i skillelinjen. -->
+            <StackPanel HorizontalAlignment="Stretch">
 
               <TextBlock x:Name="ForklaringOverskrift" FontSize="19" FontWeight="SemiBold"
                          TextWrapping="Wrap" Text="Fra lyd til tekst" />
