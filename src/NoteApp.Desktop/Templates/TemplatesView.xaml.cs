@@ -279,7 +279,6 @@ public partial class TemplatesView : UserControl
             UserPrompt =
                 "Her er udskriften af mødet.\n\n" +
                 "Titel: {{titel}}\nDato: {{dato}}\nMødet blev holdt på: {{sprog}}\n\n" +
-                "Fagord og navne, der kan optræde: {{ordbog}}\n\n" +
                 "Udskrift:\n{{transskription}}"
         };
 

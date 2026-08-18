@@ -2,14 +2,12 @@
 using System.Reflection;
 using System.Windows;
 using NoteApp.Core;
-using NoteApp.Desktop.Dictionary;
 using NoteApp.Desktop.Engine;
 using NoteApp.Desktop.Documents;
 using NoteApp.Desktop.Files;
 using NoteApp.Desktop.Jobs;
 using NoteApp.Desktop.Meeting;
 using NoteApp.Desktop.Preferences;
-using NoteApp.Desktop.ReadAloud;
 using NoteApp.Desktop.Templates;
 using NoteApp.Desktop.Transcribe;
 
@@ -18,9 +16,7 @@ namespace NoteApp.Desktop;
 public partial class MainWindow : Window
 {
     private readonly MeetingView _moede = new();
-    private readonly ReadAloudView _oplaesning = new();
     private readonly GlobalHotkey _genvej = new();
-    private DictionaryView? _ordbog;
 
     /// <summary>Optagelsen, Optagelser-skærmen skal åbne på. Bruges én gang.</summary>
     private string? _aabnOptagelse;
@@ -116,49 +112,13 @@ public partial class MainWindow : Window
         //
         // Stien gemmes, så Optagelser-skærmen kan åbne PÅ den optagelse, der
         // lige er lavet, og spørge, om den skal skrives ud.
-        _oplaesning.TranskriptionØnskes += sti =>
-        {
-            _aabnOptagelse = sti;
-            if (NavTransskriber.IsChecked == true) Nav_Changed(this, new RoutedEventArgs());
-            else NavTransskriber.IsChecked = true;
-        };
-
-        // Når et møde begynder, BLIVER appen mødet. Alt andet er ligegyldigt i
-        // den periode: man skal kunne skrive noter og se, at der optages — og
-        // der skal være plads til at skrive, ikke et felt i en bjælke.
-        _moede.Startet += () =>
-        {
-            Indhold.Content = new MeetingLiveView(_moede);
-        };
-
-        // Efter et møde peger appen samme vej som efter en oplæsning: hen til
-        // optagelsen, med spørgsmålet om den skal skrives ud.
-        _moede.FærdigMedMøde += sti =>
-        {
-            _aabnOptagelse = sti;
-            NavTransskriber.IsChecked = true;
-        };
-
-        // Kørsler, der ikke hører til nogen skærm. Bjælken nederst er det
-        // eneste sted, de kan ses fra — derfor bor den i vinduet og ikke i en
-        // skærm, der bliver bygget om, hver gang man skifter menupunkt.
-        BackgroundJobs.Ændret += VisJob;
-        BackgroundJobs.DokumentFærdigt += id =>
-        {
-            _færdigtDokument = id;
-            TilbydAtAabne(id);
-        };
-
-        // Optagebjælken ligger fast øverst og er den samme, uanset hvilken
-        // skærm der vises. Den bygges én gang og bliver siddende — en optagelse
-        // må aldrig kunne dø af, at man klikker på et menupunkt.
         OptagBjaelke.Content = _moede;
 
         // Startskærmen sættes HER, ikke af Nav_Changed. Menupunktet er markeret
         // fra XAML'en, men Checked fyrer under InitializeComponent, hvor
         // Indhold endnu er null — så handleren returnerer, og skærmen stod tom,
         // indtil man klikkede på et andet punkt og tilbage igen.
-        Indhold.Content = _oplaesning;
+        Indhold.Content = NyOptagelsesskaerm();
 
         // Genvejstasten kobles på, når vinduet findes. Virker den ikke, skal
         // det siges — en genvej, der stille er død, opdages først den dag, man
@@ -216,13 +176,6 @@ public partial class MainWindow : Window
             }
         });
     }
-
-    /// <summary>
-    /// Går til oplæsningsskærmen. Kaldes fra træningen, når en sætning skal
-    /// læses op igen — dér er vejen videre ikke en knap på samme skærm, men et
-    /// andet sted i appen.
-    /// </summary>
-    public void GaaTilOplaesning() => NavOplaesning.IsChecked = true;
 
     /// <summary>Går til historikken — hele listen bag klokkens beskeder.</summary>
     public void GaaTilHistorik() => NavHistorik.IsChecked = true;
@@ -294,15 +247,9 @@ public partial class MainWindow : Window
         // fyrer under InitializeComponent.
         if (Indhold is null) return;
 
-        // Skærmene bygges først, når de vises. Ordbogen åbner en
-        // databaseforbindelse, og motorskærmen leder efter filer på disken —
-        // ingen af delene skal ske, mens man bare vil optage.
-        if (NavOrdbog.IsChecked == true)
-        {
-            _ordbog ??= new DictionaryView();
-            Indhold.Content = _ordbog;
-        }
-        else if (NavTransskriber.IsChecked == true)
+        // Skærmene bygges først, når de vises. Motorskærmen leder efter filer
+        // på disken, og det skal ikke ske, mens man bare vil optage.
+        if (NavTransskriber.IsChecked == true)
         {
             // Bygges hver gang: listen over optagelser skal vise den, der
             // netop er lavet, uden at nogen skal genstarte appen.
@@ -344,8 +291,22 @@ public partial class MainWindow : Window
         }
         else
         {
-            Indhold.Content = _oplaesning;
+            // Alt andet lander paa optagelserne. De er det, appen er til.
+            Indhold.Content = NyOptagelsesskaerm();
         }
+    }
+
+    /// <summary>
+    /// Optagelsesskærmen, bygget forfra.
+    ///
+    /// Den bygges hver gang frem for at blive genbrugt: listen skal vise den
+    /// optagelse, der netop er lavet, uden at nogen skal genstarte appen.
+    /// </summary>
+    private Transcribe.TranscribeView NyOptagelsesskaerm()
+    {
+        var aabn = _aabnOptagelse;
+        _aabnOptagelse = null;              // gælder kun dette skift
+        return new Transcribe.TranscribeView(aabn);
     }
 
     /// <summary>
@@ -354,7 +315,7 @@ public partial class MainWindow : Window
     /// </summary>
     protected override void OnClosing(CancelEventArgs e)
     {
-        if (!_moede.StopHvisIGang() || !_oplaesning.StopHvisIGang()) { e.Cancel = true; return; }
+        if (!_moede.StopHvisIGang()) { e.Cancel = true; return; }
 
         _genvej.Dispose();
         base.OnClosing(e);

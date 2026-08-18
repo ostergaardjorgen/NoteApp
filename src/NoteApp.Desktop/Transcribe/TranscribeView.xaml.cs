@@ -18,7 +18,6 @@ public sealed class OptagelseVisning
         var wav = Path.Combine(mappe, "mikrofon.wav");
 
         Gruppe = Optagelsesgruppe.Af(mappe, meta);
-        Traeningsnoegle = Optagelsesgruppe.Traeningsnoegle(mappe, meta);
         Emnemappe = meta?.Mappe;
 
         Titel = meta?.Title ?? Path.GetFileName(mappe);
@@ -65,9 +64,6 @@ public sealed class OptagelseVisning
     public long Bytes { get; }
 
     public Gruppe Gruppe { get; }
-
-    /// <summary>Hvilken prøvetekst der blev læst op. Null for rigtige møder.</summary>
-    public string? Traeningsnoegle { get; }
 
     /// <summary>Er der en udskrift? Det afgør, om mødet overhovedet kan være færdigbehandlet.</summary>
     public bool ErSkrevetUd => Directory.EnumerateFiles(Mappe, "*.txt")
@@ -184,7 +180,6 @@ public partial class TranscribeView : UserControl
 
         var moeder = alle.Count(o => o.Gruppe == Gruppe.Moede);
         var arkiv = alle.Count(o => o.Gruppe == Gruppe.Arkiv);
-        var traening = alle.Count(o => o.Gruppe == Gruppe.Traening);
 
         var oensket = _viserArkiv ? Gruppe.Arkiv : Gruppe.Moede;
 
@@ -207,12 +202,6 @@ public partial class TranscribeView : UserControl
         FaneMoeder.IsChecked = !_viserArkiv;
         FaneArkiv.IsChecked = _viserArkiv;
 
-        // Træningen ligger et andet sted, og det skal siges HER — ellers ser
-        // det ud, som om oplæsningerne er forsvundet.
-        TraeningsNote.Text = traening == 0
-            ? ""
-            : $"{traening} træningsoptagelse{(traening == 1 ? "" : "r")} ligger under «Træning».";
-        TraeningsNote.Visibility = traening == 0 ? Visibility.Collapsed : Visibility.Visible;
 
         if (Optagelser.Items.Count > 0) return;
 
@@ -228,9 +217,7 @@ public partial class TranscribeView : UserControl
 
         Status.Text = "Ingen møder endnu.";
         ForklaringOverskrift.Text = "Der ligger ingen møder her";
-        ForklaringUnder.Text = traening > 0
-            ? "Dine oplæsninger ligger under «Træning». Tryk «Optag møde» øverst, når du skal holde et rigtigt møde."
-            : "Tryk «Optag møde» øverst, når mødet begynder. Optagelsen dukker op her bagefter.";
+        ForklaringUnder.Text = "Tryk «Optag møde» øverst, når mødet begynder. Optagelsen dukker op her bagefter.";
     }
 
     private const string AlleMapper = "Alle mapper";
@@ -424,98 +411,6 @@ public partial class TranscribeView : UserControl
         Status.Text = "";
     }
 
-    // -------------------------------------------------------------- rettelser
-
-    private void Resultat_SelectionChanged(object sender, RoutedEventArgs e)
-    {
-        if (RetKnap is null) return;
-
-        var valgt = Resultat.SelectedText.Trim();
-
-        // Der skal vaere markeret noget, der ligner et ord — ikke et halvt
-        // afsnit. En regel paa tredive ord ville aldrig ramme igen.
-        RetKnap.IsEnabled = valgt.Length is > 1 and <= 60 && !valgt.Contains('\n');
-    }
-
-    /// <summary>
-    /// Retter et ord OG lærer rettelsen.
-    ///
-    /// Det er her, appen faktisk bliver bedre. Alt det andet — ordbogen,
-    /// modellerne, skabelonerne — ændrer ikke på, hvad Whisper hører. Det gør
-    /// den her: næste gang det samme bliver hørt forkert, er det rettet, før
-    /// nogen ser det.
-    /// </summary>
-    private void Ret_Click(object sender, RoutedEventArgs e)
-    {
-        if (Optagelser.SelectedItem is not OptagelseVisning valgt) return;
-
-        var markeret = Resultat.SelectedText.Trim();
-        if (markeret.Length == 0) return;
-
-        var tekstFil = FindTekst(valgt.Mappe);
-        if (tekstFil is null) return;
-
-        // Hvor mange gange staar det i teksten? Det aendrer, hvad rettelsen
-        // betyder, og det skal staa FOER man siger ja.
-        var antal = System.Text.RegularExpressions.Regex.Matches(
-            Resultat.Text, System.Text.RegularExpressions.Regex.Escape(markeret),
-            System.Text.RegularExpressions.RegexOptions.IgnoreCase).Count;
-
-        // SPÆRREN. En regel gaelder ALLE fremtidige moeder og skelner ikke
-        // mellem de steder, ordet var forkert, og de steder det var rigtigt.
-        //
-        // Uden den blev der laert regler paa almindelige ord — «at»→«af»,
-        // «af»→«er». Proevet af paa tre almindelige saetninger lavede fire
-        // saadanne regler 15 aendringer, alle forkerte, og de koerer efter
-        // hinanden paa samme tekst, saa de kaeder sig sammen.
-        //
-        // Graensen er sat ved fem: staar ordet saa mange gange i EN udskrift,
-        // er det et almindeligt ord, uanset hvad det saa er.
-        if (antal >= 5)
-        {
-            var ok = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
-                $"«{markeret}» står {antal} gange i teksten",
-                "En rettelse er en regel, der gælder alle fremtidige møder, og den skelner ikke: " +
-                "den retter hver eneste gang ordet optræder — også de gange, det var rigtigt.\n\n" +
-                "Rettelser hører til navne og fagord, som «cpr-nummer» eller «SCIM». Er dette et " +
-                "almindeligt ord, gør en regel mere skade end gavn.",
-                godkend: "Ret det alligevel",
-                annuller: "Lad være",
-                slags: Dialogs.Slags.Pas_paa,
-                godkendErStandard: false);
-
-            if (!ok) return;
-        }
-
-        var vindue = new CorrectionWindow(markeret, antal) { Owner = Window.GetWindow(this) };
-        if (vindue.ShowDialog() != true) return;
-
-        try
-        {
-            using var ordbog = new LearningStore();
-
-            ordbog.LearnCorrection(vindue.Hørt, vindue.Rigtigt,
-                engineId: "manuel", meetingId: Path.GetFileName(valgt.Mappe));
-
-            // Reglen anvendes med det samme paa den tekst, der ligger. Ellers
-            // skulle man skrive den ud igen for at se sin egen rettelse.
-            var ændringer = TranscriptCorrector.FromStore(ordbog).ApplyToFile(tekstFil);
-            Resultat.Text = File.ReadAllText(tekstFil, System.Text.Encoding.UTF8).Trim();
-
-            var rettet = ændringer.Sum(x => x.Count);
-            Status.Text = rettet > 0
-                ? $"Lært: «{vindue.Hørt}» → «{vindue.Rigtigt}». Rettet {rettet} steder her og fremover."
-                : $"Lært: «{vindue.Hørt}» → «{vindue.Rigtigt}». Gælder fremover.";
-
-            Historik.Skriv(HaendelseType.Rettelser, $"Rettelse lært: {vindue.Hørt} → {vindue.Rigtigt}",
-                $"{rettet} steder rettet i «{valgt.Titel}»", sti: tekstFil);
-        }
-        catch (Exception ex)
-        {
-            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Kunne ikke lære", $"Rettelsen kunne ikke gemmes.\n\n{ex.Message}", Dialogs.Slags.Pas_paa);
-        }
-    }
-
     // -------------------------------------------------------------- omdøbning
 
     /// <summary>
@@ -625,10 +520,7 @@ public partial class TranscribeView : UserControl
 
         var meta = MeetingStore.Load(valgt.Mappe);
 
-        Dictionary<string, string?> felter;
-        using (var ordbog = new LearningStore())
-        {
-            felter = new Dictionary<string, string?>
+        var felter = new Dictionary<string, string?>
             {
                 ["transskription"] = File.ReadAllText(tekstFil, System.Text.Encoding.UTF8),
                 ["titel"] = valgt.Titel,
@@ -636,13 +528,13 @@ public partial class TranscribeView : UserControl
                 ["varighed"] = TimeSpan.FromSeconds(valgt.Sekunder).ToString(@"h\:mm"),
                 ["noter"] = LaesNoter(valgt.Mappe),
                 ["sprog"] = meta?.Language is null ? "ikke registreret" : Transcriber.LanguageName(meta.Language),
-                // De rigtige stavemaader fra dine rettelser. Den gaar til
-                // SPROGMODELLEN, ikke til Whisper — en sprogmodel laeser en
-                // liste og retter sig efter den, og det er maalt. Whisper
-                // gjorde ikke, og derfor er den vej fjernet.
-                ["ordbog"] = string.Join(", ", ordbog.Ordbogsord())
-            };
-        }
+
+            // HER LAA "ordbog": de rigtige stavemaader fra brugerens rettelser.
+            // Maalt 18-08-2026 med og uden, to koersler hver: ingen forskel.
+            // Se doc/maaling-sky.md. Feltet findes stadig i skabelonen og
+            // udfyldes med tom tekst.
+                ["ordbog"] = ""
+        };
 
         var info = new DocumentInfo
         {
@@ -852,22 +744,22 @@ public partial class TranscribeView : UserControl
                 new TranscriptionRequest(wav, install.ModelPath!, udBase, "auto"),
                 fremdrift, _afbryd.Token);
 
-            // Efterretning: de fejl, du allerede har rettet én gang, rettes nu
-            // af sig selv. Det er DEN vej, appen lærer. Ordlisten i Whispers
-            // initial_prompt er målt til ingen forskel og er fjernet.
-            IReadOnlyList<AppliedCorrection> rettelser = Array.Empty<AppliedCorrection>();
-            try
-            {
-                using var ordbog = new LearningStore();
-                rettelser = TranscriptCorrector.FromStore(ordbog).ApplyToFile(r.TextPath);
-            }
-            catch (Exception)
-            {
-                // En fejl i efterretningen maa ikke koste transskriptionen.
-                // Den raa tekst ligger der, og den er det vaesentlige.
-            }
-
-            VisResultat(r, rettelser);
+            // HER LAA EFTERRETNINGEN: de rettelser, brugeren havde lavet, blev
+            // anvendt paa udskriften bagefter, og originalen gemt som .raa.txt.
+            //
+            // Den er fjernet 18-08-2026. To grunde, og den anden er den
+            // alvorlige:
+            //
+            //   1. Ordbogen til sprogmodellen maalte nul. Se doc/maaling-sky.md.
+            //   2. Reglerne blev laert fra oplaesninger - ogsaa den blandede,
+            //      dansk og engelsk mellem hinanden. Der laa regler som
+            //      "eller -> or we" og "hvor -> where are". De ville have
+            //      omskrevet ENHVER dansk udskrift, hvor ordet "eller" stod.
+            //
+            // Det naaede aldrig at ske: der fandtes ingen .raa.txt-filer paa
+            // disken, saa ingen udskrift blev roert. Men mekanismen var live,
+            // og den ventede kun paa den naeste transskription.
+            VisResultat(r);
 
             // Vejen videre foreslås, frem for at man skal finde den selv. Det
             // er alligevel dét, man kom efter — teksten er sjældent målet.
@@ -908,7 +800,7 @@ public partial class TranscribeView : UserControl
         }
     }
 
-    private void VisResultat(TranscriptionResult r, IReadOnlyList<AppliedCorrection>? rettelser = null)
+    private void VisResultat(TranscriptionResult r)
     {
         var tekst = r.Text.Trim();
         var ord = tekst.Split(' ', '\n', '\r').Count(s => s.Length > 0);
@@ -932,16 +824,6 @@ public partial class TranscribeView : UserControl
         if (r.LanguageProbability is double p && p < 0.7)
             sprog += $" (usikker, {p * 100:0}%)";
 
-        // Rettelserne skal SES. Bliver teksten lavet om uden at det siges,
-        // ved man ikke, hvad man læser — og så kan man heller ikke opdage, at
-        // en regel er blevet forkert.
-        var rettet = "";
-        if (rettelser is { Count: > 0 })
-        {
-            var antal = rettelser.Sum(x => x.Count);
-            rettet = $" · {antal} rettet automatisk";
-        }
-
         // Historikken. Et usikkert sprogvalg skal stå som «se efter», ikke som
         // fuldført: netop dét kostede en times møde, der blev skrevet ned på
         // engelsk, fordi de første tredive sekunder var på engelsk.
@@ -951,7 +833,7 @@ public partial class TranscribeView : UserControl
             usikker ? "Transskription færdig — sproget er usikkert" : "Transskription færdig",
             $"{TimeSpan.FromSeconds(r.AudioSeconds):hh\\:mm\\:ss} lyd · sprog {Transcriber.LanguageName(r.DetectedLanguage)}" +
             (r.LanguageProbability is double p3 ? $" ({p3 * 100:0}% sikker)" : " (valgt)") +
-            $" · RTF {r.RealTimeFactor:0.00}{rettet}",
+            $" · RTF {r.RealTimeFactor:0.00}",
             usikker ? Udfald.SeEfter : Udfald.Fuldført,
             r.EngineId, r.TextPath, r.ElapsedSeconds);
         Notifikationer.Meld();
@@ -961,7 +843,7 @@ public partial class TranscribeView : UserControl
         // sproget blev.
         Status.Text =
             $"Færdig · {TimeSpan.FromSeconds(r.AudioSeconds):mm\\:ss} lyd skrevet ud på " +
-            $"{TimeSpan.FromSeconds(r.ElapsedSeconds):mm\\:ss} · {ord} ord · {sprog}{rettet}";
+            $"{TimeSpan.FromSeconds(r.ElapsedSeconds):mm\\:ss} · {ord} ord · {sprog}";
         AabnKnap.IsEnabled = true;
     }
 

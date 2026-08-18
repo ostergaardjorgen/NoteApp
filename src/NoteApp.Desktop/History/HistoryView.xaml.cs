@@ -96,8 +96,8 @@ public partial class HistoryView : UserControl
             : $"{udgående} hentninger fra internettet";
 
         UdgaaendeTekst.Text = udgående == 0
-            ? "Ingen optagelse, udskrift, note eller ordbog er sendt nogen steder hen. Alt er sket her på maskinen, med modeller der ligger på disken."
-            : "Hentning af motor og modeller er det eneste, der rører netværket. Appen beder om en navngiven fil og modtager den — der sendes intet med om dig, dine møder eller din ordbog.";
+            ? "Ingen optagelse, udskrift eller note er sendt nogen steder hen. Alt er sket her på maskinen, med modeller der ligger på disken."
+            : "Hentning af motor og modeller er det eneste, der rører netværket. Appen beder om en navngiven fil og modtager den — der sendes intet med om dig eller dine møder.";
 
         Vis();
         Status.Text = Historik.Path;

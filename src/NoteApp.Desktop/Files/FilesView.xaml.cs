@@ -36,8 +36,8 @@ public partial class FilesView : UserControl
 
         var optagelser = Directory.Exists(UserDataPaths.Meetings)
             ? Directory.GetDirectories(UserDataPaths.Meetings).Length : 0;
-        using (var store = new LearningStore())
-            DataIndhold.Text = $"{optagelser} optagelser · {store.TermCount()} ord i ordbogen";
+        var dokumenter = NoteApp.Core.Documents.DocumentStore.LoadAll().Count;
+        DataIndhold.Text = $"{optagelser} optagelser · {dokumenter} dokumenter";
 
         BackupSti.Text = Destination;
 
@@ -269,8 +269,8 @@ public partial class FilesView : UserControl
                 (r.SafetyArchive is null
                     ? "Der blev ikke taget et fortrydelsesarkiv — datamappen var tom, så der var intet at sikre.\n\n"
                     : $"Dine tidligere data ligger som:\n{r.SafetyArchive}\n\n") +
-                "LUK OG START APPEN IGEN, så ordbogen genindlæses. Indtil da viser " +
-                "appen stadig det, den havde i hukommelsen.", Dialogs.Slags.Valg);
+                "LUK OG START APPEN IGEN, så de gendannede data læses ind. Indtil da " +
+                "viser appen stadig det, den havde i hukommelsen.", Dialogs.Slags.Valg);
 
             Status.Text = $"Gendannet fra {valgt.Navn}. Genstart appen.";
             Opdater();

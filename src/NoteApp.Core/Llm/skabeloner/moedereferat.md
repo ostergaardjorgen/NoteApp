@@ -56,8 +56,6 @@ Dato: {{dato}}
 Varighed: {{varighed}}
 Mødet blev holdt på: {{sprog}}
 
-Fagord og navne, der kan optræde: {{ordbog}}
-
 Mine egne noter undervejs:
 {{noter}}
 

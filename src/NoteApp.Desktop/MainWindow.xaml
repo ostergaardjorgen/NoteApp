@@ -47,27 +47,21 @@
           <!-- «Optag møde» står IKKE i menuen. Det er kernefunktionen, og den
                skal ikke være et sted, man går hen — den ligger som en fast
                bjælke øverst, der er der uanset hvilken skærm man står på.
-               Dermed er «Start her» det første punkt, hvilket også er det,
-               navnet lover. -->
-          <RadioButton x:Name="NavOplaesning" GroupName="nav" Content="Start her"
-                       Checked="Nav_Changed" IsChecked="True"
-                       Style="{StaticResource NavKnap}" />
-          <!-- «Dine rettelser» — ikke «Din ordbog». Navnet er ændret, fordi
-               indholdet er: der var en ordliste, man kunne skrive i, og den
-               gjorde målt ingen forskel. Tilbage er det, der virker. -->
-          <RadioButton x:Name="NavOrdbog" GroupName="nav" Content="Dine rettelser"
-                       Checked="Nav_Changed"
-                       Style="{StaticResource NavKnap}" />
-          <!-- Her lå «Træning» som eget punkt. Det viste resultatet af de tre
-               oplæsninger — men de tre oplæsninger står på «Start her», så man
-               skulle skifte skærm for at se, hvad ens egen oplæsning gav, og de
-               to skærme kunne sige noget forskelligt om det samme. Resultatet
-               ligger nu under den boks, det hører til. -->
+
+               HER LÅ «START HER» OG «DINE RETTELSER».
+               Begge hørte til oplæsning og træning, som er fjernet 18-08-2026.
+               Grunden var målt: hverken ordlisten til Whisper, sprogmodellen
+               over udskriften eller ordbogen til sprogmodellen kunne påvises at
+               flytte noget. Tre håndtag, tre nuller — se doc/maaling-sky.md.
+
+               Menuen begynder nu ved «Optagelser», som er det, appen er til.
+               Mikrofonens kvalitet kan stadig måles; det står under
+               «Indstillinger», hvor man er, når man vælger mikrofon. -->
           <!-- «Optagelser» frem for «Transskribér»: menupunktet siger, hvad man
                finder derinde. Handlingen står på selve skærmen, ved den
                optagelse den hører til. -->
           <RadioButton x:Name="NavTransskriber" GroupName="nav" Content="Optagelser"
-                       Checked="Nav_Changed"
+                       Checked="Nav_Changed" IsChecked="True"
                        Style="{StaticResource NavKnap}" />
           <RadioButton x:Name="NavDokumenter" GroupName="nav" Content="Dokumenter"
                        Checked="Nav_Changed"
