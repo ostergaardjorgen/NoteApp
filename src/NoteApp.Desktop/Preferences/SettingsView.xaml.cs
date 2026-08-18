@@ -441,7 +441,7 @@ public partial class SettingsView : UserControl
         {
             Mikrofontest.Bedoemmelse.God => "Godkendt",
             Mikrofontest.Bedoemmelse.Brugbar => "Advarsel",
-            _ => "Optager"   // rød. Der findes ingen «Fejl»-farve i temaet.
+            _ => "FejlTekst"
         });
 
         TestDom.Text = $"{r.Ramt} af {r.Ialt} ord ramt · {r.Sekunder:0} sekunder";

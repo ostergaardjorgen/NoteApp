@@ -31,8 +31,13 @@ public static class Notifikationer
     /// <summary>
     /// Hændelser, der er værd at give besked om.
     ///
-    /// PRÆCIS TO TING: en optagelse, der er skrevet ud, og et dokument, der er
-    /// lavet. Det er dem, man sætter i gang og går væk fra.
+    /// TO TING, MAN GÅR VÆK FRA: en optagelse, der er skrevet ud, og et
+    /// dokument, der er lavet. Det er dem, man sætter i gang og forlader.
+    ///
+    /// Og ÉN ting, der mangler: et trin i opsætningen, der ikke er gjort. Den
+    /// bryder reglen med vilje. En ny installation kan optage og skrive ud,
+    /// men ikke lave dokumenter, og uden en besked opdager man det først den
+    /// dag, man står og skal bruge et referat. Den skrives én gang.
     ///
     /// Her stod også sikkerhedskopier og ALT, der fejlede. Klokken kom til at
     /// vise seks beskeder om sætninger, der var læst op igen — noget brugeren
@@ -46,6 +51,7 @@ public static class Notifikationer
     /// </summary>
     private static bool Vaerd(Haendelse h) =>
         h.Slags is HaendelseType.Transskription or HaendelseType.Dokument
+                or HaendelseType.Opsaetning
         && !ErGammelTraening(h);
 
     /// <summary>
@@ -59,6 +65,33 @@ public static class Notifikationer
     private static bool ErGammelTraening(Haendelse h) =>
         h.Hvad.StartsWith("Sætning ", StringComparison.Ordinal) &&
         h.Hvad.Contains("læst op igen", StringComparison.Ordinal);
+
+    /// <summary>
+    /// Skriver beskeden om, at opsætningen mangler et trin — hvis den mangler,
+    /// og hvis den ikke allerede er skrevet.
+    ///
+    /// Kaldes ved opstart. Der ledes i historikken frem for at sætte et flag i
+    /// indstillingerne: historikken ER kilden, og et flag ved siden af kunne
+    /// komme ud af trit med den. Sletter man historikken, kommer beskeden
+    /// igen, og det er også det rigtige — så er der ingen, der har set den.
+    /// </summary>
+    public static void MeldManglendeOpsaetning(bool noegleMangler)
+    {
+        if (!noegleMangler) return;
+
+        var alleredeSkrevet = Historik.Laes(300)
+            .Any(h => h.Slags == HaendelseType.Opsaetning);
+
+        if (alleredeSkrevet) return;
+
+        Historik.Skriv(HaendelseType.Opsaetning,
+            "Opsætningen mangler et trin",
+            "Dokumenter laves af en sprogmodel i Europa, og den er ikke sat op endnu. " +
+            "Optagelse og udskrift virker uændret. Sæt den op under «AI-modeller».",
+            Udfald.SeEfter);
+
+        Meld();
+    }
 
     /// <summary>De nyeste beskeder, uanset om de er læst.</summary>
     public static IReadOnlyList<Haendelse> Seneste(int maks = 30) =>

@@ -143,6 +143,117 @@
               <Button Grid.Column="1" x:Name="SkyKnap" Click="Sky_Klik" VerticalAlignment="Top"
                       Padding="16,8" MinWidth="150" />
             </Grid>
+
+            <!-- ================== Vejledningen ==========================
+                 Den står KUN, når nøglen mangler, og forsvinder når den er
+                 sat. En vejledning til noget, der er gjort, er en skærm, man
+                 lærer at læse forbi.
+
+                 Trinnene står i den rækkefølge, de skal gøres i, og de to
+                 vigtigste er ikke dem, man selv ville gætte: betalingen skal
+                 sættes op, før nøglen virker, og træningen skal slås fra på
+                 kontoen — appen kan ikke gøre nogen af delene. -->
+            <Border x:Name="SkyVejledning" Visibility="Collapsed" Margin="0,16,0,0"
+                    Background="#FF181B22" BorderBrush="{StaticResource PanelKant}"
+                    BorderThickness="1" CornerRadius="8" Padding="16,14">
+              <StackPanel>
+                <TextBlock Text="Sådan kommer du i gang — fem minutter" FontSize="13.5"
+                           FontWeight="SemiBold" Margin="0,0,0,4" />
+                <TextBlock FontSize="12" TextWrapping="Wrap" Margin="0,0,0,12"
+                           Foreground="{StaticResource TekstMeget}"
+                           Text="Mistral er en fransk leverandør. Du opretter dig hos dem selv, og nøglen er din — den følger aldrig med appen." />
+
+                <!-- Trin 1 -->
+                <Grid Margin="0,0,0,14">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                  </Grid.ColumnDefinitions>
+                  <Border Grid.Column="0" Width="22" Height="22" CornerRadius="11" Margin="0,1,12,0"
+                          Background="{StaticResource Accent}" VerticalAlignment="Top">
+                    <TextBlock Text="1" FontSize="12" FontWeight="SemiBold" Foreground="#FF0B1220"
+                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                  </Border>
+                  <StackPanel Grid.Column="1">
+                    <TextBlock Text="Opret en konto" FontSize="13" FontWeight="SemiBold" />
+                    <TextBlock FontSize="12.5" LineHeight="20" TextWrapping="Wrap" Margin="0,3,0,0"
+                               MaxWidth="560" HorizontalAlignment="Left"
+                               Foreground="{StaticResource TekstSvag}"
+                               Text="Gå til console.mistral.ai og opret dig. Der skal ikke vælges abonnement undervejs." />
+                  </StackPanel>
+                </Grid>
+
+                <!-- Trin 2 -->
+                <Grid Margin="0,0,0,14">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                  </Grid.ColumnDefinitions>
+                  <Border Grid.Column="0" Width="22" Height="22" CornerRadius="11" Margin="0,1,12,0"
+                          Background="{StaticResource Accent}" VerticalAlignment="Top">
+                    <TextBlock Text="2" FontSize="12" FontWeight="SemiBold" Foreground="#FF0B1220"
+                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                  </Border>
+                  <StackPanel Grid.Column="1">
+                    <TextBlock Text="Sæt betaling op — vælg «Pay as you go»" FontSize="13" FontWeight="SemiBold" />
+                    <TextBlock FontSize="12.5" LineHeight="20" TextWrapping="Wrap" Margin="0,3,0,0"
+                               MaxWidth="560" HorizontalAlignment="Left"
+                               Foreground="{StaticResource TekstSvag}"
+                               Text="Under Billing. Uden den afviser nøglen alle kald, og fejlen ligner et forkert indtastet tegn. Du betaler pr. referat, ikke pr. måned — et mødereferat koster omkring 21 øre, så et normalt forbrug lander på nogle få kroner om måneden." />
+                    <TextBlock FontSize="12" LineHeight="19" TextWrapping="Wrap" Margin="0,6,0,0"
+                               MaxWidth="560" HorizontalAlignment="Left"
+                               Foreground="{StaticResource TekstMeget}"
+                               Text="Pay as you go er også det, der giver den aftale, vi bygger på. Gratisniveauet har andre vilkår for, hvad dine data må bruges til." />
+                  </StackPanel>
+                </Grid>
+
+                <!-- Trin 3 -->
+                <Grid Margin="0,0,0,14">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                  </Grid.ColumnDefinitions>
+                  <Border Grid.Column="0" Width="22" Height="22" CornerRadius="11" Margin="0,1,12,0"
+                          Background="{StaticResource Advarsel}" VerticalAlignment="Top">
+                    <TextBlock Text="3" FontSize="12" FontWeight="SemiBold" Foreground="#FF0B1220"
+                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                  </Border>
+                  <StackPanel Grid.Column="1">
+                    <TextBlock Text="Slå fra, at dine data må bruges til træning" FontSize="13"
+                               FontWeight="SemiBold" Foreground="{StaticResource Advarsel}" />
+                    <TextBlock FontSize="12.5" LineHeight="20" TextWrapping="Wrap" Margin="0,3,0,0"
+                               MaxWidth="560" HorizontalAlignment="Left"
+                               Foreground="{StaticResource TekstSvag}"
+                               Text="Workspace → Data. Det er slået TIL som udgangspunkt, og appen kan ikke ændre det for dig. Det er det eneste trin, hvor det gør en forskel for dine mødedata, om du husker det." />
+                  </StackPanel>
+                </Grid>
+
+                <!-- Trin 4 -->
+                <Grid Margin="0,0,0,4">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                  </Grid.ColumnDefinitions>
+                  <Border Grid.Column="0" Width="22" Height="22" CornerRadius="11" Margin="0,1,12,0"
+                          Background="{StaticResource Accent}" VerticalAlignment="Top">
+                    <TextBlock Text="4" FontSize="12" FontWeight="SemiBold" Foreground="#FF0B1220"
+                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                  </Border>
+                  <StackPanel Grid.Column="1">
+                    <TextBlock Text="Lav en API-nøgle og sæt den ind her" FontSize="13" FontWeight="SemiBold" />
+                    <TextBlock FontSize="12.5" LineHeight="20" TextWrapping="Wrap" Margin="0,3,0,0"
+                               MaxWidth="560" HorizontalAlignment="Left"
+                               Foreground="{StaticResource TekstSvag}"
+                               Text="Under API Keys. Kopiér den med det samme — den vises kun én gang. Tryk så «Sæt op …» heroppe og indsæt den." />
+                  </StackPanel>
+                </Grid>
+
+                <StackPanel Orientation="Horizontal" Margin="34,12,0,0">
+                  <Button Content="Åbn console.mistral.ai" Click="AabnKonsol_Klik" Padding="14,7" />
+                  <Button Content="Priser hos Mistral" Click="AabnPriser_Klik" Padding="14,7" Margin="8,0,0,0" />
+                </StackPanel>
+              </StackPanel>
+            </Border>
           </StackPanel>
         </Border>
 

@@ -1,4 +1,4 @@
-<Window x:Class="NoteApp.Desktop.MainWindow"
+﻿<Window x:Class="NoteApp.Desktop.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="NoteApp" Height="820" Width="1280" MinHeight="640" MinWidth="1040"
@@ -69,9 +69,40 @@
           <RadioButton x:Name="NavSkabeloner" GroupName="nav" Content="Skabeloner"
                        Checked="Nav_Changed"
                        Style="{StaticResource NavKnap}" />
-          <RadioButton x:Name="NavMotor" GroupName="nav" Content="AI-modeller"
+          <!-- AI-modeller er det eneste menupunkt med et mærkat. Grunden er,
+               at det er det eneste sted, hvor noget kan MANGLE, uden at man
+               opdager det: appen optager og skriver ud som den skal, og først
+               den dag man vil have et referat, viser det sig, at nøglen aldrig
+               blev sat. Tallet står, indtil den er sat, og forsvinder så. -->
+          <!-- AutomationProperties.Name skal saettes i haanden her.
+               Content var teksten "AI-modeller", og saa gav WPF menupunktet
+               det navn af sig selv. Nu er Content et Grid, og saa har punktet
+               ikke laengere et navn - hverken for en skaermlaeser eller for
+               den, der proever skaermene af med UI-automatik. -->
+          <RadioButton x:Name="NavMotor" GroupName="nav"
                        Checked="Nav_Changed"
-                       Style="{StaticResource NavKnap}" />
+                       AutomationProperties.Name="AI-modeller"
+                       Style="{StaticResource NavKnap}">
+            <Grid>
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+              </Grid.ColumnDefinitions>
+              <TextBlock Grid.Column="0" Text="AI-modeller" VerticalAlignment="Center"
+                         Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}" />
+              <Border Grid.Column="1" x:Name="MotorMaerkat" Visibility="Collapsed"
+                      MinWidth="18" Height="18" CornerRadius="9" Margin="8,0,0,0"
+                      Background="{StaticResource Advarsel}" VerticalAlignment="Center"
+                      ToolTipService.InitialShowDelay="200" ToolTipService.ShowDuration="30000">
+                <Border.ToolTip>
+                  <TextBlock MaxWidth="280" TextWrapping="Wrap" LineHeight="19"
+                             Text="API-nøglen til den europæiske sprogmodel er ikke sat op endnu. Uden den kan appen optage og skrive ud, men ikke lave dokumenter. Klik her, så står vejledningen der." />
+                </Border.ToolTip>
+                <TextBlock Text="1" FontSize="11" FontWeight="SemiBold" Foreground="#FF0B1220"
+                           HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,0" />
+              </Border>
+            </Grid>
+          </RadioButton>
           <RadioButton x:Name="NavHistorik" GroupName="nav" Content="Historik"
                        Checked="Nav_Changed"
                        Style="{StaticResource NavKnap}" />

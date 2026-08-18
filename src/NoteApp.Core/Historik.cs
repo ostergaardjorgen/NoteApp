@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -29,6 +29,19 @@ public enum HaendelseType
     /// en klokke.
     /// </summary>
     Traening,
+
+    /// <summary>
+    /// Et trin i opsætningen, der mangler.
+    ///
+    /// Den eneste hændelsestype, der handler om noget, der IKKE er sket. Den
+    /// findes, fordi en ny installation ellers er tavs om, at appen kun kan
+    /// det halve: optage og skrive ud, men ikke lave dokumenter. Det opdager
+    /// man først den dag, man trykker på knappen — typisk lige efter et møde,
+    /// hvor man skal bruge referatet nu.
+    ///
+    /// Skrives én gang. Se <see cref="Opsaetning"/>.
+    /// </summary>
+    Opsaetning,
 
     Andet
 }

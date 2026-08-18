@@ -104,6 +104,13 @@ public partial class MainWindow : Window
             .GetName().Version?.ToString(2) ?? "0.0");
         DataSti.Text = UserDataPaths.Root;
         OpdaterDataLoefte();
+        OpdaterOpsaetningsmaerkat();
+
+        // En ny installation kan optage og skrive ud, men ikke lave
+        // dokumenter. Uden en besked opdager man det foerst den dag, man staar
+        // med et moede og skal bruge referatet nu. Skrives een gang.
+        NoteApp.Core.Notifikationer.MeldManglendeOpsaetning(
+            NoteApp.Core.Llm.SkyNoegle.Hent() is null);
 
         // Efter en oplæsning peger kvitteringen videre til transskription.
         // Skærmskiftet skal ske her, fordi det er MainWindow, der ejer
@@ -239,6 +246,27 @@ public partial class MainWindow : Window
         DataLoefte.Text = NoteApp.Core.Llm.SkyNoegle.Hent() is null
             ? "Intet forlader denne pc. Appen har ingen netværkskald."
             : "Optagelser og udskrifter bliver på denne pc. Referater bearbejdes i EU.";
+
+        // De to hoerer sammen: begge svarer paa, om noeglen er sat. Skiftede
+        // den ene uden den anden, ville sidebjaelken og menuen sige hver sit.
+        OpdaterOpsaetningsmaerkat();
+    }
+
+    /// <summary>
+    /// Viser eller skjuler 1-tallet ved «AI-modeller».
+    ///
+    /// Kaldes ved opstart og hver gang noeglen kan have aendret sig. Den
+    /// laeser tilstanden frem for at faa den fortalt: et maerkat, der bliver
+    /// sat af den, der aendrer noget, staar tilbage den dag nogen glemmer at
+    /// kalde det.
+    /// </summary>
+    public void OpdaterOpsaetningsmaerkat()
+    {
+        if (MotorMaerkat is null) return;
+
+        MotorMaerkat.Visibility = NoteApp.Core.Llm.SkyNoegle.Hent() is null
+            ? Visibility.Visible
+            : Visibility.Collapsed;
     }
 
     private void Nav_Changed(object sender, RoutedEventArgs e)

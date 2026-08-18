@@ -108,6 +108,34 @@ public partial class EngineView : System.Windows.Controls.UserControl
         SkyStatus.Text = tilsluttet
             ? $"Tilsluttet {new Uri(SkyKatalog.Endpoint).Host}. Dokumenter laves her."
             : "Ikke sat op endnu. Uden den kan appen optage og skrive ud, men ikke lave dokumenter.";
+
+        // Vejledningen staar kun, naar der mangler noget. En vejledning til
+        // det, der allerede er gjort, laerer man at laese forbi - og saa
+        // laeser man ogsaa forbi den dag, der staar noget nyt.
+        SkyVejledning.Visibility = tilsluttet ? Visibility.Collapsed : Visibility.Visible;
+
+        // Maerkatet i menuen foelger den samme tilstand. Bliver noeglen sat
+        // her, skal 1-tallet vaek med det samme og ikke ved naeste opstart.
+        (Application.Current.MainWindow as MainWindow)?.OpdaterOpsaetningsmaerkat();
+    }
+
+    private void AabnKonsol_Klik(object sender, RoutedEventArgs e) => Aabn("https://console.mistral.ai");
+    private void AabnPriser_Klik(object sender, RoutedEventArgs e) => Aabn("https://mistral.ai/pricing");
+
+    private void Aabn(string url)
+    {
+        try
+        {
+            System.Diagnostics.Process.Start(
+                new System.Diagnostics.ProcessStartInfo(url) { UseShellExecute = true });
+        }
+        catch (Exception)
+        {
+            // En browser, der ikke vil aabne, maa ikke ende som en tom
+            // knap. Adressen staar der, saa den kan skrives af i haanden.
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Kunne ikke åbne browseren",
+                $"Gå til denne adresse i din browser:\n\n{url}", Dialogs.Slags.Valg);
+        }
     }
 
     private void Sky_Klik(object sender, RoutedEventArgs e)
