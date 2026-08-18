@@ -88,7 +88,14 @@ public static class BackgroundJobs
         _detaljer = $"«{skabelonInfo.Title}» · {model.Navn} i {model.Hjemland} · " +
                     $"startet {startet:HH:mm} · lander under «Dokumenter»";
 
-        Meld($"Sender til {model.Hjemland} …");
+        // GEOGRAFIEN STAAR IKKE HER.
+        //
+        // Der stod "Sender til Frankrig". Det er rigtigt, men det er ikke
+        // nyt: hvor bearbejdningen sker, er afgjort under opsaetningen og
+        // staar i sidebjaelken. Gentaget ved hver koersel bliver det en
+        // paamindelse om noget, brugeren allerede har taget stilling til -
+        // og en paamindelse, ingen kan handle paa, er stoej.
+        Meld("Skriver referatet …");
 
         try
         {
@@ -104,11 +111,12 @@ public static class BackgroundJobs
             skabelonInfo.Markdown = r.Tekst.Trim();
             var odt = DocumentStore.Save(skabelonInfo);
 
-            // PROVENIENSEN SKAL VISE, AT DET GIK UD AF HUSET. Historikken er
-            // det eneste sted, man bagefter kan svare paa, hvilke moeder der er
-            // sendt afsted - og det spoergsmaal kommer, den dag nogen spoerger.
-            Historik.Skriv(HaendelseType.Dokument, $"Dokument oprettet i {model.Hjemland}: {skabelonInfo.Title}",
-                $"Skabelon «{skabelon.Name}» · {model.Navn} hos {model.Leverandoer} · " +
+            // MODELLEN staar der - det er proveniens, praecis som gguf-navnet
+            // er det for en lokal koersel. LANDET goer ikke: det er afgjort
+            // under opsaetningen og gaelder alle koersler, saa det ville staa
+            // paa hver eneste linje uden at skille dem fra hinanden.
+            Historik.Skriv(HaendelseType.Dokument, $"Dokument oprettet: {skabelonInfo.Title}",
+                $"Skabelon «{skabelon.Name}» · {model.Navn} · " +
                 $"{r.TokensInd} tokens sendt, {r.TokensUd} modtaget · ${r.PrisUsd:0.0000}",
                 Udfald.Fuldført, model.Navn, odt, r.Forloebet.TotalSeconds);
             Notifikationer.Meld();

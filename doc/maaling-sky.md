@@ -128,11 +128,48 @@ sagt». Bedømmelsen tæller, om et navn er nævnt — ikke om det står det rig
 sted. Et referat kan score højt på alle tal ovenfor og stadig tillægge den ene
 deltager den andens ord.
 
-**Det er hullet, der er værd at lukke.** Metoden findes allerede i projektet:
-ved oplæsning måles udskriften mod en facitliste, sætning for sætning. Det
-samme kan gøres her — en håndlavet liste over udsagn med hvem der sagde dem,
-og så tælles der rigtige og forkerte tilskrivninger pr. model. Det er
-manuelt arbejde én gang og en målbar tabel hver gang derefter.
+**Hullet er lukket 18-08-2026.** Se næste afsnit.
+
+---
+
+## Tilskrivning: hvem sagde hvad
+
+*Målt 18-08-2026 med `scripts/bedoem-tilskrivning.ps1` mod `facit-udsagn.md` —
+17 håndlavede udsagn med hvem der sagde dem, i mødets egen mappe.*
+
+**Målestokken er kalibreret først.** Facit bedømt mod sig selv giver 17 af 17
+rigtige og nul forkerte. En måling, der ikke kan ramme sit eget facit, kan man
+ikke bruge til at dømme andre.
+
+| | Rigtigt tilskrevet | **Forkert tilskrevet** | Uden navn | Mangler | Dækning |
+|---|---|---|---|---|---|
+| Lokal Qwen3-8B | 2 | **0** | 0 | 15 | 12 % |
+| Mistral Medium 3.5 | 10 | **0** | 6 | 1 | **94 %** |
+| Mistral Large 3 | 11 | **0** | 2 | 4 | 76 % |
+| Facit (Claude) | 17 | 0 | 0 | 0 | 100 % |
+
+### Det, målingen fandt — og det, den ikke fandt
+
+**Ingen af modellerne tilskrev noget forkert.** Det er værd at sige lige ud,
+også selvom målingen blev bygget for at fange præcis den fejl. Klagen, der
+startede det hele — «det citerer Espen for at sige ting, som jeg selv har
+sagt» — stammer fra en kørsel FØR v0.56, hvor hver blok blev læst i blinde
+uden deltagerliste. Den rettelse ser ud til at have løst problemet. Målingen
+bekræfter en rettelse frem for at afsløre en fejl, og det er også et resultat.
+
+**Den lokale models fejl er en anden: den udelader.** 15 af 17 udsagn er slet
+ikke med — 12 % dækning. Den skriver ikke forkert om hvem der sagde hvad; den
+skriver næsten ikke om det. Et referat, der har to ud af sytten udsagn med,
+kan ikke bruges til noget, uanset at det, der står, er rigtigt.
+
+**Medium nævner mere, men hæfter det sjældnere på nogen.** Seks udsagn står
+uden et navn i nærheden mod Large's to. Til gengæld har Medium 94 % dækning
+mod Large's 76 %. Medium tager altså mere med; Large er lidt bedre til at
+sige hvem, af det mindre den tager med.
+
+Det er ikke en fejl at skrive «det blev nævnt, at …» — men det er værd at vide,
+og det er et sted, skabelonen kan strammes, hvis tilskrivning bliver vigtigere
+end dækning.
 
 ---
 

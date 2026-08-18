@@ -470,8 +470,8 @@ static async Task<int> Sky(string[] a)
         Console.WriteLine();
         Console.WriteLine("Modeller:");
         foreach (var m in NoteApp.Core.Llm.SkyKatalog.Kendte)
-            Console.WriteLine($"  {m.Id,-16} {m.Navn,-20} {m.Leverandoer} ({m.Hjemland})  " +
-                              $"${m.PrisIndPrMTok}/${m.PrisUdPrMTok} pr. MTok");
+            Console.WriteLine($"  {m.Id,-16} {m.Navn,-20} ${m.PrisIndPrMTok}/${m.PrisUdPrMTok} pr. MTok" +
+                              (m.Standard ? "   <- standard" : ""));
         Console.WriteLine();
 
         if (noegle is null) Console.WriteLine(NoteApp.Core.Llm.SkyNoegle.Vejledning);
@@ -494,13 +494,17 @@ static async Task<int> Sky(string[] a)
         return 0;
     }
 
-    if (underkommando is not "referat" || a.Length < 3)
+    if (underkommando is not "referat" || a.Length < 2)
     {
-        Console.Error.WriteLine("Brug: noteapp sky referat <mappe-eller-tekstfil> <model> [skabelon]");
+        Console.Error.WriteLine("Brug: noteapp sky referat <mappe-eller-tekstfil> [model] [skabelon]");
         return 1;
     }
 
-    var model = NoteApp.Core.Llm.SkyKatalog.Find(a[2]);
+    // Uden et modelnavn bruges standarden. Maalingerne skal kunne koere paa en
+    // bestemt model, men den daglige brug skal ikke skulle vide, hvilken.
+    var model = a.Length > 2
+        ? NoteApp.Core.Llm.SkyKatalog.Find(a[2])
+        : NoteApp.Core.Llm.SkyKatalog.Standard;
     if (model is null)
     {
         Console.Error.WriteLine($"Ukendt model: {a[2]}");

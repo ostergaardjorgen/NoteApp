@@ -26,7 +26,15 @@ public sealed record SkyModel(
     string Hjemland,
     decimal PrisIndPrMTok,
     decimal PrisUdPrMTok,
-    string Beskrivelse)
+    string Beskrivelse,
+    /// <summary>
+    /// Den model, appen bruger. Præcis én i kataloget har den sat.
+    ///
+    /// Valget er målt, ikke skønnet — se doc/maaling-sky.md. Står her frem for
+    /// i en if-sætning inde i brugerfladen, så begrundelsen står ved siden af
+    /// beslutningen.
+    /// </summary>
+    bool Standard = false)
 {
     /// <summary>
     /// Hvad én kørsel kostede, i dollar. Regnet på de tokens, leverandøren
@@ -122,13 +130,40 @@ public static class SkyKatalog
         new SkyModel(
             "mistral-medium", "mistral-medium-latest", "Mistral Medium 3.5",
             "Mistral AI", "Frankrig", 1.50m, 7.50m,
-            "Mellemklassen. Den, der skal måle sig med et rigtigt referat."),
+            "Den, appen bruger. Bedst og mest stabil af de målte.",
+            Standard: true),
 
         new SkyModel(
             "mistral-large", "mistral-large-latest", "Mistral Large 3",
             "Mistral AI", "Frankrig", 0.50m, 1.50m,
-            "Billigere END Medium og alligevel større. Prisen skal efterprøves, ikke antages.")
+            "Billigere end Medium, men dårligere og mere svingende. Beholdt til sammenligning.")
     };
+
+    /// <summary>
+    /// Modellen, appen bruger.
+    ///
+    /// HVORFOR MEDIUM OG IKKE LARGE
+    ///
+    /// Målt tre gange hver på det samme møde, mod det samme facit
+    /// (doc/maaling-sky.md, 18-08-2026):
+    ///
+    ///                laengde         navnetab      tid
+    ///   Medium 3.5   111/111/110 %   23/23/24 %    ~25 sek
+    ///   Large 3       98/111/99 %    35/28/30 %    ~57 sek
+    ///
+    /// Medium er ikke bare bedre — den er STABIL. Længden varierer ét
+    /// procentpoint over tre kørsler, navnetabet ét. Large svinger 13 point på
+    /// længde og 7 på navnetab, og er tre gange langsommere.
+    ///
+    /// Large er billigere (0,04 mod 0,21 kr. pr. referat). Forskellen er 17
+    /// øre, og den køber et referat, der taber hver tredje navn i stedet for
+    /// hver fjerde. Det er ikke en besparelse, det er en dårlig handel.
+    ///
+    /// Large bliver stående i kataloget, så sammenligningen kan gentages, når
+    /// der kommer en ny udgave af en af dem.
+    /// </summary>
+    public static SkyModel Standard =>
+        Kendte.FirstOrDefault(m => m.Standard) ?? Kendte[0];
 
     public static SkyModel? Find(string id) =>
         Kendte.FirstOrDefault(m =>

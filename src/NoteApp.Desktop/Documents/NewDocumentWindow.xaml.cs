@@ -48,13 +48,10 @@ public partial class NewDocumentWindow : Window
         _modeller = modeller;
         _optagelse = optagelsesTitel;
 
-        // MODELLEN VAELGES AF APPEN. Der er maalt paa begge europaeiske:
-        // Medium 3.5 ramte 101 % af facits laengde mod Large 3's 97 % og fandt
-        // flere navne og tal. At lade brugeren vaelge ville flytte en
-        // beslutning, vi har tal paa, over paa en, der ikke har dem.
-        SkyValgt = SkyNoegle.Hent() is null
-            ? null
-            : SkyKatalog.Kendte.FirstOrDefault(m => m.Id == "mistral-medium") ?? SkyKatalog.Kendte[0];
+        // MODELLEN VAELGES AF APPEN - se SkyKatalog.Standard for hvilken og
+        // hvorfor. At lade brugeren vaelge ville flytte en beslutning, vi har
+        // maalt os frem til, over paa en, der ikke har tallene.
+        SkyValgt = SkyNoegle.Hent() is null ? null : SkyKatalog.Standard;
 
         // HER STOD "Referatet laves i Europa (Mistral AI)".
         //
