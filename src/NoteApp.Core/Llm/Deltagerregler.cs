@@ -1,4 +1,4 @@
-namespace NoteApp.Core.Llm;
+﻿namespace NoteApp.Core.Llm;
 
 /// <summary>
 /// De regler, enhver skabelon skal følge om deltagere.
@@ -48,5 +48,15 @@ Følg disse regler, og fravig dem ikke:
 
 5. Er du i tvivl om en person, så lad være med at nævne vedkommende. En
    deltager for lidt bliver opdaget af den, der var med. En deltager for meget
-   bliver det ikke — den bliver troet.";
+   bliver det ikke — den bliver troet.
+
+6. HERFRA og DERFRA ER IKKE NAVNE. Står de foran replikkerne, er udskriften
+   lavet af to lydspor, og mærkatet siger, hvilken SIDE af mødet der talte —
+   ikke hvem. Skriv dem aldrig som deltagere, og brug dem aldrig som roller.
+   Der kan sagtens være flere personer bag hver af dem.
+
+   Brug dem til det, de duer til: en replik mærket HERFRA er sagt af den, der
+   optog, eller af nogen i det samme lokale. En mærket DERFRA er sagt af en af
+   de øvrige. Det gør det muligt at holde styr på, hvem der lovede hvad, uden
+   at gætte.";
 }

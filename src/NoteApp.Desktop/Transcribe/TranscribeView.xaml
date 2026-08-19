@@ -350,6 +350,9 @@
                     <TextBlock FontSize="12.5" LineHeight="19" TextWrapping="Wrap" Margin="0,3,0,0"
                                Foreground="{StaticResource TekstMeget}"
                                Text="Fremdriften står nederst i denne rude. Med grafikkort går det hurtigere end lyden varer; uden tager det længere tid end selve mødet." />
+                    <TextBlock FontSize="12.5" LineHeight="19" TextWrapping="Wrap" Margin="0,6,0,0"
+                               Foreground="{StaticResource TekstMeget}"
+                               Text="Var mødet online, blev der optaget to spor — din mikrofon og det, de andre sagde. Begge skrives ud, så det tager omtrent dobbelt så lang tid. Til gengæld er begge sider af mødet med, og det kan ses på hver replik, hvilken side der talte." />
                   </StackPanel>
                 </Grid>
 

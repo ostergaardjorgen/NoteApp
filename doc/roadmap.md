@@ -4,6 +4,27 @@ Idéer, der er gode, men ikke skal laves nu. Se `roadmap`-færdigheden.
 
 ## Næste
 
+### Diktering ind i et hvilket som helst felt
+*Foreslået 19-08-2026 · besluttet som næste efter 1, 2 og 6 · skal drøftes før start*
+
+Tryk genvejstasten, tal, slip — teksten står, hvor markøren er. I Outlook, i
+Teams, i et Word-dokument. Ikke et møde, der skrives ud bagefter, men tale som
+en almindelig måde at skrive på.
+
+Tre fjerdedele findes allerede: Whisper-motoren, den globale genvejstast og
+lydopsamlingen. Det, der mangler, er en model, der er hurtig nok til korte klip
+(large-v3 er for tung til at vente på), og indsættelse i det aktive vindue.
+
+**Hvorfor:** Det ændrer, hvad produktet er. I dag åbnes NoteApp efter et møde;
+med det her bruges den halvtreds gange om dagen. Motoren er allerede betalt for
+— den står stille mellem møderne.
+
+**Inspiration:** Wispr Flow, superwhisper.
+
+**Skal afklares først:** hvilken model til korte klip, hvordan indsættelsen sker
+uden at slås med det aktive vindue, og om genvejstasten skal deles med
+optagelsen eller være sin egen.
+
 ### Notifikationsklokke øverst til højre
 *Foreslået 14-08-2026*
 

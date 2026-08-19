@@ -57,6 +57,7 @@ public partial class SettingsView : UserControl
             : "Appen åbner ikke et vindue ved opstart — den ligger klar, indtil du trykker genvejstasten.";
 
         VisGenveje();
+        VisSprog();
     }
 
     private bool _indlæserGenveje;
@@ -177,6 +178,57 @@ public partial class SettingsView : UserControl
     }
 
     // ------------------------------------------------------------------ valg
+
+    /// <summary>
+    /// Sprogene, mikrofonsporet kan skrives ud med.
+    ///
+    /// Listen er kort med vilje. Whisper kan næsten hundrede sprog, men det er
+    /// DIT eget sprog, der vælges her — ikke mødets. En rulleliste med
+    /// halvfems punkter gør det svært at finde de tre, nogen faktisk bruger.
+    /// «auto» står nederst, fordi den er den, der blev målt forkert.
+    /// </summary>
+    private static readonly (string Kode, string Navn)[] Sprogvalg =
+    {
+        ("da", "Dansk"),
+        ("nb", "Norsk"),
+        ("sv", "Svensk"),
+        ("en", "Engelsk"),
+        ("de", "Tysk"),
+        ("auto", "Lad appen gætte")
+    };
+
+    private bool _indlæserSprog;
+
+    private void VisSprog()
+    {
+        _indlæserSprog = true;
+
+        MitSprog.ItemsSource = Sprogvalg.Select(v => v.Navn).ToList();
+
+        var kode = string.IsNullOrWhiteSpace(AppSettings.Current.MitSprog)
+            ? "da"
+            : AppSettings.Current.MitSprog!;
+
+        var nr = Array.FindIndex(Sprogvalg, v => v.Kode == kode);
+        MitSprog.SelectedIndex = nr < 0 ? 0 : nr;
+
+        _indlæserSprog = false;
+    }
+
+    private void MitSprog_Valgt(object sender, SelectionChangedEventArgs e)
+    {
+        if (_indlæserSprog || MitSprog.SelectedIndex < 0) return;
+
+        var valg = Sprogvalg[MitSprog.SelectedIndex];
+        AppSettings.Current.MitSprog = valg.Kode;
+        AppSettings.Current.Save();
+
+        // Gaelder foerst naeste gang, der skrives ud. Det skal siges - ellers
+        // tror man, at den udskrift, man staar med, lige er blevet rettet.
+        Status.Text = valg.Kode == "auto"
+            ? "Appen gætter selv sproget på mikrofonen fra næste udskrift."
+            : $"Mikrofonen skrives ud på {valg.Navn.ToLowerInvariant()} fra næste udskrift.";
+    }
 
     private void Mikrofon_Valgt(object sender, SelectionChangedEventArgs e)
     {

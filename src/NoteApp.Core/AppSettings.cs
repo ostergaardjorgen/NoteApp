@@ -45,6 +45,29 @@ public sealed class AppSettings
     public string? SpeakerId { get; set; }
 
     /// <summary>
+    /// Sproget, DU taler. Bruges til mikrofonsporet.
+    ///
+    /// HVORFOR DET ER EN INDSTILLING OG IKKE ET GÆT
+    ///
+    /// Whispers egen sprogdetektering blev målt forkert på et rigtigt møde:
+    /// mikrofonsporet blev bedømt til ENGELSK med 42 % sikkerhed, mens der
+    /// blev talt dansk, og hele udskriften blev derfor engelsk vrøvl. Fejlen
+    /// så ikke ud som en fejl — den så ud som et referat.
+    ///
+    /// Mikrofonsporet er per definition din egen stemme og dem, der sidder i
+    /// samme lokale. Hvilket sprog det er, ved du; det er ikke noget, en model
+    /// skal gætte sig til ud fra de første tredive sekunder, hvor der som
+    /// regel ikke bliver sagt noget.
+    ///
+    /// Det ANDET spor detekteres frit, og det er med vilje: modparten skifter
+    /// fra møde til møde. Et dansk-norsk møde giver dansk på det ene spor og
+    /// norsk på det andet — og det er det rigtige svar, ikke et problem.
+    ///
+    /// «auto» lader appen gætte, som den gjorde før. Null betyder dansk.
+    /// </summary>
+    public string? MitSprog { get; set; }
+
+    /// <summary>
     /// Skift afsnit automatisk under oplæsning. Kræver en lille model ved
     /// siden af den store — se LiveListener. Slået fra som standard: den
     /// koster GPU-tid, og en fejltolkning midt i en oplæsning er irriterende.

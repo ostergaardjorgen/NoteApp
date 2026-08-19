@@ -869,8 +869,21 @@ public partial class TranscribeView : UserControl
 
         var wav = Path.Combine(valgt.Mappe, "mikrofon.wav");
 
+        // DET ANDET SPOR.
+        //
+        // Et onlinemoede optages paa to spor, og indtil nu blev kun
+        // mikrofonen skrevet ud. Loopback laa og fyldte over hundrede
+        // megabyte pr. moede uden at blive laest - og alt, hvad de andre
+        // sagde, manglede derfor i referatet, med mindre det tilfaeldigvis
+        // kunne hoeres akustisk i lokalet.
+        //
+        // Findes filen ikke, var det et fysisk moede. Saa koeres der som foer.
+        var loopWav = Path.Combine(valgt.Mappe, "loopback.wav");
+        var toSpor = File.Exists(loopWav);
+
         var modelNavn = Path.GetFileNameWithoutExtension(install.ModelPath!).Replace("ggml-", "");
         var udBase = Path.Combine(valgt.Mappe, $"mikrofon_{modelNavn}");
+        var loopUdBase = Path.Combine(valgt.Mappe, $"loopback_{modelNavn}");
 
         _afbryd = new CancellationTokenSource();
         KoerKnap.IsEnabled = false;
@@ -897,25 +910,93 @@ public partial class TranscribeView : UserControl
         ForklaringUnder.Text =
             "Fremdriften står nederst i ruden. Teksten dukker op her, når den er færdig, og bliver gemt automatisk.";
 
+        // FREMDRIFTEN DAEKKER BEGGE SPOR.
+        //
+        // Med to spor tager det dobbelt saa lang tid, og en bjaelke, der
+        // naar hundrede og saa begynder forfra, ligner en fejl. Hvert spor
+        // faar derfor sin halvdel, og teksten siger hvilket.
+        var sporNr = 0;
+        var sporIAlt = toSpor ? 2 : 1;
+
         var fremdrift = new Progress<TranscriptionProgress>(p =>
         {
             // Foerste melding fra motoren: nu ER den i gang, saa bjaelken
             // skifter fra "arbejder" til at vise et rigtigt tal.
             Fremdrift.IsIndeterminate = false;
-            Fremdrift.Value = p.Percent;
-            Fremdriftstal.Text = $"{p.Percent:0} %";
-            Status.Text = $"{p.Message}   ({modelNavn}, {install.Engine})";
+            Fremdrift.Value = (sporNr * 100.0 + p.Percent) / sporIAlt;
+            Fremdriftstal.Text = $"{Fremdrift.Value:0} %";
+
+            var hvilket = !toSpor ? "" : sporNr == 0 ? "  ·  spor 1 af 2: herfra" : "  ·  spor 2 af 2: derfra";
+            Status.Text = $"{p.Message}   ({modelNavn}, {install.Engine}){hvilket}";
         });
 
         try
         {
             var motor = new Transcriber(install.WhisperCli!);
+
+            // ============ HVERT SPOR SIT SPROG ============
+            //
+            // Det er ikke en komplikation - det er svaret paa et rigtigt
+            // problem. Maalt paa et dansk-norsk moede: gaesterne talte norsk,
+            // vaerten dansk. Med ét spor er det ét sprog, og den ene side
+            // bliver skrevet ud gennem den forkerte model.
+            //
+            // MIKROFONEN faar DIT sprog fra Indstillinger. Det er din egen
+            // stemme og dem i samme lokale - det ved du, og det skal ikke
+            // gaettes. Auto-detekteringen blev maalt til ENGELSK med 42 %
+            // sikkerhed paa netop det moede, og hele udskriften blev engelsk
+            // vroevl af dansk tale. Referatet byggede paa det.
+            //
+            // LOOPBACK detekteres frit. Modparten skifter fra moede til
+            // moede, og der er ingen indstilling, der kan vide det paa
+            // forhaand.
+            var mitSprog = string.IsNullOrWhiteSpace(AppSettings.Current.MitSprog)
+                ? "da"
+                : AppSettings.Current.MitSprog!;
+
+            TranscriptionResult? loopR = null;
+
+            if (toSpor)
+            {
+                loopR = await motor.RunAsync(
+                    new TranscriptionRequest(loopWav, install.ModelPath!, loopUdBase, "auto"),
+                    fremdrift, _afbryd.Token);
+
+                sporNr = 1;
+            }
+
             var r = await motor.RunAsync(
-                // "auto": Whisper finder selv sproget. Møder holdes ikke altid
-                // på dansk, og et engelsk møde tvunget gennem dansk giver
-                // volapyk frem for en fejl — og volapyk ligner et resultat.
-                new TranscriptionRequest(wav, install.ModelPath!, udBase, "auto"),
+                new TranscriptionRequest(wav, install.ModelPath!, udBase, mitSprog),
                 fremdrift, _afbryd.Token);
+
+            if (loopR is not null)
+            {
+                // Fletningen er den, dokumenterne skal bruge. Den skrives til
+                // sidst, saa den er den nyeste .txt i mappen - det er den,
+                // resten af appen finder frem.
+                var samtale = Samtale.Flet(r.JsonPath, loopR.JsonPath,
+                    Transcriber.LanguageName(r.DetectedLanguage),
+                    Transcriber.LanguageName(loopR.DetectedLanguage));
+                if (samtale is not null)
+                {
+                    var samtaleSti = Path.Combine(valgt.Mappe, $"samtale_{modelNavn}.txt");
+                    File.WriteAllText(samtaleSti, samtale, new System.Text.UTF8Encoding(false));
+
+                    // TIDEN ER BEGGE SPOR TILSAMMEN, OG SPROGET ER DET RENE
+                    // SPORS.
+                    //
+                    // Uden tiden ville realtidsfaktoren vise halvdelen af det,
+                    // koerslen faktisk kostede - og RTF er netop det tal, der
+                    // afgoer, om en udskrift er noget, man venter paa, eller
+                    // noget, man planlaegger. Et maaletal, der lyver til den
+                    // gode side, er vaerre end ingen maaling.
+                    r = r with
+                    {
+                        TextPath = samtaleSti,
+                        ElapsedSeconds = r.ElapsedSeconds + loopR.ElapsedSeconds
+                    };
+                }
+            }
 
             // HER LAA EFTERRETNINGEN: de rettelser, brugeren havde lavet, blev
             // anvendt paa udskriften bagefter, og originalen gemt som .raa.txt.
@@ -1012,7 +1093,8 @@ public partial class TranscribeView : UserControl
         Historik.Skriv(
             HaendelseType.Transskription,
             usikker ? "Transskription færdig — sproget er usikkert" : "Transskription færdig",
-            $"{TimeSpan.FromSeconds(r.AudioSeconds):hh\\:mm\\:ss} lyd · sprog {Transcriber.LanguageName(r.DetectedLanguage)}" +
+            $"{TimeSpan.FromSeconds(r.AudioSeconds):hh\\:mm\\:ss} lyd · {SporTekst(r)} · " +
+            $"sprog {Transcriber.LanguageName(r.DetectedLanguage)}" +
             (r.LanguageProbability is double p3 ? $" ({p3 * 100:0}% sikker)" : " (valgt)") +
             $" · RTF {r.RealTimeFactor:0.00}",
             Udfald.Fuldført,
@@ -1027,9 +1109,23 @@ public partial class TranscribeView : UserControl
         // sproget blev.
         Status.Text =
             $"Færdig · {TimeSpan.FromSeconds(r.AudioSeconds):mm\\:ss} lyd skrevet ud på " +
-            $"{TimeSpan.FromSeconds(r.ElapsedSeconds):mm\\:ss} · {ord} ord · {sprog}";
+            $"{TimeSpan.FromSeconds(r.ElapsedSeconds):mm\\:ss} · {ord} ord · {sprog} · {SporTekst(r)}";
+
         AabnKnap.IsEnabled = true;
     }
+
+    /// <summary>
+    /// «to spor, flettet» eller «ét spor».
+    ///
+    /// Forskellen er ikke kosmetisk. Med ét spor mangler alt, hvad de andre
+    /// sagde i et onlinemøde — og kan man ikke se det på skærmen og i
+    /// historikken, kan man heller ikke bagefter vide, om et referat bygger
+    /// på hele mødet eller kun på den ene halvdel.
+    /// </summary>
+    private static string SporTekst(TranscriptionResult r) =>
+        Path.GetFileName(r.TextPath).StartsWith("samtale_", StringComparison.Ordinal)
+            ? "to spor, flettet"
+            : "ét spor";
 
     /// <summary>
     /// Sletter en optagelse med alt, hvad der hører til den.
@@ -1051,7 +1147,13 @@ public partial class TranscribeView : UserControl
 
         var hvad = new List<string>();
         if (valgt.HarLyd) hvad.Add($"lyden ({TimeSpan.FromSeconds(valgt.Sekunder):mm\\:ss})");
-        if (transskriptioner > 0) hvad.Add($"{transskriptioner} transskriptioner");
+        // «3 transskriptioner» ville vaere misvisende: et onlinemoede giver tre
+        // txt-filer — de to spor og fletningen — men det er ÉN udskrift af ét
+        // moede. Tallet i parentes er der, saa stoerrelsen ikke overrasker.
+        if (transskriptioner > 0)
+            hvad.Add(transskriptioner == 1
+                ? "udskriften"
+                : $"udskriften ({transskriptioner} filer: de enkelte spor og fletningen)");
         if (noter) hvad.Add("noter og blokmærker");
 
         var ja = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
