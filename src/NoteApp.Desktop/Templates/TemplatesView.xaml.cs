@@ -36,6 +36,7 @@ public partial class TemplatesView : UserControl
     public TemplatesView()
     {
         InitializeComponent();
+        FeltAgenda.Text = Agenda();
 
         Felter.Text = string.Join("   ",
             PromptTemplate.Fields.Keys.Select(f => "{{" + f + "}}"));
@@ -95,6 +96,39 @@ public partial class TemplatesView : UserControl
 
     private Biblioteker.Biblioteksnode? _rod;
     private bool _byggerTrae;
+
+    /// <summary>
+    /// Standarddagsordenen. Den ligger som en indlejret tekstfil frem for i
+    /// koden, saa den kan rettes uden at roere en eneste linje C#.
+    /// </summary>
+    private static string Agenda()
+    {
+        var asm = System.Reflection.Assembly.GetExecutingAssembly();
+        var navn = asm.GetManifestResourceNames()
+            .FirstOrDefault(n => n.EndsWith("agenda.txt", StringComparison.Ordinal));
+
+        if (navn is null) return "Dagsordenen kunne ikke indlæses.";
+
+        using var s = asm.GetManifestResourceStream(navn);
+        if (s is null) return "Dagsordenen kunne ikke indlæses.";
+
+        using var l = new System.IO.StreamReader(s, System.Text.Encoding.UTF8);
+        return l.ReadToEnd();
+    }
+
+    private void KopierAgenda_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            Clipboard.SetText(FeltAgenda.Text);
+            Status.Text = "Dagsordenen er kopieret. Sæt den ind i mødeindkaldelsen.";
+        }
+        catch (Exception ex)
+        {
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Kunne ikke kopiere",
+                $"Udklipsholderen kunne ikke skrives til:\n\n{ex.Message}", Dialogs.Slags.Pas_paa);
+        }
+    }
 
     private void Trae_Valgt(object sender, RoutedPropertyChangedEventArgs<object> e)
     {

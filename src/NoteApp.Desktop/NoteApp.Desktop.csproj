@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -20,6 +20,10 @@
          scripts\lav-ikon.ps1. -->
     <ApplicationIcon>app.ico</ApplicationIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Templates\agenda.txt" />
+  </ItemGroup>
 
   <ItemGroup>
     <!-- Samme billede som ressource, så vinduerne og sidebjælken kan vise
