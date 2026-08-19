@@ -102,7 +102,6 @@ public partial class MainWindow : Window
         Version.Text = "v" + (Assembly.GetExecutingAssembly()
             .GetName().Version?.ToString(2) ?? "0.0");
         DataSti.Text = UserDataPaths.Root;
-        OpdaterDataLoefte();
         OpdaterOpsaetningsmaerkat();
 
         // En ny installation kan optage og skrive ud, men ikke lave
@@ -254,39 +253,17 @@ public partial class MainWindow : Window
         _moede.Lynstart();
     }
 
-    /// <summary>
-    /// Løftet nederst i sidebjælken. Skal sige det, der faktisk gælder.
-    ///
-    /// «Intet forlader denne pc» stod fast, og det var rigtigt, så længe der
-    /// ikke fandtes en vej ud. Der gør der nu — og et løfte, koden selv kan
-    /// bryde, koster mere end det, det vinder. Derfor to tekster, og den ene
-    /// er lige så præcis som den anden.
-    ///
-    /// Bemærk, at teksten IKKE siger «dine data sendes til Frankrig». Det ville
-    /// være lige så forkert den anden vej: der sendes intet, før man sætter et
-    /// hak på et bestemt dokument. Den siger, hvad der KAN ske, og hvad der
-    /// skal til.
-    /// </summary>
-    public void OpdaterDataLoefte()
-    {
-        // DET ENE STED, ARKITEKTUREN HOERER HJEMME.
-        //
-        // Den staar her frem for i dokumentdialogen, fordi det er en egenskab
-        // ved INSTALLATIONEN, ikke ved det enkelte referat. Skrevet paa hvert
-        // dokument ligner det noget, der varierer; skrevet her, hvor "Dine
-        // data" i forvejen staar, er det det, det er.
-        //
-        // Begge halvdele skal med. "Optagelser bliver her" alene fortier den
-        // ene halvdel af loesningen, og en halv sandhed om databehandling er
-        // den slags, der bliver opdaget af en anden end en selv.
-        DataLoefte.Text = NoteApp.Core.Llm.SkyNoegle.Hent() is null
-            ? "Intet forlader denne pc. Appen har ingen netværkskald."
-            : "Optagelser og udskrifter bliver på denne pc. Referater bearbejdes i EU.";
-
-        // De to hoerer sammen: begge svarer paa, om noeglen er sat. Skiftede
-        // den ene uden den anden, ville sidebjaelken og menuen sige hver sit.
-        OpdaterOpsaetningsmaerkat();
-    }
+    // HER LAA OpdaterDataLoefte, som satte linjen nederst i sidebjaelken:
+    // "Optagelser og udskrifter bliver paa denne pc. Referater bearbejdes
+    // i EU."
+    //
+    // Linjen var sand, men overfloedig. Det samme staar under AI-modeller,
+    // hvor man vaelger det, og under Compliance, hvor det hoerer juridisk
+    // hjemme. En paastand, der gentages tre steder, bliver ikke tre gange
+    // saa troevaerdig - den bliver til noget, man laeser forbi.
+    //
+    // Maerkatet ved menupunktet opdateres nu direkte, hvor noeglen kan have
+    // aendret sig. Fjernet 19-08-2026.
 
     /// <summary>
     /// Viser eller skjuler 1-tallet ved «AI-modeller».

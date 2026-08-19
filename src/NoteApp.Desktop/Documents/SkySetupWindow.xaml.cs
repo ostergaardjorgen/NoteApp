@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Windows;
 using NoteApp.Core.Llm;
 
@@ -127,7 +127,7 @@ public partial class SkySetupWindow : Window
     /// </summary>
     private void Luk()
     {
-        (Application.Current.MainWindow as MainWindow)?.OpdaterDataLoefte();
+        (Application.Current.MainWindow as MainWindow)?.OpdaterOpsaetningsmaerkat();
         DialogResult = true;
     }
 
