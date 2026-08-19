@@ -53,8 +53,8 @@ public partial class EngineView : System.Windows.Controls.UserControl
         // "Whisper" foran modelnavnet. Uden det stod der bare "large-v3", og
         // saa kunne skaermen ikke svare paa, HVAD der skriver lyden ud.
         LydModel.Text = s.ModelPath is null
-            ? $"Whisper {model.Id} — ikke hentet"
-            : "Whisper " + Path.GetFileNameWithoutExtension(s.ModelPath).Replace("ggml-", "");
+            ? $"{model.Id} — ikke hentet"
+            : Path.GetFileNameWithoutExtension(s.ModelPath).Replace("ggml-", "");
 
         LydResume.Text = model.Summary + " " + model.Pros;
 
@@ -63,10 +63,11 @@ public partial class EngineView : System.Windows.Controls.UserControl
         // Motoren staar fremme, ikke kun i foldebjaelken. Det er to ting -
         // programmet, der koerer modellen, og modelfilen selv - og begge har
         // hver sin licens at goere rede for.
+        LydMotor.Text = "whisper.cpp";
         LydMotorLinje.Text = s.WhisperCli is null
-            ? "Motor: whisper.cpp — ikke installeret"
-            : $"Motor: whisper.cpp · {s.Engine}" +
-              (s.EngineVersion is { } v ? $" · {v}" : "");
+            ? "Ikke installeret. Den følger med, når du henter modellen."
+            : $"Programmet, der afvikler modellen. Kører på {s.Engine}" +
+              (s.EngineVersion is { } v ? $", version {v}." : ".");
 
 
         // Version hvis vi kender den, ellers datoen paa binaeren. Der staar
