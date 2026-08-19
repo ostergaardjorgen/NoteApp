@@ -89,6 +89,14 @@
                       <TextBlock x:Name="LydModel" FontSize="14.5" FontWeight="SemiBold" />
                       <TextBlock x:Name="LydResume" FontSize="12.5" LineHeight="20" Margin="0,5,0,0"
                                  TextWrapping="Wrap" Foreground="{StaticResource TekstSvag}" />
+
+                      <!-- Modellen faar ikke nye udgaver. Det skal staa VED
+                           modellen, ikke i en note et andet sted: knappen
+                           "Hent igen" ved siden af "Opdatér motoren" laeses
+                           ellers, som om der ogsaa kommer noget nyere ud af
+                           den. -->
+                      <TextBlock x:Name="ModelNote" FontSize="11.5" LineHeight="18" Margin="0,7,0,0"
+                                 TextWrapping="Wrap" Foreground="{StaticResource TekstMeget}" />
                     </StackPanel>
                   </Grid>
                 </Border>

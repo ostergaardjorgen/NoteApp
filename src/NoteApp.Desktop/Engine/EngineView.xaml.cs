@@ -63,11 +63,22 @@ public partial class EngineView : System.Windows.Controls.UserControl
         // Motoren staar fremme, ikke kun i foldebjaelken. Det er to ting -
         // programmet, der koerer modellen, og modelfilen selv - og begge har
         // hver sin licens at goere rede for.
-        LydMotor.Text = "whisper.cpp";
+        // VERSION OG DATO SKAL STAA FREMME.
+        //
+        // De laa kun i foldebjaelken. Naar man lige HAR trykket "Opdatér
+        // motoren", er versionen praecis det, man vil se - og uden den kan
+        // man ikke afgoere, om knappen gjorde noget.
+        LydMotor.Text = s.WhisperCli is null ? "whisper.cpp — ikke installeret" : "whisper.cpp";
+
+        var dato = s.EngineInstalled is { } i
+            ? $" · installeret {i.ToLocalTime():d. MMMM yyyy 'kl.' HH:mm}"
+            : "";
+
         LydMotorLinje.Text = s.WhisperCli is null
-            ? "Ikke installeret. Den følger med, når du henter modellen."
-            : $"Programmet, der afvikler modellen. Kører på {s.Engine}" +
-              (s.EngineVersion is { } v ? $", version {v}." : ".");
+            ? "Programmet, der afvikler modellen. Hentes for sig, uafhængigt af modellen."
+            : s.EngineVersion is { } v
+                ? $"Version {v}{dato} · kører på {s.Engine}."
+                : $"Version ukendt — motoren er ikke hentet af appen selv{dato}. Kører på {s.Engine}.";
 
 
         // Version hvis vi kender den, ellers datoen paa binaeren. Der staar
@@ -85,7 +96,20 @@ public partial class EngineView : System.Windows.Controls.UserControl
             ? $"Motoren hentes til {WhisperInstall.EngineDirectory}"
             : $"{s.WhisperCli}\nModeller: {WhisperInstall.ModelDirectory}";
 
-        LydKnap.Content = s.ModelPath is null ? $"Hent {model.SizeText}" : "Hent igen";
+        // KNAPTEKSTEN MAA IKKE LOVE EN FORBEDRING.
+        //
+        // "Hent igen" ved siden af "Opdatér motoren" laeses let, som om der
+        // ogsaa kommer en nyere model ud af det. Det goer der ikke: large-v3
+        // er en fast fil med et fast indhold, og en ny hentning giver praecis
+        // den samme. Knappen hedder derfor "Hent modellen igen", og linjen
+        // under kassen siger hvorfor.
+        LydKnap.Content = s.ModelPath is null ? $"Hent {model.SizeText}" : "Hent modellen igen";
+
+        ModelNote.Text = s.ModelPath is null
+            ? "Modellen er en fast fil. Den hentes én gang og ændrer sig ikke bagefter."
+            : "Modellen er en fast fil og får ikke nye udgaver — modsat motoren. " +
+              "At hente den igen giver præcis den samme fil og gør ikke udskriften bedre. " +
+              "Det er kun værd at gøre, hvis filen er blevet beskadiget.";
         // MOTORKNAPPEN VAR SLAAET FRA, NAAR MOTOREN MANGLEDE.
         //
         // "IsEnabled = WhisperCli is not null" betoed, at den ENESTE knap,

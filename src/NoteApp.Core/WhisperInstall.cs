@@ -245,15 +245,28 @@ public static class WhisperInstall
 
     private static IEnumerable<string> EngineDirectories()
     {
-        // 1. Repoets CUDA-build vinder, hvis den er der — GPU slår CPU med
-        //    omkring en faktor ti, og på udviklingsmaskinen ligger den der.
+        // RAEKKEFOELGEN ER VENDT 19-08-2026, OG GRUNDEN ER EN FEJL.
+        //
+        // Repoets build stod foerst, fordi den paa udviklingsmaskinen er en
+        // CUDA-build, og GPU slaar CPU med omkring en faktor ti. Det virkede,
+        // indtil "Opdatér motoren" kom til: knappen hentede v1.9.2 til
+        // datamappen, skrev et manifest og meldte succes - og appen blev ved
+        // med at koere repoets kopi. Opdateringen aendrede ingenting, og
+        // versionen stod tom, fordi manifestet laa ved siden af en anden exe
+        // end den, der blev brugt.
+        //
+        // Den, brugeren SELV har hentet, vinder nu. En knap, der siger den
+        // opdaterede noget, skal have opdateret dét, der koerer.
+
+        // 1. Hentet af appen selv.
+        yield return EngineDirectory;
+
+        // 2. Repoets build. Stadig med, saa en udviklingsmaskine uden hentet
+        //    motor virker ud af boksen.
         yield return Path.Combine("C:", "NoteApp", "tools", "whisper");
 
-        // 2. Ved siden af den installerede exe.
+        // 3. Ved siden af den installerede exe.
         yield return Path.Combine(AppContext.BaseDirectory, "whisper");
-
-        // 3. Hentet af appen selv.
-        yield return EngineDirectory;
     }
 
     private static string? FindModel(string? preferredId)
