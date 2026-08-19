@@ -122,7 +122,7 @@ public static class BackgroundJobs
             // paa hver eneste linje uden at skille dem fra hinanden.
             Historik.Skriv(HaendelseType.Dokument, $"Dokument oprettet: {skabelonInfo.Title}",
                 $"Skabelon «{skabelon.Name}» · {model.Navn} · " +
-                $"{r.TokensInd} tokens sendt, {r.TokensUd} modtaget · ${r.PrisUsd:0.0000}",
+                $"{r.TokensInd} tokens sendt, {r.TokensUd} modtaget · €{r.PrisEur:0.0000}",
                 Udfald.Fuldført, model.Navn, odt, r.Forloebet.TotalSeconds,
                 kilde: skabelonInfo.Id);
             Notifikationer.Meld();

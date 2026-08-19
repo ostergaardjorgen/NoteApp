@@ -1,4 +1,4 @@
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 
@@ -38,7 +38,16 @@ public sealed record Kvittering
 
     public int TokensInd { get; init; }
     public int TokensUd { get; init; }
-    public decimal PrisUsd { get; init; }
+    /// <summary>
+    /// Prisen i EURO.
+    ///
+    /// Kontoen hos Mistral gøres op i euro — set på deres egen konsol, hvor
+    /// både forbrug, den inkluderede mængde og forbrugsloftet står i EUR.
+    /// Hed før PrisUsd, og det var forkert: en kvittering skal kunne holdes
+    /// op mod en faktura, og står der dollar det ene sted og euro det andet,
+    /// duer den ikke til netop det, den findes for.
+    /// </summary>
+    public decimal PrisEur { get; init; }
     public double Sekunder { get; init; }
 
     /// <summary>

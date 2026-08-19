@@ -505,7 +505,7 @@ static async Task<int> Sky(string[] a)
     Console.WriteLine();
     Console.WriteLine($"Tid      : {r.Forloebet.TotalSeconds:0.0} sek");
     Console.WriteLine($"Tokens   : {r.TokensInd:N0} ind, {r.TokensUd:N0} ud  ({r.TokensPrSekund:0.0}/sek)");
-    Console.WriteLine($"Pris     : ${r.PrisUsd:0.0000}  (ca. {r.PrisUsd * 6.5m:0.00} kr.)");
+    Console.WriteLine($"Pris     : €{r.PrisEur:0.0000}  (ca. {r.PrisEur * 7.46m:0.00} kr.)");
     Console.WriteLine($"Gemt     : {sti}");
     return 0;
 }

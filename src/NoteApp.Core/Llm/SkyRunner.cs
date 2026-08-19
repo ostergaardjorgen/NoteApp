@@ -252,7 +252,10 @@ public sealed record SkyResultat(
     int TokensInd,
     int TokensUd)
 {
-    public decimal PrisUsd => Model.Pris(TokensInd, TokensUd);
+    /// <summary>
+    /// Prisen i EURO. Kontoen hos Mistral gøres op i euro — se Kvittering.
+    /// </summary>
+    public decimal PrisEur => Model.Pris(TokensInd, TokensUd);
 
     public double TokensPrSekund => Forloebet.TotalSeconds <= 0 ? 0 : TokensUd / Forloebet.TotalSeconds;
 
@@ -402,7 +405,7 @@ public sealed class SkyRunner
             {
                 TokensInd = ind,
                 TokensUd = ud,
-                PrisUsd = resultat.PrisUsd,
+                PrisEur = resultat.PrisEur,
                 Sekunder = Math.Round(ur.Elapsed.TotalSeconds, 1)
             };
 
