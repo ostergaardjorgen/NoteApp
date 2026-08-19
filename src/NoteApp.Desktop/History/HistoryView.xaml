@@ -68,6 +68,47 @@
                                  TextWrapping="Wrap" Foreground="{StaticResource TekstSvag}" />
                       <TextBlock Text="{Binding Model}" FontSize="11.5" Margin="0,3,0,0"
                                  TextWrapping="Wrap" Foreground="{StaticResource TekstMeget}" />
+
+                      <!-- VEJEN TILBAGE TIL KILDEN.
+                           Teksten er slaaet op paa id'et, da linjen blev
+                           vist - ikke da den blev skrevet. Derfor staar det
+                           NUVAERENDE navn, ogsaa hvis noget er omdoebt siden,
+                           og der staar "slettet", hvis kilden er vaek.
+
+                           En knap og ikke et hyperlink: hyperlinket arver
+                           ikke temaets farver og stod blaat paa blaat. -->
+                      <Button Content="{Binding LinkTekst}" Tag="{Binding}" Click="Kilde_Klik"
+                              HorizontalAlignment="Left" Margin="0,6,0,0" Padding="0"
+                              FontSize="11.5" Cursor="Hand" BorderThickness="0"
+                              Background="Transparent" Foreground="{Binding LinkFarve}"
+                              IsEnabled="{Binding Findes}"
+                              ToolTip="Gå til den, linjen handler om">
+                        <Button.Style>
+                          <Style TargetType="Button">
+                            <Setter Property="Template">
+                              <Setter.Value>
+                                <ControlTemplate TargetType="Button">
+                                  <TextBlock Text="{TemplateBinding Content}"
+                                             Foreground="{TemplateBinding Foreground}"
+                                             FontSize="{TemplateBinding FontSize}"
+                                             TextDecorations="Underline" />
+                                </ControlTemplate>
+                              </Setter.Value>
+                            </Setter>
+                            <Style.Triggers>
+                              <!-- Er kilden slettet, er teksten en oplysning
+                                   og ikke et link. Saa skal den heller ikke
+                                   se ud som et. -->
+                              <DataTrigger Binding="{Binding Findes}" Value="False">
+                                <Setter Property="Cursor" Value="Arrow" />
+                              </DataTrigger>
+                              <DataTrigger Binding="{Binding HarLink}" Value="False">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                              </DataTrigger>
+                            </Style.Triggers>
+                          </Style>
+                        </Button.Style>
+                      </Button>
                     </StackPanel>
 
                     <TextBlock Grid.Column="2" Text="{Binding UdfaldTekst}" FontSize="12"

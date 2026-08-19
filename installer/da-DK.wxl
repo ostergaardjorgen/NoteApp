@@ -27,10 +27,10 @@
   <String Id="HelpCloseButton" Value="&amp;Luk" />
 
   <String Id="InstallHeader" Value="Installér [WixBundleName]" />
-  <String Id="InstallVersion" Value="Version [WixBundleVersion]" />
+  <String Id="InstallVersion" Value="Version [WixBundleVersion]. Er en tidligere version installeret, bliver den opdateret — og dine optagelser, udskrifter og dokumenter bliver liggende." />
   <String Id="InstallAcceptCheckbox" Value="Jeg har &amp;læst ovenstående" />
   <String Id="InstallOptionsButton" Value="&amp;Indstillinger" />
-  <String Id="InstallInstallButton" Value="&amp;Installér" />
+  <String Id="InstallInstallButton" Value="&amp;Installér eller opdatér" />
   <String Id="InstallCancelButton" Value="&amp;Annullér" />
   <String Id="InstallLicenseLinkText" Value="Om NoteApp" />
 
@@ -50,7 +50,7 @@
   <String Id="ModifyUninstallButton" Value="&amp;Afinstallér" />
   <String Id="ModifyCancelButton" Value="&amp;Luk" />
 
-  <String Id="SuccessHeader" Value="Færdig" />
+  <String Id="SuccessHeader" Value="NoteApp [WixBundleVersion] er installeret" />
   <String Id="SuccessInstallHeader" Value="NoteApp er installeret" />
   <String Id="SuccessRepairHeader" Value="Reparationen er gennemført" />
   <String Id="SuccessUninstallHeader" Value="NoteApp er fjernet" />

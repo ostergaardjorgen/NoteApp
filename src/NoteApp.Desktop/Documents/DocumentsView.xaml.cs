@@ -2,6 +2,7 @@
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using NoteApp.Core;
 using NoteApp.Core.Documents;
 
 namespace NoteApp.Desktop.Documents;
@@ -400,8 +401,13 @@ public partial class DocumentsView : UserControl
 
         try
         {
+            var fraMappe = _valgt.Mappe;
             _valgt.Mappe = vindue.Valgt;
             DocumentStore.Save(_valgt);
+
+            Historik.Skriv(HaendelseType.Flyttet, $"Dokument flyttet: {_valgt.Title}",
+                $"Fra «{fraMappe ?? "roden"}» til «{vindue.Valgt ?? "roden"}».",
+                Udfald.Fuldført, kilde: _valgt.Id);
 
             var id = _valgt.Id;
             Indlæs(id);
@@ -472,7 +478,19 @@ public partial class DocumentsView : UserControl
 
         try
         {
+            // SLETNINGEN LOGGES, FOER FILEN ER VAEK.
+            // Der er ingen papirkurv. Linjen i historikken er derfor det
+            // eneste spor af, at dokumentet fandtes - og id'et goer, at en
+            // aeldre linje om det samme dokument stadig kan kendes.
+            var slettetNavn = _valgt.Title;
+            var slettetId = _valgt.Id;
+
             DocumentStore.Delete(_valgt);
+
+            Historik.Skriv(HaendelseType.Slettet, $"Dokument slettet: {slettetNavn}",
+                "Der er ingen papirkurv — filen er væk.",
+                Udfald.Fuldført, kilde: slettetId);
+
             Status.Text = "Dokumentet er slettet.";
             Indlæs();
         }

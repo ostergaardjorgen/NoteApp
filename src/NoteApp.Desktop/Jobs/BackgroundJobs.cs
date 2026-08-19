@@ -118,7 +118,8 @@ public static class BackgroundJobs
             Historik.Skriv(HaendelseType.Dokument, $"Dokument oprettet: {skabelonInfo.Title}",
                 $"Skabelon «{skabelon.Name}» · {model.Navn} · " +
                 $"{r.TokensInd} tokens sendt, {r.TokensUd} modtaget · ${r.PrisUsd:0.0000}",
-                Udfald.Fuldført, model.Navn, odt, r.Forloebet.TotalSeconds);
+                Udfald.Fuldført, model.Navn, odt, r.Forloebet.TotalSeconds,
+                kilde: skabelonInfo.Id);
             Notifikationer.Meld();
 
             Meld($"Færdigt: {Path.GetFileName(odt)} · {r.Forloebet.TotalSeconds:0} sek", kører: false);

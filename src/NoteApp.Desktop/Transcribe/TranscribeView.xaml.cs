@@ -998,9 +998,16 @@ public partial class TranscribeView : UserControl
         if (r.LanguageProbability is double p && p < 0.7)
             sprog += $" (usikker, {p * 100:0}%)";
 
-        // Historikken. Et usikkert sprogvalg skal stå som «se efter», ikke som
-        // fuldført: netop dét kostede en times møde, der blev skrevet ned på
-        // engelsk, fordi de første tredive sekunder var på engelsk.
+        // GULT ER FORBEHOLDT NOGET, DER KAN GOERES VED.
+        //
+        // Et usikkert sprogvalg stod foer som «se efter». Men koerslen ER
+        // faerdig, og der er intet at handle paa bagefter - udskriften er,
+        // hvad maskinen hoerte. Et maerkat, der beder om en handling, som
+        // ikke findes, laerer folk at se bort fra maerkatet, og saa virker
+        // det heller ikke den dag, der ER noget.
+        //
+        // Usikkerheden forsvinder ikke: den staar i overskriften og med
+        // procent i detaljelinjen. Den er en OPLYSNING, ikke en opgave.
         var usikker = r.LanguageProbability is double p2 && p2 < 0.7;
         Historik.Skriv(
             HaendelseType.Transskription,
@@ -1008,8 +1015,11 @@ public partial class TranscribeView : UserControl
             $"{TimeSpan.FromSeconds(r.AudioSeconds):hh\\:mm\\:ss} lyd · sprog {Transcriber.LanguageName(r.DetectedLanguage)}" +
             (r.LanguageProbability is double p3 ? $" ({p3 * 100:0}% sikker)" : " (valgt)") +
             $" · RTF {r.RealTimeFactor:0.00}",
-            usikker ? Udfald.SeEfter : Udfald.Fuldført,
-            r.EngineId, r.TextPath, r.ElapsedSeconds);
+            Udfald.Fuldført,
+            r.EngineId, r.TextPath, r.ElapsedSeconds,
+            // Moedemappen udledes af udskriftens sti - den ligger i mappen.
+            // Valgt kan have skiftet, mens koerslen loeb.
+            kilde: MeetingStore.Load(Path.GetDirectoryName(r.TextPath) ?? "")?.Id.ToString() ?? "");
         Notifikationer.Meld();
 
         // Den ene linje, der erstattede de fire store tal. Den siger, hvad man

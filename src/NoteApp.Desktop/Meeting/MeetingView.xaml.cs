@@ -383,8 +383,12 @@ public partial class MeetingView : UserControl
 
         Historik.Skriv(HaendelseType.Optagelse, $"Møde optaget: {titel}",
             $"{længde:hh\\:mm\\:ss} lyd · {noter} noter · " + (_varOnline ? "begge spor" : "kun mikrofon"),
-            længde < TimeSpan.FromSeconds(10) ? Udfald.SeEfter : Udfald.Fuldført,
-            sti: mappe, sekunder: længde.TotalSeconds);
+            // En kort optagelse stod foer som «se efter». Den er gemt og
+            // faerdig; laengden staar i linjen ovenfor, og der er ikke noget
+            // at goere ved den bagefter. Se Udfald.SeEfter.
+            Udfald.Fuldført,
+            sti: mappe, sekunder: længde.TotalSeconds,
+            kilde: MeetingStore.Load(mappe)?.Id.ToString() ?? "");
 
         FærdigMedMøde?.Invoke(mappe);
         return mappe;

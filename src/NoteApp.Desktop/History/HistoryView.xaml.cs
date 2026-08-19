@@ -31,6 +31,68 @@ public sealed class PostVisning
         };
 
         Slags = a.Slags;
+        Kilde = a.Kilde;
+
+        // NAVNET SLAAS OP NU, IKKE DA LINJEN BLEV SKREVET.
+        //
+        // Overskriften baerer det navn, tingen havde dengang. Omdoebes den,
+        // peger linjen paa noget, der ikke findes - og saa leder man efter en
+        // fil, der ligger lige der, under et andet navn.
+        //
+        // Id'et aendrer sig aldrig. Findes kilden, staar dens NUVAERENDE navn
+        // som et link. Findes den ikke, staar der, at den er slettet - og det
+        // er ogsaa et svar: linjen bliver staaende som det eneste spor af, at
+        // noget fandtes.
+        (LinkTekst, Findes) = SlaaOp(a);
+
+        HarLink = LinkTekst.Length > 0;
+        LinkFarve = Findes
+            ? new SolidColorBrush(Color.FromRgb(0x5B, 0x9D, 0xF0))
+            : new SolidColorBrush(Color.FromRgb(0x8A, 0x92, 0xA0));
+    }
+
+    /// <summary>
+    /// Finder kilden frem på id'et og giver den tekst, linjen skal vise.
+    ///
+    /// Returnerer tom tekst for hændelser uden en kilde at gå til — en
+    /// hentning, en backup, et manglende opsætningstrin.
+    /// </summary>
+    private static (string Tekst, bool Findes) SlaaOp(Haendelse a)
+    {
+        if (a.Kilde.Length == 0) return ("", false);
+
+        try
+        {
+            switch (a.Slags)
+            {
+                case HaendelseType.Dokument:
+                case HaendelseType.Slettet when NoteApp.Core.Documents.DocumentStore.LoadAll().Any(d => d.Id == a.Kilde):
+                case HaendelseType.Flyttet:
+                {
+                    var d = NoteApp.Core.Documents.DocumentStore.LoadAll().FirstOrDefault(x => x.Id == a.Kilde);
+                    return d is null
+                        ? ("dokumentet er slettet", false)
+                        : ($"Vis «{d.Title}»", true);
+                }
+
+                case HaendelseType.Optagelse:
+                case HaendelseType.Transskription:
+                {
+                    var m = MeetingStore.FindById(a.Kilde);
+                    return m is null
+                        ? ("optagelsen er slettet", false)
+                        : ($"Vis «{m.Value.Meta.Title}»", true);
+                }
+
+                default:
+                    return ("", false);
+            }
+        }
+        catch (Exception)
+        {
+            // Kan kilden ikke slaas op, er linjen stadig laesbar uden link.
+            return ("", false);
+        }
     }
 
     public string Klokkeslet { get; }
@@ -41,6 +103,18 @@ public sealed class PostVisning
     public string UdfaldTekst { get; }
     public Brush Kantfarve { get; }
     public HaendelseType Slags { get; }
+
+    /// <summary>Id'et på kilden. Tom, hvis der ikke er en at gå til.</summary>
+    public string Kilde { get; }
+
+    /// <summary>«Vis «navn»» eller «optagelsen er slettet». Tom uden kilde.</summary>
+    public string LinkTekst { get; }
+
+    /// <summary>Findes kilden stadig? Afgør om der kan klikkes.</summary>
+    public bool Findes { get; }
+
+    public bool HarLink { get; }
+    public Brush LinkFarve { get; }
 }
 
 /// <summary>
@@ -125,6 +199,36 @@ public partial class HistoryView : UserControl
     }
 
     private void Genindlaes_Click(object sender, RoutedEventArgs e) => Indlæs();
+
+    /// <summary>
+    /// Går til det, linjen handler om.
+    ///
+    /// Kilden slås op på id'et her og nu. Er den forsvundet mellem visningen
+    /// og klikket, siges det — frem for at skifte skærm og vise ingenting.
+    /// </summary>
+    private void Kilde_Klik(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button b || b.Tag is not PostVisning post) return;
+        if (post.Kilde.Length == 0 || !post.Findes) return;
+
+        var hoved = Application.Current.MainWindow as MainWindow;
+        if (hoved is null) return;
+
+        var gik = post.Slags switch
+        {
+            HaendelseType.Optagelse or HaendelseType.Transskription
+                => hoved.GaaTilOptagelse(post.Kilde),
+            _ => Gaa(() => hoved.GaaTilDokumenter(post.Kilde))
+        };
+
+        if (!gik)
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Den findes ikke længere",
+                "Det, linjen handler om, er slettet eller flyttet uden for appen. " +
+                "Linjen bliver stående som spor af, at det fandtes.",
+                Dialogs.Slags.Valg);
+    }
+
+    private static bool Gaa(Action a) { a(); return true; }
 
     private void Aabn_Click(object sender, RoutedEventArgs e)
     {

@@ -229,6 +229,28 @@ public partial class MainWindow : Window
     }
 
     /// <summary>
+    /// Springer til «Optagelser» og markerer den optagelse, id'et peger på.
+    ///
+    /// Tager et ID og ikke en mappe. Mappen slås op HER, i det øjeblik der
+    /// klikkes — en optagelse kan være flyttet eller omdøbt, siden linjen i
+    /// historikken blev skrevet, og så peger en gemt sti på ingenting.
+    ///
+    /// Returnerer falsk, hvis optagelsen ikke findes mere. Så bliver man
+    /// stående, hvor man er, frem for at skifte skærm og vise en tom liste.
+    /// </summary>
+    public bool GaaTilOptagelse(string id)
+    {
+        if (MeetingStore.FindById(id) is not { } fundet) return false;
+
+        _aabnOptagelse = fundet.Mappe;
+
+        if (NavTransskriber.IsChecked == true) Indhold.Content = NyOptagelsesskaerm();
+        else NavTransskriber.IsChecked = true;
+
+        return true;
+    }
+
+    /// <summary>
     /// Registrerer genvejen og fortæller mødeskærmen, hvad der blev til noget.
     /// Kaldes igen, når valget ændres under Indstillinger.
     /// </summary>

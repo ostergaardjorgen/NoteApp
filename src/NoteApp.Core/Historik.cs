@@ -20,6 +20,25 @@ public enum HaendelseType
     HentetFrem,
 
     /// <summary>
+    /// Et dokument eller en optagelse er slettet.
+    ///
+    /// Der er ingen papirkurv i appen. Linjen her er derfor det eneste spor
+    /// af, at noget fandtes — hvad det hed, hvornår det forsvandt, og hvor
+    /// stort det var. Uden den kan man ikke bagefter afgøre, om en fil er
+    /// slettet eller aldrig har været der.
+    /// </summary>
+    Slettet,
+
+    /// <summary>
+    /// Et dokument eller en optagelse er flyttet til en anden mappe.
+    ///
+    /// Flytningen er grunden til, at <see cref="Haendelse.Sti"/> ikke kan stå
+    /// alene: stien i en ældre linje peger på det sted, filen lå dengang.
+    /// Id'et i <see cref="Haendelse.Kilde"/> holder.
+    /// </summary>
+    Flyttet,
+
+    /// <summary>
     /// Træning: en sætning læst op igen, en fejl markeret.
     ///
     /// Står for sig selv frem for som <see cref="Transskription"/>, selvom der
@@ -51,7 +70,23 @@ public enum Udfald
     /// <summary>Gik som det skulle.</summary>
     Fuldført,
 
-    /// <summary>Kørte, men noget skal ses efter — fx et usikkert sprogvalg.</summary>
+    /// <summary>
+    /// Sat i gang, men ikke gjort færdigt — og brugeren kan gøre noget ved det.
+    ///
+    /// BEGGE DELE SKAL VÆRE OPFYLDT. Værdien blev før også brugt om kørsler,
+    /// der var færdige, men hvor noget var værd at bemærke: et usikkert
+    /// sprogvalg, en meget kort optagelse. Det var forkert. Mærkatet beder om
+    /// en handling, og fandtes den ikke, lærte man at se bort fra mærkatet —
+    /// og så virkede det heller ikke den dag, der var noget at gøre.
+    ///
+    /// Er kørslen færdig, er den <see cref="Fuldført"/>, uanset hvor meget
+    /// der er værd at vide om den. Det, der er værd at vide, hører i
+    /// overskriften og detaljelinjen, hvor det kan læses uden at ligne en
+    /// opgave.
+    ///
+    /// Eksempel på korrekt brug: opsætningen mangler et trin — den er
+    /// påbegyndt, ikke gjort færdig, og der er en knap at trykke på.
+    /// </summary>
     SeEfter,
 
     /// <summary>Brugeren stoppede det.</summary>
@@ -88,6 +123,23 @@ public sealed class Haendelse
 
     /// <summary>Mappen eller filen, det handler om.</summary>
     public string Sti { get; init; } = "";
+
+    /// <summary>
+    /// Id'et paa det, hændelsen handler om — mødets id eller dokumentets id.
+    ///
+    /// HVORFOR ID OG IKKE NAVN
+    ///
+    /// Overskriften siger «Dokument oprettet: Møde med Cloudworks». Omdøbes
+    /// dokumentet dagen efter, står der stadig det gamle navn, og linjen
+    /// peger på noget, der ikke findes mere. Det samme gælder <see cref="Sti"/>:
+    /// en fil, der flyttes til en mappe, kan ikke findes på sin gamle sti.
+    ///
+    /// Id'et ændrer sig aldrig. Navnet slås op, når linjen vises, så
+    /// historikken følger med af sig selv.
+    ///
+    /// Tom for hændelser uden en kilde at gå til — en hentning, en backup.
+    /// </summary>
+    public string Kilde { get; init; } = "";
 
     public double Sekunder { get; init; }
 
@@ -159,7 +211,7 @@ public static class Historik
     public static void Skriv(HaendelseType slags, string hvad, string detaljer = "",
                              Udfald udfald = Udfald.Fuldført,
                              string model = "", string sti = "", double sekunder = 0,
-                             bool dataForlodMaskinen = false) =>
+                             bool dataForlodMaskinen = false, string kilde = "") =>
         Skriv(new Haendelse
         {
             Slags = slags,
@@ -169,7 +221,8 @@ public static class Historik
             Model = model,
             Sti = sti,
             Sekunder = sekunder,
-            DataForlodMaskinen = dataForlodMaskinen
+            DataForlodMaskinen = dataForlodMaskinen,
+            Kilde = kilde
         });
 
     /// <summary>
