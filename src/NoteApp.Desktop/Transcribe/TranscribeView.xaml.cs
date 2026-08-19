@@ -919,18 +919,46 @@ public partial class TranscribeView : UserControl
         var mitSprog = sprogvalg.MitSprog;
         var deresSprog = sprogvalg.DeresSprog ?? mitSprog;
 
-        // Valget huskes til naeste gang, MOEDET skrives ud - ikke til naeste
-        // gang der skrives noget som helst ud.
-        if (gemtMeta is not null)
-        {
-            gemtMeta.ValgtSprogMik = mitSprog;
-            gemtMeta.ValgtSprogLoop = sprogvalg.DeresSprog;
-            try { MeetingStore.Save(valgt.Mappe, gemtMeta); } catch (IOException) { }
-        }
-
         var modelNavn = Path.GetFileNameWithoutExtension(install.ModelPath!).Replace("ggml-", "");
         var udBase = Path.Combine(valgt.Mappe, $"mikrofon_{modelNavn}");
         var loopUdBase = Path.Combine(valgt.Mappe, $"loopback_{modelNavn}");
+
+        // ============ ET SPOR, DER IKKE HAR AENDRET SIG, KOERES IKKE IGEN ============
+        //
+        // Retter man kun sproget paa gaesternes spor, er der ingen grund til
+        // at bruge fem minutter paa mikrofonen igen - den ville give ordret
+        // det samme. Det halverer ventetiden i netop det tilfaelde, der er
+        // det almindelige, naar man opdager et forkert sprog.
+        //
+        // FIRE BETINGELSER, OG DE SKAL ALLE VAERE OPFYLDT:
+        //   - der blev valgt det SAMME sprog som sidst
+        //   - baade json og txt findes fra dengang
+        //   - de er nyere end lydfilen (ellers er lyden lavet om)
+        //   - modelnavnet staar i filnavnet, saa en anden model giver andre
+        //     filer og dermed ingen genbrug
+        //
+        // Er én af dem ikke opfyldt, koeres sporet. Det er billigere at bruge
+        // fem minutter for meget end at flette en udskrift, der ikke passer
+        // til det, der blev bedt om.
+        bool KanGenbruges(string udbase, string lyd, string? sidst, string nu) =>
+            sidst is not null && sidst == nu
+            && File.Exists(udbase + ".json") && File.Exists(udbase + ".txt")
+            && File.GetLastWriteTimeUtc(udbase + ".json") > File.GetLastWriteTimeUtc(lyd);
+
+        var genbrugMik = KanGenbruges(udBase, wav, gemtMeta?.ValgtSprogMik, mitSprog);
+        var genbrugLoop = toSpor
+                          && KanGenbruges(loopUdBase, loopWav, gemtMeta?.ValgtSprogLoop, sprogvalg.DeresSprog ?? "");
+
+        // Kan begge genbruges, er der intet at lave. Saa siges det, frem for
+        // at lade en bjaelke koere til hundrede uden at noget skete.
+        if (genbrugMik && genbrugLoop)
+        {
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Den er skrevet ud i forvejen",
+                "Begge spor er allerede skrevet ud på de sprog, du valgte, og lyden er ikke ændret siden. " +
+                "Vil du gøre det om alligevel, så vælg et andet sprog — eller slet udskrifterne i mappen.",
+                Dialogs.Slags.Valg);
+            return;
+        }
 
         _afbryd = new CancellationTokenSource();
         KoerKnap.IsEnabled = false;
@@ -1011,16 +1039,49 @@ public partial class TranscribeView : UserControl
 
             if (toSpor)
             {
-                loopR = await motor.RunAsync(
-                    new TranscriptionRequest(loopWav, install.ModelPath!, loopUdBase, deresSprog),
-                    fremdrift, _afbryd.Token);
+                if (genbrugLoop) Status.Text = "Gæsternes spor er skrevet ud i forvejen — genbruges.";
+                else
+                    loopR = await motor.RunAsync(
+                        new TranscriptionRequest(loopWav, install.ModelPath!, loopUdBase, deresSprog),
+                        fremdrift, _afbryd.Token);
 
                 sporNr = 1;
             }
 
-            var r = await motor.RunAsync(
-                new TranscriptionRequest(wav, install.ModelPath!, udBase, mitSprog),
-                fremdrift, _afbryd.Token);
+            TranscriptionResult? r = null;
+
+            if (genbrugMik) Status.Text = "Dit spor er skrevet ud i forvejen — genbruges.";
+            else
+                r = await motor.RunAsync(
+                    new TranscriptionRequest(wav, install.ModelPath!, udBase, mitSprog),
+                    fremdrift, _afbryd.Token);
+
+            // ============ ET SPOR UDEN UDSKRIFT ER EN FEJL ============
+            //
+            // Her stod intet, og det kostede en koersel. Motoren afviste
+            // sprogkoden «nb», skrev sin hjaelpetekst og stoppede - uden at
+            // det gav en fejl, appen kunne se. Sporet blev bare aldrig
+            // skrevet ud.
+            //
+            // Fletningen laeste saa den GAMLE json fra en tidligere koersel,
+            // paa et andet sprog, og satte den sammen med det nye spor. Ud
+            // kom en udskrift, der saa faerdig ud og var forkert.
+            //
+            // Nu kontrolleres det, at filerne faktisk er der. Er de ikke, er
+            // det en fejl med det samme - ikke et referat, man opdager det i.
+            r ??= LaesFaerdig(udBase, wav, install, mitSprog);
+            if (toSpor && loopR is null) loopR = LaesFaerdig(loopUdBase, loopWav, install, deresSprog);
+
+            // Valget huskes FOERST nu, hvor koerslen lykkedes. Gemtes det
+            // foer, ville en fejlet koersel efterlade et valg, der ser ud
+            // som om det virkede - og saa ville genbruget gribe fat i det
+            // naeste gang.
+            if (gemtMeta is not null)
+            {
+                gemtMeta.ValgtSprogMik = mitSprog;
+                gemtMeta.ValgtSprogLoop = sprogvalg.DeresSprog;
+                try { MeetingStore.Save(valgt.Mappe, gemtMeta); } catch (IOException) { }
+            }
 
             if (loopR is not null)
             {
@@ -1165,6 +1226,39 @@ public partial class TranscribeView : UserControl
             $"{TimeSpan.FromSeconds(r.ElapsedSeconds):mm\\:ss} · {ord} ord · {sprog} · {SporTekst(r)}";
 
         AabnKnap.IsEnabled = true;
+    }
+
+    /// <summary>
+    /// Bygger et resultat af de filer, et spor allerede har efterladt.
+    ///
+    /// Bruges to steder: når et spor er genbrugt, og som KONTROL af, at et
+    /// spor, der lige er kørt, faktisk skrev noget. Motoren kan stoppe uden
+    /// at give en fejl, appen kan se — det skete, da den afviste sprogkoden
+    /// «nb» og bare skrev sin hjælpetekst.
+    ///
+    /// Mangler filerne, kastes der. Alternativet er, at fletningen læser en
+    /// gammel fil fra en tidligere kørsel og laver en udskrift, der ser
+    /// færdig ud og er forkert.
+    /// </summary>
+    private static TranscriptionResult LaesFaerdig(string udBase, string lyd,
+                                                   InstallState install, string sprog)
+    {
+        var json = udBase + ".json";
+        var txt = udBase + ".txt";
+
+        if (!File.Exists(json) || !File.Exists(txt))
+            throw new InvalidOperationException(
+                $"Sporet «{Path.GetFileName(lyd)}» blev ikke skrevet ud. Motoren gav ingen fil.\n\n" +
+                $"Er sproget «{sprog}» et, motoren kender? Se loggen: {udBase}.log");
+
+        return new TranscriptionResult(
+            txt, json, udBase + ".log",
+            Transcriber.WavSeconds(lyd),
+            // Nul sekunder: der blev ikke koert noget. Et opdigtet tal ville
+            // goere realtidsfaktoren til en loegn.
+            0,
+            install.Engine,
+            sprog == "auto" ? "da" : sprog);
     }
 
     /// <summary>

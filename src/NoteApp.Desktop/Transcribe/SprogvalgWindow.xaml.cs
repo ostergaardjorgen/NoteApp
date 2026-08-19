@@ -1,4 +1,4 @@
-using System.Windows;
+﻿using System.Windows;
 
 namespace NoteApp.Desktop.Transcribe;
 
@@ -37,7 +37,11 @@ public partial class SprogvalgWindow : Window
     {
         ("da", "Dansk"),
         ("en", "Engelsk"),
-        ("nb", "Norsk"),
+        // «no» og IKKE «nb». Whisper kender ikke Bokmaal som selvstaendig
+        // kode: motoren svarer «unknown language 'nb'», skriver sin
+        // hjaelpetekst og stopper. Det kostede en koersel paa tyve minutter,
+        // hvor sporet fejlede uden at nogen opdagede det.
+        ("no", "Norsk"),
         ("sv", "Svensk"),
         ("de", "Tysk"),
         ("fr", "Fransk"),
