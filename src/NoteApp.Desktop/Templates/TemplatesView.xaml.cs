@@ -3,6 +3,7 @@ using System.Globalization;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using NoteApp.Core;
 using NoteApp.Core.Llm;
 
@@ -39,7 +40,12 @@ public partial class TemplatesView : UserControl
 
         // Felterne er knapper, ikke en liste at laese. Forklaringen fra
         // PromptTemplate.Fields bliver til hjaelpeteksten paa hver enkelt.
+        // DELTAGERREGLER ER IKKE MED HER.
+        // Feltet erstattes kun i systemprompten. Blev det sat ind paa
+        // materialefanen, blev det byttet ud med ingenting - reglerne
+        // forsvandt uden en lyd. Knappen til det staar paa Instruktion.
         Felter.ItemsSource = PromptTemplate.Fields
+            .Where(f => f.Key != Deltagerregler.Felt)
             .Select(f => new { Felt = "{{" + f.Key + "}}", Forklaring = f.Value })
             .ToList();
 
@@ -123,6 +129,20 @@ public partial class TemplatesView : UserControl
         // Markoeren skal staa EFTER det indsatte, saa man kan skrive videre.
         FeltBruger.CaretIndex = pos + felt.Length;
         FeltBruger.Focus();
+    }
+
+    /// <summary>
+    /// Sætter de fælles deltagerregler ind i instruktionen, hvor markøren
+    /// står. Egen metode, fordi den skriver i et andet felt end Felt_Klik.
+    /// </summary>
+    private void Systemfelt_Klik(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button b || b.Tag is not string felt) return;
+
+        var pos = FeltSystem.CaretIndex;
+        FeltSystem.Text = FeltSystem.Text.Insert(pos, felt);
+        FeltSystem.CaretIndex = pos + felt.Length;
+        FeltSystem.Focus();
     }
 
     /// <summary>
@@ -307,6 +327,96 @@ public partial class TemplatesView : UserControl
     private void Aendret(object sender, TextChangedEventArgs e)
     {
         if (!_indlæser) GemKnap.IsEnabled = true;
+        TjekFelter();
+    }
+
+    /// <summary>
+    /// Kontrollerer felterne i materialeteksten, mens der skrives.
+    ///
+    /// TRE FEJL, DER ELLERS FOERST VISER SIG I ET FAERDIGT DOKUMENT:
+    ///
+    /// 1. {{transskription}} mangler. Så beder skabelonen en model om at
+    ///    skrive et referat af ingenting. Den fejl er altid en fejl, og der
+    ///    kan ikke gemmes, før den er rettet.
+    ///
+    /// 2. Et felt findes ikke. {{deltagere}} ser rigtigt ud, men står ikke på
+    ///    listen — og så sendes de krøllede parenteser ordret videre til
+    ///    modellen, som gætter på, hvad de betyder.
+    ///
+    /// 3. {{deltagerregler}} står her i stedet for i instruktionen. Det
+    ///    erstattes kun i systemprompten, så her bliver det byttet ud med
+    ///    ingenting, og reglerne forsvinder uden en lyd.
+    /// </summary>
+    private void TjekFelter()
+    {
+        var tekst = FeltBruger.Text;
+
+        var brugte = System.Text.RegularExpressions.Regex
+            .Matches(tekst, @"\{\{\s*([a-zA-Z_æøåÆØÅ0-9]+)\s*\}\}")
+            .Select(m => m.Groups[1].Value)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        var manglerUdskrift = !brugte.Contains("transskription", StringComparer.OrdinalIgnoreCase);
+        var ukendte = brugte.Where(f => !PromptTemplate.Fields.ContainsKey(f)).ToList();
+        var reglerForkert = brugte.Contains(Deltagerregler.Felt, StringComparer.OrdinalIgnoreCase);
+
+        var linjer = new List<string>();
+
+        if (manglerUdskrift)
+            linjer.Add("{{transskription}} mangler. Uden det felt får modellen ikke selve " +
+                       "udskriften, og dokumentet bliver skrevet på ingenting. Der kan ikke " +
+                       "gemmes, før feltet er sat ind.");
+
+        if (reglerForkert)
+            linjer.Add("{{deltagerregler}} hører til under «Instruktion». Her bliver det byttet " +
+                       "ud med ingenting, og reglerne når aldrig frem til modellen.");
+
+        if (ukendte.Count > 0)
+            linjer.Add((ukendte.Count == 1 ? "Feltet " : "Felterne ") +
+                       string.Join(", ", ukendte.Select(f => "{{" + f + "}}")) +
+                       (ukendte.Count == 1 ? " findes ikke" : " findes ikke") +
+                       " og bliver sendt ordret videre til modellen. Brug knapperne herunder.");
+
+        if (linjer.Count == 0)
+        {
+            // Naar alt er i orden, staar der hvilke oplysninger der faktisk
+            // sendes. Det er svaret paa "goer den her fane en forskel?" -
+            // den goer, og det er DET her, den goer.
+            var navne = PromptTemplate.Fields.Keys
+                .Where(k => k != Deltagerregler.Felt && brugte.Contains(k, StringComparer.OrdinalIgnoreCase))
+                .ToList();
+
+            var ubrugte = PromptTemplate.Fields.Keys
+                .Where(k => k != Deltagerregler.Felt && !brugte.Contains(k, StringComparer.OrdinalIgnoreCase))
+                .ToList();
+
+            Feltbesked.Text = $"Sendes med: {string.Join(", ", navne)}." +
+                              (ubrugte.Count == 0
+                                  ? ""
+                                  : $" Sendes ikke: {string.Join(", ", ubrugte)}.");
+
+            Saet(Feltkontrol, Feltbesked, "#FF181B22", "PanelKant", "TekstMeget");
+        }
+        else
+        {
+            Feltbesked.Text = string.Join("\n\n", linjer);
+            Saet(Feltkontrol, Feltbesked,
+                 manglerUdskrift ? "#33E5484D" : "#33E8A33D",
+                 manglerUdskrift ? "FejlTekst" : "Advarsel",
+                 "Tekst");
+        }
+
+        Feltkontrol.Visibility = Visibility.Visible;
+        GemKnap.IsEnabled = GemKnap.IsEnabled && !manglerUdskrift;
+    }
+
+    private void Saet(Border ramme, TextBlock tekst, string baggrund, string kant, string skrift)
+    {
+        ramme.Background = new SolidColorBrush(
+            (Color)ColorConverter.ConvertFromString(baggrund));
+        ramme.BorderBrush = (Brush)FindResource(kant);
+        tekst.Foreground = (Brush)FindResource(skrift);
     }
 
     // ---------------------------------------------------------------- gem
@@ -362,6 +472,21 @@ public partial class TemplatesView : UserControl
         _valgt.MaxTokens = maks;
         _valgt.SystemPrompt = FeltSystem.Text.Trim();
         _valgt.UserPrompt = FeltBruger.Text.Trim();
+
+        // SIDSTE SPAERRE. Knappen er graa, naar udskriften mangler, men et
+        // gem kan ogsaa komme herind ad andre veje. En skabelon uden
+        // {{transskription}} maa ikke naa filen - den ville producere et
+        // dokument skrevet paa ingenting, og fejlen viser sig foerst dér.
+        if (!_valgt.UserPrompt.Contains("{{transskription}}", StringComparison.OrdinalIgnoreCase))
+        {
+            MaterialeFane.IsSelected = true;
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Udskriften mangler",
+                "Skabelonen kan ikke gemmes uden feltet {{transskription}} under " +
+                "«Hvad modellen får». Uden det får modellen ikke selve udskriften af " +
+                "mødet, og dokumentet bliver skrevet på ingenting.",
+                Dialogs.Slags.Pas_paa);
+            return;
+        }
 
         try
         {

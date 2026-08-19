@@ -228,17 +228,61 @@
               <TextBlock DockPanel.Dock="Top" FontSize="11.5" Margin="2,0,0,8" TextWrapping="Wrap"
                          Foreground="{StaticResource TekstMeget}"
                          Text="Reglerne, modellen arbejder efter. Det er her, du bestemmer, hvad et referat SKAL og ikke må — og det er her, en fejl i et referat oftest skal rettes." />
+
+              <!-- DELTAGERREGLERNE HOERER TIL HER, IKKE PAA MATERIALEFANEN.
+                   De er en REGEL, ikke en oplysning om moedet, og de bliver
+                   kun sat ind i systemprompten. Stod feltet paa den anden
+                   fane, blev det erstattet med ingenting - reglerne forsvandt
+                   uden en lyd, og det viste sig foerst som en opfundet
+                   deltager i et referat. -->
+              <Border DockPanel.Dock="Bottom" Background="#FF181B22" CornerRadius="8"
+                      BorderBrush="{StaticResource PanelKant}" BorderThickness="1"
+                      Padding="14,11" Margin="0,10,0,0">
+                <StackPanel>
+                  <TextBlock Text="Fælles regler, du kan sætte ind" FontSize="12.5" FontWeight="SemiBold" />
+                  <TextBlock FontSize="11.5" Margin="0,4,0,8" TextWrapping="Wrap" LineHeight="18"
+                             Foreground="{StaticResource TekstMeget}"
+                             Text="Reglerne for, hvem der kommer på deltagerlisten, er de samme i alle skabeloner. Sæt feltet ind, så følger de med — og retter vi dem ét sted, følger alle skabeloner med." />
+                  <!-- {} foerst: ellers laeser XAML den kroellede parentes som en
+                       markup-extension og vil ikke bygge. -->
+                  <Button Content="{}{{deltagerregler}}" Tag="{}{{deltagerregler}}" Click="Systemfelt_Klik"
+                          HorizontalAlignment="Left" Padding="10,5" FontFamily="Consolas" FontSize="12"
+                          ToolTip="Sætter de fælles deltagerregler ind, hvor markøren står" />
+                </StackPanel>
+              </Border>
+
               <TextBox x:Name="FeltSystem" AcceptsReturn="True" TextWrapping="Wrap"
                        VerticalScrollBarVisibility="Auto" AcceptsTab="True"
                        FontFamily="Consolas" FontSize="12.5" TextChanged="Aendret" />
             </DockPanel>
           </TabItem>
 
-          <TabItem Header="Opgave" Style="{StaticResource Fane}">
+          <!-- «OPGAVE» SAGDE IKKE, HVAD MAN KIGGEDE PAA.
+               Fanen er ikke en kvalitetsknap. Den afgoer, hvilke data der
+               overhovedet naar frem til modellen: staar {{noter}} ikke her,
+               bliver dine noter aldrig sendt. Det er et roer, ikke en
+               indstilling - og navnet skal sige det. -->
+          <TabItem x:Name="MaterialeFane" Header="Hvad modellen får" Style="{StaticResource Fane}">
             <DockPanel>
-              <TextBlock DockPanel.Dock="Top" FontSize="11.5" Margin="2,0,0,8" TextWrapping="Wrap"
-                         LineHeight="18" Foreground="{StaticResource TekstMeget}"
-                         Text="Selve opgaven, modellen får stillet. Alt herunder sendes, som det står — bortset fra felterne, der bliver skiftet ud med mødets egne oplysninger." />
+              <StackPanel DockPanel.Dock="Top" Margin="2,0,0,8">
+                <TextBlock FontSize="11.5" TextWrapping="Wrap" LineHeight="18"
+                           Foreground="{StaticResource TekstMeget}"
+                           Text="«Instruktion» er reglerne — hvad modellen skal gøre. Det her er materialet, den skal gøre det på. Alt herunder sendes, som det står, bortset fra felterne, der bliver skiftet ud med mødets egne oplysninger." />
+                <TextBlock FontSize="11.5" Margin="0,5,0,0" TextWrapping="Wrap" LineHeight="18"
+                           Foreground="{StaticResource TekstMeget}"
+                           Text="Står et felt ikke her, når de oplysninger aldrig frem — uanset hvad instruktionen beder om." />
+
+                <!-- KONTROLLEN AF FELTERNE.
+                     En skabelon uden {{transskription}} beder en model om at
+                     skrive et referat af ingenting. Den fejl opdages foerst i
+                     et faerdigt dokument, man skulle bruge til noget - derfor
+                     staar den her, mens man skriver, og ikke som en
+                     overraskelse bagefter. -->
+                <Border x:Name="Feltkontrol" Visibility="Collapsed" CornerRadius="7"
+                        BorderThickness="1" Padding="12,9" Margin="0,9,0,0">
+                  <TextBlock x:Name="Feltbesked" FontSize="12" LineHeight="19" TextWrapping="Wrap" />
+                </Border>
+              </StackPanel>
 
               <!-- FELTERNE STAAR HER, IKKE I EN FANE FOR SIG.
                    De var en fane med en liste, man kunne laese. Det svarede
