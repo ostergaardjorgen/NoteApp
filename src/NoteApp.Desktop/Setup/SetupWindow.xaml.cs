@@ -25,7 +25,7 @@ public partial class SetupWindow : Window
 
     private static readonly (string Titel, string Under)[] Trin =
     {
-        ("Velkommen til NoteApp", "Møde-noter der bliver på din egen maskine"),
+        ("Velkommen til NoteApp", "Lyden bliver på din maskine — teksten bearbejdes i Europa"),
         ("Sidste trin: hent Whisper", "Motoren og en sprogmodel, så appen kan skrive dine møder ud")
     };
 
@@ -268,8 +268,12 @@ public partial class SetupWindow : Window
 
             Dialogs.AppDialog.Vis(Window.GetWindow(this), "Klar", klar + "\n\n" +
                 "Tryk «Optag møde», når dit næste møde begynder — så er du i gang.\n\n" +
-                "Vil du vide, hvor godt appen rammer netop din stemme, kan du læse en prøvetekst " +
-                "op under «Start her». Det er frivilligt.", Dialogs.Slags.Valg);
+                // HER STOD «Start her». Det menupunkt findes ikke mere - det
+                // hoerte til oplaesning og traening, som er fjernet. Testen af
+                // mikrofonen er tilbage under Indstillinger, hvor man er, naar
+                // man vaelger mikrofon.
+                "Vil du vide, om din mikrofon er god nok, kan du læse en prøvetekst " +
+                "op under «Indstillinger» → «Lyd». Det er frivilligt.", Dialogs.Slags.Valg);
         }
 
         DialogResult = true;

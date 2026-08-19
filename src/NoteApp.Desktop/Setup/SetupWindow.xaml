@@ -75,8 +75,12 @@
         <RowDefinition Height="Auto" />
       </Grid.RowDefinitions>
 
+      <!-- HER STOD "det eneste, appen bruger internettet til - der sendes
+           intet fra din pc". Det var sandt, da alt kunne koere lokalt. Nu
+           skrives dokumenter hos Mistral, og saa er saetningen forkert - to
+           skaerme foer staar det rigtige, og de maa ikke modsige hinanden. -->
       <TextBlock Grid.Row="0" FontSize="13" Foreground="{StaticResource TekstSvag}" Margin="0,0,0,16" LineHeight="20"
-                 Text="Transskriptionen laves af Whisper, som kører på din egen maskine. Motoren og en sprogmodel skal hentes én gang. Det er det eneste, appen bruger internettet til — og der sendes intet fra din pc, kun hentes ned." />
+                 Text="Transskriptionen laves af Whisper, som kører på din egen maskine. Motoren og en sprogmodel skal hentes én gang. Selve hentningen henter kun ned — der sendes intet fra din pc undervejs." />
 
       <Border Grid.Row="1" Background="{StaticResource Panel}" CornerRadius="10" Padding="18,15"
               BorderBrush="{StaticResource PanelKant}" BorderThickness="1" Margin="0,0,0,12">

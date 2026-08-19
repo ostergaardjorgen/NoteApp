@@ -1,10 +1,34 @@
-# Mine data — hvor de ligger, og hvorfor de aldrig kan lække
+# Mine data — hvor de ligger, og hvad der forlader maskinen
 
-## Grundprincip: intet forlader den pc, appen kører på
+> ## ⚠️ Grundprincippet er ændret 19. august 2026
+>
+> Dokumentet herunder blev skrevet, da **alt** kørte lokalt, og det bærer
+> stadig præg af det. Læs det som en protokol over, hvad der blev besluttet
+> hvornår — ikke som en beskrivelse af, hvad appen gør i dag.
+>
+> **Sådan er det nu:**
+>
+> | | |
+> |---|---|
+> | Lyd | Forlader **aldrig** maskinen. Optagelse og udskrift sker lokalt med Whisper. |
+> | Udskriften | Sendes til Mistral AI's europæiske endepunkt, **når du beder om et dokument** — og kun da. |
+> | Noter, skabeloner, dokumenter, indstillinger | Bliver på maskinen. |
+> | Telemetri, fejlrapportering, skysynkronisering | Findes ikke. |
+>
+> Skiftet var et bevidst valg, ikke et brud: dokumentdelen kunne ikke laves
+> lokalt i en kvalitet, der var til at bruge — det er målt, se
+> `maaling-sky.md`. Til gengæld er dokumentdelen den **eneste** vej ud, den
+> kræver din egen API-nøgle, og appen kan bruges til optagelse og udskrift
+> helt uden den.
+>
+> Hvad vi ved og ikke ved om leverandøren står under **Compliance** i appen
+> og i `mistral-dpa.md`. Dér står også det, vi ikke kan garantere.
+
+## Det oprindelige grundprincip (10. august 2026, delvist ophævet)
 
 **Ingen feature i NoteApp må introducere en risiko for, at data kan forlade den pc, appen er installeret på.** Det er ikke en anbefaling og ikke en standardindstilling, der kan skrues på — det er en grænse, der ligger fast. En feature, der bryder den, bliver ikke bygget, uanset hvor nyttig den er.
 
-Besluttet 10. august 2026. Det kostede Fase 3, auto-resuméet — se afsnittet nederst.
+Besluttet 10. august 2026. Det kostede Fase 3, auto-resuméet — se afsnittet nederst. **Ophævet for udskriften 19. august 2026**, se rammen øverst. Reglen gælder uændret for lyd, noter og alt andet.
 
 ### Retningen er det afgørende
 
@@ -12,12 +36,12 @@ Præciseret 10. august 2026. Reglen hed først "ingen netværkskald overhovedet"
 
 | Retning | Regel |
 |---|---|
-| **Ud af maskinen** | Forbudt, uden undtagelse. Ingen optagelser, noter, ordbog, metadata eller fejlrapporter. |
+| **Ud af maskinen** | Forbudt for lyd, noter og metadata. Siden 19. august 2026 gælder én undtagelse: **udskriften**, når du selv beder om et dokument. Se rammen øverst. |
 | **Ned på maskinen** | Tilladt for **Whisper-motoren og sprogmodellen** — og kun efter en informeret godkendelse. |
 
 Hentningen sender intet om dig med. Den beder om en navngiven fil fra en navngiven adresse, og appen viser begge dele, før den spørger. Det eneste, modtageren kan udlede, er at nogen på din internetforbindelse har hentet en Whisper-model — samme spor som at hente et hvilket som helst program.
 
-Al netværkskode ligger i én fil, `src\NoteApp.Core\Downloader.cs`. Ét sted at læse, ét sted at revidere. Skal der hentes noget nyt, går det gennem den; skal der *sendes* noget, er svaret nej.
+Netværkskoden ligger to steder, og det er med vilje kun to: `src\NoteApp.Core\Downloader.cs` henter ned (motor og model), og `src\NoteApp.Core\Llm\SkyRunner.cs` er det eneste sted, der sender noget ud. Skal der sendes fra et tredje sted, er svaret nej.
 
 ### Når noget alligevel kan få data ud
 
@@ -61,9 +85,9 @@ Testteksten `fase0\oplaesning\testtekst.md` bruger **opdigtede navne** og kan li
 
 ## Backup
 
-**Sikkerhedskopien tages i appen** under *Filer og backup*. Der kan du vælge mappe, se de gemte arkiver og tage en kopi med det samme.
+**Sikkerhedskopien tages i appen** under *Indstillinger* → *Backup*. Der kan du vælge mappe, se de gemte arkiver og tage en kopi med det samme.
 
-**Lydfiler er som standard IKKE med.** Det er ikke en spareøvelse: en times optagelse fylder over 100 MB, mens ordbog, noter, transskriptioner og indstillinger tilsammen er få MB. Lyden er samtidig det, der er lettest at undvære — arbejdet ligger i transskriptionen og i de rettelser, appen har lært. Tages lyden med hver uge, bliver arkivet så stort, at man holder op med at tage backup, og så er man dårligere stillet end med en lille kopi hver gang. Vil du have lyden med, er der et afkrydsningsfelt, og appen viser forskellen i størrelse, før du vælger.
+**Lydfiler er som standard IKKE med.** Det er ikke en spareøvelse: en times optagelse fylder over 100 MB, mens noter, udskrifter, dokumenter, skabeloner og indstillinger tilsammen er få MB. Lyden er samtidig det, der er lettest at undvære — arbejdet ligger i udskriften og i de dokumenter, der er lavet ud af den. Tages lyden med hver uge, bliver arkivet så stort, at man holder op med at tage backup, og så er man dårligere stillet end med en lille kopi hver gang. Vil du have lyden med, er der et afkrydsningsfelt, og appen viser forskellen i størrelse, før du vælger.
 
 Loggen skriver, om lyden var med. Uden det kan man ikke bagefter afgøre, om et arkiv rækker til at gendanne et helt møde eller kun teksten.
 
@@ -113,4 +137,6 @@ Fase 3 var auto-resumé i appen: transskriptionen sendt til Claudes API, svaret 
 
 Skulle auto-resumé blive relevant igen, er den eneste vej en **lokal model på din egen maskine**. Det er en ny beslutning, ikke en genoplivning af den gamle.
 
-Alt i appen — optagelse, transskription, diarisering, ordbog, rettelser, eksport — kører udelukkende på din maskine. Whisper er en lokal binær, modellerne ligger på din disk, og der er intet kald ud af huset overhovedet.
+Optagelse, transskription og eksport kører udelukkende på din maskine. Whisper er en lokal binær, og modellen ligger på din disk.
+
+*Sætningen sluttede oprindeligt «og der er intet kald ud af huset overhovedet». Det gælder ikke længere for dokumentdelen — se rammen øverst i dokumentet.*

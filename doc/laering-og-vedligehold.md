@@ -1,5 +1,19 @@
 # Lokal læring — hvordan appen bliver klogere uden at blive låst
 
+> ## ⚠️ Forældet 18. august 2026 — funktionen findes ikke
+>
+> Dette dokument beskriver ordbogen og træningen, som er **fjernet fra appen**.
+> Grunden var målt, ikke en fornemmelse: hverken ordlisten til Whisper,
+> sprogmodellen over udskriften eller ordbogen til sprogmodellen kunne
+> påvises at flytte noget. Tre håndtag, tre nuller — se `findings.md`
+> afsnit «Ordbogen — virker ikke som antaget» og `maaling-sky.md`.
+>
+> Dokumentet bliver liggende, fordi det forklarer **hvorfor** vi troede, det
+> ville virke, og hvad der skulle måles for at afgøre det. Det er værd at
+> kunne læse igen, hvis spørgsmålet en dag tages op på ny.
+>
+> Intet herunder beskriver, hvad appen gør i dag.
+
 ## Spørgsmålet
 
 Kan appen lære af de ord, den misforstår, så den bliver bedre over tid — og kan den læring overleve, at Whisper opdateres?
