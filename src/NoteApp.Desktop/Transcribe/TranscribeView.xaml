@@ -54,6 +54,15 @@
                 MinWidth="150" IsEnabled="False" Padding="14,7" Content="Opret dokument"
                 ToolTip="Lav et referat eller et andet dokument ud af udskriften" />
 
+        <!-- Kopiér staar FOER "Opret dokument", fordi det er den lettere vej
+             ud: hele udskriften i udklipsholderen, saa den kan sættes ind et
+             andet sted - en anden model, en mail, et dokument man selv
+             skriver. Den er graa, indtil der ER en udskrift. -->
+        <Button DockPanel.Dock="Right" x:Name="KopierKnap" Click="Kopier_Click"
+                MinWidth="130" IsEnabled="False" Padding="14,7" Margin="0,0,8,0"
+                Content="Kopiér teksten"
+                ToolTip="Læg hele udskriften i udklipsholderen" />
+
         <TextBlock DockPanel.Dock="Right" Text="&#xE76C;" FontFamily="Segoe MDL2 Assets"
                    FontSize="11" VerticalAlignment="Center" Margin="10,0"
                    Foreground="{StaticResource PanelKant}" />
@@ -325,7 +334,7 @@
                     <TextBlock Text="Lyden skrives ud" FontSize="13.5" FontWeight="SemiBold" />
                     <TextBlock FontSize="12.5" LineHeight="19" TextWrapping="Wrap" Margin="0,3,0,0"
                                Foreground="{StaticResource TekstMeget}"
-                               Text="Fremdriften står under værktøjslinjen. Med grafikkort går det hurtigere end lyden varer; uden tager det længere tid end selve mødet." />
+                               Text="Fremdriften står nederst i denne rude. Med grafikkort går det hurtigere end lyden varer; uden tager det længere tid end selve mødet." />
                   </StackPanel>
                 </Grid>
 
@@ -358,7 +367,7 @@
 
               <TextBlock FontSize="12.5" LineHeight="20" Margin="2,18,0,0" TextWrapping="Wrap"
                          Foreground="{StaticResource TekstMeget}"
-                         Text="Teksten bliver ikke perfekt. Navne og fagord er det, der oftest rammes forkert. Du kan rette direkte i udskriften, før du laver et dokument ud af den." />
+                         Text="Teksten bliver ikke perfekt. Navne og fagord er det, der oftest rammes forkert. Udskriften kan ikke rettes her — den er, hvad maskinen hørte. Skal noget rettes, gøres det i det færdige dokument." />
             </StackPanel>
           </ScrollViewer>
 

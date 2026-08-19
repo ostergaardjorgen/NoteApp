@@ -615,6 +615,7 @@ public partial class TranscribeView : UserControl
             : "Skriv lyden ud igen. Den nuværende udskrift bliver overskrevet";
 
         ReferatKnap.IsEnabled = færdig is not null && _afbryd is null;
+        KopierKnap.IsEnabled = færdig is not null;
         OmdoebKnap.IsEnabled = valgt is not null && _afbryd is null;
         FlytKnap.IsEnabled = valgt is not null && _afbryd is null;
 
@@ -889,7 +890,7 @@ public partial class TranscribeView : UserControl
         Resultat.Visibility = Visibility.Collapsed;
         ForklaringOverskrift.Text = "Skriver lyden ud …";
         ForklaringUnder.Text =
-            "Fremdriften står nederst. Teksten dukker op her, når den er færdig, og bliver gemt automatisk.";
+            "Fremdriften står nederst i ruden. Teksten dukker op her, når den er færdig, og bliver gemt automatisk.";
 
         var fremdrift = new Progress<TranscriptionProgress>(p =>
         {
@@ -1063,6 +1064,44 @@ public partial class TranscribeView : UserControl
         {
             Dialogs.AppDialog.Vis(Window.GetWindow(this), "Sletning fejlede", $"Kunne ikke slette:\n\n{ex.Message}\n\n" +
                 "Er filen åben i et andet program, så luk det og prøv igen.", Dialogs.Slags.Pas_paa);
+        }
+    }
+
+    /// <summary>
+    /// Lægger hele udskriften i udklipsholderen.
+    ///
+    /// Den findes, fordi udskriften er brugerens tekst og ikke appens. Vil
+    /// man have den over i en anden model, en mail eller et dokument, man
+    /// selv skriver, skal det ikke kræve at finde .txt-filen på disken.
+    ///
+    /// Der kopieres fra FILEN og ikke fra tekstfeltet: feltet kan være
+    /// afkortet under visning, og en halv udskrift, der ligner en hel, er
+    /// værre end ingen.
+    /// </summary>
+    private void Kopier_Click(object sender, RoutedEventArgs e)
+    {
+        if (Valgt is not { } valgt) return;
+        if (FindTekst(valgt.Mappe) is not { } fil) return;
+
+        try
+        {
+            var tekst = File.ReadAllText(fil, System.Text.Encoding.UTF8).Trim();
+            Clipboard.SetText(tekst);
+
+            var ord = tekst.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries).Length;
+            Status.Text = $"Hele udskriften er kopieret — {ord:N0} ord. Sæt den ind, hvor du vil bruge den.";
+            Fremdriftsrude.Visibility = Visibility.Visible;
+            Fremdrift.Visibility = Visibility.Collapsed;
+            Fremdriftstal.Text = "";
+        }
+        catch (Exception ex)
+        {
+            // Udklipsholderen kan vaere laast af et andet program. Det er
+            // ikke en fejl i appen, og det skal siges som det er.
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Kunne ikke kopiere",
+                $"Udklipsholderen kunne ikke skrives til:\n\n{ex.Message}\n\n" +
+                "Det sker, hvis et andet program holder den. Prøv igen om et øjeblik.",
+                Dialogs.Slags.Pas_paa);
         }
     }
 
