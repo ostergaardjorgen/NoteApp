@@ -99,8 +99,14 @@ public partial class MainWindow : Window
 
         // Versionen paa appen kender vi — den staar i assemblyen. Det er kun
         // Whispers version, vi ikke kan aflaese; se WhisperInstall.
+        //
+        // TRE LED, IKKE TO. ToString(2) klippede tredje led vaek, og det er
+        // netop dét led, udgivelserne taeller paa: 1.0.1, 1.0.2, 1.0.3 stod
+        // alle sammen som "v1.0". Saa kunne man ikke se paa skaermen, hvilken
+        // udgave man koerte - og det er hele grunden til, at nummeret staar
+        // der. Fjerde led er altid 0 og siger ingenting.
         Version.Text = "v" + (Assembly.GetExecutingAssembly()
-            .GetName().Version?.ToString(2) ?? "0.0");
+            .GetName().Version?.ToString(3) ?? "0.0.0");
         DataSti.Text = UserDataPaths.Root;
         OpdaterOpsaetningsmaerkat();
 
