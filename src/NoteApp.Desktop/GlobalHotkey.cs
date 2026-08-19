@@ -1,4 +1,4 @@
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
 using NoteApp.Core;
@@ -55,13 +55,23 @@ public sealed class GlobalHotkey : IDisposable
         //
         // Hastighed er hele pointen. Et møde begynder, og der skal trykkes
         // ÉN gang, uden at kigge ned på tastaturet.
+        //
+        // NULLET STÅR FØRST, OG DET ER DERFOR STANDARDEN. HotkeyId = null
+        // betyder «tag den første ledige», så rækkefølgen her ER valget.
+        // Nullet ligger yderst på rækken og rammes uden at flytte hånden.
+        //
+        // Ctrl+0 UDEN Shift er efterprøvet ledig 19-08-2026 og er alligevel
+        // ikke med. En global genvej vinder over det program, man står i, og
+        // Ctrl+0 nulstiller zoom i enhver browser og fjerner afsnitsafstand i
+        // Word. Windows siger ikke fra — konflikten viser sig som «zoom virker
+        // ikke længere», og den ville ingen kæde sammen med den her app.
+        liste.Add(new HotkeyValg("ctrl-shift-0", "Ctrl+Shift+0", MOD_CONTROL | MOD_SHIFT, 0x30,
+            "Nullet ligger yderst på talrækken og rammes med venstre hånd alene."));
+
         for (var n = 1; n <= 9; n++)
             liste.Add(new HotkeyValg($"ctrl-shift-{n}", $"Ctrl+Shift+{n}",
                 MOD_CONTROL | MOD_SHIFT, (uint)(0x30 + n),
                 "Tal rammes med venstre hånd alene og er sjældent taget af andre programmer."));
-
-        liste.Add(new HotkeyValg("ctrl-shift-0", "Ctrl+Shift+0", MOD_CONTROL | MOD_SHIFT, 0x30,
-            "Tal rammes med venstre hånd alene og er sjældent taget af andre programmer."));
 
         // Bogstaverne som reserve. De er nemmere at huske, men oftere taget —
         // Ctrl+Alt+R og Ctrl+Alt+M var begge optaget på den første maskine,
