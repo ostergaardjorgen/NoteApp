@@ -899,6 +899,35 @@ public partial class TranscribeView : UserControl
         var loopWav = Path.Combine(valgt.Mappe, "loopback.wav");
         var toSpor = File.Exists(loopWav);
 
+        // ============ SPROGET SPOERGES DER OM HER ============
+        //
+        // Ikke en indstilling, ikke et gaet. Se SprogvalgWindow for hvorfor -
+        // kort fortalt: appen gaettede begge spor til engelsk paa et
+        // dansk-norsk moede, og hele udskriften blev vroevl.
+        //
+        // Der spoerges FOER noget saettes i gang. Et spoergsmaal midt i en
+        // koersel paa tyve minutter er ikke et spoergsmaal, det er en
+        // afbrydelse.
+        var gemtMeta = MeetingStore.Load(valgt.Mappe);
+
+        var sprogvalg = new SprogvalgWindow(toSpor,
+            gemtMeta?.ValgtSprogMik, gemtMeta?.ValgtSprogLoop, valgt.Titel)
+        { Owner = Window.GetWindow(this) };
+
+        if (sprogvalg.ShowDialog() != true) return;
+
+        var mitSprog = sprogvalg.MitSprog;
+        var deresSprog = sprogvalg.DeresSprog ?? mitSprog;
+
+        // Valget huskes til naeste gang, MOEDET skrives ud - ikke til naeste
+        // gang der skrives noget som helst ud.
+        if (gemtMeta is not null)
+        {
+            gemtMeta.ValgtSprogMik = mitSprog;
+            gemtMeta.ValgtSprogLoop = sprogvalg.DeresSprog;
+            try { MeetingStore.Save(valgt.Mappe, gemtMeta); } catch (IOException) { }
+        }
+
         var modelNavn = Path.GetFileNameWithoutExtension(install.ModelPath!).Replace("ggml-", "");
         var udBase = Path.Combine(valgt.Mappe, $"mikrofon_{modelNavn}");
         var loopUdBase = Path.Combine(valgt.Mappe, $"loopback_{modelNavn}");
@@ -975,26 +1004,10 @@ public partial class TranscribeView : UserControl
             // vaerten dansk. Med ét spor er det ét sprog, og den ene side
             // bliver skrevet ud gennem den forkerte model.
             //
-            // MIKROFONEN faar DIT sprog fra Indstillinger. Det er din egen
-            // stemme og dem i samme lokale - det ved du, og det skal ikke
-            // gaettes. Auto-detekteringen blev maalt til ENGELSK med 42 %
-            // sikkerhed paa netop det moede, og hele udskriften blev engelsk
-            // vroevl af dansk tale. Referatet byggede paa det.
-            //
-            // LOOPBACK detekteres frit. Modparten skifter fra moede til
-            // moede, og der er ingen indstilling, der kan vide det paa
-            // forhaand.
-            var mitSprog = string.IsNullOrWhiteSpace(AppSettings.Current.MitSprog)
-                ? "da"
-                : AppSettings.Current.MitSprog!;
-
+            // Sprogene kommer fra spoergsmaalet oeverst i metoden. Hvert
+            // spor faar sit eget: de to sider af et moede taler ikke
+            // noedvendigvis samme sprog.
             TranscriptionResult? loopR = null;
-
-            // Null betyder «samme som mit». De fleste moeder holdes paa ét
-            // sprog, og saa er det svaret, der kraever mindst opmaerksomhed.
-            var deresSprog = string.IsNullOrWhiteSpace(AppSettings.Current.DeresSprog)
-                ? mitSprog
-                : AppSettings.Current.DeresSprog!;
 
             if (toSpor)
             {

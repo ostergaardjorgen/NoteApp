@@ -1,0 +1,72 @@
+<Window x:Class="NoteApp.Desktop.Transcribe.SprogvalgWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Hvilket sprog blev der talt?" SizeToContent="Height" Width="560"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
+        Background="{StaticResource Baggrund}" Foreground="{StaticResource Tekst}">
+
+  <!-- ============== SPROGET SPØRGES DER OM HER ==============
+
+       Det var før en indstilling under Lyd, og det var forkert. Man holder
+       ikke alle sine møder på det samme sprog: nogle er på dansk, nogle på
+       engelsk, og gæsterne kan tale et tredje.
+
+       Det er heller ikke noget, appen kan gætte. Målt på et rigtigt
+       dansk-norsk møde blev BEGGE spor bedømt til engelsk — mikrofonen med
+       42 % sandsynlighed, gæsterne med 26-34 %, målt fra fire forskellige
+       steder i optagelsen. Et gæt på sproget ødelægger ikke ét ord; det
+       ødelægger hele udskriften, og resultatet ligner et resultat.
+
+       Man ved det selv. Man var der. -->
+
+  <Grid Margin="26,22,26,22">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+
+    <StackPanel Grid.Row="0" Margin="0,0,0,16">
+      <TextBlock Text="Hvilket sprog blev der talt?" FontSize="19" FontWeight="SemiBold"
+                 TextWrapping="Wrap" />
+      <TextBlock x:Name="Under" FontSize="13" LineHeight="21" Margin="0,7,0,0" TextWrapping="Wrap"
+                 Foreground="{StaticResource TekstSvag}" />
+    </StackPanel>
+
+    <StackPanel Grid.Row="1">
+      <TextBlock Text="Dit spor — mikrofonen" FontSize="13" FontWeight="SemiBold" />
+      <TextBlock Style="{StaticResource Underskrift}" Margin="0,3,0,6" TextWrapping="Wrap"
+                 Text="Dig og alle andre i det samme lokale." />
+      <ComboBox x:Name="Mit" FontSize="13.5" Padding="9,7" />
+
+      <StackPanel x:Name="DeresPanel" Margin="0,18,0,0" Visibility="Collapsed">
+        <TextBlock Text="Gæsternes spor — højttaleren" FontSize="13" FontWeight="SemiBold" />
+        <TextBlock Style="{StaticResource Underskrift}" Margin="0,3,0,6" TextWrapping="Wrap"
+                   Text="De øvrige mødedeltagere, som de lød i højttaleren. De behøver ikke tale samme sprog som dig." />
+        <ComboBox x:Name="Deres" FontSize="13.5" Padding="9,7" />
+      </StackPanel>
+    </StackPanel>
+
+    <!-- Advarslen står ved siden af valget, ikke som en fodnote. «Find selv»
+         ser ud som det trygge valg, og det er det modsatte. -->
+    <Border Grid.Row="2" Background="#33E8A33D" BorderBrush="{StaticResource Advarsel}"
+            BorderThickness="1" CornerRadius="8" Padding="14,11" Margin="0,18,0,0">
+      <TextBlock FontSize="12.5" LineHeight="20" TextWrapping="Wrap"
+                 Foreground="{StaticResource Tekst}"
+                 Text="Vælg «find selv» kun hvis du virkelig ikke ved det. Målt på et dansk-norsk møde gættede appen begge spor til engelsk — og så bliver hele udskriften engelsk vrøvl af det, der blev sagt. Det ligner et resultat, og det opdages først i referatet." />
+    </Border>
+
+    <Grid Grid.Row="3" Margin="0,20,0,0">
+      <TextBlock x:Name="Husket" VerticalAlignment="Center" FontSize="11.5"
+                 Foreground="{StaticResource TekstMeget}" TextWrapping="Wrap" MaxWidth="300"
+                 HorizontalAlignment="Left" />
+      <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+        <Button Content="Annullér" Click="Annuller_Click" Padding="18,9" Margin="0,0,10,0"
+                IsCancel="True" />
+        <Button Content="Skriv ud" Click="Ok_Click" Padding="22,9" MinWidth="130"
+                Style="{StaticResource Primaer}" IsDefault="True" />
+      </StackPanel>
+    </Grid>
+  </Grid>
+</Window>

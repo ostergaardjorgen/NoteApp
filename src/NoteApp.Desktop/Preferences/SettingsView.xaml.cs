@@ -57,8 +57,6 @@ public partial class SettingsView : UserControl
             : "Appen åbner ikke et vindue ved opstart — den ligger klar, indtil du trykker genvejstasten.";
 
         VisGenveje();
-        VisSprog();
-        VisDeresSprog();
     }
 
     private bool _indlæserGenveje;
@@ -180,89 +178,11 @@ public partial class SettingsView : UserControl
 
     // ------------------------------------------------------------------ valg
 
-    /// <summary>
-    /// Sprogene, mikrofonsporet kan skrives ud med.
-    ///
-    /// Listen er kort med vilje. Whisper kan næsten hundrede sprog, men det er
-    /// DIT eget sprog, der vælges her — ikke mødets. En rulleliste med
-    /// halvfems punkter gør det svært at finde de tre, nogen faktisk bruger.
-    /// «auto» står nederst, fordi den er den, der blev målt forkert.
-    /// </summary>
-    private static readonly (string Kode, string Navn)[] Sprogvalg =
-    {
-        ("da", "Dansk"),
-        ("nb", "Norsk"),
-        ("sv", "Svensk"),
-        ("en", "Engelsk"),
-        ("de", "Tysk"),
-        ("auto", "Lad appen gætte")
-    };
-
-    private bool _indlæserSprog;
-
-    private void VisSprog()
-    {
-        _indlæserSprog = true;
-
-        MitSprog.ItemsSource = Sprogvalg.Select(v => v.Navn).ToList();
-
-        var kode = string.IsNullOrWhiteSpace(AppSettings.Current.MitSprog)
-            ? "da"
-            : AppSettings.Current.MitSprog!;
-
-        var nr = Array.FindIndex(Sprogvalg, v => v.Kode == kode);
-        MitSprog.SelectedIndex = nr < 0 ? 0 : nr;
-
-        _indlæserSprog = false;
-    }
-
-    /// <summary>
-    /// Modpartens sprog. «Samme som mit» står først og er standarden —
-    /// de fleste møder holdes på ét sprog.
-    /// </summary>
-    private static readonly (string Kode, string Navn)[] Deresvalg =
-        new[] { ("", "Samme som mit") }.Concat(Sprogvalg).ToArray();
-
-    private void VisDeresSprog()
-    {
-        _indlæserSprog = true;
-
-        DeresSprog.ItemsSource = Deresvalg.Select(v => v.Navn).ToList();
-
-        var kode = AppSettings.Current.DeresSprog ?? "";
-        var nr = Array.FindIndex(Deresvalg, v => v.Kode == kode);
-        DeresSprog.SelectedIndex = nr < 0 ? 0 : nr;
-
-        _indlæserSprog = false;
-    }
-
-    private void DeresSprog_Valgt(object sender, SelectionChangedEventArgs e)
-    {
-        if (_indlæserSprog || DeresSprog.SelectedIndex < 0) return;
-
-        var valg = Deresvalg[DeresSprog.SelectedIndex];
-        AppSettings.Current.DeresSprog = valg.Kode.Length == 0 ? null : valg.Kode;
-        AppSettings.Current.Save();
-
-        Status.Text = valg.Kode.Length == 0
-            ? "De andre skrives ud på samme sprog som dig, fra næste udskrift."
-            : $"De andre skrives ud på {valg.Navn.ToLowerInvariant()} fra næste udskrift.";
-    }
-
-    private void MitSprog_Valgt(object sender, SelectionChangedEventArgs e)
-    {
-        if (_indlæserSprog || MitSprog.SelectedIndex < 0) return;
-
-        var valg = Sprogvalg[MitSprog.SelectedIndex];
-        AppSettings.Current.MitSprog = valg.Kode;
-        AppSettings.Current.Save();
-
-        // Gaelder foerst naeste gang, der skrives ud. Det skal siges - ellers
-        // tror man, at den udskrift, man staar med, lige er blevet rettet.
-        Status.Text = valg.Kode == "auto"
-            ? "Appen gætter selv sproget på mikrofonen fra næste udskrift."
-            : $"Mikrofonen skrives ud på {valg.Navn.ToLowerInvariant()} fra næste udskrift.";
-    }
+    // HER LAA VALGET AF SPROG - dit og modpartens. Flyttet til
+    // Transcribe\SprogvalgWindow, hvor der spoerges ved selve knappen.
+    // En global indstilling var rigtig for ét moede og forkert for det
+    // naeste, og fejlen viste sig ikke som en fejl: udskriften saa faerdig
+    // ud, den var bare paa det forkerte sprog.
 
     private void Mikrofon_Valgt(object sender, SelectionChangedEventArgs e)
     {

@@ -1,4 +1,4 @@
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace NoteApp.Core;
 
@@ -98,6 +98,22 @@ public sealed class MeetingMetadata
     /// <see cref="NoteApp.Core.Mapper"/> for hvorfor.
     /// </summary>
     public string? Mappe { get; set; }
+
+    /// <summary>
+    /// Sproget, der blev VALGT til mikrofonsporet, sidst der blev skrevet ud.
+    ///
+    /// Huskes pr. møde og ikke som en global indstilling. Man holder ikke
+    /// alle sine møder på samme sprog, men et bestemt møde har det samme
+    /// sprog, hver gang det skrives ud igen — og så skal man ikke tage
+    /// stilling forfra, bare fordi man gør det om.
+    ///
+    /// Forskellig fra <see cref="Language"/>, som er det, Whisper LANDEDE på.
+    /// Det ene er et valg, det andet er et udfald.
+    /// </summary>
+    public string? ValgtSprogMik { get; set; }
+
+    /// <summary>Det samme for gæsternes spor. Null når mødet kun har ét spor.</summary>
+    public string? ValgtSprogLoop { get; set; }
 
     public Dictionary<string, string> Tracks { get; init; } = new();
 }

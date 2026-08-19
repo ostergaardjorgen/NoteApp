@@ -128,43 +128,16 @@
             <TextBlock x:Name="MikAdvarsel" FontSize="12" Margin="0,10,0,0" TextWrapping="Wrap"
                        Foreground="{StaticResource Advarsel}" Visibility="Collapsed" />
 
-            <!-- ============ DIT SPROG ============
-                 Det staar HER, ved mikrofonen, og ikke under en
-                 sprogindstilling for sig. Mikrofonsporet ER dig, og det er
-                 dét spor, valget gaelder.
+            <!-- HER LAA TO RULLELISTER MED SPROG: dit og modpartens.
+                 De er fjernet 19-08-2026. En global indstilling ville vaere
+                 rigtig for ét moede og forkert for det naeste - man holder
+                 moeder paa dansk, paa engelsk, og med gaester der taler et
+                 tredje sprog.
 
-                 Det findes, fordi Whispers egen detektering blev maalt
-                 forkert paa et rigtigt moede: 42 % sikker paa ENGELSK, mens
-                 der blev talt dansk - og hele udskriften blev engelsk vroevl,
-                 som et referat saa blev bygget paa. Detekteringen sker paa de
-                 foerste tredive sekunder, hvor der som regel ikke bliver sagt
-                 noget. -->
-            <Border Background="#FF181B22" BorderBrush="{StaticResource PanelKant}" BorderThickness="1"
-                    CornerRadius="8" Padding="14,12" Margin="0,16,0,0">
-              <StackPanel>
-                <TextBlock Text="Sproget, du taler" FontSize="13" FontWeight="SemiBold" />
-                <TextBlock Style="{StaticResource Underskrift}" Margin="0,3,0,9" TextWrapping="Wrap"
-                           Text="Gælder mikrofonen — dig og dem i samme lokale. De andre mødedeltagere bliver altid genkendt automatisk, så et dansk-norsk møde bliver skrevet ud på begge sprog." />
-                <ComboBox x:Name="MitSprog" SelectionChanged="MitSprog_Valgt" MaxWidth="320"
-                          HorizontalAlignment="Left" />
-                <TextBlock Style="{StaticResource Underskrift}" Margin="0,9,0,0" TextWrapping="Wrap"
-                           Foreground="{StaticResource TekstMeget}"
-                           Text="«Lad appen gætte» er den gamle opførsel. Den blev målt forkert på et rigtigt møde — hele udskriften kom ud på engelsk, fordi de første tredive sekunder var tavse." />
-
-                <!-- OGSAA MODPARTEN SKAL KUNNE SAETTES.
-                     Foerst blev det andet spor detekteret frit, ud fra den
-                     antagelse at det er rent digitalt og derfor til at stole
-                     paa. Det holdt ikke: norske gaester blev bedoemt til
-                     ENGELSK med 26-34 % sandsynlighed, maalt fra fire
-                     forskellige steder i optagelsen med samme forkerte svar. -->
-                <TextBlock Text="Sproget, de andre taler" FontSize="13" FontWeight="SemiBold"
-                           Margin="0,18,0,0" />
-                <TextBlock Style="{StaticResource Underskrift}" Margin="0,3,0,9" TextWrapping="Wrap"
-                           Text="Gælder det spor, der optages fra højttaleren i et onlinemøde. Holder du møder på tværs af landegrænser, er det her, du sætter det." />
-                <ComboBox x:Name="DeresSprog" SelectionChanged="DeresSprog_Valgt" MaxWidth="320"
-                          HorizontalAlignment="Left" />
-              </StackPanel>
-            </Border>
+                 Der spoerges nu ved knappen «Opret transskription», hvor man
+                 staar med det konkrete moede og VED det. Valget huskes pr.
+                 moede, saa en gentagen udskrivning ikke spoerger forfra.
+                 Se Transcribe\SprogvalgWindow. -->
           </StackPanel>
         </Border>
 
