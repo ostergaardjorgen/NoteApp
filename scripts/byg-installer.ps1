@@ -148,6 +148,23 @@ finally
 
 $setup = Join-Path $installer 'NoteApp-setup.exe'
 
+# --- EFTERPROEV, FREM FOR AT ANTAGE -------------------------------------
+#
+# wix build kan fejle paa bundle-trinnet uden at scriptet stopper, og saa
+# bliver den GAMLE setup.exe liggende. Den ser rigtig ud: rigtigt navn,
+# rigtig stoerrelse, samme mappe. Kun tidsstemplet og versionen afsloerer
+# den - og dem kigger man ikke paa, naar der lige stod "Faerdig".
+#
+# Det skete to gange den 19-08-2026, og begge gange blev en fil paa vej ud
+# ad doeren stoppet af en tilfaeldighed frem for af en kontrol.
+if (-not (Test-Path $setup)) { throw "NoteApp-setup.exe blev ikke bygget." }
+
+$setupVersion = [Diagnostics.FileVersionInfo]::GetVersionInfo($setup).FileVersion
+if (($setupVersion -split '\.')[0..2] -join '.' -ne $msiVersion) {
+    throw ("NoteApp-setup.exe er version $setupVersion, men der blev bygget $msiVersion. " +
+           "Bundle-trinnet er fejlet, og den gamle fil ligger der stadig. Koer scriptet igen.")
+}
+
 Write-Host ""
 Write-Host "Færdig." -ForegroundColor Green
 foreach ($f in @($setup, $msi)) {
