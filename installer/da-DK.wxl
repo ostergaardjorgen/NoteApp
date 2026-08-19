@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <!--
   Dansk tekst i installationsprogrammet.
 
@@ -19,7 +19,7 @@
        en tom flade — og man kunne ikke se, hvilken version man var ved at
        installere, hvilket er netop det, man har brug for ved en opdatering. -->
   <String Id="HeaderVersion" Value="Version [WixBundleVersion]" />
-  <String Id="HeaderTagline" Value="Møde-noter der bliver på din egen pc" />
+  <String Id="HeaderTagline" Value="Fra optagelse til færdigt referat" />
   <String Id="ConfirmCancelMessage" Value="Vil du afbryde installationen?" />
   <String Id="ExecuteUpgradeRelatedBundleMessage" Value="Tidligere version" />
   <String Id="HelpHeader" Value="Hjælp til installationen" />
