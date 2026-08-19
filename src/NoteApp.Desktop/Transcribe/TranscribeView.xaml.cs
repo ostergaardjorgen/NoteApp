@@ -614,6 +614,11 @@ public partial class TranscribeView : UserControl
             ? "Skriv lyden ud til tekst her på maskinen"
             : "Skriv lyden ud igen. Den nuværende udskrift bliver overskrevet";
 
+        // Stien til den valgte optagelse. Samme linje samme sted som paa
+        // Dokumenter og Skabeloner - det er den, man skal bruge, naar en fil
+        // skal findes frem uden om appen.
+        Stilinje.Text = valgt?.Mappe ?? "";
+
         ReferatKnap.IsEnabled = færdig is not null && _afbryd is null;
         KopierKnap.IsEnabled = færdig is not null;
         OmdoebKnap.IsEnabled = valgt is not null && _afbryd is null;

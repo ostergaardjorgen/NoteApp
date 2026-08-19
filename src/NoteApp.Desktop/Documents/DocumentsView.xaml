@@ -210,6 +210,93 @@
                        Text="Gå til «Optagelser», vælg en optagelse der er skrevet ud til tekst, og tryk «Opret dokument». Så vælger du en skabelon — referat, opgaveliste eller hvad du selv har lavet." />
           </StackPanel>
 
+          <!-- ================== FORKLARINGEN ==========================
+               SAMME OPBYGNING SOM PAA OPTAGELSER, OG DET ER MED VILJE.
+
+               Ruden stod helt tom, saa snart der fandtes ét dokument, men
+               ingen var valgt: TomPanel gaelder kun, naar der slet ikke er
+               nogen. Det er ogsaa dér, man staar foerste gang - man har lige
+               lavet ét dokument, gaar herover, og skaermen siger ingenting.
+
+               Trinnene er ikke pynt. De to ting, folk faktisk spoerger om -
+               hvorfor dokumentet ser ud, som det goer, og hvad der forlader
+               maskinen - staar som trin 1 og 2. -->
+          <ScrollViewer x:Name="Forklaring" Grid.Row="0" Padding="26,20,26,18"
+                        VerticalScrollBarVisibility="Auto"
+                        HorizontalScrollBarVisibility="Disabled"
+                        Visibility="Collapsed">
+            <StackPanel HorizontalAlignment="Stretch">
+
+              <TextBlock FontSize="19" FontWeight="SemiBold" TextWrapping="Wrap"
+                         Text="Fra tekst til dokument" />
+              <TextBlock FontSize="13.5" LineHeight="22" Margin="0,10,0,0"
+                         TextWrapping="Wrap" Foreground="{StaticResource TekstSvag}"
+                         Text="Vælg et dokument i træet til venstre for at se det. Nye dokumenter laves under «Optagelser» — vælg en optagelse, der er skrevet ud til tekst, og tryk «Opret dokument»." />
+
+              <StackPanel Margin="0,22,0,0">
+                <Grid Margin="0,0,0,14">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="30" />
+                    <ColumnDefinition Width="*" />
+                  </Grid.ColumnDefinitions>
+                  <TextBlock Grid.Column="0" Text="1" FontSize="15" FontWeight="SemiBold"
+                             Foreground="{StaticResource Accent}" />
+                  <StackPanel Grid.Column="1">
+                    <TextBlock Text="Skabelonen bestemmer indholdet" FontSize="13.5" FontWeight="SemiBold" />
+                    <TextBlock FontSize="12.5" LineHeight="19" TextWrapping="Wrap" Margin="0,3,0,0"
+                               Foreground="{StaticResource TekstMeget}"
+                               Text="Du vælger en skabelon undervejs. Den afgør, hvilke afsnit dokumentet får, hvor langt det bliver, og hvad der ikke må stå i det. Skabelonerne kan rettes under «Skabeloner»." />
+                  </StackPanel>
+                </Grid>
+
+                <Grid Margin="0,0,0,14">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="30" />
+                    <ColumnDefinition Width="*" />
+                  </Grid.ColumnDefinitions>
+                  <TextBlock Grid.Column="0" Text="2" FontSize="15" FontWeight="SemiBold"
+                             Foreground="{StaticResource Accent}" />
+                  <StackPanel Grid.Column="1">
+                    <TextBlock Text="Teksten sendes til sprogmodellen" FontSize="13.5" FontWeight="SemiBold" />
+                    <TextBlock FontSize="12.5" LineHeight="19" TextWrapping="Wrap" Margin="0,3,0,0"
+                               Foreground="{StaticResource TekstMeget}"
+                               Text="Til forskel fra udskriften sker det her ikke på maskinen. Udskriften sendes til Mistrals europæiske endepunkt. Lyden bliver liggende. Hvad det betyder, står under «Compliance»." />
+                  </StackPanel>
+                </Grid>
+
+                <Grid>
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="30" />
+                    <ColumnDefinition Width="*" />
+                  </Grid.ColumnDefinitions>
+                  <TextBlock Grid.Column="0" Text="3" FontSize="15" FontWeight="SemiBold"
+                             Foreground="{StaticResource Accent}" />
+                  <StackPanel Grid.Column="1">
+                    <TextBlock Text="Dokumentet står her" FontSize="13.5" FontWeight="SemiBold" />
+                    <TextBlock FontSize="12.5" LineHeight="19" TextWrapping="Wrap" Margin="0,3,0,0"
+                               Foreground="{StaticResource TekstMeget}"
+                               Text="Det gemmes som et Word-dokument (.docx). Vælg det i træet, så kan du åbne det, omdøbe det eller flytte det ned i en mappe." />
+                  </StackPanel>
+                </Grid>
+              </StackPanel>
+
+              <Border Background="#334CBE72" BorderBrush="{StaticResource Godkendt}" BorderThickness="1"
+                      CornerRadius="10" Padding="16,13" Margin="0,22,0,0">
+                <StackPanel>
+                  <TextBlock Text="Du kan lave dokumentet om" FontSize="13"
+                             FontWeight="SemiBold" Foreground="{StaticResource Tekst}" />
+                  <TextBlock FontSize="12.5" LineHeight="20" Margin="0,6,0,0" TextWrapping="Wrap"
+                             Foreground="{StaticResource Tekst}"
+                             Text="Udskriften bliver liggende ved optagelsen, og den kan bruges igen. Blev referatet ikke, som du ville have det, laver du et nyt fra den samme udskrift med en anden skabelon — så mange gange du vil. Det gamle dokument bliver stående, indtil du selv sletter det." />
+                </StackPanel>
+              </Border>
+
+              <TextBlock FontSize="12.5" LineHeight="20" Margin="2,18,0,0" TextWrapping="Wrap"
+                         Foreground="{StaticResource TekstMeget}"
+                         Text="Læs dokumentet igennem, før du sender det videre. Modellen kan tage fejl af, hvem der sagde hvad — især hvis navnene aldrig blev sagt højt på mødet — og den har tidligere føjet en deltager til, som ikke var med." />
+            </StackPanel>
+          </ScrollViewer>
+
           <!-- Se TranscribeView: uden Disabled maales indholdet med uendelig
                bredde, og teksten ombrydes ikke. -->
           <ScrollViewer x:Name="Detaljer" Grid.Row="0" Padding="24,20" VerticalScrollBarVisibility="Auto"

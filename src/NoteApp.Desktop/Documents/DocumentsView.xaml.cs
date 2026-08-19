@@ -136,6 +136,7 @@ public partial class DocumentsView : UserControl
         if (_alle.Count == 0)
         {
             Detaljer.Visibility = Visibility.Collapsed;
+            Forklaring.Visibility = Visibility.Collapsed;
             Status.Text = $"Dokumenter gemmes i {DocumentStore.Directory}";
             return;
         }
@@ -298,6 +299,13 @@ public partial class DocumentsView : UserControl
         {
             _valgt = null;
             SletKnap.IsEnabled = AabnKnap.IsEnabled = GemKnap.IsEnabled = OmdoebKnap.IsEnabled = FlytKnap.IsEnabled = false;
+
+            // RUDEN STOD TOM HER.
+            // TomPanel gaelder kun, naar der slet ikke findes dokumenter.
+            // Var der ét, og stod markeringen ikke paa det, sagde skaermen
+            // ingenting - og det er netop foerste gang, man kommer herover.
+            Detaljer.Visibility = Visibility.Collapsed;
+            Forklaring.Visibility = _alle.Count == 0 ? Visibility.Collapsed : Visibility.Visible;
             return;
         }
 
@@ -305,6 +313,7 @@ public partial class DocumentsView : UserControl
         _valgt = d;
 
         TomPanel.Visibility = Visibility.Collapsed;
+        Forklaring.Visibility = Visibility.Collapsed;
         Detaljer.Visibility = Visibility.Visible;
 
         Titel.Text = d.Title;

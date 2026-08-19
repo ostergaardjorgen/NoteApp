@@ -34,6 +34,7 @@
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
       <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
       <RowDefinition Height="*" />
     </Grid.RowDefinitions>
 
@@ -136,8 +137,22 @@
          sker, ogsaa staar. Dokumenter melder samme sted hen, saa bjaelken
          ikke flytter sig alt efter, hvad man venter paa. -->
 
+    <!-- STILINJEN OG DENS MELLEMRUM.
+         Spalterne laa klods op ad vaerktoejslinjen her, mens Dokumenter og
+         Skabeloner havde luft. Forskellen var ikke et valg - de to andre
+         skaerme har en linje med stien under bjaelken, og den skabte
+         mellemrummet. Nu har alle tre den samme linje det samme sted.
+
+         Linjen er ikke bare luft: den siger, hvor filen ligger. Det er
+         praecis det spoergsmaal, man staar med, naar noget skal findes frem
+         uden om appen. -->
+    <Grid Grid.Row="2" Margin="2,8,2,10">
+      <TextBlock x:Name="Stilinje" Style="{StaticResource Underskrift}" VerticalAlignment="Bottom"
+                 TextTrimming="CharacterEllipsis" />
+    </Grid>
+
     <!-- ======================= Træ · indhold =========================== -->
-    <Grid Grid.Row="2">
+    <Grid Grid.Row="3">
       <Grid.ColumnDefinitions>
         <ColumnDefinition Width="300" />
         <ColumnDefinition Width="Auto" />
