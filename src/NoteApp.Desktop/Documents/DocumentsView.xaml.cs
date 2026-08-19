@@ -24,10 +24,22 @@ public partial class DocumentsView : UserControl
     private DocumentInfo? _valgt;
     private bool _indlæser;
 
-    public DocumentsView(string? aabnId = null)
+    public DocumentsView(string? aabnId = null) : this(aabnId, 0) { }
+
+    /// <param name="position">
+    /// Tegnnummeret i dokumentets tekst, der skal springes til. Nul betyder
+    /// «vis bare dokumentet». Kommer fra søgningen, hvor man klikkede på ét
+    /// bestemt sted frem for på dokumentet som helhed.
+    /// </param>
+    public DocumentsView(string? aabnId, int position)
     {
         InitializeComponent();
         Indlæs(aabnId);
+
+        // Springet sker foerst, naar teksten er tegnet. Et opslag paa
+        // position i en TextBox, der endnu ikke har maalt sit indhold, giver
+        // ingenting - og saa lander man oeverst uden at vide hvorfor.
+        if (position > 0) Loaded += (_, _) => SpringTil(position);
 
         // Koerslen er startet fra en anden skaerm og lever i BackgroundJobs.
         // Her lyttes der bare med, saa bjaelken viser det samme, uanset hvor
@@ -346,6 +358,37 @@ public partial class DocumentsView : UserControl
         AabnKnap.IsEnabled = findes;
         GemKnap.IsEnabled = false;
         Status.Text = findes ? fil : "Dokumentfilen findes ikke længere — kun oplysningerne om den.";
+    }
+
+    /// <summary>
+    /// Ruller hen til et bestemt sted i dokumentteksten og markerer det.
+    ///
+    /// Teksten ligger i en TextBox INDE i en ScrollViewer, så den har ingen
+    /// egen rulning. Derfor slås stedets placering op i tekstfeltet og
+    /// regnes om til ruderens koordinater — ScrollToLine ville ikke gøre
+    /// noget her.
+    /// </summary>
+    private void SpringTil(int position)
+    {
+        if (position < 0 || position >= Indhold.Text.Length) return;
+
+        Indhold.Focus();
+        Indhold.Select(position, Math.Min(60, Indhold.Text.Length - position));
+
+        try
+        {
+            var kasse = Indhold.GetRectFromCharacterIndex(position);
+            var punkt = Indhold.TransformToAncestor(Detaljer).Transform(new Point(0, kasse.Top));
+
+            // Et stykke over stedet, saa man kan se, hvad der staar FOER det.
+            // Lander linjen oeverst i ruden, mangler sammenhaengen.
+            Detaljer.ScrollToVerticalOffset(Math.Max(0, Detaljer.VerticalOffset + punkt.Y - 120));
+        }
+        catch (InvalidOperationException)
+        {
+            // Er teksten ikke maalt endnu, bliver man staaende oeverst.
+            // Markeringen er der stadig, saa stedet kan findes med rulning.
+        }
     }
 
     private void Beskrivelse_Aendret(object sender, TextChangedEventArgs e)

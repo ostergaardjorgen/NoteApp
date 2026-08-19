@@ -102,8 +102,13 @@ public static class BackgroundJobs
             var fremdrift = new Progress<LlmProgress>(p =>
                 Meld($"{p.Message} · {(DateTime.Now - startet).TotalSeconds:0} sek"));
 
+            // Moedets id og titel foelger med i kvitteringen. Uden dem kan
+            // en afsendelse ikke spores tilbage til, hvad den handlede om -
+            // og det er netop dét, en revision spoerger om.
             var r = await new SkyRunner(noegle).KoerAsync(
-                model, skabelon, skabelon.Render(felter), fremdrift, _afbryd.Token);
+                model, skabelon, skabelon.Render(felter), fremdrift, _afbryd.Token,
+                kilde: skabelonInfo.SourceMeetingId,
+                kildeTitel: skabelonInfo.SourceTitle);
 
             DraftStore.Save(mødeMappe, skabelon, r.SomLlmResult(),
                 motor: $"{model.Leverandoer} ({model.Hjemland})");

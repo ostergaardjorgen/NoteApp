@@ -316,12 +316,21 @@ public sealed class SkyRunner
             : new List<string>();
     }
 
+    /// <param name="kilde">
+    /// Mødets id, når afsendelsen hører til et møde. Står i kvitteringen, så
+    /// en afsendelse kan spores tilbage til det, den handlede om. Tom for
+    /// afsendelser, der ikke gør — en skabelon, der bliver skrevet, en
+    /// dagsorden, der bliver tilpasset.
+    /// </param>
+    /// <param name="kildeTitel">Mødets navn, som det var på afsendelsestidspunktet.</param>
     public async Task<SkyResultat> KoerAsync(
         SkyModel model,
         PromptTemplate skabelon,
         string brugerPrompt,
         IProgress<LlmProgress>? fremdrift = null,
-        CancellationToken ct = default)
+        CancellationToken ct = default,
+        string kilde = "",
+        string kildeTitel = "")
     {
         fremdrift?.Report(new LlmProgress($"Sender til {model.Navn} ({model.Hjemland}) …"));
 
@@ -337,34 +346,85 @@ public sealed class SkyRunner
             max_tokens = skabelon.MaxTokens
         });
 
+        // ============ KVITTERINGEN ============
+        //
+        // Den bygges FOER afsendelsen, saa summen er af de bytes, der
+        // faktisk gaar af sted - ikke af noget, der blev regnet ud bagefter.
+        //
+        // Den skrives i finally. En afsendelse, der fejlede, har stadig
+        // sendt: data forlod maskinen, uanset hvad der kom tilbage. En
+        // kvittering, der kun daekker de vellykkede, ville vise mindre, end
+        // der faktisk gik ud - og det er den forkerte vej at tage fejl.
+        var kvittering = new Kvittering
+        {
+            Endepunkt = SkyKatalog.Endpoint,
+            Model = $"{model.Navn} ({model.ApiId})",
+            Skabelon = skabelon.Name,
+            Kilde = kilde,
+            KildeTitel = kildeTitel,
+            Tegn = krop.Length,
+            Sum = Kvitteringer.Kontrolsum(krop)
+        };
+
         var ur = Stopwatch.StartNew();
-        using var svar = await SendAsync(HttpMethod.Post, SkyKatalog.Endpoint, krop, ct);
-        var svarKrop = await svar.Content.ReadAsStringAsync(ct);
-        ur.Stop();
 
-        if (!svar.IsSuccessStatusCode) throw Fejl(svar.StatusCode, svarKrop);
+        try
+        {
+            using var svar = await SendAsync(HttpMethod.Post, SkyKatalog.Endpoint, krop, ct);
+            var svarKrop = await svar.Content.ReadAsStringAsync(ct);
+            ur.Stop();
 
-        using var doc = JsonDocument.Parse(svarKrop);
-        var rod = doc.RootElement;
+            if (!svar.IsSuccessStatusCode) throw Fejl(svar.StatusCode, svarKrop);
 
-        var tekst = rod.TryGetProperty("choices", out var valg) && valg.GetArrayLength() > 0
-            && valg[0].TryGetProperty("message", out var besked)
-            && besked.TryGetProperty("content", out var indhold)
-                ? indhold.GetString() ?? ""
-                : "";
+            using var doc = JsonDocument.Parse(svarKrop);
+            var rod = doc.RootElement;
 
-        if (tekst.Trim().Length == 0)
-            throw new InvalidOperationException(
-                $"{model.Navn} svarede uden indhold. Hele svaret:\n{Forkort(svarKrop, 800)}");
+            var tekst = rod.TryGetProperty("choices", out var valg) && valg.GetArrayLength() > 0
+                && valg[0].TryGetProperty("message", out var besked)
+                && besked.TryGetProperty("content", out var indhold)
+                    ? indhold.GetString() ?? ""
+                    : "";
 
-        // Tokentallene kommer fra leverandoeren og er dem, der faktureres. De
-        // maa ikke skoennes: hele pointen med maalingen er at kunne sige, hvad
-        // en koersel KOSTEDE, ikke hvad den cirka kostede.
-        var (ind, ud) = LaesTokens(rod);
+            if (tekst.Trim().Length == 0)
+                throw new InvalidOperationException(
+                    $"{model.Navn} svarede uden indhold. Hele svaret:\n{Forkort(svarKrop, 800)}");
 
-        fremdrift?.Report(new LlmProgress("Færdig", Percent: 100));
+            // Tokentallene kommer fra leverandoeren og er dem, der faktureres.
+            // De maa ikke skoennes: hele pointen med maalingen er at kunne
+            // sige, hvad en koersel KOSTEDE, ikke hvad den cirka kostede.
+            var (ind, ud) = LaesTokens(rod);
 
-        return new SkyResultat(tekst.Trim(), ur.Elapsed, model, ind, ud);
+            fremdrift?.Report(new LlmProgress("Færdig", Percent: 100));
+
+            var resultat = new SkyResultat(tekst.Trim(), ur.Elapsed, model, ind, ud);
+
+            kvittering = kvittering with
+            {
+                TokensInd = ind,
+                TokensUd = ud,
+                PrisUsd = resultat.PrisUsd,
+                Sekunder = Math.Round(ur.Elapsed.TotalSeconds, 1)
+            };
+
+            return resultat;
+        }
+        catch (Exception ex)
+        {
+            ur.Stop();
+
+            kvittering = kvittering with
+            {
+                Lykkedes = false,
+                Fejl = ex.Message,
+                Sekunder = Math.Round(ur.Elapsed.TotalSeconds, 1)
+            };
+
+            throw;
+        }
+        finally
+        {
+            Kvitteringer.Skriv(kvittering);
+        }
     }
 
     private async Task<HttpResponseMessage> SendAsync(

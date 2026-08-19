@@ -145,7 +145,14 @@ public partial class TranscribeView : UserControl
     /// linje i historikken, vil man SE optagelsen — og så er et tilbud om at
     /// skrive den ud igen på tyve minutter ikke en hjælp, det er i vejen.
     /// </summary>
-    public TranscribeView(string? aabnMappe, bool spoerg)
+    public TranscribeView(string? aabnMappe, bool spoerg) : this(aabnMappe, spoerg, 0) { }
+
+    /// <param name="position">
+    /// Tegnnummeret i udskriften, der skal springes til. Nul betyder «vis
+    /// bare optagelsen». Kommer fra søgningen, hvor man klikkede på ét
+    /// bestemt sted i teksten.
+    /// </param>
+    public TranscribeView(string? aabnMappe, bool spoerg, int position)
     {
         InitializeComponent();
         IndlaesOptagelser();
@@ -164,6 +171,30 @@ public partial class TranscribeView : UserControl
         // aabner over en halvfaerdig skaerm, og saa kan man ikke se, hvad man
         // siger ja til.
         if (spoerg) Loaded += (_, _) => SpoergOmStart(match);
+
+        // SPRINGET SKER FOERST, NAAR TEKSTEN ER TEGNET.
+        //
+        // Select og ScrollToLine paa en TextBox, der endnu ikke har maalt sit
+        // indhold, goer ingenting - og saa lander man oeverst i en udskrift
+        // paa halvtreds sider uden at vide hvorfor.
+        if (position > 0) Loaded += (_, _) => SpringTil(position);
+    }
+
+    /// <summary>
+    /// Ruller hen til et bestemt sted i udskriften og markerer det.
+    ///
+    /// Markeringen er ikke pynt: uden den lander man et sted i en mur af
+    /// tekst og skal selv finde ordet igen. Fokus flyttes til feltet, saa
+    /// markeringen faktisk kan ses.
+    /// </summary>
+    private void SpringTil(int position)
+    {
+        if (Resultat.Visibility != Visibility.Visible) return;
+        if (position < 0 || position >= Resultat.Text.Length) return;
+
+        Resultat.Focus();
+        Resultat.Select(position, Math.Min(60, Resultat.Text.Length - position));
+        Resultat.ScrollToLine(Math.Max(0, Resultat.GetLineIndexFromCharacterIndex(position) - 4));
     }
 
     private bool _harSpurgt;
@@ -1222,8 +1253,8 @@ public partial class TranscribeView : UserControl
         // faktisk skal vide: hvor meget lyd, hvor lang tid det tog, og hvad
         // sproget blev.
         Status.Text =
-            $"Færdig · {TimeSpan.FromSeconds(r.AudioSeconds):mm\\:ss} lyd skrevet ud på " +
-            $"{TimeSpan.FromSeconds(r.ElapsedSeconds):mm\\:ss} · {ord} ord · {sprog} · {SporTekst(r)}";
+            $"Færdig · {Laengde(r.AudioSeconds)} lyd skrevet ud på " +
+            $"{Laengde(r.ElapsedSeconds)} · {ord} ord · {sprog} · {SporTekst(r)}";
 
         AabnKnap.IsEnabled = true;
     }
@@ -1259,6 +1290,18 @@ public partial class TranscribeView : UserControl
             0,
             install.Engine,
             sprog == "auto" ? "da" : sprog);
+    }
+
+    /// <summary>
+    /// Et tidsrum skrevet ud, med timer kun naar der ER timer.
+    ///
+    /// mm:ss alene klipper timerne af, saa en optagelse paa 1:00:50 stod som
+    /// «00:50» - en time lignede et minut. Fejlen stod tre steder.
+    /// </summary>
+    private static string Laengde(double sekunder)
+    {
+        var t = TimeSpan.FromSeconds(sekunder);
+        return t.TotalHours >= 1 ? t.ToString(@"h\:mm\:ss") : t.ToString(@"mm\:ss");
     }
 
     /// <summary>

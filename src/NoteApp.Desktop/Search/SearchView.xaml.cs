@@ -1,4 +1,4 @@
-﻿using System.Windows;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Threading;
@@ -6,14 +6,30 @@ using NoteApp.Core;
 
 namespace NoteApp.Desktop.Search;
 
-/// <summary>Ét fund, som listen kan vise det.</summary>
+/// <summary>Ét sted, ordet står — som listen viser det.</summary>
+public sealed class Traefvisning
+{
+    public Traefvisning(Fund f, Traef t, int nummer)
+    {
+        Fund = f;
+        Traef = t;
+        Nummer = $"{nummer}.";
+        Uddrag = t.Uddrag;
+    }
+
+    public Fund Fund { get; }
+    public Traef Traef { get; }
+    public string Nummer { get; }
+    public string Uddrag { get; }
+}
+
+/// <summary>Én kilde med alle sine steder.</summary>
 public sealed class Fundvisning
 {
     public Fundvisning(Fund f)
     {
         Fund = f;
         Overskrift = f.Overskrift;
-        Uddrag = f.Uddrag;
 
         (Maerkat, Maerkatfarve) = f.Slags switch
         {
@@ -22,38 +38,38 @@ public sealed class Fundvisning
             _ => ("DOKUMENT", new SolidColorBrush(Color.FromRgb(0xC9, 0x8C, 0xF0)))
         };
 
-        // Datoen og antallet står yderst til højre. Antallet er ikke pynt:
-        // ét træf er en omtale i forbifarten, tolv er dét, mødet handlede om.
-        Hoejre = f.AntalIAlt > 1
-            ? $"{f.Tid:dd-MM-yyyy}  ·  {f.AntalIAlt} steder"
-            : $"{f.Tid:dd-MM-yyyy}";
+        Hoejre = f.Traef.Count == 1
+            ? $"{f.Tid:dd-MM-yyyy}  ·  1 sted"
+            : $"{f.Tid:dd-MM-yyyy}  ·  {f.Traef.Count} steder";
+
+        Steder = f.Traef.Select((t, n) => new Traefvisning(f, t, n + 1)).ToList();
     }
 
     public Fund Fund { get; }
     public string Overskrift { get; }
-    public string Uddrag { get; }
     public string Maerkat { get; }
     public Brush Maerkatfarve { get; }
     public string Hoejre { get; }
+    public IReadOnlyList<Traefvisning> Steder { get; }
 }
 
 /// <summary>
 /// Søgning på tværs af alle møder og dokumenter.
 ///
-/// HVORFOR DEN HAR SIN EGEN SKÆRM
+/// HVORFOR HVERT STED STÅR FOR SIG
 ///
-/// Et søgefelt på Optagelser ville kun kunne søge i optagelser. Det, man
-/// leder efter, er sjældent bundet til én slags ting: «hvad blev der sagt om
-/// Kernesys» kan lige så godt stå i et referat som i en udskrift eller i en
-/// note, man selv skrev midt i mødet.
+/// Første udgave viste ét fund pr. fil og åbnede filen ved klik. Det hjalp
+/// ikke: står ordet tolv steder i en udskrift på en time, er spørgsmålet ikke
+/// OM det står der, men i hvilken sammenhæng — og hvilket af de tolv steder
+/// man skal læse.
+///
+/// Nu står hvert sted som sin egen linje med teksten omkring, og et klik
+/// springer hen til netop dét sted i teksten.
 ///
 /// HVORFOR DER SØGES, MENS MAN SKRIVER
 ///
 /// En søgeknap gør et opslag til noget, man overvejer. Uden knap er det noget,
 /// man bare gør — og det er hele forskellen på, om arkivet bliver brugt.
-///
-/// Selve søgningen ligger i <see cref="Soegning"/> og kører på en baggrunds-
-/// tråd. Skærmen her venter aldrig på disken.
 /// </summary>
 public partial class SearchView : UserControl
 {
@@ -70,8 +86,8 @@ public partial class SearchView : UserControl
         // eneste tastetryk. Ved "Cloudworks" er det ti soegninger, hvor de ni
         // er smidt vaek, foer de blev faerdige.
         //
-        // 220 ms er valgt, fordi det er kortere end pausen mellem to ord og
-        // laengere end mellem to bogstaver.
+        // 220 ms er kortere end pausen mellem to ord og laengere end mellem
+        // to bogstaver.
         _pause = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(220) };
         _pause.Tick += (_, _) => { _pause.Stop(); Soeg(); };
 
@@ -134,6 +150,8 @@ public partial class SearchView : UserControl
 
             IntetOverskrift.Text = $"Ingen fund på «{spoergsmaal}»";
 
+            var steder = fund.Sum(f => f.Traef.Count);
+
             // TIDEN STAAR DER, OG DET ER MED VILJE.
             //
             // Der er ikke noget indeks - der laeses i filerne hver gang. Saa
@@ -142,7 +160,8 @@ public partial class SearchView : UserControl
             // til en irritation.
             Status.Text = fund.Count == 0
                 ? $"Ingen fund  ·  {ur.ElapsedMilliseconds} ms"
-                : $"{fund.Count} fund  ·  {ur.ElapsedMilliseconds} ms";
+                : $"{steder} {(steder == 1 ? "sted" : "steder")} i {fund.Count} " +
+                  $"{(fund.Count == 1 ? "kilde" : "kilder")}  ·  {ur.ElapsedMilliseconds} ms";
         }
         catch (OperationCanceledException)
         {
@@ -157,23 +176,25 @@ public partial class SearchView : UserControl
     }
 
     /// <summary>
-    /// Går til det, fundet peger på.
+    /// Springer hen til det sted, der blev klikket på.
     ///
     /// Der slås op på id og ikke på sti: et møde kan være flyttet til en
     /// mappe, og et dokument kan være omdøbt, siden udskriften blev lavet.
+    /// Positionen er tegnnummeret i den tekst, skærmen viser — derfor kan der
+    /// rulles direkte derhen frem for blot at åbne filen.
     /// </summary>
-    private void Fund_Klik(object sender, RoutedEventArgs e)
+    private void Sted_Klik(object sender, RoutedEventArgs e)
     {
-        if (sender is not Button b || b.Tag is not Fundvisning v) return;
+        if (sender is not Button b || b.Tag is not Traefvisning v) return;
         if (Application.Current.MainWindow is not MainWindow hoved) return;
 
         if (v.Fund.Slags == Fundtype.Dokument)
         {
-            hoved.GaaTilDokumenter(v.Fund.Kilde);
+            hoved.GaaTilDokumenter(v.Fund.Kilde, v.Traef.Position);
             return;
         }
 
-        if (!hoved.GaaTilOptagelse(v.Fund.Kilde))
+        if (!hoved.GaaTilOptagelse(v.Fund.Kilde, v.Traef.Position))
             Dialogs.AppDialog.Vis(Window.GetWindow(this), "Den findes ikke længere",
                 "Optagelsen er slettet eller flyttet uden for appen, siden den blev skrevet ud.",
                 Dialogs.Slags.Valg);

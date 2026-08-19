@@ -1,4 +1,4 @@
-<UserControl x:Class="NoteApp.Desktop.Search.SearchView"
+﻿<UserControl x:Class="NoteApp.Desktop.Search.SearchView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
@@ -66,26 +66,16 @@
           <ItemsControl x:Name="Liste">
             <ItemsControl.ItemTemplate>
               <DataTemplate>
-                <Button Tag="{Binding}" Click="Fund_Klik" Cursor="Hand"
-                        HorizontalContentAlignment="Stretch" Padding="0"
-                        BorderThickness="0" Background="Transparent" Margin="0,0,0,6">
-                  <Button.Template>
-                    <ControlTemplate TargetType="Button">
-                      <Border x:Name="rk" CornerRadius="8" Padding="14,11"
-                              Background="#FF181B22" BorderThickness="1"
-                              BorderBrush="{StaticResource PanelKant}">
-                        <ContentPresenter />
-                      </Border>
-                      <ControlTemplate.Triggers>
-                        <Trigger Property="IsMouseOver" Value="True">
-                          <Setter TargetName="rk" Property="Background" Value="#FF2C323D" />
-                        </Trigger>
-                      </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                  </Button.Template>
-
+                <!-- KILDEN ER EN OVERSKRIFT, IKKE EN KNAP.
+                     Foer var hele kortet klikbart og aabnede filen. Det var
+                     ikke det, man ville: staar ordet tolv steder, er
+                     spoergsmaalet hvilket af dem - ikke om filen kan aabnes.
+                     Nu staar hvert sted som sin egen linje. -->
+                <Border CornerRadius="10" Padding="0" Margin="0,0,0,10"
+                        Background="#FF181B22" BorderThickness="1"
+                        BorderBrush="{StaticResource PanelKant}">
                   <StackPanel>
-                    <Grid>
+                    <Grid Margin="14,12,14,8">
                       <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="*" />
@@ -107,11 +97,49 @@
                                  Foreground="{StaticResource TekstMeget}" />
                     </Grid>
 
-                    <TextBlock Text="{Binding Uddrag}" FontSize="12.5" LineHeight="19"
-                               Margin="0,7,0,0" TextWrapping="Wrap"
-                               Foreground="{StaticResource TekstSvag}" />
+                    <!-- Hvert sted. Nummeret goer det muligt at tale om «det
+                         tredje sted» og finde tilbage til det. -->
+                    <ItemsControl ItemsSource="{Binding Steder}" Margin="10,0,10,10">
+                      <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                          <Button Tag="{Binding}" Click="Sted_Klik" Cursor="Hand"
+                                  HorizontalContentAlignment="Stretch" Padding="0"
+                                  BorderThickness="0" Background="Transparent" Margin="0,0,0,3"
+                                  ToolTip="Gå til dette sted i teksten">
+                            <Button.Template>
+                              <ControlTemplate TargetType="Button">
+                                <Border x:Name="rk" CornerRadius="6" Padding="11,8"
+                                        Background="#FF12151B" BorderThickness="1"
+                                        BorderBrush="Transparent">
+                                  <ContentPresenter />
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                  <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="rk" Property="Background" Value="#FF2C323D" />
+                                    <Setter TargetName="rk" Property="BorderBrush" Value="{StaticResource Accent}" />
+                                  </Trigger>
+                                </ControlTemplate.Triggers>
+                              </ControlTemplate>
+                            </Button.Template>
+
+                            <Grid>
+                              <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="30" />
+                                <ColumnDefinition Width="*" />
+                              </Grid.ColumnDefinitions>
+                              <TextBlock Grid.Column="0" Text="{Binding Nummer}" FontSize="11.5"
+                                         Foreground="{StaticResource TekstMeget}"
+                                         VerticalAlignment="Top" />
+                              <TextBlock Grid.Column="1" Text="{Binding Uddrag}" FontSize="12.5"
+                                         LineHeight="19" TextWrapping="Wrap"
+                                         Foreground="{StaticResource TekstSvag}" />
+                            </Grid>
+                          </Button>
+                        </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                    </ItemsControl>
                   </StackPanel>
-                </Button>
+                </Border>
               </DataTemplate>
             </ItemsControl.ItemTemplate>
           </ItemsControl>

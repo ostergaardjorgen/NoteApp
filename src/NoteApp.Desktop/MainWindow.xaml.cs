@@ -230,12 +230,29 @@ public partial class MainWindow : Window
     /// sker et andet sted, end man staar, og en besked om det uden en vej
     /// derhen er en halv besked.
     /// </summary>
-    public void GaaTilDokumenter(string? dokumentId = null)
+    /// <param name="position">
+    /// Tegnnummeret i dokumentets tekst, der skal springes til. Nul betyder
+    /// «vis bare dokumentet». Kommer fra en søgning, hvor man klikkede på ét
+    /// bestemt sted frem for på dokumentet som helhed.
+    /// </param>
+    public void GaaTilDokumenter(string? dokumentId = null, int position = 0)
     {
         _aabnDokument = dokumentId;
+        _aabnPosition = position;
 
-        if (NavDokumenter.IsChecked == true) Indhold.Content = new Documents.DocumentsView(_aabnDokument);
+        if (NavDokumenter.IsChecked == true)
+            Indhold.Content = new Documents.DocumentsView(_aabnDokument, Brug());
         else NavDokumenter.IsChecked = true;
+    }
+
+    /// <summary>Positionen, der skal springes til. Bruges ÉN gang.</summary>
+    private int _aabnPosition;
+
+    private int Brug()
+    {
+        var p = _aabnPosition;
+        _aabnPosition = 0;
+        return p;
     }
 
     /// <summary>
@@ -248,11 +265,12 @@ public partial class MainWindow : Window
     /// Returnerer falsk, hvis optagelsen ikke findes mere. Så bliver man
     /// stående, hvor man er, frem for at skifte skærm og vise en tom liste.
     /// </summary>
-    public bool GaaTilOptagelse(string id)
+    public bool GaaTilOptagelse(string id, int position = 0)
     {
         if (MeetingStore.FindById(id) is not { } fundet) return false;
 
         _aabnOptagelse = fundet.Mappe;
+        _aabnPosition = position;
 
         if (NavTransskriber.IsChecked == true) Indhold.Content = NyOptagelsesskaerm();
         else NavTransskriber.IsChecked = true;
@@ -347,7 +365,7 @@ public partial class MainWindow : Window
         {
             var id = _aabnDokument;
             _aabnDokument = null;
-            Indhold.Content = new DocumentsView(id);
+            Indhold.Content = new DocumentsView(id, Brug());
         }
         else if (NavSoeg.IsChecked == true)
         {
@@ -403,7 +421,7 @@ public partial class MainWindow : Window
         _aabnOptagelse = null;              // gælder kun dette skift
         _spoergOmUdskrift = false;
 
-        return new Transcribe.TranscribeView(aabn, spoerg);
+        return new Transcribe.TranscribeView(aabn, spoerg, Brug());
     }
 
     /// <summary>

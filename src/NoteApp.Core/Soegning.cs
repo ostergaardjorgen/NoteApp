@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using NoteApp.Core.Documents;
 
 namespace NoteApp.Core;
@@ -12,7 +12,16 @@ public enum Fundtype
 }
 
 /// <summary>
-/// Ét fund: hvor det står, hvad der står, og hvordan man kommer derhen.
+/// Ét sted, ordet står — med teksten omkring og positionen i filen.
+/// </summary>
+/// <param name="Position">
+/// Tegnnummeret i den tekst, der blev søgt i. Det er DEN, der gør, at man kan
+/// springe hen til stedet frem for blot at åbne filen og lede selv.
+/// </param>
+public sealed record Traef(int Position, string Uddrag);
+
+/// <summary>
+/// Én kilde, der indeholder det søgte — og hvert sted, det står.
 /// </summary>
 /// <param name="Kilde">
 /// Mødets eller dokumentets id. Det er DEN, der åbner tingen — ikke stien.
@@ -23,8 +32,7 @@ public sealed record Fund(
     string Kilde,
     string Overskrift,
     DateTimeOffset Tid,
-    string Uddrag,
-    int AntalIAlt);
+    IReadOnlyList<Traef> Traef);
 
 /// <summary>
 /// Søgning på tværs af alle møder og dokumenter.
@@ -35,37 +43,46 @@ public sealed record Fund(
 /// søgning er svaret at åbne møder ét ad gangen og læse. Efter tredive møder
 /// er det ikke længere noget, nogen gør — og så er arkivet reelt tabt.
 ///
-/// Værdien vokser med arkivet, og det gør den til den funktion, der bliver
-/// mere værd, jo længere appen har været i brug.
+/// HVORFOR HVERT STED STÅR FOR SIG
+///
+/// Første udgave gav ét fund pr. fil og et link til at åbne den. Det var ikke
+/// et svar: står ordet tolv steder i en udskrift på en time, er spørgsmålet
+/// ikke OM det står der, men i hvilken sammenhæng — og hvilket af de tolv
+/// steder man skal læse.
+///
+/// Nu står hvert sted for sig med teksten omkring og et tegnnummer, så man
+/// kan springe direkte derhen.
 ///
 /// HVORFOR DER IKKE ER ET INDEKS
 ///
-/// Der scannes direkte i filerne, hver gang. Det er et bevidst valg.
-///
-/// En times møde giver omkring 50 KB tekst. Hundrede møder er 5 MB — det
-/// læses på et øjeblik fra en SSD. Et indeks ville spare millisekunder og
-/// koste noget langt dyrere: en kopi, der kan blive uenig med virkeligheden.
-/// Retter man en udskrift i hånden, sletter man et møde uden om appen, eller
-/// går en skrivning galt, så er indekset forkert — og en søgning, der ikke
-/// finder noget, man VED er der, er værre end ingen søgning.
-///
-/// Bliver det for langsomt en dag, er det tidsnok at bygge indekset da. Så
-/// ved vi også, hvor grænsen faktisk går, i stedet for at gætte den nu.
+/// Der scannes direkte i filerne, hver gang. En times møde giver omkring
+/// 50 KB tekst; hundrede møder er 5 MB, og det læses på et øjeblik. Et indeks
+/// ville spare millisekunder og koste en kopi, der kan blive uenig med
+/// virkeligheden — og en søgning, der ikke finder noget, man VED er der, er
+/// værre end ingen søgning.
 ///
 /// ALT SKER LOKALT. Søgningen læser filer på maskinen og sender intet.
 /// </summary>
 public static class Soegning
 {
-    /// <summary>Så mange tegn vises omkring et match.</summary>
-    private const int Omkring = 90;
+    /// <summary>Så mange tegn vises omkring et træf.</summary>
+    private const int Omkring = 80;
+
+    /// <summary>
+    /// Så mange steder tages med pr. kilde.
+    ///
+    /// Søger man på «og», er der tusind. Listen skal kunne læses, ikke være
+    /// udtømmende — og står ordet flere gange end det her, er det ikke det
+    /// enkelte sted, man leder efter.
+    /// </summary>
+    private const int MaksPrKilde = 40;
 
     /// <summary>
     /// Finder alle steder, ordene optræder.
     ///
     /// Flere ord betyder, at de ALLE skal stå i den samme tekst — ikke
-    /// nødvendigvis ved siden af hinanden. Det er den opførsel, folk kender
-    /// fra en søgeboks, og den er til at forudsige. Uddraget vises omkring
-    /// det sjældneste af ordene — se <see cref="Tilfoej"/>.
+    /// nødvendigvis ved siden af hinanden. Stederne findes på det sjældneste
+    /// af ordene: det almindelige ord stod der bare for at snævre ind.
     /// </summary>
     public static List<Fund> Soeg(string spoergsmaal, CancellationToken ct = default)
     {
@@ -103,13 +120,25 @@ public static class Soegning
         {
             ct.ThrowIfCancellationRequested();
 
-            // Beskrivelsen er brugerens egne ord om dokumentet, og de er tit
-            // dem, man husker. Den søges med.
-            Tilfoej(fund, Fundtype.Dokument, d.Id, d.Title, d.Created,
-                    d.Markdown + "\n" + d.Description, ord);
+            // Der søges i selve dokumentet. Positionerne skal passe med den
+            // tekst, skærmen viser — ellers springer man det forkerte sted
+            // hen. Beskrivelsen er brugerens egne ord og tages med, men uden
+            // egne positioner: den står ikke i dokumentteksten.
+            var tekst = d.Markdown;
+
+            if (!ord.All(o => tekst.Contains(o, StringComparison.OrdinalIgnoreCase))
+                && ord.All(o => (tekst + "\n" + d.Description).Contains(o, StringComparison.OrdinalIgnoreCase)))
+                tekst += "\n" + d.Description;
+
+            Tilfoej(fund, Fundtype.Dokument, d.Id, d.Title, d.Created, tekst, ord);
         }
 
-        return fund.OrderByDescending(f => f.Tid).ToList();
+        // Flest steder først. Ét træf er en omtale i forbifarten; tolv er dét,
+        // mødet handlede om — og det er som regel den, man leder efter.
+        return fund
+            .OrderByDescending(f => f.Traef.Count)
+            .ThenByDescending(f => f.Tid)
+            .ToList();
     }
 
     /// <summary>
@@ -136,13 +165,10 @@ public static class Soegning
 
     private static IEnumerable<string> Moedemapper()
     {
-        foreach (var rod in new[] { UserDataPaths.Meetings })
-        {
-            if (!Directory.Exists(rod)) continue;
+        if (!Directory.Exists(UserDataPaths.Meetings)) yield break;
 
-            foreach (var m in Directory.EnumerateDirectories(rod))
-                yield return m;
-        }
+        foreach (var m in Directory.EnumerateDirectories(UserDataPaths.Meetings))
+            yield return m;
     }
 
     private static string Laes(string sti)
@@ -160,23 +186,23 @@ public static class Soegning
         // den, der blev spurgt om.
         if (!ord.All(o => tekst.Contains(o, StringComparison.OrdinalIgnoreCase))) return;
 
-        // UDDRAGET VISES OMKRING DET SJAELDNESTE ORD.
-        //
-        // Foerst blev det vist omkring det foerste ord, og det gav den
-        // forkerte linje: soeger man «Alexander Finsburg», staar «Alexander»
-        // otte steder og «Finsburg» ét. Uddraget landede paa en tilfaeldig
-        // omtale af Alexander frem for paa den ene saetning, hvor manden
-        // praesenterer sig selv.
-        //
-        // Det sjaeldneste ord er naesten altid det, man soegte PAA - det
-        // almindelige ord stod der bare for at snaevre ind.
+        // Stederne findes på det SJÆLDNESTE ord. Søger man «Alexander
+        // Finsburg», står «Alexander» otte steder og «Finsburg» ét — og det
+        // ene er dét, man ledte efter.
         var bedst = ord.OrderBy(o => Antal(tekst, o)).First();
 
-        var hvor = tekst.IndexOf(bedst, StringComparison.OrdinalIgnoreCase);
-        if (hvor < 0) return;
+        var traef = new List<Traef>();
+        var i = 0;
 
-        fund.Add(new Fund(slags, kilde, overskrift, tid,
-                          Uddrag(tekst, hvor, bedst.Length), Antal(tekst, bedst)));
+        while (traef.Count < MaksPrKilde
+               && (i = tekst.IndexOf(bedst, i, StringComparison.OrdinalIgnoreCase)) >= 0)
+        {
+            traef.Add(new Traef(i, Uddrag(tekst, i, bedst.Length)));
+            i += bedst.Length;
+        }
+
+        if (traef.Count > 0)
+            fund.Add(new Fund(slags, kilde, overskrift, tid, traef));
     }
 
     private static int Antal(string tekst, string ord)
@@ -194,7 +220,7 @@ public static class Soegning
     }
 
     /// <summary>
-    /// Teksten omkring et match, på én linje.
+    /// Teksten omkring et træf, på én linje.
     ///
     /// Uden uddraget ville et fund kun sige, at ordet står et sted i et møde
     /// på en time. Det er ikke et svar — det er en henvisning til at læse

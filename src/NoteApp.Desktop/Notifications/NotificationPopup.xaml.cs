@@ -104,6 +104,18 @@ public partial class NotificationPopup : UserControl
             });
         }
 
+        // ============ VEJEN HEN TIL DET, BESKEDEN HANDLER OM ============
+        //
+        // Klokken sagde, AT noget var faerdigt, og saa skulle man selv finde
+        // det. Det er en halv besked - og netop den halvdel, der mangler, er
+        // grunden til, at man aabner klokken.
+        //
+        // Historikken og soegningen aabner allerede paa id. Det samme her, og
+        // af samme grund: en optagelse kan vaere flyttet og et dokument
+        // omdoebt, siden beskeden blev skrevet. Navnet i beskeden er, hvad
+        // tingen HED; id'et er, hvad den ER.
+        if (Link(h) is { } link) indhold.Children.Add(link);
+
         return new Border
         {
             Background = (Brush)new BrushConverter().ConvertFrom(ny ? "#FF1D2530" : "#00000000")!,
@@ -115,6 +127,85 @@ public partial class NotificationPopup : UserControl
             Child = indhold
         };
     }
+
+    /// <summary>
+    /// Linket til det, beskeden handler om. Null for beskeder uden en kilde
+    /// at gå til — en sikkerhedskopi, en hentning, et manglende trin i
+    /// opsætningen.
+    /// </summary>
+    private Button? Link(Haendelse h)
+    {
+        if (h.Kilde.Length == 0) return null;
+
+        var tekst = h.Slags switch
+        {
+            HaendelseType.Dokument => "Vis dokumentet",
+            HaendelseType.Optagelse or HaendelseType.Transskription => "Vis optagelsen",
+            HaendelseType.Flyttet or HaendelseType.Slettet => null,
+            _ => null
+        };
+
+        if (tekst is null) return null;
+
+        var knap = new Button
+        {
+            Content = tekst,
+            Tag = h,
+            Cursor = System.Windows.Input.Cursors.Hand,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            Margin = new Thickness(0, 6, 0, 0),
+            Padding = new Thickness(0),
+            BorderThickness = new Thickness(0),
+            Background = Brushes.Transparent,
+            FontSize = 11.5,
+            Foreground = (Brush)new BrushConverter().ConvertFrom("#FF5B9DF0")!,
+            Template = Linkskabelon()
+        };
+
+        knap.Click += Kilde_Klik;
+        return knap;
+    }
+
+    /// <summary>
+    /// En knap, der ser ud som et link. Hyperlink arver ikke temaets farver
+    /// og stod blåt på blåt — samme løsning som i historikken.
+    /// </summary>
+    private static ControlTemplate Linkskabelon()
+    {
+        var tekst = new FrameworkElementFactory(typeof(TextBlock));
+        tekst.SetBinding(TextBlock.TextProperty,
+            new System.Windows.Data.Binding("Content") { RelativeSource = System.Windows.Data.RelativeSource.TemplatedParent });
+        tekst.SetBinding(TextBlock.ForegroundProperty,
+            new System.Windows.Data.Binding("Foreground") { RelativeSource = System.Windows.Data.RelativeSource.TemplatedParent });
+        tekst.SetValue(TextBlock.TextDecorationsProperty, TextDecorations.Underline);
+        tekst.SetValue(TextBlock.FontSizeProperty, 11.5);
+
+        return new ControlTemplate(typeof(Button)) { VisualTree = tekst };
+    }
+
+    private void Kilde_Klik(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button b || b.Tag is not Haendelse h) return;
+        if (Application.Current.MainWindow is not MainWindow hoved) return;
+
+        // Popup'en lukkes foerst. Ellers staar den og daekker det, man netop
+        // bad om at se.
+        Luk?.Invoke();
+
+        if (h.Slags == HaendelseType.Dokument)
+        {
+            hoved.GaaTilDokumenter(h.Kilde);
+            return;
+        }
+
+        if (!hoved.GaaTilOptagelse(h.Kilde))
+            Dialogs.AppDialog.Vis(hoved, "Den findes ikke længere",
+                "Optagelsen er slettet eller flyttet uden for appen, siden beskeden blev skrevet.",
+                Dialogs.Slags.Valg);
+    }
+
+    /// <summary>Bedes om at lukke popup'en, når man går et andet sted hen.</summary>
+    public Action? Luk { get; set; }
 
     /// <summary>
     /// «for 5 min siden» frem for et klokkeslæt. Det er dét, man vil vide om

@@ -363,8 +363,17 @@
               <TextBlock Text="Indhold" Style="{StaticResource Underskrift}" Margin="0,18,0,0" />
               <Border Background="#FF181B22" BorderBrush="{StaticResource PanelKant}" BorderThickness="1"
                       CornerRadius="8" Padding="16,13" Margin="0,5,0,0">
-                <TextBlock x:Name="Indhold" FontSize="12.5" LineHeight="21" TextWrapping="Wrap"
-                           Foreground="{StaticResource TekstSvag}" />
+                <!-- TextBox og ikke TextBlock. To grunde:
+                     - Soegningen skal kunne springe hen til et bestemt sted,
+                       og det kraever, at tegnene kan slaas op paa position.
+                     - Man kan markere og kopiere et afsnit uden at aabne
+                       dokumentet i Word. -->
+                <TextBox x:Name="Indhold" FontSize="12.5" TextWrapping="Wrap"
+                         IsReadOnly="True" BorderThickness="0" Background="Transparent"
+                         Padding="0" Foreground="{StaticResource TekstSvag}"
+                         IsInactiveSelectionHighlightEnabled="True"
+                         VerticalScrollBarVisibility="Disabled"
+                         HorizontalScrollBarVisibility="Disabled" />
               </Border>
             </StackPanel>
           </ScrollViewer>

@@ -174,9 +174,39 @@ public static class Samtale
             .Select(g => g.Key)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-        return taeller.Count == 0
-            ? replikker
-            : replikker.Where(r => !taeller.Contains(r.Tekst)).ToList();
+        return replikker.Where(r => !taeller.Contains(r.Tekst) && !ErStilhed(r)).ToList();
+    }
+
+    /// <summary>
+    /// Er replikken en håndfuld ord spredt ud over et helt vindue?
+    ///
+    /// DET ER DET SIKRESTE KENDETEGN, OG DET ER MÅLT.
+    ///
+    /// Gentagelsesreglen ovenfor fanger kun det, der står tre gange ordret.
+    /// Den holdt, så længe begge spor var på dansk og hallucinerede den samme
+    /// sætning. Da gæsternes spor blev skrevet ud på norsk, kom der nye —
+    /// «Undertekster av Ai-Media», «Teksting av Nicolai Winther» — og de stod
+    /// for få gange hver til at blive fanget.
+    ///
+    /// Talehastigheden skiller dem rent. Målt på et rigtigt møde på en time:
+    ///
+    ///   hallucinationer     0,10 – 0,30 ord/sekund   (altid hele vinduet)
+    ///   den langsomste
+    ///   ægte lange replik   1,49 ord/sekund
+    ///
+    /// Der er et spring på en faktor fem mellem dem. Grænsen er sat på 0,5 —
+    /// tre gange under den langsomste rigtige tale, der blev målt.
+    ///
+    /// Kun lange segmenter vurderes. Et kort «ja» fylder få ord på få
+    /// sekunder og ville ellers ryge med.
+    /// </summary>
+    private static bool ErStilhed(Replik r)
+    {
+        var sekunder = (r.TilMs - r.FraMs) / 1000.0;
+        if (sekunder < 20) return false;
+
+        var ord = r.Tekst.Split(' ', StringSplitOptions.RemoveEmptyEntries).Length;
+        return ord / sekunder < 0.5;
     }
 
     /// <summary>
