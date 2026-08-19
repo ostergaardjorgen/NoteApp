@@ -38,8 +38,11 @@ public partial class TemplatesView : UserControl
         InitializeComponent();
         FeltAgenda.Text = Agenda();
 
-        Felter.Text = string.Join("   ",
-            PromptTemplate.Fields.Keys.Select(f => "{{" + f + "}}"));
+        // Felterne er knapper, ikke en liste at laese. Forklaringen fra
+        // PromptTemplate.Fields bliver til hjaelpeteksten paa hver enkelt.
+        Felter.ItemsSource = PromptTemplate.Fields
+            .Select(f => new { Felt = "{{" + f.Key + "}}", Forklaring = f.Value })
+            .ToList();
 
         // De indbyggede skabeloner lægges i datamappen, hvis de ikke er der.
         // Uden dette står skærmen tom første gang, og så ser det ud, som om
@@ -114,6 +117,26 @@ public partial class TemplatesView : UserControl
 
         using var l = new System.IO.StreamReader(s, System.Text.Encoding.UTF8);
         return l.ReadToEnd();
+    }
+
+    /// <summary>
+    /// Saetter et felt ind, hvor markoeren staar i opgaveteksten.
+    ///
+    /// Feltlisten var foer en fane for sig med en raekke navne, man kunne
+    /// laese. Den svarede ikke paa det, man staar med - hvor skal de hen? -
+    /// og man skulle skrive de kroellede parenteser af i haanden. Nu staar
+    /// listen under den tekst, felterne hoerer til, og et klik goer arbejdet.
+    /// </summary>
+    private void Felt_Klik(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button b || b.Tag is not string felt) return;
+
+        var pos = FeltBruger.CaretIndex;
+        FeltBruger.Text = FeltBruger.Text.Insert(pos, felt);
+
+        // Markoeren skal staa EFTER det indsatte, saa man kan skrive videre.
+        FeltBruger.CaretIndex = pos + felt.Length;
+        FeltBruger.Focus();
     }
 
     private void KopierAgenda_Click(object sender, RoutedEventArgs e)

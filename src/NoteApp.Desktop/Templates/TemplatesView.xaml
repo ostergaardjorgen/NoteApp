@@ -167,49 +167,59 @@
 
           <TabItem Header="Indstillinger" Style="{StaticResource Fane}">
             <StackPanel>
+
+              <!-- De tre korte felter paa een raekke. Beskrivelsen fik foer
+                   halvdelen af bredden og een linje - og den er den eneste
+                   af dem, der kan blive lang. Nu staar de smaa sammen
+                   foroven, og beskrivelsen faar hele bredden og plads til
+                   flere linjer. -->
               <Grid>
                 <Grid.ColumnDefinitions>
-                  <ColumnDefinition Width="*" />
                   <ColumnDefinition Width="2*" />
+                  <ColumnDefinition Width="*" />
+                  <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
-                <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                <StackPanel Grid.Column="0" Margin="0,0,10,0">
                   <TextBlock Text="Navn" Style="{StaticResource Underskrift}" />
                   <TextBox x:Name="FeltNavn" Margin="0,4,0,0" TextChanged="Aendret" />
                 </StackPanel>
 
-                <StackPanel Grid.Column="1" Margin="8,0,0,0">
-                  <TextBlock Text="Beskrivelse" Style="{StaticResource Underskrift}" />
-                  <TextBox x:Name="FeltBeskrivelse" Margin="0,4,0,0" TextChanged="Aendret" />
+                <StackPanel Grid.Column="1" Margin="0,0,10,0">
+                  <TextBlock Text="Temperatur" Style="{StaticResource Underskrift}" />
+                  <TextBox x:Name="FeltTemperatur" Margin="0,4,0,0" TextChanged="Aendret" />
+                </StackPanel>
+
+                <StackPanel Grid.Column="2">
+                  <TextBlock Text="Maks. længde (tokens)" Style="{StaticResource Underskrift}" />
+                  <TextBox x:Name="FeltMaksTokens" Margin="0,4,0,0" TextChanged="Aendret" />
                 </StackPanel>
               </Grid>
 
-              <TextBlock FontSize="11.5" Margin="2,6,0,0" TextWrapping="Wrap"
-                         Foreground="{StaticResource TekstMeget}"
-                         Text="Navnet står på knappen, når du vælger skabelon. Beskrivelsen står under den, så valget ikke er et gæt." />
-
-              <Grid Margin="0,22,0,0">
+              <Grid Margin="0,6,0,0">
                 <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="2*" />
                   <ColumnDefinition Width="*" />
                   <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-
-                <StackPanel Grid.Column="0" Margin="0,0,8,0">
-                  <TextBlock Text="Temperatur" Style="{StaticResource Underskrift}" />
-                  <TextBox x:Name="FeltTemperatur" Margin="0,4,0,0" TextChanged="Aendret" />
-                  <TextBlock FontSize="11.5" Margin="2,6,0,0" TextWrapping="Wrap" LineHeight="18"
-                             Foreground="{StaticResource TekstMeget}"
-                             Text="0,0 holder sig tæt på udskriften. Over 0,4 begynder den at formulere sig frit — og til et referat er det en fejl, ikke en stil." />
-                </StackPanel>
-
-                <StackPanel Grid.Column="1" Margin="8,0,0,0">
-                  <TextBlock Text="Maks. længde (tokens)" Style="{StaticResource Underskrift}" />
-                  <TextBox x:Name="FeltMaksTokens" Margin="0,4,0,0" TextChanged="Aendret" />
-                  <TextBlock FontSize="11.5" Margin="2,6,0,0" TextWrapping="Wrap" LineHeight="18"
-                             Foreground="{StaticResource TekstMeget}"
-                             Text="Loftet over svaret. Cirka 3 tegn pr. token — 2048 rækker til et fyldigt referat." />
-                </StackPanel>
+                <TextBlock Grid.Column="0" FontSize="11.5" TextWrapping="Wrap" Margin="2,0,10,0"
+                           Foreground="{StaticResource TekstMeget}"
+                           Text="Står på knappen, når du vælger skabelon." />
+                <TextBlock Grid.Column="1" FontSize="11.5" TextWrapping="Wrap" Margin="2,0,10,0"
+                           Foreground="{StaticResource TekstMeget}"
+                           Text="0,0 holder sig tæt på udskriften. Over 0,4 formulerer den sig frit — og til et referat er det en fejl." />
+                <TextBlock Grid.Column="2" FontSize="11.5" TextWrapping="Wrap" Margin="2,0,0,0"
+                           Foreground="{StaticResource TekstMeget}"
+                           Text="Loftet over svaret. Cirka 3 tegn pr. token." />
               </Grid>
+
+              <TextBlock Text="Beskrivelse" Style="{StaticResource Underskrift}" Margin="0,20,0,0" />
+              <TextBox x:Name="FeltBeskrivelse" Margin="0,4,0,0" TextChanged="Aendret"
+                       AcceptsReturn="True" TextWrapping="Wrap" MinHeight="58"
+                       VerticalScrollBarVisibility="Auto" />
+              <TextBlock FontSize="11.5" Margin="2,6,0,0" TextWrapping="Wrap"
+                         Foreground="{StaticResource TekstMeget}"
+                         Text="Står under navnet, når du vælger skabelon — så valget ikke er et gæt. Skriv gerne to linjer om, hvad den er god til, og hvornår man vælger den frem for de andre." />
             </StackPanel>
           </TabItem>
 
@@ -227,27 +237,46 @@
           <TabItem Header="Opgave" Style="{StaticResource Fane}">
             <DockPanel>
               <TextBlock DockPanel.Dock="Top" FontSize="11.5" Margin="2,0,0,8" TextWrapping="Wrap"
-                         Foreground="{StaticResource TekstMeget}"
-                         Text="Selve opgaven, med udskriften sat ind. Felterne i krøllede parenteser bliver erstattet, når dokumentet laves — se fanen «Felter»." />
+                         LineHeight="18" Foreground="{StaticResource TekstMeget}"
+                         Text="Selve opgaven, modellen får stillet. Alt herunder sendes, som det står — bortset fra felterne, der bliver skiftet ud med mødets egne oplysninger." />
+
+              <!-- FELTERNE STAAR HER, IKKE I EN FANE FOR SIG.
+                   De var en fane med en liste, man kunne laese. Det svarede
+                   ikke paa det, man staar med: hvor skal de hen? Svaret er
+                   HER, i denne tekst - og nu kan man klikke dem ind, hvor
+                   markoeren staar, i stedet for at skrive kroellede
+                   parenteser af i haanden. -->
+              <Border DockPanel.Dock="Bottom" Background="#FF181B22" CornerRadius="8"
+                      BorderBrush="{StaticResource PanelKant}" BorderThickness="1"
+                      Padding="14,11" Margin="0,10,0,0">
+                <StackPanel>
+                  <TextBlock Text="Sæt et felt ind, hvor markøren står" FontSize="12.5"
+                             FontWeight="SemiBold" />
+                  <TextBlock FontSize="11.5" Margin="0,4,0,8" TextWrapping="Wrap" LineHeight="18"
+                             Foreground="{StaticResource TekstMeget}"
+                             Text="Klik på et felt for at sætte det ind i teksten ovenfor. Når dokumentet laves, bliver feltet skiftet ud med mødets egne oplysninger — {{transskription}} bliver til hele udskriften." />
+                  <ItemsControl x:Name="Felter">
+                    <ItemsControl.ItemsPanel>
+                      <ItemsPanelTemplate>
+                        <WrapPanel />
+                      </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate>
+                        <Button Content="{Binding Felt}" Tag="{Binding Felt}" Click="Felt_Klik"
+                                ToolTip="{Binding Forklaring}" Margin="0,0,6,6"
+                                Padding="10,5" FontFamily="Consolas" FontSize="12" />
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </StackPanel>
+              </Border>
+
               <TextBox x:Name="FeltBruger" AcceptsReturn="True" TextWrapping="Wrap"
                        VerticalScrollBarVisibility="Auto" AcceptsTab="True"
                        FontFamily="Consolas" FontSize="12.5" TextChanged="Aendret" />
             </DockPanel>
           </TabItem>
-
-          <TabItem Header="Felter" Style="{StaticResource Fane}">
-            <StackPanel>
-              <TextBlock FontSize="12.5" TextWrapping="Wrap" LineHeight="21"
-                         Foreground="{StaticResource TekstSvag}"
-                         Text="Skriv et af disse felter ind i teksten, så bliver det erstattet med mødets egne oplysninger, når dokumentet laves." />
-              <Border Background="#FF181B22" BorderBrush="{StaticResource PanelKant}"
-                      BorderThickness="1" CornerRadius="8" Padding="16,13" Margin="0,12,0,0">
-                <TextBlock x:Name="Felter" FontSize="12.5" TextWrapping="Wrap"
-                           LineHeight="22" Foreground="{StaticResource TekstMeget}" />
-              </Border>
-            </StackPanel>
-          </TabItem>
-
 
           <TabItem Header="Agenda" Style="{StaticResource Fane}">
             <DockPanel>
