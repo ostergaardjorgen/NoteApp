@@ -143,10 +143,48 @@ if (Test-Path $udgivTil) {
 }
 
 Write-Host "Bygger og udgiver til $udgivTil ..."
+
+
+# RYD obj\Release FOER UDGIVELSEN.
+#
+# MSBuild husker i obj\, at de native DLL'er er kopieret. Ryddes output-
+# mappen, men ikke obj\, springer den kopieringen over - og saa staar exe'en
+# alene tilbage uden PresentationNative_cor3.dll og seks andre. Appen bygger
+# uden fejl og doer ved opstart.
+#
+# "dotnet publish --no-incremental" findes ikke; det er en build-switch, og
+# publish afviser den med MSB1001. Derfor slettes mappen i haanden.
+$objRelease = Join-Path (Split-Path $csproj) 'obj\Release'
+if (Test-Path $objRelease) {
+    Remove-Item $objRelease -Recurse -Force -ErrorAction SilentlyContinue
+}
+
 & dotnet publish $csproj -c Release -r win-x64 --self-contained true `
     -p:PublishSingleFile=true -o $udgivTil --nologo -v q | Out-Null
 
 if ($LASTEXITCODE -ne 0) { throw "dotnet publish fejlede med kode $LASTEXITCODE" }
+
+# --- SPAERRE: WPF'S NATIVE DLL'ER SKAL VAERE DER -------------------------
+#
+# PublishSingleFile pakker ikke disse ind i exe'en - de skal ligge ved siden
+# af. Mangler de, bygger og starter appen ikke: den doer med
+# System.DllNotFoundException, foer der er noget at se paa skaermen.
+#
+# Det skete 19-08-2026 og gav tre installationsfiler, der ikke kunne starte.
+# Ingen af dem fejlede ved bygningen - de var bare 5 MB for smaa.
+$paakraevet = @(
+    'PresentationNative_cor3.dll',
+    'wpfgfx_cor3.dll',
+    'vcruntime140_cor3.dll',
+    'D3DCompiler_47_cor3.dll',
+    'PenImc_cor3.dll'
+)
+$mangler = $paakraevet | Where-Object { -not (Test-Path (Join-Path $udgivTil $_)) }
+if ($mangler) {
+    throw ("Udgivelsen mangler $($mangler.Count) native DLL(er): $($mangler -join ', ').`n" +
+           "Appen ville bygge uden fejl og doe ved opstart. Slet " +
+           "src\NoteApp.Desktop\obj og koer igen.")
+}
 
 # --- Efterproev ------------------------------------------------------------
 # Et byg, der siger "faerdig" uden at filen er skiftet, er vaerre end et, der
