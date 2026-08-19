@@ -4,7 +4,6 @@ using System.Windows;
 using NoteApp.Core;
 using NoteApp.Desktop.Engine;
 using NoteApp.Desktop.Documents;
-using NoteApp.Desktop.Files;
 using NoteApp.Desktop.Jobs;
 using NoteApp.Desktop.Meeting;
 using NoteApp.Desktop.Preferences;
@@ -338,10 +337,6 @@ public partial class MainWindow : Window
         else if (NavMotor.IsChecked == true)
         {
             Indhold.Content = new EngineView();
-        }
-        else if (NavFiler.IsChecked == true)
-        {
-            Indhold.Content = new FilesView();
         }
         else if (NavCompliance.IsChecked == true)
         {

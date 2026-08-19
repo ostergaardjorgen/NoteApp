@@ -109,9 +109,10 @@
           <RadioButton x:Name="NavHistorik" GroupName="nav" Content="Historik"
                        Checked="Nav_Changed"
                        Style="{StaticResource NavKnap}" />
-          <RadioButton x:Name="NavFiler" GroupName="nav" Content="Filer og backup"
-                       Checked="Nav_Changed"
-                       Style="{StaticResource NavKnap}" />
+          <!-- HER LAA «Filer og backup». Det er ikke et sted, man gaar hen
+               - det er indstillinger, man aabner den dag, man skal flytte
+               datamappen eller gendanne noget. Nu to faner under
+               «Indstillinger». Fjernet 19-08-2026. -->
           <RadioButton x:Name="NavIndstillinger" GroupName="nav" Content="Indstillinger"
                        Checked="Nav_Changed"
                        Style="{StaticResource NavKnap}" />

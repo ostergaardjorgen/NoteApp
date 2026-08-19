@@ -1,259 +1,401 @@
-<UserControl x:Class="NoteApp.Desktop.Preferences.SettingsView"
+﻿<UserControl x:Class="NoteApp.Desktop.Preferences.SettingsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              Background="{StaticResource Baggrund}">
 
-  <!-- Rækkerne er Auto og ligger i en ScrollViewer. Med en fast *-række blev
-       panelet nederst klippet på en lav skærm, og der var ingen måde at nå
-       det på. En indstilling, man ikke kan se, kan man ikke ændre. -->
-  <ScrollViewer VerticalScrollBarVisibility="Auto">
+  <!-- ALT DET, MAN STILLER IND, EET STED.
+       «Filer og backup» laa som sit eget menupunkt. Det er ikke noget, man
+       gaar til - det er en indstilling, man aabner den dag, man skal flytte
+       datamappen eller gendanne noget. Menuen blev en linje laengere for
+       noget, der bruges to gange om aaret.
+
+       Fire faner i den raekkefoelge, man moeder dem: opstart foerst, fordi
+       den gaelder appen som helhed; saa lyden, som er det, man vender
+       tilbage til; og til sidst filer og sikkerhedskopi. -->
+
   <Grid Margin="24,20,24,20">
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
-      <RowDefinition Height="Auto" />
-      <RowDefinition Height="Auto" />
-      <RowDefinition Height="Auto" />
-      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
       <RowDefinition Height="Auto" />
     </Grid.RowDefinitions>
 
-    <Grid Grid.Row="0" Margin="0,0,0,16">
-      <StackPanel>
-        <TextBlock Text="Indstillinger" Style="{StaticResource Overskrift}" />
-        <TextBlock Style="{StaticResource Underskrift}" TextWrapping="Wrap" MaxWidth="700"
-                   HorizontalAlignment="Left"
-                   Text="Vælg mikrofon og højttaler. Appen lytter ikke, før du trykker prøv — eller trykker optag." />
-      </StackPanel>
+    <StackPanel Grid.Row="0" Margin="0,0,0,12">
+      <TextBlock Text="Indstillinger" Style="{StaticResource Overskrift}" />
+      <TextBlock Style="{StaticResource Underskrift}" TextWrapping="Wrap" MaxWidth="820"
+                 HorizontalAlignment="Left"
+                 Text="Opstart, lyd, hvor dine filer ligger — og sikkerhedskopien." />
+    </StackPanel>
 
-      <!-- Måleren kræver, at mikrofonen åbnes. Det skal være et valg: en app,
-           der lytter, fordi man kigger på en indstillingsskærm, holder ikke
-           det løfte, resten af appen giver. -->
-      <Button x:Name="ProeveKnap" Content="▶ Prøv mikrofon og højttaler" Click="Proeve_Click"
-              HorizontalAlignment="Right" VerticalAlignment="Center" Padding="16,9"
-              Background="{StaticResource Accent}" Foreground="#FF0B1220" BorderThickness="0"
-              FontWeight="SemiBold" />
-    </Grid>
+    <TabControl Grid.Row="1" Style="{StaticResource Fanerude}">
 
-    <!-- ============================ Mikrofon ============================ -->
-    <Border Grid.Row="1" Background="{StaticResource Panel}" CornerRadius="10" Padding="20" Margin="0,0,0,14"
-            BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
-      <StackPanel>
-        <TextBlock Text="Mikrofon" FontSize="15" FontWeight="SemiBold" />
-        <TextBlock Style="{StaticResource Underskrift}" Margin="0,3,0,10"
-                   Text="Dig. Optages på alle møder, både fysiske og online." />
-
-        <!-- ItemTemplate frem for DisplayMemberPath: med en egen ComboBox-
-             skabelon slaar DisplayMemberPath ikke igennem paa den lukkede
-             boks, og saa staar hele objektet der i staedet for navnet. -->
-        <ComboBox x:Name="Mikrofoner" SelectionChanged="Mikrofon_Valgt">
-          <ComboBox.ItemTemplate>
-            <DataTemplate>
-              <TextBlock Text="{Binding Display}" TextTrimming="CharacterEllipsis" />
-            </DataTemplate>
-          </ComboBox.ItemTemplate>
-        </ComboBox>
-
-        <Grid Margin="0,14,0,0">
-          <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="Auto" />
-          </Grid.ColumnDefinitions>
-          <TextBlock Grid.Column="0" Text="Niveau" Style="{StaticResource Underskrift}"
-                     VerticalAlignment="Center" Width="52" />
-          <Border Grid.Column="1" Height="10" Background="#FF2C323D" CornerRadius="5"
-                  VerticalAlignment="Center">
-            <Border x:Name="MikNiveau" HorizontalAlignment="Left" Width="0" Height="10"
-                    CornerRadius="5" Background="{StaticResource Godkendt}" />
-          </Border>
-          <TextBlock Grid.Column="2" x:Name="MikStatus" Style="{StaticResource Underskrift}"
-                     Margin="12,0,0,0" VerticalAlignment="Center" MinWidth="150" />
-        </Grid>
-
-        <TextBlock x:Name="MikAdvarsel" FontSize="12" Margin="0,10,0,0" TextWrapping="Wrap"
-                   Foreground="{StaticResource Advarsel}" Visibility="Collapsed" />
-      </StackPanel>
-    </Border>
-
-    <!-- =========================== Højttaler ============================ -->
-    <Border Grid.Row="2" Background="{StaticResource Panel}" CornerRadius="10" Padding="20"
-            BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
-      <StackPanel>
-        <TextBlock Text="Højttaler" FontSize="15" FontWeight="SemiBold" />
-        <TextBlock Style="{StaticResource Underskrift}" Margin="0,3,0,10"
-                   Text="De andre deltagere. Vælges den forkerte, bliver deres spor tomt." />
-
-        <ComboBox x:Name="Hoejttalere" SelectionChanged="Hoejttaler_Valgt">
-          <ComboBox.ItemTemplate>
-            <DataTemplate>
-              <TextBlock Text="{Binding Display}" TextTrimming="CharacterEllipsis" />
-            </DataTemplate>
-          </ComboBox.ItemTemplate>
-        </ComboBox>
-
-        <Grid Margin="0,14,0,0">
-          <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="Auto" />
-          </Grid.ColumnDefinitions>
-          <TextBlock Grid.Column="0" Text="Niveau" Style="{StaticResource Underskrift}"
-                     VerticalAlignment="Center" Width="52" />
-          <Border Grid.Column="1" Height="10" Background="#FF2C323D" CornerRadius="5"
-                  VerticalAlignment="Center">
-            <Border x:Name="HoejtNiveau" HorizontalAlignment="Left" Width="0" Height="10"
-                    CornerRadius="5" Background="{StaticResource Godkendt}" />
-          </Border>
-          <TextBlock Grid.Column="2" x:Name="HoejtStatus" Style="{StaticResource Underskrift}"
-                     Margin="12,0,0,0" VerticalAlignment="Center" MinWidth="150" />
-        </Grid>
-
-        <TextBlock x:Name="HoejtAdvarsel" FontSize="12" Margin="0,10,0,0" TextWrapping="Wrap"
-                   Foreground="{StaticResource Advarsel}" Visibility="Collapsed" />
-      </StackPanel>
-    </Border>
-
-    <!-- ====================== Er mikrofonen god nok? ====================
-         Måleren ovenfor siger, at mikrofonen VIRKER. Den siger ingenting om,
-         hvor godt den kan HØRES — og det er dét, hele appen står og falder
-         med. Her læses en tekst, appen kender i forvejen, op i en halv
-         minut, og udskriften sammenlignes ord for ord. Ét tal.
-
-         Testen er det eneste, der er beholdt fra træningen, som blev fjernet
-         18-08-2026. Resten målte nul; det her svarer på et spørgsmål, man
-         ellers først får svar på efter et møde på en time. -->
-    <Border Grid.Row="3" Background="{StaticResource Panel}" CornerRadius="10" Padding="20" Margin="0,0,0,14"
-            BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
-      <StackPanel>
-        <Grid>
+      <TabItem Header="Opstart" Style="{StaticResource Fane}">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
           <StackPanel>
-            <TextBlock Text="Er mikrofonen god nok?" FontSize="15" FontWeight="SemiBold" />
-            <TextBlock Style="{StaticResource Underskrift}" Margin="0,3,0,0" TextWrapping="Wrap" MaxWidth="620"
-                       HorizontalAlignment="Left"
-                       Text="Læs en fast tekst op i cirka tredive sekunder. Appen kender teksten i forvejen og tæller, hvor mange ord den hørte rigtigt." />
+        <!-- ===================== Klar til næste møde ======================== -->
+        <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20"
+                BorderBrush="{StaticResource PanelKant}" BorderThickness="1" Margin="0,0,0,14"
+                VerticalAlignment="Top">
+          <StackPanel>
+            <TextBlock Text="Klar til næste møde" FontSize="15" FontWeight="SemiBold" />
+            <TextBlock FontSize="12.5" Margin="0,6,0,0" TextWrapping="Wrap" LineHeight="20"
+                       Foreground="{StaticResource TekstMeget}"
+                       Text="Genvejstasten kan kun starte en optagelse, hvis appen kører. Derfor hænger de to ting sammen." />
+
+            <CheckBox x:Name="StartMedWindows" Margin="0,14,0,0" Click="Autostart_Klik"
+                      Content="Start NoteApp, når jeg logger på Windows" />
+            <TextBlock x:Name="AutostartStatus" FontSize="12" Margin="24,6,0,0" TextWrapping="Wrap"
+                       Foreground="{StaticResource TekstMeget}" />
+
+            <Border Background="#FF181B22" BorderBrush="{StaticResource PanelKant}" BorderThickness="1"
+                    CornerRadius="8" Padding="14,11" Margin="0,14,0,0">
+              <StackPanel>
+                <TextBlock x:Name="GenvejOverskrift" FontSize="13" FontWeight="SemiBold"
+                           Text="Lynstart af optagelse" />
+                <TextBlock FontSize="12.5" Margin="0,6,0,0" TextWrapping="Wrap" LineHeight="20"
+                           Foreground="{StaticResource TekstSvag}"
+                           Text="Tryk kombinationen hvor som helst i Windows, så begynder optagelsen med det samme. Listen viser, hvad der er ledigt på netop din maskine — det er forskelligt fra pc til pc." />
+
+                <ComboBox x:Name="Genveje" Margin="0,12,0,0" SelectionChanged="Genvej_Valgt">
+                  <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                      <TextBlock Text="{Binding Visning}" />
+                    </DataTemplate>
+                  </ComboBox.ItemTemplate>
+                </ComboBox>
+
+                <TextBlock x:Name="GenvejForklaring" FontSize="12" Margin="2,8,0,0" TextWrapping="Wrap"
+                           LineHeight="19" Foreground="{StaticResource TekstMeget}" />
+              </StackPanel>
+            </Border>
           </StackPanel>
-          <Button x:Name="TestKnap" Content="▶ Start test" Click="Test_Click"
-                  HorizontalAlignment="Right" VerticalAlignment="Top" Padding="16,9" MinWidth="150"
-                  Background="{StaticResource Accent}" Foreground="#FF0B1220" BorderThickness="0"
-                  FontWeight="SemiBold" />
-        </Grid>
+        </Border>
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
 
-        <!-- Selve oplæsningen. Teksten skal fylde, mens den læses — man skal
-             kunne se den uden at læne sig frem. -->
-        <Border x:Name="TestRude" Background="#FF181B22" BorderBrush="{StaticResource PanelKant}"
-                BorderThickness="1" CornerRadius="8" Padding="16,14" Margin="0,14,0,0"
-                Visibility="Collapsed">
+      <TabItem Header="Lyd" Style="{StaticResource Fane}">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
           <StackPanel>
-            <Grid Margin="0,0,0,12">
-              <TextBlock x:Name="TestTrin" FontSize="13" FontWeight="SemiBold"
-                         Foreground="{StaticResource Accent}" Text="Læs højt — i almindeligt tempo" />
-              <TextBlock x:Name="TestUr" FontSize="13" HorizontalAlignment="Right"
-                         Foreground="{StaticResource TekstSvag}" FontFamily="Consolas" />
+            <Grid Margin="0,0,0,14">
+              <TextBlock Style="{StaticResource Underskrift}" TextWrapping="Wrap" MaxWidth="700"
+                         HorizontalAlignment="Left" VerticalAlignment="Center"
+                         Text="Vælg mikrofon og højttaler. Appen lytter ikke, før du trykker prøv — eller trykker optag." />
+                    <!-- Måleren kræver, at mikrofonen åbnes. Det skal være et valg: en app,
+                         der lytter, fordi man kigger på en indstillingsskærm, holder ikke
+                         det løfte, resten af appen giver. -->
+                    <Button x:Name="ProeveKnap" Content="▶ Prøv mikrofon og højttaler" Click="Proeve_Click"
+                            HorizontalAlignment="Right" VerticalAlignment="Center" Padding="16,9"
+                            Background="{StaticResource Accent}" Foreground="#FF0B1220" BorderThickness="0"
+                            FontWeight="SemiBold" />
             </Grid>
+        <!-- ============================ Mikrofon ============================ -->
+        <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20" Margin="0,0,0,14"
+                BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+          <StackPanel>
+            <TextBlock Text="Mikrofon" FontSize="15" FontWeight="SemiBold" />
+            <TextBlock Style="{StaticResource Underskrift}" Margin="0,3,0,10"
+                       Text="Dig. Optages på alle møder, både fysiske og online." />
 
-            <TextBlock x:Name="TestTekst" FontSize="15.5" LineHeight="30" TextWrapping="Wrap"
-                       Foreground="{StaticResource Tekst}" />
+            <!-- ItemTemplate frem for DisplayMemberPath: med en egen ComboBox-
+                 skabelon slaar DisplayMemberPath ikke igennem paa den lukkede
+                 boks, og saa staar hele objektet der i staedet for navnet. -->
+            <ComboBox x:Name="Mikrofoner" SelectionChanged="Mikrofon_Valgt">
+              <ComboBox.ItemTemplate>
+                <DataTemplate>
+                  <TextBlock Text="{Binding Display}" TextTrimming="CharacterEllipsis" />
+                </DataTemplate>
+              </ComboBox.ItemTemplate>
+            </ComboBox>
 
             <Grid Margin="0,14,0,0">
               <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
               </Grid.ColumnDefinitions>
               <TextBlock Grid.Column="0" Text="Niveau" Style="{StaticResource Underskrift}"
                          VerticalAlignment="Center" Width="52" />
               <Border Grid.Column="1" Height="10" Background="#FF2C323D" CornerRadius="5"
                       VerticalAlignment="Center">
-                <Border x:Name="TestNiveau" HorizontalAlignment="Left" Width="0" Height="10"
+                <Border x:Name="MikNiveau" HorizontalAlignment="Left" Width="0" Height="10"
                         CornerRadius="5" Background="{StaticResource Godkendt}" />
               </Border>
+              <TextBlock Grid.Column="2" x:Name="MikStatus" Style="{StaticResource Underskrift}"
+                         Margin="12,0,0,0" VerticalAlignment="Center" MinWidth="150" />
             </Grid>
+
+            <TextBlock x:Name="MikAdvarsel" FontSize="12" Margin="0,10,0,0" TextWrapping="Wrap"
+                       Foreground="{StaticResource Advarsel}" Visibility="Collapsed" />
           </StackPanel>
         </Border>
 
-        <!-- Resultatet. Tallet står stort, fordi det er det, man kom efter;
-             rådet står under, fordi et tal uden en vej videre er ubrugeligt. -->
-        <Border x:Name="TestSvar" Background="#FF181B22" BorderBrush="{StaticResource PanelKant}"
-                BorderThickness="1" CornerRadius="8" Padding="16,14" Margin="0,14,0,0"
-                Visibility="Collapsed">
+        <!-- =========================== Højttaler ============================ -->
+        <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20"
+                BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
           <StackPanel>
-            <Grid>
-              <StackPanel Orientation="Horizontal">
-                <TextBlock x:Name="TestTal" FontSize="30" FontWeight="SemiBold"
-                           VerticalAlignment="Center" />
-                <TextBlock x:Name="TestDom" FontSize="14" Margin="14,0,0,0" VerticalAlignment="Center"
-                           Foreground="{StaticResource TekstSvag}" />
-              </StackPanel>
-            </Grid>
+            <TextBlock Text="Højttaler" FontSize="15" FontWeight="SemiBold" />
+            <TextBlock Style="{StaticResource Underskrift}" Margin="0,3,0,10"
+                       Text="De andre deltagere. Vælges den forkerte, bliver deres spor tomt." />
 
-            <TextBlock x:Name="TestRaad" FontSize="12.5" LineHeight="21" TextWrapping="Wrap"
-                       Margin="0,10,0,0" Foreground="{StaticResource TekstSvag}" MaxWidth="640"
-                       HorizontalAlignment="Left" />
-
-            <Expander x:Name="TestDetalje" Header="Sådan hørte appen det" Margin="0,12,0,0"
-                      Foreground="{StaticResource TekstMeget}" FontSize="12">
-              <StackPanel Margin="0,10,0,0">
-                <TextBlock x:Name="TestFejl" FontSize="12.5" TextWrapping="Wrap" LineHeight="21"
-                           Foreground="{StaticResource TekstSvag}" Margin="0,0,0,10" />
-                <TextBlock x:Name="TestUdskrift" FontSize="12.5" TextWrapping="Wrap" LineHeight="21"
-                           FontFamily="Consolas" Foreground="{StaticResource TekstMeget}" />
-              </StackPanel>
-            </Expander>
-          </StackPanel>
-        </Border>
-
-        <TextBlock x:Name="TestStatus" FontSize="12" Margin="0,10,0,0" TextWrapping="Wrap"
-                   Foreground="{StaticResource TekstMeget}" />
-      </StackPanel>
-    </Border>
-
-    <!-- ===================== Klar til næste møde ======================== -->
-    <Border Grid.Row="4" Background="{StaticResource Panel}" CornerRadius="10" Padding="20"
-            BorderBrush="{StaticResource PanelKant}" BorderThickness="1" Margin="0,0,0,14"
-            VerticalAlignment="Top">
-      <StackPanel>
-        <TextBlock Text="Klar til næste møde" FontSize="15" FontWeight="SemiBold" />
-        <TextBlock FontSize="12.5" Margin="0,6,0,0" TextWrapping="Wrap" LineHeight="20"
-                   Foreground="{StaticResource TekstMeget}"
-                   Text="Genvejstasten kan kun starte en optagelse, hvis appen kører. Derfor hænger de to ting sammen." />
-
-        <CheckBox x:Name="StartMedWindows" Margin="0,14,0,0" Click="Autostart_Klik"
-                  Content="Start NoteApp, når jeg logger på Windows" />
-        <TextBlock x:Name="AutostartStatus" FontSize="12" Margin="24,6,0,0" TextWrapping="Wrap"
-                   Foreground="{StaticResource TekstMeget}" />
-
-        <Border Background="#FF181B22" BorderBrush="{StaticResource PanelKant}" BorderThickness="1"
-                CornerRadius="8" Padding="14,11" Margin="0,14,0,0">
-          <StackPanel>
-            <TextBlock x:Name="GenvejOverskrift" FontSize="13" FontWeight="SemiBold"
-                       Text="Lynstart af optagelse" />
-            <TextBlock FontSize="12.5" Margin="0,6,0,0" TextWrapping="Wrap" LineHeight="20"
-                       Foreground="{StaticResource TekstSvag}"
-                       Text="Tryk kombinationen hvor som helst i Windows, så begynder optagelsen med det samme. Listen viser, hvad der er ledigt på netop din maskine — det er forskelligt fra pc til pc." />
-
-            <ComboBox x:Name="Genveje" Margin="0,12,0,0" SelectionChanged="Genvej_Valgt">
+            <ComboBox x:Name="Hoejttalere" SelectionChanged="Hoejttaler_Valgt">
               <ComboBox.ItemTemplate>
                 <DataTemplate>
-                  <TextBlock Text="{Binding Visning}" />
+                  <TextBlock Text="{Binding Display}" TextTrimming="CharacterEllipsis" />
                 </DataTemplate>
               </ComboBox.ItemTemplate>
             </ComboBox>
 
-            <TextBlock x:Name="GenvejForklaring" FontSize="12" Margin="2,8,0,0" TextWrapping="Wrap"
-                       LineHeight="19" Foreground="{StaticResource TekstMeget}" />
+            <Grid Margin="0,14,0,0">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+              </Grid.ColumnDefinitions>
+              <TextBlock Grid.Column="0" Text="Niveau" Style="{StaticResource Underskrift}"
+                         VerticalAlignment="Center" Width="52" />
+              <Border Grid.Column="1" Height="10" Background="#FF2C323D" CornerRadius="5"
+                      VerticalAlignment="Center">
+                <Border x:Name="HoejtNiveau" HorizontalAlignment="Left" Width="0" Height="10"
+                        CornerRadius="5" Background="{StaticResource Godkendt}" />
+              </Border>
+              <TextBlock Grid.Column="2" x:Name="HoejtStatus" Style="{StaticResource Underskrift}"
+                         Margin="12,0,0,0" VerticalAlignment="Center" MinWidth="150" />
+            </Grid>
+
+            <TextBlock x:Name="HoejtAdvarsel" FontSize="12" Margin="0,10,0,0" TextWrapping="Wrap"
+                       Foreground="{StaticResource Advarsel}" Visibility="Collapsed" />
           </StackPanel>
         </Border>
-      </StackPanel>
-    </Border>
 
-    <Grid Grid.Row="5" Margin="0,12,0,0">
+        <!-- ====================== Er mikrofonen god nok? ====================
+             Måleren ovenfor siger, at mikrofonen VIRKER. Den siger ingenting om,
+             hvor godt den kan HØRES — og det er dét, hele appen står og falder
+             med. Her læses en tekst, appen kender i forvejen, op i en halv
+             minut, og udskriften sammenlignes ord for ord. Ét tal.
+
+             Testen er det eneste, der er beholdt fra træningen, som blev fjernet
+             18-08-2026. Resten målte nul; det her svarer på et spørgsmål, man
+             ellers først får svar på efter et møde på en time. -->
+        <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20" Margin="0,0,0,14"
+                BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+          <StackPanel>
+            <Grid>
+              <StackPanel>
+                <TextBlock Text="Er mikrofonen god nok?" FontSize="15" FontWeight="SemiBold" />
+                <TextBlock Style="{StaticResource Underskrift}" Margin="0,3,0,0" TextWrapping="Wrap" MaxWidth="620"
+                           HorizontalAlignment="Left"
+                           Text="Læs en fast tekst op i cirka tredive sekunder. Appen kender teksten i forvejen og tæller, hvor mange ord den hørte rigtigt." />
+              </StackPanel>
+              <Button x:Name="TestKnap" Content="▶ Start test" Click="Test_Click"
+                      HorizontalAlignment="Right" VerticalAlignment="Top" Padding="16,9" MinWidth="150"
+                      Background="{StaticResource Accent}" Foreground="#FF0B1220" BorderThickness="0"
+                      FontWeight="SemiBold" />
+            </Grid>
+
+            <!-- Selve oplæsningen. Teksten skal fylde, mens den læses — man skal
+                 kunne se den uden at læne sig frem. -->
+            <Border x:Name="TestRude" Background="#FF181B22" BorderBrush="{StaticResource PanelKant}"
+                    BorderThickness="1" CornerRadius="8" Padding="16,14" Margin="0,14,0,0"
+                    Visibility="Collapsed">
+              <StackPanel>
+                <Grid Margin="0,0,0,12">
+                  <TextBlock x:Name="TestTrin" FontSize="13" FontWeight="SemiBold"
+                             Foreground="{StaticResource Accent}" Text="Læs højt — i almindeligt tempo" />
+                  <TextBlock x:Name="TestUr" FontSize="13" HorizontalAlignment="Right"
+                             Foreground="{StaticResource TekstSvag}" FontFamily="Consolas" />
+                </Grid>
+
+                <TextBlock x:Name="TestTekst" FontSize="15.5" LineHeight="30" TextWrapping="Wrap"
+                           Foreground="{StaticResource Tekst}" />
+
+                <Grid Margin="0,14,0,0">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                  </Grid.ColumnDefinitions>
+                  <TextBlock Grid.Column="0" Text="Niveau" Style="{StaticResource Underskrift}"
+                             VerticalAlignment="Center" Width="52" />
+                  <Border Grid.Column="1" Height="10" Background="#FF2C323D" CornerRadius="5"
+                          VerticalAlignment="Center">
+                    <Border x:Name="TestNiveau" HorizontalAlignment="Left" Width="0" Height="10"
+                            CornerRadius="5" Background="{StaticResource Godkendt}" />
+                  </Border>
+                </Grid>
+              </StackPanel>
+            </Border>
+
+            <!-- Resultatet. Tallet står stort, fordi det er det, man kom efter;
+                 rådet står under, fordi et tal uden en vej videre er ubrugeligt. -->
+            <Border x:Name="TestSvar" Background="#FF181B22" BorderBrush="{StaticResource PanelKant}"
+                    BorderThickness="1" CornerRadius="8" Padding="16,14" Margin="0,14,0,0"
+                    Visibility="Collapsed">
+              <StackPanel>
+                <Grid>
+                  <StackPanel Orientation="Horizontal">
+                    <TextBlock x:Name="TestTal" FontSize="30" FontWeight="SemiBold"
+                               VerticalAlignment="Center" />
+                    <TextBlock x:Name="TestDom" FontSize="14" Margin="14,0,0,0" VerticalAlignment="Center"
+                               Foreground="{StaticResource TekstSvag}" />
+                  </StackPanel>
+                </Grid>
+
+                <TextBlock x:Name="TestRaad" FontSize="12.5" LineHeight="21" TextWrapping="Wrap"
+                           Margin="0,10,0,0" Foreground="{StaticResource TekstSvag}" MaxWidth="640"
+                           HorizontalAlignment="Left" />
+
+                <Expander x:Name="TestDetalje" Header="Sådan hørte appen det" Margin="0,12,0,0"
+                          Foreground="{StaticResource TekstMeget}" FontSize="12">
+                  <StackPanel Margin="0,10,0,0">
+                    <TextBlock x:Name="TestFejl" FontSize="12.5" TextWrapping="Wrap" LineHeight="21"
+                               Foreground="{StaticResource TekstSvag}" Margin="0,0,0,10" />
+                    <TextBlock x:Name="TestUdskrift" FontSize="12.5" TextWrapping="Wrap" LineHeight="21"
+                               FontFamily="Consolas" Foreground="{StaticResource TekstMeget}" />
+                  </StackPanel>
+                </Expander>
+              </StackPanel>
+            </Border>
+
+            <TextBlock x:Name="TestStatus" FontSize="12" Margin="0,10,0,0" TextWrapping="Wrap"
+                       Foreground="{StaticResource TekstMeget}" />
+          </StackPanel>
+        </Border>
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <TabItem Header="Filer" Style="{StaticResource Fane}">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+          <StackPanel>
+        <!-- ========================== Datamappen =========================== -->
+        <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20" Margin="0,0,0,14"
+                BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+          <Grid>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0" Margin="0,0,16,0">
+              <TextBlock Text="Dine filer" FontSize="15" FontWeight="SemiBold" />
+              <TextBlock x:Name="DataSti" FontSize="13" FontFamily="Consolas" Margin="0,6,0,0" TextWrapping="Wrap" />
+              <TextBlock x:Name="DataIndhold" Style="{StaticResource Underskrift}" Margin="0,6,0,0" />
+              <TextBlock Style="{StaticResource Underskrift}" Margin="0,8,0,0" Foreground="{StaticResource TekstMeget}"
+                         Text="Optagelser, udskrifter, noter og dokumenter. Skifter du mappe, flyttes alt med." />
+            </StackPanel>
+            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+              <Button Content="Skift mappe…" Click="SkiftData_Click" MinWidth="130" />
+              <Button Content=".bn mappen" Click="AabnData_Click" Margin="0,8,0,0" MinWidth="130" />
+            </StackPanel>
+          </Grid>
+        </Border>
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <TabItem Header="Sikkerhedskopi" Style="{StaticResource Fane}">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+          <StackPanel>
+        <!-- ======================== Sikkerhedskopi ========================= -->
+        <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20"
+                BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+          <Grid>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0" Margin="0,0,16,0">
+              <TextBlock Text="Sikkerhedskopi" FontSize="15" FontWeight="SemiBold" />
+              <TextBlock x:Name="BackupSti" FontSize="13" FontFamily="Consolas" Margin="0,6,0,0" TextWrapping="Wrap" />
+              <TextBlock x:Name="BackupSenest" Style="{StaticResource Underskrift}" Margin="0,6,0,0" />
+              <TextBlock x:Name="BackupAdvarsel" FontSize="12" Margin="0,8,0,0"
+                         Foreground="{StaticResource Advarsel}" Visibility="Collapsed" TextWrapping="Wrap" />
+
+              <!-- Hvad kommer med. Lyd er fra som standard: den fylder alt, og
+                   den er det, der er lettest at undvære — arbejdet ligger i
+                   transskriptionen og de færdige dokumenter. -->
+              <Border Background="#FF181B22" CornerRadius="6" Padding="12,10" Margin="0,12,0,0"
+                      BorderThickness="1" BorderBrush="{StaticResource PanelKant}">
+                <StackPanel>
+                  <TextBlock Text="Hvad kommer med" Style="{StaticResource Underskrift}" Margin="0,0,0,8" />
+
+                  <TextBlock FontSize="12" Foreground="{StaticResource TekstSvag}" Margin="0,0,0,8"
+                             Text="Altid med: noter, transskriptioner, dokumenter, mødedata og indstillinger." />
+
+                  <CheckBox x:Name="TagLydMed" Content="Tag også lydfilerne med" Click="Lyd_Klik" />
+                  <TextBlock x:Name="LydStoerrelse" Style="{StaticResource Underskrift}" Margin="24,4,0,0"
+                             Foreground="{StaticResource TekstMeget}" />
+                </StackPanel>
+              </Border>
+            </StackPanel>
+            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+              <Button Content="Skift mappe…" Click="SkiftBackup_Click" MinWidth="130" />
+              <Button x:Name="KoerKnap" Content="Tag backup nu" Click="Koer_Click"
+                      Style="{StaticResource Primaer}" Margin="0,8,0,0" MinWidth="130" />
+            </StackPanel>
+          </Grid>
+        </Border>
+
+        <!-- ========================== Arkiverne ============================ -->
+        <Border Background="{StaticResource Panel}" CornerRadius="10" Margin="0,14,0,0"
+                BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+          <Grid>
+            <Grid.RowDefinitions>
+              <RowDefinition Height="Auto" />
+              <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="0" Margin="18,16,18,8">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+              </Grid.ColumnDefinitions>
+              <StackPanel Grid.Column="0">
+                <TextBlock Text="Gemte sikkerhedskopier" FontSize="14" FontWeight="SemiBold" />
+                <TextBlock x:Name="ValgtArkiv" Style="{StaticResource Underskrift}" Margin="0,3,0,0"
+                           Text="Vælg et arkiv for at se, hvad det indeholder." />
+              </StackPanel>
+              <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <Button x:Name="ProeveArkivKnap" Content="Prøvekørsel" Click="ProeveArkiv_Click"
+                        IsEnabled="False" Margin="0,0,8,0" />
+                <Button x:Name="GendanKnap" Content="Gendan…" Click="Gendan_Click" IsEnabled="False" />
+              </StackPanel>
+            </Grid>
+
+            <ListBox x:Name="Arkiver" Grid.Row="1" Background="Transparent" BorderThickness="0"
+                     Margin="10,0,10,12" Foreground="{StaticResource Tekst}"
+                     SelectionChanged="Arkiv_Valgt">
+              <ListBox.ItemTemplate>
+                <DataTemplate>
+                  <Grid Margin="6,4">
+                    <Grid.ColumnDefinitions>
+                      <ColumnDefinition Width="*" />
+                      <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="{Binding Navn}" FontSize="13" FontFamily="Consolas"
+                               Margin="0,0,16,0" TextTrimming="CharacterEllipsis" />
+                    <TextBlock Grid.Column="1" Text="{Binding Detaljer}" Style="{StaticResource Underskrift}"
+                               VerticalAlignment="Center" />
+                  </Grid>
+                </DataTemplate>
+              </ListBox.ItemTemplate>
+            </ListBox>
+          </Grid>
+        </Border>
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+    </TabControl>
+
+    <Grid Grid.Row="2" Margin="0,12,0,0">
       <Grid.ColumnDefinitions>
         <ColumnDefinition Width="*" />
         <ColumnDefinition Width="Auto" />
       </Grid.ColumnDefinitions>
-      <TextBlock Grid.Column="0" x:Name="Status" Style="{StaticResource Underskrift}"
-                 VerticalAlignment="Center" />
+      <StackPanel Grid.Column="0" VerticalAlignment="Center">
+        <TextBlock x:Name="Status" Style="{StaticResource Underskrift}" />
+        <TextBlock x:Name="FilStatus" Style="{StaticResource Underskrift}" Margin="0,3,0,0" />
+      </StackPanel>
       <Button Grid.Column="1" Content="Opdatér enhedslisten" Click="Genindlaes_Click" />
     </Grid>
   </Grid>
-  </ScrollViewer>
 </UserControl>
