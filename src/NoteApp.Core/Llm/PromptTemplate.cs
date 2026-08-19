@@ -51,7 +51,11 @@ public sealed class PromptTemplate
         ["dato"] = "Dato og klokkeslæt",
         ["varighed"] = "Mødets længde",
         ["noter"] = "Dine egne noter og bogmærker fra mødet",
-        ["sprog"] = "Det sprog mødet blev holdt på, som Whisper fandt det"
+        ["sprog"] = "Det sprog mødet blev holdt på, som Whisper fandt det",
+
+        // Faelles regler, ikke en oplysning om moedet. Den hoerer hjemme i
+        // systemprompten - se Deltagerregler.
+        [Deltagerregler.Felt] = "Reglerne for, hvem der kommer på deltagerlisten — fælles for alle skabeloner"
     };
 
     public static PromptTemplate Parse(string text, string? path = null)
@@ -98,6 +102,20 @@ public sealed class PromptTemplate
     /// tekst frem for at stå tilbage som {{noget}} — modellen ville ellers
     /// forsøge at udfylde det selv.
     /// </summary>
+    /// <summary>
+    /// Systemprompten med de fælles felter sat ind.
+    ///
+    /// Kun <c>{{deltagerregler}}</c> giver mening her — mødets egne
+    /// oplysninger hører til i brugerprompten. Skriver en skabelon feltet i
+    /// systemprompten, kommer reglerne med; gør den ikke, sker der
+    /// ingenting.
+    ///
+    /// Alle veje til en model skal bruge DENNE frem for SystemPrompt direkte.
+    /// Ellers ville en skabelon virke ét sted og ikke et andet.
+    /// </summary>
+    public string RenderSystem() =>
+        SystemPrompt.Replace("{{" + Deltagerregler.Felt + "}}", Deltagerregler.Tekst);
+
     public string Render(IReadOnlyDictionary<string, string?> values)
     {
         var sb = new StringBuilder(UserPrompt);

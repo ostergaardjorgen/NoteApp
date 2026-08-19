@@ -1,0 +1,231 @@
+﻿using System.Windows;
+using NoteApp.Core.Llm;
+
+namespace NoteApp.Desktop.Templates;
+
+/// <summary>
+/// Guiden, der laver en ny skabelon.
+///
+/// HVORFOR EN MODEL SKRIVER DEN
+///
+/// En tom skabelon kræver, at man ved, hvad en systemprompt er, hvilke afsnit
+/// der giver mening, og hvordan man formulerer en regel, en model faktisk
+/// følger. Det er en anden slags arbejde end at vide, hvad man skal bruge
+/// dokumentet til — og det sidste er dét, brugeren kan svare på.
+///
+/// Guiden spørger om fem ting og lader Mistral skrive resten. Vejen «start
+/// fra en tom» bliver stående: den virker uden en API-nøgle og uden at sende
+/// noget nogen steder hen.
+///
+/// RESULTATET ER ET UDKAST
+///
+/// Skabelonen åbnes til redigering bagefter. En skabelon, man ikke selv har
+/// læst igennem, er en, man ikke opdager fejl i — og fejlen dukker først op
+/// i et dokument, man skulle bruge til noget.
+/// </summary>
+public partial class NyTemplateWindow : Window
+{
+    /// <summary>Den færdige skabelon. Null hvis der blev fortrudt.</summary>
+    public PromptTemplate? Resultat { get; private set; }
+
+    private static readonly (string Navn, int Tokens)[] Længder =
+    {
+        ("Kort — et notat på en halv side", 1024),
+        ("Almindelig — et referat på et par sider", 4096),
+        ("Udførlig — alle detaljer med, ingen øvre grænse i praksis", 32000)
+    };
+
+    public NyTemplateWindow()
+    {
+        InitializeComponent();
+
+        FeltLaengde.ItemsSource = Længder.Select(l => l.Navn).ToList();
+        FeltLaengde.SelectedIndex = 1;
+
+        // Uden noegle er der ingen model at spoerge. Knappen bliver graa frem
+        // for at fejle bagefter, og teksten siger hvorfor.
+        if (SkyNoegle.Hent() is null)
+        {
+            LavKnap.IsEnabled = false;
+            Status.Text = "Skabelonen skrives af Mistral, og den er ikke sat op endnu. " +
+                          "Du kan starte fra en tom i stedet.";
+        }
+
+        FeltNavn.Focus();
+    }
+
+    private void Annuller_Click(object sender, RoutedEventArgs e) => DialogResult = false;
+
+    /// <summary>
+    /// Den gamle vej: en tom skabelon med det, der altid gælder, og intet
+    /// andet. Den skal blive: den virker uden nøgle og uden netværk.
+    /// </summary>
+    private void Tom_Click(object sender, RoutedEventArgs e)
+    {
+        Resultat = Tomskabelon(FeltNavn.Text.Trim());
+        DialogResult = true;
+    }
+
+    private static PromptTemplate Tomskabelon(string navn) => new()
+    {
+        Name = string.IsNullOrWhiteSpace(navn) ? "Ny skabelon" : navn,
+        Description = "Beskriv hvad den laver",
+        Temperature = 0.2,
+        MaxTokens = 4096,
+        SystemPrompt =
+            "Du skriver på dansk ud fra en udskrift af et møde.\n\n" +
+            "Skriv kun det, der faktisk står i udskriften. Find ikke på deltagere, datoer, tal\n" +
+            "eller beslutninger. Skriv aldrig et tal, der ikke står i udskriften.\n\n" +
+            "Er noget uklart, så skriv det som et åbent spørgsmål frem for at gætte.\n\n" +
+            "{{" + Deltagerregler.Felt + "}}\n",
+        UserPrompt =
+            "Her er udskriften af mødet.\n\n" +
+            "Titel: {{titel}}\nDato: {{dato}}\nMødet blev holdt på: {{sprog}}\n\n" +
+            "Udskrift:\n{{transskription}}"
+    };
+
+    private async void Lav_Click(object sender, RoutedEventArgs e)
+    {
+        var navn = FeltNavn.Text.Trim();
+        if (navn.Length == 0)
+        {
+            Vis("Skabelonen skal have et navn.");
+            FeltNavn.Focus();
+            return;
+        }
+
+        var formaal = FeltFormaal.Text.Trim();
+        if (formaal.Length == 0)
+        {
+            Vis("Skriv, hvad der skal komme ud af det. Det er dét, modellen bygger skabelonen på.");
+            FeltFormaal.Focus();
+            return;
+        }
+
+        var noegle = SkyNoegle.Hent();
+        if (noegle is null) { Vis("Der er ingen API-nøgle. Start fra en tom i stedet."); return; }
+
+        Fejl.Visibility = Visibility.Collapsed;
+        LavKnap.IsEnabled = false;
+        TomKnap.IsEnabled = false;
+        Status.Text = "Mistral skriver skabelonen … det tager typisk under et minut.";
+
+        var tokens = Længder[Math.Max(0, FeltLaengde.SelectedIndex)].Tokens;
+
+        try
+        {
+            // SkyRunner tager en skabelon, ikke en loes systemprompt. Her
+            // bygges en midlertidig een - den gemmes aldrig, den er kun
+            // indpakningen om det ene kald.
+            var opskrift = new PromptTemplate
+            {
+                Name = "Skabelonskriver",
+                Temperature = 0.3,
+                MaxTokens = 4000,
+                SystemPrompt = Opskrift(),
+                UserPrompt = ""
+            };
+
+            var svar = await new SkyRunner(noegle).KoerAsync(
+                SkyKatalog.Standard,
+                opskrift,
+                Opgave(navn, formaal, FeltLaeser.Text.Trim(), FeltSkalMed.Text.Trim(),
+                       Længder[Math.Max(0, FeltLaengde.SelectedIndex)].Navn));
+
+            Resultat = Byg(navn, formaal, tokens, svar.Tekst);
+            DialogResult = true;
+        }
+        catch (Exception ex)
+        {
+            Vis($"Skabelonen kunne ikke laves: {ex.Message}\n\n" +
+                "Du kan prøve igen, eller starte fra en tom og skrive den selv.");
+            LavKnap.IsEnabled = true;
+            TomKnap.IsEnabled = true;
+            Status.Text = "";
+        }
+    }
+
+    /// <summary>
+    /// Instruktionen til den model, der skriver skabelonen.
+    ///
+    /// Den beder om PROMPTEN og ikke om et referat — det er en anden opgave
+    /// end den, appen ellers stiller, og det skal siges tydeligt, ellers
+    /// begynder modellen at skrive et eksempel på et dokument i stedet.
+    /// </summary>
+    private static string Opskrift() =>
+        "Du skriver systemprompter til en anden sprogmodel, som skal lave dokumenter ud fra " +
+        "udskrifter af møder. Du skriver ALTID på dansk.\n\n" +
+        "Du skal IKKE skrive et eksempel på et dokument. Du skal skrive den INSTRUKTION, " +
+        "som en model skal følge for at lave sådan et dokument hver gang.\n\n" +
+        "Svar med instruktionen og intet andet — ingen indledning, ingen forklaring af hvad du " +
+        "har gjort, ingen markdown-kodeblok omkring.\n\n" +
+        "Instruktionen skal:\n" +
+        "· være skrevet i bydeform til modellen\n" +
+        "· sige, at hele svaret skal være på dansk\n" +
+        "· forbyde at finde på tal, navne, datoer og beslutninger, der ikke står i udskriften\n" +
+        "· beskrive dokumentets afsnit med markdown-overskrifter (##) og sige, hvad hvert " +
+        "afsnit skal indeholde\n" +
+        "· sige, at et afsnit udelades helt, hvis der ikke er noget at skrive i det\n\n" +
+        "Skriv IKKE regler om, hvem der kommer på deltagerlisten — de tilføjes automatisk " +
+        "bagefter. Skriv heller ikke et «## Deltagere»-afsnit.\n\n" +
+        "Hold dig til 40-70 linjer.";
+
+    private static string Opgave(string navn, string formaal, string laeser, string skalMed, string laengde) =>
+        $"Lav instruktionen til en skabelon, der hedder «{navn}».\n\n" +
+        $"Hvad der skal komme ud af det:\n{formaal}\n\n" +
+        (laeser.Length > 0 ? $"Hvem der skal læse det:\n{laeser}\n\n" : "") +
+        (skalMed.Length > 0 ? $"Det skal altid med:\n{skalMed}\n\n" : "") +
+        $"Længde: {laengde}";
+
+    /// <summary>
+    /// Sætter svaret sammen til en skabelon.
+    ///
+    /// Deltagerreglerne sættes PÅ til sidst som felt, uanset hvad modellen
+    /// skrev. De er fælles og skal ikke kunne glemmes af en model, der havde
+    /// travlt.
+    /// </summary>
+    private static PromptTemplate Byg(string navn, string formaal, int tokens, string svar)
+    {
+        var system = svar.Trim();
+
+        // Modeller pakker gerne svaret i en kodeblok, selv naar man beder om
+        // det modsatte. Den skal vaek, ellers staar der ``` i prompten.
+        if (system.StartsWith("```", StringComparison.Ordinal))
+        {
+            var foerste = system.IndexOf('\n');
+            if (foerste > 0) system = system[(foerste + 1)..];
+            if (system.EndsWith("```", StringComparison.Ordinal)) system = system[..^3];
+            system = system.Trim();
+        }
+
+        return new PromptTemplate
+        {
+            Name = navn,
+            Description = Kort(formaal),
+            Temperature = 0.2,
+            MaxTokens = tokens,
+            SystemPrompt = system + "\n\n{{" + Deltagerregler.Felt + "}}\n",
+            UserPrompt =
+                "Her er udskriften af mødet.\n\n" +
+                "Titel: {{titel}}\nDato: {{dato}}\nVarighed: {{varighed}}\n" +
+                "Mødet blev holdt på: {{sprog}}\n\n" +
+                "Mine egne noter undervejs:\n{{noter}}\n\n" +
+                "Udskrift:\n{{transskription}}"
+        };
+    }
+
+    /// <summary>Første sætning af formålet, som beskrivelse. Hele afsnittet ville fylde listen.</summary>
+    private static string Kort(string formaal)
+    {
+        var linje = formaal.Replace('\n', ' ').Replace('\r', ' ').Trim();
+        var punktum = linje.IndexOf('.');
+        if (punktum > 20) linje = linje[..punktum];
+        return linje.Length > 140 ? linje[..137] + "…" : linje;
+    }
+
+    private void Vis(string besked)
+    {
+        Fejl.Text = besked;
+        Fejl.Visibility = Visibility.Visible;
+    }
+}

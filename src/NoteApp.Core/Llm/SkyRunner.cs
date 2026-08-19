@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
@@ -330,7 +330,7 @@ public sealed class SkyRunner
             model = model.ApiId,
             messages = new object[]
             {
-                new { role = "system", content = skabelon.SystemPrompt },
+                new { role = "system", content = skabelon.RenderSystem() },
                 new { role = "user", content = brugerPrompt }
             },
             temperature = skabelon.Temperature,

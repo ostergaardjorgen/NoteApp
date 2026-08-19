@@ -286,42 +286,35 @@ public partial class TemplatesView : UserControl
 
     // ------------------------------------------------------------- ny/slet
 
+    /// <summary>
+    /// Ny skabelon — gennem guiden.
+    ///
+    /// Her blev der foer lavet en tom skabelon med det samme. Den vej findes
+    /// stadig, som en knap i guiden; men den tomme er kun brugbar for en, der
+    /// ved, hvad en systemprompt er, og hvilke afsnit der giver mening.
+    /// </summary>
     private void Ny_Click(object sender, RoutedEventArgs e)
     {
-        var ny = new PromptTemplate
-        {
-            Name = "Ny skabelon",
-            Description = "Beskriv hvad den laver",
-            Temperature = 0.2,
-            MaxTokens = 2048,
-            SystemPrompt =
-                "Du skriver på dansk ud fra en udskrift af et møde.\n\n" +
-                "Skriv kun det, der faktisk står i udskriften. Find ikke på deltagere, datoer, tal\n" +
-                "eller beslutninger. Skriv aldrig et tal, der ikke står i udskriften.\n\n" +
-                "Er noget uklart, så skriv det som et åbent spørgsmål frem for at gætte.",
-            UserPrompt =
-                "Her er udskriften af mødet.\n\n" +
-                "Titel: {{titel}}\nDato: {{dato}}\nMødet blev holdt på: {{sprog}}\n\n" +
-                "Udskrift:\n{{transskription}}"
-        };
+        var vindue = new NyTemplateWindow { Owner = Window.GetWindow(this) };
+        if (vindue.ShowDialog() != true || vindue.Resultat is not { } ny) return;
 
         try
         {
-            var sti = Path.Combine(PromptTemplate.Directory, PromptTemplate.Filnavn(ny.Name));
-            if (File.Exists(sti))
-            {
-                ny.Name = "Ny skabelon " + DateTime.Now.ToString("HH-mm");
-            }
+            // Et navn, der allerede findes, ville overskrive en skabelon, man
+            // stadig bruger. Der laegges et nummer paa i stedet.
+            var grund = ny.Name;
+            var n = 2;
+            while (File.Exists(Path.Combine(PromptTemplate.Directory, PromptTemplate.Filnavn(ny.Name))))
+                ny.Name = $"{grund} {n++}";
 
             ny.Save();
             Indlæs(ny.Name);
-            Status.Text = "Ny skabelon oprettet. Giv den et navn, og skriv hvad den skal lave.";
-            FeltNavn.Focus();
-            FeltNavn.SelectAll();
+            Status.Text = $"«{ny.Name}» er lavet. Læs den igennem, og ret det, der skal rettes.";
         }
         catch (Exception ex)
         {
-            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Kunne ikke oprette", $"Skabelonen kunne ikke oprettes.\n\n{ex.Message}", Dialogs.Slags.Fejl);
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Kunne ikke gemme skabelonen",
+                ex.Message, Dialogs.Slags.Pas_paa);
         }
     }
 

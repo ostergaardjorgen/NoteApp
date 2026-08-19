@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Text;
 
 namespace NoteApp.Core.Llm;
@@ -120,7 +120,7 @@ public sealed class LlmRunner
 
         // Groft skoen: dansk tekst lander omkring 3 tegn pr. token. Bevidst
         // rundhaandet, saa prompten ikke bliver klippet over.
-        var anslaaetPrompt = (template.SystemPrompt.Length + userPrompt.Length) / 3 + 200;
+        var anslaaetPrompt = (template.RenderSystem().Length + userPrompt.Length) / 3 + 200;
         var kontekst = Naermeste2Potens(anslaaetPrompt + template.MaxTokens + 512);
 
         // Prompten sendes i en FIL, ikke paa kommandolinjen. Windows knaekker
@@ -138,7 +138,7 @@ public sealed class LlmRunner
         var args = new List<string>
         {
             "-m", modelPath,
-            "-sys", template.SystemPrompt,
+            "-sys", template.RenderSystem(),
             "-f", promptFil,
             "-n", template.MaxTokens.ToString(),
             "-c", kontekst.ToString(),

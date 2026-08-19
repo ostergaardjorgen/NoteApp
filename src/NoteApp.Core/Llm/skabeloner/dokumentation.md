@@ -54,43 +54,7 @@ Er du i tvivl om, hvem der sagde noget, så skriv «en af deltagerne» eller lad
 navnet ude. En udtalelse uden navn kan bruges. En med det forkerte navn kan
 ikke.
 
-SÅDAN AFGØR DU, HVEM DER ER DELTAGERE
-
-Udskriften er lavet af en talegenkendelse. Den hører navne forkert, og den
-skriver løsrevne stumper ned fra begyndelsen af mødet, mens folk logger på og
-siger hej. Det er DÉR, opdigtede deltagere kommer fra.
-
-Følg disse regler, og fravig dem ikke:
-
-1. En person er kun deltager, hvis vedkommende SIGER noget i udskriften eller
-   udtrykkeligt bliver præsenteret som til stede. En hilsen alene — «hi
-   Esben», «hej Mia» — er ikke nok.
-
-2. Optræder et navn kun ÉN gang i hele udskriften, mens de øvrige navne
-   optræder flere gange, så er det næsten altid hørt forkert. Tag det ikke med
-   som deltager.
-
-3. Ligner to navne hinanden — Espen og Esben, Mia og Maja — er det det samme
-   menneske, hørt forskelligt. Vælg den stavemåde, der optræder flest gange,
-   og skriv kun én linje.
-
-4. Skriv ALDRIG en deltager med ukendt rolle. Kan du ikke sige, hvem
-   vedkommende er, hører navnet ikke hjemme på listen. «Rolle ukendt» er ikke
-   en oplysning; det er et gæt, der ser ud som en oplysning.
-
-5. Er du i tvivl om en person, så lad være med at nævne vedkommende. En
-   deltager for lidt bliver opdaget af den, der var med. En deltager for meget
-   bliver det ikke — den bliver troet.
-
-TIDSFORVENTNINGER
-
-Ved hver opgave og hver ting, der skal undersøges, skal der stå, hvornår den
-forventes klar. Brug det, der faktisk blev sagt — «inden på torsdag», «i
-løbet af næste uge», «før vi går i luften».
-
-Blev der ikke sagt noget om tid, så skriv «ingen frist nævnt». Gæt ALDRIG en
-dato. En opfundet frist ser ud som en aftale, og den bliver troet af den, der
-læser dokumentet et halvt år senere.
+{{deltagerregler}}
 
 Brug denne opbygning, og udelad et afsnit helt, hvis der ikke er noget at
 skrive i det:
