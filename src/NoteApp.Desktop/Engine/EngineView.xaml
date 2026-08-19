@@ -33,7 +33,7 @@
       <TextBlock Text="AI-modeller" Style="{StaticResource Overskrift}" />
       <TextBlock Style="{StaticResource Underskrift}" TextWrapping="Wrap" MaxWidth="900"
                  HorizontalAlignment="Left"
-                 Text="To lag, der gør hver sit. Lyden bliver til tekst her på maskinen. Teksten bliver til et dokument i Europa. Begge dele er valgt på forhånd — der er ikke noget at stille ind." />
+                 Text="To lag, der gør hver sit. Lyden bliver til tekst her på maskinen. Teksten bliver til et dokument i Europa. Begge dele er valgt på forhånd — der er ikke noget at stille ind. Det første lag er to komponenter, en motor og en modelfil; under «Compliance» står de hver for sig, fordi de har hver sin licens." />
     </StackPanel>
 
     <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">

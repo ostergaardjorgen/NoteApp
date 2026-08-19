@@ -286,7 +286,17 @@
                 BorderBrush="{StaticResource PanelKant}" BorderThickness="1" Margin="0,0,0,14">
           <StackPanel>
             <TextBlock Text="MODELLER OG LICENSER" FontSize="10.5" FontWeight="SemiBold"
-                       Foreground="{StaticResource TekstMeget}" Margin="0,0,0,12" />
+                       Foreground="{StaticResource TekstMeget}" Margin="0,0,0,6" />
+
+            <!-- HVORFOR DER STAAR TRE HER OG TO PAA AI-MODELLER.
+                 De to skaerme taeller ikke det samme. AI-modeller taeller LAG
+                 - lyd til tekst, tekst til dokument. Her taelles KOMPONENTER
+                 med hver sin licens, og det foerste lag er to: programmet,
+                 der koerer modellen, og modelfilen selv. De har hver sin
+                 rettighedshaver, og saa skal de staa hver for sig. -->
+            <TextBlock FontSize="12" LineHeight="20" TextWrapping="Wrap" Margin="0,0,0,12"
+                       Foreground="{StaticResource TekstMeget}"
+                       Text="Tre komponenter, fordelt på appens to lag. Whisper tæller for to — motoren, der afvikler modellen, og selve modelfilen. De har hver sin rettighedshaver og derfor hver sin licens, og derfor står de her hver for sig, mens «AI-modeller» viser dem som ét lag." />
 
             <ItemsControl x:Name="Modeller">
               <ItemsControl.ItemTemplate>
