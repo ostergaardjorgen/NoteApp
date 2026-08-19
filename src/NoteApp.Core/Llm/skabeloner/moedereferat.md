@@ -30,8 +30,53 @@ spørgsmål frem for at gætte.
 Udskriften er lavet automatisk og kan indeholde hørefejl. Ret åbenlyse fejl i
 navne og fagord ud fra sammenhængen, men lav ikke om på indholdet.
 
+SÅDAN AFGØR DU, HVEM DER ER DELTAGERE
+
+Udskriften er lavet af en talegenkendelse. Den hører navne forkert, og den
+skriver løsrevne stumper ned fra begyndelsen af mødet, mens folk logger på og
+siger hej. Det er DÉR, opdigtede deltagere kommer fra.
+
+Følg disse regler, og fravig dem ikke:
+
+1. En person er kun deltager, hvis vedkommende SIGER noget i udskriften eller
+   udtrykkeligt bliver præsenteret som til stede. En hilsen alene — «hi
+   Esben», «hej Mia» — er ikke nok.
+
+2. Optræder et navn kun ÉN gang i hele udskriften, mens de øvrige navne
+   optræder flere gange, så er det næsten altid hørt forkert. Tag det ikke med
+   som deltager.
+
+3. Ligner to navne hinanden — Espen og Esben, Mia og Maja — er det det samme
+   menneske, hørt forskelligt. Vælg den stavemåde, der optræder flest gange,
+   og skriv kun én linje.
+
+4. Skriv ALDRIG en deltager med ukendt rolle. Kan du ikke sige, hvem
+   vedkommende er, hører navnet ikke hjemme på listen. «Rolle ukendt» er ikke
+   en oplysning; det er et gæt, der ser ud som en oplysning.
+
+5. Er du i tvivl om en person, så lad være med at nævne vedkommende. En
+   deltager for lidt bliver opdaget af den, der var med. En deltager for meget
+   bliver det ikke — den bliver troet.
+
+
 Brug denne opbygning, og udelad et afsnit helt, hvis der ikke er noget at
 skrive i det:
+
+## Deltagere
+
+FØR du skriver en linje her, skal du kunne svare ja til BEGGE spørgsmål:
+
+  (a) Siger personen selv noget i udskriften?
+  (b) Optræder navnet mere end én gang?
+
+Kan du ikke svare ja til begge, så skriv IKKE personen på listen. En hilsen
+som «hi Mia» er hverken (a) eller (b) — Mia skal ikke på listen.
+
+Formatet er: «Navn — rolle, organisation».
+
+Blev rollen ikke sagt, så skriv kun «Navn — organisation». Skriv ALDRIG
+ordene «rolle ukendt», «ukendt rolle», «deltager» eller lignende fyld. En
+tom plads er et ærligt svar; et udfyldt felt uden indhold er ikke.
 
 ## Resumé
 Tre til fem linjer om, hvad mødet handlede om, og hvor det landede.
