@@ -281,7 +281,8 @@
           <TabItem Header="Agenda" Style="{StaticResource Fane}">
             <DockPanel>
               <StackPanel DockPanel.Dock="Top" Margin="0,0,0,10">
-                <TextBlock Text="Hvorfor en fast dagsorden" FontSize="13.5" FontWeight="SemiBold" />
+                <TextBlock x:Name="AgendaOverskrift" FontSize="13.5" FontWeight="SemiBold"
+                           Text="Hvorfor en fast dagsorden" />
                 <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,6,0,0"
                            Foreground="{StaticResource TekstSvag}"
                            Text="Et referat kan kun indeholde det, der blev sagt. Bliver et navn aldrig nævnt, en frist aldrig aftalt eller en beslutning aldrig sagt højt, står det heller ikke i dokumentet — uanset hvor god modellen er." />
@@ -292,9 +293,26 @@
                            Foreground="{StaticResource TekstMeget}"
                            Text="Kopiér den ind i mødeindkaldelsen. Det vigtigste enkelte punkt er navnerunden: uden den har talegenkendelsen ingen navne at genkende, og så bliver «hvem sagde hvad» et gæt." />
 
-                <Button Content="Kopiér dagsordenen" Click="KopierAgenda_Click"
-                        HorizontalAlignment="Left" Margin="0,12,0,0" Padding="14,7"
-                        ToolTip="Læg hele dagsordenen i udklipsholderen" />
+                <!-- DAGSORDENEN HOERER TIL SKABELONEN.
+                     Foerst viste den det samme, uanset hvad man stod paa. Det
+                     var forkert: et referat skal bruge beslutninger og
+                     frister sagt hoejt, en brainstorm skal bruge de idéer,
+                     der blev forkastet - og det er praecis dét, ingen siger,
+                     medmindre dagsordenen beder om det.
+
+                     Har skabelonen ikke sin egen, staar standarden. Den kan
+                     tilpasses med een knap, og den kan altid rulles tilbage. -->
+                <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                  <Button x:Name="AgendaKopierKnap" Content="Kopiér dagsordenen"
+                          Click="KopierAgenda_Click" Padding="14,7" Margin="0,0,8,0"
+                          ToolTip="Læg hele dagsordenen i udklipsholderen" />
+                  <Button x:Name="AgendaTilpasKnap" Content="Tilpas til denne skabelon"
+                          Click="TilpasAgenda_Click" Padding="14,7" Margin="0,0,8,0"
+                          ToolTip="Lad Mistral skrive en dagsorden, der passer til netop denne skabelon" />
+                  <Button x:Name="AgendaNulstilKnap" Content="Tilbage til standarden"
+                          Click="NulstilAgenda_Click" Padding="14,7" Visibility="Collapsed"
+                          ToolTip="Slet skabelonens egen dagsorden og brug den fælles igen" />
+                </StackPanel>
               </StackPanel>
 
               <TextBox x:Name="FeltAgenda" IsReadOnly="True" AcceptsReturn="True"

@@ -36,7 +36,6 @@ public partial class TemplatesView : UserControl
     public TemplatesView()
     {
         InitializeComponent();
-        FeltAgenda.Text = Agenda();
 
         // Felterne er knapper, ikke en liste at laese. Forklaringen fra
         // PromptTemplate.Fields bliver til hjaelpeteksten paa hver enkelt.
@@ -91,6 +90,7 @@ public partial class TemplatesView : UserControl
         }
 
         Detaljer.IsEnabled = true;
+        VisAgenda();
 
         var valgt = _rod.Boern.FirstOrDefault(k => k.Skabelon?.Name == vælgNavn) ?? _rod.Boern[0];
         valgt.ErValgt = true;
@@ -137,6 +137,108 @@ public partial class TemplatesView : UserControl
         // Markoeren skal staa EFTER det indsatte, saa man kan skrive videre.
         FeltBruger.CaretIndex = pos + felt.Length;
         FeltBruger.Focus();
+    }
+
+    /// <summary>
+    /// Viser den dagsorden, der hører til den valgte skabelon — eller
+    /// standarden, hvis den ikke har sin egen.
+    /// </summary>
+    private void VisAgenda()
+    {
+        var navn = _valgt?.Name;
+        var egen = navn is not null && Agendaer.HarEgen(navn);
+
+        FeltAgenda.Text = navn is null ? Agenda() : Agendaer.Hent(navn, Agenda());
+
+        AgendaOverskrift.Text = egen
+            ? $"Dagsorden til «{navn}»"
+            : "Hvorfor en fast dagsorden";
+
+        AgendaNulstilKnap.Visibility = egen ? Visibility.Visible : Visibility.Collapsed;
+        AgendaTilpasKnap.IsEnabled = navn is not null && SkyNoegle.Hent() is not null;
+    }
+
+    /// <summary>
+    /// Beder Mistral skrive en dagsorden, der passer til netop denne
+    /// skabelon.
+    ///
+    /// Standarden gives med som udgangspunkt frem for at bede om en fra
+    /// bunden. De fem ting, den sikrer — navne, formål, beslutninger sagt
+    /// højt, det ingen ved, og hvem der følger op — gælder alle møder, og de
+    /// skal ikke kunne forsvinde, fordi en model syntes, den kunne gøre det
+    /// bedre.
+    /// </summary>
+    private async void TilpasAgenda_Click(object sender, RoutedEventArgs e)
+    {
+        if (_valgt is not { } t) return;
+
+        var noegle = SkyNoegle.Hent();
+        if (noegle is null) return;
+
+        AgendaTilpasKnap.IsEnabled = false;
+        Status.Text = "Mistral tilpasser dagsordenen …";
+
+        try
+        {
+            var opskrift = new PromptTemplate
+            {
+                Name = "Dagsordensskriver",
+                Temperature = 0.3,
+                MaxTokens = 2000,
+                SystemPrompt =
+                    "Du tilpasser dagsordener til møder, der bliver optaget og skrevet ud " +
+                    "til tekst. Du skriver ALTID på dansk.\n\n" +
+                    "Du får en standarddagsorden og den instruktion, et dokument bliver " +
+                    "lavet efter bagefter. Din opgave er at rette dagsordenen til, så mødet " +
+                    "af sig selv kommer omkring det, dokumentet har brug for.\n\n" +
+                    "Behold punkt 1 (navnerunden) ordret. Uden den har talegenkendelsen " +
+                    "ingen navne at genkende.\n\n" +
+                    "Behold formen: nummererede punkter med en tidsangivelse i parentes og " +
+                    "konkrete sætninger, deltagerne skal sige højt. Tilføj, fjern og omskriv " +
+                    "de øvrige punkter, så de passer til dokumentet.\n\n" +
+                    "Svar med dagsordenen og intet andet — ingen indledning, ingen " +
+                    "forklaring, ingen kodeblok omkring.",
+                UserPrompt = ""
+            };
+
+            var svar = await new SkyRunner(noegle).KoerAsync(
+                SkyKatalog.Standard, opskrift,
+                $"Dokumentet, der skal laves bagefter, hedder «{t.Name}».\n\n" +
+                $"Instruktionen til det:\n{t.SystemPrompt}\n\n" +
+                $"Standarddagsordenen:\n{Agenda()}");
+
+            var tekst = svar.Tekst.Trim();
+            if (tekst.StartsWith("```", StringComparison.Ordinal))
+            {
+                var foerste = tekst.IndexOf('\n');
+                if (foerste > 0) tekst = tekst[(foerste + 1)..];
+                if (tekst.EndsWith("```", StringComparison.Ordinal)) tekst = tekst[..^3];
+                tekst = tekst.Trim();
+            }
+
+            Agendaer.Gem(t.Name, tekst);
+            VisAgenda();
+            Status.Text = $"Dagsordenen er tilpasset «{t.Name}». Læs den igennem, før du bruger den.";
+        }
+        catch (Exception ex)
+        {
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Kunne ikke tilpasse dagsordenen",
+                ex.Message, Dialogs.Slags.Pas_paa);
+            Status.Text = "";
+        }
+        finally
+        {
+            AgendaTilpasKnap.IsEnabled = SkyNoegle.Hent() is not null;
+        }
+    }
+
+    private void NulstilAgenda_Click(object sender, RoutedEventArgs e)
+    {
+        if (_valgt is not { } t) return;
+
+        Agendaer.Slet(t.Name);
+        VisAgenda();
+        Status.Text = $"«{t.Name}» bruger standarddagsordenen igen.";
     }
 
     private void KopierAgenda_Click(object sender, RoutedEventArgs e)
