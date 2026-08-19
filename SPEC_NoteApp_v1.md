@@ -1,5 +1,21 @@
 # NoteApp (Windows) — samlet spec v1
 
+> ## ⚠️ Protokol, ikke aktuel tilstand
+>
+> Denne spec er skrevet **7. august 2026** og beskriver planen, som den så ud
+> dengang. Flere ting er siden besluttet om — mest indgribende er afsnit 0,
+> «intet forlader maskinen»:
+>
+> | Afsnit | Status i dag |
+> |---|---|
+> | 0 — intet forlader maskinen | **Delvist ophævet 17. august 2026.** Lyden forlader aldrig maskinen; udskriften sendes til Mistral i EU, når du beder om et dokument. Se `README.md` og `doc/mine-data.md` |
+> | Fase 3 — auto-resumé | **Genindført** i en anden form: dokumenter laves i appen mod Mistrals EU-endepunkt med din egen API-nøgle |
+> | Ordbog og oplæsning/træning | **Fjernet 18. august 2026.** Virkningen kunne ikke måles — se `doc/findings.md` og `doc/maaling-sky.md` |
+>
+> Specen bliver liggende, fordi den forklarer, hvorfor tingene blev bygget som
+> de blev. Skal du vide, hvad appen gør **i dag**, så læs
+> [`README.md`](README.md) og [`INSTALLATION.md`](INSTALLATION.md).
+
 Konsolideret 2026-08-07 ud fra samtalehistorikken. Erstatter den oprindelige iOS-plan.
 
 Projektmappe: `C:\NoteApp\` — kildekode, modeller, whisper-binærer og optagelser. Koden backes op til GitHub (privat repo); begrundelsen for at arbejde på lokal disk er målt, ikke antaget — se afsnit 8.
