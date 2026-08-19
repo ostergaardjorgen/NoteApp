@@ -174,7 +174,34 @@
       <Border Grid.Column="2" Background="{StaticResource Panel}" CornerRadius="10"
               BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
         <Grid>
-          <StackPanel x:Name="TomPanel" VerticalAlignment="Center" HorizontalAlignment="Center"
+          <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+          </Grid.RowDefinitions>
+
+          <!-- FREMDRIFTEN SAMME STED SOM PAA OPTAGELSER.
+               Et dokument saettes i gang fra en anden skaerm, og koerslen
+               lander her. Uden en bjaelke var der ingenting at se, naar man
+               kom herover - og saa tror man, det gik i staa. -->
+          <Border x:Name="Fremdriftsrude" Grid.Row="1" Visibility="Collapsed"
+                  Background="#FF1A2230" BorderBrush="{StaticResource Accent}"
+                  BorderThickness="0,1,0,0" CornerRadius="0,0,10,10" Padding="20,12">
+            <StackPanel>
+              <Grid>
+                <TextBlock x:Name="JobTekst" FontSize="12.5" FontWeight="SemiBold"
+                           TextTrimming="CharacterEllipsis" Margin="0,0,60,0" />
+                <TextBlock x:Name="JobTal" FontSize="12.5" HorizontalAlignment="Right"
+                           Foreground="{StaticResource Accent}" FontFamily="Consolas" />
+              </Grid>
+              <TextBlock x:Name="JobDetaljer" FontSize="11.5" Margin="0,3,0,0" TextWrapping="Wrap"
+                         Foreground="{StaticResource TekstMeget}" />
+              <ProgressBar x:Name="Fremdrift" Height="5" Minimum="0" Maximum="100" Margin="0,9,0,0"
+                           Background="#FF2C323D" Foreground="{StaticResource Accent}"
+                           BorderThickness="0" />
+            </StackPanel>
+          </Border>
+
+          <StackPanel Grid.Row="0" x:Name="TomPanel" VerticalAlignment="Center" HorizontalAlignment="Center"
                       MaxWidth="440">
             <TextBlock Text="Der er ingen dokumenter endnu" FontSize="17" FontWeight="SemiBold"
                        HorizontalAlignment="Center" />
@@ -185,7 +212,7 @@
 
           <!-- Se TranscribeView: uden Disabled maales indholdet med uendelig
                bredde, og teksten ombrydes ikke. -->
-          <ScrollViewer x:Name="Detaljer" Padding="24,20" VerticalScrollBarVisibility="Auto"
+          <ScrollViewer x:Name="Detaljer" Grid.Row="0" Padding="24,20" VerticalScrollBarVisibility="Auto"
                         HorizontalScrollBarVisibility="Disabled"
                         Visibility="Collapsed">
             <StackPanel>

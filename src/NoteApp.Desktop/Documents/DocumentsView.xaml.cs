@@ -27,7 +27,45 @@ public partial class DocumentsView : UserControl
     {
         InitializeComponent();
         Indlæs(aabnId);
+
+        // Koerslen er startet fra en anden skaerm og lever i BackgroundJobs.
+        // Her lyttes der bare med, saa bjaelken viser det samme, uanset hvor
+        // man staar - og saa den forsvinder igen, naar dokumentet er der.
+        Jobs.BackgroundJobs.Ændret += Job_Aendret;
+        Jobs.BackgroundJobs.DokumentFærdigt += Dokument_Faerdigt;
+
+        Unloaded += (_, _) =>
+        {
+            Jobs.BackgroundJobs.Ændret -= Job_Aendret;
+            Jobs.BackgroundJobs.DokumentFærdigt -= Dokument_Faerdigt;
+        };
+
+        // Er der allerede en koersel i gang, naar skaermen aabnes, skal
+        // bjaelken staa med det samme - ikke foerst ved naeste melding.
+        if (Jobs.BackgroundJobs.Kører)
+            Job_Aendret(new Jobs.JobStatus("Dokument",
+                Jobs.BackgroundJobs.HvadKører ?? "Laver dokument …", true));
     }
+
+    private void Job_Aendret(Jobs.JobStatus j)
+    {
+        Dispatcher.Invoke(() =>
+        {
+            Fremdriftsrude.Visibility = j.Kører ? Visibility.Visible : Visibility.Collapsed;
+            if (!j.Kører) return;
+
+            JobTekst.Text = j.Besked;
+            JobDetaljer.Text = j.Detaljer;
+
+            // Negativ procent betyder "vi ved ikke hvor langt" - saa skal
+            // bjaelken vise arbejde frem for et tal, den ikke har.
+            Fremdrift.IsIndeterminate = j.Procent < 0;
+            if (j.Procent >= 0) Fremdrift.Value = j.Procent;
+            JobTal.Text = j.Procent >= 0 ? $"{j.Procent:0} %" : "";
+        });
+    }
+
+    private void Dokument_Faerdigt(string id) => Dispatcher.Invoke(() => Indlæs(id));
 
     /// <summary>Den valgte knude i træet. Null indtil træet er bygget.</summary>
     private Biblioteker.Biblioteksnode? _valgtKnude;

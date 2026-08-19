@@ -34,7 +34,6 @@
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
       <RowDefinition Height="Auto" />
-      <RowDefinition Height="Auto" />
       <RowDefinition Height="*" />
     </Grid.RowDefinitions>
 
@@ -118,17 +117,18 @@
       </DockPanel>
     </Border>
 
-    <!-- Status og fremdrift. Én linje under værktøjslinjen, i fuld bredde —
-         den hører til begge spalter og skal ikke tage plads fra nogen af dem. -->
-    <Grid Grid.Row="2" Margin="2,8,2,10">
-      <ProgressBar x:Name="Fremdrift" Height="4" Minimum="0" Maximum="100" Visibility="Collapsed"
-                   VerticalAlignment="Top" Margin="0,0,0,6"
-                   Background="#FF2C323D" Foreground="{StaticResource Accent}" BorderThickness="0" />
-      <TextBlock x:Name="Status" Style="{StaticResource Underskrift}" VerticalAlignment="Bottom" />
-    </Grid>
+    <!-- HER LAA FREMDRIFTEN OG STATUS, UNDER VAERKTOEJSLINJEN.
+         To kontroller i den samme gittercelle - den ene toppet, den anden
+         bundet - saa teksten laa hen over bjaelken, saa snart begge var
+         fremme. Og stedet var forkert: fremdriften hoerer til DET, den
+         handler om, og det staar i spalten til hoejre.
+
+         Den ligger nu nederst i indholdsruden, hvor teksten om, hvad der
+         sker, ogsaa staar. Dokumenter melder samme sted hen, saa bjaelken
+         ikke flytter sig alt efter, hvad man venter paa. -->
 
     <!-- ======================= Træ · indhold =========================== -->
-    <Grid Grid.Row="3">
+    <Grid Grid.Row="2">
       <Grid.ColumnDefinitions>
         <ColumnDefinition Width="300" />
         <ColumnDefinition Width="Auto" />
@@ -251,12 +251,38 @@
       <Border Grid.Column="2" Background="{StaticResource Panel}" CornerRadius="10"
               BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
         <Grid>
+          <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+          </Grid.RowDefinitions>
+
+          <!-- FREMDRIFTEN NEDERST I INDHOLDSRUDEN.
+               Den staar under den tekst, der forklarer hvad der sker, og den
+               er kun fremme, mens der koeres. Baade transskription og
+               dokumenter melder hertil, saa bjaelken ikke flytter sig alt
+               efter, hvad man venter paa. -->
+          <Border x:Name="Fremdriftsrude" Grid.Row="1" Visibility="Collapsed"
+                  Background="#FF1A2230" BorderBrush="{StaticResource Accent}"
+                  BorderThickness="0,1,0,0" CornerRadius="0,0,10,10" Padding="20,12">
+            <StackPanel>
+              <Grid>
+                <TextBlock x:Name="Status" FontSize="12.5" FontWeight="SemiBold"
+                           TextTrimming="CharacterEllipsis" Margin="0,0,60,0" />
+                <TextBlock x:Name="Fremdriftstal" FontSize="12.5" HorizontalAlignment="Right"
+                           Foreground="{StaticResource Accent}" FontFamily="Consolas" />
+              </Grid>
+              <ProgressBar x:Name="Fremdrift" Height="5" Minimum="0" Maximum="100" Margin="0,9,0,0"
+                           Background="#FF2C323D" Foreground="{StaticResource Accent}"
+                           BorderThickness="0" />
+            </StackPanel>
+          </Border>
+
           <!-- HorizontalScrollBarVisibility="Disabled" er ikke pynt: uden den
                maaler ScrollViewer sit indhold med UENDELIG bredde, og saa
                ombrydes teksten slet ikke. Foer holdt en MaxWidth paa 620
                teksten i en smal soejle og skjulte det - da den blev fjernet,
                saa man fejlen. -->
-          <ScrollViewer x:Name="Forklaring" Padding="26,20,26,18"
+          <ScrollViewer x:Name="Forklaring" Grid.Row="0" Padding="26,20,26,18"
                         VerticalScrollBarVisibility="Auto"
                         HorizontalScrollBarVisibility="Disabled">
             <!-- Ingen MaxWidth. Der stod 620, og saa blev teksten staaende i
@@ -336,7 +362,7 @@
             </StackPanel>
           </ScrollViewer>
 
-          <TextBox x:Name="Resultat" FontSize="13" Visibility="Collapsed"
+          <TextBox x:Name="Resultat" Grid.Row="0" FontSize="13" Visibility="Collapsed"
                    Foreground="{StaticResource TekstSvag}" Background="Transparent"
                    BorderThickness="0" IsReadOnly="True" TextWrapping="Wrap"
                    VerticalScrollBarVisibility="Auto" Padding="22,18,22,18" />

@@ -210,6 +210,21 @@ public partial class MainWindow : Window
     public void GaaTilHistorik() => NavHistorik.IsChecked = true;
 
     /// <summary>
+    /// Springer til «Dokumenter» og markerer det dokument, der er sat i gang.
+    ///
+    /// Kaldes fra optagelsesskærmen, naar en koersel er startet: arbejdet
+    /// sker et andet sted, end man staar, og en besked om det uden en vej
+    /// derhen er en halv besked.
+    /// </summary>
+    public void GaaTilDokumenter(string? dokumentId = null)
+    {
+        _aabnDokument = dokumentId;
+
+        if (NavDokumenter.IsChecked == true) Indhold.Content = new Documents.DocumentsView(_aabnDokument);
+        else NavDokumenter.IsChecked = true;
+    }
+
+    /// <summary>
     /// Registrerer genvejen og fortæller mødeskærmen, hvad der blev til noget.
     /// Kaldes igen, når valget ændres under Indstillinger.
     /// </summary>

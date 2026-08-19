@@ -807,8 +807,22 @@ public partial class TranscribeView : UserControl
         // saa beskytter den ingen.
         Jobs.BackgroundJobs.LavDokumentISkyen(SkyKatalog.Standard, skabelon, felter, info, valgt.Mappe);
 
-        Status.Text = "Dokumentet laves — det tager typisk under et minut. " +
-                      "Du får besked på klokken øverst, når det er klar.";
+        // DOKUMENTET LAVES ET ANDET STED, END MAN STAAR.
+        //
+        // Koerslen lander under «Dokumenter», og fremdriften vises dér. Stod
+        // der kun en linje her, ville man blive staaende og vente paa en
+        // skaerm, hvor der ikke sker mere - og saa tror man, det gik i staa.
+        var gaa = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
+            $"«{dialog.Titel}» er sat i gang",
+            "Dokumentet laves nu i Europa. Det tager typisk under et minut.\n\n" +
+            "Fremdriften vises under «Dokumenter», og klokken øverst giver besked, " +
+            "når det er klar. Du kan roligt lave noget andet imens.",
+            godkend: "Gå til Dokumenter",
+            annuller: "Bliv her");
+
+        if (gaa) (Application.Current.MainWindow as MainWindow)?.GaaTilDokumenter(info.Id);
+
+        Status.Text = "Dokumentet laves — fremdriften står under «Dokumenter».";
     }
 
     /// <summary>Noterne fra mødet som ren tekst, så de kan gå med til modellen.</summary>
@@ -855,8 +869,17 @@ public partial class TranscribeView : UserControl
         _afbryd = new CancellationTokenSource();
         KoerKnap.IsEnabled = false;
         AfbrydKnap.Visibility = Visibility.Visible;
-        Fremdrift.Visibility = Visibility.Visible;
+        // DER SKAL SIGES NOGET MED DET SAMME.
+        //
+        // Modellen fylder 2,9 GB og skal laeses ind, foer whisper.cpp melder
+        // sin foerste procent. Det tager omkring et halvt minut, og i den tid
+        // skete der INGENTING paa skaermen - hverken bjaelke eller besked. Man
+        // tror, man har trykket forkert, og trykker igen.
+        Fremdriftsrude.Visibility = Visibility.Visible;
+        Fremdrift.IsIndeterminate = true;
         Fremdrift.Value = 0;
+        Fremdriftstal.Text = "";
+        Status.Text = "Indlæser modellen … det tager typisk et halvt minut første gang";
         Resultat.Text = "";
 
         // Forklaringen bliver staaende, mens der koeres. Det er praecis dér,
@@ -870,7 +893,11 @@ public partial class TranscribeView : UserControl
 
         var fremdrift = new Progress<TranscriptionProgress>(p =>
         {
+            // Foerste melding fra motoren: nu ER den i gang, saa bjaelken
+            // skifter fra "arbejder" til at vise et rigtigt tal.
+            Fremdrift.IsIndeterminate = false;
             Fremdrift.Value = p.Percent;
+            Fremdriftstal.Text = $"{p.Percent:0} %";
             Status.Text = $"{p.Message}   ({modelNavn}, {install.Engine})";
         });
 
@@ -932,7 +959,8 @@ public partial class TranscribeView : UserControl
         }
         finally
         {
-            Fremdrift.Visibility = Visibility.Collapsed;
+            Fremdriftsrude.Visibility = Visibility.Collapsed;
+            Fremdrift.IsIndeterminate = false;
             AfbrydKnap.Visibility = Visibility.Collapsed;
             _afbryd?.Dispose();
             _afbryd = null;
