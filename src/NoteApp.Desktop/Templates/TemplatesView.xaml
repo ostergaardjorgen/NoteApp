@@ -153,93 +153,102 @@
       <!-- Højre: den valgte skabelon -->
       <Border Grid.Column="2" Background="{StaticResource Panel}" CornerRadius="10"
               BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
-        <!-- INGEN YDRE RULLEBJAELKE.
-             Her laa en ScrollViewer om hele ruden, og inde i den to
-             tekstfelter med hver sin egen. Tre rullebjaelker i eet panel,
-             hvoraf to laa lige ved siden af hinanden - man kunne ikke se,
-             hvilken man greb fat i.
+        <!-- FIRE FANER FREM FOR FIRE FELTER OVEN PAA HINANDEN.
+             Ruden skulle vise navn, beskrivelse, to prompter og en feltliste
+             paa een gang. Hver af de to store tekstfelter fik derfor en
+             tredjedel af hoejden, og man redigerede en prompt paa halvfems
+             linjer gennem en rude paa fem.
 
-             Nu er ruden et gitter: felterne foroven fylder det, de skal, og
-             de to store tekstfelter deler resten. Saa ruller kun DET, der
-             har mere tekst, end der er plads til - og der er praecis een
-             bjaelke det sted, man forventer den. -->
-        <Grid x:Name="Detaljer" Margin="22,18">
-          <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="2*" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
-          </Grid.RowDefinitions>
+             Med faner faar det, man arbejder i, hele pladsen. Raekkefoelgen
+             er den, man bruger dem i: hvad skabelonen hedder, hvad modellen
+             skal goere, hvad den faar at arbejde med - og til sidst
+             opslagslisten over felter. -->
+        <TabControl x:Name="Detaljer" Style="{StaticResource Fanerude}" Margin="22,16,22,18">
 
-          <Grid Grid.Row="0">
-            <Grid.ColumnDefinitions>
-              <ColumnDefinition Width="*" />
-              <ColumnDefinition Width="2*" />
-            </Grid.ColumnDefinitions>
-
-            <StackPanel Grid.Column="0" Margin="0,0,8,0">
-              <TextBlock Text="Navn" Style="{StaticResource Underskrift}" />
-              <TextBox x:Name="FeltNavn" Margin="0,4,0,0" TextChanged="Aendret" />
-            </StackPanel>
-
-            <StackPanel Grid.Column="1" Margin="8,0,0,0">
-              <TextBlock Text="Beskrivelse" Style="{StaticResource Underskrift}" />
-              <TextBox x:Name="FeltBeskrivelse" Margin="0,4,0,0" TextChanged="Aendret" />
-            </StackPanel>
-          </Grid>
-
-          <!-- HER LAA ET VALG AF SPROGMODEL PR. SKABELON.
-               Der er kun een sprogmodel tilbage, og den er valgt paa forhaand
-               - se doc/maaling-sky.md. Et felt med eet svar er ikke et valg. -->
-
-          <Grid Grid.Row="1" Margin="0,14,0,0">
-            <Grid.ColumnDefinitions>
-              <ColumnDefinition Width="*" />
-              <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
-
-            <StackPanel Grid.Column="0" Margin="0,0,8,0">
-              <TextBlock Text="Temperatur" Style="{StaticResource Underskrift}" />
-              <TextBox x:Name="FeltTemperatur" Margin="0,4,0,0" TextChanged="Aendret" />
-              <TextBlock FontSize="11.5" Margin="2,5,0,0" TextWrapping="Wrap"
-                         Foreground="{StaticResource TekstMeget}"
-                         Text="0,0 holder sig tæt på udskriften. Over 0,4 begynder den at formulere sig frit — og til et referat er det en fejl, ikke en stil." />
-            </StackPanel>
-
-            <StackPanel Grid.Column="1" Margin="8,0,0,0">
-              <TextBlock Text="Maks. længde (tokens)" Style="{StaticResource Underskrift}" />
-              <TextBox x:Name="FeltMaksTokens" Margin="0,4,0,0" TextChanged="Aendret" />
-              <TextBlock FontSize="11.5" Margin="2,5,0,0" TextWrapping="Wrap"
-                         Foreground="{StaticResource TekstMeget}"
-                         Text="Loftet over svaret. Cirka 3 tegn pr. token — 2048 rækker til et fyldigt referat." />
-            </StackPanel>
-          </Grid>
-
-          <TextBlock Grid.Row="3" Text="Instruktion til modellen" Style="{StaticResource Underskrift}"
-                     Margin="0,18,0,0" />
-          <TextBox Grid.Row="4" x:Name="FeltSystem" Margin="0,4,0,0" AcceptsReturn="True"
-                   TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"
-                   FontFamily="Consolas" FontSize="12.5" TextChanged="Aendret" />
-
-          <TextBlock Grid.Row="5" Text="Det, modellen får at arbejde med"
-                     Style="{StaticResource Underskrift}" Margin="0,16,0,0" />
-          <TextBox Grid.Row="6" x:Name="FeltBruger" Margin="0,4,0,0" AcceptsReturn="True"
-                   TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"
-                   FontFamily="Consolas" FontSize="12.5" TextChanged="Aendret" />
-
-          <Border Grid.Row="7" Background="#FF181B22" BorderBrush="{StaticResource PanelKant}"
-                  BorderThickness="1" CornerRadius="8" Padding="14,10" Margin="0,12,0,0">
+          <TabItem Header="Navn og indstillinger" Style="{StaticResource Fane}">
             <StackPanel>
-              <TextBlock Text="Felter du kan sætte ind" FontSize="12.5" FontWeight="SemiBold" />
-              <TextBlock x:Name="Felter" FontSize="12" Margin="0,5,0,0" TextWrapping="Wrap"
-                         LineHeight="19" Foreground="{StaticResource TekstMeget}" />
+              <Grid>
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="*" />
+                  <ColumnDefinition Width="2*" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                  <TextBlock Text="Navn" Style="{StaticResource Underskrift}" />
+                  <TextBox x:Name="FeltNavn" Margin="0,4,0,0" TextChanged="Aendret" />
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                  <TextBlock Text="Beskrivelse" Style="{StaticResource Underskrift}" />
+                  <TextBox x:Name="FeltBeskrivelse" Margin="0,4,0,0" TextChanged="Aendret" />
+                </StackPanel>
+              </Grid>
+
+              <TextBlock FontSize="11.5" Margin="2,6,0,0" TextWrapping="Wrap"
+                         Foreground="{StaticResource TekstMeget}"
+                         Text="Navnet står på knappen, når du vælger skabelon. Beskrivelsen står under den, så valget ikke er et gæt." />
+
+              <Grid Margin="0,22,0,0">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="*" />
+                  <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                  <TextBlock Text="Temperatur" Style="{StaticResource Underskrift}" />
+                  <TextBox x:Name="FeltTemperatur" Margin="0,4,0,0" TextChanged="Aendret" />
+                  <TextBlock FontSize="11.5" Margin="2,6,0,0" TextWrapping="Wrap" LineHeight="18"
+                             Foreground="{StaticResource TekstMeget}"
+                             Text="0,0 holder sig tæt på udskriften. Over 0,4 begynder den at formulere sig frit — og til et referat er det en fejl, ikke en stil." />
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                  <TextBlock Text="Maks. længde (tokens)" Style="{StaticResource Underskrift}" />
+                  <TextBox x:Name="FeltMaksTokens" Margin="0,4,0,0" TextChanged="Aendret" />
+                  <TextBlock FontSize="11.5" Margin="2,6,0,0" TextWrapping="Wrap" LineHeight="18"
+                             Foreground="{StaticResource TekstMeget}"
+                             Text="Loftet over svaret. Cirka 3 tegn pr. token — 2048 rækker til et fyldigt referat." />
+                </StackPanel>
+              </Grid>
             </StackPanel>
-          </Border>
-        </Grid>
+          </TabItem>
+
+          <TabItem Header="Instruktion til modellen" Style="{StaticResource Fane}">
+            <DockPanel>
+              <TextBlock DockPanel.Dock="Top" FontSize="11.5" Margin="2,0,0,8" TextWrapping="Wrap"
+                         Foreground="{StaticResource TekstMeget}"
+                         Text="Reglerne, modellen arbejder efter. Det er her, du bestemmer, hvad et referat SKAL og ikke må — og det er her, en fejl i et referat oftest skal rettes." />
+              <TextBox x:Name="FeltSystem" AcceptsReturn="True" TextWrapping="Wrap"
+                       VerticalScrollBarVisibility="Auto" AcceptsTab="True"
+                       FontFamily="Consolas" FontSize="12.5" TextChanged="Aendret" />
+            </DockPanel>
+          </TabItem>
+
+          <TabItem Header="Det, modellen får at arbejde med" Style="{StaticResource Fane}">
+            <DockPanel>
+              <TextBlock DockPanel.Dock="Top" FontSize="11.5" Margin="2,0,0,8" TextWrapping="Wrap"
+                         Foreground="{StaticResource TekstMeget}"
+                         Text="Selve opgaven, med udskriften sat ind. Felterne i krøllede parenteser bliver erstattet, når dokumentet laves — se fanen «Felter»." />
+              <TextBox x:Name="FeltBruger" AcceptsReturn="True" TextWrapping="Wrap"
+                       VerticalScrollBarVisibility="Auto" AcceptsTab="True"
+                       FontFamily="Consolas" FontSize="12.5" TextChanged="Aendret" />
+            </DockPanel>
+          </TabItem>
+
+          <TabItem Header="Felter" Style="{StaticResource Fane}">
+            <StackPanel>
+              <TextBlock FontSize="12.5" TextWrapping="Wrap" LineHeight="21"
+                         Foreground="{StaticResource TekstSvag}"
+                         Text="Skriv et af disse felter ind i teksten, så bliver det erstattet med mødets egne oplysninger, når dokumentet laves." />
+              <Border Background="#FF181B22" BorderBrush="{StaticResource PanelKant}"
+                      BorderThickness="1" CornerRadius="8" Padding="16,13" Margin="0,12,0,0">
+                <TextBlock x:Name="Felter" FontSize="12.5" TextWrapping="Wrap"
+                           LineHeight="22" Foreground="{StaticResource TekstMeget}" />
+              </Border>
+            </StackPanel>
+          </TabItem>
+
+        </TabControl>
       </Border>
     </Grid>
   </Grid>

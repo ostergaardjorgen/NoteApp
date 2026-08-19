@@ -175,6 +175,63 @@
       <Setter Property="AllowDrop" Value="True" />
     </Style>
 
+    <!-- ======================== Faner i en rude =========================
+         WPF's egne faner er lysegraa med en 3D-kant og staar fuldstaendig
+         forkert paa et moerkt tema. Denne er flad: en understregning under
+         den valgte, og ellers ingenting.
+
+         Den findes, fordi skabelonruden havde fire ting at vise - navn,
+         instruktion, brugerprompt og feltliste - i eet vindue. Hvert af de
+         to store tekstfelter fik derfor en tredjedel af hoejden, og man
+         redigerede en prompt paa halvfems linjer gennem en rude paa fem.
+         Med faner faar det, man arbejder i, hele pladsen. -->
+    <Style x:Key="Fanerude" TargetType="TabControl">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="TabControl">
+            <DockPanel>
+              <Border DockPanel.Dock="Top" BorderBrush="{StaticResource PanelKant}"
+                      BorderThickness="0,0,0,1">
+                <TabPanel IsItemsHost="True" Panel.ZIndex="1" Margin="0,0,0,-1" />
+              </Border>
+              <ContentPresenter ContentSource="SelectedContent" Margin="0,14,0,0" />
+            </DockPanel>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
+    <Style x:Key="Fane" TargetType="TabItem">
+      <Setter Property="Foreground" Value="{StaticResource TekstMeget}" />
+      <Setter Property="FontFamily" Value="Segoe UI" />
+      <Setter Property="FontSize" Value="12.5" />
+      <Setter Property="Cursor" Value="Hand" />
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="TabItem">
+            <Border x:Name="kant" Padding="14,9" Margin="0,0,4,0"
+                    Background="Transparent" BorderThickness="0,0,0,2"
+                    BorderBrush="Transparent">
+              <ContentPresenter ContentSource="Header" VerticalAlignment="Center" />
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Foreground" Value="{StaticResource TekstSvag}" />
+              </Trigger>
+              <Trigger Property="IsSelected" Value="True">
+                <Setter TargetName="kant" Property="BorderBrush" Value="{StaticResource Accent}" />
+                <Setter Property="Foreground" Value="{StaticResource Tekst}" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
     <Style x:Key="Fare" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
       <Setter Property="Background" Value="{StaticResource Optager}" />
       <Setter Property="BorderBrush" Value="{StaticResource Optager}" />
