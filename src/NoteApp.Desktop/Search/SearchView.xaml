@@ -102,7 +102,13 @@
                     <ItemsControl ItemsSource="{Binding Steder}" Margin="10,0,10,10">
                       <ItemsControl.ItemTemplate>
                         <DataTemplate>
+                          <!-- AutomationProperties.Name skal saettes i haanden.
+                               Content er et Grid, og saa har knappen intet navn
+                               - hverken for en skaermlaeser eller for den, der
+                               proever skaermene af med UI-automatik. Samme
+                               fejl som menupunktet med maerkatet havde. -->
                           <Button Tag="{Binding}" Click="Sted_Klik" Cursor="Hand"
+                                  AutomationProperties.Name="{Binding Uddrag}"
                                   HorizontalContentAlignment="Stretch" Padding="0"
                                   BorderThickness="0" Background="Transparent" Margin="0,0,0,3"
                                   ToolTip="Gå til dette sted i teksten">
