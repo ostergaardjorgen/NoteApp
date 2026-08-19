@@ -16,14 +16,14 @@
 
     Begge dele er nu ét skridt, der ikke kan gøres halvt.
 
-    Versionen læses som standard af den seneste commit ("vX.YY: ..."), så
+    Versionen læses som standard af den seneste commit ("vX.Y.Z: ..."), så
     nummeret i appen ikke kan komme ud af trit med historikken.
 
 .EXAMPLE
     powershell -File C:\NoteApp\scripts\udgiv.ps1
 
 .EXAMPLE
-    powershell -File C:\NoteApp\scripts\udgiv.ps1 -Version 0.40
+    powershell -File C:\NoteApp\scripts\udgiv.ps1 -Version 1.0.2
 #>
 [CmdletBinding()]
 param(
@@ -44,16 +44,35 @@ if (-not $Version) {
     Push-Location $Rod
     try { $besked = git log -1 --pretty=%s 2>$null } finally { Pop-Location }
 
-    if ($besked -match '^v(\d+\.\d+)') {
+    # TRE LED: vX.Y.Z. Konventionen var to cifre - v0.99, v1.00, v1.01 - og
+    # den holdt indtil 1.0. Derefter dropper .NET det foranstillede nul, saa
+    # v1.01 blev til filversion 1.1.0.0, og skaermen sagde noget andet end
+    # commiten. Et versionsnummer, der ikke passer med historikken, kan man
+    # ikke bruge til at afgoere, hvad der koerer.
+    if ($besked -match '^v(\d+\.\d+\.\d+)') {
         $Version = $Matches[1]
         Write-Host "Version fra seneste commit: v$Version"
     }
+    elseif ($besked -match '^v(\d+\.\d+)') {
+        # De gamle to-leddede numre skal stadig kunne laeses, saa en aeldre
+        # commit ikke stopper en udgivelse.
+        $Version = $Matches[1]
+        Write-Host "Version fra seneste commit: v$Version (gammelt format med to led)"
+    }
     else {
-        throw "Kunne ikke læse versionen af seneste commit ('$besked'). Angiv -Version."
+        throw "Kunne ikke læse versionen af seneste commit ('$besked'). Angiv -Version, fx 1.0.2."
     }
 }
 
 $fuld = if ($Version -match '^\d+\.\d+$') { "$Version.0" } else { $Version }
+
+# Advar, hvis .NET normaliserer nummeret vaek fra det, der blev bedt om.
+# Foranstillede nuller forsvinder - 1.01 bliver til 1.1 - og saa passer
+# skaermen ikke med commiten.
+$normaliseret = ([version]$fuld).ToString(3)
+if ($normaliseret -ne $fuld) {
+    Write-Warning "Versionen $fuld normaliseres til $normaliseret. Undgaa foranstillede nuller - skriv fx 1.0.1, ikke 1.01."
+}
 
 $tekst = [IO.File]::ReadAllText($csproj, [Text.Encoding]::UTF8)
 $nu = if ($tekst -match '<Version>([^<]+)</Version>') { $Matches[1] } else { '(ingen)' }
@@ -145,7 +164,7 @@ Write-Host ("PRODUKTION: v{0} · bygget {1:dd-MM HH:mm}" -f $fuld, $fil.LastWrit
 
 if ($snavset) {
     Write-Host ("  Bemaerk: der er uommitede aendringer. Versionsnummeret staar stille," +
-                " indtil der commites med en ny 'vX.YY:'-besked — brug tidsstemplet til" +
+                " indtil der commites med en ny 'vX.Y.Z:'-besked — brug tidsstemplet til" +
                 " at se, hvad der koerer.") -ForegroundColor Yellow
 }
 
