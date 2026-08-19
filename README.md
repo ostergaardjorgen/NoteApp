@@ -18,6 +18,18 @@ Det her er det vigtigste afsnit i hele repoet, så det står først:
 | Noter, skabeloner, dokumenter, indstillinger | Bliver på maskinen. |
 | Telemetri, fejlrapportering, skysynkronisering | Findes ikke. |
 
+**Hvorfor det er lyden, der tæller.** Forskellen på en lydfil og en udskrift er
+ikke en gradsforskel. Behandles en stemmeoptagelse med det formål at genkende,
+hvem der taler, er den samtidig biometriske data efter databeskyttelses-
+forordningens artikel 4, nr. 14 — og dermed en særlig kategori efter artikel 9.
+En optagelse er råstoffet til den behandling; en udskrift er det ikke. Lyden
+bærer desuden tonefald, accent og ting om helbred og sindstilstand, som ingen
+har sagt højt. Intet af det følger med en tekst.
+
+Det er et designvalg, ikke en begrænsning. Talegenkendelse i skyen ville være
+hurtigere og er fravalgt; bliver udskriften for langsom, løses det med bedre
+lokale modeller.
+
 Dokumentdelen kræver **din egen API-nøgle**. Der følger ingen med appen, og
 appen opretter ingen konto for dig. Vil du ikke sende noget ud af huset, kan
 du bruge appen til optagelse og udskrift alene.

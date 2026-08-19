@@ -69,6 +69,14 @@
                            Foreground="{StaticResource TekstSvag}"
                            Text="Mistral AI er fransk og underlagt GDPR direkte. Men de to dokumenter, der juridisk binder — databehandleraftalen og de kommercielle vilkår — forpligter ikke behandlingen til et bestemt område, og de skelner ikke mellem de tre endepunkter. Derfor står der herunder både, hvad der er efterprøvet, og hvad der ikke er." />
 
+                <!-- DET, DER ER EFTERPROEVET OG SIKKERT, SKAL OGSAA STAA
+                     OEVERST. Rammen her er en advarsel, og en advarsel uden
+                     det, man kan stole paa, giver et skaevt billede: tvivlen
+                     gaelder ét skridt i kaeden - teksten - og ikke lyden. -->
+                <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,10,0,0"
+                           Foreground="{StaticResource Godkendt}" FontWeight="SemiBold"
+                           Text="Tvivlen gælder teksten. Den gælder ikke lyden: optagelsen forlader aldrig maskinen, og det er den, der vejer tungest — se «Hvor data går hen»." />
+
                 <Grid Margin="0,16,0,0">
                   <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
@@ -183,6 +191,52 @@
                     </StackPanel>
                   </Border>
                 </Grid>
+              </StackPanel>
+            </Border>
+
+            <!-- ============ HVORFOR DET ER LYDEN, DER TAELLER ============
+                 Det staerkeste argument for den her app stod ingen steder:
+                 forskellen paa en lydfil og en tekst er ikke en gradsforskel.
+
+                 FORMULERINGEN ER EFTERPROEVET OG BEVIDST FORSIGTIG. En
+                 stemmeoptagelse er ikke i sig selv biometriske data efter
+                 forordningen - den bliver det, naar den behandles med det
+                 formaal at identificere nogen entydigt. Paastanden "en stemme
+                 ER biometriske data" ville vaere forkert, og en overdrivelse
+                 paa netop den her side er vaerre end ingen tekst. -->
+            <Border Background="#FF16241C" BorderBrush="{StaticResource Godkendt}" BorderThickness="1"
+                    CornerRadius="10" Padding="20,16" Margin="0,0,0,14">
+              <StackPanel>
+                <TextBlock Text="Derfor betyder det noget, at det er LYDEN, der bliver hos dig"
+                           FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap" />
+                <TextBlock FontSize="12.5" LineHeight="21" Margin="0,8,0,14" TextWrapping="Wrap"
+                           Foreground="{StaticResource TekstSvag}"
+                           Text="Forskellen på en lydfil og en udskrift er ikke en gradsforskel. Det er to forskellige slags oplysninger, og den ene af dem forlader aldrig din maskine." />
+
+                <TextBlock Text="Lyden kan blive til biometri. Teksten kan ikke." FontSize="13.5"
+                           FontWeight="SemiBold" Margin="0,0,0,4" />
+                <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,0,0,12"
+                           Foreground="{StaticResource TekstSvag}"
+                           Text="En stemmeoptagelse er personoplysninger. Bliver den behandlet med det formål at genkende, HVEM der taler, er den samtidig biometriske data efter databeskyttelsesforordningens artikel 4, nr. 14 — og dermed en særlig kategori efter artikel 9, hvor kravene er skærpede. En optagelse er råstoffet til den behandling. En udskrift er det ikke: tekst kan ikke laves om til et stemmeaftryk." />
+
+                <TextBlock Text="Lyden indeholder mere end ordene." FontSize="13.5"
+                           FontWeight="SemiBold" Margin="0,0,0,4" />
+                <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,0,0,12"
+                           Foreground="{StaticResource TekstSvag}"
+                           Text="Hvem der talte, kan høres, også når navnet aldrig bliver sagt. Dertil kommer tonefald, tøven, accent og ting om helbred og sindstilstand, som ingen har sagt højt. Intet af det følger med en udskrift." />
+
+                <TextBlock Text="De øvrige deltagere har ikke sagt ja til noget." FontSize="13.5"
+                           FontWeight="SemiBold" Margin="0,0,0,4" />
+                <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap"
+                           Foreground="{StaticResource TekstSvag}"
+                           Text="Det er dig, der har valgt at optage. Netop derfor er det afgørende, at deres stemmer bliver på din maskine — det er dem, der har mindst kontrol over, hvor optagelsen ender." />
+
+                <Border Background="#FF16241C" BorderBrush="{StaticResource Godkendt}" BorderThickness="0,1,0,0"
+                        Padding="0,12,0,0" Margin="0,14,0,0">
+                  <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap"
+                             Foreground="{StaticResource Tekst}"
+                             Text="Det er et designvalg, ikke en begrænsning, der venter på at blive ophævet. Talegenkendelse i skyen ville være hurtigere, og det er fravalgt. Bliver udskriften for langsom, løses det med bedre lokale modeller — ikke ved at sende lyden væk." />
+                </Border>
               </StackPanel>
             </Border>
           </StackPanel>
