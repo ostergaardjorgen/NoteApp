@@ -86,15 +86,22 @@ public partial class EngineView : System.Windows.Controls.UserControl
             : $"{s.WhisperCli}\nModeller: {WhisperInstall.ModelDirectory}";
 
         LydKnap.Content = s.ModelPath is null ? $"Hent {model.SizeText}" : "Hent igen";
-        MotorKnap.IsEnabled = s.WhisperCli is not null;
+        // MOTORKNAPPEN VAR SLAAET FRA, NAAR MOTOREN MANGLEDE.
+        //
+        // "IsEnabled = WhisperCli is not null" betoed, at den ENESTE knap,
+        // der kan installere motoren, var graa praecis naar den ikke var
+        // installeret. Motoren og modellen hentes hver for sig - det ene
+        // foelger ikke med det andet - saa uden motor var der ingen vej frem
+        // fra denne skaerm. Fundet 19-08-2026.
+        MotorKnap.Content = s.WhisperCli is null ? "Hent motoren" : "Opdatér motoren";
 
         // Hvor filen ligger, staar fremme og ikke i en foldbar. Ligger den i
         // repoets models-mappe frem for datamappen, er det vaerd at vide -
         // den flytter ikke med en sikkerhedskopi.
         LydStatus.Text = s.ModelPath is null
-            ? "Modellen er ikke hentet. Uden den kan appen ikke skrive optagelser ud — motoren følger med hentningen."
+            ? "Modellen er ikke hentet. Uden den kan appen ikke skrive optagelser ud."
             : s.WhisperCli is null
-                ? "Motoren mangler. Tryk «Hent igen», så følger den med."
+                ? "Motoren mangler. Tryk «Hent motoren» — den hentes for sig, uafhængigt af modellen."
                 : $"I brug: {s.ModelPath}";
 
         Status.Text = "";

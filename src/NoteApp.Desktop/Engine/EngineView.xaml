@@ -98,9 +98,13 @@
               </StackPanel>
 
               <StackPanel Grid.Column="1" VerticalAlignment="Top" MinWidth="150">
-                <Button x:Name="LydKnap" Click="Lyd_Klik" HorizontalAlignment="Stretch" Padding="16,8" />
-                <Button x:Name="MotorKnap" Content="Opdatér motoren" Click="Motor_Klik"
-                        HorizontalAlignment="Stretch" Padding="16,8" Margin="0,8,0,0" />
+                <!-- Samme raekkefoelge som kasserne til venstre: motoren
+                     oeverst, modellen under. To knapper til to komponenter,
+                     der hentes og opdateres hver for sig. -->
+                <Button x:Name="MotorKnap" Click="Motor_Klik"
+                        HorizontalAlignment="Stretch" Padding="16,8" />
+                <Button x:Name="LydKnap" Click="Lyd_Klik" HorizontalAlignment="Stretch"
+                        Padding="16,8" Margin="0,8,0,0" />
               </StackPanel>
             </Grid>
 
