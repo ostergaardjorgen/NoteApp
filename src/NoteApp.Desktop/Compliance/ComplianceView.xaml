@@ -409,7 +409,7 @@
 
                 <TextBlock FontSize="12" LineHeight="20" TextWrapping="Wrap"
                            Foreground="{StaticResource TekstMeget}"
-                           Text="Oplysningerne på denne side er en gengivelse af tredjepartsvilkår, licensbetingelser og offentligt tilgængelig dokumentation, som forelå på de anførte gennemgangsdatoer. De udgør ikke juridisk rådgivning og kan ikke træde i stedet for en selvstændig vurdering." />
+                           Text="Oplysningerne under «Compliance» er en gengivelse af tredjepartsvilkår, licensbetingelser og offentligt tilgængelig dokumentation, som forelå på de anførte gennemgangsdatoer. De udgør ikke juridisk rådgivning og kan ikke træde i stedet for en selvstændig vurdering." />
 
                 <TextBlock FontSize="12" LineHeight="20" TextWrapping="Wrap" Margin="0,9,0,0"
                            Foreground="{StaticResource TekstMeget}"
@@ -417,7 +417,7 @@
 
                 <TextBlock FontSize="12" LineHeight="20" TextWrapping="Wrap" Margin="0,9,0,0"
                            Foreground="{StaticResource TekstMeget}"
-                           Text="Ansvaret for, at anvendelsen af programmet er i overensstemmelse med databeskyttelsesforordningen og øvrig gældende ret — herunder rollefordelingen som dataansvarlig, behandlingsgrundlag, oplysningspligt og fortegnelse over behandlingsaktiviteter — påhviler alene brugeren som dataansvarlig. Der påtages intet ansvar for direkte eller indirekte tab som følge af, at oplysningerne på denne side lægges til grund." />
+                           Text="Ansvaret for, at anvendelsen af programmet er i overensstemmelse med databeskyttelsesforordningen og øvrig gældende ret — herunder rollefordelingen som dataansvarlig, behandlingsgrundlag, oplysningspligt og fortegnelse over behandlingsaktiviteter — påhviler alene brugeren som dataansvarlig. Der påtages intet ansvar for direkte eller indirekte tab som følge af, at oplysningerne under «Compliance» lægges til grund." />
               </StackPanel>
             </Border>
           </StackPanel>
