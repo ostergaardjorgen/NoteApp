@@ -68,6 +68,24 @@ public sealed class AppSettings
     public string? MitSprog { get; set; }
 
     /// <summary>
+    /// Sproget, de ØVRIGE mødedeltagere taler. Bruges til loopback-sporet.
+    ///
+    /// HVORFOR OGSÅ DET ER EN INDSTILLING
+    ///
+    /// Først lod appen dette spor detektere frit, ud fra den antagelse at det
+    /// er det rene digitale signal og derfor til at stole på. Det holdt ikke:
+    /// på et dansk-norsk møde blev de norske gæster bedømt til ENGELSK med
+    /// 26–34 % sandsynlighed — målt fra fire forskellige steder i optagelsen,
+    /// med samme forkerte svar hver gang.
+    ///
+    /// Det lave tal er selve signalet. Whisper gætter, og et gæt på sproget
+    /// ødelægger hele udskriften, ikke bare et ord.
+    ///
+    /// «auto» lader appen gætte. Null betyder «samme som mit».
+    /// </summary>
+    public string? DeresSprog { get; set; }
+
+    /// <summary>
     /// Skift afsnit automatisk under oplæsning. Kræver en lille model ved
     /// siden af den store — se LiveListener. Slået fra som standard: den
     /// koster GPU-tid, og en fejltolkning midt i en oplæsning er irriterende.

@@ -150,6 +150,19 @@
                 <TextBlock Style="{StaticResource Underskrift}" Margin="0,9,0,0" TextWrapping="Wrap"
                            Foreground="{StaticResource TekstMeget}"
                            Text="«Lad appen gætte» er den gamle opførsel. Den blev målt forkert på et rigtigt møde — hele udskriften kom ud på engelsk, fordi de første tredive sekunder var tavse." />
+
+                <!-- OGSAA MODPARTEN SKAL KUNNE SAETTES.
+                     Foerst blev det andet spor detekteret frit, ud fra den
+                     antagelse at det er rent digitalt og derfor til at stole
+                     paa. Det holdt ikke: norske gaester blev bedoemt til
+                     ENGELSK med 26-34 % sandsynlighed, maalt fra fire
+                     forskellige steder i optagelsen med samme forkerte svar. -->
+                <TextBlock Text="Sproget, de andre taler" FontSize="13" FontWeight="SemiBold"
+                           Margin="0,18,0,0" />
+                <TextBlock Style="{StaticResource Underskrift}" Margin="0,3,0,9" TextWrapping="Wrap"
+                           Text="Gælder det spor, der optages fra højttaleren i et onlinemøde. Holder du møder på tværs af landegrænser, er det her, du sætter det." />
+                <ComboBox x:Name="DeresSprog" SelectionChanged="DeresSprog_Valgt" MaxWidth="320"
+                          HorizontalAlignment="Left" />
               </StackPanel>
             </Border>
           </StackPanel>

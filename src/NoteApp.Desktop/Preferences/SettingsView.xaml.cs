@@ -58,6 +58,7 @@ public partial class SettingsView : UserControl
 
         VisGenveje();
         VisSprog();
+        VisDeresSprog();
     }
 
     private bool _indlæserGenveje;
@@ -213,6 +214,39 @@ public partial class SettingsView : UserControl
         MitSprog.SelectedIndex = nr < 0 ? 0 : nr;
 
         _indlæserSprog = false;
+    }
+
+    /// <summary>
+    /// Modpartens sprog. «Samme som mit» står først og er standarden —
+    /// de fleste møder holdes på ét sprog.
+    /// </summary>
+    private static readonly (string Kode, string Navn)[] Deresvalg =
+        new[] { ("", "Samme som mit") }.Concat(Sprogvalg).ToArray();
+
+    private void VisDeresSprog()
+    {
+        _indlæserSprog = true;
+
+        DeresSprog.ItemsSource = Deresvalg.Select(v => v.Navn).ToList();
+
+        var kode = AppSettings.Current.DeresSprog ?? "";
+        var nr = Array.FindIndex(Deresvalg, v => v.Kode == kode);
+        DeresSprog.SelectedIndex = nr < 0 ? 0 : nr;
+
+        _indlæserSprog = false;
+    }
+
+    private void DeresSprog_Valgt(object sender, SelectionChangedEventArgs e)
+    {
+        if (_indlæserSprog || DeresSprog.SelectedIndex < 0) return;
+
+        var valg = Deresvalg[DeresSprog.SelectedIndex];
+        AppSettings.Current.DeresSprog = valg.Kode.Length == 0 ? null : valg.Kode;
+        AppSettings.Current.Save();
+
+        Status.Text = valg.Kode.Length == 0
+            ? "De andre skrives ud på samme sprog som dig, fra næste udskrift."
+            : $"De andre skrives ud på {valg.Navn.ToLowerInvariant()} fra næste udskrift.";
     }
 
     private void MitSprog_Valgt(object sender, SelectionChangedEventArgs e)

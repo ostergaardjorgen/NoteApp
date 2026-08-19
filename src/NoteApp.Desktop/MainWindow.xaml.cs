@@ -20,6 +20,15 @@ public partial class MainWindow : Window
     /// <summary>Optagelsen, Optagelser-skærmen skal åbne på. Bruges én gang.</summary>
     private string? _aabnOptagelse;
 
+    /// <summary>
+    /// Skal skærmen spørge «skal den skrives ud nu?» ved næste skift?
+    ///
+    /// Kun sandt lige efter en optagelse. Kommer man fra et søgeresultat eller
+    /// fra historikken, vil man se optagelsen — ikke have et tilbud om tyve
+    /// minutters arbejde, man ikke bad om.
+    /// </summary>
+    private bool _spoergOmUdskrift;
+
     /// <summary>Dokumentet, Dokumenter-skærmen skal åbne på. Bruges én gang.</summary>
     private string? _aabnDokument;
 
@@ -138,6 +147,7 @@ public partial class MainWindow : Window
         _moede.FærdigMedMøde += mappe =>
         {
             _aabnOptagelse = mappe;
+            _spoergOmUdskrift = true;
             NavTransskriber.IsChecked = true;
 
             // Er man allerede paa skaermen, fyrer Checked ikke. Saa bygges
@@ -331,10 +341,7 @@ public partial class MainWindow : Window
         {
             // Bygges hver gang: listen over optagelser skal vise den, der
             // netop er lavet, uden at nogen skal genstarte appen.
-            var aabn = _aabnOptagelse;
-            _aabnOptagelse = null;          // gælder kun dette skift
-
-            Indhold.Content = new TranscribeView(aabn);
+            Indhold.Content = NyOptagelsesskaerm();
         }
         else if (NavDokumenter.IsChecked == true)
         {
@@ -391,8 +398,12 @@ public partial class MainWindow : Window
     private Transcribe.TranscribeView NyOptagelsesskaerm()
     {
         var aabn = _aabnOptagelse;
+        var spoerg = _spoergOmUdskrift;
+
         _aabnOptagelse = null;              // gælder kun dette skift
-        return new Transcribe.TranscribeView(aabn);
+        _spoergOmUdskrift = false;
+
+        return new Transcribe.TranscribeView(aabn, spoerg);
     }
 
     /// <summary>

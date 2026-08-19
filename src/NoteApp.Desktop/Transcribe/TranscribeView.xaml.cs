@@ -33,7 +33,12 @@ public sealed class OptagelseVisning
             : start.LocalDateTime;
 
         var længde = TimeSpan.FromSeconds(Sekunder);
-        Detaljer = $"{dato:dd/MM HH:mm} · {længde:mm\\:ss}";
+        // Samme fejl som i dialogen: mm klipper timerne af, saa et moede paa
+        // 1:00:50 stod i traeet som «00:50». Timer vises kun, naar der ER
+        // timer - ellers ville hvert femminutters moede staa som «00:05:12».
+        Detaljer = længde.TotalHours >= 1
+            ? $"{dato:dd/MM HH:mm} · {længde:h\\:mm\\:ss}"
+            : $"{dato:dd/MM HH:mm} · {længde:mm\\:ss}";
 
         HarLyd = File.Exists(wav) && Sekunder > 0;
         if (!HarLyd) Detaljer += " · ingen lyd";
@@ -129,7 +134,18 @@ public partial class TranscribeView : UserControl
     /// finde den, man lige havde lavet. Det er ikke «videre», det er «start
     /// forfra et andet sted».
     /// </summary>
-    public TranscribeView(string? aabnMappe)
+    public TranscribeView(string? aabnMappe) : this(aabnMappe, spoerg: true) { }
+
+    /// <summary>
+    /// <paramref name="spoerg"/> afgør, om der spørges «skal den skrives ud
+    /// nu?».
+    ///
+    /// Det spørgsmål hører KUN til lige efter en optagelse, hvor man står med
+    /// mødet i hovedet. Kommer man hertil fra et søgeresultat eller fra en
+    /// linje i historikken, vil man SE optagelsen — og så er et tilbud om at
+    /// skrive den ud igen på tyve minutter ikke en hjælp, det er i vejen.
+    /// </summary>
+    public TranscribeView(string? aabnMappe, bool spoerg)
     {
         InitializeComponent();
         IndlaesOptagelser();
@@ -147,7 +163,7 @@ public partial class TranscribeView : UserControl
         // Spoerg foerst, naar vinduet er tegnet. En dialog fra en konstruktoer
         // aabner over en halvfaerdig skaerm, og saa kan man ikke se, hvad man
         // siger ja til.
-        Loaded += (_, _) => SpoergOmStart(match);
+        if (spoerg) Loaded += (_, _) => SpoergOmStart(match);
     }
 
     private bool _harSpurgt;
@@ -170,7 +186,9 @@ public partial class TranscribeView : UserControl
 
         var ja = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
             $"«{optagelse.Titel}» er gemt. Skal den skrives ud til tekst nu?",
-            $"Længde: {TimeSpan.FromSeconds(optagelse.Sekunder):mm\\:ss}. " +
+            // hh:mm:ss og ikke mm:ss. Et moede paa 1:00:50 stod som «00:50»,
+            // fordi mm klipper timerne af - og saa lignede en time et minut.
+            $"Længde: {TimeSpan.FromSeconds(optagelse.Sekunder):hh\\:mm\\:ss}. " +
             $"Det tager typisk {Math.Max(1, Math.Round(minutter * 0.3)):0} til {Math.Max(2, Math.Round(minutter * 0.5)):0} minutter " +
             "på denne maskine.\n\n" +
             "Du kan roligt lave noget andet imens — også optage et nyt møde. " +
@@ -972,10 +990,16 @@ public partial class TranscribeView : UserControl
 
             TranscriptionResult? loopR = null;
 
+            // Null betyder «samme som mit». De fleste moeder holdes paa ét
+            // sprog, og saa er det svaret, der kraever mindst opmaerksomhed.
+            var deresSprog = string.IsNullOrWhiteSpace(AppSettings.Current.DeresSprog)
+                ? mitSprog
+                : AppSettings.Current.DeresSprog!;
+
             if (toSpor)
             {
                 loopR = await motor.RunAsync(
-                    new TranscriptionRequest(loopWav, install.ModelPath!, loopUdBase, "auto"),
+                    new TranscriptionRequest(loopWav, install.ModelPath!, loopUdBase, deresSprog),
                     fremdrift, _afbryd.Token);
 
                 sporNr = 1;
