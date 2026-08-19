@@ -159,16 +159,24 @@ public partial class TranscribeView : UserControl
 
         if (!optagelse.HarLyd) return;
 
+        // JA ER DET NEMME SVAR, OG NEJ ER LIGE SAA NEMT.
+        //
+        // "Ja" er standardknappen, saa Enter er nok. "Nej tak - senere" siger
+        // ligeud, at optagelsen bliver liggende. Uden det lyder et afslag,
+        // som om man mister noget, og saa siger folk ja for en sikkerheds
+        // skyld til noget, der optager maskinen i fem minutter.
+
         var minutter = optagelse.Sekunder / 60.0;
 
         var ja = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
-            $"Skriv «{optagelse.Titel}» ud til tekst nu?",
+            $"«{optagelse.Titel}» er gemt. Skal den skrives ud til tekst nu?",
             $"Længde: {TimeSpan.FromSeconds(optagelse.Sekunder):mm\\:ss}. " +
             $"Det tager typisk {Math.Max(1, Math.Round(minutter * 0.3)):0} til {Math.Max(2, Math.Round(minutter * 0.5)):0} minutter " +
             "på denne maskine.\n\n" +
-            "Du kan roligt lave noget andet imens — også optage et nyt møde.",
-            godkend: "Skriv ud nu",
-            annuller: "Ikke nu");
+            "Du kan roligt lave noget andet imens — også optage et nyt møde. " +
+            "Siger du nej tak, bliver optagelsen liggende, og du kan gøre det når som helst med knappen øverst.",
+            godkend: "Ja, skriv den ud",
+            annuller: "Nej tak — senere");
 
         if (ja) Koer_Click(this, new RoutedEventArgs());
     }

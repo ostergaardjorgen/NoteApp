@@ -162,3 +162,46 @@ powershell -File scripts\maal-noejagtighed.ps1 -Transskription ud.txt -Reference
 
 `-Reference` skal med. Standardværdien bruger `$PSScriptRoot` i `param`-blokken,
 hvor den er tom, og så fejler scriptet.
+
+---
+
+## whisper.cpp v1.9.2 mod den tidligere motor
+
+*Målt 19-08-2026 på Fase 0-oplæsningen. Samme maskine (RTX 2060), samme model
+(large-v3), samme lydfil, samme flag.*
+
+Motoren blev opdateret fra AI-modeller-skærmen. En ny motor kan ændre
+udskriften til det bedre eller det værre, så den blev målt.
+
+| | Tidligere motor | v1.9.2 |
+|---|---|---|
+| Ordfejlrate | 9,98 % | **9,98 %** |
+| Ord i udskriften | 2.375 | 2.375 |
+| Bytninger / manglende / ekstra | 152 / 37 / 47 | 152 / 37 / 47 |
+| Fagtermer ramt | 12 af 19 | 12 af 19 |
+| Negationer bevaret | 11 af 17 | 11 af 17 |
+| **Tid (15 min lyd)** | **4 min 20 s** | **1 min 56 s** |
+
+**Udskriften er identisk.** Ikke «næsten ens» — hvert eneste tal i
+bedømmelsen er det samme. Der er ingen kvalitetsforskel at veje for eller
+imod.
+
+**Til gengæld er den 2,2 gange hurtigere.** 116 sekunder mod 260 på den samme
+lyd. Det er den eneste forskel, og den er gratis.
+
+### Fejlen undervejs, og hvad den viser om `-mc 0`
+
+Første kørsel gav **87,7 % ordfejlrate** og så ud som et sammenbrud. Den var
+kørt uden `-mc 0`, som appen altid sætter.
+
+| Kørsel | Ord | WER | Fallbacks |
+|---|---|---|---|
+| uden `-mc 0` | 3.065 | 87,7 % | 4 p / 18 h |
+| med `-mc 0` | 2.375 | 9,98 % | 0 / 0 |
+
+Udskriften uden flaget læste stadig som god dansk — den gentog bare afsnit,
+så der kom 700 ord for meget. Det er værd at kende: fejlen ligner ikke en
+fejl, når man læser teksten. Kun tællingen afslører den.
+
+Det er samme mekanisme, der blev fundet 12-08-2026 (se `Transcriber.cs`), og
+den gælder altså stadig i v1.9.2. Flaget er ikke en historisk rest.

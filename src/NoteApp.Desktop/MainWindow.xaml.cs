@@ -121,6 +121,28 @@ public partial class MainWindow : Window
         // lige er lavet, og spørge, om den skal skrives ud.
         OptagBjaelke.Content = _moede;
 
+        // NAAR EN OPTAGELSE ER SLUT, SKAL DER SPOERGES MED DET SAMME.
+        //
+        // FaerdigMedMoede blev rejst, men INGEN lyttede. Efter et stop skete
+        // der derfor ingenting: optagelsen laa i listen, og man skulle selv
+        // finde den og trykke. Det er det oejeblik, man staar med moedet i
+        // hovedet og gerne vil have teksten - og det oejeblik gik tabt.
+        //
+        // Der navigeres til optagelsen og spoerges dér. Svarer man nej, staar
+        // man samme sted med optagelsen markeret, saa "senere" er lige saa
+        // nemt som "nu": man trykker bare paa knappen, naar man vil.
+        _moede.FærdigMedMøde += mappe =>
+        {
+            _aabnOptagelse = mappe;
+            NavTransskriber.IsChecked = true;
+
+            // Er man allerede paa skaermen, fyrer Checked ikke. Saa bygges
+            // den her - ellers ville dialogen udeblive netop naar man
+            // optager to moeder i traek.
+            if (Indhold.Content is Transcribe.TranscribeView)
+                Indhold.Content = NyOptagelsesskaerm();
+        };
+
         // Startskærmen sættes HER, ikke af Nav_Changed. Menupunktet er markeret
         // fra XAML'en, men Checked fyrer under InitializeComponent, hvor
         // Indhold endnu er null — så handleren returnerer, og skærmen stod tom,
