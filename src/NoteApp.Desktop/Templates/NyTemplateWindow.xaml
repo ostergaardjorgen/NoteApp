@@ -1,4 +1,4 @@
-<Window x:Class="NoteApp.Desktop.Templates.NyTemplateWindow"
+﻿<Window x:Class="NoteApp.Desktop.Templates.NyTemplateWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Ny skabelon" Height="700" Width="680" MinHeight="560" MinWidth="560"
@@ -93,9 +93,18 @@
       <TextBlock x:Name="Status" VerticalAlignment="Center" FontSize="12"
                  Foreground="{StaticResource TekstMeget}" TextWrapping="Wrap" />
       <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-        <Button x:Name="TomKnap" Content="Start fra en tom" Click="Tom_Click"
-                Padding="14,9" Margin="0,0,10,0"
-                ToolTip="Opret en skabelon uden hjælp — du skriver den selv fra bunden" />
+        <!-- HER LAA "Start fra en tom".
+             En tom skabelon er kun brugbar for en, der ved hvad en
+             systemprompt er, hvilke afsnit der giver mening, og hvordan man
+             formulerer en regel, en model faktisk foelger. Resultatet blev
+             daarligt, og en daarlig skabelon opdages foerst i et dokument,
+             man skulle bruge til noget. Fjernet 19-08-2026.
+
+             Uden en API-noegle er der derfor ingen vej frem her - saa peges
+             der paa opsaetningen i stedet. -->
+        <Button x:Name="SaetOpKnap" Content="Sæt Mistral op …" Click="SaetOp_Click"
+                Padding="14,9" Margin="0,0,10,0" Visibility="Collapsed"
+                ToolTip="Skabelonen skrives af Mistral. Den skal sættes op først" />
         <Button Content="Annullér" Click="Annuller_Click" Padding="18,9" Margin="0,0,10,0" />
         <Button x:Name="LavKnap" Content="Lav skabelonen" Click="Lav_Click" Padding="20,9"
                 Style="{StaticResource Primaer}" IsDefault="True" MinWidth="150" />

@@ -43,13 +43,8 @@ public partial class NyTemplateWindow : Window
         FeltLaengde.SelectedIndex = 1;
 
         // Uden noegle er der ingen model at spoerge. Knappen bliver graa frem
-        // for at fejle bagefter, og teksten siger hvorfor.
-        if (SkyNoegle.Hent() is null)
-        {
-            LavKnap.IsEnabled = false;
-            Status.Text = "Skabelonen skrives af Mistral, og den er ikke sat op endnu. " +
-                          "Du kan starte fra en tom i stedet.";
-        }
+        // for at fejle bagefter, og der peges paa opsaetningen.
+        Klar(SkyNoegle.Hent() is not null);
 
         FeltNavn.Focus();
     }
@@ -57,32 +52,29 @@ public partial class NyTemplateWindow : Window
     private void Annuller_Click(object sender, RoutedEventArgs e) => DialogResult = false;
 
     /// <summary>
-    /// Den gamle vej: en tom skabelon med det, der altid gælder, og intet
-    /// andet. Den skal blive: den virker uden nøgle og uden netværk.
+    /// Åbner opsætningen af Mistral og prøver igen bagefter.
+    ///
+    /// HER LÅ «start fra en tom». Den er fjernet: en tom skabelon er kun
+    /// brugbar for en, der i forvejen ved, hvad en systemprompt er — og en
+    /// dårlig skabelon opdages først i et dokument, man skulle bruge til
+    /// noget. Uden en nøgle er der derfor ingen vej frem her, og så skal der
+    /// peges på den, der findes.
     /// </summary>
-    private void Tom_Click(object sender, RoutedEventArgs e)
+    private void SaetOp_Click(object sender, RoutedEventArgs e)
     {
-        Resultat = Tomskabelon(FeltNavn.Text.Trim());
-        DialogResult = true;
+        new Documents.SkySetupWindow { Owner = this }.ShowDialog();
+        Klar(SkyNoegle.Hent() is not null);
     }
 
-    private static PromptTemplate Tomskabelon(string navn) => new()
+    private void Klar(bool harNoegle)
     {
-        Name = string.IsNullOrWhiteSpace(navn) ? "Ny skabelon" : navn,
-        Description = "Beskriv hvad den laver",
-        Temperature = 0.2,
-        MaxTokens = 4096,
-        SystemPrompt =
-            "Du skriver på dansk ud fra en udskrift af et møde.\n\n" +
-            "Skriv kun det, der faktisk står i udskriften. Find ikke på deltagere, datoer, tal\n" +
-            "eller beslutninger. Skriv aldrig et tal, der ikke står i udskriften.\n\n" +
-            "Er noget uklart, så skriv det som et åbent spørgsmål frem for at gætte.\n\n" +
-            "{{" + Deltagerregler.Felt + "}}\n",
-        UserPrompt =
-            "Her er udskriften af mødet.\n\n" +
-            "Titel: {{titel}}\nDato: {{dato}}\nMødet blev holdt på: {{sprog}}\n\n" +
-            "Udskrift:\n{{transskription}}"
-    };
+        LavKnap.IsEnabled = harNoegle;
+        SaetOpKnap.Visibility = harNoegle ? Visibility.Collapsed : Visibility.Visible;
+
+        Status.Text = harNoegle
+            ? ""
+            : "Skabelonen skrives af Mistral, og den er ikke sat op endnu.";
+    }
 
     private async void Lav_Click(object sender, RoutedEventArgs e)
     {
@@ -103,11 +95,10 @@ public partial class NyTemplateWindow : Window
         }
 
         var noegle = SkyNoegle.Hent();
-        if (noegle is null) { Vis("Der er ingen API-nøgle. Start fra en tom i stedet."); return; }
+        if (noegle is null) { Vis("Der er ingen API-nøgle. Sæt Mistral op først."); return; }
 
         Fejl.Visibility = Visibility.Collapsed;
         LavKnap.IsEnabled = false;
-        TomKnap.IsEnabled = false;
         Status.Text = "Mistral skriver skabelonen … det tager typisk under et minut.";
 
         var tokens = Længder[Math.Max(0, FeltLaengde.SelectedIndex)].Tokens;
@@ -138,9 +129,8 @@ public partial class NyTemplateWindow : Window
         catch (Exception ex)
         {
             Vis($"Skabelonen kunne ikke laves: {ex.Message}\n\n" +
-                "Du kan prøve igen, eller starte fra en tom og skrive den selv.");
+                "Prøv igen — det er som regel en midlertidig fejl på forbindelsen.");
             LavKnap.IsEnabled = true;
-            TomKnap.IsEnabled = true;
             Status.Text = "";
         }
     }
