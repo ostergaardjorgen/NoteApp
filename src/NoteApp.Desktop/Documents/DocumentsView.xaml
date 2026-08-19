@@ -109,6 +109,17 @@
 
             <TreeView.ItemContainerStyle>
               <Style TargetType="TreeViewItem">
+                <Style.Resources>
+                  <!-- WPF tegner sin EGEN markering under vores skabelon, med
+                       systemets fremhaevningsfarve og hvid tekst. Paa et
+                       moerkt tema bliver navnet dermed usynligt, naar man
+                       vaelger det. De tre noegler slukker den, saa det er
+                       DataTriggeren paa ErValgt nedenfor, der tegner
+                       markeringen - i temaets egne farver. -->
+                  <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="Transparent" />
+                  <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="Transparent" />
+                  <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="#FFF4F6FA" />
+                </Style.Resources>
                 <Setter Property="Padding" Value="2,1" />
                 <Setter Property="AllowDrop" Value="True" />
                 <Setter Property="Foreground" Value="{StaticResource TekstSvag}" />
@@ -140,6 +151,9 @@
                   </StackPanel>
                 </Border>
                 <HierarchicalDataTemplate.Triggers>
+                  <DataTrigger Binding="{Binding ErValgt}" Value="True">
+                    <Setter TargetName="rk" Property="Background" Value="#FF33405A" />
+                  </DataTrigger>
                   <DataTrigger Binding="{Binding ErBeholder}" Value="True">
                     <Setter TargetName="rk" Property="ToolTipService.IsEnabled" Value="False" />
                   </DataTrigger>

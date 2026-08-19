@@ -17,7 +17,6 @@
       <RowDefinition Height="Auto" />
       <RowDefinition Height="Auto" />
       <RowDefinition Height="Auto" />
-      <RowDefinition Height="Auto" />
       <RowDefinition Height="*" />
     </Grid.RowDefinitions>
 
@@ -27,21 +26,14 @@
                  Text="Hvad der skal laves ud af en optagelse" />
     </StackPanel>
 
-    <!-- Hvad dokumenterne bliver lavet af. Det er ikke et valg her — det
-         står, fordi man skal kunne se det uden at lede. -->
-    <Border Grid.Row="1" Background="#FF181B22" BorderBrush="{StaticResource PanelKant}"
-            BorderThickness="1" CornerRadius="10" Padding="18,14" Margin="0,0,0,16">
-      <StackPanel>
-        <TextBlock x:Name="ModelStatus" FontSize="13.5" TextWrapping="Wrap"
-                   Foreground="{StaticResource TekstSvag}" />
-        <TextBlock FontSize="12.5" Margin="0,7,0,0" TextWrapping="Wrap"
-                   Foreground="{StaticResource TekstMeget}"
-                   Text="Optagelse og transskription virker uændret, også før den er sat op. Du bliver ikke mindet om det igen." />
-      </StackPanel>
-    </Border>
+    <!-- HER LAA ET PANEL: "Dokumenter laves af Mistral Medium 3.5 i Europa".
+         Det staar nu to andre steder - under AI-modeller, hvor man vaelger
+         det, og under Compliance, hvor det hoerer juridisk hjemme. Tre steder
+         er ikke tre gange saa tydeligt; det er stoej de to af gangene, og her
+         tog det den plads, skabelonens egne felter havde brug for.
+         Fjernet 18-08-2026. -->
 
-
-    <Border Grid.Row="2" Background="{StaticResource Panel}" CornerRadius="8"
+    <Border Grid.Row="1" Background="{StaticResource Panel}" CornerRadius="8"
             BorderBrush="{StaticResource PanelKant}" BorderThickness="1" Padding="8,6">
       <DockPanel>
         <Button DockPanel.Dock="Right" x:Name="GemKnap" Content="Gem ændringer" Click="Gem_Click"
@@ -79,11 +71,11 @@
       </DockPanel>
     </Border>
 
-    <Grid Grid.Row="3" Margin="2,8,2,10">
+    <Grid Grid.Row="2" Margin="2,8,2,10">
       <TextBlock x:Name="Status" Style="{StaticResource Underskrift}" VerticalAlignment="Bottom" />
     </Grid>
 
-    <Grid Grid.Row="4">
+    <Grid Grid.Row="3">
       <Grid.ColumnDefinitions>
         <ColumnDefinition Width="300" />
         <ColumnDefinition Width="Auto" />
@@ -102,6 +94,17 @@
 
             <TreeView.ItemContainerStyle>
               <Style TargetType="TreeViewItem">
+                <Style.Resources>
+                  <!-- WPF tegner sin EGEN markering under vores skabelon, med
+                       systemets fremhaevningsfarve og hvid tekst. Paa et
+                       moerkt tema bliver navnet dermed usynligt, naar man
+                       vaelger det. De tre noegler slukker den, saa det er
+                       DataTriggeren paa ErValgt nedenfor, der tegner
+                       markeringen - i temaets egne farver. -->
+                  <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="Transparent" />
+                  <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="Transparent" />
+                  <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="#FFF4F6FA" />
+                </Style.Resources>
                 <Setter Property="Padding" Value="2,1" />
                 <Setter Property="Foreground" Value="{StaticResource TekstSvag}" />
                 <Setter Property="IsExpanded" Value="{Binding ErUdfoldet, Mode=TwoWay}" />
@@ -131,6 +134,9 @@
                   </StackPanel>
                 </Border>
                 <HierarchicalDataTemplate.Triggers>
+                  <DataTrigger Binding="{Binding ErValgt}" Value="True">
+                    <Setter TargetName="rk" Property="Background" Value="#FF33405A" />
+                  </DataTrigger>
                   <DataTrigger Binding="{Binding ErBeholder}" Value="True">
                     <Setter TargetName="rk" Property="ToolTipService.IsEnabled" Value="False" />
                   </DataTrigger>
@@ -147,66 +153,93 @@
       <!-- Højre: den valgte skabelon -->
       <Border Grid.Column="2" Background="{StaticResource Panel}" CornerRadius="10"
               BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
-        <!-- Se TranscribeView: uden Disabled maales indholdet med uendelig
-             bredde, og teksten ombrydes ikke. -->
-        <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="22,18"
-                      HorizontalScrollBarVisibility="Disabled">
-          <StackPanel x:Name="Detaljer">
+        <!-- INGEN YDRE RULLEBJAELKE.
+             Her laa en ScrollViewer om hele ruden, og inde i den to
+             tekstfelter med hver sin egen. Tre rullebjaelker i eet panel,
+             hvoraf to laa lige ved siden af hinanden - man kunne ikke se,
+             hvilken man greb fat i.
 
-            <TextBlock Text="Navn" Style="{StaticResource Underskrift}" />
-            <TextBox x:Name="FeltNavn" Margin="0,4,0,0" TextChanged="Aendret" />
+             Nu er ruden et gitter: felterne foroven fylder det, de skal, og
+             de to store tekstfelter deler resten. Saa ruller kun DET, der
+             har mere tekst, end der er plads til - og der er praecis een
+             bjaelke det sted, man forventer den. -->
+        <Grid x:Name="Detaljer" Margin="22,18">
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="2*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+          </Grid.RowDefinitions>
 
-            <TextBlock Text="Beskrivelse" Style="{StaticResource Underskrift}" Margin="0,14,0,0" />
-            <TextBox x:Name="FeltBeskrivelse" Margin="0,4,0,0" TextChanged="Aendret" />
+          <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="2*" />
+            </Grid.ColumnDefinitions>
 
-            <!-- HER LAA ET VALG AF SPROGMODEL PR. SKABELON.
-                 Der er kun een sprogmodel tilbage, og den er valgt paa
-                 forhaand — se doc/maaling-sky.md. Et felt med eet svar er
-                 ikke et valg, det er en oplysning, og den staar oeverst. -->
+            <StackPanel Grid.Column="0" Margin="0,0,8,0">
+              <TextBlock Text="Navn" Style="{StaticResource Underskrift}" />
+              <TextBox x:Name="FeltNavn" Margin="0,4,0,0" TextChanged="Aendret" />
+            </StackPanel>
 
-            <Grid Margin="0,18,0,0">
-              <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-              </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="1" Margin="8,0,0,0">
+              <TextBlock Text="Beskrivelse" Style="{StaticResource Underskrift}" />
+              <TextBox x:Name="FeltBeskrivelse" Margin="0,4,0,0" TextChanged="Aendret" />
+            </StackPanel>
+          </Grid>
 
-              <StackPanel Grid.Column="0" Margin="0,0,8,0">
-                <TextBlock Text="Temperatur" Style="{StaticResource Underskrift}" />
-                <TextBox x:Name="FeltTemperatur" Margin="0,4,0,0" TextChanged="Aendret" />
-                <TextBlock FontSize="11.5" Margin="2,5,0,0" TextWrapping="Wrap"
-                           Foreground="{StaticResource TekstMeget}"
-                           Text="0,0 holder sig tæt på udskriften. Over 0,4 begynder den at formulere sig frit — og til et referat er det en fejl, ikke en stil." />
-              </StackPanel>
+          <!-- HER LAA ET VALG AF SPROGMODEL PR. SKABELON.
+               Der er kun een sprogmodel tilbage, og den er valgt paa forhaand
+               - se doc/maaling-sky.md. Et felt med eet svar er ikke et valg. -->
 
-              <StackPanel Grid.Column="1" Margin="8,0,0,0">
-                <TextBlock Text="Maks. længde (tokens)" Style="{StaticResource Underskrift}" />
-                <TextBox x:Name="FeltMaksTokens" Margin="0,4,0,0" TextChanged="Aendret" />
-                <TextBlock FontSize="11.5" Margin="2,5,0,0" TextWrapping="Wrap"
-                           Foreground="{StaticResource TekstMeget}"
-                           Text="Loftet over svaret. Cirka 3 tegn pr. token — 2048 rækker til et fyldigt referat." />
-              </StackPanel>
-            </Grid>
+          <Grid Grid.Row="1" Margin="0,14,0,0">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
 
-            <TextBlock Text="Instruktion til modellen" Style="{StaticResource Underskrift}" Margin="0,18,0,0" />
-            <TextBox x:Name="FeltSystem" Margin="0,4,0,0" AcceptsReturn="True" TextWrapping="Wrap"
-                     MinHeight="150" MaxHeight="260" VerticalScrollBarVisibility="Auto"
-                     FontFamily="Consolas" FontSize="12.5" TextChanged="Aendret" />
+            <StackPanel Grid.Column="0" Margin="0,0,8,0">
+              <TextBlock Text="Temperatur" Style="{StaticResource Underskrift}" />
+              <TextBox x:Name="FeltTemperatur" Margin="0,4,0,0" TextChanged="Aendret" />
+              <TextBlock FontSize="11.5" Margin="2,5,0,0" TextWrapping="Wrap"
+                         Foreground="{StaticResource TekstMeget}"
+                         Text="0,0 holder sig tæt på udskriften. Over 0,4 begynder den at formulere sig frit — og til et referat er det en fejl, ikke en stil." />
+            </StackPanel>
 
-            <TextBlock Text="Det, modellen får at arbejde med" Style="{StaticResource Underskrift}" Margin="0,18,0,0" />
-            <TextBox x:Name="FeltBruger" Margin="0,4,0,0" AcceptsReturn="True" TextWrapping="Wrap"
-                     MinHeight="110" MaxHeight="200" VerticalScrollBarVisibility="Auto"
-                     FontFamily="Consolas" FontSize="12.5" TextChanged="Aendret" />
+            <StackPanel Grid.Column="1" Margin="8,0,0,0">
+              <TextBlock Text="Maks. længde (tokens)" Style="{StaticResource Underskrift}" />
+              <TextBox x:Name="FeltMaksTokens" Margin="0,4,0,0" TextChanged="Aendret" />
+              <TextBlock FontSize="11.5" Margin="2,5,0,0" TextWrapping="Wrap"
+                         Foreground="{StaticResource TekstMeget}"
+                         Text="Loftet over svaret. Cirka 3 tegn pr. token — 2048 rækker til et fyldigt referat." />
+            </StackPanel>
+          </Grid>
 
-            <Border Background="#FF181B22" BorderBrush="{StaticResource PanelKant}" BorderThickness="1"
-                    CornerRadius="8" Padding="14,11" Margin="0,10,0,0">
-              <StackPanel>
-                <TextBlock Text="Felter du kan sætte ind" FontSize="12.5" FontWeight="SemiBold" />
-                <TextBlock x:Name="Felter" FontSize="12" Margin="0,6,0,0" TextWrapping="Wrap"
-                           LineHeight="20" Foreground="{StaticResource TekstMeget}" />
-              </StackPanel>
-            </Border>
-          </StackPanel>
-        </ScrollViewer>
+          <TextBlock Grid.Row="3" Text="Instruktion til modellen" Style="{StaticResource Underskrift}"
+                     Margin="0,18,0,0" />
+          <TextBox Grid.Row="4" x:Name="FeltSystem" Margin="0,4,0,0" AcceptsReturn="True"
+                   TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"
+                   FontFamily="Consolas" FontSize="12.5" TextChanged="Aendret" />
+
+          <TextBlock Grid.Row="5" Text="Det, modellen får at arbejde med"
+                     Style="{StaticResource Underskrift}" Margin="0,16,0,0" />
+          <TextBox Grid.Row="6" x:Name="FeltBruger" Margin="0,4,0,0" AcceptsReturn="True"
+                   TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"
+                   FontFamily="Consolas" FontSize="12.5" TextChanged="Aendret" />
+
+          <Border Grid.Row="7" Background="#FF181B22" BorderBrush="{StaticResource PanelKant}"
+                  BorderThickness="1" CornerRadius="8" Padding="14,10" Margin="0,12,0,0">
+            <StackPanel>
+              <TextBlock Text="Felter du kan sætte ind" FontSize="12.5" FontWeight="SemiBold" />
+              <TextBlock x:Name="Felter" FontSize="12" Margin="0,5,0,0" TextWrapping="Wrap"
+                         LineHeight="19" Foreground="{StaticResource TekstMeget}" />
+            </StackPanel>
+          </Border>
+        </Grid>
       </Border>
     </Grid>
   </Grid>

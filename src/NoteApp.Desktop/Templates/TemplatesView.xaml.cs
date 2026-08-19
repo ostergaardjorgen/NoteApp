@@ -45,23 +45,14 @@ public partial class TemplatesView : UserControl
         // appen ikke kan noget — mens den i virkeligheden bare ikke har pakket
         // ud endnu.
         try { DraftStore.SeedTemplates(); } catch (Exception) { /* vises som tom liste */ }
-
-        VisModelStatus();
         Indlæs();
     }
 
     // ------------------------------------------------------------- modeller
 
-    /// <summary>
-    /// Hvad dokumenterne laves af. Der er ikke noget at vælge, så linjen
-    /// oplyser frem for at spørge.
-    /// </summary>
-    private void VisModelStatus()
-    {
-        ModelStatus.Text = SkyNoegle.Hent() is null
-            ? "Dokumenter laves af " + SkyKatalog.Standard.Navn + " i Europa. Den er ikke sat op endnu — det sker under «AI-modeller»."
-            : "Dokumenter laves af " + SkyKatalog.Standard.Navn + " i Europa. Skabelonen her bestemmer, hvad der kommer ud.";
-    }
+    // HER LAA VisModelStatus. Panelet, den skrev til, er fjernet: hvad
+    // dokumenter laves af, staar under AI-modeller og under Compliance. Tre
+    // steder er ikke tre gange saa tydeligt.
 
     // ------------------------------------------------------------ indlæsning
 
