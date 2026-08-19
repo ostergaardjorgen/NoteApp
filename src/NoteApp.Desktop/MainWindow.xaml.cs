@@ -342,6 +342,12 @@ public partial class MainWindow : Window
             _aabnDokument = null;
             Indhold.Content = new DocumentsView(id);
         }
+        else if (NavSoeg.IsChecked == true)
+        {
+            // Bygges hver gang: soegningen skal se det, der blev skrevet ud
+            // for et oejeblik siden, uden at nogen genstarter appen.
+            Indhold.Content = new Search.SearchView();
+        }
         else if (NavSkabeloner.IsChecked == true)
         {
             // Bygges hver gang: skabelonerne er filer, og de kan være rettet i

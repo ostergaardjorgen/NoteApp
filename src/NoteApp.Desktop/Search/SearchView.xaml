@@ -1,0 +1,131 @@
+<UserControl x:Class="NoteApp.Desktop.Search.SearchView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+  <!-- ================== SØGNING PÅ TVÆRS ==================
+
+       Skærmen findes, fordi et arkiv, man ikke kan søge i, holder op med at
+       være et arkiv. Efter tredive møder åbner ingen dem ét ad gangen for at
+       finde ud af, hvad der blev aftalt.
+
+       Der er ingen søgeknap. Resultaterne kommer, mens man skriver — en
+       søgning, der koster et ekstra klik, bliver til et opslag man overvejer
+       frem for noget, man bare gør. -->
+
+  <Grid Margin="24,20,24,20">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+    </Grid.RowDefinitions>
+
+    <StackPanel Grid.Row="0" Margin="0,0,0,14">
+      <TextBlock Text="Søg" FontSize="24" FontWeight="SemiBold" />
+      <TextBlock Style="{StaticResource Underskrift}" Margin="0,4,0,0"
+                 Text="I alt, hvad der er sagt og skrevet — udskrifter, dine noter og de færdige dokumenter." />
+    </StackPanel>
+
+    <Border Grid.Row="1" Background="{StaticResource Panel}" CornerRadius="10"
+            BorderBrush="{StaticResource PanelKant}" BorderThickness="1" Padding="6">
+      <Grid>
+        <TextBox x:Name="Felt" FontSize="16" Padding="12,10" BorderThickness="0"
+                 Background="Transparent" TextChanged="Felt_Aendret" />
+        <TextBlock x:Name="Pladsholder" IsHitTestVisible="False" FontSize="16"
+                   Margin="15,0,0,0" VerticalAlignment="Center"
+                   Foreground="{StaticResource TekstMeget}"
+                   Text="Skriv et ord eller et navn — fx et kundenavn eller et systemnavn" />
+      </Grid>
+    </Border>
+
+    <TextBlock x:Name="Status" Grid.Row="2" Style="{StaticResource Underskrift}"
+               Margin="2,10,2,10" />
+
+    <!-- ===================== Resultaterne ====================== -->
+    <Border Grid.Row="3" Background="{StaticResource Panel}" CornerRadius="10"
+            BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+      <Grid>
+
+        <!-- Tom skærm, før der er skrevet noget. Den siger, hvad der bliver
+             søgt i — ellers ved man ikke, om et manglende fund betyder, at
+             ordet ikke findes, eller at der ikke blev ledt det rigtige sted. -->
+        <StackPanel x:Name="TomPanel" VerticalAlignment="Center" HorizontalAlignment="Center"
+                    MaxWidth="520">
+          <TextBlock Text="Hvad leder du efter?" FontSize="17" FontWeight="SemiBold"
+                     HorizontalAlignment="Center" />
+          <TextBlock FontSize="13" Margin="0,10,0,0" TextWrapping="Wrap" LineHeight="21"
+                     TextAlignment="Center" Foreground="{StaticResource TekstSvag}"
+                     Text="Der søges i alle udskrifter, i de noter du skrev undervejs, og i de dokumenter appen har lavet. Flere ord betyder, at de alle skal stå i den samme tekst." />
+          <TextBlock FontSize="12.5" Margin="0,14,0,0" TextWrapping="Wrap" LineHeight="20"
+                     TextAlignment="Center" Foreground="{StaticResource TekstMeget}"
+                     Text="Søgningen læser filerne på din maskine. Der sendes intet." />
+        </StackPanel>
+
+        <ScrollViewer x:Name="Rude" Padding="8,8,8,12" Visibility="Collapsed"
+                      VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+          <ItemsControl x:Name="Liste">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <Button Tag="{Binding}" Click="Fund_Klik" Cursor="Hand"
+                        HorizontalContentAlignment="Stretch" Padding="0"
+                        BorderThickness="0" Background="Transparent" Margin="0,0,0,6">
+                  <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                      <Border x:Name="rk" CornerRadius="8" Padding="14,11"
+                              Background="#FF181B22" BorderThickness="1"
+                              BorderBrush="{StaticResource PanelKant}">
+                        <ContentPresenter />
+                      </Border>
+                      <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                          <Setter TargetName="rk" Property="Background" Value="#FF2C323D" />
+                        </Trigger>
+                      </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                  </Button.Template>
+
+                  <StackPanel>
+                    <Grid>
+                      <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                      </Grid.ColumnDefinitions>
+
+                      <Border Grid.Column="0" CornerRadius="4" Padding="7,2" Margin="0,0,10,0"
+                              Background="#FF2C323D" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding Maerkat}" FontSize="10.5" FontWeight="SemiBold"
+                                   Foreground="{Binding Maerkatfarve}" />
+                      </Border>
+
+                      <TextBlock Grid.Column="1" Text="{Binding Overskrift}" FontSize="13.5"
+                                 FontWeight="SemiBold" VerticalAlignment="Center"
+                                 TextTrimming="CharacterEllipsis" />
+
+                      <TextBlock Grid.Column="2" Text="{Binding Hoejre}" FontSize="11.5"
+                                 VerticalAlignment="Center" Margin="12,0,0,0"
+                                 Foreground="{StaticResource TekstMeget}" />
+                    </Grid>
+
+                    <TextBlock Text="{Binding Uddrag}" FontSize="12.5" LineHeight="19"
+                               Margin="0,7,0,0" TextWrapping="Wrap"
+                               Foreground="{StaticResource TekstSvag}" />
+                  </StackPanel>
+                </Button>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </ScrollViewer>
+
+        <StackPanel x:Name="IntetPanel" VerticalAlignment="Center" HorizontalAlignment="Center"
+                    MaxWidth="480" Visibility="Collapsed">
+          <TextBlock x:Name="IntetOverskrift" FontSize="17" FontWeight="SemiBold"
+                     HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" />
+          <TextBlock FontSize="13" Margin="0,10,0,0" TextWrapping="Wrap" LineHeight="21"
+                     TextAlignment="Center" Foreground="{StaticResource TekstSvag}"
+                     Text="Prøv med færre ord. Husk at et møde først kan søges, når det er skrevet ud til tekst — en optagelse alene indeholder ingen ord at lede i." />
+        </StackPanel>
+      </Grid>
+    </Border>
+  </Grid>
+</UserControl>

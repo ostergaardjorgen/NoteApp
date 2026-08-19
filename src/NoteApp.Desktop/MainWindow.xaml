@@ -66,6 +66,13 @@
           <RadioButton x:Name="NavDokumenter" GroupName="nav" Content="Dokumenter"
                        Checked="Nav_Changed"
                        Style="{StaticResource NavKnap}" />
+          <!-- SOEG staar mellem Dokumenter og Skabeloner, fordi den daekker
+               BEGGE de to over den. Et soegefelt paa Optagelser ville kun
+               kunne soege i optagelser, og det, man leder efter, er sjaeldent
+               bundet til én slags ting. -->
+          <RadioButton x:Name="NavSoeg" GroupName="nav" Content="Søg"
+                       Checked="Nav_Changed"
+                       Style="{StaticResource NavKnap}" />
           <RadioButton x:Name="NavSkabeloner" GroupName="nav" Content="Skabeloner"
                        Checked="Nav_Changed"
                        Style="{StaticResource NavKnap}" />
