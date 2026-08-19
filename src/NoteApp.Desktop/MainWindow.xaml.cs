@@ -259,13 +259,22 @@ public partial class MainWindow : Window
         var ok = _genvej.Tilslut(this, AppSettings.Current.HotkeyId);
         _moede.VisGenvej(ok ? _genvej.Aktiv!.Navn : null, _genvej.Bemærkning);
 
-        // Blev der valgt en anden end den oenskede, gemmes den. Ellers ville
-        // appen proeve den optagede igen ved hver opstart og skifte hver gang.
-        if (ok && _genvej.Aktiv!.Id != AppSettings.Current.HotkeyId)
-        {
-            AppSettings.Current.HotkeyId = _genvej.Aktiv.Id;
-            AppSettings.Current.Save();
-        }
+        // HER BLEV NOEDLOESNINGEN GEMT SOM ET VALG.
+        //
+        // Var den oenskede tast optaget, tog appen den naeste ledige og
+        // skrev den i indstillingerne. Begrundelsen var, at den ellers ville
+        // proeve den optagede igen ved hver opstart.
+        //
+        // Men det er praecis, hvad den SKAL. Konflikten er som regel
+        // midlertidig - det var en anden NoteApp, der laa og holdt tasten -
+        // og naar den er vaek, skal man have sin egen tast tilbage. Med det
+        // gemte valg sad man fast paa Ctrl+Shift+1 for altid, uden nogensinde
+        // at have valgt den.
+        //
+        // HotkeyId er nu OENSKET og intet andet: enten det, brugeren har
+        // valgt under Indstillinger, eller null for standarden. Hvad der
+        // faktisk blev registreret, staar oeverst til hoejre og i
+        // bemaerkningen - dér hoerer en midlertidig tilstand hjemme.
     }
 
     /// <summary>

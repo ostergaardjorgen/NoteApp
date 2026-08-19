@@ -10,6 +10,17 @@ public partial class App : Application
     {
         base.OnStartup(e);
 
+        // KUN EEN AD GANGEN MOD SAMME DATAMAPPE.
+        //
+        // Skal staa foer alt andet: kommer vi hertil som nummer to, skal der
+        // ikke oprettes mapper, laeses indstillinger eller vises et
+        // opsaetningsvindue. Der skal lukkes ned, og den koerende skal frem.
+        if (!Enkeltinstans.ErFoerste(KomFrem))
+        {
+            Shutdown();
+            return;
+        }
+
         // Datamappen skal findes, før noget forsøger at skrive i den. Værnet
         // mod at den peger ind i kode-repoet kører her, ved opstart, frem for
         // at fejle stille den dag en optagelse havner i et git-checkout.
@@ -17,10 +28,9 @@ public partial class App : Application
 
         DispatcherUnhandledException += VisFejl;
 
-        // Første start: lad brugeren sætte fagområde og navne, før det første
-        // møde. En tom ordbog gør de første transskriptioner dårligere end
-        // nødvendigt, og det er ikke noget, man opdager — man tror bare, at
-        // værktøjet ikke duer.
+        // Foerste start: hvor filerne skal ligge, og hentning af Whisper.
+        // Uden motoren kan appen optage, men ikke skrive ud - og det opdager
+        // man foerst efter det foerste moede, hvis der ikke spoerges her.
         if (!AppSettings.Current.SetupCompleted)
         {
             var opsaetning = new Setup.SetupWindow();
@@ -33,6 +43,25 @@ public partial class App : Application
         if (e.Args.Any(a => a.Equals("--minimeret", StringComparison.OrdinalIgnoreCase)))
             _startMinimeret = true;
     }
+
+    /// <summary>
+    /// Henter vinduet frem, når nogen forsøger at starte appen igen.
+    ///
+    /// Kaldes fra en baggrundstråd, så alt skal over på UI-tråden først.
+    /// Var vinduet minimeret — fx startet med Windows — skal det også ud af
+    /// den tilstand; ellers blinker det bare i proceslinjen, og så ligner
+    /// spærren, at der ikke skete noget.
+    /// </summary>
+    private void KomFrem() => Dispatcher.Invoke(() =>
+    {
+        if (MainWindow is not { } v) return;
+
+        if (v.WindowState == WindowState.Minimized)
+            v.WindowState = WindowState.Normal;
+
+        v.Show();
+        v.Activate();
+    });
 
     private bool _startMinimeret;
 
