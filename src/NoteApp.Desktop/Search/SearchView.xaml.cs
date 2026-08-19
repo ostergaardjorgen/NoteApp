@@ -1,4 +1,4 @@
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Threading;
@@ -76,7 +76,14 @@ public partial class SearchView : UserControl
     private readonly DispatcherTimer _pause;
     private CancellationTokenSource? _afbryd;
 
-    public SearchView()
+    public SearchView() : this(null) { }
+
+    /// <param name="start">
+    /// Et ord, der skal søges på med det samme. Sat, når man kommer tilbage
+    /// fra et sted, man klikkede sig hen til — så listen står, som den gjorde,
+    /// og man kan gå videre til det næste sted.
+    /// </param>
+    public SearchView(string? start)
     {
         InitializeComponent();
 
@@ -91,7 +98,18 @@ public partial class SearchView : UserControl
         _pause = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(220) };
         _pause.Tick += (_, _) => { _pause.Stop(); Soeg(); };
 
-        Loaded += (_, _) => Felt.Focus();
+        Loaded += (_, _) =>
+        {
+            if (start is { Length: > 0 })
+            {
+                // Teksten saettes FOER fokus. Ellers markerer TextBox'en det
+                // hele, og det naeste tastetryk sletter soegningen.
+                Felt.Text = start;
+                Felt.CaretIndex = Felt.Text.Length;
+            }
+
+            Felt.Focus();
+        };
     }
 
     private void Felt_Aendret(object sender, TextChangedEventArgs e)
@@ -188,13 +206,21 @@ public partial class SearchView : UserControl
         if (sender is not Button b || b.Tag is not Traefvisning v) return;
         if (Application.Current.MainWindow is not MainWindow hoved) return;
 
+        // Ordet huskes EFTER navigationen. Nav_Changed rydder linjen, og
+        // den fyrer undervejs - saettes den foer, er den vaek igen med det
+        // samme.
+        var ord = Felt.Text.Trim();
+
         if (v.Fund.Slags == Fundtype.Dokument)
         {
             hoved.GaaTilDokumenter(v.Fund.Kilde, v.Traef.Position);
+            hoved.HuskSoegning(ord);
             return;
         }
 
-        if (!hoved.GaaTilOptagelse(v.Fund.Kilde, v.Traef.Position))
+        if (hoved.GaaTilOptagelse(v.Fund.Kilde, v.Traef.Position))
+            hoved.HuskSoegning(ord);
+        else
             Dialogs.AppDialog.Vis(Window.GetWindow(this), "Den findes ikke længere",
                 "Optagelsen er slettet eller flyttet uden for appen, siden den blev skrevet ud.",
                 Dialogs.Slags.Valg);

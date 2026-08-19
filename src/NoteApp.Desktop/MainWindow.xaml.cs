@@ -248,6 +248,61 @@ public partial class MainWindow : Window
     /// <summary>Positionen, der skal springes til. Bruges ÉN gang.</summary>
     private int _aabnPosition;
 
+    /// <summary>
+    /// Det, der blev søgt på, da man klikkede sig videre herfra.
+    ///
+    /// Null betyder, at man ikke kom fra en søgning — og så er der ingen
+    /// tilbage-linje at vise.
+    /// </summary>
+    private string? _soegeord;
+
+    /// <summary>
+    /// Går til «Søg» med et ord skrevet ind, så listen står, som den gjorde.
+    ///
+    /// Kaldes både af tilbage-linjen og af søgeskærmen selv, når den sender
+    /// én videre — det er det samme ord, der skal bruges begge veje.
+    /// </summary>
+    public void GaaTilSoeg(string ord)
+    {
+        _soegeord = null;
+        VisTilbagelinje();
+
+        _startSoegning = ord;
+
+        if (NavSoeg.IsChecked == true) Indhold.Content = new Search.SearchView(ord);
+        else NavSoeg.IsChecked = true;
+    }
+
+    private string? _startSoegning;
+
+    /// <summary>
+    /// Husker søgeordet, så man kan komme tilbage til listen.
+    ///
+    /// Kaldes af søgeskærmen LIGE FØR den sender én videre. Rækkefølgen
+    /// betyder noget: navigationen udløser Nav_Changed, som rydder linjen —
+    /// derfor sættes den bagefter.
+    /// </summary>
+    public void HuskSoegning(string ord)
+    {
+        _soegeord = ord;
+        VisTilbagelinje();
+    }
+
+    private void VisTilbagelinje()
+    {
+        if (TilbageLinje is null) return;
+
+        TilbageLinje.Visibility = _soegeord is null ? Visibility.Collapsed : Visibility.Visible;
+
+        if (_soegeord is not null)
+            TilbageKnap.Content = $"Tilbage til søgningen på «{_soegeord}»";
+    }
+
+    private void Tilbage_Click(object sender, RoutedEventArgs e)
+    {
+        if (_soegeord is { } ord) GaaTilSoeg(ord);
+    }
+
     private int Brug()
     {
         var p = _aabnPosition;
@@ -353,6 +408,12 @@ public partial class MainWindow : Window
         // fyrer under InitializeComponent.
         if (Indhold is null) return;
 
+        // VAELGER MAN SELV ET MENUPUNKT, ER MAN IKKE LAENGERE PAA VEJ TILBAGE.
+        // En linje, der bliver staaende, efter man er gaaet et helt andet
+        // sted hen, peger tilbage til noget, man for laengst er faerdig med.
+        _soegeord = null;
+        VisTilbagelinje();
+
         // Skærmene bygges først, når de vises. Motorskærmen leder efter filer
         // på disken, og det skal ikke ske, mens man bare vil optage.
         if (NavTransskriber.IsChecked == true)
@@ -371,7 +432,9 @@ public partial class MainWindow : Window
         {
             // Bygges hver gang: soegningen skal se det, der blev skrevet ud
             // for et oejeblik siden, uden at nogen genstarter appen.
-            Indhold.Content = new Search.SearchView();
+            var ord = _startSoegning;
+            _startSoegning = null;
+            Indhold.Content = new Search.SearchView(ord);
         }
         else if (NavSkabeloner.IsChecked == true)
         {

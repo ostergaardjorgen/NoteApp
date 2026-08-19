@@ -147,7 +147,43 @@
       </DockPanel>
     </Border>
 
-    <ContentControl x:Name="Indhold" Grid.Column="1" />
+    <!-- ============ VEJEN TILBAGE TIL SOEGNINGEN ============
+         Man rammer sjaeldent det rigtige sted foerste gang. Uden en vej
+         tilbage skal man til Soeg, skrive ordet igen og finde stedet i
+         listen forfra - for hvert eneste sted, man vil kontrollere.
+
+         Linjen ligger HER og ikke inde i de enkelte skaerme: den skal se ens
+         ud og opfoere sig ens, uanset om man landede i en udskrift eller i
+         et dokument. Den forsvinder, saa snart man selv vaelger et menupunkt.
+         -->
+    <Grid Grid.Column="1">
+      <Grid.RowDefinitions>
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="*" />
+      </Grid.RowDefinitions>
+
+      <Border x:Name="TilbageLinje" Grid.Row="0" Visibility="Collapsed"
+              Background="#FF1D2530" BorderBrush="{StaticResource Accent}"
+              BorderThickness="0,0,0,1" Padding="24,9">
+        <Button x:Name="TilbageKnap" Click="Tilbage_Click" Cursor="Hand"
+                HorizontalAlignment="Left" Padding="0" BorderThickness="0"
+                Background="Transparent" ToolTip="Tilbage til listen over steder">
+          <Button.Template>
+            <ControlTemplate TargetType="Button">
+              <StackPanel Orientation="Horizontal">
+                <TextBlock Text="&#xE72B;" FontFamily="Segoe MDL2 Assets" FontSize="12"
+                           VerticalAlignment="Center" Margin="0,0,8,0"
+                           Foreground="{StaticResource Accent}" />
+                <TextBlock x:Name="tekst" Text="{TemplateBinding Content}" FontSize="12.5"
+                           VerticalAlignment="Center" Foreground="{StaticResource Accent}" />
+              </StackPanel>
+            </ControlTemplate>
+          </Button.Template>
+        </Button>
+      </Border>
+
+      <ContentControl x:Name="Indhold" Grid.Row="1" />
+    </Grid>
     </Grid>
 
     <!-- Kørslen, der ikke hører til nogen skærm. Den ligger nederst i vinduet,
