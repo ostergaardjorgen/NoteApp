@@ -420,6 +420,107 @@
         </ScrollViewer>
       </TabItem>
 
+      <!-- ==================== KVITTERINGER ====================
+           Resten af skaermen beskriver, hvad appen GOER. Den her fane siger,
+           hvad der FAKTISK skete - og det er to forskellige ting.
+
+           En revision spoerger ikke "hvordan virker det", men "hvad skete der
+           den 14. august". Det kan en beskrivelse af koden ikke svare paa. -->
+      <TabItem Header="Kvitteringer" Style="{StaticResource Fane}">
+        <DockPanel>
+
+          <StackPanel DockPanel.Dock="Top" Margin="0,0,0,12">
+            <TextBlock Text="Hvad der faktisk er sendt" FontSize="15" FontWeight="SemiBold" />
+            <TextBlock FontSize="12.5" LineHeight="21" Margin="0,6,0,0" TextWrapping="Wrap"
+                       Foreground="{StaticResource TekstSvag}"
+                       Text="Hver gang noget forlader maskinen, bogføres det her: tidspunkt, adresse, model, hvor mange tegn der gik, hvad det kostede — og en kontrolsum af de nøjagtige bytes. Også når kaldet fejler; en fejlet afsendelse har stadig sendt." />
+            <TextBlock FontSize="12" LineHeight="20" Margin="0,8,0,0" TextWrapping="Wrap"
+                       Foreground="{StaticResource TekstMeget}"
+                       Text="Selve teksten gemmes IKKE. Den ligger allerede ved mødet, og en kopi mere ville være endnu et sted, den kunne slippe ud fra. Kontrolsummen kan holdes op mod originalen — passer den ikke, er udskriften ændret siden." />
+          </StackPanel>
+
+          <Border DockPanel.Dock="Top" Background="{StaticResource Panel}" CornerRadius="10"
+                  BorderBrush="{StaticResource PanelKant}" BorderThickness="1"
+                  Padding="18,14" Margin="0,0,0,12">
+            <Grid>
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+              </Grid.ColumnDefinitions>
+
+              <StackPanel Grid.Column="0">
+                <TextBlock Text="AFSENDELSER" FontSize="10.5" FontWeight="SemiBold"
+                           Foreground="{StaticResource TekstMeget}" />
+                <TextBlock x:Name="KvitAntal" FontSize="20" FontWeight="SemiBold" Margin="0,3,0,0" />
+              </StackPanel>
+
+              <StackPanel Grid.Column="1">
+                <TextBlock Text="TEGN SENDT I ALT" FontSize="10.5" FontWeight="SemiBold"
+                           Foreground="{StaticResource TekstMeget}" />
+                <TextBlock x:Name="KvitTegn" FontSize="20" FontWeight="SemiBold" Margin="0,3,0,0" />
+              </StackPanel>
+
+              <StackPanel Grid.Column="2">
+                <TextBlock Text="SAMLET PRIS" FontSize="10.5" FontWeight="SemiBold"
+                           Foreground="{StaticResource TekstMeget}" />
+                <TextBlock x:Name="KvitPris" FontSize="20" FontWeight="SemiBold" Margin="0,3,0,0" />
+              </StackPanel>
+
+              <Button Grid.Column="3" Content="Åbn mappen" Click="Kvitteringer_Klik"
+                      VerticalAlignment="Center" Padding="14,8"
+                      ToolTip="Filerne er almindelig JSONL — én linje pr. afsendelse. De kan læses af et regneark eller et script uden appen" />
+            </Grid>
+          </Border>
+
+          <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <StackPanel>
+              <TextBlock x:Name="KvitTom" FontSize="13" LineHeight="21" TextWrapping="Wrap"
+                         Margin="4,10,4,0" Visibility="Collapsed"
+                         Foreground="{StaticResource TekstSvag}"
+                         Text="Der er ikke sendt noget endnu. Første gang du laver et dokument, står afsendelsen her." />
+
+              <ItemsControl x:Name="KvitListe">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate>
+                    <Border CornerRadius="8" Padding="14,11" Margin="0,0,0,6"
+                            Background="#FF181B22" BorderThickness="1"
+                            BorderBrush="{Binding Kant}">
+                      <StackPanel>
+                        <Grid>
+                          <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                          </Grid.ColumnDefinitions>
+                          <TextBlock Grid.Column="0" Text="{Binding Hvad}" FontSize="13.5"
+                                     FontWeight="SemiBold" TextWrapping="Wrap" />
+                          <TextBlock Grid.Column="1" Text="{Binding Naar}" FontSize="11.5"
+                                     Margin="12,0,0,0" VerticalAlignment="Top"
+                                     Foreground="{StaticResource TekstMeget}" />
+                        </Grid>
+
+                        <TextBlock Text="{Binding Linje}" FontSize="12" Margin="0,6,0,0"
+                                   TextWrapping="Wrap" LineHeight="19"
+                                   Foreground="{StaticResource TekstSvag}" />
+
+                        <TextBlock Text="{Binding Sum}" FontSize="11" Margin="0,5,0,0"
+                                   FontFamily="Consolas" TextWrapping="Wrap"
+                                   Foreground="{StaticResource TekstMeget}" />
+
+                        <TextBlock Text="{Binding Fejl}" FontSize="12" Margin="0,5,0,0"
+                                   TextWrapping="Wrap" Visibility="{Binding FejlSynlig}"
+                                   Foreground="{StaticResource FejlTekst}" />
+                      </StackPanel>
+                    </Border>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+          </ScrollViewer>
+        </DockPanel>
+      </TabItem>
+
       <TabItem Header="Forbehold" Style="{StaticResource Fane}">
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
           <StackPanel>

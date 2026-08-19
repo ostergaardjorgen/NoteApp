@@ -48,6 +48,8 @@ public partial class ComplianceView : UserControl
 
         Endepunkt.Text = SkyKatalog.Endpoint;
 
+        VisKvitteringer();
+
         var whisper = WhisperInstall.Standard;
 
         Modeller.ItemsSource = new[]
@@ -97,6 +99,60 @@ public partial class ComplianceView : UserControl
             // Adressen staar der, saa den kan skrives af i haanden.
             Dialogs.AppDialog.Vis(Window.GetWindow(this), "Kunne ikke åbne browseren",
                 $"Gå til denne adresse i din browser:\n\n{url}", Dialogs.Slags.Valg);
+        }
+    }
+
+    /// <summary>
+    /// Kvitteringerne — hvad der faktisk har forladt maskinen.
+    ///
+    /// Resten af skærmen beskriver, hvad appen GØR. Det her er, hvad der
+    /// SKETE. En revision spørger om det sidste, og en beskrivelse af koden
+    /// kan ikke svare på det.
+    /// </summary>
+    private void VisKvitteringer()
+    {
+        var alle = Kvitteringer.Laes();
+
+        KvitAntal.Text = alle.Count.ToString();
+        KvitTegn.Text = alle.Count == 0 ? "0" : $"{alle.Sum(k => (long)k.Tegn):N0}";
+        KvitPris.Text = $"${alle.Sum(k => k.PrisUsd):0.00}";
+
+        KvitTom.Visibility = alle.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+
+        KvitListe.ItemsSource = alle.Select(k => new
+        {
+            Hvad = k.KildeTitel.Length > 0
+                ? $"{k.Skabelon} — {k.KildeTitel}"
+                : k.Skabelon,
+
+            Naar = k.Tidspunkt.LocalDateTime.ToString("dd-MM-yyyy HH:mm:ss"),
+
+            Linje = $"{new Uri(k.Endepunkt).Host}  ·  {k.Model}  ·  " +
+                    $"{k.Tegn:N0} tegn sendt  ·  {k.TokensInd:N0} ind / {k.TokensUd:N0} ud  ·  " +
+                    $"${k.PrisUsd:0.0000}  ·  {k.Sekunder:0.0} sek",
+
+            // Kontrolsummen staar HELT ud. Det er den, der goer kvitteringen
+            // til et bevis - en forkortet sum kan ikke sammenlignes med noget.
+            Sum = "SHA-256: " + k.Sum,
+
+            Kant = (System.Windows.Media.Brush)FindResource(k.Lykkedes ? "PanelKant" : "FejlTekst"),
+            Fejl = k.Fejl,
+            FejlSynlig = k.Fejl.Length > 0 ? Visibility.Visible : Visibility.Collapsed
+        }).ToList();
+    }
+
+    private void Kvitteringer_Klik(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            System.IO.Directory.CreateDirectory(Kvitteringer.Directory);
+            System.Diagnostics.Process.Start(
+                new System.Diagnostics.ProcessStartInfo(Kvitteringer.Directory) { UseShellExecute = true });
+        }
+        catch (Exception ex)
+        {
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Kunne ikke åbne mappen",
+                ex.Message, Dialogs.Slags.Pas_paa);
         }
     }
 }
