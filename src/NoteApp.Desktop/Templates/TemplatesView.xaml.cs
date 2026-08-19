@@ -90,7 +90,6 @@ public partial class TemplatesView : UserControl
         }
 
         Detaljer.IsEnabled = true;
-        VisAgenda();
 
         var valgt = _rod.Boern.FirstOrDefault(k => k.Skabelon?.Name == vælgNavn) ?? _rod.Boern[0];
         valgt.ErValgt = true;
@@ -100,24 +99,11 @@ public partial class TemplatesView : UserControl
     private Biblioteker.Biblioteksnode? _rod;
     private bool _byggerTrae;
 
-    /// <summary>
-    /// Standarddagsordenen. Den ligger som en indlejret tekstfil frem for i
-    /// koden, saa den kan rettes uden at roere en eneste linje C#.
-    /// </summary>
-    private static string Agenda()
-    {
-        var asm = System.Reflection.Assembly.GetExecutingAssembly();
-        var navn = asm.GetManifestResourceNames()
-            .FirstOrDefault(n => n.EndsWith("agenda.txt", StringComparison.Ordinal));
-
-        if (navn is null) return "Dagsordenen kunne ikke indlæses.";
-
-        using var s = asm.GetManifestResourceStream(navn);
-        if (s is null) return "Dagsordenen kunne ikke indlæses.";
-
-        using var l = new System.IO.StreamReader(s, System.Text.Encoding.UTF8);
-        return l.ReadToEnd();
-    }
+    // Standarddagsordenen og selve Mistral-kaldet laa her. De er flyttet til
+    // Dagsordensskriver, fordi guiden til nye skabeloner skal bruge praecis
+    // det samme kald - stod prompten to steder, ville de to veje langsomt
+    // give hver sit resultat.
+    private static string Agenda() => Dagsordensskriver.Standard();
 
     /// <summary>
     /// Saetter et felt ind, hvor markoeren staar i opgaveteksten.
@@ -180,44 +166,12 @@ public partial class TemplatesView : UserControl
 
         try
         {
-            var opskrift = new PromptTemplate
-            {
-                Name = "Dagsordensskriver",
-                Temperature = 0.3,
-                MaxTokens = 2000,
-                SystemPrompt =
-                    "Du tilpasser dagsordener til møder, der bliver optaget og skrevet ud " +
-                    "til tekst. Du skriver ALTID på dansk.\n\n" +
-                    "Du får en standarddagsorden og den instruktion, et dokument bliver " +
-                    "lavet efter bagefter. Din opgave er at rette dagsordenen til, så mødet " +
-                    "af sig selv kommer omkring det, dokumentet har brug for.\n\n" +
-                    "Behold punkt 1 (navnerunden) ordret. Uden den har talegenkendelsen " +
-                    "ingen navne at genkende.\n\n" +
-                    "Behold formen: nummererede punkter med en tidsangivelse i parentes og " +
-                    "konkrete sætninger, deltagerne skal sige højt. Tilføj, fjern og omskriv " +
-                    "de øvrige punkter, så de passer til dokumentet.\n\n" +
-                    "Svar med dagsordenen og intet andet — ingen indledning, ingen " +
-                    "forklaring, ingen kodeblok omkring.",
-                UserPrompt = ""
-            };
-
-            var svar = await new SkyRunner(noegle).KoerAsync(
-                SkyKatalog.Standard, opskrift,
-                $"Dokumentet, der skal laves bagefter, hedder «{t.Name}».\n\n" +
-                $"Instruktionen til det:\n{t.SystemPrompt}\n\n" +
-                $"Standarddagsordenen:\n{Agenda()}");
-
-            var tekst = svar.Tekst.Trim();
-            if (tekst.StartsWith("```", StringComparison.Ordinal))
-            {
-                var foerste = tekst.IndexOf('\n');
-                if (foerste > 0) tekst = tekst[(foerste + 1)..];
-                if (tekst.EndsWith("```", StringComparison.Ordinal)) tekst = tekst[..^3];
-                tekst = tekst.Trim();
-            }
-
-            Agendaer.Gem(t.Name, tekst);
+            Agendaer.Gem(t.Name, await Dagsordensskriver.SkrivAsync(noegle, t.Name, t.SystemPrompt));
             VisAgenda();
+
+            // Instruktionen og dagsordenen passer sammen nu. Saa skal der
+            // ikke mindes om noget, foer den bliver aendret igen.
+            _systemVedIndlaesning = t.SystemPrompt;
             Status.Text = $"Dagsordenen er tilpasset «{t.Name}». Læs den igennem, før du bruger den.";
         }
         catch (Exception ex)
@@ -230,6 +184,37 @@ public partial class TemplatesView : UserControl
         {
             AgendaTilpasKnap.IsEnabled = SkyNoegle.Hent() is not null;
         }
+    }
+
+    /// <summary>
+    /// Spørger, om dagsordenen skal følge med den ændrede instruktion.
+    ///
+    /// Det er et spørgsmål og ikke en automatik: en dagsorden, man selv har
+    /// rettet i hånden, må ikke blive skrevet over, fordi man rettede et komma
+    /// i instruktionen.
+    /// </summary>
+    private void MindOmDagsorden()
+    {
+        var navn = _valgt?.Name;
+        if (navn is null) return;
+
+        var egen = Agendaer.HarEgen(navn);
+
+        var ja = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
+            "Skal dagsordenen følge med?",
+            $"Du har ændret instruktionen til «{navn}».\n\n" +
+            "Dagsordenen bestemmer, hvad der bliver sagt på mødet. Beder den ikke om " +
+            "det, den nye instruktion har brug for, står felterne tomme i dokumentet — " +
+            "udskriften kan kun indeholde det, nogen sagde højt.\n\n" +
+            (egen
+                ? "Den nuværende dagsorden bliver skrevet over."
+                : "Skabelonen bruger standarddagsordenen. Den bliver liggende — der laves en egen."),
+            "Tilpas dagsordenen nu", "Ikke nu", Dialogs.Slags.Valg);
+
+        if (!ja) return;
+
+        AgendaFane.IsSelected = true;
+        TilpasAgenda_Click(this, new RoutedEventArgs());
     }
 
     private void NulstilAgenda_Click(object sender, RoutedEventArgs e)
@@ -297,7 +282,25 @@ public partial class TemplatesView : UserControl
         _indlæser = false;
         GemKnap.IsEnabled = false;
         Status.Text = t.Path is null ? "Indbygget skabelon" : t.Path;
+
+        // EFTER _valgt er sat, ikke foer. Kaldet laa i Indlaes, hvor _valgt
+        // endnu var null - saa "Tilpas til denne skabelon" var graa paa hver
+        // eneste skabelon, fordi den spurgte om et navn, der ikke fandtes
+        // endnu.
+        VisAgenda();
+
+        // Aendrer man instruktionen, passer dagsordenen maaske ikke laengere.
+        _systemVedIndlaesning = t.SystemPrompt;
     }
+
+    /// <summary>
+    /// Instruktionen, som den saa ud da skabelonen blev aabnet.
+    ///
+    /// Bruges til at opdage, om DEN er aendret ved et gem — og kun den.
+    /// Retter man et navn eller en temperatur, har dagsordenen intet med det
+    /// at goere, og saa skal der ikke mindes om noget.
+    /// </summary>
+    private string? _systemVedIndlaesning;
 
     // -------------------------------------------------------------- ændring
 
@@ -371,9 +374,24 @@ public partial class TemplatesView : UserControl
                                       && File.Exists(gammelSti))
                 File.Delete(gammelSti);
 
+            // AENDRET INSTRUKTION KAN GOERE DAGSORDENEN FORKERT.
+            // Instruktionen bestemmer, hvad dokumentet skal indeholde -
+            // dagsordenen bestemmer, hvad der bliver SAGT paa moedet. Aendrer
+            // man den ene og glemmer den anden, beder skabelonen om noget,
+            // ingen kom til at sige hoejt, og feltet staar tomt i dokumentet.
+            //
+            // Der spoerges kun, naar netop instruktionen er aendret. Retter
+            // man et navn eller en temperatur, har dagsordenen intet med det
+            // at goere.
+            var instruktionAendret = _systemVedIndlaesning is not null
+                                     && _systemVedIndlaesning != _valgt.SystemPrompt;
+
             Status.Text = $"Gemt: {sti}";
             GemKnap.IsEnabled = false;
             Indlæs(_valgt.Name);
+
+            if (instruktionAendret && SkyNoegle.Hent() is not null)
+                MindOmDagsorden();
         }
         catch (Exception ex)
         {
@@ -410,8 +428,22 @@ public partial class TemplatesView : UserControl
                 ny.Name = $"{grund} {n++}";
 
             ny.Save();
+
+            // FOERST HER ligger navnet fast. Gemte guiden selv dagsordenen,
+            // ville et navnesammenfald have skrevet hen over dagsordenen paa
+            // den skabelon, der allerede hed det.
+            if (vindue.Dagsorden is { Length: > 0 } dagsorden)
+                Agendaer.Gem(ny.Name, dagsorden);
+
             Indlæs(ny.Name);
-            Status.Text = $"«{ny.Name}» er lavet. Læs den igennem, og ret det, der skal rettes.";
+            Status.Text = $"«{ny.Name}» er lavet med sin egen dagsorden. Læs begge dele igennem, og ret det, der skal rettes.";
+
+            if (vindue.Advarsel is { } advarsel)
+            {
+                Status.Text = $"«{ny.Name}» er lavet. Læs den igennem, og ret det, der skal rettes.";
+                Dialogs.AppDialog.Vis(Window.GetWindow(this), "Dagsordenen mangler",
+                    advarsel, Dialogs.Slags.Pas_paa);
+            }
         }
         catch (Exception ex)
         {

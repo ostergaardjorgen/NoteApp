@@ -1,4 +1,4 @@
-<UserControl x:Class="NoteApp.Desktop.Meeting.MeetingView"
+﻿<UserControl x:Class="NoteApp.Desktop.Meeting.MeetingView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
@@ -107,6 +107,30 @@
 
       <!-- ===================== Højre: handlinger ==================== -->
       <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+
+        <!-- ==================== Genvejstasten =======================
+             DEN STAAR FREMME, IKKE KUN SOM TOOLTIP PAA KNAPPEN.
+
+             Et moede begynder, mens man staar i et andet program. Genvejen er
+             lavet til netop dét - den virker, ogsaa naar appen er skjult - men
+             et tooltip paa en knap, man ikke kan se, kan ingen laere den af.
+             Saa fandt man appen frem og trykkede, og de foerste minutter var
+             vaek.
+
+             Den staar oeverst til hoejre, hvor der er plads, og den forsvinder
+             under optagelsen: dér er den brugt, og Pause og Stop skal have
+             pladsen. -->
+        <StackPanel x:Name="GenvejPanel" Orientation="Horizontal" VerticalAlignment="Center"
+                    Margin="0,0,18,0" Visibility="Collapsed">
+          <TextBlock x:Name="GenvejMaerkat" Text="OPTAG MED" FontSize="10.5" FontWeight="SemiBold"
+                     VerticalAlignment="Center" Margin="0,0,8,0"
+                     Foreground="{StaticResource TekstMeget}" />
+          <Border CornerRadius="5" Padding="9,4" Background="#FF2C323D"
+                  BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+            <TextBlock x:Name="GenvejTast" FontSize="12.5" FontWeight="Bold" />
+          </Border>
+        </StackPanel>
+
         <TextBlock x:Name="Status" VerticalAlignment="Center" FontSize="11.5" MaxWidth="300"
                    TextWrapping="Wrap" Margin="0,0,14,0" Foreground="{StaticResource TekstMeget}" />
 

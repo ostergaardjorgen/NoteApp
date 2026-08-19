@@ -76,6 +76,18 @@ public partial class NyTemplateWindow : Window
             : "Skabelonen skrives af Mistral, og den er ikke sat op endnu.";
     }
 
+    /// <summary>
+    /// Dagsordenen til den nye skabelon. Null, hvis den ikke kunne skrives —
+    /// så gælder standarden. Gemmes af den, der kalder, når navnet ligger fast.
+    /// </summary>
+    public string? Dagsorden { get; private set; }
+
+    /// <summary>
+    /// Sat, hvis skabelonen blev lavet, men dagsordenen ikke kunne skrives.
+    /// Null når alt gik godt.
+    /// </summary>
+    public string? Advarsel { get; private set; }
+
     private async void Lav_Click(object sender, RoutedEventArgs e)
     {
         var navn = FeltNavn.Text.Trim();
@@ -124,6 +136,40 @@ public partial class NyTemplateWindow : Window
                        Længder[Math.Max(0, FeltLaengde.SelectedIndex)].Navn));
 
             Resultat = Byg(navn, formaal, tokens, svar.Tekst);
+
+            // DAGSORDENEN LAVES MED DET SAMME.
+            //
+            // Skabelonen bestemmer, hvad dokumentet skal indeholde. Dagsordenen
+            // bestemmer, hvad der bliver SAGT paa moedet - og udskriften kan
+            // kun indeholde det, nogen sagde hoejt. En ny skabelon uden en
+            // dagsorden, der passer til den, beder derfor om felter, ingen kom
+            // omkring, og de staar tomme i det foerste dokument.
+            //
+            // Den bygges paa den instruktion, modellen lige har skrevet - ikke
+            // paa svarene her - fordi det er instruktionen, dokumentet faktisk
+            // laves efter.
+            //
+            // FEJLER DEN, STAAR SKABELONEN STADIG. Standarddagsordenen gaelder
+            // saa, og knappen paa Agenda-fanen kan proeve igen. At kaste
+            // skabelonen vaek, fordi dagsordenen ikke kunne skrives, ville
+            // vaere at smide det dyre kald vaek for det billige.
+            //
+            // DEN GEMMES IKKE HER. Findes navnet i forvejen, laegger den, der
+            // kaldte, et nummer paa - og saa ville en Gem() her have skrevet
+            // hen over dagsordenen paa den skabelon, der allerede hed det.
+            // Teksten gives tilbage, og den gemmes, naar navnet ligger fast.
+            Status.Text = "Skabelonen er klar. Skriver dagsordenen til den …";
+            try
+            {
+                Dagsorden = await Dagsordensskriver.SkrivAsync(noegle, navn, Resultat.SystemPrompt);
+            }
+            catch (Exception dagsorden)
+            {
+                Advarsel = "Skabelonen blev lavet, men dagsordenen kunne ikke skrives: " +
+                           dagsorden.Message + " Standarddagsordenen gælder, indtil du " +
+                           "trykker «Tilpas til denne skabelon» på Agenda-fanen.";
+            }
+
             DialogResult = true;
         }
         catch (Exception ex)

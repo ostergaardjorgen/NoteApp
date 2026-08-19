@@ -77,6 +77,25 @@ if ($normaliseret -ne $fuld) {
 $tekst = [IO.File]::ReadAllText($csproj, [Text.Encoding]::UTF8)
 $nu = if ($tekst -match '<Version>([^<]+)</Version>') { $Matches[1] } else { '(ingen)' }
 
+# SPAERRE MOD UTILSIGTET SPRING I MAJOR ELLER MINOR.
+#
+# Aftalen er tredje led: 1.0.1, 1.0.2, 1.0.3. En commit skrevet "v1.2.0:"
+# i stedet for "v1.0.2:" slaar lige igennem uden en spaerre - appen kom til
+# at hedde 1.2, og det passede hverken med aftalen eller med historikken.
+#
+# Der spaerres ikke for et spring, der ER meningen - der spoerges. Et
+# bevidst skifte til 1.1.0 eller 2.0.0 skal stadig kunne lade sig goere.
+if ($nu -match '^(\d+)\.(\d+)' -and $fuld -match '^(\d+)\.(\d+)') {
+    $nuMM   = ($nu   -split '\.')[0..1] -join '.'
+    $nyMM   = ($fuld -split '\.')[0..1] -join '.'
+    if ($nuMM -ne $nyMM) {
+        Write-Warning "Versionen springer fra $nuMM.x til $nyMM.x (fra $nu til $fuld)."
+        Write-Warning "Aftalen er tredje led - fx $nuMM.2. Er springet med vilje?"
+        $svar = Read-Host "Skriv JA for at fortsaette, eller Enter for at afbryde"
+        if ($svar -ne 'JA') { throw "Afbrudt. Ret commit-beskeden til 'v$nuMM.<nummer>: ...' og koer igen." }
+    }
+}
+
 if ($nu -ne $fuld) {
     $tekst = $tekst -replace '<Version>[^<]+</Version>', "<Version>$fuld</Version>"
     [IO.File]::WriteAllText($csproj, $tekst, (New-Object Text.UTF8Encoding $false))

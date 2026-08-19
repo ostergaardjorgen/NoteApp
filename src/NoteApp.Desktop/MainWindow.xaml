@@ -88,8 +88,14 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
               </Grid.ColumnDefinitions>
-              <TextBlock Grid.Column="0" Text="AI-modeller" VerticalAlignment="Center"
-                         Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}" />
+              <!-- INGEN Foreground HER.
+                   Den bandt til RadioButtonens egen Foreground, og den staar
+                   paa den svage tekstfarve, indtil punktet er valgt. De andre
+                   menupunkter har almindelig tekst som Content, og dér vinder
+                   den globale TextBlock-stil med den normale tekstfarve. Saa
+                   stod AI-modeller graat, mens resten stod hvidt - det lignede
+                   en deaktiveret knap. Nu foelger den samme stil som resten. -->
+              <TextBlock Grid.Column="0" Text="AI-modeller" VerticalAlignment="Center" />
               <Border Grid.Column="1" x:Name="MotorMaerkat" Visibility="Collapsed"
                       MinWidth="18" Height="18" CornerRadius="9" Margin="8,0,0,0"
                       Background="{StaticResource Advarsel}" VerticalAlignment="Center"

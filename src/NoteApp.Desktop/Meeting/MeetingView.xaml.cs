@@ -81,15 +81,47 @@ public partial class MeetingView : UserControl
     /// først den dag, man trykker på den før et møde og bagefter finder ud af,
     /// at der ikke blev optaget noget.
     /// </summary>
+    /// <summary>
+    /// Viser genvejstasten — både øverst til højre og som tooltip på knappen.
+    ///
+    /// Kombinationen kan skifte uden at brugeren har valgt noget: er den
+    /// ønskede taget af et andet program, tager appen den næste ledige. Derfor
+    /// er teksten ikke en fast streng i XAML, men den tast, der FAKTISK blev
+    /// registreret.
+    /// </summary>
     public void VisGenvej(string? tast, string? bemærkning)
     {
-        // Bjaelken har ikke plads til en linje om genvejen. Den staar som
-        // tooltip paa knappen, hvor man kigger hen, naar man er i tvivl.
-        StartKnap.ToolTip = tast is null
-            ? $"Genvejstasten virker ikke: {bemærkning ?? "ukendt årsag"}. Vælg en anden under Indstillinger."
-            : bemærkning is null
-                ? $"Eller tryk {tast} — virker også, når appen er skjult bag andre vinduer."
-                : $"Eller tryk {tast}. {bemærkning}";
+        if (tast is null)
+        {
+            // Ingen af mulighederne kunne registreres. At skjule maerkatet
+            // ville vaere at lade som ingenting - saa staar der, at den ikke
+            // virker, og hvor man goer noget ved det.
+            GenvejMaerkat.Text = "OPTAG MED";
+            GenvejTast.Text = "ingen genvej";
+            GenvejTast.Foreground = (System.Windows.Media.Brush)FindResource("Advarsel");
+            GenvejPanel.ToolTip =
+                $"Genvejstasten virker ikke: {bemærkning ?? "ukendt årsag"}. " +
+                "Vælg en anden under Indstillinger.";
+
+            StartKnap.ToolTip = GenvejPanel.ToolTip;
+        }
+        else
+        {
+            GenvejMaerkat.Text = "OPTAG MED";
+            GenvejTast.Text = tast;
+            GenvejTast.Foreground = (System.Windows.Media.Brush)FindResource("Tekst");
+            GenvejPanel.ToolTip = bemærkning is null
+                ? $"Tryk {tast} for at starte en optagelse — virker også, når appen er skjult bag andre vinduer."
+                : $"Tryk {tast} for at starte en optagelse. {bemærkning}";
+
+            StartKnap.ToolTip = GenvejPanel.ToolTip;
+        }
+
+        // Under en optagelse er genvejen brugt, og Pause og Stop skal have
+        // pladsen. Sker kun, hvis genvejen saettes op midt i en optagelse.
+        GenvejPanel.Visibility = UrPanel.Visibility == Visibility.Visible
+            ? Visibility.Collapsed
+            : Visibility.Visible;
     }
 
     // ---------------------------------------------------------- pladsholdere
@@ -241,6 +273,7 @@ public partial class MeetingView : UserControl
         _ur.Start();
 
         KlarFelter.Visibility = Visibility.Collapsed;
+        GenvejPanel.Visibility = Visibility.Collapsed;
         OptagFelter.Visibility = Visibility.Visible;
         StartKnap.Visibility = Visibility.Collapsed;
         UrPanel.Visibility = Visibility.Visible;
@@ -323,6 +356,7 @@ public partial class MeetingView : UserControl
         }
 
         KlarFelter.Visibility = Visibility.Visible;
+        GenvejPanel.Visibility = GenvejTast.Text.Length > 0 ? Visibility.Visible : Visibility.Collapsed;
         OptagFelter.Visibility = Visibility.Collapsed;
         StartKnap.Visibility = Visibility.Visible;
         UrPanel.Visibility = Visibility.Collapsed;
