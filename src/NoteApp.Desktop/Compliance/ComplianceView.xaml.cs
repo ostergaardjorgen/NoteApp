@@ -115,7 +115,18 @@ public partial class ComplianceView : UserControl
 
         KvitAntal.Text = alle.Count.ToString();
         KvitTegn.Text = alle.Count == 0 ? "0" : $"{alle.Sum(k => (long)k.Tegn):N0}";
-        KvitPris.Text = $"${alle.Sum(k => k.PrisUsd):0.00}";
+        // KURSEN ER ET RUNDT TAL, IKKE EN DAGSKURS.
+        //
+        // Den staar som en konstant her og ikke i en indstilling: et felt,
+        // brugeren kan rette, ville love en noejagtighed, tallet ikke har.
+        // Formaalet er at goere doller-beloebet til noget, man kan maerke -
+        // ikke at foere regnskab. Forbeholdet staar paa skaermen.
+        const decimal KronerPrDollar = 6.50m;
+
+        var samlet = alle.Sum(k => k.PrisUsd);
+
+        KvitPris.Text = $"${samlet:0.00}";
+        KvitPrisKr.Text = alle.Count == 0 ? "" : $"ca. {samlet * KronerPrDollar:0.00} kr.";
 
         KvitTom.Visibility = alle.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
 
@@ -129,7 +140,7 @@ public partial class ComplianceView : UserControl
 
             Linje = $"{new Uri(k.Endepunkt).Host}  ·  {k.Model}  ·  " +
                     $"{k.Tegn:N0} tegn sendt  ·  {k.TokensInd:N0} ind / {k.TokensUd:N0} ud  ·  " +
-                    $"${k.PrisUsd:0.0000}  ·  {k.Sekunder:0.0} sek",
+                    $"${k.PrisUsd:0.0000} (ca. {k.PrisUsd * KronerPrDollar:0.00} kr.)  ·  {k.Sekunder:0.0} sek",
 
             // Kontrolsummen staar HELT ud. Det er den, der goer kvitteringen
             // til et bevis - en forkortet sum kan ikke sammenlignes med noget.

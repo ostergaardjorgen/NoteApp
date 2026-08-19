@@ -463,9 +463,11 @@
               </StackPanel>
 
               <StackPanel Grid.Column="2">
-                <TextBlock Text="SAMLET PRIS" FontSize="10.5" FontWeight="SemiBold"
+                <TextBlock Text="SAMLET PRIS (SKØN)" FontSize="10.5" FontWeight="SemiBold"
                            Foreground="{StaticResource TekstMeget}" />
                 <TextBlock x:Name="KvitPris" FontSize="20" FontWeight="SemiBold" Margin="0,3,0,0" />
+                <TextBlock x:Name="KvitPrisKr" FontSize="11.5" Margin="0,2,0,0"
+                           Foreground="{StaticResource TekstMeget}" />
               </StackPanel>
 
               <Button Grid.Column="3" Content="Åbn mappen" Click="Kvitteringer_Klik"
@@ -476,6 +478,25 @@
 
           <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
             <StackPanel>
+              <!-- PRISEN ER ET SKOEN, OG DET SKAL STAA.
+                   Tokentallene er leverandoerens egne og er noejagtige. Det
+                   er OMREGNINGEN, der ikke er: listeprisen er noteret i
+                   dollar, og hvad der faktisk staar paa fakturaen - valuta,
+                   kurs, moms - er ikke efterproevet. Et tal uden det
+                   forbehold ville blive laest som et regnskab. -->
+              <Border Background="#FF181B22" BorderBrush="{StaticResource PanelKant}" BorderThickness="1"
+                      CornerRadius="8" Padding="14,11" Margin="0,0,0,12">
+                <StackPanel>
+                  <TextBlock Text="Om prisen" FontSize="12.5" FontWeight="SemiBold" />
+                  <TextBlock FontSize="12" LineHeight="19" Margin="0,4,0,0" TextWrapping="Wrap"
+                             Foreground="{StaticResource TekstMeget}"
+                             Text="Antallet af tokens kommer fra leverandøren og er det, der faktureres. Prisen herover er derimod et skøn: den er regnet ud fra listeprisen på Mistrals prisside, som er noteret i dollar. Kronebeløbet bruger en fast kurs på 6,50 kr./USD — ikke en dagskurs." />
+                  <TextBlock FontSize="12" LineHeight="19" Margin="0,6,0,0" TextWrapping="Wrap"
+                             Foreground="{StaticResource TekstMeget}"
+                             Text="Hvilken valuta Mistral rent faktisk fakturerer i, og om der lægges moms oveni, er ikke efterprøvet. Skal tallet bruges til bogføring, så tag det fra fakturaen — ikke herfra." />
+                </StackPanel>
+              </Border>
+
               <TextBlock x:Name="KvitTom" FontSize="13" LineHeight="21" TextWrapping="Wrap"
                          Margin="4,10,4,0" Visibility="Collapsed"
                          Foreground="{StaticResource TekstSvag}"
