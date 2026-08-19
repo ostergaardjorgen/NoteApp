@@ -282,11 +282,14 @@ public partial class MainWindow : Window
     /// betyder noget: navigationen udløser Nav_Changed, som rydder linjen —
     /// derfor sættes den bagefter.
     /// </summary>
-    public void HuskSoegning(string ord)
+    public void HuskSoegning(string ord, int steder = 0)
     {
         _soegeord = ord;
+        _soegesteder = steder;
         VisTilbagelinje();
     }
+
+    private int _soegesteder;
 
     private void VisTilbagelinje()
     {
@@ -294,8 +297,13 @@ public partial class MainWindow : Window
 
         TilbageLinje.Visibility = _soegeord is null ? Visibility.Collapsed : Visibility.Visible;
 
-        if (_soegeord is not null)
-            TilbageKnap.Content = $"Tilbage til søgningen på «{_soegeord}»";
+        if (_soegeord is null) return;
+
+        // Antallet staar der, saa man kan se, hvor mange steder der er
+        // tilbage at kontrollere - det er hele grunden til at gaa tilbage.
+        TilbageKnap.Content = _soegesteder > 1
+            ? $"Tilbage til de {_soegesteder} steder for «{_soegeord}»"
+            : $"Tilbage til søgningen på «{_soegeord}»";
     }
 
     private void Tilbage_Click(object sender, RoutedEventArgs e)

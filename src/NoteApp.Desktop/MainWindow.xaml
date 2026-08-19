@@ -163,20 +163,32 @@
       </Grid.RowDefinitions>
 
       <Border x:Name="TilbageLinje" Grid.Row="0" Visibility="Collapsed"
-              Background="#FF1D2530" BorderBrush="{StaticResource Accent}"
-              BorderThickness="0,0,0,1" Padding="24,9">
+              Background="#FF25344C" BorderBrush="{StaticResource Accent}"
+              BorderThickness="0,0,0,2" Padding="24,12">
         <Button x:Name="TilbageKnap" Click="Tilbage_Click" Cursor="Hand"
                 HorizontalAlignment="Left" Padding="0" BorderThickness="0"
                 Background="Transparent" ToolTip="Tilbage til listen over steder">
           <Button.Template>
             <ControlTemplate TargetType="Button">
-              <StackPanel Orientation="Horizontal">
-                <TextBlock Text="&#xE72B;" FontFamily="Segoe MDL2 Assets" FontSize="12"
-                           VerticalAlignment="Center" Margin="0,0,8,0"
-                           Foreground="{StaticResource Accent}" />
-                <TextBlock x:Name="tekst" Text="{TemplateBinding Content}" FontSize="12.5"
-                           VerticalAlignment="Center" Foreground="{StaticResource Accent}" />
-              </StackPanel>
+              <!-- Den skal ligne en knap, ikke en oplysning. Foerst var den en
+                   tynd linje med lille tekst i accentfarve, og den blev laest
+                   som en overskrift - ikke som noget, man kunne trykke paa. -->
+              <Border x:Name="flade" CornerRadius="7" Padding="14,8"
+                      Background="{StaticResource Accent}">
+                <StackPanel Orientation="Horizontal">
+                  <TextBlock Text="&#xE72B;" FontFamily="Segoe MDL2 Assets" FontSize="13"
+                             VerticalAlignment="Center" Margin="0,0,10,0"
+                             Foreground="#FF0B1220" FontWeight="Bold" />
+                  <TextBlock Text="{TemplateBinding Content}" FontSize="13.5"
+                             VerticalAlignment="Center" Foreground="#FF0B1220"
+                             FontWeight="SemiBold" />
+                </StackPanel>
+              </Border>
+              <ControlTemplate.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                  <Setter TargetName="flade" Property="Background" Value="#FF7FB8F5" />
+                </Trigger>
+              </ControlTemplate.Triggers>
             </ControlTemplate>
           </Button.Template>
         </Button>

@@ -210,16 +210,17 @@ public partial class SearchView : UserControl
         // den fyrer undervejs - saettes den foer, er den vaek igen med det
         // samme.
         var ord = Felt.Text.Trim();
+        var steder = v.Fund.Traef.Count;
 
         if (v.Fund.Slags == Fundtype.Dokument)
         {
             hoved.GaaTilDokumenter(v.Fund.Kilde, v.Traef.Position);
-            hoved.HuskSoegning(ord);
+            hoved.HuskSoegning(ord, steder);
             return;
         }
 
         if (hoved.GaaTilOptagelse(v.Fund.Kilde, v.Traef.Position))
-            hoved.HuskSoegning(ord);
+            hoved.HuskSoegning(ord, steder);
         else
             Dialogs.AppDialog.Vis(Window.GetWindow(this), "Den findes ikke længere",
                 "Optagelsen er slettet eller flyttet uden for appen, siden den blev skrevet ud.",
