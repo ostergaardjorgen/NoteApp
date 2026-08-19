@@ -926,7 +926,23 @@ public partial class TranscribeView : UserControl
             Fremdrift.Value = (sporNr * 100.0 + p.Percent) / sporIAlt;
             Fremdriftstal.Text = $"{Fremdrift.Value:0} %";
 
-            var hvilket = !toSpor ? "" : sporNr == 0 ? "  ·  spor 1 af 2: herfra" : "  ·  spor 2 af 2: derfra";
+            // HVAD DER SKRIVES UD, IKKE HVAD SPORET HEDDER.
+            //
+            // Her stod «herfra» og «derfra» - maerkaterne fra selve
+            // udskriften. To fejl paa én linje:
+            //
+            //   1. De var BYTTET OM. Spor 1 er loopback (de andre) og spor 2
+            //      er mikrofonen, fordi raekkefoelgen blev vendt, da sproget
+            //      skulle afgoeres paa det rene spor. Maerkaterne fulgte ikke
+            //      med.
+            //   2. Selv rigtigt vendt siger «derfra» ingenting i en
+            //      fremdriftslinje. Maerkaterne giver mening i udskriften,
+            //      hvor de staar forklaret oeverst - ikke her.
+            var hvilket = !toSpor
+                ? ""
+                : sporNr == 0
+                    ? "  ·  spor 1 af 2: de andres lyd"
+                    : "  ·  spor 2 af 2: din mikrofon";
             Status.Text = $"{p.Message}   ({modelNavn}, {install.Engine}){hvilket}";
         });
 
