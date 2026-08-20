@@ -1,90 +1,202 @@
 # Roadmap
 
-Idéer, der er gode, men ikke skal laves nu. Se `roadmap`-færdigheden.
+*Skrevet om 20-08-2026, efter at retningen blev lagt fast.*
 
-## Næste
+## Hvor produktet er på vej hen
 
-### Diktering ind i et hvilket som helst felt
-*Foreslået 19-08-2026 · besluttet som næste efter 1, 2 og 6 · skal drøftes før start*
+Indtil nu har appen været et værktøj: optag, skriv ud, lav et dokument. Herfra
+bliver den et **sted, hvor mødeaktiviteten samles** — kalenderen, lyden,
+udskriften, dokumenterne og opgaverne det samme sted, med et overblik over
+dagen og ugen som forside.
 
-Tryk genvejstasten, tal, slip — teksten står, hvor markøren er. I Outlook, i
-Teams, i et Word-dokument. Ikke et møde, der skrives ud bagefter, men tale som
-en almindelig måde at skrive på.
+Det ændrer, hvad der er vigtigt. Tre ting bliver bærende:
 
-Tre fjerdedele findes allerede: Whisper-motoren, den globale genvejstast og
-lydopsamlingen. Det, der mangler, er en model, der er hurtig nok til korte klip
-(large-v3 er for tung til at vente på), og indsættelse i det aktive vindue.
+**Udskriften skal kunne rettes.** Den er i dag noget, maskinen har lavet, og
+som man kun kan læse. Bliver den til noget, man kan finpudse — med tidsstempler
+og navne på hvem der sagde hvad — er den ikke længere et halvfabrikat. Så kan
+man i mange tilfælde nøjes med at kopiere det, man skal bruge, **uden at sende
+noget i skyen overhovedet**. Det er både bedre for brugeren og for compliance.
 
-**Hvorfor:** Det ændrer, hvad produktet er. I dag åbnes NoteApp efter et møde;
-med det her bruges den halvtreds gange om dagen. Motoren er allerede betalt for
-— den står stille mellem møderne.
+**Materialet skal kunne komme ind udefra.** Møder optages ikke altid på pc'en.
+En optagelse fra en telefon skal kunne lægges ind og behandles som alt andet.
 
-**Inspiration:** Wispr Flow, superwhisper.
+**Møderne skal have en tidslinje.** Uden en kalender er der kun en liste over
+fortiden. Med en kalender bliver «hvad sker der i dag» og «hvad blev aftalt
+sidst» spørgsmål, appen kan svare på.
 
-**Skal afklares først:** hvilken model til korte klip, hvordan indsættelsen sker
-uden at slås med det aktive vindue, og om genvejstasten skal deles med
-optagelsen eller være sin egen.
+---
 
-### Notifikationsklokke øverst til højre
-*Foreslået 14-08-2026*
+## Den beslutning, der skal træffes først
 
-En klokke i topbjælken, der giver besked, når noget, man har sat i gang, er
-færdigt — transskription, dokument, sikkerhedskopi. Med en tæller, så man kan se,
-at der er sket noget, uden at have skærmen fremme.
+**Hvad sker der med en rettet udskrift, når man kører transskriptionen om?**
 
-Kunne også bruges til andet end kørsler: en optagelse, der aldrig blev skrevet
-ud, en model, der er blevet forældet, en sikkerhedskopi, der ikke er taget i
-tre uger.
+Det er ikke en detalje. I dag kan udskriften genskabes når som helst, og hele
+maskineriet bygger på det: fletningen af de to spor, genbruget af et spor der
+ikke har ændret sig, søgningens tegnnumre. Rettes teksten i hånden, holder den
+antagelse op.
 
-**Hvorfor:** Et referat af et 61-minutters møde tog 28 minutter i én kørsel, og
-selv med mødet delt op i blokke tager det tid. Uden en besked skal man selv
-huske at kigge efter — og så opdager man det først dagen efter. Jobbjælken
-nederst virker kun, mens man har appen fremme.
+Vi har lavet den fejl før. Mekanismen, der anvendte lærte rettelser på
+udskrifter, blev fjernet 18-08 — den ville have omskrevet enhver dansk udskrift
+med ordet «eller» i, og den nåede kun at lade være, fordi der tilfældigvis ikke
+lå nogen filer at røre.
 
-### Bearbejdning hos en europæisk sky-model
-*Foreslået 16-08-2026 · under arbejde*
+**Forslaget:**
 
-**Budskabet:** Mødeoptagelse og transskription 100 % lokalt. Bearbejdning af
-indhold og dokumentskabeloner 100 % europæisk.
+1. Rettelser gemmes som **deres egen fil** ved siden af den maskingenererede.
+   Den rettede er den, resten af appen bruger — dokumenter, søgning, kopiering.
+2. En ny transskription **overskriver den aldrig**. Der spørges, og den gamle
+   rettede udgave bliver liggende som kopi.
+3. **Talernavne bages ikke ind i teksten.** De gemmes som en tilknytning i
+   `meeting.json` — HERFRA er Jørgen, DERFRA er Alexander og Espen — og sættes
+   på, når teksten vises. Så overlever navnene en ny udskrivning.
 
-Det er en skarpere position end «valgfrit sky-tilvalg», og den gør noget ved
-valget af leverandør: Claude og ChatGPT kan ikke bruges til bearbejdningen, for
-så holder anden halvdel af sætningen ikke. Mistral (Frankrig) er den eneste af
-de undersøgte, hvor «europæisk» og «brugerens egen nøgle» kan være sandt
-samtidig. Se `sky-api-priser.md`.
+Punkt 3 er det samme princip, der har reddet os hele vejen: gem id'et, slå
+navnet op. Det gælder også her.
 
-Claude bliver derfor ikke et produkt-tilvalg, men **målestokken**: facit i
-`reference.txt` er lavet af Claude, og hver europæisk model måles op mod det.
+---
 
-**Det, der skal efterprøves, før budskabet må bruges:** at Mistral faktisk
-hoster i EU, og at der findes en databehandleraftale. «100 % europæisk» er en
-compliance-påstand, ikke en markedsføringsvending — den skal stå på skrift fra
-leverandøren, før den står i appen.
+## Etape 1 — Udskriften bliver til at stole på
 
-**Hvorfor:** Den lokale 8B-model rammer et loft, der ikke er til at prompte sig
-ud af. Målt på et rigtigt møde mod et facit lavet af en stor model: 66 % af
-facits længde, 10 af 34 tal fundet, og omkring **ni opfundne navne** —
-«Entropic» for Anthropic, «Nomada» for Omada, «Savion», «Healthspot»,
-«BioTrust», «Joachim», «Peng».
+### 1.1 Redigering af udskriften
+*Stor · ingen afhængigheder · **start her***
 
-**RETTELSE 17-08-2026.** Her stod tidligere «35 opfundne navne» og «ordet
-Qwen3 endte i selve referatet». Begge dele var forkerte, og fejlen var min
-måling, ikke modellen: bedømmelsen læste udkastets frontmatter med, hvor
-modellens eget navn står som proveniens. Facit har ingen frontmatter, så
-fejlen ramte kun den ene side af sammenligningen. Qwen3 stod aldrig i
-referatet. De ni navne ovenfor er efterprøvet i selve teksten.
+Udskriften bliver en rigtig teksteditor: tidsstempler i margen, talerens navn
+på hver replik, og mulighed for at rette. Gemmes løbende.
 
-**Hvad det koster:** Løftet. Appen siger «Intet forlader denne pc», og det er
-hele compliance-vinklen. Sender man udskrifter afsted, gælder det ikke længere —
-og det er ikke kun brugerens egne ord, men også mødedeltagernes, som ikke har
-sagt ja.
+**Hvorfor først:** den gør alt det andet mere værd, og den er den eneste
+funktion på listen, der kan reducere, hvor meget der sendes i skyen. Kan man
+finpudse selv, behøver man ikke bede en model om at rydde op.
 
-**Hvordan det i givet fald skal bygges:** Lokalt som standard og som forvalg.
-Sky som et bevidst tilvalg pr. dokument, aldrig som en indstilling, man sætter
-én gang og glemmer. Med en klar besked om præcis hvad der sendes, hvorhen, og
-hvad der ikke gør. Nøglen i brugerens eget tastatur, aldrig indbygget.
+**Skal afklares:** beslutningen ovenfor. Og om der skal være fortryd på tværs
+af sessioner.
 
-## Idéer
+### 1.2 Navne på talerne
+*Middel · bygger på to-spor-udskriften (færdig)*
+
+I dag står der HERFRA og DERFRA. Man skal kunne sætte navne på — sine egne og
+gæsternes — og navnene skal huskes pr. person, så de foreslås næste gang de
+samme folk er med.
+
+**Hvorfor:** det er forudsætningen for at kunne søge på personer, og det er
+det, der gør en udskrift læselig for andre end den, der var med.
+
+**Grænsen skal stå:** vi kan skille de to SIDER ad, ikke de enkelte personer i
+den anden ende. Navngivning er brugerens vurdering, ikke en måling — og det
+skal fremgå, så ingen tror, maskinen har genkendt stemmerne.
+
+---
+
+## Etape 2 — Materialet kan komme ind udefra
+
+### 2.1 Upload af lydfiler
+*Middel · ingen afhængigheder*
+
+Træk en lydfil ind, og behandl den som en optagelse. Særligt fra telefon:
+iPhones taleoptagelser er `.m4a`, og Whisper skal bruge 16 kHz mono WAV — så
+der skal konverteres.
+
+**Skal afklares:** hvad der konverterer. En ekstra binær (ffmpeg) er 40-80 MB
+og en ny ting at holde opdateret; alternativet er at afkode `.m4a` med Windows'
+egne kodeks, som er der i forvejen.
+
+**Bemærk:** en optagelse fra telefonen har ét spor. Så er der ingen opdeling i
+HERFRA og DERFRA — alt står som ét. Det skal siges i udskriften, ikke opdages.
+
+### 2.2 Overvåget mappe (iCloud, Google Drev, OneDrive)
+*Lille · bygger på 2.1*
+
+Peg appen på en mappe. Dukker der en lydfil op, tilbyder den at lægge den ind.
+
+**Den vigtige forenkling:** alle tre tjenester har en Windows-klient, der
+synkroniserer til en helt almindelig lokal mappe. Derfor kræver det her
+**ingen OAuth, ingen tokens og ingen ny leverandør i Compliance** — appen ser
+kun en mappe på disken. Optager du på iPhone med iCloud slået til, ligger filen
+på pc'en af sig selv.
+
+Et rigtigt API mod de tre tjenester bliver først nødvendigt, hvis man vil
+undvære synkroniseringsklienten. Det er en senere beslutning, ikke en
+forudsætning.
+
+---
+
+## Etape 3 — Møderne får en tidslinje
+
+### 3.1 Kalender, lokal
+*Middel · ingen afhængigheder*
+
+Opret og se møder i appen. Tidspunkt, titel, deltagere, sted eller link. Et
+møde kan knyttes til en optagelse, og en optagelse til et møde.
+
+**Version 1 fungerer helt uden integration.** Det er ikke en overgangsløsning:
+en kalender, der kræver en konto hos Google for at virke, er ubrugelig for den,
+der ikke vil have en.
+
+### 3.2 Startside — dagens overblik
+*Middel · bygger på 3.1*
+
+Forsiden bliver dagen og den kommende uge: hvad der sker i dag, hvad der ligger
+forude, hvad der er sket, og hvad der venter — en optagelse, der aldrig blev
+skrevet ud, et dokument, der aldrig blev åbnet, et åbent punkt uden frist.
+
+### 3.3 Google Kalender
+*Stor · bygger på 3.1*
+
+Læs møderne fra Google. Opret møder derfra — **og lad være, når man beder om
+det.** Et møde, der er markeret som privat i appen, må aldrig havne i en delt
+kalender.
+
+**Compliance-konsekvens, der skal afklares først:** det bliver den anden
+tjeneste, appen taler med, og den første, hvor appen holder et fremmed token.
+Kalenderdata er personoplysninger — titler og deltagere. Det skal stå på
+Compliance-siden, og kvitteringerne skal dække det, ligesom de dækker Mistral.
+
+### 3.4 Microsoft 365-kalender
+*Stor · efter 3.3 · afventer*
+
+Samme som 3.3. Tages først, når Google-vejen står og virker.
+
+---
+
+## Etape 4 — Det hænger sammen
+
+### 4.1 Søgning på datoer, personer og metadata
+*Middel · bygger på 1.2 og 3.1*
+
+Søgningen er i dag fritekst. Den skal kunne svare på «hvad talte vi med Espen
+om i august» — altså søge på person, på dato og på mødetype, ikke kun på ord.
+
+### 4.2 Mødeserier
+*Middel · bygger på 3.1*
+
+Et ugentligt statusmøde er ikke tredive løsrevne møder. Dokumentet skal vide,
+hvad der blev besluttet sidst, og skabelonen skal kunne spørge: hvad er der
+sket siden? Åbne punkter bæres videre, indtil nogen lukker dem.
+
+### 4.3 Noterne bliver til strukturen
+*Middel/stor · bygger på 1.1*
+
+Skriver du «budget?» klokken 14:12, skal dokumentet have et afsnit om
+budgettet. Dine noter er din prioritering — det eneste signal i hele kæden om,
+hvad DU syntes var vigtigt.
+
+Med redigeringen på plads kan noterne vises inde i udskriften, dér hvor de blev
+skrevet. Det er halvdelen af arbejdet.
+
+---
+
+## Stadig på listen, uden for etaperne
+
+| Punkt | Indsats | Bemærkning |
+|---|---|---|
+| **Åbne punkter som ét register** | Lille | Billigste vinding, der er tilbage. Bliver bedre efter 3.1, men kan laves nu |
+| **Klik på en sætning, hør den** | Lille/middel | Tidsstemplerne findes. Hører naturligt sammen med 1.1 |
+| **Mål mødet, ikke modellen** | Middel | Hvor meget var uhørligt, hvor mange talte i munden på hinanden, hvem sagde aldrig sit navn |
+| **Maskering før afsendelse** | Stor | Bliver mindre presserende, hvis 1.1 betyder, at man tit slet ikke sender noget |
+| **Forbrugsloft i appen** | Lille | Mistrals API har ingen vej til kontoens loft — efterprøvet 19-08, alle betalingsstier svarer 404. Skal derfor tastes ind |
+
+---
+
+## Målinger, der mangler
 
 ### Find ud af, hvad der egentlig gør en lang kørsel langsom
 *Foreslået 14-08-2026*
@@ -100,39 +212,49 @@ blandet sammen, og resultatet ligner en langsom model uden at bevise det.
 
 Mistanken om, at video i baggrunden pressede modellen af kortet, er afvist:
 målt med YouTube kørende bruger kortet 401 MiB, præcis som når den er slukket.
-Videoafkodning tager næsten ingen VRAM.
-
-Det, der mangler, er en måling, der skiller de to faser: hvor lang tid går til
-at læse prompten ind, og hvor lang tid til at skrive svaret. llama.cpp skriver
-begge dele ud — de skal bare aflæses og gemmes hver for sig.
 
 ### Stykkevis sprogdetektering ved sprogskifte
-*Foreslået 13-08-2026*
+*Foreslået 13-08-2026 · delvist overhalet*
 
 Whisper finder sproget én gang ud fra de første tredive sekunder. Skifter mødet
-sprog undervejs, opdager den det ikke, og resten skrives ud på det forkerte
-sprog.
+sprog undervejs, opdager den det ikke.
 
-Den rigtige løsning er at dele lyden op og detektere stykkevis.
-
-**Hvorfor:** Målt på den blandede prøvetekst: 83,1 % mod 92,3 % for den rene
-danske. Ni procentpoint er det største enkeltudslag, vi har målt — men det er
-ikke afklaret, om det skyldes sprogskiftet eller lyden den dag. Det bør måles,
-før der bygges: læs teksten op igen med bevidst god mikrofonafstand og se, om
-tallet flytter sig.
+**Status:** to-spor-udskriften løser den almindelige udgave af problemet — et
+dansk-norsk møde er nu to spor med hvert sit sprog. Tilbage står det tilfælde,
+hvor den SAMME taler skifter sprog midt i mødet.
 
 ### Måle om mikrofon og afstand er det store håndtag
 *Foreslået 14-08-2026*
 
-Læs den blandede tekst op igen med bevidst god mikrofonafstand og sammenlign med
-de 83,1 %.
+Læs den blandede tekst op igen med bevidst god mikrofonafstand og sammenlign
+med de 83,1 %.
 
 **Hvorfor:** Alle de håndtag, vi har prøvet, er målt til næsten ingenting —
 ordlisten til Whisper gav nul, sprogmodellen over udskriften rettede to ord ud
 af 3418. Lydkvaliteten er den eneste tilbageværende mulighed for et spring frem
 for en decimal, og den er aldrig blevet målt.
 
+---
+
 ## Lagt væk
+
+### Diktering ind i et hvilket som helst felt
+*Foreslået 19-08-2026 · lagt væk 20-08-2026*
+
+Tryk en tast, tal, og teksten står, hvor markøren er.
+
+**Hvorfor ikke:** det kan ikke laves ordentligt her. Den del, der gør Wispr
+Flow god — at ordbogen lærer af det, man retter bagefter i det program, man
+skriver i — kræver, at man overvåger tastetryk på tværs af hele maskinen. Det
+modsiger alt, appen ellers står for.
+
+Og oprydningen af «øh» og selvrettelser kræver en sprogmodel over alt, hvad man
+dikterer, halvtreds gange om dagen. Det er en langt bredere eksponering end en
+mødeudskrift, og den er svær at forsvare.
+
+Halvdelen af værdien kan hentes uden det — en ordbog, der retter EFTER
+udskriften frem for at styre Whisper før. Den idé lever videre; det er
+dikteringen, der er lagt væk.
 
 ### Sprogmodellen skal rette Whispers fejl
 *Prøvet af og fravalgt 14-08-2026*
@@ -148,6 +270,3 @@ Grunden er værd at huske: en sprogmodel kan kun rette det, der SER forkert ud.
 «cybernummer» ser forkert ud — men «går» i stedet for «gik», «af» i stedet for
 «at» læser fuldstændig naturligt. Der er intet signal at gå efter, og det er
 dér, tre fjerdedele af fejlene ligger.
-
-Kommandoen `noteapp llmret` er beholdt, så forsøget kan gentages med en anden
-model eller en anden formulering.
