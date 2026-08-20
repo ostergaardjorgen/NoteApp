@@ -246,12 +246,26 @@
               <TextBlock Text="KORT OPSUMMERING — HER PÅ MASKINEN" FontSize="11"
                          FontWeight="SemiBold" Foreground="{StaticResource Accent}" />
 
-              <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                <TextBlock x:Name="LokalModel" FontSize="16" FontWeight="SemiBold" />
-                <TextBlock x:Name="LokalStoerrelse" FontSize="12.5" FontFamily="Consolas"
-                           VerticalAlignment="Center" Margin="12,3,0,0"
-                           Foreground="{StaticResource TekstMeget}" />
-              </StackPanel>
+              <Grid Margin="0,8,0,0">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="*" />
+                  <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                  <TextBlock x:Name="LokalModel" FontSize="16" FontWeight="SemiBold" />
+                  <TextBlock x:Name="LokalStoerrelse" FontSize="12.5" FontFamily="Consolas"
+                             VerticalAlignment="Center" Margin="12,3,0,0"
+                             Foreground="{StaticResource TekstMeget}" />
+                </StackPanel>
+
+                <!-- Samme knap uanset om modellen mangler eller ligger der:
+                     hent, eller hent igen som reparation. En 2,3 GB-fil kan
+                     blive beskadiget, og det er en fejl, man skal kunne komme
+                     ud af — praecis som med whisper-modellen. -->
+                <Button Grid.Column="1" x:Name="LokalKnap" Click="LokalModel_Klik"
+                        VerticalAlignment="Top" Padding="16,8" MinWidth="150" />
+              </Grid>
 
               <TextBlock FontSize="12.5" LineHeight="20" Margin="0,8,0,0" TextWrapping="Wrap"
                          MaxWidth="720" HorizontalAlignment="Left"

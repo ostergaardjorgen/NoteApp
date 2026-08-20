@@ -1297,39 +1297,22 @@ public partial class UdskriftView : UserControl
             return;
         }
 
-        var modeller = LlmRunner.InstalledModels();
-        if (modeller.Count == 0)
+        // MODELVALGET LIGGER ET STED — I Sprogmodeller.Valgt().
+        //
+        // Det laa foer baade her og paa AI-modeller-skaermen, med hver sin
+        // kopi af reglen. To kopier af et valg driver fra hinanden, og saa
+        // viser skaermen een model, mens der koeres med en anden.
+        if (Sprogmodeller.Valgt() is not { } model)
         {
-            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Der er ingen model på maskinen",
-                "En opsummering på maskinen kræver en sprogmodel, og der ligger ingen i " +
-                $"{LlmRunner.ModelDirectory}.\n\n" +
-                "Du kan stadig lave opsummeringen i Europa.", Dialogs.Slags.Valg);
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Sprogmodellen er ikke hentet",
+                "En opsummering på maskinen kræver en sprogmodel på " +
+                $"{Sprogmodeller.Standard.SizeText}, og den er ikke hentet endnu.\n\n" +
+                "Gå til «AI-modeller» og vælg fanen «Opsummering» — der står knappen.\n\n" +
+                "Skal teksten være et rigtigt referat, kan du i mellemtiden lave et " +
+                "dokument efter en skabelon.",
+                Dialogs.Slags.Valg);
             return;
         }
-
-        // ============ HVILKEN MODEL ============
-        //
-        // Den MAALTE gaar forud for den mindste.
-        //
-        // Foerste udgave tog bare den mindste fil. Det ville have valgt
-        // gemma-3-4b paa 2.375 MB frem for Qwen3-4B paa 2.382 MB — syv
-        // megabyte mindre og 131 sekunder mod 76 paa det samme moede. Stoerrelse
-        // er ikke kvalitet, og det er heller ikke hastighed.
-        //
-        // Er der ingen kendt model, tages den mindste. Paa et 6 GB-kort er det
-        // KV-cachen, der saetter graensen, og en stoerre model efterlader mindre
-        // plads til udskriften — indtil den ikke kan laeses paa een gang mere.
-        string[] maalte = { "qwen3-4b" };
-
-        var model = modeller
-            .OrderBy(m =>
-            {
-                var f = Path.GetFileName(m).ToLowerInvariant();
-                var i = Array.FindIndex(maalte, k => f.Contains(k));
-                return i < 0 ? int.MaxValue : i;
-            })
-            .ThenBy(m => new FileInfo(m).Length)
-            .First();
 
         var tekst = _udskrift.SomTekst(_meta?.Talere);
 

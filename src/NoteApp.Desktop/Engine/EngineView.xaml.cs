@@ -194,41 +194,150 @@ public partial class EngineView : System.Windows.Controls.UserControl
     private void VisLokalModel()
     {
         var cli = NoteApp.Core.Llm.LlmRunner.FindCli();
-        var modeller = NoteApp.Core.Llm.LlmRunner.InstalledModels();
+        var standard = Sprogmodeller.Standard;
+        var valgt = Sprogmodeller.Valgt();
 
-        if (cli is null || modeller.Count == 0)
+        LokalKnap.Content = Sprogmodeller.ErHentet(standard)
+            ? "Hent modellen igen"
+            : $"Hent {standard.SizeText}";
+
+        if (valgt is null)
         {
-            LokalModel.Text = "ingen model hentet";
-            LokalStoerrelse.Text = "";
+            LokalModel.Text = $"{standard.Navn} — ikke hentet";
+            LokalStoerrelse.Text = standard.SizeText;
 
             LokalStatus.Text = cli is null
-                ? "Programmet, der kører en sprogmodel på maskinen, er ikke installeret."
-                : "Der ligger ingen sprogmodel. Opsummeringen kan ikke laves lokalt endnu.";
+                ? "Programmet, der kører en sprogmodel på maskinen, er ikke installeret. Modellen kan hentes alligevel."
+                : "Modellen er ikke hentet endnu. Uden den kan opsummeringen ikke laves på maskinen.";
 
-            LokalSti.Text = $"Modeller læses fra {NoteApp.Core.Llm.LlmRunner.ModelDirectory}";
+            LokalSti.Text = $"Hentes til {NoteApp.Core.Llm.LlmRunner.ModelDirectory}";
             return;
         }
-
-        string[] maalte = { "qwen3-4b" };
-
-        var valgt = modeller
-            .OrderBy(m =>
-            {
-                var f = Path.GetFileName(m).ToLowerInvariant();
-                var i = Array.FindIndex(maalte, k => f.Contains(k));
-                return i < 0 ? int.MaxValue : i;
-            })
-            .ThenBy(m => new FileInfo(m).Length)
-            .First();
 
         LokalModel.Text = Path.GetFileNameWithoutExtension(valgt);
         LokalStoerrelse.Text = $"{new FileInfo(valgt).Length / 1024.0 / 1024.0:0} MB";
 
-        LokalStatus.Text = modeller.Count == 1
-            ? "Klar. Knappen står under «Opsummering» ved en optagelse."
-            : $"Klar. Der ligger {modeller.Count} modeller; appen bruger den, der er målt bedst.";
+        LokalStatus.Text = cli is null
+            ? "Modellen ligger der, men motoren mangler — opsummeringen kan ikke køre endnu."
+            : "Klar. Knappen står under «Opsummering» ved en optagelse.";
 
-        LokalSti.Text = $"{valgt}\nMotor: {cli}";
+        LokalSti.Text = cli is null ? valgt : $"{valgt}\nMotor: {cli}";
+    }
+
+    /// <summary>
+    /// Henter sprogmodellen til den lokale opsummering.
+    ///
+    /// DEN FØLGER IKKE MED APPEN, OG DET ER MED VILJE.
+    ///
+    /// Talergenkendelsens filer fylder 61 MB og ligger i installationspakken.
+    /// Den her fylder 2,3 GB. Pakket med ville installationsfilen gå fra 104 MB
+    /// til 2,5 GB, og så bliver den ikke sendt til nogen.
+    ///
+    /// Der spørges først, og der står hvad, hvorfra og hvor meget — samme krav
+    /// som ved whisper-modellen. Det er den eneste anden gang, appen rører
+    /// netværket uden at brugeren har bedt om et dokument.
+    /// </summary>
+    private async void LokalModel_Klik(object sender, RoutedEventArgs e)
+    {
+        var m = Sprogmodeller.Standard;
+        var har = Sprogmodeller.ErHentet(m);
+
+        var ja = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
+            har ? $"Hent {m.Navn} igen?" : $"Hent {m.Navn}?",
+            $"Fil: {m.Filnavn}\n" +
+            $"Størrelse: {m.SizeText}\n" +
+            $"Licens: {m.Licens}\n" +
+            "Hentes fra: huggingface.co\n" +
+            $"Gemmes i: {NoteApp.Core.Llm.LlmRunner.ModelDirectory}\n\n" +
+            (har
+                ? "Du har den allerede. Det giver præcis den samme fil og gør ikke " +
+                  "opsummeringen bedre — det er kun værd at gøre, hvis filen er blevet beskadiget."
+                : $"{m.Opgave}\n\n{m.Hvorfor}") +
+            "\n\nDer sendes intet fra din maskine. Appen beder om en navngiven fil og " +
+            "modtager den; ingen optagelser, udskrifter eller noter forlader pc'en.",
+            godkend: har ? $"Hent {m.SizeText} igen" : $"Hent {m.SizeText}",
+            annuller: "Ikke nu",
+            slags: Dialogs.Slags.Valg,
+            godkendErStandard: !har);
+
+        if (!ja) return;
+
+        _afbryd = new CancellationTokenSource();
+        Fremdrift.Visibility = Visibility.Visible;
+        AfbrydKnap.Visibility = Visibility.Visible;
+        LokalKnap.IsEnabled = false;
+
+        var fremdrift = new Progress<DownloadProgress>(p =>
+        {
+            Fremdrift.Value = p.Percent;
+
+            var mb = p.BytesDone / 1024.0 / 1024.0;
+            var ialt = p.BytesTotal / 1024.0 / 1024.0;
+            var fart = p.BytesPerSecond / 1024.0 / 1024.0;
+            var tilbage = p.Remaining is null ? "" : $" · {p.Remaining.Value:mm\\:ss} tilbage";
+
+            Status.Text = $"Henter {m.Navn}: {mb:0} af {ialt:0} MB · {fart:0.0} MB/s{tilbage}";
+        });
+
+        var sti = Sprogmodeller.Sti(m);
+
+        // ============ EN REPARATION SKAL FAKTISK HENTE IGEN ============
+        //
+        // Downloader springer over, naar filen findes og har den forventede
+        // stoerrelse — hvilket er rigtigt ved en almindelig hentning og forkert
+        // her: en beskadiget fil kan sagtens fylde det rigtige. Uden det her
+        // ville "Hent igen" melde faerdig uden at have gjort noget.
+        //
+        // DEN GAMLE FIL SLETTES IKKE, DEN LAEGGES TIL SIDE.
+        //
+        // Slettede vi den og hentningen faldt paa halvvejen, ville en fungerende
+        // model paa 2,3 GB vaere vaek — og saa har reparationen oedelagt det, den
+        // skulle redde. Den bliver liggende, indtil den nye er hentet faerdig.
+        var reserve = sti + ".gammel";
+
+        try
+        {
+            Directory.CreateDirectory(NoteApp.Core.Llm.LlmRunner.ModelDirectory);
+
+            if (har && File.Exists(sti))
+            {
+                if (File.Exists(reserve)) File.Delete(reserve);
+                File.Move(sti, reserve);
+            }
+
+            await _downloader.DownloadAsync(m.Url, sti, m.Bytes, fremdrift, _afbryd.Token);
+
+            if (File.Exists(reserve)) File.Delete(reserve);
+
+            Status.Text = $"{m.Navn} er hentet. Opsummeringen kan nu laves på maskinen.";
+        }
+        catch (OperationCanceledException)
+        {
+            GendanReserve(sti, reserve);
+            Status.Text = "Afbrudt. Den model, du havde, er urørt.";
+        }
+        catch (Exception ex)
+        {
+            GendanReserve(sti, reserve);
+            Status.Text = $"Kunne ikke hente: {ex.Message}";
+
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Kunne ikke hente",
+                $"Hentningen fejlede.\n\n{ex.Message}\n\n" +
+                (File.Exists(sti)
+                    ? "Den model, du havde i forvejen, er lagt tilbage og virker som før.\n\n"
+                    : "") +
+                "Er der ingen internetforbindelse, kan du lægge filen manuelt i:\n" +
+                NoteApp.Core.Llm.LlmRunner.ModelDirectory, Dialogs.Slags.Pas_paa);
+        }
+        finally
+        {
+            Fremdrift.Visibility = Visibility.Collapsed;
+            AfbrydKnap.Visibility = Visibility.Collapsed;
+            LokalKnap.IsEnabled = true;
+            _afbryd?.Dispose();
+            _afbryd = null;
+            Opdater();
+        }
     }
 
     // ---------------------------------------------------------------- Europa
@@ -487,6 +596,28 @@ public partial class EngineView : System.Windows.Controls.UserControl
             _afbryd?.Dispose();
             _afbryd = null;
             Opdater();
+        }
+    }
+
+    /// <summary>
+    /// Lægger den gamle modelfil tilbage, hvis en reparation ikke lykkedes.
+    ///
+    /// Kun når der ikke ligger en ny — en halv fil fra en afbrudt hentning
+    /// bliver liggende som «.delvis» og er ikke i vejen.
+    /// </summary>
+    private static void GendanReserve(string sti, string reserve)
+    {
+        try
+        {
+            if (!File.Exists(reserve)) return;
+            if (File.Exists(sti)) { File.Delete(reserve); return; }
+
+            File.Move(reserve, sti);
+        }
+        catch (IOException)
+        {
+            // Kan den ikke laegges tilbage, staar den stadig som «.gammel» ved
+            // siden af. Filen er der; den hedder bare noget andet.
         }
     }
 
