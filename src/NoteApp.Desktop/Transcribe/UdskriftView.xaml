@@ -371,10 +371,8 @@
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                   <Button Content="Kopiér" Click="OpsumKopier_Klik" Padding="12,6"
                           FontSize="12" Margin="0,0,8,0" />
-                  <Button Content="Lav det lokalt" Click="OpsumLokal_Klik" Padding="12,6"
-                          FontSize="12" Margin="0,0,8,0" />
-                  <Button Content="Lav det i skyen" Click="OpsumLav_Klik"
-                          Padding="12,6" FontSize="12" />
+                  <Button Content="Lav den om" Click="OpsumLokal_Klik" Padding="12,6"
+                          FontSize="12" />
                 </StackPanel>
               </Grid>
 
@@ -455,22 +453,28 @@
                   <TextBlock FontSize="12" LineHeight="18" TextWrapping="Wrap" Margin="0,6,0,0"
                              Foreground="{StaticResource TekstSvag}"
                              Text="Cirka et halvt minut. Intet forlader maskinen. Kort — nogle få linjer og højst fire punkter. Den skriver ikke tal, og det, den skriver, bliver efterprøvet mod udskriften." />
-                  <Button x:Name="OpsumLokalKnap" Content="Lav det lokalt"
+                  <Button x:Name="OpsumLokalKnap" Content="Kort lokal opsummering"
                           Click="OpsumLokal_Klik" Margin="0,12,0,0" Padding="14,8"
                           Style="{StaticResource Primaer}" />
                 </StackPanel>
               </Border>
 
+              <!-- HER LÅ «LAV DET I SKYEN», OG DEN ER FJERNET.
+                   Den gjorde det samme som et dokument, bare uden skabelon og
+                   uden et navn at gemme det under — to veje til det samme, hvor
+                   den ene var ringere. Skal teksten være et rigtigt referat,
+                   er dokumenter vejen, og så skal skærmen sige hvor. -->
               <Border Grid.Column="1" Background="#FF181B22" CornerRadius="9" Padding="14,12"
                       Margin="7,0,0,0" BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
                 <StackPanel>
-                  <TextBlock Text="I SKYEN" FontSize="9.5" FontWeight="SemiBold"
-                             Foreground="{StaticResource Accent}" />
+                  <TextBlock Text="SKAL DET VÆRE ET REFERAT?" FontSize="9.5" FontWeight="SemiBold"
+                             Foreground="{StaticResource TekstMeget}" />
                   <TextBlock FontSize="12" LineHeight="18" TextWrapping="Wrap" Margin="0,6,0,0"
                              Foreground="{StaticResource TekstSvag}"
-                             Text="Cirka et halvt minut, og en fyldigere tekst med tal og datoer. Udskriften sendes til Mistral i Europa — ikke lyden. Afsendelsen bogføres under Compliance." />
-                  <Button x:Name="OpsumKnap" Content="Lav det i skyen" Click="OpsumLav_Klik"
-                          Margin="0,12,0,0" Padding="14,8" />
+                             Text="Et rigtigt mødereferat, en opgaveliste eller et tilbud laves som et dokument efter en skabelon — og det sker i Europa hos Mistral." />
+                  <TextBlock FontSize="12" LineHeight="18" TextWrapping="Wrap" Margin="0,8,0,0"
+                             Foreground="{StaticResource TekstMeget}"
+                             Text="Tryk «Opret dokument» øverst til højre og vælg en skabelon. Dine egne skabeloner ligger under «Skabeloner» i menuen." />
                 </StackPanel>
               </Border>
             </Grid>

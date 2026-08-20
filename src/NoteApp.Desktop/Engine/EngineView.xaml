@@ -29,15 +29,31 @@
       <RowDefinition Height="Auto" />
     </Grid.RowDefinitions>
 
-    <StackPanel Grid.Row="0" Margin="0,0,0,16">
+    <StackPanel Grid.Row="0" Margin="0,0,0,14">
       <TextBlock Text="AI-modeller" Style="{StaticResource Overskrift}" />
       <TextBlock Style="{StaticResource Underskrift}" TextWrapping="Wrap" MaxWidth="900"
                  HorizontalAlignment="Left"
-                 Text="To lag, der gør hver sit. Lyden bliver til tekst her på maskinen. Teksten bliver til et dokument i Europa. Begge dele er valgt på forhånd — der er ikke noget at stille ind. Det første lag er to komponenter, en motor og en modelfil; under «Compliance» står de hver for sig, fordi de har hver sin licens." />
+                 Text="Fire modeller gør hver sit. Tre af dem kører her på maskinen; kun dokumenter laves i Europa. Alt er valgt på forhånd — der er ikke noget at stille ind. Under «Compliance» står hver komponent for sig med sin egen licens." />
     </StackPanel>
 
-    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-      <StackPanel>
+    <!-- ===================== ÉN FANE PR. MODEL =====================
+
+         Her lå to store paneler under hinanden i en rulle. Da der kom to
+         modeller mere til — talergenkendelsen og den lokale opsummering —
+         blev siden længere, end en skærm er høj, og så kunne man ikke se,
+         hvad appen kører på uden at rulle.
+
+         DE LOKALE STÅR FØRST. Rækkefølgen på en skærm ER en anbefaling,
+         uanset hvad teksten ved siden af siger, og appens præmis er, at data
+         bliver på maskinen. Skyen er den sidste fane, fordi den er den
+         bevidste undtagelse. -->
+    <TabControl Grid.Row="1" Style="{StaticResource Fanerude}"
+                Background="Transparent" BorderThickness="0">
+
+      <TabItem Header="Lyd til tekst" Style="{StaticResource Fane}">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,12,0,0"
+                      HorizontalScrollBarVisibility="Disabled">
+        <StackPanel>
 
         <!-- ===================== 1 · Whisper ========================== -->
         <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20" Margin="0,0,0,14"
@@ -158,12 +174,119 @@
             </Expander>
           </StackPanel>
         </Border>
+        </StackPanel>
+        </ScrollViewer>
+      </TabItem>
 
-        <!-- ===================== 2 · Mistral Europa =================== -->
+      <!-- ===================== Talergenkendelsen ===================== -->
+      <TabItem Header="Talergenkendelse" Style="{StaticResource Fane}">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,12,0,0"
+                      HorizontalScrollBarVisibility="Disabled">
+          <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20"
+                  BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+            <StackPanel>
+              <TextBlock Text="HVEM SAGDE HVAD — HER PÅ MASKINEN" FontSize="11"
+                         FontWeight="SemiBold" Foreground="{StaticResource Accent}" />
+
+              <TextBlock FontSize="12.5" LineHeight="20" Margin="0,8,0,0" TextWrapping="Wrap"
+                         MaxWidth="720" HorizontalAlignment="Left"
+                         Foreground="{StaticResource TekstSvag}"
+                         Text="Et onlinemøde optages på to spor, og det siger hvilken SIDE der talte — ikke hvem. Sad der tre i den anden ende, ville de alle stå som «Gæster». De her to modeller skiller stemmerne ad, så hver enkelt kan navngives." />
+
+              <TextBlock x:Name="TalerStatus" FontSize="12" Margin="0,12,0,0" TextWrapping="Wrap"
+                         Foreground="{StaticResource Accent}" />
+
+              <ItemsControl x:Name="Talerdele" Margin="0,12,0,0">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate>
+                    <Border Background="#FF181B22" BorderBrush="{StaticResource PanelKant}"
+                            BorderThickness="1" CornerRadius="8" Padding="14,11" Margin="0,0,0,8">
+                      <Grid>
+                        <Grid.ColumnDefinitions>
+                          <ColumnDefinition Width="96" />
+                          <ColumnDefinition Width="*" />
+                          <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="{Binding Slags}" FontSize="10"
+                                   FontWeight="SemiBold" Margin="0,3,10,0"
+                                   Foreground="{StaticResource TekstMeget}" />
+                        <StackPanel Grid.Column="1">
+                          <TextBlock Text="{Binding Navn}" FontSize="14" FontWeight="SemiBold" />
+                          <TextBlock Text="{Binding Note}" FontSize="12" Margin="0,3,0,0"
+                                     TextWrapping="Wrap" Foreground="{StaticResource TekstMeget}" />
+                        </StackPanel>
+                        <TextBlock Grid.Column="2" Text="{Binding Stoerrelse}" FontSize="12"
+                                   FontFamily="Consolas" VerticalAlignment="Top"
+                                   Foreground="{StaticResource TekstMeget}" />
+                      </Grid>
+                    </Border>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+
+              <TextBlock FontSize="11.5" LineHeight="19" Margin="0,4,0,0" TextWrapping="Wrap"
+                         MaxWidth="720" HorizontalAlignment="Left"
+                         Foreground="{StaticResource TekstMeget}"
+                         Text="Målt på et møde på 35 minutter med to talere: begge stemmer fundet, og den ene blev genkendt igen efter ti minutters tavshed. Den kører samtidig med udskrivningen og lægger derfor kun omkring halvandet minut til et møde på en time." />
+
+              <TextBlock x:Name="TalerSti" FontSize="11" Margin="0,12,0,0" TextWrapping="Wrap"
+                         Foreground="{StaticResource TekstMeget}" />
+            </StackPanel>
+          </Border>
+        </ScrollViewer>
+      </TabItem>
+
+      <!-- ===================== Den lokale opsummering ================= -->
+      <TabItem Header="Opsummering" Style="{StaticResource Fane}">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,12,0,0"
+                      HorizontalScrollBarVisibility="Disabled">
+          <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20"
+                  BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+            <StackPanel>
+              <TextBlock Text="KORT OPSUMMERING — HER PÅ MASKINEN" FontSize="11"
+                         FontWeight="SemiBold" Foreground="{StaticResource Accent}" />
+
+              <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                <TextBlock x:Name="LokalModel" FontSize="16" FontWeight="SemiBold" />
+                <TextBlock x:Name="LokalStoerrelse" FontSize="12.5" FontFamily="Consolas"
+                           VerticalAlignment="Center" Margin="12,3,0,0"
+                           Foreground="{StaticResource TekstMeget}" />
+              </StackPanel>
+
+              <TextBlock FontSize="12.5" LineHeight="20" Margin="0,8,0,0" TextWrapping="Wrap"
+                         MaxWidth="720" HorizontalAlignment="Left"
+                         Foreground="{StaticResource TekstSvag}"
+                         Text="Ti linjer om, hvad mødet handlede om — til at huske det med. Den kører på grafikkortet her, og intet forlader maskinen. Skal teksten være et rigtigt referat, laves det som et dokument efter en skabelon." />
+
+              <TextBlock x:Name="LokalStatus" FontSize="12" Margin="0,12,0,0" TextWrapping="Wrap"
+                         Foreground="{StaticResource Accent}" />
+
+              <Border Background="#FF181B22" BorderBrush="{StaticResource PanelKant}"
+                      BorderThickness="1" CornerRadius="8" Padding="14,12" Margin="0,14,0,0">
+                <StackPanel>
+                  <TextBlock Text="Hvad den kan og ikke kan" FontSize="13" FontWeight="SemiBold" />
+                  <TextBlock FontSize="12" LineHeight="19" Margin="0,6,0,0" TextWrapping="Wrap"
+                             MaxWidth="680" HorizontalAlignment="Left"
+                             Foreground="{StaticResource TekstMeget}"
+                             Text="Målt på et møde på en time: 34 sekunder. Den fandt deltagerne, emnet og mødets aftale. Den er bedt om ikke at skrive tal — en tidligere kørsel skrev «allerede seks kunder i Danmark», og de ord faldt ikke ét sted i mødet. Alt, hvad den skriver, bliver holdt op mod udskriften bagefter, og det, der ikke kan findes, bliver markeret." />
+                </StackPanel>
+              </Border>
+
+              <TextBlock x:Name="LokalSti" FontSize="11" Margin="0,12,0,0" TextWrapping="Wrap"
+                         Foreground="{StaticResource TekstMeget}" />
+            </StackPanel>
+          </Border>
+        </ScrollViewer>
+      </TabItem>
+
+      <!-- ===================== Dokumenter i Europa =================== -->
+      <TabItem Header="Dokumenter (i skyen)" Style="{StaticResource Fane}">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,12,0,0"
+                      HorizontalScrollBarVisibility="Disabled">
         <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20"
                 BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
           <StackPanel>
-            <TextBlock Text="2 · TEKST TIL DOKUMENT — I EUROPA" FontSize="11" FontWeight="SemiBold"
+            <TextBlock Text="TEKST TIL DOKUMENT — I EUROPA" FontSize="11" FontWeight="SemiBold"
                        Foreground="{StaticResource Accent}" />
             <Grid Margin="0,8,0,0">
               <Grid.ColumnDefinitions>
@@ -305,9 +428,10 @@
             </Border>
           </StackPanel>
         </Border>
+        </ScrollViewer>
+      </TabItem>
 
-      </StackPanel>
-    </ScrollViewer>
+    </TabControl>
 
     <!-- ========================== Bundbjælke =========================== -->
     <Grid Grid.Row="2" Margin="0,14,0,0">

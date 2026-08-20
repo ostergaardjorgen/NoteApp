@@ -1341,7 +1341,6 @@ public partial class UdskriftView : UserControl
             return;
         }
 
-        OpsumKnap.IsEnabled = false;
         OpsumLokalKnap.IsEnabled = false;
 
         var navn = Path.GetFileNameWithoutExtension(model);
@@ -1409,73 +1408,18 @@ public partial class UdskriftView : UserControl
         finally
         {
             tikker.Stop();
-            OpsumKnap.IsEnabled = true;
             OpsumLokalKnap.IsEnabled = true;
         }
     }
 
-    private async void OpsumLav_Klik(object sender, RoutedEventArgs e)
-    {
-        if (_mappe is null || _udskrift is null) return;
-
-        var noegle = SkyNoegle.Hent();
-        if (noegle is null)
-        {
-            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Sprogmodellen er ikke sat op",
-                "En opsummering laves af en sprogmodel hos Mistral. Sæt din API-nøgle ind " +
-                "under «AI-modeller» først.\n\nOptagelse og udskrift virker uden.",
-                Dialogs.Slags.Valg);
-            return;
-        }
-
-        var tekst = _udskrift.SomTekst(_meta?.Talere);
-
-        if (tekst.Trim().Length < 200)
-        {
-            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Der er ikke nok tekst",
-                "Udskriften er for kort til, at en opsummering siger mere end teksten selv.",
-                Dialogs.Slags.Valg);
-            return;
-        }
-
-        OpsumKnap.IsEnabled = false;
-        OpsumStatus.Text = "Mistral læser mødet igennem …";
-
-        try
-        {
-            var titel = _meta?.Title ?? "mødet";
-
-            var svar = await new SkyRunner(noegle).KoerAsync(
-                SkyKatalog.Standard,
-                Opsummering.Opskrift(),
-                $"Mødet hedder «{titel}».\n\nUdskrift:\n{tekst}",
-                kilde: _meta?.Id.ToString() ?? "",
-                kildeTitel: titel);
-
-            Opsummering.Gem(_mappe, new Opsummeringsdata
-            {
-                Tekst = svar.Tekst.Trim(),
-                Model = SkyKatalog.Standard.Navn,
-                UdskriftSum = Kvitteringer.Kontrolsum(tekst)
-            });
-
-            VisOpsummering();
-            OpsumStatus.Text = "";
-            Meld("Opsummeringen er lavet");
-        }
-        catch (Exception ex)
-        {
-            OpsumStatus.Text = "";
-
-            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Opsummeringen blev ikke lavet",
-                ex.Message + "\n\nAfsendelsen er bogført under Compliance, uanset om den " +
-                "nåede frem.", Dialogs.Slags.Pas_paa);
-        }
-        finally
-        {
-            OpsumKnap.IsEnabled = true;
-        }
-    }
+    // HER LAA OpsumLav_Klik — opsummeringen lavet hos Mistral.
+    //
+    // Den gjorde det samme som et dokument, bare uden skabelon og uden et navn
+    // at gemme det under: to veje til det samme, hvor den ene var ringere.
+    //
+    // Opsummeringen er nu ALTID den lille, lokale — ti linjer til at huske
+    // moedet med. Skal teksten vaere et rigtigt referat, en opgaveliste eller
+    // et tilbud, er dokumenter vejen, og skaermen siger hvor man gaar hen.
 
     // ---------------------------------------------------------- springet hen
 

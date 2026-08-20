@@ -388,7 +388,7 @@
                      rettighedshaver, og saa skal de staa hver for sig. -->
                 <TextBlock FontSize="12" LineHeight="20" TextWrapping="Wrap" Margin="0,0,0,12"
                            Foreground="{StaticResource TekstMeget}"
-                           Text="Seks komponenter, fordelt på appens to lag. De tæller ikke som på «AI-modeller», der viser lagene: her står hver komponent med sin egen rettighedshaver og sin egen licens. Lyd til tekst er to — motoren og modelfilen. Talergenkendelsen er tre — programmet og to modeller, én der finder talen og én der kender stemmerne fra hinanden. Dokumentet er den sjette, og den er en tjeneste frem for en licens." />
+                           Text="Syv komponenter. De tæller ikke som fanerne under «AI-modeller»: her står hver komponent med sin egen rettighedshaver og sin egen licens. Lyd til tekst er to — motoren og modelfilen. Talergenkendelsen er tre — programmet og to modeller, én der finder talen og én der kender stemmerne fra hinanden. Den korte opsummering er den sjette og kører på maskinen. Dokumenter er den syvende, og den er en tjeneste frem for en licens — den eneste, der sender noget ud af huset." />
 
                 <ItemsControl x:Name="Modeller">
                   <ItemsControl.ItemTemplate>

@@ -105,11 +105,24 @@ public partial class ComplianceView : UserControl
                 "Modellen, der afgør, om to stykker tale kommer fra den samme stemme. Vægtene er NVIDIA's.",
                 "CC-BY-4.0 tillader kommerciel brug og videredistribution. Betingelsen er kreditering: NVIDIA skal nævnes som ophav, og det sker her og i installationsmappen."),
 
+            // ===================== DEN KORTE OPSUMMERING =====================
+            //
+            // Den staar for sig, fordi den er en HELT anden komponent end
+            // Mistral nedenfor: en modelfil paa maskinen med sin egen licens,
+            // mod en tjeneste med en databehandleraftale. At skrive dem sammen
+            // ville skjule, at den ene aldrig sender noget nogen steder.
+            new Komponent(
+                "Qwen3 (4B)",
+                "Apache-2.0",
+                "Kører lokalt",
+                "Sprogmodellen, der laver den korte opsummering af et møde. Vægtene er Alibabas og ligger på maskinen; udskriften forlader den ikke.",
+                "Apache-2.0 er fri at sælge med. Betingelsen er, at licensteksten følger med."),
+
             new Komponent(
                 SkyKatalog.Standard.Navn,
                 "Tjeneste",
                 "Kører i Frankrig",
-                "Sprogmodellen, der laver et dokument ud af udskriften. Kører hos leverandøren — der hentes ingen vægte, og der installeres ingenting.",
+                "Sprogmodellen, der laver et dokument ud af udskriften efter en skabelon. Kører hos leverandøren — der hentes ingen vægte, og der installeres ingenting.",
                 "Det er en tjeneste, ikke en licens. Det, der gælder, er databehandleraftalen og vilkårene ovenfor.")
 
             // HER STOD ROEST V3. Den er undersoegt og fravalgt, ikke i brug -

@@ -131,6 +131,104 @@ public partial class EngineView : System.Windows.Controls.UserControl
 
         Status.Text = "";
         VisSkyStatus();
+        VisTalergenkendelse();
+        VisLokalModel();
+    }
+
+    // ------------------------------------------------- talergenkendelsen
+
+    /// <summary>Én komponent på talergenkendelsens fane.</summary>
+    public sealed record Modeldel(string Slags, string Navn, string Note, string Stoerrelse);
+
+    /// <summary>
+    /// Talergenkendelsens tre dele: programmet og de to modeller.
+    ///
+    /// De står hver for sig, fordi de har hver sin rettighedshaver og derfor
+    /// hver sin licens — præcis som motoren og modelfilen gør under lyd til
+    /// tekst. Licenserne står under «Compliance».
+    ///
+    /// FILERNE FØLGER MED APPEN. De hentes ikke, og de kan ikke skiftes ud
+    /// herfra: tærsklen, stemmerne skilles ad ved, er målt mod netop de to
+    /// modelfiler, og en anden fil ville gøre målingen ugyldig.
+    /// </summary>
+    private void VisTalergenkendelse()
+    {
+        var dele = new List<Modeldel>();
+
+        void Tilfoej(string slags, string navn, string note, string? sti)
+        {
+            var mb = sti is not null && File.Exists(sti)
+                ? $"{new FileInfo(sti).Length / 1024.0 / 1024.0:0.0} MB"
+                : "mangler";
+
+            dele.Add(new Modeldel(slags, navn, note, mb));
+        }
+
+        Tilfoej("PROGRAM", "sherpa-onnx",
+            "Kører de to modeller og samler stemmerne i grupper.", Diarisering.Vaerktoej());
+
+        Tilfoej("MODEL 1", "pyannote segmentation 3.0",
+            "Finder hvornår der bliver talt, og hvornår der skiftes taler.", Diarisering.Segmentering());
+
+        Tilfoej("MODEL 2", "NVIDIA TitaNet",
+            "Afgør om to stykker tale kommer fra den samme stemme.", Diarisering.Stemmemodel());
+
+        Talerdele.ItemsSource = dele;
+
+        TalerStatus.Text = Diarisering.ErInstalleret
+            ? "Klar. Den kører af sig selv, hver gang en optagelse bliver skrevet ud."
+            : "Ikke fuldstændig — udskrifter får ingen navne på talerne, før filerne er på plads.";
+
+        TalerSti.Text = $"Filerne følger med appen og ligger i {Diarisering.Mappe}";
+    }
+
+    // ------------------------------------------------ den lokale opsummering
+
+    /// <summary>
+    /// Sprogmodellen, der laver den korte opsummering på maskinen.
+    ///
+    /// Der vises den, appen VILLE vælge — ikke en liste at vælge imellem.
+    /// Valget følger målingen: Qwen3-4B foran, ellers den mindste. Se
+    /// UdskriftView.OpsumLokal_Klik for hvorfor størrelse ikke er kriteriet.
+    /// </summary>
+    private void VisLokalModel()
+    {
+        var cli = NoteApp.Core.Llm.LlmRunner.FindCli();
+        var modeller = NoteApp.Core.Llm.LlmRunner.InstalledModels();
+
+        if (cli is null || modeller.Count == 0)
+        {
+            LokalModel.Text = "ingen model hentet";
+            LokalStoerrelse.Text = "";
+
+            LokalStatus.Text = cli is null
+                ? "Programmet, der kører en sprogmodel på maskinen, er ikke installeret."
+                : "Der ligger ingen sprogmodel. Opsummeringen kan ikke laves lokalt endnu.";
+
+            LokalSti.Text = $"Modeller læses fra {NoteApp.Core.Llm.LlmRunner.ModelDirectory}";
+            return;
+        }
+
+        string[] maalte = { "qwen3-4b" };
+
+        var valgt = modeller
+            .OrderBy(m =>
+            {
+                var f = Path.GetFileName(m).ToLowerInvariant();
+                var i = Array.FindIndex(maalte, k => f.Contains(k));
+                return i < 0 ? int.MaxValue : i;
+            })
+            .ThenBy(m => new FileInfo(m).Length)
+            .First();
+
+        LokalModel.Text = Path.GetFileNameWithoutExtension(valgt);
+        LokalStoerrelse.Text = $"{new FileInfo(valgt).Length / 1024.0 / 1024.0:0} MB";
+
+        LokalStatus.Text = modeller.Count == 1
+            ? "Klar. Knappen står under «Opsummering» ved en optagelse."
+            : $"Klar. Der ligger {modeller.Count} modeller; appen bruger den, der er målt bedst.";
+
+        LokalSti.Text = $"{valgt}\nMotor: {cli}";
     }
 
     // ---------------------------------------------------------------- Europa
