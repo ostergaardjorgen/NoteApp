@@ -26,9 +26,9 @@
             Padding="16,10">
       <Grid>
         <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="Auto" />
+          <ColumnDefinition Width="Auto" />
           <ColumnDefinition Width="*" />
-          <ColumnDefinition Width="Auto" />
-          <ColumnDefinition Width="Auto" />
           <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
 
@@ -45,7 +45,20 @@
           </Grid>
         </Border>
 
-        <TextBlock x:Name="SoegStatus" Grid.Column="1" FontSize="11.5" VerticalAlignment="Center"
+        <!-- ================= AFGRÆNSNING PÅ TALER =================
+             Den staar ved siden af soegningen, fordi den goer det samme:
+             skaerer udskriften ned til det, man leder efter. De to virker
+             sammen - «alt hvad Espen sagde om pipeline» er begge dele paa
+             een gang.
+
+             Den vises kun, naar der ER nogen at vaelge imellem. Med een
+             taler ville den vaere en rulleliste med eet punkt. -->
+        <ComboBox x:Name="Talervalg" Grid.Column="1" Width="160" Margin="10,0,0,0"
+                  FontSize="12.5" VerticalAlignment="Center" Visibility="Collapsed"
+                  SelectionChanged="Taler_Valgt"
+                  ToolTip="Vis kun det, én taler sagde" />
+
+        <TextBlock x:Name="SoegStatus" Grid.Column="2" FontSize="11.5" VerticalAlignment="Center"
                    Margin="12,0,0,0" Foreground="{StaticResource TekstMeget}" />
 
         <!-- HER LAA «NAVNGIV TALERE».
@@ -85,7 +98,44 @@
           <TextBlock x:Name="NavnUnder" FontSize="11.5" TextWrapping="Wrap" LineHeight="18"
                      Margin="0,5,0,0" Foreground="{StaticResource TekstSvag}" />
 
-          <TextBox x:Name="NavnFelt" FontSize="13" Padding="9,6" Margin="0,11,0,0"
+          <!-- ============ HENFØR ÉN REPLIK TIL EN KENDT TALER ============
+               Maskinen kan ikke altid knytte en replik til en stemme - et kort
+               indskud paa to ord giver for lidt at gaa efter. Uden det her
+               ville man skrive navnet i feltet nedenunder, og saa navngav man
+               HELE sporet: der ville staa to «Espen» i baade rullelisten og
+               statistikken, med hver sin taletid.
+
+               Her flyttes kun den ene replik. -->
+          <StackPanel x:Name="HenfoerRude" Visibility="Collapsed" Margin="0,12,0,0">
+            <TextBlock Text="LÆG REPLIKKEN HOS" FontSize="9.5" FontWeight="SemiBold"
+                       Foreground="{StaticResource Accent}" />
+
+            <ItemsControl x:Name="Henfoer" Margin="0,7,0,0">
+              <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                  <WrapPanel Orientation="Horizontal" />
+                </ItemsPanelTemplate>
+              </ItemsControl.ItemsPanel>
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <Button Content="{Binding Navn}" Tag="{Binding Noegle}" Click="Henfoer_Klik"
+                          Padding="11,5" FontSize="12" Margin="0,0,6,6" Cursor="Hand" />
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <TextBlock FontSize="11" TextWrapping="Wrap" LineHeight="17"
+                       Foreground="{StaticResource TekstMeget}"
+                       Text="Kun denne ene replik flyttes. De øvrige rører du ikke." />
+
+            <Rectangle Height="1" Fill="{StaticResource PanelKant}" Margin="0,12,0,0" />
+          </StackPanel>
+
+          <TextBlock x:Name="NavnFeltMaerkat" FontSize="9.5" FontWeight="SemiBold"
+                     Margin="0,12,0,0" Visibility="Collapsed"
+                     Foreground="{StaticResource TekstMeget}" />
+
+          <TextBox x:Name="NavnFelt" FontSize="13" Padding="9,6" Margin="0,7,0,0"
                    KeyDown="Navn_Tast" />
 
           <StackPanel Orientation="Horizontal" Margin="0,11,0,0" HorizontalAlignment="Right">
@@ -263,6 +313,104 @@
            Har man rettet i en udskrift, er spoergsmaalet et halvt aar senere,
            om en formulering er ens egen eller maskinens. Her staar maskinens
            ord, uroerte, som de kom ud. -->
+      <!-- ===================== Tallene =====================
+           Kort med vilje. Der er tre ting, man vil vide efter et møde: hvornår
+           det var, hvor længe det varede, og hvem der fyldte. Alt andet er
+           noget, man kan læse sig til i selve udskriften. -->
+      <TabItem Header="Tal" Style="{StaticResource Fane}">
+        <ScrollViewer Padding="18,16,18,18" VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled">
+          <StackPanel>
+
+            <!-- Mødet: hvornår og hvor længe -->
+            <Border Background="#FF181B22" CornerRadius="10" Padding="20,16"
+                    BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+              <StackPanel>
+                <TextBlock Text="MØDET" FontSize="10.5" FontWeight="SemiBold"
+                           Foreground="{StaticResource Accent}" Margin="0,0,0,10" />
+
+                <TextBlock x:Name="StatDato" FontSize="16" FontWeight="SemiBold" />
+
+                <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                  <StackPanel Margin="0,0,34,0">
+                    <TextBlock Text="BEGYNDTE" FontSize="9.5" FontWeight="SemiBold"
+                               Foreground="{StaticResource TekstMeget}" />
+                    <TextBlock x:Name="StatStart" FontSize="19" FontFamily="Consolas"
+                               Margin="0,3,0,0" />
+                  </StackPanel>
+                  <StackPanel Margin="0,0,34,0">
+                    <TextBlock Text="SLUTTEDE" FontSize="9.5" FontWeight="SemiBold"
+                               Foreground="{StaticResource TekstMeget}" />
+                    <TextBlock x:Name="StatSlut" FontSize="19" FontFamily="Consolas"
+                               Margin="0,3,0,0" />
+                  </StackPanel>
+                  <StackPanel>
+                    <TextBlock Text="VARIGHED" FontSize="9.5" FontWeight="SemiBold"
+                               Foreground="{StaticResource TekstMeget}" />
+                    <TextBlock x:Name="StatVarighed" FontSize="19" FontFamily="Consolas"
+                               Margin="0,3,0,0" Foreground="{StaticResource Accent}" />
+                  </StackPanel>
+                </StackPanel>
+              </StackPanel>
+            </Border>
+
+            <!-- Taletiden pr. taler -->
+            <Border Background="#FF181B22" CornerRadius="10" Padding="20,16" Margin="0,14,0,0"
+                    BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+              <StackPanel>
+                <TextBlock Text="TALETID" FontSize="10.5" FontWeight="SemiBold"
+                           Foreground="{StaticResource Accent}" Margin="0,0,0,14" />
+
+                <ItemsControl x:Name="StatTalere">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                      <Grid Margin="0,0,0,13">
+                        <Grid.ColumnDefinitions>
+                          <ColumnDefinition Width="120" />
+                          <ColumnDefinition Width="*" />
+                          <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0" Text="{Binding Navn}" FontSize="13"
+                                   FontWeight="SemiBold" VerticalAlignment="Center"
+                                   TextTrimming="CharacterEllipsis" Margin="0,0,12,0"
+                                   Foreground="{Binding Farve}" />
+
+                        <!-- Bjaelken er baggrund plus forgrund i samme celle.
+                             Saa staar alle bjaelker lige lange paa skaermen, og
+                             det, oejet sammenligner, er den fyldte del. -->
+                        <Grid Grid.Column="1" Height="16" VerticalAlignment="Center">
+                          <Border Background="#FF232A35" CornerRadius="4" />
+                          <Border Background="{Binding Farve}" CornerRadius="4"
+                                  HorizontalAlignment="Left" Width="{Binding Bredde}" />
+                        </Grid>
+
+                        <StackPanel Grid.Column="2" Orientation="Horizontal"
+                                    VerticalAlignment="Center" Margin="16,0,0,0">
+                          <TextBlock Text="{Binding Minutter}" FontSize="13" FontFamily="Consolas"
+                                     VerticalAlignment="Center" MinWidth="74"
+                                     TextAlignment="Right" />
+                          <TextBlock Text="{Binding Procent}" FontSize="13" FontWeight="SemiBold"
+                                     FontFamily="Consolas" VerticalAlignment="Center"
+                                     MinWidth="52" TextAlignment="Right"
+                                     Foreground="{StaticResource TekstSvag}" />
+                        </StackPanel>
+                      </Grid>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <TextBlock x:Name="StatNote" FontSize="11.5" TextWrapping="Wrap" LineHeight="18"
+                           Margin="0,4,0,0" Foreground="{StaticResource TekstMeget}" />
+              </StackPanel>
+            </Border>
+
+            <TextBlock x:Name="StatTom" FontSize="13" TextWrapping="Wrap" Margin="2,16,0,0"
+                       Visibility="Collapsed" Foreground="{StaticResource TekstSvag}" />
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
       <TabItem Header="Rå tekst" Style="{StaticResource Fane}">
         <DockPanel>
           <TextBlock DockPanel.Dock="Top" FontSize="11.5" Margin="10,8,10,10"

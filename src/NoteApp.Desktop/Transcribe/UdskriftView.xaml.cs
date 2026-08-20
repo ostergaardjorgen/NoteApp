@@ -105,6 +105,23 @@ public sealed class Replikvisning : INotifyPropertyChanged
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(navn));
 }
 
+/// <summary>Én taler på statistikfanen: navn, taletid og bjælkens længde.</summary>
+public sealed record Talerstat(string Navn, string Minutter, string Procent,
+                               double Bredde, Brush Farve);
+
+/// <summary>
+/// Ét punkt i rullelisten over talere, og én knap i henføringen.
+/// Null-nøgle betyder «alle talere».
+///
+/// Den er OFFENTLIG med vilje. WPF binder gennem refleksion, og en privat
+/// type giver tomme felter uden en fejl at gå efter — knapperne ville stå der
+/// uden tekst, og bindingen ville se ud til at være forkert skrevet.
+/// </summary>
+public sealed record Talerpunkt(string? Noegle, string Navn)
+{
+    public override string ToString() => Navn;
+}
+
 // HER LAA KLASSEN «Navnefelt».
 //
 // Den baar eet felt i den raekke, knappen «Navngiv talere» aabnede. Baade
@@ -138,6 +155,9 @@ public partial class UdskriftView : UserControl
 
     /// <summary>Stemmen, navneruden staar aaben for. Null naar den er lukket.</summary>
     private string? _navngiver;
+
+    /// <summary>Replikken, der kan henfoeres til en anden taler. Null naar ruden er lukket.</summary>
+    private Udskriftslinje? _henfoer;
 
     public UdskriftView()
     {
@@ -180,9 +200,12 @@ public partial class UdskriftView : UserControl
         Hoved.Visibility = Visibility.Visible;
         Navnerude.IsOpen = false;
 
+        ByggTalervalg();
+
         Byg();
         RaaTekst.Text = Raa();
         VisOpsummering();
+        VisTal();
 
         Meld(_udskrift.ErRettet ? "Rettet" : "");
         _indlæser = false;
@@ -218,11 +241,24 @@ public partial class UdskriftView : UserControl
         var navne = _meta?.Talere;
         var soeg = Soeg.Text.Trim();
 
-        var linjer = soeg.Length == 0
-            ? _udskrift.Linjer
-            : _udskrift.Linjer
-                .Where(l => l.Tekst.Contains(soeg, StringComparison.OrdinalIgnoreCase))
-                .ToList();
+        // TALEREN OG SØGEORDET VIRKER SAMMEN.
+        //
+        // «Alt hvad Espen sagde om pipeline» er begge dele paa een gang, og
+        // det er praecis den slags spoergsmaal, man staar med bagefter. De to
+        // filtre laegges derfor oven paa hinanden frem for at udelukke
+        // hinanden.
+        var kunTaler = (Talervalg.SelectedItem as Talerpunkt)?.Noegle;
+
+        var linjer = _udskrift.Linjer.AsEnumerable();
+
+        if (kunTaler is not null)
+            linjer = linjer.Where(l => Noegle(l) == kunTaler);
+
+        if (soeg.Length > 0)
+            linjer = linjer.Where(l => l.Tekst.Contains(soeg, StringComparison.OrdinalIgnoreCase));
+
+        var valgte = linjer.ToList();
+        linjer = valgte;
 
         // NAVNET VISES, NAAR DET SIGER MERE END IKONET.
         //
@@ -233,7 +269,7 @@ public partial class UdskriftView : UserControl
         // ER stemmerne skilt ad, er det stik modsat: «Gæst 1» og «Gæst 2» er
         // hele pointen, og forskellen kan ikke ses paa ikonet, som er det
         // samme for dem begge.
-        var harStemmer = linjer.Any(l => l.Stemme is { Length: > 0 });
+        var harStemmer = _udskrift.Linjer.Any(l => l.Stemme is { Length: > 0 });
         var harNavne = harStemmer || (navne is not null && navne.Values.Any(v => v.Length > 0));
 
         // Udskrift.Navn(LINJEN, ...) og ikke (l.Spor, ...).
@@ -242,14 +278,187 @@ public partial class UdskriftView : UserControl
         // naar stemmen er kendt. Det stod paa skaermen 20-08-2026: stemmerne var
         // fundet og skrevet i filen, men listen viste stadig «Gæster», fordi
         // netop DEN linje ikke var rettet med.
-        Liste.ItemsSource = linjer
+        Liste.ItemsSource = valgte
             .Select(l => new Replikvisning(l, Udskrift.Navn(l, navne), harNavne, PaaAendring))
             .ToList();
 
-        IntetFundet.Visibility = linjer.Count == 0 && soeg.Length > 0
+        // Beskeden skal sige, hvad der blev filtreret PAA. «Ingen replikker
+        // indeholder X» er forkert, naar det var taleren, der skar dem fra.
+        var taler = (Talervalg.SelectedItem as Talerpunkt)?.Navn;
+
+        IntetFundet.Visibility = valgte.Count == 0 && (soeg.Length > 0 || kunTaler is not null)
             ? Visibility.Visible : Visibility.Collapsed;
 
-        IntetFundet.Text = $"Ingen replikker indeholder «{soeg}».";
+        IntetFundet.Text = (soeg.Length > 0, kunTaler is not null) switch
+        {
+            (true, true) => $"{taler} siger ikke «{soeg}» nogen steder.",
+            (true, false) => $"Ingen replikker indeholder «{soeg}».",
+            _ => $"{taler} siger ikke noget i denne udskrift."
+        };
+    }
+
+    /// <summary>Nøglen, en replik hører til: stemmen hvis den er kendt, ellers sporet.</summary>
+    private static string Noegle(Udskriftslinje l) =>
+        l.Stemme is { Length: > 0 } s ? s : l.Spor;
+
+
+    /// <summary>
+    /// Fylder rullelisten med de talere, der faktisk siger noget.
+    ///
+    /// Den bygges af UDSKRIFTEN og ikke af de navne, der er gemt. Et navn kan
+    /// være sat på en stemme, der siden er væk efter en ny kørsel — og en
+    /// rulleliste med et punkt, der ikke findes i teksten, giver et tomt svar,
+    /// som ligner en fejl.
+    /// </summary>
+    private void ByggTalervalg()
+    {
+        if (_udskrift is null)
+        {
+            Talervalg.ItemsSource = null;
+            Talervalg.Visibility = Visibility.Collapsed;
+            return;
+        }
+
+        var navne = _meta?.Talere;
+
+        var punkter = _udskrift.Linjer
+            .Where(l => Noegle(l).Length > 0)
+            .GroupBy(Noegle)
+            .OrderByDescending(g => g.Sum(l => l.TilMs - l.FraMs))
+            .Select(g => new Talerpunkt(g.Key, Udskrift.Navn(g.First(), navne)))
+            .ToList();
+
+        // Med under to talere er der intet at afgraense imellem.
+        if (punkter.Count < 2)
+        {
+            Talervalg.ItemsSource = null;
+            Talervalg.Visibility = Visibility.Collapsed;
+            return;
+        }
+
+        var alle = new List<Talerpunkt> { new(null, "Alle talere") };
+        alle.AddRange(punkter);
+
+        _indlæser = true;
+        Talervalg.ItemsSource = alle;
+        Talervalg.SelectedIndex = 0;
+        _indlæser = false;
+
+        Talervalg.Visibility = Visibility.Visible;
+    }
+
+    private void Taler_Valgt(object sender, SelectionChangedEventArgs e)
+    {
+        if (_indlæser || _udskrift is null) return;
+        Byg();
+    }
+
+    // ------------------------------------------------------------------ tal
+
+    /// <summary>
+    /// Tallene om mødet: hvornår det var, hvor længe det varede, og hvem der
+    /// fyldte.
+    ///
+    /// PROCENTEN ER AF TALETIDEN, IKKE AF MØDET.
+    ///
+    /// De to er ikke det samme, og forskellen er ikke lille. Der er pauser,
+    /// hvor ingen siger noget, og på et onlinemøde optages der på to spor, så
+    /// to personer kan tale i det samme sekund. Regnede man i procent af
+    /// mødets længde, ville tallene hverken give hundrede eller kunne
+    /// sammenlignes. Af taletiden giver de hundrede, og de svarer på det,
+    /// spørgsmålet handler om: hvem fyldte.
+    /// </summary>
+    private void VisTal()
+    {
+        StatTalere.ItemsSource = null;
+        StatTom.Visibility = Visibility.Collapsed;
+        StatNote.Text = "";
+
+        if (_udskrift is null || _udskrift.Linjer.Count == 0)
+        {
+            StatDato.Text = "—";
+            StatStart.Text = StatSlut.Text = StatVarighed.Text = "—";
+            StatTom.Visibility = Visibility.Visible;
+            StatTom.Text = "Der er ingen udskrift at regne på endnu.";
+            return;
+        }
+
+        // ----- hvornår og hvor længe
+        var start = _meta?.StartedAt;
+        var slut = _meta?.EndedAt;
+
+        StatDato.Text = start is { } s
+            ? s.LocalDateTime.ToString("dddd 'den' d. MMMM yyyy") is var d && d.Length > 0
+                ? char.ToUpper(d[0]) + d[1..]
+                : "—"
+            : "Datoen er ikke registreret";
+
+        StatStart.Text = start?.LocalDateTime.ToString("HH:mm") ?? "—";
+        StatSlut.Text = slut?.LocalDateTime.ToString("HH:mm") ?? "—";
+
+        // Varigheden tages fra mødedata, hvis den er der. Ellers fra sidste
+        // replik - det er kortere end mødet, men det er et tal, der er maalt,
+        // og ikke et gaet.
+        var sekunder = _meta?.DurationSeconds ?? 0;
+        var fraUdskrift = false;
+
+        if (sekunder <= 0)
+        {
+            sekunder = _udskrift.Linjer.Max(l => l.TilMs) / 1000.0;
+            fraUdskrift = true;
+        }
+
+        var varighed = TimeSpan.FromSeconds(sekunder);
+        StatVarighed.Text = varighed.TotalHours >= 1
+            ? $"{(int)varighed.TotalHours}:{varighed.Minutes:00}"
+            : $"{varighed.Minutes}:{varighed.Seconds:00}";
+
+        // ----- taletiden
+        var grupper = _udskrift.Linjer
+            .GroupBy(Noegle)
+            .Select(g => new
+            {
+                Navn = Udskrift.Navn(g.First(), _meta?.Talere),
+                Spor = g.First().Spor,
+                Sekunder = g.Sum(l => l.TilMs - l.FraMs) / 1000.0,
+                Replikker = g.Count()
+            })
+            .OrderByDescending(x => x.Sekunder)
+            .ToList();
+
+        var samlet = grupper.Sum(g => g.Sekunder);
+        if (samlet <= 0) return;
+
+        var stoerste = grupper[0].Sekunder;
+
+        StatTalere.ItemsSource = grupper.Select(g => new Talerstat(
+            g.Navn,
+            g.Sekunder >= 60
+                ? $"{g.Sekunder / 60:0.0} min"
+                : $"{g.Sekunder:0} sek",
+            $"{g.Sekunder / samlet * 100:0} %",
+            // Bjaelken maales mod den, der taler MEST - ikke mod hundrede
+            // procent. Ellers ville tre nogenlunde jaevnbyrdige talere alle
+            // faa en kort stump, og forskellen mellem dem forsvinder.
+            Math.Max(3, 260 * (g.Sekunder / stoerste)),
+            g.Spor == Samtale.Derfra
+                ? new SolidColorBrush(Color.FromRgb(0xC9, 0x8C, 0xF0))
+                : new SolidColorBrush(Color.FromRgb(0x5B, 0x9D, 0xF0))))
+            .ToList();
+
+        var taletid = TimeSpan.FromSeconds(samlet);
+        var toSpor = _udskrift.Linjer.Any(l => l.Spor == Samtale.Herfra)
+                     && _udskrift.Linjer.Any(l => l.Spor == Samtale.Derfra);
+
+        StatNote.Text =
+            $"Der blev talt i alt {taletid.TotalMinutes:0} minutter. Procenterne er af " +
+            "taletiden og ikke af mødets længde — der er pauser, hvor ingen siger noget" +
+            (toSpor
+                ? ", og mødet blev optaget på to spor, så to kan tale i det samme sekund."
+                : ".") +
+            (fraUdskrift
+                ? " Mødets længde er regnet ud fra sidste replik, fordi den ikke er registreret."
+                : "");
     }
 
     /// <summary>
@@ -350,11 +559,59 @@ public partial class UdskriftView : UserControl
 
         NavnFelt.Text = GemtNavn(v.Noegle);
 
+        // ----- kan replikken henføres til en taler, der allerede findes?
+        //
+        // Kun relevant, naar maskinen IKKE kunne knytte den til en stemme.
+        // Har den en stemme, er spoergsmaalet et andet: hvad stemmen hedder.
+        _henfoer = v.Linje;
+
+        var kandidater = v.Linje.Stemme is { Length: > 0 }
+            ? new List<Talerpunkt>()
+            : _udskrift is null
+                ? new List<Talerpunkt>()
+                : _udskrift.Linjer
+                    .Where(l => l.Spor == v.Linje.Spor && l.Stemme is { Length: > 0 })
+                    .GroupBy(l => l.Stemme!)
+                    .OrderByDescending(g => g.Sum(l => l.TilMs - l.FraMs))
+                    .Select(g => new Talerpunkt(g.Key, Udskrift.Navn(g.First(), _meta.Talere)))
+                    .ToList();
+
+        Henfoer.ItemsSource = kandidater;
+        HenfoerRude.Visibility = kandidater.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+
+        // Naar begge dele staar fremme, skal feltet sige, hvad det saa goer -
+        // ellers ser de to ud som to maader at goere det samme paa.
+        NavnFeltMaerkat.Visibility = kandidater.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+        NavnFeltMaerkat.Text = $"ELLER GIV HELE «{v.Navn}» ET NAVN";
+
         Navnerude.PlacementTarget = felt;
         Navnerude.IsOpen = true;
 
         NavnFelt.Focus();
         NavnFelt.SelectAll();
+    }
+
+    /// <summary>
+    /// Flytter ÉN replik over til en taler, maskinen allerede har fundet.
+    ///
+    /// Det er en rettelse på linjen, ikke på et navn: stemmen skrives på
+    /// replikken og følger med i den rettede udskrift. Skrives optagelsen ud
+    /// igen, står maskinens egen udgave uændret ved siden af.
+    /// </summary>
+    private void Henfoer_Klik(object sender, RoutedEventArgs e)
+    {
+        if (sender is not FrameworkElement k || k.Tag is not string noegle) return;
+        if (_henfoer is null) return;
+
+        _henfoer.Stemme = noegle;
+        _henfoer = null;
+        _navngiver = null;
+        Navnerude.IsOpen = false;
+
+        ByggTalervalg();
+        Byg();
+        VisTal();
+        PaaAendring();
     }
 
     private void Navn_Tast(object sender, KeyEventArgs e)
@@ -380,8 +637,10 @@ public partial class UdskriftView : UserControl
         _meta.Talere[_navngiver] = navn.Trim();
         _navngiver = null;
 
+        ByggTalervalg();
         Byg();
         RaaTekst.Text = Raa();
+        VisTal();
         PaaAendring();
     }
 
