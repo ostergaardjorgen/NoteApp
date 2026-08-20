@@ -339,9 +339,21 @@ public partial class UdskriftView : UserControl
         var alle = new List<Talerpunkt> { new(null, "Alle talere") };
         alle.AddRange(punkter);
 
+        // AFGRÆNSNINGEN SKAL OVERLEVE, AT LISTEN BYGGES OM.
+        //
+        // Listen bygges om, hver gang en taler får et navn eller en replik
+        // flyttes. Blev valget nulstillet til «Alle talere» hver gang, ville
+        // man blive kastet ud af sin egen afgrænsning midt i arbejdet — og
+        // det ligner, at appen ikke reagerede på det, man lige gjorde.
+        //
+        // Findes den valgte taler ikke længere — den sidste replik er flyttet
+        // væk fra stemmen — falder den tilbage til «Alle talere».
+        var foer = (Talervalg.SelectedItem as Talerpunkt)?.Noegle;
+        var igen = alle.FindIndex(p => p.Noegle == foer);
+
         _indlæser = true;
         Talervalg.ItemsSource = alle;
-        Talervalg.SelectedIndex = 0;
+        Talervalg.SelectedIndex = igen >= 0 ? igen : 0;
         _indlæser = false;
 
         Talervalg.Visibility = Visibility.Visible;
@@ -579,6 +591,18 @@ public partial class UdskriftView : UserControl
         Henfoer.ItemsSource = kandidater;
         HenfoerRude.Visibility = kandidater.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
 
+        // Hvor mange er der i alt uden taler paa dette spor?
+        var udenTaler = _udskrift is null
+            ? 0
+            : _udskrift.Linjer.Count(l => l.Spor == v.Linje.Spor && l.Stemme is not { Length: > 0 });
+
+        HenfoerAlle.ItemsSource = kandidater;
+        HenfoerAlleRude.Visibility = kandidater.Count > 0 && udenTaler > 1
+            ? Visibility.Visible : Visibility.Collapsed;
+
+        HenfoerAlleMaerkat.Text =
+            $"…ELLER LÆG ALLE {udenTaler} REPLIKKER UDEN TALER HOS";
+
         // Naar begge dele staar fremme, skal feltet sige, hvad det saa goer -
         // ellers ser de to ud som to maader at goere det samme paa.
         NavnFeltMaerkat.Visibility = kandidater.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
@@ -604,6 +628,38 @@ public partial class UdskriftView : UserControl
         if (_henfoer is null) return;
 
         _henfoer.Stemme = noegle;
+
+        Efter_Henfoering();
+    }
+
+    /// <summary>
+    /// Lægger ALLE replikker uden taler på dette spor hos én taler.
+    ///
+    /// De er næsten altid korte indskud — «Ja. Ja.», «Mm.» — og de er svære at
+    /// placere, netop fordi der er så lidt lyd at gå efter. Kommer de fra den
+    /// ene side af et møde, hvor kun én person taler i det stykke, hører de
+    /// alle sammen til den samme.
+    ///
+    /// Det er et valg, brugeren træffer og kan se resultatet af med det samme.
+    /// Maskinen ville ikke kunne træffe det: den har allerede prøvet og
+    /// undladt — og en gætning, der ser ud som viden, er værre end et hul.
+    /// </summary>
+    private void HenfoerAlle_Klik(object sender, RoutedEventArgs e)
+    {
+        if (sender is not FrameworkElement k || k.Tag is not string noegle) return;
+        if (_henfoer is null || _udskrift is null) return;
+
+        var spor = _henfoer.Spor;
+
+        foreach (var l in _udskrift.Linjer)
+            if (l.Spor == spor && l.Stemme is not { Length: > 0 })
+                l.Stemme = noegle;
+
+        Efter_Henfoering();
+    }
+
+    private void Efter_Henfoering()
+    {
         _henfoer = null;
         _navngiver = null;
         Navnerude.IsOpen = false;
