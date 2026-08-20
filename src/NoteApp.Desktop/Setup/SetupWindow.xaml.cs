@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using NoteApp.Core;
@@ -85,7 +85,7 @@ public partial class SetupWindow : Window
             MotorValg.Text = "Slår op hos GitHub …";
             try
             {
-                _udgivelse = await EngineInstaller.FetchLatestAsync();
+                _udgivelse = await EngineInstaller.FetchAsync();
                 _motorValg = EngineInstaller.Recommend(_udgivelse);
 
                 if (_motorValg is null)

@@ -186,6 +186,41 @@ if ($mangler) {
            "src\NoteApp.Desktop\obj og koer igen.")
 }
 
+# --- TALERGENKENDELSEN FOELGER MED --------------------------------------
+#
+# Vaerktoejet og de to modeller fylder 48 MB og hentes ikke. Taersklen paa
+# 0,80 er maalt mod praecis de to modelfiler; skiftes de ud, gaelder maalingen
+# ikke, og den samme optagelse kan gaa fra to talere til toogfirs uden at
+# nogen har roert en indstilling. Model og indstilling er een ting.
+#
+# De kopieres ind i app-mappen, hvor appen leder efter dem - og hvor
+# installationspakken samler op ("..\app\**"), saa der kun er eet sted at
+# vedligeholde dem.
+$talerKilde = Join-Path $Rod 'talere'
+if (Test-Path $talerKilde) {
+    $talerMaal = Join-Path $udgivTil 'talere'
+    Copy-Item $talerKilde $udgivTil -Recurse -Force
+
+    $noedvendige = @(
+        'bin\sherpa-onnx-offline-speaker-diarization.exe',
+        'bin\onnxruntime.dll',
+        'segmentering.onnx',
+        'stemmer.onnx'
+    )
+    $glemt = $noedvendige | Where-Object { -not (Test-Path (Join-Path $talerMaal $_)) }
+    if ($glemt) {
+        throw ("Talergenkendelsen mangler: $($glemt -join ', ').`n" +
+               "Appen ville koere videre uden navne paa talerne, uden at sige det.")
+    }
+
+    $mb = [math]::Round(((Get-ChildItem $talerMaal -Recurse -File | Measure-Object Length -Sum).Sum / 1MB), 1)
+    Write-Host "Talergenkendelsen kopieret med ($mb MB)"
+}
+else {
+    Write-Warning ("Mappen $talerKilde findes ikke. Appen udgives UDEN " +
+                   "talergenkendelse — udskrifter faar ingen navne paa talerne.")
+}
+
 # --- Efterproev ------------------------------------------------------------
 # Et byg, der siger "faerdig" uden at filen er skiftet, er vaerre end et, der
 # fejler. Derfor kontrolleres resultatet frem for at blive antaget.
@@ -228,20 +263,46 @@ if ($snavset) {
 # Genvejen paa skrivebordet peger paa en FAST sti, saa den behoever ikke
 # aendres. Men det skal kontrolleres, at den stadig goer det — flyttes mappen,
 # aabner genvejen ingenting, og det opdages foerst naar man har brug for den.
-$skrivebord = [Environment]::GetFolderPath('Desktop')
-$lnk = Join-Path $skrivebord 'NoteApp.lnk'
+#
+# NAVNET ER IKKE GIVET, OG DER ER MERE END EEN GENVEJ.
+#
+# Der blev foer kun set efter 'NoteApp.lnk' paa brugerens eget skrivebord. Det
+# var forkert paa to maader. Udviklingsgenvejen hedder 'NoteApp_dev.lnk' — den
+# er doebt om med vilje, saa de to udgaver kan kendes fra hinanden — og saa
+# meldte scriptet "ingen skrivebordsgenvej fundet", mens den stod og pegede
+# rigtigt. Omvendt er 'NoteApp.lnk' den INSTALLEREDE udgave, der ligger paa
+# faellesskrivebordet og med rette peger paa Program Files; havde scriptet
+# fundet den, ville det have advaret om det, der er helt som det skal vaere.
+#
+# Der ses derfor paa begge skriveborde og paa alle genveje, der peger paa en
+# NoteApp.exe. De sorteres efter HVAD de peger paa, ikke efter hvad de hedder.
+$skriveborde = @(
+    [Environment]::GetFolderPath('Desktop'),
+    (Join-Path $env:PUBLIC 'Desktop')
+) | Where-Object { $_ -and (Test-Path $_) } | Select-Object -Unique
 
-if (Test-Path $lnk) {
-    $sh = New-Object -ComObject WScript.Shell
-    $maal = $sh.CreateShortcut($lnk).TargetPath
-
-    if ($maal -eq $exe) {
-        Write-Host "  skrivebordsgenvejen peger hertil — den er opdateret automatisk"
+$sh = New-Object -ComObject WScript.Shell
+$genveje = foreach ($sted in $skriveborde) {
+    foreach ($fil in Get-ChildItem $sted -Filter '*.lnk' -ErrorAction SilentlyContinue) {
+        $maal = $sh.CreateShortcut($fil.FullName).TargetPath
+        if ($maal -like '*\NoteApp.exe') {
+            [pscustomobject]@{ Navn = $fil.BaseName; Maal = $maal; Her = ($maal -eq $exe) }
+        }
     }
-    else {
-        Write-Warning "Skrivebordsgenvejen peger på $maal, ikke på $exe. Den vil åbne en anden udgave."
+}
+
+$herhen = @($genveje | Where-Object Her)
+
+if ($herhen.Count -gt 0) {
+    foreach ($g in $herhen) {
+        Write-Host "  «$($g.Navn)» peger hertil — den åbner det, der lige er bygget"
     }
 }
 else {
-    Write-Host "  (ingen skrivebordsgenvej fundet — appen startes fra $exe)"
+    Write-Warning ("Ingen genvej på skrivebordet peger på $exe. " +
+                   "Appen startes derfra, indtil der laves en.")
+}
+
+foreach ($g in @($genveje | Where-Object { -not $_.Her })) {
+    Write-Host "  «$($g.Navn)» peger på den installerede udgave: $($g.Maal)"
 }

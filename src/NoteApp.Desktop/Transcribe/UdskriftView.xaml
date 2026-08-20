@@ -50,7 +50,7 @@
 
         <Button x:Name="NavneKnap" Grid.Column="2" Content="Navngiv talere" Click="Navne_Klik"
                 Padding="12,6" Margin="14,0,8,0" FontSize="12.5"
-                ToolTip="Sæt navne på de to sider af mødet" />
+                ToolTip="Sæt navne på dem, der talte — én ad gangen, hvis stemmerne er skilt ad" />
 
         <Button Grid.Column="3" Content="Kopiér ▾" Click="Kopier_Klik"
                 Padding="12,6" FontSize="12.5"
@@ -73,22 +73,32 @@
             Background="#FF1D2530" BorderBrush="{StaticResource Accent}"
             BorderThickness="0,0,0,1" Padding="16,12">
       <StackPanel>
-        <TextBlock FontSize="12" TextWrapping="Wrap" Margin="0,0,0,9"
-                   Foreground="{StaticResource TekstSvag}"
-                   Text="Navnene sættes af dig — maskinen har ikke genkendt stemmerne. De siger, hvilken SIDE af mødet der talte, og der kan være flere personer bag hver af dem." />
-        <StackPanel Orientation="Horizontal">
-          <TextBlock Text="Mig" FontSize="12" VerticalAlignment="Center"
-                     Margin="0,0,8,0" Foreground="{StaticResource TekstMeget}" />
-          <TextBox x:Name="NavnHerfra" Width="170" FontSize="12.5" Padding="8,5"
-                   Margin="0,0,20,0" TextChanged="Navn_Aendret"
-                   ToolTip="Dig — og dem, der sad i samme lokale" />
+        <TextBlock x:Name="Navneforklaring" FontSize="12" TextWrapping="Wrap"
+                   Margin="0,0,0,9" Foreground="{StaticResource TekstSvag}" />
 
-          <TextBlock Text="Gæster" FontSize="12" VerticalAlignment="Center"
-                     Margin="0,0,8,0" Foreground="{StaticResource TekstMeget}" />
-          <TextBox x:Name="NavnDerfra" Width="220" FontSize="12.5" Padding="8,5"
-                   TextChanged="Navn_Aendret"
-                   ToolTip="De øvrige deltagere. Skriv gerne flere navne" />
-        </StackPanel>
+        <!-- Felterne bygges i koden. Antallet er ikke givet paa forhaand: har
+             talergenkendelsen skilt stemmerne ad, er der eet felt pr. stemme;
+             ellers eet pr. side af moedet. -->
+        <ItemsControl x:Name="Navnefelter">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+              <WrapPanel Orientation="Horizontal" />
+            </ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate>
+              <StackPanel Orientation="Horizontal" Margin="0,0,20,6">
+                <TextBlock Text="{Binding Maerkat}" FontSize="12" MinWidth="56"
+                           VerticalAlignment="Center" Margin="0,0,8,0"
+                           Foreground="{StaticResource TekstMeget}" />
+                <TextBox Width="180" FontSize="12.5" Padding="8,5"
+                         Text="{Binding Navn, UpdateSourceTrigger=PropertyChanged}"
+                         ToolTip="{Binding Hjaelp}"
+                         AutomationProperties.Name="{Binding Maerkat}" />
+              </StackPanel>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
       </StackPanel>
     </Border>
 

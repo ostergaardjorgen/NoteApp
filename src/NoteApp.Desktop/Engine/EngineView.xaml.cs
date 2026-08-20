@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using System.Windows;
 using System.Windows.Media;
 using NoteApp.Core;
@@ -107,9 +107,10 @@ public partial class EngineView : System.Windows.Controls.UserControl
 
         ModelNote.Text = s.ModelPath is null
             ? "Modellen er en fast fil. Den hentes én gang og ændrer sig ikke bagefter."
-            : "Modellen er en fast fil og får ikke nye udgaver — modsat motoren. " +
-              "At hente den igen giver præcis den samme fil og gør ikke udskriften bedre. " +
-              "Det er kun værd at gøre, hvis filen er blevet beskadiget.";
+            : "Modellen er en fast fil og får ikke nye udgaver. Det samme gælder motoren: " +
+              "begge dele hører til denne udgave af appen og skiftes kun med den. " +
+              "At hente igen giver præcis de samme filer og gør ikke udskriften bedre — " +
+              "det er kun værd at gøre, hvis noget er blevet beskadiget.";
         // MOTORKNAPPEN VAR SLAAET FRA, NAAR MOTOREN MANGLEDE.
         //
         // "IsEnabled = WhisperCli is not null" betoed, at den ENESTE knap,
@@ -117,7 +118,7 @@ public partial class EngineView : System.Windows.Controls.UserControl
         // installeret. Motoren og modellen hentes hver for sig - det ene
         // foelger ikke med det andet - saa uden motor var der ingen vej frem
         // fra denne skaerm. Fundet 19-08-2026.
-        MotorKnap.Content = s.WhisperCli is null ? "Hent motoren" : "Opdatér motoren";
+        MotorKnap.Content = s.WhisperCli is null ? "Hent motoren" : "Installér motoren igen";
 
         // Hvor filen ligger, staar fremme og ikke i en foldbar. Ligger den i
         // repoets models-mappe frem for datamappen, er det vaerd at vide -
@@ -244,12 +245,12 @@ public partial class EngineView : System.Windows.Controls.UserControl
         var nuvaerende = s.EngineVersion;
 
         MotorKnap.IsEnabled = false;
-        Status.Text = "Slår op, om der er en nyere udgave …";
+        Status.Text = "Henter oplysninger om motoren …";
 
         EngineRelease nyeste;
         try
         {
-            nyeste = await EngineInstaller.FetchLatestAsync();
+            nyeste = await EngineInstaller.FetchAsync();
         }
         catch (Exception ex)
         {
@@ -269,33 +270,45 @@ public partial class EngineView : System.Windows.Controls.UserControl
             return;
         }
 
-        // Er versionen den samme, er der intet at hente, og det skal siges
-        // som et svar - ikke som en hentning, der "ikke gjorde noget".
-        if (nuvaerende is not null && nuvaerende == nyeste.Version)
-        {
-            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Motoren er den nyeste",
-                $"Du kører {nuvaerende}, og det er den seneste udgivelse af whisper.cpp.\n\n" +
-                "Der er ikke hentet noget.", Dialogs.Slags.Valg);
-            Status.Text = $"Motoren er den nyeste ({nuvaerende}).";
-            return;
-        }
+        // KØRER DEN RIGTIGE UDGAVE ALLEREDE, ER DET EN REPARATION.
+        //
+        // Her stod før «Motoren er den nyeste», og knappen ved siden af hed
+        // «Opdatér motoren». Begge dele byggede på, at appen hentede den
+        // nyeste whisper.cpp, når nogen bad om det. Det er fjernet: motoren er
+        // låst til én udgave, som appens adfærd er målt imod.
+        //
+        // Tilbage står den fejl, der faktisk kan ske — at filerne på disken er
+        // gået i stykker. Den kan man komme ud af ved at hente dem igen, og
+        // det skal siges som det, det er, frem for som en opdatering.
+        var ja = nuvaerende is not null && nuvaerende == nyeste.Version
+            ? Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
+                "Installér motoren igen?",
+                $"Du kører {nuvaerende} — den udgave, appen er lavet til, og der findes " +
+                "ingen nyere at skifte til herfra.\n\n" +
+                $"Fil: {build.FileName}\n" +
+                $"Størrelse: {build.SizeText}\n" +
+                "Hentes fra: github.com\n\n" +
+                "Det giver præcis de samme filer og gør ikke udskriften bedre. Det er " +
+                "kun værd at gøre, hvis motoren er holdt op med at virke — for eksempel " +
+                "hvis en fil er blevet beskadiget.",
+                godkend: $"Hent {build.SizeText} igen",
+                annuller: "Ikke nu",
+                slags: Dialogs.Slags.Valg,
+                godkendErStandard: false)
 
-        var linje = nuvaerende is null
-            ? "Du kører en motor, appen ikke selv har installeret, så dens version kan ikke aflæses."
-            : $"Du kører: {nuvaerende}";
-
-        var ja = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
-            $"Hent {nyeste.Version}?",
-            $"{linje}\n" +
-            $"Nyeste udgivelse: {nyeste.Version}\n\n" +
-            $"Fil: {build.FileName}\n" +
-            $"Størrelse: {build.SizeText}\n" +
-            $"Hentes fra: github.com\n\n" +
-            "En ny motor kan ændre transskriptionen — til det bedre eller det værre. " +
-            "Vil du vide hvilket, skal det måles; fremgangsmåden står i doc/whisper.md.",
-            godkend: $"Hent {build.SizeText}",
-            annuller: "Ikke nu",
-            slags: Dialogs.Slags.Valg);
+            : Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
+                $"Hent motoren ({nyeste.Version})?",
+                (nuvaerende is null
+                    ? "Motoren er ikke installeret af appen, så det, der eventuelt ligger, kan ikke aflæses.\n"
+                    : $"Du kører: {nuvaerende}\n") +
+                $"Appen er lavet til: {nyeste.Version}\n\n" +
+                $"Fil: {build.FileName}\n" +
+                $"Størrelse: {build.SizeText}\n" +
+                "Hentes fra: github.com\n\n" +
+                "Uden motoren kan optagelser ikke skrives ud.",
+                godkend: $"Hent {build.SizeText}",
+                annuller: "Ikke nu",
+                slags: Dialogs.Slags.Valg);
 
         if (!ja) return;
 

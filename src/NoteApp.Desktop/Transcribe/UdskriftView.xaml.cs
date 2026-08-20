@@ -89,6 +89,48 @@ public sealed class Replikvisning : INotifyPropertyChanged
 }
 
 /// <summary>
+/// Ét felt i navngivningen — én side af mødet, eller én stemme.
+///
+/// Nøglen er det, navnet gemmes under: «HERFRA», «DERFRA» eller en stemme som
+/// «DERFRA#1». Mærkatet er det, der står på skærmen, når man ikke selv har
+/// sat et navn — «Mig», «Gæster», «Gæst 2».
+/// </summary>
+public sealed class Navnefelt : INotifyPropertyChanged
+{
+    private readonly Action<string, string> _sat;
+    private string _navn;
+
+    public Navnefelt(string noegle, string maerkat, string hjaelp, string navn,
+                     Action<string, string> sat)
+    {
+        Noegle = noegle;
+        Maerkat = maerkat;
+        Hjaelp = hjaelp;
+        _navn = navn;
+        _sat = sat;
+    }
+
+    public string Noegle { get; }
+    public string Maerkat { get; }
+    public string Hjaelp { get; }
+
+    public string Navn
+    {
+        get => _navn;
+        set
+        {
+            if (_navn == value) return;
+
+            _navn = value;
+            _sat(Noegle, value);
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Navn)));
+        }
+    }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+}
+
+/// <summary>
 /// Udskriften, som man kan rette i.
 ///
 /// HVORFOR REDIGERING ER MERE END BEKVEMMELIGHED
@@ -151,15 +193,10 @@ public partial class UdskriftView : UserControl
             return;
         }
 
-        var toSpor = _udskrift.Linjer.Any(l => l.Spor == Samtale.Herfra)
-                     && _udskrift.Linjer.Any(l => l.Spor == Samtale.Derfra);
-
         Hoved.Visibility = Visibility.Visible;
-        NavneKnap.Visibility = toSpor ? Visibility.Visible : Visibility.Collapsed;
         Navnerude.Visibility = Visibility.Collapsed;
 
-        NavnHerfra.Text = GemtNavn(Samtale.Herfra);
-        NavnDerfra.Text = GemtNavn(Samtale.Derfra);
+        ByggNavnefelter();
 
         Byg();
         RaaTekst.Text = Raa();
@@ -290,12 +327,78 @@ public partial class UdskriftView : UserControl
             ? Visibility.Collapsed
             : Visibility.Visible;
 
-    private void Navn_Aendret(object sender, TextChangedEventArgs e)
+    /// <summary>
+    /// Bygger felterne til navngivningen.
+    ///
+    /// ANTALLET ER IKKE GIVET PÅ FORHÅND.
+    ///
+    /// Før var der to felter: «Mig» og «Gæster». Det svarede til de to spor,
+    /// og det var alt, appen kunne vide. Har talergenkendelsen skilt stemmerne
+    /// ad, er der i stedet ét felt pr. stemme — «Gæst 1», «Gæst 2» — og så
+    /// giver ét samlet felt til gæstesiden ingen mening længere.
+    ///
+    /// Nøglen er stemmen selv («DERFRA#1»), ikke pladsen i rækken. Skrives
+    /// udskriften ud igen, hedder stemmerne det samme, og navnene bliver
+    /// stående.
+    /// </summary>
+    private void ByggNavnefelter()
+    {
+        if (_udskrift is null)
+        {
+            Navnefelter.ItemsSource = null;
+            NavneKnap.Visibility = Visibility.Collapsed;
+            return;
+        }
+
+        var felter = new List<Navnefelt>();
+
+        var toSpor = _udskrift.Linjer.Any(l => l.Spor == Samtale.Herfra)
+                     && _udskrift.Linjer.Any(l => l.Spor == Samtale.Derfra);
+
+        if (toSpor)
+            felter.Add(Felt(Samtale.Herfra, "Mig", "Dig — og dem, der sad i samme lokale"));
+
+        var stemmer = _udskrift.Linjer
+            .Where(l => l.Stemme is { Length: > 0 })
+            .Select(l => l.Stemme!)
+            .Distinct()
+            .OrderBy(s => s, StringComparer.Ordinal)
+            .ToList();
+
+        foreach (var stemme in stemmer)
+        {
+            var linje = _udskrift.Linjer.First(l => l.Stemme == stemme);
+
+            felter.Add(Felt(stemme,
+                Udskrift.Navn(new Udskriftslinje { Spor = linje.Spor, Stemme = stemme }, null),
+                "En stemme, maskinen har skilt ud. Sæt navnet på den, du kan høre det er"));
+        }
+
+        // Kun naar stemmerne IKKE er skilt ad, giver eet felt til hele
+        // gaestesiden mening. Ellers ville det staa og konkurrere med dem.
+        if (stemmer.Count == 0 && toSpor)
+            felter.Add(Felt(Samtale.Derfra, "Gæster", "De øvrige deltagere. Skriv gerne flere navne"));
+
+        Navnefelter.ItemsSource = felter;
+        NavneKnap.Visibility = felter.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+
+        Navneforklaring.Text = stemmer.Count > 0
+            ? "Maskinen har skilt stemmerne ad efter, hvordan de lyder — den ved ikke, " +
+              "hvem de er. Sæt navn på hver enkelt, så står navnene i udskriften og i " +
+              "alt, hvad der laves ud fra den. Den kan tage fejl; ret det, hvor det er galt."
+            : "Navnene sættes af dig — maskinen har ikke skilt stemmerne ad her. De " +
+              "siger, hvilken SIDE af mødet der talte, og der kan være flere personer " +
+              "bag hver af dem.";
+    }
+
+    private Navnefelt Felt(string noegle, string maerkat, string hjaelp) =>
+        new(noegle, maerkat, hjaelp, GemtNavn(noegle), Navn_Sat);
+
+    private void Navn_Sat(string noegle, string navn)
     {
         if (_indlæser || _meta is null || _mappe is null) return;
 
-        _meta.Talere[Samtale.Herfra] = NavnHerfra.Text.Trim();
-        _meta.Talere[Samtale.Derfra] = NavnDerfra.Text.Trim();
+        _meta.Talere[noegle] = navn.Trim();
 
         Byg();
         RaaTekst.Text = Raa();

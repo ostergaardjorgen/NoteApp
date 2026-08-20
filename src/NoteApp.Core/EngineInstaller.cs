@@ -47,7 +47,30 @@ public sealed record EngineRelease(string Version, IReadOnlyList<EngineBuild> Bu
 /// </summary>
 public static class EngineInstaller
 {
-    private const string LatestReleaseUrl = "https://api.github.com/repos/ggerganov/whisper.cpp/releases/latest";
+    /// <summary>
+    /// Den udgave af motoren, appen kører med.
+    ///
+    /// DEN ER LÅST FAST MED VILJE.
+    ///
+    /// Her stod før «releases/latest», og appen kunne hente den nyeste
+    /// whisper.cpp, når som helst nogen trykkede på knappen. Det er en fin
+    /// funktion på én maskine og et problem på ti: to kunder kan så køre med
+    /// hver sin motor, og et spørgsmål om, hvorfor en udskrift ser anderledes
+    /// ud, kan ikke besvares uden først at finde ud af hvilken.
+    ///
+    /// Appens målte adfærd hænger desuden på denne udgave. «-mc 0» mod
+    /// gentagelsesloopet, sprogkoden «no» frem for «nb», og de tidsstempler,
+    /// fletningen læser ud af json-filen — alt sammen er efterprøvet mod
+    /// v1.9.2. En nyere motor kan ændre det til det bedre eller det værre,
+    /// og forskellen kan kun ses ved at måle den igen.
+    ///
+    /// Skal der skiftes motor, sker det ved at ændre tallet her og udgive en
+    /// ny udgave af appen — efter en måling. Ikke ved et tryk hos en kunde.
+    /// </summary>
+    public const string Motorversion = "v1.9.2";
+
+    private const string ReleaseUrl =
+        "https://api.github.com/repos/ggerganov/whisper.cpp/releases/tags/" + Motorversion;
 
     /// <summary>
     /// Er der et NVIDIA-kort i maskinen? Afgør, om CUDA-udgaven overhovedet
@@ -77,12 +100,13 @@ public static class EngineInstaller
     }
 
     /// <summary>
-    /// Spørger GitHub, hvilke Windows-udgaver der findes i den nyeste udgivelse.
-    /// Beskrivelserne er vores egne; navn, størrelse og adresse er serverens.
+    /// Spørger GitHub, hvilke Windows-udgaver der findes i den udgivelse,
+    /// appen er låst til. Beskrivelserne er vores egne; navn, størrelse og
+    /// adresse er serverens.
     /// </summary>
-    public static async Task<EngineRelease> FetchLatestAsync(CancellationToken ct = default)
+    public static async Task<EngineRelease> FetchAsync(CancellationToken ct = default)
     {
-        var json = await new Downloader().FetchTextAsync(LatestReleaseUrl, ct);
+        var json = await new Downloader().FetchTextAsync(ReleaseUrl, ct);
 
         var version = Regex.Match(json, "\"tag_name\"\\s*:\\s*\"(?<tag>[^\"]+)\"").Groups["tag"].Value;
         if (string.IsNullOrWhiteSpace(version)) version = "ukendt";

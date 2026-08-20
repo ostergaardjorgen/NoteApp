@@ -32,6 +32,18 @@ public sealed class Udskriftslinje
     /// <summary>Maskinens oprindelige ord. Gemmes, første gang linjen rettes.</summary>
     public string? Oprindelig { get; set; }
 
+    /// <summary>
+    /// Hvilken STEMME på sporet der sagde det — «DERFRA#0», «DERFRA#1» og så
+    /// videre. Null, når talergenkendelsen ikke er kørt, eller når ingen
+    /// stemme kunne knyttes til replikken.
+    ///
+    /// Sporet siger hvilken SIDE af mødet der talte. Stemmen siger hvem af
+    /// dem. De to er ikke det samme, og de kan ikke slås sammen: sporet er
+    /// noget, appen ved med sikkerhed, fordi lyden kom ad to veje. Stemmen er
+    /// noget, den har regnet sig frem til, og den kan tage fejl.
+    /// </summary>
+    public string? Stemme { get; set; }
+
     public string Tid => TimeSpan.FromMilliseconds(FraMs).ToString(@"hh\:mm\:ss");
 }
 
@@ -214,7 +226,7 @@ public sealed class Udskrift
 
         foreach (var l in Linjer)
         {
-            var hvem = Navn(l.Spor, navne);
+            var hvem = Navn(l, navne);
 
             sb.Append('[').Append(l.Tid).Append(']');
             if (hvem.Length > 0) sb.Append(' ').Append(hvem).Append(':');
@@ -241,6 +253,29 @@ public sealed class Udskrift
         if (navne is not null && navne.TryGetValue(spor, out var n) && n.Length > 0) return n;
 
         return spor == Samtale.Derfra ? "Gæster" : "Mig";
+    }
+
+    /// <summary>
+    /// Navnet på den, der sagde en bestemt replik.
+    ///
+    /// Er talergenkendelsen kørt, står der en STEMME på linjen, og så er det
+    /// den, der tæller: «Gæst 2» siger mere end «Gæster». Er den ikke kørt,
+    /// eller kunne replikken ikke knyttes til en stemme, falder den tilbage
+    /// til sporet — det, appen ved med sikkerhed.
+    ///
+    /// Nøglen til et navn er stemmen selv («DERFRA#1»), så navne, man har sat
+    /// i hånden, overlever en ny kørsel af udskriften.
+    /// </summary>
+    public static string Navn(Udskriftslinje linje, IReadOnlyDictionary<string, string>? navne)
+    {
+        if (linje.Stemme is not { Length: > 0 } stemme) return Navn(linje.Spor, navne);
+
+        if (navne is not null && navne.TryGetValue(stemme, out var n) && n.Length > 0) return n;
+
+        var nummer = stemme.LastIndexOf('#') is var i and >= 0
+                     && int.TryParse(stemme[(i + 1)..], out var x) ? x + 1 : 1;
+
+        return linje.Spor == Samtale.Derfra ? $"Gæst {nummer}" : $"Taler {nummer}";
     }
 
     /// <summary>

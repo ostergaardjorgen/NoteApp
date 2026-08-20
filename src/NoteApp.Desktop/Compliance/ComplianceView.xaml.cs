@@ -68,6 +68,43 @@ public partial class ComplianceView : UserControl
                 "Modellen, der laver lyd om til tekst. Vægtene er OpenAI's og hentes fra huggingface.co.",
                 "Lyden forlader ikke maskinen. Hentningen er en envejsforbindelse: appen beder om en navngiven fil og modtager den."),
 
+            // ===================== TALERGENKENDELSEN =====================
+            //
+            // Tre komponenter mere, og de staar hver for sig af samme grund
+            // som whisper: de har hver sin rettighedshaver.
+            //
+            // LICENSERNE ER EFTERPROEVET, IKKE ANTAGET. Det er ikke en
+            // formalitet her: i den samme modelsamling ligger
+            // reverb-diarization-v1, som er udtrykkeligt IKKE-KOMMERCIEL. At
+            // en model ligger samme sted som vaerktoejet siger altsaa intet om,
+            // hvad den maa bruges til, og hver enkelt er slaaet op for sig.
+            //
+            // Den foerste stemmemodel, der blev maalt paa, var 3D-Speakers
+            // ERes2Net. Vaerktoejet bag er Apache-2.0, men selve modelvaegtene
+            // har ingen oplyst licens, og de er traenet paa VoxCeleb, som er et
+            // forskningsdatasaet. Den er derfor fravalgt til fordel for en med
+            // en licens, der staar skrevet.
+            new Komponent(
+                "sherpa-onnx",
+                "Apache-2.0",
+                "Kører lokalt",
+                "Programmet, der skiller stemmerne fra hinanden i en optagelse. Følger med appen og hentes ikke.",
+                "Apache-2.0 er fri at sælge med. Betingelsen er, at licensteksten følger med — den ligger i installationsmappen."),
+
+            new Komponent(
+                "pyannote segmentation 3.0",
+                "MIT",
+                "Kører lokalt",
+                "Modellen, der finder ud af, hvornår der bliver talt, og hvornår der skiftes taler. Vægtene er pyannote-projektets.",
+                "MIT er fri at sælge med. Der er ingen betingelser, der skal videregives til dine kunder."),
+
+            new Komponent(
+                "NVIDIA TitaNet",
+                "CC-BY-4.0",
+                "Kører lokalt",
+                "Modellen, der afgør, om to stykker tale kommer fra den samme stemme. Vægtene er NVIDIA's.",
+                "CC-BY-4.0 tillader kommerciel brug og videredistribution. Betingelsen er kreditering: NVIDIA skal nævnes som ophav, og det sker her og i installationsmappen."),
+
             new Komponent(
                 SkyKatalog.Standard.Navn,
                 "Tjeneste",

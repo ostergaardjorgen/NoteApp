@@ -55,6 +55,15 @@ bin/
 obj/
 *.user
 
+# UNDTAGET: talergenkendelsens program er ikke byggeoutput.
+#
+# "bin/" ovenfor rammer også talere/bin/, hvor sherpa-onnx og onnxruntime.dll
+# ligger. De hentes ikke og bygges ikke — de følger med appen, fordi tærsklen
+# i Diarisering.cs er målt mod præcis de filer. Blev de udeladt, ville et
+# frisk klon bygge en installationsfil uden talergenkendelse.
+!talere/bin/
+!talere/bin/**
+
 # Byggeresultater fra installationspakken. Kilden (NoteApp.wxs) hører i git,
 # den færdige pakke gør ikke — den er 100+ MB og kan bygges igen.
 installer/*.msi

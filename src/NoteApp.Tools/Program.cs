@@ -1,4 +1,4 @@
-﻿using NoteApp.Core;
+using NoteApp.Core;
 
 // Kommandolinjeværktøj til de ting, der ikke hører hjemme i en optageknap:
 // initialisering af ordbogen, genopretning efter crash, og et hurtigt kig på
@@ -517,7 +517,7 @@ static async Task<int> Sky(string[] a)
 static async Task<int> HentMotor(string[] a)
 {
     Console.WriteLine("Spørger GitHub om nyeste udgivelse ...");
-    var udgivelse = await EngineInstaller.FetchLatestAsync();
+    var udgivelse = await EngineInstaller.FetchAsync();
 
     Console.WriteLine($"Version : {udgivelse.Version}");
     Console.WriteLine($"NVIDIA  : {(EngineInstaller.HasNvidiaGpu() ? "ja — CUDA kan bruges" : "nej — CPU-udgave anbefales")}");
