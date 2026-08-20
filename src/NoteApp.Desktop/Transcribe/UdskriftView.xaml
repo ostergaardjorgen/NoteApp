@@ -232,11 +232,22 @@
 
                        Overskriften taeller traeffene, saa man ved, hvor mange
                        der er, og hvor langt man er naaet. -->
-                  <Border Visibility="{Binding BlokSynlig}" Margin="10,16,10,8"
-                          Background="#FF1A1F28" CornerRadius="6" Padding="10,5">
-                    <TextBlock Text="{Binding Bloktitel}" FontSize="10"
-                               FontWeight="SemiBold" Foreground="{StaticResource Accent}" />
-                  </Border>
+                  <StackPanel Visibility="{Binding BlokSynlig}" Margin="0,26,0,12">
+
+                    <!-- Stregen gaar helt ud i begge sider. Et maerkat alene
+                         var for spinkelt: blokkene laa taet, og oejet loeb
+                         videre uden at registrere skiftet. En streg tvaers over
+                         ruden er det, der faktisk skiller to ting ad. -->
+                    <Rectangle Height="1" Fill="#FF303845" Margin="4,0,4,0" />
+
+                    <Border Background="#FF1D2530" CornerRadius="0,6,6,0"
+                            BorderBrush="{StaticResource Accent}" BorderThickness="3,0,0,0"
+                            Padding="11,6" HorizontalAlignment="Left"
+                            Margin="4,-11,0,0">
+                      <TextBlock Text="{Binding Bloktitel}" FontSize="10.5"
+                                 FontWeight="SemiBold" Foreground="{StaticResource Accent}" />
+                    </Border>
+                  </StackPanel>
 
                   <Border CornerRadius="7" Padding="10,7" Margin="0,0,0,3"
                           Background="Transparent" BorderThickness="2,0,0,0"
