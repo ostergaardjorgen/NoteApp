@@ -30,6 +30,12 @@ Det er et designvalg, ikke en begrænsning. Talegenkendelse i skyen ville være
 hurtigere og er fravalgt; bliver udskriften for langsom, løses det med bedre
 lokale modeller.
 
+**Fortæl altid mødedeltagerne, at du optager.** Ved et onlinemøde giver
+mødeprogrammet ikke besked, når lyden optages på denne måde — så beskeden skal
+komme fra dig. Til gengæld kan du fortælle dem, hvor optagelsen ender: den
+bliver på din maskine og lægges ikke i nogen skytjeneste. Det er en besked, de
+færreste mødeværktøjer kan give.
+
 Dokumentdelen kræver **din egen API-nøgle**. Der følger ingen med appen, og
 appen opretter ingen konto for dig. Vil du ikke sende noget ud af huset, kan
 du bruge appen til optagelse og udskrift alene.

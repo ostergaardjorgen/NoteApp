@@ -224,11 +224,14 @@ lokal SSD** — og den omkostning betales, hver eneste gang en udskrift starter.
 
 ## Juridisk note
 
-Optager du et onlinemøde, fanges de andre deltageres lyd, **uden at
-mødeprogrammet signalerer det**. Til dine egne møder på egen maskine er det
-uproblematisk, men oplys deltagerne — og skal outputtet nogensinde ind i en
-kundeleverance, er det et krav, ikke en høflighed.
+**Fortæl altid mødedeltagerne, at du optager.** Ved et onlinemøde giver
+mødeprogrammet ikke besked, når lyden optages på denne måde — så beskeden skal
+komme fra dig.
 
-Sender du en udskrift til sprogmodellen, sender du også dét, de andre
-deltagere sagde. De har ikke sagt ja til det. Hvad det indebærer, står under
-**Compliance** i appen.
+Til gengæld kan du fortælle dem, hvor optagelsen ender: den bliver på din
+maskine. Den lægges ikke i en skytjeneste og sendes ikke videre. Det er en
+besked, de færreste mødeværktøjer kan give, og den gør samtykket nemt at give.
+
+Vær præcis om det sidste skridt: laver du et dokument, sendes udskriftens
+**tekst** til en europæisk leverandør — også dét, de andre sagde. Lyden gør
+ikke. Forbeholdene står under **Compliance** i appen.

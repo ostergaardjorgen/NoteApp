@@ -252,7 +252,7 @@
                     <TextBlock FontSize="12" LineHeight="19" TextWrapping="Wrap" Margin="0,6,0,0"
                                MaxWidth="560" HorizontalAlignment="Left"
                                Foreground="{StaticResource TekstMeget}"
-                               Text="Pay as you go er også det, der giver den aftale, vi bygger på. Gratisniveauet har andre vilkår for, hvad dine data må bruges til." />
+                               Text="Pay as you go er også det niveau, den databehandleraftale gælder for, som appen bygger på. Gratisniveauet har andre vilkår for, hvad dine data må bruges til." />
                   </StackPanel>
                 </Grid>
 

@@ -91,7 +91,7 @@
                                  Foreground="{StaticResource Godkendt}" Margin="0,0,0,10" />
                       <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap"
                                  Foreground="{StaticResource TekstSvag}"
-                                 Text="Lyd og udskrift forlader aldrig maskinen. Det er vores egen kode, og den kan efterprøves." />
+                                 Text="Lyd og udskrift forlader aldrig maskinen. Det sker i appens egen kode, og den kan efterprøves." />
                       <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
                                  Foreground="{StaticResource TekstSvag}"
                                  Text="Appen kan kun kalde det europæiske endepunkt. Det er spærret i koden, ikke en indstilling." />
@@ -225,11 +225,14 @@
                            Foreground="{StaticResource TekstSvag}"
                            Text="Hvem der talte, kan høres, også når navnet aldrig bliver sagt. Dertil kommer tonefald, tøven, accent og ting om helbred og sindstilstand, som ingen har sagt højt. Intet af det følger med en udskrift." />
 
-                <TextBlock Text="De øvrige deltagere har ikke sagt ja til noget." FontSize="13.5"
+                <TextBlock Text="Fortæl altid deltagerne, at du optager." FontSize="13.5"
                            FontWeight="SemiBold" Margin="0,0,0,4" />
+                <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,0,0,10"
+                           Foreground="{StaticResource TekstSvag}"
+                           Text="Sig det, inden mødet går i gang. Det er god skik, og ved onlinemøder er det nødvendigt: mødeprogrammet giver ikke besked, når lyden optages på denne måde." />
                 <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap"
                            Foreground="{StaticResource TekstSvag}"
-                           Text="Det er dig, der har valgt at optage. Netop derfor er det afgørende, at deres stemmer bliver på din maskine — det er dem, der har mindst kontrol over, hvor optagelsen ender." />
+                           Text="Og du kan sige mere end at du optager. Du kan fortælle, hvor optagelsen ender: den bliver på din maskine. Den lægges ikke i en skytjeneste — hverken en amerikansk eller en anden — og den sendes ikke videre. Det er en besked, de færreste mødeværktøjer kan give, og den gør samtykket nemt at give." />
 
                 <Border Background="#FF16241C" BorderBrush="{StaticResource Godkendt}" BorderThickness="0,1,0,0"
                         Padding="0,12,0,0" Margin="0,14,0,0">
@@ -338,7 +341,7 @@
 
                 <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,10,0,0"
                            Foreground="{StaticResource FejlTekst}" FontWeight="SemiBold"
-                           Text="TO UNDTAGELSER ER VÆRD AT KENDE. CrowdStrike står med «EØS, United States» og gælder alle produkter — altså en amerikansk placering i vores kæde, ikke kun amerikansk ejerskab. Cloudflare står med «Worldwide», dog med bemærkningen «Local to Customer», hvilket peger på, at trafikken føres til nærmeste knudepunkt." />
+                           Text="TO UNDTAGELSER ER VÆRD AT KENDE. CrowdStrike står med «EØS, United States» og gælder alle produkter — altså en amerikansk placering i leverandørkæden, ikke kun amerikansk ejerskab. Cloudflare står med «Worldwide», dog med bemærkningen «Local to Customer», hvilket peger på, at trafikken føres til nærmeste knudepunkt." />
 
                 <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,10,0,0"
                            Foreground="{StaticResource TekstSvag}"

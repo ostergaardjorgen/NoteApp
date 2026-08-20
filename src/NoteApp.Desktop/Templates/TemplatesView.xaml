@@ -242,7 +242,7 @@
                   <TextBlock Text="Fælles regler, du kan sætte ind" FontSize="12.5" FontWeight="SemiBold" />
                   <TextBlock FontSize="11.5" Margin="0,4,0,8" TextWrapping="Wrap" LineHeight="18"
                              Foreground="{StaticResource TekstMeget}"
-                             Text="Reglerne for, hvem der kommer på deltagerlisten, er de samme i alle skabeloner. Sæt feltet ind, så følger de med — og retter vi dem ét sted, følger alle skabeloner med." />
+                             Text="Reglerne for, hvem der kommer på deltagerlisten, er de samme i alle skabeloner. Sæt feltet ind, så følger de med — rettes de ét sted, følger alle skabeloner med." />
                   <!-- {} foerst: ellers laeser XAML den kroellede parentes som en
                        markup-extension og vil ikke bygge. -->
                   <Button Content="{}{{deltagerregler}}" Tag="{}{{deltagerregler}}" Click="Systemfelt_Klik"
