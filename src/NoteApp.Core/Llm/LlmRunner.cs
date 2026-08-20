@@ -138,13 +138,38 @@ public sealed class LlmRunner
         var args = new List<string>
         {
             "-m", modelPath,
-            "-sys", template.RenderSystem(),
+
+            // «/no_think» SLUKKER MODELLENS HØJTTÆNKNING.
+            //
+            // «--reasoning-budget 0» nedenfor gør det ikke i dette byg af
+            // llama.cpp. Målt 20-08-2026: Qwen3-4B skrev et helt afsnit på
+            // ENGELSK om, hvordan den ville gribe opgaven an, før den svarede
+            // — og ved 50 tokens i sekundet er det dér, tiden går. Med
+            // «/no_think» i systemprompten faldt den samme kørsel fra 63 til
+            // 9 sekunder.
+            //
+            // Det er Qwens egen kontakt. Andre modeller ser det bare som et
+            // ord i prompten og tager ikke skade af det.
+            "-sys", template.RenderSystem().TrimEnd() + " /no_think",
+
             "-f", promptFil,
             "-n", template.MaxTokens.ToString(),
             "-c", kontekst.ToString(),
             "--temp", template.Temperature.ToString(System.Globalization.CultureInfo.InvariantCulture),
             "-ngl", "999",              // laeg alt paa GPU'en; llama.cpp falder selv tilbage
             "--no-warmup",
+
+            // KV-CACHEN KVANTISERES.
+            //
+            // Den er den egentlige begrænsning på et 6 GB-kort — ikke vægtene.
+            // Målt på et møde på en time: udskriften fylder 23.345 tokens, og
+            // Qwen3 bruger omkring 147 KB pr. token i fuld opløsning. Det er
+            // 3,4 GB oven i modellen, og så er kortet fyldt.
+            //
+            // Med q8_0 halveres det. Det er forskellen på, at en model på 4B
+            // kan læse et helt møde på én gang — og at den ikke kan.
+            "--cache-type-k", "q8_0",
+            "--cache-type-v", "q8_0",
 
             // De fire her hoerer sammen, og hver af dem kostede en fejlkoersel:
             //

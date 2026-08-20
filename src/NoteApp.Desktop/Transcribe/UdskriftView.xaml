@@ -371,7 +371,10 @@
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                   <Button Content="Kopiér" Click="OpsumKopier_Klik" Padding="12,6"
                           FontSize="12" Margin="0,0,8,0" />
-                  <Button Content="Lav den om" Click="OpsumLav_Klik" Padding="12,6" FontSize="12" />
+                  <Button Content="Lav den om i Europa" Click="OpsumLav_Klik" Padding="12,6"
+                          FontSize="12" Margin="0,0,8,0" />
+                  <Button Content="Lav den om på maskinen" Click="OpsumLokal_Klik"
+                          Padding="12,6" FontSize="12" />
                 </StackPanel>
               </Grid>
 
@@ -424,16 +427,48 @@
                        TextAlignment="Center" Foreground="{StaticResource TekstSvag}"
                        Text="En kort opsummering på ti linjer: hvad der blev besluttet, hvad der blev aftalt, og hvad der stod åbent. Til at huske mødet med — ikke et dokument, du skal navngive og gemme." />
 
-            <Border Background="#33E8A33D" BorderBrush="{StaticResource Advarsel}"
-                    BorderThickness="1" CornerRadius="8" Padding="14,11" Margin="0,16,0,0">
-              <TextBlock FontSize="12.5" LineHeight="20" TextWrapping="Wrap"
-                         Foreground="{StaticResource Tekst}"
-                         Text="Det sender udskriftens tekst til Mistral i Europa — ikke lyden. Afsendelsen bogføres under Compliance med tidspunkt, antal tegn og en kontrolsum." />
-            </Border>
+            <!-- ============ TO VEJE, OG FORSKELLEN STÅR DER ============
 
-            <Button x:Name="OpsumKnap" Content="Lav en opsummering" Click="OpsumLav_Klik"
-                    HorizontalAlignment="Center" Margin="0,18,0,0" Padding="20,10"
-                    Style="{StaticResource Primaer}" />
+                 Tallene er målt 20-08-2026 på det samme møde på en time.
+                 Mistral: 25 sekunder. Qwen3-4B på maskinen: 76 sekunder.
+
+                 Den lokale fandt på et tal, der aldrig blev sagt — «allerede
+                 seks kunder i Danmark» — og missede mødets eneste aftale. Det
+                 står der, fordi valget ellers ikke kan træffes. Efterprøvningen
+                 fanger tal og navne, der ikke er i udskriften, uanset hvilken
+                 vej der blev brugt. -->
+            <Grid Margin="0,18,0,0">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+              </Grid.ColumnDefinitions>
+
+              <Border Grid.Column="0" Background="#FF181B22" CornerRadius="9" Padding="14,12"
+                      Margin="0,0,7,0" BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+                <StackPanel>
+                  <TextBlock Text="I EUROPA" FontSize="9.5" FontWeight="SemiBold"
+                             Foreground="{StaticResource Accent}" />
+                  <TextBlock FontSize="12" LineHeight="18" TextWrapping="Wrap" Margin="0,6,0,0"
+                             Foreground="{StaticResource TekstSvag}"
+                             Text="Cirka et halvt minut, og den bedste tekst. Udskriften sendes til Mistral — ikke lyden. Afsendelsen bogføres under Compliance." />
+                  <Button x:Name="OpsumKnap" Content="Lav den i Europa" Click="OpsumLav_Klik"
+                          Margin="0,12,0,0" Padding="14,8" Style="{StaticResource Primaer}" />
+                </StackPanel>
+              </Border>
+
+              <Border Grid.Column="1" Background="#FF181B22" CornerRadius="9" Padding="14,12"
+                      Margin="7,0,0,0" BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+                <StackPanel>
+                  <TextBlock Text="PÅ MASKINEN" FontSize="9.5" FontWeight="SemiBold"
+                             Foreground="{StaticResource Accent}" />
+                  <TextBlock FontSize="12" LineHeight="18" TextWrapping="Wrap" Margin="0,6,0,0"
+                             Foreground="{StaticResource TekstSvag}"
+                             Text="Halvanden til to minutter. Intet forlader maskinen. Teksten bliver ikke lige så god, og modellen kan finde på et tal — det bliver markeret." />
+                  <Button x:Name="OpsumLokalKnap" Content="Lav den på maskinen"
+                          Click="OpsumLokal_Klik" Margin="0,12,0,0" Padding="14,8" />
+                </StackPanel>
+              </Border>
+            </Grid>
 
             <TextBlock x:Name="OpsumStatus" FontSize="12" Margin="0,12,0,0"
                        HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center"

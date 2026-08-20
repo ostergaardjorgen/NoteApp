@@ -1265,6 +1265,130 @@ public partial class UdskriftView : UserControl
     /// den gør, og hvor teksten går hen. En dialog oveni ville være at
     /// spørge to gange om det samme.
     /// </summary>
+    /// <summary>
+    /// Opsummeringen lavet på maskinen — intet forlader den.
+    ///
+    /// MÅLT 20-08-2026 PÅ ET MØDE PÅ EN TIME
+    ///
+    /// Qwen3-4B i Q4_K_M brugte 76 sekunder mod Mistrals 25. Teksten er
+    /// ringere, men brugbar: den fandt Alexander, Espen, CloudWorks, Omada og
+    /// hovedemnet.
+    ///
+    /// Den skrev også «allerede seks kunder i Danmark». De ord falder ikke ét
+    /// sted i udskriften. Derfor efterprøves resultatet bagefter — se
+    /// <see cref="Efterproevning"/> — og det, der ikke kan findes, står gult
+    /// over teksten.
+    ///
+    /// EN 8B-MODEL KAN IKKE BRUGES HER. Vægtene fylder 4.795 MB af kortets
+    /// 6.144, og så er der ikke plads til de 23.345 tokens, udskriften fylder.
+    /// Den blev afbrudt efter elleve minutter. Den mindre model er ikke et
+    /// kompromis — den er den, der virker.
+    /// </summary>
+    private async void OpsumLokal_Klik(object sender, RoutedEventArgs e)
+    {
+        if (_mappe is null || _udskrift is null) return;
+
+        var cli = LlmRunner.FindCli();
+        if (cli is null)
+        {
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Den lokale motor mangler",
+                "Programmet, der kører en sprogmodel på maskinen, er ikke installeret.\n\n" +
+                "Du kan stadig lave opsummeringen i Europa.", Dialogs.Slags.Valg);
+            return;
+        }
+
+        var modeller = LlmRunner.InstalledModels();
+        if (modeller.Count == 0)
+        {
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Der er ingen model på maskinen",
+                "En opsummering på maskinen kræver en sprogmodel, og der ligger ingen i " +
+                $"{LlmRunner.ModelDirectory}.\n\n" +
+                "Du kan stadig lave opsummeringen i Europa.", Dialogs.Slags.Valg);
+            return;
+        }
+
+        // ============ HVILKEN MODEL ============
+        //
+        // Den MAALTE gaar forud for den mindste.
+        //
+        // Foerste udgave tog bare den mindste fil. Det ville have valgt
+        // gemma-3-4b paa 2.375 MB frem for Qwen3-4B paa 2.382 MB — syv
+        // megabyte mindre og 131 sekunder mod 76 paa det samme moede. Stoerrelse
+        // er ikke kvalitet, og det er heller ikke hastighed.
+        //
+        // Er der ingen kendt model, tages den mindste. Paa et 6 GB-kort er det
+        // KV-cachen, der saetter graensen, og en stoerre model efterlader mindre
+        // plads til udskriften — indtil den ikke kan laeses paa een gang mere.
+        string[] maalte = { "qwen3-4b" };
+
+        var model = modeller
+            .OrderBy(m =>
+            {
+                var f = Path.GetFileName(m).ToLowerInvariant();
+                var i = Array.FindIndex(maalte, k => f.Contains(k));
+                return i < 0 ? int.MaxValue : i;
+            })
+            .ThenBy(m => new FileInfo(m).Length)
+            .First();
+
+        var tekst = _udskrift.SomTekst(_meta?.Talere);
+
+        if (tekst.Trim().Length < 200)
+        {
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Der er ikke nok tekst",
+                "Udskriften er for kort til, at en opsummering siger mere end teksten selv.",
+                Dialogs.Slags.Valg);
+            return;
+        }
+
+        OpsumKnap.IsEnabled = false;
+        OpsumLokalKnap.IsEnabled = false;
+
+        var navn = Path.GetFileNameWithoutExtension(model);
+        var ur = System.Diagnostics.Stopwatch.StartNew();
+
+        var tikker = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+        tikker.Tick += (_, _) =>
+            OpsumStatus.Text = $"{navn} læser mødet igennem … {ur.Elapsed.TotalSeconds:0} sek.";
+        tikker.Start();
+
+        OpsumStatus.Text = $"{navn} læser mødet igennem …";
+
+        try
+        {
+            var titel = _meta?.Title ?? "mødet";
+
+            var svar = await new LlmRunner(cli).RunAsync(
+                model,
+                Opsummering.Opskrift(),
+                $"Mødet hedder «{titel}».\n\nUdskrift:\n{tekst}");
+
+            Opsummering.Gem(_mappe, new Opsummeringsdata
+            {
+                Tekst = svar.Text.Trim(),
+                Model = navn + " (på maskinen)",
+                UdskriftSum = Kvitteringer.Kontrolsum(tekst)
+            });
+
+            VisOpsummering();
+            OpsumStatus.Text = "";
+            Meld($"Opsummeringen er lavet på maskinen — {ur.Elapsed.TotalSeconds:0} sek.");
+        }
+        catch (Exception ex)
+        {
+            OpsumStatus.Text = "";
+
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Opsummeringen blev ikke lavet",
+                ex.Message, Dialogs.Slags.Pas_paa);
+        }
+        finally
+        {
+            tikker.Stop();
+            OpsumKnap.IsEnabled = true;
+            OpsumLokalKnap.IsEnabled = true;
+        }
+    }
+
     private async void OpsumLav_Klik(object sender, RoutedEventArgs e)
     {
         if (_mappe is null || _udskrift is null) return;
