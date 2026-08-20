@@ -164,6 +164,55 @@ public sealed class Replikvisning : INotifyPropertyChanged
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(navn));
 }
 
+/// <summary>Et forslag til en opgave, som skærmen viser det.</summary>
+public sealed record Forslagvisning(string Noegle, string Tekst, string Taler,
+                                    string Tid, string Grund);
+
+/// <summary>
+/// En oprettet opgave, som skærmen viser og redigerer den.
+///
+/// Den skriver DIREKTE i <see cref="Opgave"/> og melder til kalderen, at der
+/// skal gemmes. Deadline sættes i en datovælger, og en datovælger giver
+/// DateTime — opgaven gemmer DateTimeOffset, så den kan læses rigtigt, hvis
+/// filen bliver flyttet til en anden tidszone.
+/// </summary>
+public sealed class Opgavevisning : INotifyPropertyChanged
+{
+    private readonly Opgave _o;
+    private readonly Action _gem;
+
+    public Opgavevisning(Opgave o, Action gem) { _o = o; _gem = gem; }
+
+    public Opgave Bag => _o;
+    public Guid Id => _o.Id;
+    public string Ejer => _o.Ejer;
+    public string Kilde => _o.Kilde;
+
+    public Visibility EjerSynlig => _o.Ejer.Length > 0 ? Visibility.Visible : Visibility.Collapsed;
+
+    public string Tekst
+    {
+        get => _o.Tekst;
+        set { if (_o.Tekst == value) return; _o.Tekst = value; Meld(); _gem(); }
+    }
+
+    public DateTime? Deadline
+    {
+        get => _o.Deadline?.LocalDateTime;
+        set
+        {
+            _o.Deadline = value is null ? null : new DateTimeOffset(value.Value);
+            Meld();
+            _gem();
+        }
+    }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    private void Meld([System.Runtime.CompilerServices.CallerMemberName] string navn = "") =>
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(navn));
+}
+
 /// <summary>Én taler på statistikfanen: navn, taletid og bjælkens længde.</summary>
 public sealed record Talerstat(string Navn, string Minutter, string Procent,
                                double Bredde, Brush Farve);
@@ -265,6 +314,7 @@ public partial class UdskriftView : UserControl
         RaaTekst.Text = Raa();
         VisOpsummering();
         VisTal();
+        VisOpgaver();
 
         Meld(_udskrift.ErRettet ? "Rettet" : "");
         _indlæser = false;
@@ -554,6 +604,151 @@ public partial class UdskriftView : UserControl
     {
         if (_indlæser || _udskrift is null) return;
         Byg();
+    }
+
+    // -------------------------------------------------------------- opgaver
+
+    private Opgaveliste _opgaver = new();
+    private List<Opgavekandidat> _kandidater = new();
+
+    /// <summary>
+    /// Bygger opgavefanen: de oprettede opgaver øverst, forslagene under.
+    ///
+    /// Forslagene findes af sig selv, hver gang udskriften åbnes. Knappen
+    /// «Find opgaver» er til at køre det om, når man har rettet i teksten —
+    /// ikke til at få det til at ske første gang. En knap, man SKAL trykke på
+    /// for at få en funktion til at findes, er en funktion, folk ikke opdager.
+    /// </summary>
+    private void VisOpgaver()
+    {
+        if (_mappe is null || _udskrift is null)
+        {
+            Opgaverude.ItemsSource = null;
+            Forslagliste.ItemsSource = null;
+            return;
+        }
+
+        _opgaver = Opgaveliste.Hent(_mappe);
+        _kandidater = Opgavefund.Find(_udskrift, _meta?.Talere, _mappe);
+
+        TegnOpgaver();
+    }
+
+    private void TegnOpgaver()
+    {
+        Opgaverude.ItemsSource = _opgaver.Opgaver
+            .OrderBy(o => o.Deadline ?? DateTimeOffset.MaxValue)
+            .ThenBy(o => o.Oprettet)
+            .Select(o => new Opgavevisning(o, GemOpgaver))
+            .ToList();
+
+        OpgaveOverskrift.Visibility = _opgaver.Opgaver.Count > 0
+            ? Visibility.Visible : Visibility.Collapsed;
+
+        // Et forslag, der allerede er sagt ja eller nej til, skal ikke staa
+        // igen. Ellers ville listen se ud, som om intet blev gemt.
+        var tilbage = _kandidater
+            .Where(k => !_opgaver.ErAfvist(k.Tekst) && !_opgaver.ErOprettet(k.Tekst))
+            .ToList();
+
+        var svage = tilbage.Count(k => k.Styrke < Opgavefund.Vises);
+
+        var vist = VisSvage.IsChecked == true
+            ? tilbage
+            : tilbage.Where(k => k.Styrke >= Opgavefund.Vises).ToList();
+
+        Forslagliste.ItemsSource = vist
+            .OrderByDescending(k => k.Styrke)
+            .ThenBy(k => k.FraMs)
+            .Select(k => new Forslagvisning(
+                Opgaveliste.Noegle(k.Tekst), k.Tekst, k.Taler, k.Tid, k.Grund))
+            .ToList();
+
+        ForslagOverskrift.Visibility = vist.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+
+        OpgaveStatus.Text = vist.Count == 0 && svage == 0
+            ? "Ingen forslag tilbage — alle er enten oprettet eller afvist."
+            : svage > 0 && VisSvage.IsChecked != true
+                ? $"{vist.Count} forslag. {svage} svage er skjult."
+                : $"{vist.Count} forslag.";
+
+        OpgaveTom.Visibility = _opgaver.Opgaver.Count == 0 && vist.Count == 0
+            ? Visibility.Visible : Visibility.Collapsed;
+
+        OpgaveTom.Text = svage > 0
+            ? "Der er ingen stærke forslag i denne udskrift. Sæt flueben i «Vis også svage forslag» " +
+              "for at se de øvrige — eller tilføj en opgave i hånden."
+            : "Der blev ikke fundet noget, der ligner en aftale i denne udskrift. " +
+              "Du kan tilføje en opgave i hånden.";
+    }
+
+    private void GemOpgaver()
+    {
+        if (_mappe is null) return;
+        try { _opgaver.Gem(_mappe); } catch (IOException) { }
+    }
+
+    private void FindOpgaver_Klik(object sender, RoutedEventArgs e) => VisOpgaver();
+
+    private void VisSvage_Klik(object sender, RoutedEventArgs e) => TegnOpgaver();
+
+    /// <summary>
+    /// Opretter en opgave af et forslag.
+    ///
+    /// EJEREN ER DEN, DER SAGDE DET — IKKE ET GÆT.
+    ///
+    /// Navnet kommer fra den replik, forslaget blev fundet i, og det navn har
+    /// du selv sat på taleren. Derfor kan det stå der uden forbehold. Skal en
+    /// anden have opgaven, rettes det i hånden.
+    /// </summary>
+    private void OpretOpgave_Klik(object sender, RoutedEventArgs e)
+    {
+        if (sender is not FrameworkElement k || k.Tag is not string noegle) return;
+
+        var kandidat = _kandidater.FirstOrDefault(x => Opgaveliste.Noegle(x.Tekst) == noegle);
+        if (kandidat is null) return;
+
+        _opgaver.Opgaver.Add(new Opgave
+        {
+            Tekst = kandidat.Tekst,
+            // «Din note» er ikke en person. Noten er DIN, saa opgaven er din -
+            // men navnet skal vaere det, der staar paa dit spor.
+            Ejer = kandidat.Taler == "Din note"
+                ? Udskrift.Navn(Samtale.Herfra, _meta?.Talere)
+                : kandidat.Taler,
+            Kilde = kandidat.Tid
+        });
+
+        GemOpgaver();
+        TegnOpgaver();
+    }
+
+    private void AfvisOpgave_Klik(object sender, RoutedEventArgs e)
+    {
+        if (sender is not FrameworkElement k || k.Tag is not string noegle) return;
+
+        var kandidat = _kandidater.FirstOrDefault(x => Opgaveliste.Noegle(x.Tekst) == noegle);
+        if (kandidat is null) return;
+
+        _opgaver.Afvis(kandidat.Tekst);
+        GemOpgaver();
+        TegnOpgaver();
+    }
+
+    private void NyOpgave_Klik(object sender, RoutedEventArgs e)
+    {
+        _opgaver.Opgaver.Add(new Opgave { Tekst = "" });
+        GemOpgaver();
+        TegnOpgaver();
+    }
+
+    private void SletOpgave_Klik(object sender, RoutedEventArgs e)
+    {
+        if (sender is not FrameworkElement k || k.Tag is not Guid id) return;
+
+        _opgaver.Opgaver.RemoveAll(o => o.Id == id);
+        GemOpgaver();
+        TegnOpgaver();
     }
 
     // ------------------------------------------------------------------ tal
@@ -1024,6 +1219,37 @@ public partial class UdskriftView : UserControl
         OpsumAdvarsel.Text = uenig
             ? "Udskriften er ændret, siden opsummeringen blev lavet. De to siger ikke nødvendigvis det samme længere — lav den om, hvis rettelserne betyder noget."
             : "";
+
+        Efterproev(o.Tekst);
+    }
+
+    /// <summary>
+    /// Holder opsummeringens påstande op mod udskriften.
+    ///
+    /// Se <see cref="Efterproevning"/> for hvorfor. Kort: en model kan skrive
+    /// et tal, der aldrig blev sagt, og det læses som et faktum. Kilden ligger
+    /// på maskinen, og opslaget tager millisekunder.
+    /// </summary>
+    private void Efterproev(string opsummering)
+    {
+        OpsumTjek.Visibility = Visibility.Collapsed;
+
+        if (_udskrift is null || opsummering.Trim().Length == 0) return;
+
+        List<Ubelagt> fundne;
+        try { fundne = Efterproevning.Find(opsummering, _udskrift.SomTekst(_meta?.Talere)); }
+        catch (Exception) { return; }
+
+        if (fundne.Count == 0) return;
+
+        OpsumTjek.Visibility = Visibility.Visible;
+
+        OpsumTjekTitel.Text = fundne.Count == 1
+            ? "Én påstand kunne ikke findes i udskriften"
+            : $"{fundne.Count} påstande kunne ikke findes i udskriften";
+
+        OpsumTjekListe.Text = string.Join("\n",
+            fundne.Select(f => $"«{f.Tekst}» — {(f.Slags == "tal" ? "tallet" : "navnet")} står ikke i udskriften"));
     }
 
     private void OpsumKopier_Klik(object sender, RoutedEventArgs e)

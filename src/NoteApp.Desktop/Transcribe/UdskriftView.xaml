@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="NoteApp.Desktop.Transcribe.UdskriftView"
+<UserControl x:Class="NoteApp.Desktop.Transcribe.UdskriftView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
@@ -379,6 +379,35 @@
                          Margin="0,0,0,12" Visibility="Collapsed"
                          Foreground="{StaticResource Advarsel}" />
 
+              <!-- ============ EFTERPRØVNINGEN ============
+
+                   Hver påstand i opsummeringen slås op i udskriften. Det, der
+                   ikke kan findes, står her.
+
+                   Målt 20-08-2026: en lokal model skrev «allerede seks kunder i
+                   Danmark» om et møde, hvor ordene ikke faldt én eneste gang.
+                   Det læses som et faktum. Opslaget tager millisekunder, og
+                   kilden ligger på maskinen — så der er ingen grund til at lade
+                   være.
+
+                   Der SLETTES ikke noget. En påstand kan være rigtig, selvom
+                   ordene står anderledes; at fjerne den ville være at rette en
+                   fejl, der måske ikke er der. -->
+              <Border x:Name="OpsumTjek" Visibility="Collapsed" Margin="0,0,0,12"
+                      Background="#FF2A2318" CornerRadius="7" Padding="12,9"
+                      BorderBrush="{StaticResource Advarsel}" BorderThickness="0,0,0,2">
+                <StackPanel>
+                  <TextBlock x:Name="OpsumTjekTitel" FontSize="12" FontWeight="SemiBold"
+                             Foreground="{StaticResource Advarsel}" />
+                  <TextBlock x:Name="OpsumTjekListe" FontSize="12" TextWrapping="Wrap"
+                             LineHeight="19" Margin="0,5,0,0"
+                             Foreground="{StaticResource Tekst}" />
+                  <TextBlock FontSize="11" TextWrapping="Wrap" LineHeight="17" Margin="0,6,0,0"
+                             Foreground="{StaticResource TekstMeget}"
+                             Text="Det kan godt være rigtigt alligevel — ordene kan stå anderledes i udskriften end i opsummeringen. Men det er ikke efterprøvet, og der er ikke slettet noget." />
+                </StackPanel>
+              </Border>
+
               <TextBox x:Name="OpsumTekst" IsReadOnly="True" FontSize="13.5" TextWrapping="Wrap"
                        BorderThickness="0" Background="Transparent" Padding="0"
                        Foreground="{StaticResource Tekst}"
@@ -417,6 +446,145 @@
            Har man rettet i en udskrift, er spoergsmaalet et halvt aar senere,
            om en formulering er ens egen eller maskinens. Her staar maskinens
            ord, uroerte, som de kom ud. -->
+      <!-- ===================== Opgaverne =====================
+
+           MASKINEN FORESLÅR, DU AFGØR.
+
+           Der står ingen sprogmodel bag fundene. Målt 17-08-2026 havde den
+           lokale model 12 % dækning og fandt selv på navne; en opgaveliste,
+           der stille mangler syv af otte, er værre end ingen, fordi man
+           stoler på den. Appen leder i stedet efter det, folk FAKTISK siger,
+           når de påtager sig noget — «jeg sender», «kan du», «inden fredag».
+
+           Den tager for meget med. Det er den rigtige vej at fejle, når et
+           menneske alligevel skal sige ja eller nej til hvert forslag. -->
+      <TabItem Header="Opgaver" Style="{StaticResource Fane}">
+        <DockPanel>
+
+          <Border DockPanel.Dock="Top" Background="#FF1B2029" Padding="16,10"
+                  BorderBrush="{StaticResource PanelKant}" BorderThickness="0,0,0,1">
+            <Grid>
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+              </Grid.ColumnDefinitions>
+
+              <Button Grid.Column="0" x:Name="FindOpgaverKnap" Content="Find opgaver"
+                      Click="FindOpgaver_Klik" Padding="14,7" FontSize="12.5"
+                      Style="{StaticResource Primaer}"
+                      ToolTip="Gennemgå udskriften igen for steder, der kan være en opgave" />
+
+              <TextBlock Grid.Column="1" x:Name="OpgaveStatus" FontSize="11.5"
+                         VerticalAlignment="Center" Margin="14,0,0,0"
+                         TextWrapping="Wrap" Foreground="{StaticResource TekstMeget}" />
+
+              <CheckBox Grid.Column="2" x:Name="VisSvage" Content="Vis også svage forslag"
+                        Click="VisSvage_Klik" VerticalAlignment="Center" FontSize="12" />
+            </Grid>
+          </Border>
+
+          <ScrollViewer Padding="16,12,16,20" VerticalScrollBarVisibility="Auto"
+                        HorizontalScrollBarVisibility="Disabled">
+            <StackPanel>
+
+              <!-- De oprettede opgaver. -->
+              <TextBlock x:Name="OpgaveOverskrift" Text="OPGAVER" FontSize="10.5"
+                         FontWeight="SemiBold" Margin="2,0,0,8" Visibility="Collapsed"
+                         Foreground="{StaticResource Accent}" />
+
+              <ItemsControl x:Name="Opgaverude">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate>
+                    <Border Background="#FF181B22" CornerRadius="8" Padding="14,11" Margin="0,0,0,7"
+                            BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+                      <Grid>
+                        <Grid.ColumnDefinitions>
+                          <ColumnDefinition Width="*" />
+                          <ColumnDefinition Width="Auto" />
+                          <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Margin="0,0,14,0">
+                          <TextBox Text="{Binding Tekst, UpdateSourceTrigger=PropertyChanged}"
+                                   FontSize="13" TextWrapping="Wrap" AcceptsReturn="True"
+                                   BorderThickness="0" Padding="0" Background="Transparent"
+                                   Foreground="{StaticResource Tekst}" />
+                          <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                            <TextBlock Text="{Binding Ejer}" FontSize="11.5" FontWeight="SemiBold"
+                                       Foreground="{StaticResource Accent}"
+                                       Visibility="{Binding EjerSynlig}" />
+                            <TextBlock Text="{Binding Kilde}" FontSize="11" Margin="10,0,0,0"
+                                       FontFamily="Consolas" Foreground="{StaticResource TekstMeget}" />
+                          </StackPanel>
+                        </StackPanel>
+
+                        <!-- Deadline er DET ENESTE felt. Se Opgave: en liste,
+                             der kraever syv felter, bliver ikke udfyldt. -->
+                        <DatePicker Grid.Column="1" SelectedDate="{Binding Deadline}"
+                                    VerticalAlignment="Top" Width="132" FontSize="12"
+                                    ToolTip="Senest-dato. Kan stå tom." />
+
+                        <Button Grid.Column="2" Content="✕" Click="SletOpgave_Klik"
+                                Tag="{Binding Id}" Margin="8,0,0,0" Padding="8,4"
+                                VerticalAlignment="Top" FontSize="11" Cursor="Hand"
+                                ToolTip="Slet opgaven" />
+                      </Grid>
+                    </Border>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+
+              <Button x:Name="NyOpgaveKnap" Content="+ Tilføj en opgave i hånden"
+                      Click="NyOpgave_Klik" HorizontalAlignment="Left" Margin="0,4,0,0"
+                      Padding="12,6" FontSize="12"
+                      ToolTip="Til en, der ikke var med på mødet — det kan appen ikke vide" />
+
+              <!-- Forslagene, der ikke er taget stilling til endnu. -->
+              <TextBlock x:Name="ForslagOverskrift" Text="FORSLAG" FontSize="10.5"
+                         FontWeight="SemiBold" Margin="2,26,0,8" Visibility="Collapsed"
+                         Foreground="{StaticResource Accent}" />
+
+              <ItemsControl x:Name="Forslagliste">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate>
+                    <Border Background="#FF14181F" CornerRadius="8" Padding="14,11" Margin="0,0,0,8"
+                            BorderBrush="#FF2A313D" BorderThickness="1">
+                      <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,7">
+                          <TextBlock Text="{Binding Taler}" FontSize="11.5" FontWeight="SemiBold"
+                                     Foreground="{StaticResource Accent}" />
+                          <TextBlock Text="{Binding Tid}" FontSize="11" FontFamily="Consolas"
+                                     Margin="10,0,0,0" Foreground="{StaticResource TekstMeget}" />
+                          <TextBlock Text="{Binding Grund}" FontSize="11" Margin="14,0,0,0"
+                                     Foreground="{StaticResource TekstMeget}" />
+                        </StackPanel>
+
+                        <TextBlock Text="{Binding Tekst}" FontSize="13" TextWrapping="Wrap"
+                                   LineHeight="20" Foreground="{StaticResource Tekst}" />
+
+                        <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                          <Button Content="Opret opgave" Click="OpretOpgave_Klik"
+                                  Tag="{Binding Noegle}" Padding="13,6" FontSize="12"
+                                  Style="{StaticResource Primaer}" Cursor="Hand" />
+                          <Button Content="Ikke en opgave" Click="AfvisOpgave_Klik"
+                                  Tag="{Binding Noegle}" Padding="13,6" FontSize="12"
+                                  Margin="8,0,0,0" Cursor="Hand" />
+                        </StackPanel>
+                      </StackPanel>
+                    </Border>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+
+              <TextBlock x:Name="OpgaveTom" FontSize="13" TextWrapping="Wrap" LineHeight="21"
+                         Margin="2,18,0,0" Visibility="Collapsed"
+                         Foreground="{StaticResource TekstSvag}" />
+            </StackPanel>
+          </ScrollViewer>
+        </DockPanel>
+      </TabItem>
+
       <!-- ===================== Tallene =====================
            Kort med vilje. Der er tre ting, man vil vide efter et møde: hvornår
            det var, hvor længe det varede, og hvem der fyldte. Alt andet er
