@@ -1,4 +1,4 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.IO;
 using System.Text;
 using System.Windows;
@@ -6,6 +6,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Threading;
 using NoteApp.Core;
+using NoteApp.Core.Llm;
 
 namespace NoteApp.Desktop.Transcribe;
 
@@ -162,6 +163,7 @@ public partial class UdskriftView : UserControl
 
         Byg();
         RaaTekst.Text = Raa();
+        VisOpsummering();
 
         Meld(_udskrift.ErRettet ? "Rettet" : "");
         _indlæser = false;
@@ -176,6 +178,9 @@ public partial class UdskriftView : UserControl
 
         Liste.ItemsSource = null;
         RaaTekst.Text = "";
+        OpsumTekst.Text = "";
+        OpsumRude.Visibility = Visibility.Collapsed;
+        OpsumTom.Visibility = Visibility.Visible;
         Hoved.Visibility = Visibility.Collapsed;
         Navnerude.Visibility = Visibility.Collapsed;
         Meld("");
@@ -395,6 +400,116 @@ public partial class UdskriftView : UserControl
             Dialogs.AppDialog.Vis(Window.GetWindow(this), "Rettelsen blev ikke gemt",
                 $"{ex.Message}\n\nRet igen om lidt — teksten på skærmen er stadig din.",
                 Dialogs.Slags.Pas_paa);
+        }
+    }
+
+    // --------------------------------------------------------- opsummering
+
+    /// <summary>
+    /// Viser opsummeringen, hvis der er lavet en.
+    ///
+    /// ER UDSKRIFTEN RETTET SIDEN, SIGES DET.
+    ///
+    /// Opsummeringen blev lavet af den tekst, der stod dengang. Har man
+    /// rettet i udskriften bagefter, passer de to ikke længere sammen — og
+    /// det er ikke til at se på selve teksten. Kontrolsummen kan se det.
+    /// </summary>
+    private void VisOpsummering()
+    {
+        if (_mappe is null) { OpsumTom.Visibility = Visibility.Visible; return; }
+
+        var o = Opsummering.Hent(_mappe);
+
+        OpsumRude.Visibility = o is null ? Visibility.Collapsed : Visibility.Visible;
+        OpsumTom.Visibility = o is null ? Visibility.Visible : Visibility.Collapsed;
+
+        if (o is null) return;
+
+        OpsumTekst.Text = o.Tekst;
+        OpsumHoved.Text = $"Lavet {o.Lavet.LocalDateTime:d. MMMM yyyy 'kl.' HH:mm} · {o.Model}";
+
+        var nu = Kvitteringer.Kontrolsum(_udskrift?.SomTekst(_meta?.Talere) ?? "");
+        var uenig = o.UdskriftSum.Length > 0 && o.UdskriftSum != nu;
+
+        OpsumAdvarsel.Visibility = uenig ? Visibility.Visible : Visibility.Collapsed;
+        OpsumAdvarsel.Text = uenig
+            ? "Udskriften er ændret, siden opsummeringen blev lavet. De to siger ikke nødvendigvis det samme længere — lav den om, hvis rettelserne betyder noget."
+            : "";
+    }
+
+    private void OpsumKopier_Klik(object sender, RoutedEventArgs e)
+    {
+        try { Clipboard.SetText(OpsumTekst.Text); Meld("Opsummeringen er kopieret"); }
+        catch (Exception) { Meld("Kunne ikke kopiere — prøv igen"); }
+    }
+
+    /// <summary>
+    /// Laver opsummeringen.
+    ///
+    /// Der spørges ikke om lov: knappen står under en tekst, der siger, hvad
+    /// den gør, og hvor teksten går hen. En dialog oveni ville være at
+    /// spørge to gange om det samme.
+    /// </summary>
+    private async void OpsumLav_Klik(object sender, RoutedEventArgs e)
+    {
+        if (_mappe is null || _udskrift is null) return;
+
+        var noegle = SkyNoegle.Hent();
+        if (noegle is null)
+        {
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Sprogmodellen er ikke sat op",
+                "En opsummering laves af en sprogmodel hos Mistral. Sæt din API-nøgle ind " +
+                "under «AI-modeller» først.\n\nOptagelse og udskrift virker uden.",
+                Dialogs.Slags.Valg);
+            return;
+        }
+
+        var tekst = _udskrift.SomTekst(_meta?.Talere);
+
+        if (tekst.Trim().Length < 200)
+        {
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Der er ikke nok tekst",
+                "Udskriften er for kort til, at en opsummering siger mere end teksten selv.",
+                Dialogs.Slags.Valg);
+            return;
+        }
+
+        OpsumKnap.IsEnabled = false;
+        OpsumStatus.Text = "Mistral læser mødet igennem …";
+
+        try
+        {
+            var titel = _meta?.Title ?? "mødet";
+
+            var svar = await new SkyRunner(noegle).KoerAsync(
+                SkyKatalog.Standard,
+                Opsummering.Opskrift(),
+                $"Mødet hedder «{titel}».\n\nUdskrift:\n{tekst}",
+                kilde: _meta?.Id.ToString() ?? "",
+                kildeTitel: titel);
+
+            Opsummering.Gem(_mappe, new Opsummeringsdata
+            {
+                Tekst = svar.Tekst.Trim(),
+                Model = SkyKatalog.Standard.Navn,
+                UdskriftSum = Kvitteringer.Kontrolsum(tekst)
+            });
+
+            VisOpsummering();
+            OpsumStatus.Text = "";
+            Meld("Opsummeringen er lavet");
+        }
+        catch (Exception ex)
+        {
+            OpsumStatus.Text = "";
+
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Opsummeringen blev ikke lavet",
+                ex.Message + "\n\nAfsendelsen er bogført under Compliance, uanset om den " +
+                "nåede frem.", Dialogs.Slags.Pas_paa);
+        }
+        finally
+        {
+            OpsumKnap.IsEnabled = true;
         }
     }
 

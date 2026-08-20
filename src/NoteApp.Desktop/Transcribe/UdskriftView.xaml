@@ -168,6 +168,66 @@
         </ScrollViewer>
       </TabItem>
 
+      <!-- ============ OPSUMMERINGEN ============
+           Den lille vej. Dokumenterne er den store: vaelg skabelon, giv det
+           et navn, faa en Word-fil. Opsummeringen er ti linjer om, hvad
+           moedet handlede om - til at huske det, ikke til at sende videre.
+
+           DEN LAVES IKKE AF SIG SELV. At lave den sender udskriften til
+           Mistral, og det maa aldrig ske, fordi man klikkede paa en fane. -->
+      <TabItem Header="Opsummering" Style="{StaticResource Fane}">
+        <Grid>
+          <ScrollViewer x:Name="OpsumRude" Padding="18,14,18,18" Visibility="Collapsed"
+                        VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <StackPanel>
+              <Grid Margin="0,0,0,12">
+                <TextBlock x:Name="OpsumHoved" FontSize="11.5" VerticalAlignment="Center"
+                           TextWrapping="Wrap" Foreground="{StaticResource TekstMeget}" />
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                  <Button Content="Kopiér" Click="OpsumKopier_Klik" Padding="12,6"
+                          FontSize="12" Margin="0,0,8,0" />
+                  <Button Content="Lav den om" Click="OpsumLav_Klik" Padding="12,6" FontSize="12" />
+                </StackPanel>
+              </Grid>
+
+              <TextBlock x:Name="OpsumAdvarsel" FontSize="12" TextWrapping="Wrap" LineHeight="19"
+                         Margin="0,0,0,12" Visibility="Collapsed"
+                         Foreground="{StaticResource Advarsel}" />
+
+              <TextBox x:Name="OpsumTekst" IsReadOnly="True" FontSize="13.5" TextWrapping="Wrap"
+                       BorderThickness="0" Background="Transparent" Padding="0"
+                       Foreground="{StaticResource Tekst}"
+                       VerticalScrollBarVisibility="Disabled"
+                       HorizontalScrollBarVisibility="Disabled" />
+            </StackPanel>
+          </ScrollViewer>
+
+          <StackPanel x:Name="OpsumTom" VerticalAlignment="Center" HorizontalAlignment="Center"
+                      MaxWidth="480">
+            <TextBlock Text="Hvad handlede mødet om?" FontSize="17" FontWeight="SemiBold"
+                       HorizontalAlignment="Center" />
+            <TextBlock FontSize="13" Margin="0,10,0,0" TextWrapping="Wrap" LineHeight="21"
+                       TextAlignment="Center" Foreground="{StaticResource TekstSvag}"
+                       Text="En kort opsummering på ti linjer: hvad der blev besluttet, hvad der blev aftalt, og hvad der stod åbent. Til at huske mødet med — ikke et dokument, du skal navngive og gemme." />
+
+            <Border Background="#33E8A33D" BorderBrush="{StaticResource Advarsel}"
+                    BorderThickness="1" CornerRadius="8" Padding="14,11" Margin="0,16,0,0">
+              <TextBlock FontSize="12.5" LineHeight="20" TextWrapping="Wrap"
+                         Foreground="{StaticResource Tekst}"
+                         Text="Det sender udskriftens tekst til Mistral i Europa — ikke lyden. Afsendelsen bogføres under Compliance med tidspunkt, antal tegn og en kontrolsum." />
+            </Border>
+
+            <Button x:Name="OpsumKnap" Content="Lav en opsummering" Click="OpsumLav_Klik"
+                    HorizontalAlignment="Center" Margin="0,18,0,0" Padding="20,10"
+                    Style="{StaticResource Primaer}" />
+
+            <TextBlock x:Name="OpsumStatus" FontSize="12" Margin="0,12,0,0"
+                       HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center"
+                       Foreground="{StaticResource TekstMeget}" />
+          </StackPanel>
+        </Grid>
+      </TabItem>
+
       <!-- RAA TEKST ER IKKE PYNT.
            Har man rettet i en udskrift, er spoergsmaalet et halvt aar senere,
            om en formulering er ens egen eller maskinens. Her staar maskinens
