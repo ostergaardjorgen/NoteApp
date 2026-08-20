@@ -167,6 +167,18 @@ public sealed class Udskrift
     public static bool HarRettelser(string mappe) =>
         Laes(RettetSti(mappe)) is { ErRettet: true };
 
+    /// <summary>
+    /// Den rettede udgave, hvis filen findes — også når den ikke indeholder
+    /// nogen rettelser endnu.
+    ///
+    /// <see cref="HarRettelser"/> svarer på, om nogen HAR rettet noget.
+    /// Det her svarer på, om der ligger en fil, som editoren vil læse. De to
+    /// er ikke det samme, og forskellen betyder noget, når stemmerne skal
+    /// skrives ind: sættes de kun på maskinens udgave, mens editoren læser
+    /// den rettede, står navnene i en fil, ingen kigger i.
+    /// </summary>
+    public static Udskrift? HentRettet(string mappe) => Laes(RettetSti(mappe));
+
     private static Udskrift? Laes(string sti)
     {
         if (!File.Exists(sti)) return null;

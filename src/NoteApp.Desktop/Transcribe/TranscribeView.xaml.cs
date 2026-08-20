@@ -1034,9 +1034,29 @@ public partial class TranscribeView : UserControl
         var genbrugLoop = toSpor
                           && KanGenbruges(loopUdBase, loopWav, gemtMeta?.ValgtSprogLoop, sprogvalg.DeresSprog ?? "");
 
-        // Kan begge genbruges, er der intet at lave. Saa siges det, frem for
-        // at lade en bjaelke koere til hundrede uden at noget skete.
-        if (genbrugMik && genbrugLoop)
+        // ============ ER DER NOGET AT LAVE? ============
+        //
+        // Kan begge spor genbruges, er der intet at skrive ud, og saa siges
+        // det - frem for at lade en bjaelke koere til hundrede uden at noget
+        // skete.
+        //
+        // MEN "SKREVET UD" ER IKKE LAENGERE DET ENESTE, DER KAN MANGLE.
+        //
+        // Optagelser fra foer talergenkendelsen har to faerdige udskrifter og
+        // ingen stemmer. Den her kontrol saa kun paa whisper-filerne og paa
+        // sproget, saa knappen svarede "den er skrevet ud i forvejen" og
+        // stoppede - og der var ingen vej til at faa navne paa talerne
+        // overhovedet. Fundet 20-08-2026, umiddelbart efter funktionen kom ind.
+        //
+        // Mangler stemmerne, koeres der videre. Genbruget staar ved magt, saa
+        // whisper springes over; det er kun talergenkendelsen, der arbejder,
+        // og udskriften bliver bygget op af de filer, der allerede ligger.
+        var talerSporNu = toSpor ? Samtale.Derfra : "";
+
+        var manglerStemmer = Diarisering.ErInstalleret
+                             && Diarisering.Hent(valgt.Mappe, talerSporNu) is null;
+
+        if (genbrugMik && genbrugLoop && !manglerStemmer)
         {
             Dialogs.AppDialog.Vis(Window.GetWindow(this), "Den er skrevet ud i forvejen",
                 "Begge spor er allerede skrevet ud på de sprog, du valgte, og lyden er ikke ændret siden. " +
@@ -1044,6 +1064,8 @@ public partial class TranscribeView : UserControl
                 Dialogs.Slags.Valg);
             return;
         }
+
+        var kunStemmer = genbrugMik && genbrugLoop;
 
         _afbryd = new CancellationTokenSource();
         KoerKnap.IsEnabled = false;
@@ -1058,7 +1080,9 @@ public partial class TranscribeView : UserControl
         Fremdrift.IsIndeterminate = true;
         Fremdrift.Value = 0;
         Fremdriftstal.Text = "";
-        Status.Text = "Indlæser modellen … det tager typisk et halvt minut første gang";
+        Status.Text = kunStemmer
+            ? "Finder stemmerne i optagelsen …"
+            : "Indlæser modellen … det tager typisk et halvt minut første gang";
         Resultat.Ryd();
 
         // Forklaringen bliver staaende, mens der koeres. Det er praecis dér,
@@ -1066,9 +1090,12 @@ public partial class TranscribeView : UserControl
         // "maa jeg lave noget andet imens".
         Forklaring.Visibility = Visibility.Visible;
         Resultat.Visibility = Visibility.Collapsed;
-        ForklaringOverskrift.Text = "Skriver lyden ud …";
-        ForklaringUnder.Text =
-            "Fremdriften står nederst i ruden. Teksten dukker op her, når den er færdig, og bliver gemt automatisk.";
+        ForklaringOverskrift.Text = kunStemmer ? "Finder stemmerne …" : "Skriver lyden ud …";
+        ForklaringUnder.Text = kunStemmer
+            ? "Teksten er skrevet ud i forvejen og bliver ikke lavet om. Der bliver kun " +
+              "skilt stemmer ad, så de kan navngives hver for sig. Det tager omkring et " +
+              "minut for hvert kvarters optagelse."
+            : "Fremdriften står nederst i ruden. Teksten dukker op her, når den er færdig, og bliver gemt automatisk.";
 
         // FREMDRIFTEN DAEKKER BEGGE SPOR.
         //
@@ -1225,6 +1252,18 @@ public partial class TranscribeView : UserControl
                 // ligger de i deres egen fil uden at staa nogen steder i
                 // teksten, og saa er de ikke til nogen nytte.
                 Diarisering.Anvend(udskrift, talere);
+
+                // OGSAA PAA DEN RETTEDE UDGAVE.
+                //
+                // Har man rettet i teksten, er det den fil, editoren laeser -
+                // og saa ville navnene staa i maskinens udgave, som ingen
+                // kigger i. Rettelserne roeres ikke; der saettes kun stemmer
+                // paa de linjer, der allerede er der.
+                if (Udskrift.HentRettet(valgt.Mappe) is { } rettet
+                    && Diarisering.Anvend(rettet, talere) > 0)
+                {
+                    rettet.GemRettet(valgt.Mappe);
+                }
             }
 
             udskrift.GemMaskin(valgt.Mappe, modelNavn);
