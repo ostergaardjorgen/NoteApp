@@ -36,12 +36,41 @@
                 BorderBrush="{StaticResource PanelKant}" BorderThickness="1"
                 Width="240" HorizontalAlignment="Left" Padding="4">
           <Grid>
-            <TextBox x:Name="Soeg" FontSize="12.5" Padding="8,5" BorderThickness="0"
-                     Background="Transparent" TextChanged="Soeg_Aendret" />
-            <TextBlock x:Name="SoegPladsholder" IsHitTestVisible="False" FontSize="12.5"
-                       Margin="10,0,0,0" VerticalAlignment="Center"
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <TextBox x:Name="Soeg" Grid.Column="0" FontSize="12.5" Padding="8,5"
+                     BorderThickness="0" Background="Transparent"
+                     TextChanged="Soeg_Aendret" KeyDown="Soeg_Tast" />
+            <TextBlock x:Name="SoegPladsholder" Grid.Column="0" IsHitTestVisible="False"
+                       FontSize="12.5" Margin="10,0,0,0" VerticalAlignment="Center"
                        Foreground="{StaticResource TekstMeget}"
                        Text="Søg i udskriften" />
+
+            <!-- Krydset rydder feltet i eet klik. Et soegeord paa tyve tegn
+                 skal ellers slettes tegn for tegn, eller markeres foerst - og
+                 det er nok til, at man lader det staa og glemmer, at listen
+                 stadig er filtreret. Escape goer det samme. -->
+            <Button x:Name="SoegRyd" Grid.Column="1" Content="✕" Click="SoegRyd_Klik"
+                    Visibility="Collapsed" Cursor="Hand" FontSize="11"
+                    Padding="0" BorderThickness="0" Background="Transparent"
+                    Width="24" Height="24" Margin="0,0,3,0"
+                    ToolTip="Ryd søgningen (Escape)">
+              <Button.Template>
+                <ControlTemplate TargetType="Button">
+                  <Border x:Name="flade" CornerRadius="12" Background="Transparent">
+                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                  </Border>
+                  <ControlTemplate.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                      <Setter TargetName="flade" Property="Background" Value="#FF2C323D" />
+                    </Trigger>
+                  </ControlTemplate.Triggers>
+                </ControlTemplate>
+              </Button.Template>
+            </Button>
           </Grid>
         </Border>
 
@@ -192,6 +221,23 @@
             <ItemsControl x:Name="Liste">
               <ItemsControl.ItemTemplate>
                 <DataTemplate>
+                 <StackPanel>
+
+                  <!-- ============ HVOR ET TRÆF BEGYNDER ============
+                       Ved en soegning vises replikken FOER og EFTER hvert
+                       traef, saa man kan se sammenhaengen. Uden en tydelig
+                       adskillelse ville de tre-linjers stumper loebe sammen til
+                       een lang liste, og saa kan man ikke se, hvor det ene
+                       resultat slutter og det naeste begynder.
+
+                       Overskriften taeller traeffene, saa man ved, hvor mange
+                       der er, og hvor langt man er naaet. -->
+                  <Border Visibility="{Binding BlokSynlig}" Margin="10,16,10,8"
+                          Background="#FF1A1F28" CornerRadius="6" Padding="10,5">
+                    <TextBlock Text="{Binding Bloktitel}" FontSize="10"
+                               FontWeight="SemiBold" Foreground="{StaticResource Accent}" />
+                  </Border>
+
                   <Border CornerRadius="7" Padding="10,7" Margin="0,0,0,3"
                           Background="Transparent" BorderThickness="2,0,0,0"
                           BorderBrush="Transparent">
@@ -247,13 +293,31 @@
                         </StackPanel>
                       </Button>
 
-                      <TextBox Grid.Column="2"
-                               Text="{Binding Tekst, UpdateSourceTrigger=PropertyChanged}"
-                               FontSize="13.5" TextWrapping="Wrap"
-                               AcceptsReturn="True" BorderThickness="0" Padding="0"
-                               Background="Transparent" Foreground="{StaticResource Tekst}"
-                               VerticalScrollBarVisibility="Disabled"
-                               HorizontalScrollBarVisibility="Disabled" />
+                      <!-- ============ DEN GULE MARKERING ============
+                           En TextBox kan ikke give enkelte ord en baggrund.
+                           Derfor ligger der en TextBlock BAG feltet med samme
+                           skrift, samme stoerrelse og samme ombrydning, hvor
+                           det soegte ord staar gult - og selve feltets tekst
+                           goeres gennemsigtig, mens der soeges.
+
+                           Feltet bliver ved at virke: markoeren staar der,
+                           man kan rette, og markeringen tegnes om, naar
+                           teksten aendrer sig. Kun farven flytter. -->
+                      <Grid Grid.Column="2">
+                        <TextBlock FontSize="13.5" TextWrapping="Wrap"
+                                   Visibility="{Binding FremhaevSynlig}"
+                                   Foreground="{StaticResource Tekst}"
+                                   Loaded="Fremhaev_Ind" Unloaded="Fremhaev_Ud" />
+
+                        <TextBox Text="{Binding Tekst, UpdateSourceTrigger=PropertyChanged}"
+                                 FontSize="13.5" TextWrapping="Wrap"
+                                 AcceptsReturn="True" BorderThickness="0" Padding="0"
+                                 Background="Transparent"
+                                 Foreground="{Binding Tekstfarve}"
+                                 CaretBrush="{StaticResource Tekst}"
+                                 VerticalScrollBarVisibility="Disabled"
+                                 HorizontalScrollBarVisibility="Disabled" />
+                      </Grid>
                     </Grid>
 
                     <Border.Style>
@@ -270,6 +334,7 @@
                       </Style>
                     </Border.Style>
                   </Border>
+                 </StackPanel>
                 </DataTemplate>
               </ItemsControl.ItemTemplate>
             </ItemsControl>

@@ -17,11 +17,29 @@ public sealed class Replikvisning : INotifyPropertyChanged
     private readonly Udskriftslinje _linje;
     private readonly Action _aendret;
 
-    public Replikvisning(Udskriftslinje linje, string navn, bool visNavne, Action aendret)
+    public Replikvisning(Udskriftslinje linje, string navn, bool visNavne, Action aendret,
+                         string soegeord = "", string bloktitel = "")
     {
         _linje = linje;
         _aendret = aendret;
         Navn = navn;
+
+        Soegeord = soegeord;
+        Bloktitel = bloktitel;
+
+        BlokSynlig = bloktitel.Length > 0 ? Visibility.Visible : Visibility.Collapsed;
+
+        // Markeringen tegnes kun paa de replikker, ordet FAKTISK staar i.
+        // Naboerne er der for sammenhaengens skyld, og en tom fremhaevning
+        // paa dem ville laegge en gennemsigtig tekst oven paa ingenting.
+        var traef = soegeord.Length > 0
+                    && linje.Tekst.Contains(soegeord, StringComparison.OrdinalIgnoreCase);
+
+        FremhaevSynlig = traef ? Visibility.Visible : Visibility.Collapsed;
+
+        Tekstfarve = traef
+            ? Brushes.Transparent
+            : new SolidColorBrush(Color.FromRgb(0xE8, 0xEC, 0xF2));
 
         // NØGLEN ER DET, NAVNET GEMMES UNDER.
         //
@@ -60,6 +78,47 @@ public sealed class Replikvisning : INotifyPropertyChanged
 
     /// <summary>Nøglen, navnet gemmes under: «HERFRA», «DERFRA» eller «DERFRA#1».</summary>
     public string Noegle { get; }
+
+    public string Soegeord { get; } = "";
+    public string Bloktitel { get; } = "";
+    public Visibility BlokSynlig { get; }
+    public Visibility FremhaevSynlig { get; }
+    public Brush Tekstfarve { get; } = Brushes.White;
+
+    /// <summary>
+    /// Teksten skåret op i stykker, hvor de gule er dem, der blev søgt på.
+    ///
+    /// Der skæres på ALLE forekomster, ikke kun den første. Står ordet tre
+    /// gange i den samme replik, er det de tre, man leder efter.
+    /// </summary>
+    public IEnumerable<(string Tekst, bool Gul)> Dele()
+    {
+        var t = _linje.Tekst;
+
+        if (Soegeord.Length == 0)
+        {
+            yield return (t, false);
+            yield break;
+        }
+
+        var i = 0;
+
+        while (i <= t.Length)
+        {
+            var j = t.IndexOf(Soegeord, i, StringComparison.OrdinalIgnoreCase);
+
+            if (j < 0)
+            {
+                if (i < t.Length) yield return (t[i..], false);
+                yield break;
+            }
+
+            if (j > i) yield return (t[i..j], false);
+
+            yield return (t.Substring(j, Soegeord.Length), true);
+            i = j + Soegeord.Length;
+        }
+    }
 
     public Udskriftslinje Linje => _linje;
 
@@ -249,16 +308,81 @@ public partial class UdskriftView : UserControl
         // hinanden.
         var kunTaler = (Talervalg.SelectedItem as Talerpunkt)?.Noegle;
 
-        var linjer = _udskrift.Linjer.AsEnumerable();
+        var alle = _udskrift.Linjer;
 
-        if (kunTaler is not null)
-            linjer = linjer.Where(l => Noegle(l) == kunTaler);
+        // ============ SØGERESULTATET ER BLOKKE, IKKE LØSE LINJER ============
+        //
+        // Et soegeord alene siger sjaeldent nok. «Pipeline» kan staa i et svar
+        // paa et spoergsmaal, der blev stillet i replikken foer - og uden den
+        // kan man ikke huske, hvad det handlede om.
+        //
+        // Hvert traef vises derfor med replikken FOER og EFTER. Ligger to traef
+        // ved siden af hinanden, smelter deres blokke sammen frem for at gentage
+        // de samme linjer to gange.
+        //
+        // Konteksten hentes fra HELE udskriften, ogsaa naar der er afgraenset
+        // paa en taler. Replikken foer og efter er som regel den andens - det
+        // er jo en samtale - og en «sammenhaeng», hvor modparten er klippet ud,
+        // er ingen sammenhaeng.
+        var valgte = new List<Udskriftslinje>();
+        var titler = new Dictionary<Udskriftslinje, string>();
 
-        if (soeg.Length > 0)
-            linjer = linjer.Where(l => l.Tekst.Contains(soeg, StringComparison.OrdinalIgnoreCase));
+        if (soeg.Length == 0)
+        {
+            valgte = kunTaler is null
+                ? alle.ToList()
+                : alle.Where(l => Noegle(l) == kunTaler).ToList();
+        }
+        else
+        {
+            var traef = new List<int>();
 
-        var valgte = linjer.ToList();
-        linjer = valgte;
+            for (var i = 0; i < alle.Count; i++)
+            {
+                if (kunTaler is not null && Noegle(alle[i]) != kunTaler) continue;
+                if (alle[i].Tekst.Contains(soeg, StringComparison.OrdinalIgnoreCase)) traef.Add(i);
+            }
+
+            var med = new SortedSet<int>();
+            foreach (var i in traef)
+                for (var j = Math.Max(0, i - 1); j <= Math.Min(alle.Count - 1, i + 1); j++)
+                    med.Add(j);
+
+            // 1. Hvilken blok hoerer hver medtaget linje til? Ny blok, hver
+            //    gang der er hul ned til den forrige.
+            var blokAf = new Dictionary<int, int>();
+            var nr = 0;
+            var forrige = int.MinValue;
+
+            foreach (var i in med)
+            {
+                if (i != forrige + 1) nr++;
+                blokAf[i] = nr;
+                forrige = i;
+            }
+
+            // 2. Blokkens tidsstempel er det FOERSTE traef i den - ikke
+            //    kontekstlinjen foer, som kan ligge et halvt minut tidligere.
+            var tidAf = new Dictionary<int, string>();
+            foreach (var i in traef)
+                if (!tidAf.ContainsKey(blokAf[i])) tidAf[blokAf[i]] = alle[i].Tid;
+
+            // 3. Titlen staar paa blokkens foerste linje. Der taelles BLOKKE og
+            //    ikke traef: ligger to traef ved siden af hinanden, er de eet
+            //    resultat paa skaermen, og «traef 4 af 9» ville saa ikke passe
+            //    med, hvor mange stumper man kan rulle igennem.
+            forrige = int.MinValue;
+
+            foreach (var i in med)
+            {
+                valgte.Add(alle[i]);
+
+                if (i != forrige + 1)
+                    titler[alle[i]] = $"TRÆF {blokAf[i]} AF {nr}  ·  {tidAf[blokAf[i]]}";
+
+                forrige = i;
+            }
+        }
 
         // NAVNET VISES, NAAR DET SIGER MERE END IKONET.
         //
@@ -279,8 +403,11 @@ public partial class UdskriftView : UserControl
         // fundet og skrevet i filen, men listen viste stadig «Gæster», fordi
         // netop DEN linje ikke var rettet med.
         Liste.ItemsSource = valgte
-            .Select(l => new Replikvisning(l, Udskrift.Navn(l, navne), harNavne, PaaAendring))
+            .Select(l => new Replikvisning(l, Udskrift.Navn(l, navne), harNavne, PaaAendring,
+                                           soeg, titler.GetValueOrDefault(l, "")))
             .ToList();
+
+        SoegRyd.Visibility = Soeg.Text.Length > 0 ? Visibility.Visible : Visibility.Collapsed;
 
         // Beskeden skal sige, hvad der blev filtreret PAA. «Ingen replikker
         // indeholder X» er forkert, naar det var taleren, der skar dem fra.
@@ -295,6 +422,70 @@ public partial class UdskriftView : UserControl
             (true, false) => $"Ingen replikker indeholder «{soeg}».",
             _ => $"{taler} siger ikke noget i denne udskrift."
         };
+    }
+
+    // ---------------------------------------------------- den gule markering
+
+    private static readonly Brush Gul = new SolidColorBrush(Color.FromRgb(0xF5, 0xD1, 0x3B));
+    private static readonly Brush PaaGul = new SolidColorBrush(Color.FromRgb(0x14, 0x18, 0x1F));
+
+    /// <summary>
+    /// Tegner den gule markering i TextBlock'en bag tekstfeltet.
+    ///
+    /// Den tegnes om, hver gang teksten ændrer sig. Feltet ovenpå er stadig
+    /// det, man skriver i — og uden det her ville markeringen blive stående på
+    /// de gamle ord, mens man rettede.
+    /// </summary>
+    private void Fremhaev_Ind(object sender, RoutedEventArgs e)
+    {
+        if (sender is not System.Windows.Controls.TextBlock tb) return;
+        if (tb.DataContext is not Replikvisning v) return;
+
+        Tegn(tb, v);
+
+        PropertyChangedEventHandler h = (_, a) =>
+        {
+            if (a.PropertyName == nameof(Replikvisning.Tekst)) Tegn(tb, v);
+        };
+
+        tb.Tag = h;
+        v.PropertyChanged += h;
+    }
+
+    private void Fremhaev_Ud(object sender, RoutedEventArgs e)
+    {
+        if (sender is not System.Windows.Controls.TextBlock tb) return;
+        if (tb.DataContext is not Replikvisning v) return;
+        if (tb.Tag is not PropertyChangedEventHandler h) return;
+
+        v.PropertyChanged -= h;
+        tb.Tag = null;
+    }
+
+    private static void Tegn(System.Windows.Controls.TextBlock tb, Replikvisning v)
+    {
+        tb.Inlines.Clear();
+
+        foreach (var (tekst, gul) in v.Dele())
+            tb.Inlines.Add(gul
+                ? new System.Windows.Documents.Run(tekst) { Background = Gul, Foreground = PaaGul }
+                : new System.Windows.Documents.Run(tekst));
+    }
+
+    // ------------------------------------------------------------ søgningen
+
+    private void SoegRyd_Klik(object sender, RoutedEventArgs e)
+    {
+        Soeg.Clear();
+        Soeg.Focus();
+    }
+
+    private void Soeg_Tast(object sender, KeyEventArgs e)
+    {
+        if (e.Key != Key.Escape || Soeg.Text.Length == 0) return;
+
+        Soeg.Clear();
+        e.Handled = true;
     }
 
     /// <summary>Nøglen, en replik hører til: stemmen hvis den er kendt, ellers sporet.</summary>
