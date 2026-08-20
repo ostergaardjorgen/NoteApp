@@ -117,6 +117,20 @@ public sealed class AppSettings
     /// </summary>
     public DateTimeOffset NotifikationerSetTil { get; set; } = DateTimeOffset.MinValue;
 
+    /// <summary>
+    /// Hvor optagebåndet stod sidst — i skærmkoordinater.
+    ///
+    /// Det huskes, fordi det ikke er en pyntedetalje: har man to skærme, ligger
+    /// mødet på den ene og båndet skal ligge på den anden. Skulle det trækkes
+    /// derover ved hvert eneste møde, ville det være hurtigere at lade være.
+    ///
+    /// Null betyder «aldrig flyttet» — så lægger båndet sig selv øverst midt
+    /// på den skærm, appen står på.
+    /// </summary>
+    public double? BaandX { get; set; }
+
+    public double? BaandY { get; set; }
+
     private static string Path => System.IO.Path.Combine(UserDataPaths.Root, "indstillinger.json");
 
     private static AppSettings? _current;

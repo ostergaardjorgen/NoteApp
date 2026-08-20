@@ -49,16 +49,38 @@ public sealed class GlobalHotkey : IDisposable
     {
         var liste = new List<HotkeyValg>();
 
-        // TALLENE FØRST. Ctrl+Shift+ét tal rammes med venstre hånd alene, og
-        // kombinationen er sjældent taget: programmer bruger typisk bogstaver,
-        // og Windows selv bruger Win+tal til proceslinjen — ikke Ctrl+Shift.
+        // ============ KOMMAET STÅR FØRST OG ER DERMED STANDARDEN ============
         //
-        // Hastighed er hele pointen. Et møde begynder, og der skal trykkes
-        // ÉN gang, uden at kigge ned på tastaturet.
+        // HotkeyId = null betyder «tag den første ledige», så rækkefølgen her
+        // ER valget.
         //
-        // NULLET STÅR FØRST, OG DET ER DERFOR STANDARDEN. HotkeyId = null
-        // betyder «tag den første ledige», så rækkefølgen her ER valget.
-        // Nullet ligger yderst på rækken og rammes uden at flytte hånden.
+        // Grebet er delt mellem hænderne: venstre holder Ctrl+Shift nede,
+        // højre finder tasten. Så skal tasten ligge i højre side, og der er
+        // kommaet det nærmeste, der ikke er taget af noget andet.
+        //
+        // Efterprøvet 20-08-2026 på denne maskine: fri både hos RegisterHotKey
+        // og i Windows' egen inputtabel.
+        //
+        // «(komma)» står med i navnet med vilje. «Ctrl+Shift+,» slutter på et
+        // komma, og et komma sidst i en sætning ligner tegnsætning — man kan
+        // ikke se, om tasten er en del af genvejen eller bare et skilletegn.
+        liste.Add(new HotkeyValg("ctrl-shift-komma", "Ctrl+Shift+, (komma)",
+            MOD_CONTROL | MOD_SHIFT, 0xBC,
+            "Venstre hånd holder Ctrl+Shift, højre rammer kommaet. Fri på stort set enhver maskine."));
+
+        // TALLENE SOM ALTERNATIV. De er sjældent taget af andre programmer:
+        // programmer bruger typisk bogstaver, og Windows selv bruger Win+tal
+        // til proceslinjen — ikke Ctrl+Shift.
+        //
+        // HER STOD Ctrl+Shift+0 SOM STANDARD, OG DEN VIRKEDE IKKE.
+        //
+        // Windows havde selv taget den til at skifte tastatursprog, fordi der
+        // var to layout installeret. RegisterHotKey sagde ja alligevel — de to
+        // ting lever i hver sit system — så appen viste genvejen som aktiv,
+        // mens intet skete, når man trykkede. Se TagetAfWindows.
+        //
+        // Nullet er ikke fjernet: er der kun ét tastatursprog på maskinen, er
+        // det stadig en fin genvej. Men det står ikke længere først.
         //
         // Ctrl+0 UDEN Shift er efterprøvet ledig 19-08-2026 og er alligevel
         // ikke med. En global genvej vinder over det program, man står i, og
@@ -66,12 +88,19 @@ public sealed class GlobalHotkey : IDisposable
         // Word. Windows siger ikke fra — konflikten viser sig som «zoom virker
         // ikke længere», og den ville ingen kæde sammen med den her app.
         liste.Add(new HotkeyValg("ctrl-shift-0", "Ctrl+Shift+0", MOD_CONTROL | MOD_SHIFT, 0x30,
-            "Nullet ligger yderst på talrækken og rammes med venstre hånd alene."));
+            "Nullet ligger yderst på talrækken. Bruges af Windows til at skifte tastatursprog, hvis du har flere sprog installeret."));
 
         for (var n = 1; n <= 9; n++)
             liste.Add(new HotkeyValg($"ctrl-shift-{n}", $"Ctrl+Shift+{n}",
                 MOD_CONTROL | MOD_SHIFT, (uint)(0x30 + n),
                 "Tal rammes med venstre hånd alene og er sjældent taget af andre programmer."));
+
+        // Punktummet lige ved siden af kommaet. Efterproevet fri samme dag.
+        // Ctrl+Alt+komma er derimod TAGET (post 00000072) og Ctrl+punktum
+        // ogsaa (post 00000012) - derfor staar de to ikke paa listen.
+        liste.Add(new HotkeyValg("ctrl-shift-punktum", "Ctrl+Shift+. (punktum)",
+            MOD_CONTROL | MOD_SHIFT, 0xBE,
+            "Nabotasten til kommaet. Lige så fri — vælg den, der falder bedst i hånden."));
 
         // Bogstaverne som reserve. De er nemmere at huske, men oftere taget —
         // Ctrl+Alt+R og Ctrl+Alt+M var begge optaget på den første maskine,
@@ -89,7 +118,20 @@ public sealed class GlobalHotkey : IDisposable
             new HotkeyValg("ctrl-alt-f9", "Ctrl+Alt+F9", MOD_CONTROL | MOD_ALT, 0x78,
                 "Funktionstast. Næsten altid ledig, men sværere at huske."),
             new HotkeyValg("ctrl-alt-f12", "Ctrl+Alt+F12", MOD_CONTROL | MOD_ALT, 0x7B,
-                "Sidste udvej. Fri på stort set enhver maskine.")
+                "Sidste udvej. Fri på stort set enhver maskine."),
+
+            // PILETASTEN STAAR SIDST OG MED EN ADVARSEL.
+            //
+            // Den er teknisk fri - efterproevet 20-08-2026, baade hos
+            // RegisterHotKey og i Windows' inputtabel - men den er i brug
+            // overalt: Ctrl+Shift+pil markerer naeste ord i hvert eneste
+            // tekstfelt i Windows. En global genvej vinder over det program,
+            // man staar i, saa ordmarkering ville holde op med at virke, og
+            // ingen ville kaede det sammen med den her app.
+            //
+            // Den er med, fordi valget er brugerens - ikke fordi den er god.
+            new HotkeyValg("ctrl-shift-hoejre", "Ctrl+Shift+→", MOD_CONTROL | MOD_SHIFT, 0x27,
+                "FRARÅDES: den markerer næste ord i alle tekstfelter i Windows. Vælger du den, holder ordmarkering op med at virke i andre programmer.")
         });
 
         return liste;
@@ -141,17 +183,34 @@ public sealed class GlobalHotkey : IDisposable
             ? Muligheder
             : new[] { ønsket }.Concat(Muligheder.Where(m => m.Id != ønsket.Id)).ToList();
 
+        // De kombinationer, Windows selv bruger til at skifte inputmetode.
+        // RegisterHotKey siger ja til dem, saa de skal sorteres fra HER -
+        // ellers vaelger appen en genvej, der aldrig kommer til at virke.
+        var systemtaget = TagetAfWindows();
+        string? spaerret = null;
+
         foreach (var valg in rækkefølge)
         {
+            if (systemtaget.Contains((valg.Modifiers, valg.Key)))
+            {
+                spaerret ??= valg.Navn;
+                continue;
+            }
+
             // MOD_NOREPEAT: holder man tasten nede, skal der starte EEN
             // optagelse, ikke tyve.
             if (!RegisterHotKey(_håndtag, Id, valg.Modifiers | MOD_NOREPEAT, valg.Key)) continue;
 
             _registreret = true;
             Aktiv = valg;
-            Bemærkning = ønsket is not null && valg.Id != ønsket.Id
-                ? $"{ønsket.Navn} var taget af et andet program — bruger {valg.Navn} i stedet"
-                : null;
+
+            Bemærkning = valg.Navn == spaerret ? null
+                : spaerret is not null && (ønsket is null || ønsket.Navn == spaerret)
+                    ? $"{spaerret} bruger Windows selv til at skifte tastatursprog — bruger {valg.Navn} i stedet"
+                    : ønsket is not null && valg.Id != ønsket.Id
+                        ? $"{ønsket.Navn} var taget af et andet program — bruger {valg.Navn} i stedet"
+                        : null;
+
             return true;
         }
 
@@ -164,6 +223,10 @@ public sealed class GlobalHotkey : IDisposable
     /// <summary>Er kombinationen ledig lige nu? Bruges til at vise listen ærligt.</summary>
     public static bool ErLedig(HotkeyValg valg, Window vindue)
     {
+        // Windows' egen tekstbehandling spoerges FOERST. Se TagetAfWindows:
+        // RegisterHotKey siger ja til de kombinationer, den har taget.
+        if (TagetAfWindows().Contains((valg.Modifiers, valg.Key))) return false;
+
         var h = new WindowInteropHelper(vindue).Handle;
         if (h == IntPtr.Zero) return true;
 
@@ -174,6 +237,62 @@ public sealed class GlobalHotkey : IDisposable
 
         UnregisterHotKey(h, prøveId);
         return true;
+    }
+
+    /// <summary>
+    /// De kombinationer, Windows' egen tekstbehandling allerede har taget.
+    ///
+    /// HVORFOR DEN HER KONTROL SKAL LAVES SÆRSKILT
+    ///
+    /// RegisterHotKey siger JA til dem. De to ting lever i hver sit system:
+    /// genvejstaster hører til vindueshåndteringen, mens skift af inputmetode
+    /// håndteres af tekstbehandlingen (TSF), som får tastetrykket først. Appen
+    /// får altså lov at registrere en genvej, der aldrig kommer til at virke,
+    /// og der er intet at se — hverken en fejl eller en advarsel.
+    ///
+    /// Det skete i praksis 20-08-2026. Ctrl+Shift+0 stod i appen som den
+    /// aktive genvej og gjorde ingenting. Årsagen lå i posten «00000104»
+    /// under Control Panel\Input Method\Hot Keys, hvor Windows havde lagt
+    /// Ctrl+Shift+0 til at skifte inputmetode — fordi der var to
+    /// tastaturlayout installeret, dansk og amerikansk.
+    ///
+    /// Værdierne er fire byte hver, hvor kun den første betyder noget. Alt,
+    /// Ctrl og Shift har præcis de samme bitværdier som i RegisterHotKey
+    /// (1, 2 og 4), så de kan sammenlignes direkte.
+    /// </summary>
+    private static HashSet<(uint Mod, uint Key)> TagetAfWindows()
+    {
+        var taget = new HashSet<(uint, uint)>();
+
+        try
+        {
+            using var rod = Microsoft.Win32.Registry.CurrentUser
+                .OpenSubKey(@"Control Panel\Input Method\Hot Keys");
+
+            if (rod is null) return taget;
+
+            foreach (var navn in rod.GetSubKeyNames())
+            {
+                using var post = rod.OpenSubKey(navn);
+                if (post is null) continue;
+
+                if (post.GetValue("Key Modifiers") is not byte[] mod || mod.Length == 0) continue;
+                if (post.GetValue("Virtual Key") is not byte[] tast || tast.Length == 0) continue;
+
+                // 0 betyder "ingen tast sat" - posten findes, men er slaaet fra.
+                if (tast[0] == 0) continue;
+
+                taget.Add((mod[0], tast[0]));
+            }
+        }
+        catch (Exception)
+        {
+            // Kan registreringsdatabasen ikke laeses, falder vi tilbage til
+            // den gamle opfoersel. En genvej, der maaske ikke virker, er
+            // bedre end en app, der ikke starter.
+        }
+
+        return taget;
     }
 
     private IntPtr Hook(IntPtr hwnd, int besked, IntPtr wParam, IntPtr lParam, ref bool håndteret)

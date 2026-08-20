@@ -43,12 +43,42 @@
 
       <!-- ===================== Venstre: knappen ===================== -->
       <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-        <Button x:Name="StartKnap" Click="Start_Click" Cursor="Hand" Padding="0"
-                BorderThickness="0" Background="Transparent">
-          <Border CornerRadius="9" Background="{StaticResource Optager}" Padding="22,11">
-            <TextBlock Text="● Optag møde" FontSize="15.5" FontWeight="SemiBold"
-                       Foreground="#FFFFFFFF" />
-          </Border>
+        <!-- KNAPPEN ER GJORT MINDRE.
+             Den fyldte som en overskrift og trak blikket til sig hver gang,
+             man aabnede appen - ogsaa naar man var der for at laese et
+             referat. Den skal vaere det foerste, oejet finder, ikke det
+             eneste det kan se. Farven goer arbejdet; stoerrelsen behoever
+             ikke ogsaa.
+
+             Prikken er en Ellipse og ikke tegnet «●». Tegnet ligger
+             forskelligt paa linjen fra skrifttype til skrifttype og stod
+             derfor ikke midt for. -->
+        <Button x:Name="StartKnap" Click="Start_Click" Cursor="Hand"
+                VerticalAlignment="Center">
+          <Button.Template>
+            <ControlTemplate TargetType="Button">
+              <Border x:Name="flade" CornerRadius="7" Padding="15,8"
+                      Background="{StaticResource Optager}">
+                <StackPanel Orientation="Horizontal">
+                  <Ellipse Width="8" Height="8" Fill="#FFFFFFFF"
+                           VerticalAlignment="Center" Margin="0,0,8,0" />
+                  <TextBlock Text="Optag møde" FontSize="13" FontWeight="SemiBold"
+                             Foreground="#FFFFFFFF" VerticalAlignment="Center" />
+                </StackPanel>
+              </Border>
+              <ControlTemplate.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                  <Setter TargetName="flade" Property="Opacity" Value="0.87" />
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                  <Setter TargetName="flade" Property="Opacity" Value="0.72" />
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                  <Setter TargetName="flade" Property="Opacity" Value="0.42" />
+                </Trigger>
+              </ControlTemplate.Triggers>
+            </ControlTemplate>
+          </Button.Template>
         </Button>
 
         <!-- Under optagelse: uret og prikken i stedet for knappen -->
@@ -120,14 +150,23 @@
              Den staar oeverst til hoejre, hvor der er plads, og den forsvinder
              under optagelsen: dér er den brugt, og Pause og Stop skal have
              pladsen. -->
+        <!-- Den er formet som selve knappen: samme hjoernerunding, samme
+             hoejde. De to hoerer sammen - det er den samme handling, ad to
+             veje - og naar de ligner hinanden, laeses genvejen som «det her
+             er den anden maade», ikke som en note ved siden af.
+
+             Tasten staar som en tastekap: lysere flade, en kant, og en tone
+             dybere i bunden. Det er nok til, at oejet laeser den som noget,
+             man trykker paa, uden at den fylder mere end teksten i den. -->
         <StackPanel x:Name="GenvejPanel" Orientation="Horizontal" VerticalAlignment="Center"
                     Margin="0,0,18,0" Visibility="Collapsed">
-          <TextBlock x:Name="GenvejMaerkat" Text="OPTAG MED" FontSize="10.5" FontWeight="SemiBold"
-                     VerticalAlignment="Center" Margin="0,0,8,0"
+          <TextBlock x:Name="GenvejMaerkat" Text="OPTAG MED" FontSize="10" FontWeight="SemiBold"
+                     VerticalAlignment="Center" Margin="0,1,9,0"
                      Foreground="{StaticResource TekstMeget}" />
-          <Border CornerRadius="5" Padding="9,4" Background="#FF2C323D"
-                  BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
-            <TextBlock x:Name="GenvejTast" FontSize="12.5" FontWeight="Bold" />
+          <Border CornerRadius="7" Padding="12,7" Background="#FF2F3644"
+                  BorderBrush="#FF454E5E" BorderThickness="1,1,1,2">
+            <TextBlock x:Name="GenvejTast" FontSize="12.5" FontWeight="SemiBold"
+                       Foreground="#FFEDF0F5" VerticalAlignment="Center" />
           </Border>
         </StackPanel>
 

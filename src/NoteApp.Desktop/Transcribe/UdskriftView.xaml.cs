@@ -1,8 +1,9 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using System.IO;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
 using NoteApp.Core;
@@ -22,6 +23,13 @@ public sealed class Replikvisning : INotifyPropertyChanged
         _aendret = aendret;
         Navn = navn;
 
+        // NØGLEN ER DET, NAVNET GEMMES UNDER.
+        //
+        // Er stemmerne skilt ad, hører navnet til STEMMEN — «DERFRA#1» — og
+        // ikke til sporet. Ellers ville et navn på Gæst 2 lande på hele
+        // gæstesiden og dermed også på Gæst 1.
+        Noegle = linje.Stemme is { Length: > 0 } s ? s : linje.Spor;
+
         var gaester = linje.Spor == Samtale.Derfra;
 
         // ÉN PERSON MOD FLERE.
@@ -38,11 +46,20 @@ public sealed class Replikvisning : INotifyPropertyChanged
             ? new SolidColorBrush(Color.FromRgb(0xC9, 0x8C, 0xF0))
             : new SolidColorBrush(Color.FromRgb(0x5B, 0x9D, 0xF0));
 
-        Hjaelp = gaester ? "Gæsterne — de øvrige mødedeltagere" : "Dig og dem i samme lokale";
+        var erStemme = linje.Stemme is { Length: > 0 };
+
+        Hjaelp = erStemme
+            ? "Klik for at sætte navn på denne stemme. Navnet slår igennem alle steder, hun eller han taler."
+            : gaester
+                ? "Gæsterne — de øvrige mødedeltagere. Klik for at give dem et navn."
+                : "Dig og dem i samme lokale. Klik for at give siden et navn.";
 
         IkonSynlig = linje.Spor.Length > 0 ? Visibility.Visible : Visibility.Collapsed;
         NavnSynlig = visNavne && navn.Length > 0 ? Visibility.Visible : Visibility.Collapsed;
     }
+
+    /// <summary>Nøglen, navnet gemmes under: «HERFRA», «DERFRA» eller «DERFRA#1».</summary>
+    public string Noegle { get; }
 
     public Udskriftslinje Linje => _linje;
 
@@ -88,47 +105,11 @@ public sealed class Replikvisning : INotifyPropertyChanged
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(navn));
 }
 
-/// <summary>
-/// Ét felt i navngivningen — én side af mødet, eller én stemme.
-///
-/// Nøglen er det, navnet gemmes under: «HERFRA», «DERFRA» eller en stemme som
-/// «DERFRA#1». Mærkatet er det, der står på skærmen, når man ikke selv har
-/// sat et navn — «Mig», «Gæster», «Gæst 2».
-/// </summary>
-public sealed class Navnefelt : INotifyPropertyChanged
-{
-    private readonly Action<string, string> _sat;
-    private string _navn;
-
-    public Navnefelt(string noegle, string maerkat, string hjaelp, string navn,
-                     Action<string, string> sat)
-    {
-        Noegle = noegle;
-        Maerkat = maerkat;
-        Hjaelp = hjaelp;
-        _navn = navn;
-        _sat = sat;
-    }
-
-    public string Noegle { get; }
-    public string Maerkat { get; }
-    public string Hjaelp { get; }
-
-    public string Navn
-    {
-        get => _navn;
-        set
-        {
-            if (_navn == value) return;
-
-            _navn = value;
-            _sat(Noegle, value);
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Navn)));
-        }
-    }
-
-    public event PropertyChangedEventHandler? PropertyChanged;
-}
+// HER LAA KLASSEN «Navnefelt».
+//
+// Den baar eet felt i den raekke, knappen «Navngiv talere» aabnede. Baade
+// knappen og raekken er vaek: navnet saettes nu paa taleren selv, og nøglen
+// foelger med i Replikvisning.Noegle. Se Taler_Klik.
 
 /// <summary>
 /// Udskriften, som man kan rette i.
@@ -154,6 +135,9 @@ public partial class UdskriftView : UserControl
     private string _model = "";
     private MeetingMetadata? _meta;
     private bool _indlæser;
+
+    /// <summary>Stemmen, navneruden staar aaben for. Null naar den er lukket.</summary>
+    private string? _navngiver;
 
     public UdskriftView()
     {
@@ -187,16 +171,14 @@ public partial class UdskriftView : UserControl
             Liste.ItemsSource = null;
             RaaTekst.Text = "";
             Hoved.Visibility = Visibility.Collapsed;
-            Navnerude.Visibility = Visibility.Collapsed;
+            Navnerude.IsOpen = false;
             Meld("");
             _indlæser = false;
             return;
         }
 
         Hoved.Visibility = Visibility.Visible;
-        Navnerude.Visibility = Visibility.Collapsed;
-
-        ByggNavnefelter();
+        Navnerude.IsOpen = false;
 
         Byg();
         RaaTekst.Text = Raa();
@@ -219,7 +201,7 @@ public partial class UdskriftView : UserControl
         OpsumRude.Visibility = Visibility.Collapsed;
         OpsumTom.Visibility = Visibility.Visible;
         Hoved.Visibility = Visibility.Collapsed;
-        Navnerude.Visibility = Visibility.Collapsed;
+        Navnerude.IsOpen = false;
         Meld("");
     }
 
@@ -242,13 +224,26 @@ public partial class UdskriftView : UserControl
                 .Where(l => l.Tekst.Contains(soeg, StringComparison.OrdinalIgnoreCase))
                 .ToList();
 
-        // Navnet vises kun, naar man selv har sat et. Ellers staar ikonet
-        // alene - det siger allerede «mig» eller «gaesterne», og et maerkat
-        // med det samme ord ville bare fylde.
-        var harNavne = navne is not null && navne.Values.Any(v => v.Length > 0);
+        // NAVNET VISES, NAAR DET SIGER MERE END IKONET.
+        //
+        // Uden talergenkendelse siger «Mig» og «Gæster» praecis det samme som
+        // de to ikoner, og saa er maerkatet stoej; det vises derfor kun, naar
+        // man selv har sat et navn.
+        //
+        // ER stemmerne skilt ad, er det stik modsat: «Gæst 1» og «Gæst 2» er
+        // hele pointen, og forskellen kan ikke ses paa ikonet, som er det
+        // samme for dem begge.
+        var harStemmer = linjer.Any(l => l.Stemme is { Length: > 0 });
+        var harNavne = harStemmer || (navne is not null && navne.Values.Any(v => v.Length > 0));
 
+        // Udskrift.Navn(LINJEN, ...) og ikke (l.Spor, ...).
+        //
+        // Den med sporet kender kun siderne af moedet og svarer «Gæster», ogsaa
+        // naar stemmen er kendt. Det stod paa skaermen 20-08-2026: stemmerne var
+        // fundet og skrevet i filen, men listen viste stadig «Gæster», fordi
+        // netop DEN linje ikke var rettet med.
         Liste.ItemsSource = linjer
-            .Select(l => new Replikvisning(l, Udskrift.Navn(l.Spor, navne), harNavne, PaaAendring))
+            .Select(l => new Replikvisning(l, Udskrift.Navn(l, navne), harNavne, PaaAendring))
             .ToList();
 
         IntetFundet.Visibility = linjer.Count == 0 && soeg.Length > 0
@@ -322,83 +317,68 @@ public partial class UdskriftView : UserControl
 
     // --------------------------------------------------------- navngivning
 
-    private void Navne_Klik(object sender, RoutedEventArgs e) =>
-        Navnerude.Visibility = Navnerude.Visibility == Visibility.Visible
-            ? Visibility.Collapsed
-            : Visibility.Visible;
-
     /// <summary>
-    /// Bygger felterne til navngivningen.
+    /// Navngivningen sker PÅ taleren, ikke i en rude for sig.
     ///
-    /// ANTALLET ER IKKE GIVET PÅ FORHÅND.
+    /// Her lå en knap «Navngiv talere», der åbnede en række felter øverst.
+    /// Den havde to problemer. Man skulle gå et andet sted hen for at rette
+    /// noget, man sad og kiggede på — og man skulle selv regne ud, hvilket
+    /// felt der hørte til hvilken stemme, hvilket kun kan lade sig gøre, hvis
+    /// man allerede ved, hvem «Gæst 2» er.
     ///
-    /// Før var der to felter: «Mig» og «Gæster». Det svarede til de to spor,
-    /// og det var alt, appen kunne vide. Har talergenkendelsen skilt stemmerne
-    /// ad, er der i stedet ét felt pr. stemme — «Gæst 1», «Gæst 2» — og så
-    /// giver ét samlet felt til gæstesiden ingen mening længere.
-    ///
-    /// Nøglen er stemmen selv («DERFRA#1»), ikke pladsen i rækken. Skrives
-    /// udskriften ud igen, hedder stemmerne det samme, og navnene bliver
-    /// stående.
+    /// Nu klikker man på den, det handler om. Navnet gemmes på stemmens nøgle,
+    /// så det slår igennem hver eneste replik, den stemme siger.
     /// </summary>
-    private void ByggNavnefelter()
+    private void Taler_Klik(object sender, RoutedEventArgs e)
     {
-        if (_udskrift is null)
-        {
-            Navnefelter.ItemsSource = null;
-            NavneKnap.Visibility = Visibility.Collapsed;
-            return;
-        }
+        if (sender is not FrameworkElement felt || felt.DataContext is not Replikvisning v) return;
+        if (v.Noegle.Length == 0 || _meta is null) return;
 
-        var felter = new List<Navnefelt>();
+        _navngiver = v.Noegle;
 
-        var toSpor = _udskrift.Linjer.Any(l => l.Spor == Samtale.Herfra)
-                     && _udskrift.Linjer.Any(l => l.Spor == Samtale.Derfra);
+        var erStemme = v.Noegle.Contains('#');
 
-        if (toSpor)
-            felter.Add(Felt(Samtale.Herfra, "Mig", "Dig — og dem, der sad i samme lokale"));
+        NavnTitel.Text = $"Hvem er «{v.Navn}»?";
 
-        var stemmer = _udskrift.Linjer
-            .Where(l => l.Stemme is { Length: > 0 })
-            .Select(l => l.Stemme!)
-            .Distinct()
-            .OrderBy(s => s, StringComparer.Ordinal)
-            .ToList();
+        NavnUnder.Text = erStemme
+            ? "Maskinen har skilt stemmen ud efter, hvordan den lyder — den ved ikke, hvem " +
+              "det er. Navnet kommer til at stå alle de steder, denne stemme taler."
+            : v.Noegle == Samtale.Derfra
+                ? "Det er hele gæstesiden af mødet. Der kan sidde flere personer bag den — " +
+                  "skriv gerne flere navne."
+                : "Det er dig og dem, der sad i samme lokale som dig.";
 
-        foreach (var stemme in stemmer)
-        {
-            var linje = _udskrift.Linjer.First(l => l.Stemme == stemme);
+        NavnFelt.Text = GemtNavn(v.Noegle);
 
-            felter.Add(Felt(stemme,
-                Udskrift.Navn(new Udskriftslinje { Spor = linje.Spor, Stemme = stemme }, null),
-                "En stemme, maskinen har skilt ud. Sæt navnet på den, du kan høre det er"));
-        }
+        Navnerude.PlacementTarget = felt;
+        Navnerude.IsOpen = true;
 
-        // Kun naar stemmerne IKKE er skilt ad, giver eet felt til hele
-        // gaestesiden mening. Ellers ville det staa og konkurrere med dem.
-        if (stemmer.Count == 0 && toSpor)
-            felter.Add(Felt(Samtale.Derfra, "Gæster", "De øvrige deltagere. Skriv gerne flere navne"));
-
-        Navnefelter.ItemsSource = felter;
-        NavneKnap.Visibility = felter.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
-
-        Navneforklaring.Text = stemmer.Count > 0
-            ? "Maskinen har skilt stemmerne ad efter, hvordan de lyder — den ved ikke, " +
-              "hvem de er. Sæt navn på hver enkelt, så står navnene i udskriften og i " +
-              "alt, hvad der laves ud fra den. Den kan tage fejl; ret det, hvor det er galt."
-            : "Navnene sættes af dig — maskinen har ikke skilt stemmerne ad her. De " +
-              "siger, hvilken SIDE af mødet der talte, og der kan være flere personer " +
-              "bag hver af dem.";
+        NavnFelt.Focus();
+        NavnFelt.SelectAll();
     }
 
-    private Navnefelt Felt(string noegle, string maerkat, string hjaelp) =>
-        new(noegle, maerkat, hjaelp, GemtNavn(noegle), Navn_Sat);
-
-    private void Navn_Sat(string noegle, string navn)
+    private void Navn_Tast(object sender, KeyEventArgs e)
     {
-        if (_indlæser || _meta is null || _mappe is null) return;
+        if (e.Key == Key.Enter) { SaetNavn(NavnFelt.Text); e.Handled = true; }
+        else if (e.Key == Key.Escape) { Navnerude.IsOpen = false; e.Handled = true; }
+    }
 
-        _meta.Talere[noegle] = navn.Trim();
+    private void NavnGem_Klik(object sender, RoutedEventArgs e) => SaetNavn(NavnFelt.Text);
+
+    private void NavnRyd_Klik(object sender, RoutedEventArgs e) => SaetNavn("");
+
+    /// <summary>
+    /// Gemmer navnet på den stemme, ruden blev åbnet for — og tegner listen om,
+    /// så det står med det samme, hver eneste gang stemmen taler.
+    /// </summary>
+    private void SaetNavn(string navn)
+    {
+        Navnerude.IsOpen = false;
+
+        if (_navngiver is null || _meta is null || _mappe is null) { _navngiver = null; return; }
+
+        _meta.Talere[_navngiver] = navn.Trim();
+        _navngiver = null;
 
         Byg();
         RaaTekst.Text = Raa();

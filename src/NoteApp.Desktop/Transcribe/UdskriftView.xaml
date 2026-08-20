@@ -48,9 +48,12 @@
         <TextBlock x:Name="SoegStatus" Grid.Column="1" FontSize="11.5" VerticalAlignment="Center"
                    Margin="12,0,0,0" Foreground="{StaticResource TekstMeget}" />
 
-        <Button x:Name="NavneKnap" Grid.Column="2" Content="Navngiv talere" Click="Navne_Klik"
-                Padding="12,6" Margin="14,0,8,0" FontSize="12.5"
-                ToolTip="Sæt navne på dem, der talte — én ad gangen, hvis stemmerne er skilt ad" />
+        <!-- HER LAA «NAVNGIV TALERE».
+             Den aabnede en raekke felter i en rude for sig, hvor man skulle
+             regne ud, hvilket felt der hoerte til hvilken stemme. Navngivningen
+             sidder nu paa taleren selv: man klikker paa «Gæst 2» i teksten og
+             skriver navnet dér. Rettelsen slaar igennem alle steder, den stemme
+             taler. -->
 
         <Button Grid.Column="3" Content="Kopiér ▾" Click="Kopier_Klik"
                 Padding="12,6" FontSize="12.5"
@@ -67,40 +70,33 @@
     </Border>
 
     <!-- ===================== Navngivningen =====================
-         Skjult, indtil man beder om den. Den bruges én gang pr. møde og skal
-         ikke fylde i vejen resten af tiden. -->
-    <Border x:Name="Navnerude" Grid.Row="1" Visibility="Collapsed"
-            Background="#FF1D2530" BorderBrush="{StaticResource Accent}"
-            BorderThickness="0,0,0,1" Padding="16,12">
-      <StackPanel>
-        <TextBlock x:Name="Navneforklaring" FontSize="12" TextWrapping="Wrap"
-                   Margin="0,0,0,9" Foreground="{StaticResource TekstSvag}" />
+         Den åbner VED den taler, man klikkede på, og lukker af sig selv.
+         Navnet hører til den ene stemme, så ruden skal heller ikke handle om
+         andet end den. -->
+    <Popup x:Name="Navnerude" Placement="Bottom" StaysOpen="False"
+           AllowsTransparency="True" PopupAnimation="Fade" HorizontalOffset="-6">
+      <Border Background="#FF1D2530" BorderBrush="{StaticResource Accent}"
+              BorderThickness="1" CornerRadius="9" Padding="14,12" Margin="8">
+        <Border.Effect>
+          <DropShadowEffect BlurRadius="16" ShadowDepth="3" Opacity="0.5" Color="#FF000000" />
+        </Border.Effect>
+        <StackPanel Width="264">
+          <TextBlock x:Name="NavnTitel" FontSize="13" FontWeight="SemiBold" />
+          <TextBlock x:Name="NavnUnder" FontSize="11.5" TextWrapping="Wrap" LineHeight="18"
+                     Margin="0,5,0,0" Foreground="{StaticResource TekstSvag}" />
 
-        <!-- Felterne bygges i koden. Antallet er ikke givet paa forhaand: har
-             talergenkendelsen skilt stemmerne ad, er der eet felt pr. stemme;
-             ellers eet pr. side af moedet. -->
-        <ItemsControl x:Name="Navnefelter">
-          <ItemsControl.ItemsPanel>
-            <ItemsPanelTemplate>
-              <WrapPanel Orientation="Horizontal" />
-            </ItemsPanelTemplate>
-          </ItemsControl.ItemsPanel>
-          <ItemsControl.ItemTemplate>
-            <DataTemplate>
-              <StackPanel Orientation="Horizontal" Margin="0,0,20,6">
-                <TextBlock Text="{Binding Maerkat}" FontSize="12" MinWidth="56"
-                           VerticalAlignment="Center" Margin="0,0,8,0"
-                           Foreground="{StaticResource TekstMeget}" />
-                <TextBox Width="180" FontSize="12.5" Padding="8,5"
-                         Text="{Binding Navn, UpdateSourceTrigger=PropertyChanged}"
-                         ToolTip="{Binding Hjaelp}"
-                         AutomationProperties.Name="{Binding Maerkat}" />
-              </StackPanel>
-            </DataTemplate>
-          </ItemsControl.ItemTemplate>
-        </ItemsControl>
-      </StackPanel>
-    </Border>
+          <TextBox x:Name="NavnFelt" FontSize="13" Padding="9,6" Margin="0,11,0,0"
+                   KeyDown="Navn_Tast" />
+
+          <StackPanel Orientation="Horizontal" Margin="0,11,0,0" HorizontalAlignment="Right">
+            <Button Content="Fjern navnet" Click="NavnRyd_Klik" Padding="11,5"
+                    FontSize="12" Margin="0,0,8,0" />
+            <Button Content="Gem" Click="NavnGem_Klik" Padding="16,5"
+                    FontSize="12" FontWeight="SemiBold" />
+          </StackPanel>
+        </StackPanel>
+      </Border>
+    </Popup>
 
     <!-- ===================== Fanerne ===================== -->
     <TabControl x:Name="Faner" Grid.Row="2" Style="{StaticResource Fanerude}"
@@ -135,18 +131,43 @@
                                  FontFamily="Consolas" VerticalAlignment="Top"
                                  Margin="0,4,12,0" Foreground="{StaticResource TekstMeget}" />
 
-                      <StackPanel Grid.Column="1" Orientation="Horizontal"
-                                  VerticalAlignment="Top" Margin="0,2,12,0">
-                        <TextBlock Text="{Binding Ikon}" FontFamily="Segoe MDL2 Assets"
-                                   FontSize="13" VerticalAlignment="Center"
-                                   Foreground="{Binding Farve}"
-                                   Visibility="{Binding IkonSynlig}"
-                                   ToolTip="{Binding Hjaelp}" />
-                        <TextBlock Text="{Binding Navn}" FontSize="12" FontWeight="SemiBold"
-                                   VerticalAlignment="Center" Margin="6,0,0,0"
-                                   Foreground="{Binding Farve}"
-                                   Visibility="{Binding NavnSynlig}" />
-                      </StackPanel>
+                      <!-- TALEREN ER EN KNAP.
+                           Navngivningen laa foer bag en knap i vaerktoejslinjen,
+                           som aabnede en raekke felter. Det var et sted at gaa
+                           hen for at rette noget, man sad og kiggede paa - og
+                           man skulle selv finde ud af, hvilket felt der svarede
+                           til hvilken stemme. Nu klikker man paa den, det
+                           handler om. -->
+                      <Button Grid.Column="1" Click="Taler_Klik" Cursor="Hand"
+                              VerticalAlignment="Top" Margin="0,2,12,0"
+                              Padding="0" BorderThickness="0" Background="Transparent"
+                              ToolTip="{Binding Hjaelp}"
+                              AutomationProperties.Name="{Binding Navn}">
+                        <Button.Template>
+                          <ControlTemplate TargetType="Button">
+                            <Border x:Name="flade" CornerRadius="6" Padding="5,3"
+                                    Background="Transparent">
+                              <ContentPresenter />
+                            </Border>
+                            <ControlTemplate.Triggers>
+                              <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="flade" Property="Background" Value="#FF262D3A" />
+                              </Trigger>
+                            </ControlTemplate.Triggers>
+                          </ControlTemplate>
+                        </Button.Template>
+
+                        <StackPanel Orientation="Horizontal">
+                          <TextBlock Text="{Binding Ikon}" FontFamily="Segoe MDL2 Assets"
+                                     FontSize="13" VerticalAlignment="Center"
+                                     Foreground="{Binding Farve}"
+                                     Visibility="{Binding IkonSynlig}" />
+                          <TextBlock Text="{Binding Navn}" FontSize="12" FontWeight="SemiBold"
+                                     VerticalAlignment="Center" Margin="6,0,0,0"
+                                     Foreground="{Binding Farve}"
+                                     Visibility="{Binding NavnSynlig}" />
+                        </StackPanel>
+                      </Button>
 
                       <TextBox Grid.Column="2"
                                Text="{Binding Tekst, UpdateSourceTrigger=PropertyChanged}"

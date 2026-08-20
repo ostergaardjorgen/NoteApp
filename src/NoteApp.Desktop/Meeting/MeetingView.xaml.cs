@@ -289,7 +289,74 @@ public partial class MeetingView : UserControl
 
         VisPladsholdere();
 
+        VisBaand();
+
         Startet?.Invoke();
+    }
+
+    // ============================ OPTAGEBÅNDET ============================
+    //
+    // MENS DER OPTAGES, ER APPEN I VEJEN.
+    //
+    // Man kigger på mødet — et videoopkald, en dagsorden, en andens skærm —
+    // ikke på NoteApp. Et helt programvindue ovenpå bliver skjult, og så kan
+    // man ikke længere se, om der overhovedet stadig optages.
+    //
+    // Vinduet trækkes derfor helt væk, og båndet bliver tilbage: at der
+    // optages, hvor længe, notefeltet, og de to udveje.
+
+    private OptageBaand? _baand;
+    private Window? _skjultVindue;
+
+    private void VisBaand()
+    {
+        if (_baand is not null) return;
+
+        var ejer = Window.GetWindow(this);
+
+        _baand = new OptageBaand();
+        _baand.Pause += () => Pause_Click(this, new RoutedEventArgs());
+        _baand.Stop += () => Stop();
+        _baand.Annuller += Kassér_FraBaand;
+        _baand.Note_Skrevet += TilføjNote;
+
+        _baand.SaetPause(false);
+        _baand.SaetNoter(0);
+        _baand.Show();
+        _baand.Placer(ejer);
+
+        // Vinduet SKJULES, det lukkes ikke. En optagelse i gang maa ikke
+        // haenge paa, at et vindue overlever - og appen skal staa praecis,
+        // hvor den stod, naar moedet er slut.
+        if (ejer is not null)
+        {
+            _skjultVindue = ejer;
+            ejer.Hide();
+        }
+    }
+
+    private void SkjulBaand()
+    {
+        if (_baand is not null)
+        {
+            _baand.LukForAlvor();
+            _baand = null;
+        }
+
+        if (_skjultVindue is null) return;
+
+        _skjultVindue.Show();
+        _skjultVindue.Activate();
+        _skjultVindue = null;
+    }
+
+    /// <summary>
+    /// Kassér fra båndet. Der er allerede spurgt dér, så der spørges ikke igen.
+    /// </summary>
+    private void Kassér_FraBaand()
+    {
+        SkjulBaand();
+        Stop(spørgOmNavn: false);
     }
 
     private void Pause_Click(object sender, RoutedEventArgs e)
@@ -302,6 +369,7 @@ public partial class MeetingView : UserControl
             PauseKnap.Content = "❚❚ Pause";
             OptagerPrik.Fill = (Brush)FindResource("Optager");
             Status.Text = "Optager igen.";
+            _baand?.SaetPause(false);
         }
         else
         {
@@ -309,15 +377,29 @@ public partial class MeetingView : UserControl
             PauseKnap.Content = "● Fortsæt";
             OptagerPrik.Fill = (Brush)FindResource("Advarsel");
             Status.Text = "På pause — der optages intet, før du fortsætter.";
+            _baand?.SaetPause(true);
         }
     }
 
     private void Stop_Click(object sender, RoutedEventArgs e) => Stop();
 
     /// <summary>Stopper og gemmer. Sikker at kalde, når der ikke optages.</summary>
-    public string? Stop()
+    public string? Stop() => Stop(spørgOmNavn: true);
+
+    /// <summary>
+    /// Stopper optagelsen.
+    ///
+    /// <paramref name="spørgOmNavn"/> er falsk, når optagelsen kasseres fra
+    /// båndet. Der er spurgt dér — og et navn på noget, der skal slettes om
+    /// et øjeblik, er et spørgsmål uden formål.
+    /// </summary>
+    private string? Stop(bool spørgOmNavn)
     {
         if (_session is null) return null;
+
+        // Baandet vaek FOERST. Ellers ligger navnedialogen bag et vindue,
+        // der altid er oeverst, og appen ser laast ud.
+        SkjulBaand();
 
         _ur.Stop();
 
@@ -334,7 +416,11 @@ public partial class MeetingView : UserControl
         // Forslaget bygges af det, der faktisk er kendt, når mødet er slut —
         // den første note og datoen. Ikke klokkeslættet: man husker «mødet med
         // Espen den 13.», ikke «mødet 09:57».
-        var titel = SpørgOmNavn();
+        //
+        // Kasseres optagelsen fra båndet, springes der over. Der ER spurgt, og
+        // et navn på noget, der bliver slettet om et øjeblik, er et spørgsmål
+        // uden formål. null betyder «kassér» længere nede.
+        var titel = spørgOmNavn ? SpørgOmNavn() : null;
 
         _session.Stop();
         _session.Dispose();
@@ -448,6 +534,8 @@ public partial class MeetingView : UserControl
         NoteTaeller.Text = $"✓ {_noter[0].Tid} · {_noter.Count}";
         NoteTaeller.ToolTip = string.Join("\n", _noter.Take(12).Select(n => $"{n.Tid}  {n.Tekst}"));
 
+        _baand?.SaetNoter(_noter.Count);
+
         VisPladsholdere();
     }
 
@@ -457,8 +545,15 @@ public partial class MeetingView : UserControl
     {
         if (_session is null) return;
 
-        Ur.Text = _session.Elapsed.ToString(@"hh\:mm\:ss");
+        var tid = _session.Elapsed.ToString(@"hh\:mm\:ss");
+
+        Ur.Text = tid;
         UrUnder.Text = _session.IsPaused ? "på pause" : "optager";
+
+        // Baandet er det, man kan SE, mens der optages - appens eget ur staar
+        // bag et skjult vindue. Det er altsaa ikke en kopi, det er visningen.
+        _baand?.SaetTid(tid);
+
         Opdateret?.Invoke();
     }
 

@@ -1,0 +1,97 @@
+<Window x:Class="NoteApp.Desktop.Meeting.OptageBaand"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="NoteApp optager"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        ResizeMode="NoResize" SizeToContent="WidthAndHeight"
+        Topmost="True" ShowInTaskbar="True">
+
+  <!-- ======================= OPTAGEBÅNDET =======================
+
+       Mens der optages, er appen ikke det, man kigger på. Man kigger på
+       mødet: et videoopkald, en dagsorden, en anden persons skærm. Et helt
+       programvindue i vejen er ikke bare i vejen — det gør, at man skjuler
+       det, og så kan man ikke se, om der stadig optages.
+
+       Båndet er derfor det eneste, der bliver stående. Det viser, at der
+       optages, hvor længe, og det har de to udveje: gem eller kassér.
+
+       DET LIGGER ØVERST OVER ALT ANDET.
+       Topmost. Et bånd, der forsvinder bag et browservindue, svarer til ikke
+       at have det.
+
+       DET STÅR I PROCESLINJEN.
+       Mens der optages, er hovedvinduet skjult, og båndet er dermed det
+       eneste, der er tilbage af appen. Uden en knap i proceslinjen ville en
+       skærm, der bliver koblet fra — eller et andet program, der også vil
+       ligge øverst — kunne efterlade en igang­værende optagelse uden nogen vej
+       tilbage til den.
+
+       DET KAN FLYTTES.
+       Hele fladen trækker vinduet — undtagen felterne og knapperne, som selv
+       tager imod klikket. Placeringen huskes til næste møde, fordi den med to
+       skærme aldrig er tilfældig. -->
+
+  <Border x:Name="Flade" CornerRadius="12" Background="#FF161A21"
+          BorderBrush="#FF39404D" BorderThickness="1" Padding="14,9"
+          MouseLeftButtonDown="Flade_Traek" Cursor="SizeAll">
+    <Border.Effect>
+      <DropShadowEffect BlurRadius="22" ShadowDepth="3" Opacity="0.55" Color="#FF000000" />
+    </Border.Effect>
+
+    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+
+      <!-- Greb. Det siger, at båndet kan flyttes — uden en linje tekst,
+           der skal læses hver gang. -->
+      <TextBlock Text="⠿" FontSize="16" VerticalAlignment="Center"
+                 Margin="0,0,12,0" Foreground="#FF6B7484" />
+
+      <!-- Prikken blinker, så længe der optages. Står den stille, er der
+           pause — og det skal kunne ses på tværs af et lokale. -->
+      <Ellipse x:Name="Prik" Width="11" Height="11" VerticalAlignment="Center"
+               Margin="0,0,10,0" Fill="#FFE5484D" />
+
+      <TextBlock x:Name="Ur" Text="00:00:00" FontSize="19" FontWeight="SemiBold"
+                 FontFamily="Consolas" VerticalAlignment="Center"
+                 Foreground="#FFF2F4F8" Margin="0,0,4,0" />
+
+      <TextBlock x:Name="Tilstand" FontSize="11" VerticalAlignment="Center"
+                 Margin="10,2,0,0" Foreground="#FF9AA3B2" />
+
+      <Rectangle Width="1" Height="26" Fill="#FF39404D" Margin="14,0,14,0" />
+
+      <!-- Noterne skal kunne skrives HER.
+           Kunne de kun skrives i appen, og appen er væk, ville funktionen
+           reelt være væk under mødet — som er det eneste tidspunkt, den er
+           noget værd. -->
+      <Grid Width="240" VerticalAlignment="Center">
+        <TextBox x:Name="Note" FontSize="12.5" Padding="9,6" Cursor="IBeam"
+                 Background="#FF1E2330" BorderBrush="#FF39404D" BorderThickness="1"
+                 Foreground="#FFF2F4F8" CaretBrush="#FFF2F4F8"
+                 KeyDown="Note_Tast"
+                 ToolTip="Skriv en note og tryk Enter. Den bliver tidsstemplet." />
+        <TextBlock x:Name="NotePladsholder" IsHitTestVisible="False" FontSize="12.5"
+                   Margin="12,0,0,0" VerticalAlignment="Center" Foreground="#FF6B7484"
+                   Text="Note — tryk Enter" />
+      </Grid>
+
+      <TextBlock x:Name="NoteTaeller" FontSize="11.5" FontWeight="SemiBold"
+                 VerticalAlignment="Center" Margin="10,0,0,0" Foreground="#FF4C8DFF" />
+
+      <Rectangle Width="1" Height="26" Fill="#FF39404D" Margin="14,0,14,0" />
+
+      <Button x:Name="PauseKnap" Click="Pause_Klik" Content="❚❚" Cursor="Hand"
+              Padding="11,7" FontSize="12" Margin="0,0,7,0"
+              ToolTip="Hold pause. Der optages intet, før du fortsætter." />
+
+      <Button x:Name="StopKnap" Click="Stop_Klik" Content="■ Stop og gem" Cursor="Hand"
+              Padding="14,7" FontSize="12.5" FontWeight="SemiBold"
+              Background="#FFE5484D" Foreground="#FFFFFFFF" BorderThickness="0"
+              ToolTip="Afslut optagelsen og gem den. Du navngiver mødet bagefter." />
+
+      <Button x:Name="AnnullerKnap" Click="Annuller_Klik" Content="✕" Cursor="Hand"
+              Padding="11,7" FontSize="12" Margin="7,0,0,0"
+              ToolTip="Kassér optagelsen uden at gemme. Lyden bliver slettet." />
+    </StackPanel>
+  </Border>
+</Window>
