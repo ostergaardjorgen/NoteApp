@@ -135,8 +135,25 @@ public sealed class Udskrift
         return bygget;
     }
 
-    /// <summary>Findes der en rettet udgave?</summary>
-    public static bool HarRettelser(string mappe) => File.Exists(RettetSti(mappe));
+    /// <summary>
+    /// Er der rettet noget i udskriften?
+    ///
+    /// DET ER IKKE NOK, AT FILEN FINDES.
+    ///
+    /// Editoren gemmer, når man har rørt teksten — også når man kun har
+    /// rullet igennem og lukket igen. Så ligger der en rettet fil uden en
+    /// eneste rettelse i.
+    ///
+    /// Blev der kun set på filen, ville appen advare «Du har rettet i
+    /// udskriften», hver gang man ville skrive ud igen, af noget der aldrig
+    /// blev rettet. En advarsel, der er forkert hver anden gang, bliver til en
+    /// advarsel, man klikker væk uden at læse — og så virker den heller ikke
+    /// den gang, den har ret.
+    ///
+    /// Der læses derfor efter, om en linje faktisk er mærket som rettet.
+    /// </summary>
+    public static bool HarRettelser(string mappe) =>
+        Laes(RettetSti(mappe)) is { ErRettet: true };
 
     private static Udskrift? Laes(string sti)
     {

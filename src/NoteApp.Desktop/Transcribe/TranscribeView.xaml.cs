@@ -815,7 +815,7 @@ public partial class TranscribeView : UserControl
 
         var felter = new Dictionary<string, string?>
             {
-                ["transskription"] = File.ReadAllText(tekstFil, System.Text.Encoding.UTF8),
+                ["transskription"] = Udskriftstekst(valgt.Mappe, meta, tekstFil),
                 ["titel"] = valgt.Titel,
                 ["dato"] = DateTime.Now.ToString("d. MMMM yyyy"),
                 ["varighed"] = TimeSpan.FromSeconds(valgt.Sekunder).ToString(@"h\:mm"),
@@ -894,6 +894,36 @@ public partial class TranscribeView : UserControl
     }
 
     /// <summary>Den nyeste udskrevne tekst i mappen, hvis der er en.</summary>
+    /// <summary>
+    /// Teksten, dokumentet bliver lavet af.
+    ///
+    /// DEN RETTEDE UDSKRIFT GÅR FORUD FOR MASKINENS.
+    ///
+    /// Før 20-08-2026 blev den nyeste .txt-fil i mappen sendt afsted. Det var
+    /// forkert på to måder. Rettelserne talte ikke med: har man siddet og rettet
+    /// navne og fagord, blev referatet alligevel lavet af maskinens første bud.
+    /// Og navnene på talerne fulgte ikke med — sprogmodellen fik «Mig» og
+    /// «Gæster» at arbejde med, selv når der stod rigtige navne i mødet.
+    ///
+    /// Filvalget var desuden usikkert. Mappen indeholder både de enkelte spor
+    /// og den flettede samtale, og «nyeste .txt» kunne lige så godt ramme det
+    /// ene spor for sig — et referat af den halve samtale, uden at nogen kunne
+    /// se det på resultatet.
+    ///
+    /// Udskriften bruges nu direkte: den rettede, hvis den findes, ellers
+    /// maskinens, og med talernes navne sat på. Den gamle vej beholdes som
+    /// reserve for optagelser fra før udskriftsfilen fandtes.
+    /// </summary>
+    private static string Udskriftstekst(string mappe, MeetingMetadata? meta, string? reserve)
+    {
+        if (Udskrift.HentEllerByg(mappe, Modelnavn()) is { } udskrift)
+            return udskrift.SomTekst(meta?.Talere);
+
+        return reserve is not null
+            ? File.ReadAllText(reserve, System.Text.Encoding.UTF8)
+            : "";
+    }
+
     private static string? FindTekst(string mappe) =>
         Directory.Exists(mappe)
             ? Directory.GetFiles(mappe, "*.txt").OrderByDescending(File.GetLastWriteTime).FirstOrDefault()
@@ -1188,23 +1218,39 @@ public partial class TranscribeView : UserControl
             // og den ventede kun paa den naeste transskription.
             VisResultat(r);
 
-            // Vejen videre foreslås, frem for at man skal finde den selv. Det
-            // er alligevel dét, man kom efter — teksten er sjældent målet.
+            // GENNEMLÆSNING FØRST — DOKUMENTET BAGEFTER.
             //
+            // Her blev der før tilbudt et dokument med det samme, og «Lav et
+            // dokument» var den knap, der stod fremhævet. Rækkefølgen var
+            // forkert: referatet blev lavet af maskinens første bud, mens de
+            // navne og fagord, den havde hørt forkert, stadig stod i teksten —
+            // og sporene hed «Mig» og «Gæster».
+            //
+            // Et forkert navn i udskriften bliver til et forkert navn i
+            // referatet, og dér er det sværere at få øje på: teksten er kortere,
+            // den ser færdig ud, og lydfilen bliver ikke hørt igennem igen.
+            // Fem minutters gennemlæsning er det billigste sted at rette det.
+            //
+            // Tilbuddet om et dokument står stadig — men som den anden knap.
             // Der spørges KUN, når der er en nøgle at gøre det med. Et tilbud,
             // der ender i «du mangler noget», er ikke et tilbud.
             if (SkyNoegle.Hent() is not null)
             {
-                var ja = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
+                var gennemgaa = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
                     $"«{valgt.Titel}» er skrevet ud",
-                    "Vil du lave et dokument ud af den nu — et referat, en opgaveliste eller " +
-                    "hvad du selv har lavet af skabeloner?\n\n" +
-                    "Du kan også gøre det senere med knappen «Opret dokument».",
-                    godkend: "Lav et dokument",
-                    annuller: "Ikke nu",
+                    "Læs udskriften igennem, før der laves et dokument. To ting betaler " +
+                    "sig især: at rette navne og fagord, maskinen har hørt forkert, og at " +
+                    "give de to spor rigtige navne i stedet for «Mig» og «Gæster».\n\n" +
+                    "Dokumentet bliver lavet af den rettede udskrift, med navnene på — " +
+                    "så det, der står rigtigt her, står også rigtigt i referatet.\n\n" +
+                    "Knappen «Opret dokument» står klar bagefter.",
+                    godkend: "Gennemgå udskriften",
+                    annuller: "Lav et dokument nu",
                     slags: Dialogs.Slags.Godt);
 
-                if (ja) Referat_Click(this, new RoutedEventArgs());
+                // Udskriften er allerede på skærmen, så «Gennemgå» er at blive
+                // staaende. Det er den anden knap, der foerer et sted hen.
+                if (!gennemgaa) Referat_Click(this, new RoutedEventArgs());
             }
             _sidsteMappe = valgt.Mappe;
         }
