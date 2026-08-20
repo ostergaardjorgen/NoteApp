@@ -47,32 +47,27 @@ if (-not $wix) {
 }
 
 # --- 1. Udgiv appen -------------------------------------------------------
+#
+# DER UDGIVES GENNEM udgiv.ps1 OG IKKE MED ET EGET "dotnet publish".
+#
+# Her stod en kopi af udgivelsen: luk appen, ryd obj\Release, publish. Den
+# gjorde tre ting faerre end udgiv.ps1, og de tre kostede en installationsfil
+# den 20-08-2026:
+#
+#   1. VERSIONEN blev ikke sat ud fra seneste commit. Pakken blev bygget som
+#      1.0.33, selv om koden var 1.0.34 - og en pakke med en version, der
+#      allerede er installeret, tilbyder at REPARERE frem for at opdatere.
+#      Man tror, aendringen ikke virkede.
+#   2. TALERGENKENDELSEN blev ikke kopieret med. Pakken var 61 MB for lille
+#      og ville have installeret en app, der ikke kunne saette navne paa
+#      talere - uden at sige det.
+#   3. Genvejen blev ikke efterproevet.
+#
+# To scripts, der begge udgiver, driver fra hinanden. Nu er der eet.
 if (-not $SpringUdgivelseOver) {
     Write-Host "Udgiver appen ..." -ForegroundColor Cyan
-    $proj = Join-Path $rod 'src\NoteApp.Desktop\NoteApp.Desktop.csproj'
 
-    # Luk en koerende udgave: en exe i brug kan ikke overskrives, og fejlen
-    # ser ud som en byggefejl.
-    Get-Process NoteApp -ErrorAction SilentlyContinue | Stop-Process -Force
-    Start-Sleep -Milliseconds 500
-
-
-    # RYD obj\Release FOER UDGIVELSEN.
-    #
-    # MSBuild husker i obj\, at de native DLL'er er kopieret. Ryddes output-
-    # mappen, men ikke obj\, springer den kopieringen over - og saa staar exe'en
-    # alene tilbage uden PresentationNative_cor3.dll og seks andre. Appen bygger
-    # uden fejl og doer ved opstart.
-    #
-    # "dotnet publish --no-incremental" findes ikke; det er en build-switch, og
-    # publish afviser den med MSB1001. Derfor slettes mappen i haanden.
-    $objRelease = Join-Path (Split-Path $proj) 'obj\Release'
-    if (Test-Path $objRelease) {
-        Remove-Item $objRelease -Recurse -Force -ErrorAction SilentlyContinue
-    }
-
-    dotnet publish $proj -c Release -r win-x64 --self-contained true `
-        -p:PublishSingleFile=true -o $app --nologo -v q
+    & powershell -NoProfile -File (Join-Path $rod 'scripts\udgiv.ps1') -Rod $rod
     if ($LASTEXITCODE -ne 0) { throw "Udgivelsen fejlede." }
 }
 
@@ -80,12 +75,32 @@ $exe = Join-Path $app 'NoteApp.exe'
 if (-not (Test-Path $exe)) { throw "Fandt ikke $exe. Udgiv appen først." }
 
 $version = (Get-Item $exe).VersionInfo.FileVersion
-$filer = Get-ChildItem $app -File
+
+# -Recurse: talergenkendelsen ligger i en undermappe. Uden den taeller
+# opgoerelsen 61 MB for lidt og ser rigtig ud, selv om noget mangler.
+$filer = Get-ChildItem $app -Recurse -File
 $mb = [math]::Round(($filer | Measure-Object Length -Sum).Sum / 1MB, 1)
 
 Write-Host ""
 Write-Host "Programfiler : $($filer.Count) filer, $mb MB"
 Write-Host "Version      : $version"
+
+# --- SPAERRE: TALERGENKENDELSEN SKAL VAERE I PAKKEN ----------------------
+#
+# Den ligger i app\talere\ og samles op af "..\app\**" i NoteApp.wxs. Mangler
+# den, bygger pakken uden fejl og installerer en app, der stiltiende holder op
+# med at kunne skille stemmer ad.
+$talerFiler = @(
+    'talere\bin\sherpa-onnx-offline-speaker-diarization.exe',
+    'talere\bin\onnxruntime.dll',
+    'talere\segmentering.onnx',
+    'talere\stemmer.onnx'
+)
+$manglerTalere = $talerFiler | Where-Object { -not (Test-Path (Join-Path $app $_)) }
+if ($manglerTalere) {
+    throw ("Talergenkendelsen mangler i app-mappen: $($manglerTalere -join ', ').`n" +
+           "Pakken ville installere en app uden navne paa talere.")
+}
 
 # --- SPAERRE: WPF'S NATIVE DLL'ER SKAL VAERE DER -------------------------
 #
