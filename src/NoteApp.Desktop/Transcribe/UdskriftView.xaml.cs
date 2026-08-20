@@ -1347,12 +1347,21 @@ public partial class UdskriftView : UserControl
         var navn = Path.GetFileNameWithoutExtension(model);
         var ur = System.Diagnostics.Stopwatch.StartNew();
 
+        // FREMDRIFTEN SKAL KUNNE SES BEGGE STEDER.
+        //
+        // OpsumStatus ligger i den TOMME rudes panel, og det er skjult, saa
+        // snart der ER en opsummering. Ved en ny koersel stod der derfor
+        // ingenting i halvandet minut, og man kunne ikke vide, om appen
+        // arbejdede eller var gaaet i staa. Meld() skriver i linjen oeverst,
+        // som staar fremme uanset hvad.
+        void Sig(string s) { OpsumStatus.Text = s; Meld(s); }
+
         var tikker = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
         tikker.Tick += (_, _) =>
-            OpsumStatus.Text = $"{navn} læser mødet igennem … {ur.Elapsed.TotalSeconds:0} sek.";
+            Sig($"{navn} læser mødet igennem … {ur.Elapsed.TotalSeconds:0} sek.");
         tikker.Start();
 
-        OpsumStatus.Text = $"{navn} læser mødet igennem …";
+        Sig($"{navn} indlæses …");
 
         try
         {
@@ -1360,19 +1369,35 @@ public partial class UdskriftView : UserControl
 
             var svar = await new LlmRunner(cli).RunAsync(
                 model,
-                Opsummering.Opskrift(),
+                Opsummering.LokalOpskrift(),
                 $"Mødet hedder «{titel}».\n\nUdskrift:\n{tekst}");
+
+            var ren = svar.Text.Trim();
+
+            // ET AFKORTET SVAR MAA IKKE SE FAERDIGT UD.
+            //
+            // Modellen stopper midt i et ord, naar pladsen slipper op, og saa
+            // stod der «- Cloudworks har planer paa at st» i ruden - uden at
+            // noget sagde, at der manglede noget. Ender teksten ikke paa et
+            // skilletegn, siges det.
+            var afkortet = ren.Length > 0 && !".!?»\")".Contains(ren[^1]);
 
             Opsummering.Gem(_mappe, new Opsummeringsdata
             {
-                Tekst = svar.Text.Trim(),
+                Tekst = afkortet
+                    ? ren + "\n\n[Svaret stoppede her — modellen løb tør for plads. " +
+                            "Prøv igen, eller lav den i Europa.]"
+                    : ren,
                 Model = navn + " (på maskinen)",
                 UdskriftSum = Kvitteringer.Kontrolsum(tekst)
             });
 
             VisOpsummering();
             OpsumStatus.Text = "";
-            Meld($"Opsummeringen er lavet på maskinen — {ur.Elapsed.TotalSeconds:0} sek.");
+
+            Meld(afkortet
+                ? $"Opsummeringen blev afkortet — {ur.Elapsed.TotalSeconds:0} sek."
+                : $"Opsummeringen er lavet på maskinen — {ur.Elapsed.TotalSeconds:0} sek.");
         }
         catch (Exception ex)
         {

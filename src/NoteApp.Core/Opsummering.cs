@@ -117,4 +117,49 @@ public static class Opsummering
             "overskrift, ingen kodeblok omkring.",
         UserPrompt = ""
     };
+
+    /// <summary>
+    /// Opskriften, når opsummeringen laves PÅ MASKINEN.
+    ///
+    /// DEN ER KORTERE MED VILJE — OG DET ER IKKE EN NEDPRIORITERING.
+    ///
+    /// Målt 20-08-2026: den lokale model blev bedt om op til 1.200 tokens oven
+    /// på en udskrift, der fylder 23.345. På et 6 GB-kort er der ikke plads til
+    /// begge dele, og svaret stoppede midt i et ord — «- Cloudworks har planer
+    /// på at st». En opsummering, der ender sådan, kan man hverken bruge eller
+    /// stole på.
+    ///
+    /// Med fem linjer i stedet for ti er der plads, og så bliver den færdig.
+    ///
+    /// DEN MÅ IKKE SKRIVE TAL
+    ///
+    /// Den samme model skrev «allerede seks kunder i Danmark». De ord falder
+    /// ikke ét sted i udskriften. Efterprøvningen fanger den slags bagefter,
+    /// men det bedste er, at den ikke bliver skrevet: et tal i en opsummering
+    /// på fem linjer bærer sjældent sin egen vægt, og et forkert et koster
+    /// mere, end et rigtigt gavner.
+    /// </summary>
+    public static PromptTemplate LokalOpskrift() => new()
+    {
+        Name = "Opsummering (på maskinen)",
+        Temperature = 0.2,
+        MaxTokens = 320,
+        SystemPrompt =
+            "Du laver en MEGET KORT opsummering af et møde ud fra en udskrift. Du " +
+            "skriver ALTID på dansk, også når mødet blev holdt på et andet sprog.\n\n" +
+            "FORMEN\n\n" +
+            "To til tre linjer om, hvad mødet handlede om. Derefter højst fire punkter " +
+            "med bindestreg, hver på én linje: det vigtigste, der blev sagt eller aftalt.\n\n" +
+            "Hold dig under 120 ord i alt. Bliv færdig — en opsummering, der stopper " +
+            "midt i en sætning, kan ikke bruges.\n\n" +
+            "REGLERNE\n\n" +
+            "Skriv ALDRIG et navn eller en dato, der ikke står i udskriften.\n\n" +
+            "SKRIV IKKE TAL. Ingen antal, ingen beløb, ingen procenter, ingen årstal. " +
+            "Skriv «flere kunder» frem for et antal. Er et tal helt afgørende, så skriv " +
+            "den sætning af, det stod i.\n\n" +
+            "Er du i tvivl om noget, så lad være med at skrive det. Det, der står, skal " +
+            "kunne genfindes i udskriften.\n\n" +
+            "Svar med opsummeringen og intet andet.",
+        UserPrompt = ""
+    };
 }
