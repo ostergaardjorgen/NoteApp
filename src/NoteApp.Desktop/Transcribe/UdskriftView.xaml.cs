@@ -1,5 +1,6 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using System.IO;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -14,24 +15,44 @@ public sealed class Replikvisning : INotifyPropertyChanged
     private readonly Udskriftslinje _linje;
     private readonly Action _aendret;
 
-    public Replikvisning(Udskriftslinje linje, string hvem, Action aendret)
+    public Replikvisning(Udskriftslinje linje, string navn, bool visNavne, Action aendret)
     {
         _linje = linje;
         _aendret = aendret;
-        Hvem = hvem;
+        Navn = navn;
 
-        Farve = linje.Spor == Samtale.Derfra
+        var gaester = linje.Spor == Samtale.Derfra;
+
+        // ÉN PERSON MOD FLERE.
+        //
+        // Ikonet siger det, et maerkat skulle bruge et ord paa, og det fylder
+        // en broekdel. Bag «gaester» kan der sagtens vaere flere personer -
+        // det er netop dét, det andet ikon viser uden at skulle forklares.
+        //
+        // E77B = Contact, E716 = People. Begge efterproevet mod skrifttypens
+        // egen tegntabel; et gaet giver en tom firkant.
+        Ikon = gaester ? "" : "";
+
+        Farve = gaester
             ? new SolidColorBrush(Color.FromRgb(0xC9, 0x8C, 0xF0))
             : new SolidColorBrush(Color.FromRgb(0x5B, 0x9D, 0xF0));
+
+        Hjaelp = gaester ? "Gæsterne — de øvrige mødedeltagere" : "Dig og dem i samme lokale";
+
+        IkonSynlig = linje.Spor.Length > 0 ? Visibility.Visible : Visibility.Collapsed;
+        NavnSynlig = visNavne && navn.Length > 0 ? Visibility.Visible : Visibility.Collapsed;
     }
 
     public Udskriftslinje Linje => _linje;
 
     public string Tid => _linje.Tid;
-    public string Hvem { get; }
+    public string Ikon { get; }
+    public string Navn { get; }
+    public string Hjaelp { get; }
     public Brush Farve { get; }
 
-    public Visibility HvemSynlig => Hvem.Length > 0 ? Visibility.Visible : Visibility.Collapsed;
+    public Visibility IkonSynlig { get; }
+    public Visibility NavnSynlig { get; }
 
     public bool Rettet => _linje.Rettet;
 
@@ -79,14 +100,7 @@ public sealed class Replikvisning : INotifyPropertyChanged
 /// HVORDAN RETTELSER OG NYE KØRSLER LEVER SIDE OM SIDE
 ///
 /// Rettelserne ligger i deres egen fil. En ny transskription skriver maskinens
-/// udgave og rører aldrig den rettede. Bliver de to uenige, er det et
-/// spørgsmål til brugeren — ikke noget appen afgør selv.
-///
-/// TEKSTFILEN ER EN GENGIVELSE
-///
-/// Dokumenter, søgning og kopiering læser en txt-fil. Den skrives om, hver
-/// gang der rettes, ud fra den strukturerede udskrift og de navne, der er sat.
-/// Så er der ét sted, sandheden står, og ét sted, den bliver læst.
+/// udgave og rører aldrig den rettede.
 /// </summary>
 public partial class UdskriftView : UserControl
 {
@@ -98,9 +112,6 @@ public partial class UdskriftView : UserControl
     private MeetingMetadata? _meta;
     private bool _indlæser;
 
-    /// <summary>Hvor hver replik begynder i den gengivne tekst. Til at springe hen til et sted.</summary>
-    private readonly List<(int Fra, int Til)> _positioner = new();
-
     public UdskriftView()
     {
         InitializeComponent();
@@ -108,24 +119,17 @@ public partial class UdskriftView : UserControl
         // DER GEMMES EFTER EN PAUSE, IKKE VED HVERT TASTETRYK.
         //
         // En udskrift paa en time er hundredvis af replikker. At skrive hele
-        // filen ved hvert bogstav ville betyde en diskskrivning i sekundet,
-        // mens man skriver - og en fil, der konstant er halvvejs skrevet.
-        //
-        // 900 ms er laenge nok til, at en saetning bliver faerdig, og kort nok
-        // til at man ikke naar at lukke vinduet foerst.
+        // filen ved hvert bogstav ville betyde en diskskrivning i sekundet -
+        // og en fil, der konstant er halvvejs skrevet.
         _gemSenere = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(900) };
         _gemSenere.Tick += (_, _) => { _gemSenere.Stop(); Gem(); };
     }
 
-    /// <summary>Findes der en udskrift at vise?</summary>
-    public bool HarUdskrift => _udskrift is not null && _udskrift.Linjer.Count > 0;
-
     /// <summary>Den gengivne tekst — det, der kopieres og sendes videre.</summary>
     public string Tekst => _udskrift?.SomTekst(_meta?.Talere) ?? "";
 
-    /// <summary>
-    /// Viser udskriften for et møde.
-    /// </summary>
+    // -------------------------------------------------------------- visning
+
     public void Vis(string mappe, string model)
     {
         _indlæser = true;
@@ -138,8 +142,10 @@ public partial class UdskriftView : UserControl
         if (_udskrift is null)
         {
             Liste.ItemsSource = null;
+            RaaTekst.Text = "";
             Hoved.Visibility = Visibility.Collapsed;
-            Status.Text = "";
+            Navnerude.Visibility = Visibility.Collapsed;
+            Meld("");
             _indlæser = false;
             return;
         }
@@ -148,51 +154,136 @@ public partial class UdskriftView : UserControl
                      && _udskrift.Linjer.Any(l => l.Spor == Samtale.Derfra);
 
         Hoved.Visibility = Visibility.Visible;
-        Navnefelter.Visibility = toSpor ? Visibility.Visible : Visibility.Collapsed;
+        NavneKnap.Visibility = toSpor ? Visibility.Visible : Visibility.Collapsed;
+        Navnerude.Visibility = Visibility.Collapsed;
 
-        NavnHerfra.Text = Navn(Samtale.Herfra);
-        NavnDerfra.Text = Navn(Samtale.Derfra);
+        NavnHerfra.Text = GemtNavn(Samtale.Herfra);
+        NavnDerfra.Text = GemtNavn(Samtale.Derfra);
 
         Byg();
+        RaaTekst.Text = Raa();
 
-        Status.Text = _udskrift.ErRettet ? "Rettet" : "Som maskinen skrev den";
+        Meld(_udskrift.ErRettet ? "Rettet" : "");
         _indlæser = false;
     }
 
     public void Ryd()
     {
         _gemSenere.Stop();
+
         _udskrift = null;
         _mappe = null;
+
         Liste.ItemsSource = null;
+        RaaTekst.Text = "";
         Hoved.Visibility = Visibility.Collapsed;
-        Status.Text = "";
+        Navnerude.Visibility = Visibility.Collapsed;
+        Meld("");
     }
 
-    private string Navn(string spor) =>
+    private string GemtNavn(string spor) =>
         _meta?.Talere.TryGetValue(spor, out var n) == true ? n : "";
 
+    private void Meld(string tekst) => SoegStatus.Text = tekst;
+
+    /// <summary>Bygger listen — filtreret, hvis der er søgt.</summary>
     private void Byg()
     {
         if (_udskrift is null) return;
 
         var navne = _meta?.Talere;
+        var soeg = Soeg.Text.Trim();
 
-        Liste.ItemsSource = _udskrift.Linjer
-            .Select(l => new Replikvisning(l, Udskrift.Navn(l.Spor, navne), PaaAendring))
+        var linjer = soeg.Length == 0
+            ? _udskrift.Linjer
+            : _udskrift.Linjer
+                .Where(l => l.Tekst.Contains(soeg, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+        // Navnet vises kun, naar man selv har sat et. Ellers staar ikonet
+        // alene - det siger allerede «mig» eller «gaesterne», og et maerkat
+        // med det samme ord ville bare fylde.
+        var harNavne = navne is not null && navne.Values.Any(v => v.Length > 0);
+
+        Liste.ItemsSource = linjer
+            .Select(l => new Replikvisning(l, Udskrift.Navn(l.Spor, navne), harNavne, PaaAendring))
             .ToList();
+
+        IntetFundet.Visibility = linjer.Count == 0 && soeg.Length > 0
+            ? Visibility.Visible : Visibility.Collapsed;
+
+        IntetFundet.Text = $"Ingen replikker indeholder «{soeg}».";
     }
 
-    // ------------------------------------------------------------- gemning
-
-    private void PaaAendring()
+    /// <summary>
+    /// Maskinens egne ord, uden rettelser.
+    ///
+    /// Læses fra maskinfilen og ikke fra den rettede. Det er hele pointen: har
+    /// man rettet, er spørgsmålet et halvt år senere, om en formulering er ens
+    /// egen eller maskinens — og det kan kun besvares, hvis begge findes.
+    /// </summary>
+    private string Raa()
     {
-        if (_indlæser) return;
+        if (_mappe is null) return "";
 
-        Status.Text = "Gemmer …";
-        _gemSenere.Stop();
-        _gemSenere.Start();
+        var maskin = Udskrift.MaskinSti(_mappe, _model);
+        if (!File.Exists(maskin)) return "Maskinens udgave findes ikke for denne optagelse.";
+
+        try
+        {
+            var linjer = System.Text.Json.JsonSerializer
+                .Deserialize<List<Udskriftslinje>>(File.ReadAllText(maskin, Encoding.UTF8));
+
+            return linjer is null ? "" : new Udskrift { Linjer = linjer }.SomTekst(_meta?.Talere);
+        }
+        catch (Exception)
+        {
+            return "Maskinens udgave kunne ikke læses.";
+        }
     }
+
+    // ------------------------------------------------------------- søgning
+
+    /// <summary>
+    /// Søgning INDE i udskriften.
+    ///
+    /// Der filtreres frem for at fremhæve. En udskrift på en time er
+    /// hundredvis af replikker, og en markering et sted i den mur kræver, at
+    /// man alligevel ruller. Vises kun de replikker, ordet står i, er svaret
+    /// på skærmen med det samme — og de kan rettes, mens de står der.
+    ///
+    /// Filtreringen rører ikke teksten. Ryddes feltet, står alt igen.
+    /// </summary>
+    private void Soeg_Aendret(object sender, TextChangedEventArgs e)
+    {
+        SoegPladsholder.Visibility = Soeg.Text.Length == 0
+            ? Visibility.Visible : Visibility.Collapsed;
+
+        if (_udskrift is null) return;
+
+        var foer = _indlæser;
+        _indlæser = true;
+        Byg();
+        _indlæser = foer;
+
+        var soeg = Soeg.Text.Trim();
+
+        if (soeg.Length == 0)
+        {
+            Meld(_udskrift.ErRettet ? "Rettet" : "");
+            return;
+        }
+
+        var n = Liste.ItemsSource is IEnumerable<Replikvisning> v ? v.Count() : 0;
+        Meld(n == 1 ? "1 replik" : $"{n} replikker");
+    }
+
+    // --------------------------------------------------------- navngivning
+
+    private void Navne_Klik(object sender, RoutedEventArgs e) =>
+        Navnerude.Visibility = Navnerude.Visibility == Visibility.Visible
+            ? Visibility.Collapsed
+            : Visibility.Visible;
 
     private void Navn_Aendret(object sender, TextChangedEventArgs e)
     {
@@ -201,10 +292,80 @@ public partial class UdskriftView : UserControl
         _meta.Talere[Samtale.Herfra] = NavnHerfra.Text.Trim();
         _meta.Talere[Samtale.Derfra] = NavnDerfra.Text.Trim();
 
-        // Navnene staar paa hver replik, saa listen skal bygges om. Det er
-        // billigt: der oprettes visningsobjekter, ikke filer.
         Byg();
+        RaaTekst.Text = Raa();
         PaaAendring();
+    }
+
+    // ------------------------------------------------------------ kopiering
+
+    /// <summary>
+    /// Knappen åbner menuen. Der er ikke ét rigtigt svar på, hvad «kopiér»
+    /// betyder: skal tidsstemplerne med i en mail? Skal taleren med i et
+    /// citat? Det afhænger af, hvor teksten skal hen.
+    /// </summary>
+    private void Kopier_Klik(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button b || b.ContextMenu is null) return;
+
+        b.ContextMenu.PlacementTarget = b;
+        b.ContextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
+        b.ContextMenu.IsOpen = true;
+    }
+
+    private void KopierAlt_Klik(object sender, RoutedEventArgs e) => Kopier(true, true);
+    private void KopierTid_Klik(object sender, RoutedEventArgs e) => Kopier(true, false);
+    private void KopierRen_Klik(object sender, RoutedEventArgs e) => Kopier(false, false);
+
+    private void Kopier(bool medTid, bool medTaler)
+    {
+        if (_udskrift is null) return;
+
+        var navne = _meta?.Talere;
+        var sb = new StringBuilder();
+
+        // Der kopieres DET, DER STAAR PAA SKAERMEN. Har man soegt, er det de
+        // fundne replikker - ellers ville knappen goere noget andet end det,
+        // man kigger paa.
+        var linjer = Liste.ItemsSource is IEnumerable<Replikvisning> vist
+            ? vist.Select(v => v.Linje).ToList()
+            : _udskrift.Linjer;
+
+        foreach (var l in linjer)
+        {
+            if (medTid) sb.Append('[').Append(l.Tid).Append("] ");
+
+            if (medTaler)
+            {
+                var hvem = Udskrift.Navn(l.Spor, navne);
+                if (hvem.Length > 0) sb.Append(hvem).Append(": ");
+            }
+
+            sb.AppendLine(l.Tekst.Trim());
+            if (medTid || medTaler) sb.AppendLine();
+        }
+
+        try
+        {
+            Clipboard.SetText(sb.ToString().TrimEnd() + Environment.NewLine);
+            Meld(linjer.Count == 1 ? "1 replik kopieret" : $"{linjer.Count} replikker kopieret");
+        }
+        catch (Exception)
+        {
+            // Udklipsholderen kan vaere laast af et andet program et oejeblik.
+            Meld("Kunne ikke kopiere — prøv igen");
+        }
+    }
+
+    // ------------------------------------------------------------- gemning
+
+    private void PaaAendring()
+    {
+        if (_indlæser) return;
+
+        Meld("Gemmer …");
+        _gemSenere.Stop();
+        _gemSenere.Start();
     }
 
     private void Gem()
@@ -221,16 +382,15 @@ public partial class UdskriftView : UserControl
             // Gengivelsen skrives om, saa dokumenter og soegning laeser det
             // rettede - ikke det, maskinen sagde.
             var sti = Path.Combine(_mappe, $"udskrift_{_model}.txt");
-            File.WriteAllText(sti, _udskrift.SomTekst(_meta?.Talere),
-                              new System.Text.UTF8Encoding(false));
+            File.WriteAllText(sti, _udskrift.SomTekst(_meta?.Talere), new UTF8Encoding(false));
 
-            Status.Text = _udskrift.ErRettet
+            Meld(_udskrift.ErRettet
                 ? $"Rettet · gemt {DateTime.Now:HH:mm:ss}"
-                : $"Gemt {DateTime.Now:HH:mm:ss}";
+                : $"Gemt {DateTime.Now:HH:mm:ss}");
         }
         catch (IOException ex)
         {
-            Status.Text = "Kunne ikke gemme";
+            Meld("Kunne ikke gemme");
 
             Dialogs.AppDialog.Vis(Window.GetWindow(this), "Rettelsen blev ikke gemt",
                 $"{ex.Message}\n\nRet igen om lidt — teksten på skærmen er stadig din.",
@@ -243,32 +403,11 @@ public partial class UdskriftView : UserControl
     /// <summary>
     /// Ruller hen til et bestemt tegnnummer i den gengivne tekst.
     ///
-    /// Søgningen kender teksten som én streng. Skærmen viser den som replikker.
-    /// Her regnes det ene om til det andet: hvilken replik indeholder det
-    /// tegnnummer?
+    /// Søgningen på tværs kender teksten som én streng; skærmen viser den som
+    /// replikker. Her regnes det ene om til det andet.
     /// </summary>
     public void SpringTil(int position)
     {
-        if (_udskrift is null) return;
-
-        BeregnPositioner();
-
-        var nr = _positioner.FindIndex(p => position >= p.Fra && position < p.Til);
-        if (nr < 0) return;
-
-        if (Liste.ItemContainerGenerator.ContainerFromIndex(nr) is FrameworkElement raekke)
-            raekke.BringIntoView();
-    }
-
-    /// <summary>
-    /// Hvor hver replik begynder og slutter i den gengivne tekst.
-    ///
-    /// Skal regnes på nøjagtig samme måde som <see cref="Udskrift.SomTekst"/>
-    /// skriver den — ellers peger søgningen ved siden af.
-    /// </summary>
-    private void BeregnPositioner()
-    {
-        _positioner.Clear();
         if (_udskrift is null) return;
 
         var navne = _meta?.Talere;
@@ -278,16 +417,23 @@ public partial class UdskriftView : UserControl
 
         var nu = toSpor ? Samtale.Forklaring(navne).Length : 0;
 
-        foreach (var l in _udskrift.Linjer)
+        for (var i = 0; i < _udskrift.Linjer.Count; i++)
         {
+            var l = _udskrift.Linjer[i];
             var hvem = Udskrift.Navn(l.Spor, navne);
 
-            var laengde = 1 + l.Tid.Length + 1                       // [hh:mm:ss]
+            var laengde = 1 + l.Tid.Length + 1
                           + (hvem.Length > 0 ? 1 + hvem.Length + 1 : 0)
                           + 1 + l.Tekst.Trim().Length
                           + Environment.NewLine.Length * 2;
 
-            _positioner.Add((nu, nu + laengde));
+            if (position >= nu && position < nu + laengde)
+            {
+                if (Liste.ItemContainerGenerator.ContainerFromIndex(i) is FrameworkElement raekke)
+                    raekke.BringIntoView();
+                return;
+            }
+
             nu += laengde;
         }
     }

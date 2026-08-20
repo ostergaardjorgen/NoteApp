@@ -253,13 +253,16 @@ public static class Samtale
         }
         else
         {
-            sb.AppendLine($"  {Herfra} = mikrofonen på den pc, mødet blev optaget fra. Det er den, der");
+            // «Mig» og «Gaester» frem for HERFRA og DERFRA. Noeglerne i
+            // filerne er uaendrede; det er kun det, modellen og laeseren ser.
+            // To ord, der siger noget, slaar to ord, der skal forklares.
+            sb.AppendLine("  Mig    = mikrofonen på den pc, mødet blev optaget fra. Det er den, der");
             sb.AppendLine("           optog, og alle andre i det samme lokale.");
-            sb.AppendLine($"  {Derfra} = de øvrige deltagere, som de lød i højttaleren.");
+            sb.AppendLine("  Gæster = de øvrige deltagere, som de lød i højttaleren.");
             sb.AppendLine();
             sb.AppendLine("MÆRKATERNE ER IKKE NAVNE. De siger, hvilken side af mødet der talte, ikke");
             sb.AppendLine("hvem. Navnene skal findes i det, der bliver sagt — typisk i navnerunden");
-            sb.AppendLine($"først i mødet. Der kan være flere personer bag både {Herfra} og {Derfra}.");
+            sb.AppendLine("først i mødet. Der kan være flere personer bag både «Mig» og «Gæster».");
         }
 
         sb.AppendLine();

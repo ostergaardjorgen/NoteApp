@@ -68,3 +68,8 @@ desktop.ini
 
 # Lokale arbejdsregler - maa ikke i versionsstyring
 CLAUDE.md
+
+# Roadmappen som Word og PDF er GENGIVELSER af doc/roadmap.md.
+# Kilden er markdown-filen; de her genskabes, naar der er brug for dem.
+doc/*.docx
+doc/*.pdf

@@ -4,109 +4,186 @@
 
   <!-- ================== UDSKRIFTEN, SOM MAN KAN RETTE I ==================
 
-       Udskriften var indtil nu én tekstblok, man kun kunne læse. Den er nu en
-       liste af replikker med tidsstempel og taler, og hver enkelt kan rettes.
-
-       HVORFOR DET BETYDER NOGET UD OVER BEKVEMMELIGHED
-
        Kan man finpudse teksten selv, kan man i mange tilfælde nøjes med at
        kopiere det, man skal bruge — uden at bede en sprogmodel om noget, og
-       dermed uden at sende noget ud af maskinen overhovedet. Redigering er
-       ikke bare en bekvemmelighed; det er den funktion, der kan gøre skyen
-       unødvendig for en stor del af arbejdet. -->
+       dermed uden at sende noget ud af maskinen overhovedet. -->
 
   <Grid>
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
       <RowDefinition Height="*" />
     </Grid.RowDefinitions>
 
-    <!-- ===================== Talernavne og status ===================== -->
+    <!-- ===================== Værktøjslinjen =====================
+
+         SØGEFELTET STÅR YDERST TIL VENSTRE.
+         Her stod navnefelterne før, og de blev læst som en søgning — hvilket
+         er den rigtige forventning: et felt øverst til venstre i en tekst er
+         en søgning. Navngivningen er flyttet til sin egen knap. -->
     <Border x:Name="Hoved" Grid.Row="0" Background="#FF1B2029"
             BorderBrush="{StaticResource PanelKant}" BorderThickness="0,0,0,1"
-            Padding="20,11">
+            Padding="16,10">
       <Grid>
         <Grid.ColumnDefinitions>
           <ColumnDefinition Width="*" />
           <ColumnDefinition Width="Auto" />
+          <ColumnDefinition Width="Auto" />
+          <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
 
-        <StackPanel x:Name="Navnefelter" Grid.Column="0" Orientation="Horizontal">
-          <TextBlock Text="HVEM TALTE" FontSize="10.5" FontWeight="SemiBold"
-                     VerticalAlignment="Center" Margin="0,0,12,0"
-                     Foreground="{StaticResource TekstMeget}" />
+        <Border Grid.Column="0" Background="#FF12151B" CornerRadius="6"
+                BorderBrush="{StaticResource PanelKant}" BorderThickness="1"
+                MaxWidth="420" HorizontalAlignment="Left" Padding="4">
+          <Grid>
+            <TextBox x:Name="Soeg" FontSize="12.5" Padding="8,5" BorderThickness="0"
+                     Background="Transparent" TextChanged="Soeg_Aendret" />
+            <TextBlock x:Name="SoegPladsholder" IsHitTestVisible="False" FontSize="12.5"
+                       Margin="10,0,0,0" VerticalAlignment="Center"
+                       Foreground="{StaticResource TekstMeget}"
+                       Text="Søg i udskriften" />
+          </Grid>
+        </Border>
 
-          <TextBlock Text="Herfra" FontSize="11.5" VerticalAlignment="Center"
-                     Margin="0,0,6,0" Foreground="{StaticResource TekstMeget}" />
-          <TextBox x:Name="NavnHerfra" Width="150" FontSize="12.5" Padding="8,4"
-                   Margin="0,0,16,0" TextChanged="Navn_Aendret"
-                   ToolTip="Dit navn — og navnet på dem, der sad i samme lokale" />
+        <TextBlock x:Name="SoegStatus" Grid.Column="1" FontSize="11.5" VerticalAlignment="Center"
+                   Margin="12,0,0,0" Foreground="{StaticResource TekstMeget}" />
 
-          <TextBlock Text="Derfra" FontSize="11.5" VerticalAlignment="Center"
-                     Margin="0,0,6,0" Foreground="{StaticResource TekstMeget}" />
-          <TextBox x:Name="NavnDerfra" Width="180" FontSize="12.5" Padding="8,4"
-                   TextChanged="Navn_Aendret"
-                   ToolTip="De øvrige deltagere. Skriv gerne flere navne — der kan være flere personer bag sporet" />
-        </StackPanel>
+        <Button x:Name="NavneKnap" Grid.Column="2" Content="Navngiv talere" Click="Navne_Klik"
+                Padding="12,6" Margin="14,0,8,0" FontSize="12.5"
+                ToolTip="Sæt navne på de to sider af mødet" />
 
-        <TextBlock x:Name="Status" Grid.Column="1" FontSize="11.5"
-                   VerticalAlignment="Center" Margin="16,0,0,0"
-                   Foreground="{StaticResource TekstMeget}" />
+        <Button Grid.Column="3" Content="Kopiér ▾" Click="Kopier_Klik"
+                Padding="12,6" FontSize="12.5"
+                ToolTip="Kopiér udskriften — med eller uden tidsstempler og talere">
+          <Button.ContextMenu>
+            <ContextMenu x:Name="Kopimenu">
+              <MenuItem Header="Kopiér med tidsstempel og taler" Click="KopierAlt_Klik" />
+              <MenuItem Header="Kopiér med tidsstempel" Click="KopierTid_Klik" />
+              <MenuItem Header="Kopiér kun teksten" Click="KopierRen_Klik" />
+            </ContextMenu>
+          </Button.ContextMenu>
+        </Button>
       </Grid>
     </Border>
 
-    <ScrollViewer x:Name="Rude" Grid.Row="1" Padding="14,12,14,20"
-                  VerticalScrollBarVisibility="Auto"
-                  HorizontalScrollBarVisibility="Disabled">
-      <ItemsControl x:Name="Liste">
-        <ItemsControl.ItemTemplate>
-          <DataTemplate>
-            <Border x:Name="rk" CornerRadius="7" Padding="10,7" Margin="0,0,0,3"
-                    Background="Transparent" BorderThickness="2,0,0,0"
-                    BorderBrush="Transparent">
-              <Grid>
-                <Grid.ColumnDefinitions>
-                  <ColumnDefinition Width="Auto" />
-                  <ColumnDefinition Width="Auto" />
-                  <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
+    <!-- ===================== Navngivningen =====================
+         Skjult, indtil man beder om den. Den bruges én gang pr. møde og skal
+         ikke fylde i vejen resten af tiden. -->
+    <Border x:Name="Navnerude" Grid.Row="1" Visibility="Collapsed"
+            Background="#FF1D2530" BorderBrush="{StaticResource Accent}"
+            BorderThickness="0,0,0,1" Padding="16,12">
+      <StackPanel>
+        <TextBlock FontSize="12" TextWrapping="Wrap" Margin="0,0,0,9"
+                   Foreground="{StaticResource TekstSvag}"
+                   Text="Navnene sættes af dig — maskinen har ikke genkendt stemmerne. De siger, hvilken SIDE af mødet der talte, og der kan være flere personer bag hver af dem." />
+        <StackPanel Orientation="Horizontal">
+          <TextBlock Text="Mig" FontSize="12" VerticalAlignment="Center"
+                     Margin="0,0,8,0" Foreground="{StaticResource TekstMeget}" />
+          <TextBox x:Name="NavnHerfra" Width="170" FontSize="12.5" Padding="8,5"
+                   Margin="0,0,20,0" TextChanged="Navn_Aendret"
+                   ToolTip="Dig — og dem, der sad i samme lokale" />
 
-                <!-- Tidsstemplet staar i margen og ikke inde i teksten. Saa
-                     kan man loebe listen igennem paa tid uden at laese. -->
-                <TextBlock Grid.Column="0" Text="{Binding Tid}" FontSize="11"
-                           FontFamily="Consolas" VerticalAlignment="Top"
-                           Margin="0,4,12,0" Foreground="{StaticResource TekstMeget}" />
+          <TextBlock Text="Gæster" FontSize="12" VerticalAlignment="Center"
+                     Margin="0,0,8,0" Foreground="{StaticResource TekstMeget}" />
+          <TextBox x:Name="NavnDerfra" Width="220" FontSize="12.5" Padding="8,5"
+                   TextChanged="Navn_Aendret"
+                   ToolTip="De øvrige deltagere. Skriv gerne flere navne" />
+        </StackPanel>
+      </StackPanel>
+    </Border>
 
-                <TextBlock Grid.Column="1" Text="{Binding Hvem}" FontSize="12"
-                           FontWeight="SemiBold" VerticalAlignment="Top"
-                           Margin="0,3,12,0" MinWidth="70"
-                           Foreground="{Binding Farve}"
-                           Visibility="{Binding HvemSynlig}" />
+    <!-- ===================== Fanerne ===================== -->
+    <TabControl x:Name="Faner" Grid.Row="2" Style="{StaticResource Fanerude}"
+                Background="Transparent" BorderThickness="0">
 
-                <TextBox Grid.Column="2" Text="{Binding Tekst, UpdateSourceTrigger=PropertyChanged}"
-                         FontSize="13.5" TextWrapping="Wrap"
-                         AcceptsReturn="True" BorderThickness="0" Padding="0"
-                         Background="Transparent" Foreground="{StaticResource Tekst}"
-                         VerticalScrollBarVisibility="Disabled"
-                         HorizontalScrollBarVisibility="Disabled" />
-              </Grid>
+      <TabItem Header="Redigeret tekst" Style="{StaticResource Fane}">
+        <ScrollViewer x:Name="Rude" Padding="8,10,8,20"
+                      VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled">
+          <StackPanel>
+            <TextBlock x:Name="IntetFundet" FontSize="13" Margin="10,20,10,0"
+                       TextWrapping="Wrap" Visibility="Collapsed"
+                       Foreground="{StaticResource TekstSvag}" />
 
-              <Border.Style>
-                <Style TargetType="Border">
-                  <Style.Triggers>
-                    <!-- En rettet replik faar en streg i margen. Ikke en anden
-                         baggrund: rettede og urettede skal kunne staa i den
-                         samme liste, uden at listen bliver til to lister. -->
-                    <DataTrigger Binding="{Binding Rettet}" Value="True">
-                      <Setter Property="BorderBrush" Value="{StaticResource Accent}" />
-                    </DataTrigger>
-                  </Style.Triggers>
-                </Style>
-              </Border.Style>
-            </Border>
-          </DataTemplate>
-        </ItemsControl.ItemTemplate>
-      </ItemsControl>
-    </ScrollViewer>
+            <ItemsControl x:Name="Liste">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <Border CornerRadius="7" Padding="10,7" Margin="0,0,0,3"
+                          Background="Transparent" BorderThickness="2,0,0,0"
+                          BorderBrush="Transparent">
+                    <Grid>
+                      <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" MinWidth="26" />
+                        <ColumnDefinition Width="*" />
+                      </Grid.ColumnDefinitions>
+
+                      <!-- Tidsstemplet staar i margen og ikke inde i teksten.
+                           Saa kan man loebe listen igennem paa tid uden at
+                           laese. -->
+                      <TextBlock Grid.Column="0" Text="{Binding Tid}" FontSize="11"
+                                 FontFamily="Consolas" VerticalAlignment="Top"
+                                 Margin="0,4,12,0" Foreground="{StaticResource TekstMeget}" />
+
+                      <StackPanel Grid.Column="1" Orientation="Horizontal"
+                                  VerticalAlignment="Top" Margin="0,2,12,0">
+                        <TextBlock Text="{Binding Ikon}" FontFamily="Segoe MDL2 Assets"
+                                   FontSize="13" VerticalAlignment="Center"
+                                   Foreground="{Binding Farve}"
+                                   Visibility="{Binding IkonSynlig}"
+                                   ToolTip="{Binding Hjaelp}" />
+                        <TextBlock Text="{Binding Navn}" FontSize="12" FontWeight="SemiBold"
+                                   VerticalAlignment="Center" Margin="6,0,0,0"
+                                   Foreground="{Binding Farve}"
+                                   Visibility="{Binding NavnSynlig}" />
+                      </StackPanel>
+
+                      <TextBox Grid.Column="2"
+                               Text="{Binding Tekst, UpdateSourceTrigger=PropertyChanged}"
+                               FontSize="13.5" TextWrapping="Wrap"
+                               AcceptsReturn="True" BorderThickness="0" Padding="0"
+                               Background="Transparent" Foreground="{StaticResource Tekst}"
+                               VerticalScrollBarVisibility="Disabled"
+                               HorizontalScrollBarVisibility="Disabled" />
+                    </Grid>
+
+                    <Border.Style>
+                      <Style TargetType="Border">
+                        <Style.Triggers>
+                          <!-- En rettet replik faar en streg i margen. Ikke en
+                               anden baggrund: rettede og urettede skal kunne
+                               staa i samme liste, uden at listen bliver til
+                               to lister. -->
+                          <DataTrigger Binding="{Binding Rettet}" Value="True">
+                            <Setter Property="BorderBrush" Value="{StaticResource Accent}" />
+                          </DataTrigger>
+                        </Style.Triggers>
+                      </Style>
+                    </Border.Style>
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <!-- RAA TEKST ER IKKE PYNT.
+           Har man rettet i en udskrift, er spoergsmaalet et halvt aar senere,
+           om en formulering er ens egen eller maskinens. Her staar maskinens
+           ord, uroerte, som de kom ud. -->
+      <TabItem Header="Rå tekst" Style="{StaticResource Fane}">
+        <DockPanel>
+          <TextBlock DockPanel.Dock="Top" FontSize="11.5" Margin="10,8,10,10"
+                     TextWrapping="Wrap" Foreground="{StaticResource TekstMeget}"
+                     Text="Maskinens egne ord, som de kom ud — uden dine rettelser. Den kan ikke redigeres; den er der for at kunne holdes op mod den rettede." />
+          <TextBox x:Name="RaaTekst" IsReadOnly="True" FontSize="12.5" TextWrapping="Wrap"
+                   BorderThickness="0" Background="Transparent" Padding="10,0,10,10"
+                   Foreground="{StaticResource TekstSvag}"
+                   VerticalScrollBarVisibility="Auto"
+                   HorizontalScrollBarVisibility="Disabled" />
+        </DockPanel>
+      </TabItem>
+    </TabControl>
   </Grid>
 </UserControl>

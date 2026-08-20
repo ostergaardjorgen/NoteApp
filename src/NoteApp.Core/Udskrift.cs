@@ -209,14 +209,21 @@ public sealed class Udskrift
         return sb.ToString().TrimEnd() + "\n";
     }
 
-    /// <summary>Navnet på et spor, eller mærkatet hvis der ikke er sat et navn.</summary>
+    /// <summary>
+    /// Navnet på et spor.
+    ///
+    /// Er der ikke sat et navn, bruges «Mig» og «Gæster» — ikke HERFRA og
+    /// DERFRA. De to sidste er NØGLER i filerne og skal blive, hvor de er;
+    /// men de siger ingenting til hverken et menneske eller en sprogmodel.
+    /// «Gæster» siger samtidig det rigtige om, at der kan være flere.
+    /// </summary>
     public static string Navn(string spor, IReadOnlyDictionary<string, string>? navne)
     {
         if (spor.Length == 0) return "";
 
-        return navne is not null && navne.TryGetValue(spor, out var n) && n.Length > 0
-            ? n
-            : spor;
+        if (navne is not null && navne.TryGetValue(spor, out var n) && n.Length > 0) return n;
+
+        return spor == Samtale.Derfra ? "Gæster" : "Mig";
     }
 
     /// <summary>
