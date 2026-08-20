@@ -34,7 +34,7 @@
 
         <Border Grid.Column="0" Background="#FF12151B" CornerRadius="6"
                 BorderBrush="{StaticResource PanelKant}" BorderThickness="1"
-                MaxWidth="420" HorizontalAlignment="Left" Padding="4">
+                Width="240" HorizontalAlignment="Left" Padding="4">
           <Grid>
             <TextBox x:Name="Soeg" FontSize="12.5" Padding="8,5" BorderThickness="0"
                      Background="Transparent" TextChanged="Soeg_Aendret" />

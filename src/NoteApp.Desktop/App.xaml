@@ -33,6 +33,57 @@
          stedet for bare eet vindue. -->
     <SolidColorBrush x:Key="FejlTekst"     Color="#FFF05055" />
 
+    <!-- ================== MENUER ==================
+         Appen havde ingen menu foer Kopier-knappen, og saa arvede den
+         Windows' egne farver: hvid flade med hvid tekst i det moerke tema -
+         ordene var der, man kunne bare ikke se dem.
+
+         MenuItem faar en hel skabelon og ikke bare farver. Standardskabelonen
+         henter sin markeringsfarve fra systemet, og en Setter paa Background
+         slaar ikke igennem paa den. Samme fejl som traeerne havde. -->
+    <Style TargetType="ContextMenu">
+      <Setter Property="Background" Value="{StaticResource Panel}" />
+      <Setter Property="Foreground" Value="{StaticResource Tekst}" />
+      <Setter Property="BorderBrush" Value="{StaticResource PanelKant}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="Padding" Value="4" />
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="ContextMenu">
+            <Border Background="{TemplateBinding Background}"
+                    BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}"
+                    CornerRadius="8" Padding="{TemplateBinding Padding}">
+              <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Cycle" />
+            </Border>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
+    <Style TargetType="MenuItem">
+      <Setter Property="Foreground" Value="{StaticResource Tekst}" />
+      <Setter Property="FontSize" Value="12.5" />
+      <Setter Property="Cursor" Value="Hand" />
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="MenuItem">
+            <Border x:Name="flade" Background="Transparent" CornerRadius="5" Padding="12,7">
+              <ContentPresenter ContentSource="Header" VerticalAlignment="Center" />
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsHighlighted" Value="True">
+                <Setter TargetName="flade" Property="Background" Value="#FF33405A" />
+              </Trigger>
+              <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Foreground" Value="{StaticResource TekstMeget}" />
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
     <Style TargetType="TextBlock">
       <Setter Property="Foreground" Value="{StaticResource Tekst}" />
       <Setter Property="FontFamily" Value="Segoe UI" />
