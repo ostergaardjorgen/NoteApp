@@ -103,7 +103,18 @@ public static class BackupService
     /// og rettelserne er det, der er arbejde i. Tages lyden med hver uge,
     /// bliver backuppen så stor, at man holder op med at tage den.
     /// </summary>
-    public static BackupResult Run(string destination, int keep = 8, bool includeAudio = false)
+    /// <summary>
+    /// Hvor langt sikkerhedskopien er nået. <paramref name="Fil"/> er navnet på
+    /// den, der pakkes lige nu — så en kørsel, der tager tre minutter, kan ses
+    /// bevæge sig og ikke bare vare længe.
+    /// </summary>
+    public readonly record struct BackupFremdrift(int Gjort, int IAlt, string Fil)
+    {
+        public double Procent => IAlt <= 0 ? 0 : Gjort * 100.0 / IAlt;
+    }
+
+    public static BackupResult Run(string destination, int keep = 8, bool includeAudio = false,
+                                   IProgress<BackupFremdrift>? fremdrift = null)
     {
         var kilde = UserDataPaths.Root;
 
@@ -150,12 +161,26 @@ public static class BackupService
         // saa gendannelse lander samme sted, uanset hvor mappen ligger.
         using (var zip = ZipFile.Open(undervejs, ZipArchiveMode.Create))
         {
+            var gjort = 0;
+
+            // Der meldes FOER filen pakkes, ikke efter.
+            //
+            // Den fil, der tager tid, er den store - en optagelse paa hundrede
+            // megabyte. Meldte vi bagefter, ville navnet paa den staa stille i
+            // et halvt minut, mens taelleren allerede var gaaet videre, og saa
+            // peger skaermen paa noget, der er faerdigt.
             foreach (var f in filer)
             {
+                fremdrift?.Report(new BackupFremdrift(gjort, filer.Length, Path.GetFileName(f)));
+
                 var relativ = Path.GetRelativePath(kilde, f).Replace('\\', '/');
                 try { zip.CreateEntryFromFile(f, relativ, CompressionLevel.Optimal); }
                 catch (IOException) { /* en fil i brug — resten skal stadig med. */ }
+
+                gjort++;
             }
+
+            fremdrift?.Report(new BackupFremdrift(filer.Length, filer.Length, ""));
         }
         ur.Stop();
 

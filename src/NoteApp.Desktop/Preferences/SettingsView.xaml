@@ -405,6 +405,17 @@
       <StackPanel Grid.Column="0" VerticalAlignment="Center">
         <TextBlock x:Name="Status" Style="{StaticResource Underskrift}" />
         <TextBlock x:Name="FilStatus" Style="{StaticResource Underskrift}" Margin="0,3,0,0" />
+
+        <!-- BJÆLKEN VISER, HVOR LANGT DEN ER — IKKE BARE AT DEN KØRER.
+             Her stod kun en tekst med sekunder. Den kunne fortælle, at der
+             gik tid, men ikke om der var to sekunder eller to minutter igen —
+             og en sikkerhedskopi med lyd er hundredvis af megabyte. Uden et
+             tal at holde det op imod ligner en langsom kørsel en, der hænger,
+             og så lukker man appen midt i den. -->
+        <ProgressBar x:Name="BackupBjaelke" Height="5" Margin="0,7,0,0"
+                     Visibility="Collapsed" Minimum="0" Maximum="100"
+                     Background="#FF232A35" BorderThickness="0"
+                     Foreground="{StaticResource Accent}" />
       </StackPanel>
       <Button Grid.Column="1" Content="Opdatér enhedslisten" Click="Genindlaes_Click" />
     </Grid>

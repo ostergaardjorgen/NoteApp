@@ -651,23 +651,57 @@ public partial class SettingsView : UserControl
         var medLyd = AppSettings.Current.BackupIncludeAudio;
         var start = DateTime.Now;
 
-        // Et ur, der taeller. En besked, der har staaet uaendret i to
-        // minutter, kan ikke skelnes fra en, der haenger.
+        BackupBjaelke.Visibility = Visibility.Visible;
+        BackupBjaelke.Value = 0;
+
+        // FREMDRIFTEN KOMMER FRA KOPIEN SELV, IKKE FRA ET UR.
+        //
+        // Her taalte et ur sekunder, og det er ikke det samme: sekunder siger,
+        // at der GAAR tid, men ikke hvor meget der er igen. En kopi med lyd er
+        // hundredvis af megabyte, og en langsom koersel ligner en, der haenger.
+        // Saa lukker man appen midt i den - og saa ER kopien afbrudt.
+        var senest = DateTime.MinValue;
+
+        var fremdrift = new Progress<BackupService.BackupFremdrift>(p =>
+        {
+            BackupBjaelke.Value = p.Procent;
+
+            // Der tegnes hoejst fem gange i sekundet. Ved tusindvis af smaa
+            // filer ville hver enkelt ellers udloese en opdatering, og saa
+            // bruger skaermen mere tid end selve kopieringen.
+            var nu = DateTime.Now;
+            if (p.Gjort < p.IAlt && (nu - senest).TotalMilliseconds < 200) return;
+            senest = nu;
+
+            var gaaet = DateTime.Now - start;
+
+            FilStatus.Text = p.Fil.Length == 0
+                ? $"Lukker arkivet … {gaaet.TotalSeconds:0} sek."
+                : $"Tager sikkerhedskopi … {p.Gjort} af {p.IAlt} filer " +
+                  $"({p.Procent:0} %) · {gaaet.TotalSeconds:0} sek. — {p.Fil}";
+        });
+
+        // Uret loeber stadig, men kun saa laenge der ikke er meldt fremdrift
+        // endnu: filerne skal foerst taelles op, og det tager tid i sig selv
+        // paa en stor datamappe.
         var ur = new System.Windows.Threading.DispatcherTimer
         {
             Interval = TimeSpan.FromSeconds(1)
         };
         ur.Tick += (_, _) =>
         {
+            if (senest != DateTime.MinValue) return;
+
             var gaaet = DateTime.Now - start;
-            FilStatus.Text = $"Tager sikkerhedskopi … {gaaet.TotalSeconds:0} sek. " +
+            FilStatus.Text = $"Finder filerne … {gaaet.TotalSeconds:0} sek. " +
                           "Du kan roligt lave noget andet imens.";
         };
         ur.Start();
 
         try
         {
-            var r = await Task.Run(() => BackupService.Run(Destination, includeAudio: medLyd));
+            var r = await Task.Run(() =>
+                BackupService.Run(Destination, includeAudio: medLyd, fremdrift: fremdrift));
 
             FilStatus.Text = $"Færdig: {r.Files} filer, {r.MegaBytes:0.0} MB " +
                           $"({(medLyd ? "med lyd" : "uden lyd")}) på {r.Elapsed.TotalSeconds:0.0} sek. " +
@@ -682,6 +716,7 @@ public partial class SettingsView : UserControl
         finally
         {
             ur.Stop();
+            BackupBjaelke.Visibility = Visibility.Collapsed;
             KoerKnap.Content = oprindeligTekst;
             KoerKnap.IsEnabled = true;
         }
