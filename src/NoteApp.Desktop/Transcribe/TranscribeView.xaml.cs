@@ -190,11 +190,8 @@ public partial class TranscribeView : UserControl
     private void SpringTil(int position)
     {
         if (Resultat.Visibility != Visibility.Visible) return;
-        if (position < 0 || position >= Resultat.Text.Length) return;
 
-        Resultat.Focus();
-        Resultat.Select(position, Math.Min(60, Resultat.Text.Length - position));
-        Resultat.ScrollToLine(Math.Max(0, Resultat.GetLineIndexFromCharacterIndex(position) - 4));
+        Resultat.SpringTil(position);
     }
 
     private bool _harSpurgt;
@@ -677,8 +674,7 @@ public partial class TranscribeView : UserControl
         {
             Forklaring.Visibility = Visibility.Collapsed;
             Resultat.Visibility = Visibility.Visible;
-            Resultat.Text = File.ReadAllText(færdig, System.Text.Encoding.UTF8).Trim();
-            Resultat.Foreground = (Brush)FindResource("Tekst");
+            Resultat.Vis(valgt!.Mappe, Modelnavn());
             Status.Text = "Skrevet ud tidligere. Tryk «Opdatér transskription» for at gøre det om.";
             return;
         }
@@ -941,6 +937,34 @@ public partial class TranscribeView : UserControl
         // afbrydelse.
         var gemtMeta = MeetingStore.Load(valgt.Mappe);
 
+        // ============ RETTELSER SKAL IKKE OVERRASKES ============
+        //
+        // Den rettede udskrift overskrives ikke af en ny koersel - den ligger
+        // i sin egen fil. Men de to bliver uenige: teksten paa skaermen er
+        // stadig den rettede, mens maskinens udgave nedenunder er en anden.
+        //
+        // Det skal siges FOER, ikke opdages bagefter. En time senere kan man
+        // ikke huske, hvad man rettede.
+        if (Udskrift.HarRettelser(valgt.Mappe))
+        {
+            var fortsaet = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
+                "Du har rettet i udskriften",
+                "Dine rettelser bliver liggende — de bliver ikke slettet af en ny " +
+                "udskrivning.\n\n" +
+                "Men de to udgaver kommer til at sige noget forskelligt: du læser " +
+                "stadig din rettede tekst, mens maskinens nye udgave ligger nedenunder. " +
+                "Vil du have maskinens nye ord frem, skal du fjerne rettelserne " +
+                "bagefter.\n\n" +
+                "Skriv kun ud igen, hvis der er noget galt med selve udskriften — " +
+                "et forkert sprog eller et spor, der manglede.",
+                godkend: "Skriv ud igen",
+                annuller: "Behold det, jeg har rettet",
+                slags: Dialogs.Slags.Pas_paa,
+                godkendErStandard: false);
+
+            if (!fortsaet) return;
+        }
+
         var sprogvalg = new SprogvalgWindow(toSpor,
             gemtMeta?.ValgtSprogMik, gemtMeta?.ValgtSprogLoop, valgt.Titel)
         { Owner = Window.GetWindow(this) };
@@ -1005,7 +1029,7 @@ public partial class TranscribeView : UserControl
         Fremdrift.Value = 0;
         Fremdriftstal.Text = "";
         Status.Text = "Indlæser modellen … det tager typisk et halvt minut første gang";
-        Resultat.Text = "";
+        Resultat.Ryd();
 
         // Forklaringen bliver staaende, mens der koeres. Det er praecis dér,
         // den er noget vaerd: den svarer paa "hvor lang tid tager det" og
@@ -1114,34 +1138,38 @@ public partial class TranscribeView : UserControl
                 try { MeetingStore.Save(valgt.Mappe, gemtMeta); } catch (IOException) { }
             }
 
-            if (loopR is not null)
-            {
-                // Fletningen er den, dokumenterne skal bruge. Den skrives til
-                // sidst, saa den er den nyeste .txt i mappen - det er den,
-                // resten af appen finder frem.
-                var samtale = Samtale.Flet(r.JsonPath, loopR.JsonPath,
-                    Transcriber.LanguageName(r.DetectedLanguage),
-                    Transcriber.LanguageName(loopR.DetectedLanguage));
-                if (samtale is not null)
-                {
-                    var samtaleSti = Path.Combine(valgt.Mappe, $"samtale_{modelNavn}.txt");
-                    File.WriteAllText(samtaleSti, samtale, new System.Text.UTF8Encoding(false));
+            // ============ UDSKRIFTEN GEMMES STRUKTURERET ============
+            //
+            // Filen med replikker, tidsstempler og spor er den rigtige. Den
+            // txt-fil, resten af appen laeser, er en GENGIVELSE af den - lavet
+            // med de navne, der er sat paa talerne.
+            //
+            // Det er den opdeling, der goer udskriften til noget, man kan
+            // rette. En tekstblok kan man laese; en liste af replikker kan man
+            // arbejde i.
+            var replikker = Samtale.Flet(r.JsonPath, loopR?.JsonPath);
+            var udskrift = Udskrift.Af(replikker);
 
-                    // TIDEN ER BEGGE SPOR TILSAMMEN, OG SPROGET ER DET RENE
-                    // SPORS.
-                    //
-                    // Uden tiden ville realtidsfaktoren vise halvdelen af det,
-                    // koerslen faktisk kostede - og RTF er netop det tal, der
-                    // afgoer, om en udskrift er noget, man venter paa, eller
-                    // noget, man planlaegger. Et maaletal, der lyver til den
-                    // gode side, er vaerre end ingen maaling.
-                    r = r with
-                    {
-                        TextPath = samtaleSti,
-                        ElapsedSeconds = r.ElapsedSeconds + loopR.ElapsedSeconds
-                    };
-                }
-            }
+            udskrift.GemMaskin(valgt.Mappe, modelNavn);
+
+            var navne = gemtMeta?.Talere;
+            var udskriftSti = Path.Combine(valgt.Mappe, $"udskrift_{modelNavn}.txt");
+
+            File.WriteAllText(udskriftSti, udskrift.SomTekst(navne),
+                              new System.Text.UTF8Encoding(false));
+
+            // TIDEN ER BEGGE SPOR TILSAMMEN.
+            //
+            // Uden det ville realtidsfaktoren vise halvdelen af det, koerslen
+            // faktisk kostede - og RTF er netop det tal, der afgoer, om en
+            // udskrift er noget, man venter paa, eller noget, man
+            // planlaegger. Et maaletal, der lyver til den gode side, er
+            // vaerre end ingen maaling.
+            r = r with
+            {
+                TextPath = udskriftSti,
+                ElapsedSeconds = r.ElapsedSeconds + (loopR?.ElapsedSeconds ?? 0)
+            };
 
             // HER LAA EFTERRETNINGEN: de rettelser, brugeren havde lavet, blev
             // anvendt paa udskriften bagefter, og originalen gemt som .raa.txt.
@@ -1213,8 +1241,8 @@ public partial class TranscribeView : UserControl
         // ligger stadig i Historik, hvor de hører hjemme.
         Forklaring.Visibility = Visibility.Collapsed;
         Resultat.Visibility = Visibility.Visible;
-        Resultat.Text = tekst.Length == 0 ? "(tom transskription — var der lyd på optagelsen?)" : tekst;
-        Resultat.Foreground = (Brush)FindResource("Tekst");
+
+        if (Valgt is { } v) Resultat.Vis(v.Mappe, Modelnavn());
 
         // Sproget staar i statuslinjen, fordi det er den oplysning, der
         // forklarer en tekst, der ser forkert ud. Er detekteringen usikker,
@@ -1293,6 +1321,21 @@ public partial class TranscribeView : UserControl
     }
 
     /// <summary>
+    /// Modelnavnet, som udskriftsfilerne er navngivet efter.
+    ///
+    /// Slås op frem for at blive husket: skærmen kan være bygget, før motoren
+    /// er fundet, og et gemt navn ville så være tomt netop den første gang.
+    /// </summary>
+    private static string Modelnavn()
+    {
+        var install = WhisperInstall.Locate(AppSettings.Current.PreferredModel);
+
+        return install.ModelPath is null
+            ? ""
+            : Path.GetFileNameWithoutExtension(install.ModelPath).Replace("ggml-", "");
+    }
+
+    /// <summary>
     /// Et tidsrum skrevet ud, med timer kun naar der ER timer.
     ///
     /// mm:ss alene klipper timerne af, saa en optagelse paa 1:00:50 stod som
@@ -1313,8 +1356,9 @@ public partial class TranscribeView : UserControl
     /// på hele mødet eller kun på den ene halvdel.
     /// </summary>
     private static string SporTekst(TranscriptionResult r) =>
-        Path.GetFileName(r.TextPath).StartsWith("samtale_", StringComparison.Ordinal)
-            ? "to spor, flettet"
+        File.Exists(r.JsonPath) && Path.GetFileName(r.TextPath)
+            .StartsWith("udskrift_", StringComparison.Ordinal)
+            ? "flettet udskrift"
             : "ét spor";
 
     /// <summary>

@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 using NoteApp.Core.Documents;
 
 namespace NoteApp.Core;
@@ -157,10 +157,15 @@ public static class Soegning
             .Where(f => !f.EndsWith(".raa.txt", StringComparison.OrdinalIgnoreCase))
             .ToList();
 
-        var flettet = filer.FirstOrDefault(f =>
-            Path.GetFileName(f).StartsWith("samtale_", StringComparison.OrdinalIgnoreCase));
+        // «udskrift_» er den gengivelse, der gaelder - med talernavne og
+        // med de rettelser, der er lavet. «samtale_» er det gamle navn og
+        // bliver liggende paa moeder, der er skrevet ud foer.
+        var gaeldende = filer.FirstOrDefault(f =>
+                            Path.GetFileName(f).StartsWith("udskrift_", StringComparison.OrdinalIgnoreCase))
+                        ?? filer.FirstOrDefault(f =>
+                            Path.GetFileName(f).StartsWith("samtale_", StringComparison.OrdinalIgnoreCase));
 
-        return flettet ?? filer.OrderByDescending(File.GetLastWriteTime).FirstOrDefault();
+        return gaeldende ?? filer.OrderByDescending(File.GetLastWriteTime).FirstOrDefault();
     }
 
     private static IEnumerable<string> Moedemapper()

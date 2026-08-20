@@ -216,97 +216,77 @@ public static class Samtale
     /// Whisper skærer ved tredive sekunder, ikke ved talerskift, og uden det
     /// her ville udskriften være en mur af enkeltlinjer med et mærkat på hver.
     /// </summary>
-    public static string Skriv(List<Replik> replikker, string? sprogHerfra = null, string? sprogDerfra = null)
+    /// <summary>
+    /// Forklaringen øverst i en to-spors udskrift.
+    ///
+    /// Den er til sprogmodellen lige så meget som til læseren: uden den er
+    /// mærkaterne to ord uden betydning, og så gætter modellen på, hvad de
+    /// dækker. Med den kan den holde de to sider fra hinanden — og den ved
+    /// samtidig, at mærkaterne IKKE er navne, så den ikke finder på en
+    /// deltager, der hedder Derfra.
+    ///
+    /// Er der sat navne på talerne, skifter forklaringen: så er der ikke
+    /// længere mærkater at forklare, men til gengæld er der noget vigtigere
+    /// at sige — at navnene er sat af et menneske og ikke genkendt af en
+    /// maskine.
+    /// </summary>
+    public static string Forklaring(IReadOnlyDictionary<string, string>? navne = null)
     {
         var sb = new StringBuilder();
 
-        // FORKLARINGEN STÅR ØVERST, OG DEN ER TIL MODELLEN.
-        //
-        // Uden den er «HERFRA» og «DERFRA» to ord uden betydning, og så
-        // gætter sprogmodellen på, hvad de dækker. Med den kan den holde de
-        // to sider fra hinanden — og den ved samtidig, at mærkaterne IKKE er
-        // navne, så den ikke finder på en deltager, der hedder Derfra.
+        var harNavne = navne is not null
+                       && (navne.ContainsKey(Herfra) || navne.ContainsKey(Derfra));
+
         sb.AppendLine("SÅDAN ER UDSKRIFTEN LAVET");
         sb.AppendLine();
         sb.AppendLine("Mødet blev optaget på to lydspor, skrevet ud hver for sig og flettet");
-        sb.AppendLine("efter tid. Mærkatet foran hver replik siger, hvilket spor den kom fra:");
-        sb.AppendLine();
-        sb.AppendLine($"  {Herfra} = mikrofonen på den pc, mødet blev optaget fra. Det er den, der");
-        sb.AppendLine("           optog, og alle andre i det samme lokale.");
-        sb.AppendLine($"  {Derfra} = de øvrige deltagere, som de lød i højttaleren.");
+        sb.AppendLine("efter tid.");
         sb.AppendLine();
 
-        // SPROGET PR. SPOR SKAL STAA DER.
-        //
-        // De to sider taler ikke noedvendigvis samme sprog - et dansk-norsk
-        // moede er to sprog i én samtale, og hvert spor er skrevet ud gennem
-        // sin egen model. Staar det ikke, kan hverken laeseren eller
-        // sprogmodellen se, hvorfor den ene side lyder anderledes.
-        //
-        // Det er ogsaa det eneste sted, en forkert sprogindstilling kan
-        // OPDAGES: staar der "engelsk" ud for et dansk moede, er det den
-        // indstilling, der skal rettes.
-        if (sprogHerfra is not null || sprogDerfra is not null)
+        if (harNavne)
         {
-            sb.AppendLine($"Skrevet ud på: {Herfra} = {sprogHerfra ?? "ukendt"}, " +
-                          $"{Derfra} = {sprogDerfra ?? "ukendt"}.");
-            sb.AppendLine("Er et af sprogene forkert, rettes det under Indstillinger → Lyd.");
+            sb.AppendLine($"  {Udskrift.Navn(Herfra, navne)} = mikrofonen på den pc, mødet blev optaget fra.");
+            sb.AppendLine($"  {Udskrift.Navn(Derfra, navne)} = de øvrige deltagere, som de lød i højttaleren.");
             sb.AppendLine();
+            sb.AppendLine("NAVNENE ER SAT I HÅNDEN, ikke genkendt af maskinen. De siger, hvilken");
+            sb.AppendLine("SIDE af mødet der talte — der kan være flere personer bag hver af dem.");
         }
-        sb.AppendLine("MÆRKATERNE ER IKKE NAVNE. De siger, hvilken side af mødet der talte, ikke");
-        sb.AppendLine("hvem. Navnene skal findes i det, der bliver sagt — typisk i navnerunden");
-        sb.AppendLine($"først i mødet. Der kan være flere personer bag både {Herfra} og {Derfra}.");
+        else
+        {
+            sb.AppendLine($"  {Herfra} = mikrofonen på den pc, mødet blev optaget fra. Det er den, der");
+            sb.AppendLine("           optog, og alle andre i det samme lokale.");
+            sb.AppendLine($"  {Derfra} = de øvrige deltagere, som de lød i højttaleren.");
+            sb.AppendLine();
+            sb.AppendLine("MÆRKATERNE ER IKKE NAVNE. De siger, hvilken side af mødet der talte, ikke");
+            sb.AppendLine("hvem. Navnene skal findes i det, der bliver sagt — typisk i navnerunden");
+            sb.AppendLine($"først i mødet. Der kan være flere personer bag både {Herfra} og {Derfra}.");
+        }
+
         sb.AppendLine();
         sb.AppendLine("---");
         sb.AppendLine();
 
-        string? sidsteSpor = null;
-        var afsnit = new StringBuilder();
-        long afsnitStart = 0;
-
-        void Luk()
-        {
-            if (afsnit.Length == 0) return;
-            sb.AppendLine($"[{Tid(afsnitStart)}] {sidsteSpor}: {afsnit.ToString().Trim()}");
-            sb.AppendLine();
-            afsnit.Clear();
-        }
-
-        foreach (var r in replikker)
-        {
-            if (r.Spor != sidsteSpor)
-            {
-                Luk();
-                sidsteSpor = r.Spor;
-                afsnitStart = r.FraMs;
-            }
-
-            afsnit.Append(r.Tekst).Append(' ');
-        }
-
-        Luk();
-        return sb.ToString().TrimEnd() + "\n";
+        return sb.ToString();
     }
 
     private static string Tid(long ms) =>
         TimeSpan.FromMilliseconds(ms).ToString(@"hh\:mm\:ss");
 
     /// <summary>
-    /// Hele vejen: to json-filer ind, én udskrift ud.
+    /// Hele vejen: json-filerne ind, replikkerne ud — rensede og flettede.
     ///
-    /// Findes loopback-sporet ikke — et fysisk møde — er der intet at flette,
-    /// og der returneres null. Så bliver mikrofonens egen udskrift stående som
-    /// den, den var, og intet ændrer sig for de møder.
+    /// Er der kun ét spor — et fysisk møde eller en optagelse fra en telefon —
+    /// er der intet at flette. Så renses mikrofonsporet alene, og replikkerne
+    /// får intet spormærkat: der er ingen sider at holde fra hinanden.
     /// </summary>
-    public static string? Flet(string mikrofonJson, string? loopbackJson,
-                               string? sprogHerfra = null, string? sprogDerfra = null)
+    public static List<Replik> Flet(string mikrofonJson, string? loopbackJson)
     {
-        if (loopbackJson is null || !File.Exists(loopbackJson)) return null;
+        var etSpor = loopbackJson is null || !File.Exists(loopbackJson);
 
-        var mik = Laes(mikrofonJson, Herfra);
-        var loop = Laes(loopbackJson, Derfra);
+        var mik = Laes(mikrofonJson, etSpor ? "" : Herfra);
+        var loop = etSpor ? new List<Replik>() : Laes(loopbackJson!, Derfra);
 
-        if (loop.Count == 0) return null;
+        if (loop.Count == 0) return FjernStilhed(mik);
 
         // DER TAELLES PAA BEGGE SPOR SAMLET, IKKE ET SPOR AD GANGEN.
         //
@@ -328,15 +308,16 @@ public static class Samtale
         var loopRen = alle.Where(r => r.Spor == Derfra).ToList();
 
         // Var alt i det andet spor hallucinationer, er der intet at flette.
-        // En "samtale" med mærkater, hvor kun den ene side siger noget, ville
-        // love en opdeling, der ikke findes.
-        if (loopRen.Count == 0) return null;
+        // En "samtale" med maerkater, hvor kun den ene side siger noget, ville
+        // love en opdeling, der ikke findes - saa staar mikrofonen alene og
+        // uden maerkat.
+        if (loopRen.Count == 0)
+            return mikRen.Select(r => r with { Spor = "" }).ToList();
 
-        return Skriv(FjernEkko(mikRen, loopRen)
-                     .Concat(loopRen)
-                     .OrderBy(r => r.FraMs)
-                     .ThenBy(r => r.Spor)
-                     .ToList(),
-                     sprogHerfra, sprogDerfra);
+        return FjernEkko(mikRen, loopRen)
+               .Concat(loopRen)
+               .OrderBy(r => r.FraMs)
+               .ThenBy(r => r.Spor)
+               .ToList();
     }
 }

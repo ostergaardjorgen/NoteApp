@@ -115,6 +115,18 @@ public sealed class MeetingMetadata
     /// <summary>Det samme for gæsternes spor. Null når mødet kun har ét spor.</summary>
     public string? ValgtSprogLoop { get; set; }
 
+    /// <summary>
+    /// Navnene på talerne, pr. spor: HERFRA og DERFRA.
+    ///
+    /// Ligger HER og ikke inde i udskriften. Navnene sættes på, når teksten
+    /// vises, så en omdøbning ikke kræver, at udskriften skrives om — og så
+    /// de overlever, at transskriptionen køres om.
+    ///
+    /// Det er det samme princip, der bærer resten af appen: gem id'et, slå
+    /// navnet op.
+    /// </summary>
+    public Dictionary<string, string> Talere { get; init; } = new();
+
     public Dictionary<string, string> Tracks { get; init; } = new();
 }
 

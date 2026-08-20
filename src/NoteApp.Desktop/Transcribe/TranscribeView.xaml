@@ -1,6 +1,7 @@
 ﻿<UserControl x:Class="NoteApp.Desktop.Transcribe.TranscribeView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:NoteApp.Desktop.Transcribe"
              Background="{StaticResource Baggrund}">
 
   <!-- ======================== LAYOUTET, OG HVORFOR =======================
@@ -389,10 +390,15 @@
             </StackPanel>
           </ScrollViewer>
 
-          <TextBox x:Name="Resultat" Grid.Row="0" FontSize="13" Visibility="Collapsed"
-                   Foreground="{StaticResource TekstSvag}" Background="Transparent"
-                   BorderThickness="0" IsReadOnly="True" TextWrapping="Wrap"
-                   VerticalScrollBarVisibility="Auto" Padding="22,18,22,18" />
+          <!-- HER LAA EN SKRIVEBESKYTTET TEKSTBLOK.
+               Udskriften kunne laeses og intet andet. Nu er den en liste af
+               replikker med tidsstempel og taler, og hver enkelt kan rettes.
+
+               Det er ikke bare bekvemmeligt: kan man finpudse teksten selv,
+               kan man tit noejes med at kopiere det, man skal bruge - uden at
+               bede en sprogmodel om noget, og dermed uden at sende noget ud af
+               maskinen overhovedet. -->
+          <local:UdskriftView x:Name="Resultat" Grid.Row="0" Visibility="Collapsed" />
         </Grid>
       </Border>
     </Grid>
