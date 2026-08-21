@@ -165,10 +165,37 @@ public partial class SearchView : UserControl
 
     private void Felt_Aendret(object sender, TextChangedEventArgs e)
     {
-        Pladsholder.Visibility = Felt.Text.Length == 0 ? Visibility.Visible : Visibility.Collapsed;
+        var tomt = Felt.Text.Length == 0;
+
+        Pladsholder.Visibility = tomt ? Visibility.Visible : Visibility.Collapsed;
+        Ryd.Visibility = tomt ? Visibility.Collapsed : Visibility.Visible;
 
         _pause.Stop();
         _pause.Start();
+    }
+
+    /// <summary>
+    /// Escape rydder søgningen — samme tast som i udskriftens søgefelt.
+    ///
+    /// To søgefelter i den samme app skal opføre sig ens. Ellers skal man
+    /// lære dem hver for sig, og så trykker man Escape det ene sted og
+    /// opdager, at feltet stadig står med tekst.
+    /// </summary>
+    private void Felt_Tast(object sender, System.Windows.Input.KeyEventArgs e)
+    {
+        if (e.Key != System.Windows.Input.Key.Escape || Felt.Text.Length == 0) return;
+
+        Ryd_Klik(sender, e);
+        e.Handled = true;
+    }
+
+    private void Ryd_Klik(object sender, RoutedEventArgs e)
+    {
+        Felt.Clear();
+
+        // Fokus tilbage i feltet. Man rydder for at skrive noget andet, ikke
+        // for at holde op med at soege.
+        Felt.Focus();
     }
 
     // ------------------------------------------------------------- filtrene

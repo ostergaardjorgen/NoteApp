@@ -48,6 +48,7 @@
         <Grid.ColumnDefinitions>
           <ColumnDefinition Width="Auto" />
           <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
 
         <TextBlock Grid.Column="0" Text="&#xE721;" FontFamily="Segoe MDL2 Assets"
@@ -55,11 +56,39 @@
                    Foreground="{StaticResource Accent}" />
 
         <TextBox x:Name="Felt" Grid.Column="1" FontSize="18" Padding="10,12"
-                 BorderThickness="0" Background="Transparent" TextChanged="Felt_Aendret" />
+                 BorderThickness="0" Background="Transparent"
+                 TextChanged="Felt_Aendret" KeyDown="Felt_Tast" />
         <TextBlock x:Name="Pladsholder" Grid.Column="1" IsHitTestVisible="False" FontSize="18"
                    Margin="13,0,0,0" VerticalAlignment="Center"
                    Foreground="{StaticResource TekstMeget}"
                    Text="Hvad leder du efter?" />
+
+        <!-- Krydset rydder feltet i ét klik — samme som i udskriftens
+             søgefelt, og af samme grund: et søgeord på tyve tegn skal ellers
+             slettes tegn for tegn. Escape gør det samme.
+
+             Det er STØRRE her end i udskriften, fordi feltet er større. Et
+             kryds på 24 pixel i et felt med 18 punkts tekst ser ud som en
+             fejl. -->
+        <Button x:Name="Ryd" Grid.Column="2" Content="✕" Click="Ryd_Klik"
+                Visibility="Collapsed" Cursor="Hand" FontSize="13"
+                Padding="0" BorderThickness="0" Background="Transparent"
+                Width="32" Height="32" Margin="0,0,10,0"
+                Foreground="{StaticResource TekstMeget}"
+                ToolTip="Ryd søgningen (Escape)">
+          <Button.Template>
+            <ControlTemplate TargetType="Button">
+              <Border x:Name="flade" CornerRadius="16" Background="Transparent">
+                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+              </Border>
+              <ControlTemplate.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                  <Setter TargetName="flade" Property="Background" Value="#FF2C323D" />
+                </Trigger>
+              </ControlTemplate.Triggers>
+            </ControlTemplate>
+          </Button.Template>
+        </Button>
       </Grid>
     </Border>
 
