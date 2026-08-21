@@ -161,7 +161,19 @@ public partial class MainWindow : Window
         // fra XAML'en, men Checked fyrer under InitializeComponent, hvor
         // Indhold endnu er null — så handleren returnerer, og skærmen stod tom,
         // indtil man klikkede på et andet punkt og tilbage igen.
-        Indhold.Content = NyOptagelsesskaerm();
+        //
+        // DEN SKAL SVARE TIL DET MARKEREDE MENUPUNKT.
+        //
+        // De to steder kan komme ud af trit, og det gjorde de: 21-08-2026 blev
+        // «Cockpit» markeret i XAML'en, mens denne linje stadig byggede
+        // optagelsesskærmen. Menuen sagde Cockpit, skærmen viste Optagelser, og
+        // man skulle klikke væk og tilbage for at få den rigtige frem.
+        //
+        // Kommentaren ovenfor advarede mod nøjagtig den fælde, og den blev
+        // alligevel gået i — fordi man ændrer XAML'en og ikke leder efter den
+        // linje her. Derfor står de nu sammen i én sætning: cockpit er markeret,
+        // cockpit bygges.
+        Indhold.Content = new Search.SearchView(null);
 
         // Genvejstasten kobles på, når vinduet findes. Virker den ikke, skal
         // det siges — en genvej, der stille er død, opdages først den dag, man
