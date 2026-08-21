@@ -224,12 +224,40 @@
         </ScrollViewer>
 
         <StackPanel x:Name="IntetPanel" VerticalAlignment="Center" HorizontalAlignment="Center"
-                    MaxWidth="480" Visibility="Collapsed">
+                    MaxWidth="520" Visibility="Collapsed">
           <TextBlock x:Name="IntetOverskrift" FontSize="17" FontWeight="SemiBold"
                      HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" />
-          <TextBlock FontSize="13" Margin="0,10,0,0" TextWrapping="Wrap" LineHeight="21"
-                     TextAlignment="Center" Foreground="{StaticResource TekstSvag}"
-                     Text="Prøv med færre ord. Husk at et møde først kan søges, når det er skrevet ud til tekst — en optagelse alene indeholder ingen ord at lede i." />
+          <TextBlock x:Name="IntetTekst" FontSize="13" Margin="0,10,0,0" TextWrapping="Wrap"
+                     LineHeight="21" TextAlignment="Center" Foreground="{StaticResource TekstSvag}" />
+
+          <!-- ============ HVERT ORD FOR SIG ============
+               Naar der ikke er noget fund, er spoergsmaalet ikke «findes
+               ordene», men HVILKET af dem der staar i vejen. Uden den her
+               liste maa man selv proeve sig frem ét ord ad gangen — og det
+               er praecis dét, appen kan goere paa fire millisekunder. -->
+          <ItemsControl x:Name="Enkeltvis" Margin="0,16,0,0" HorizontalAlignment="Center">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <Border Background="#FF181B22" BorderBrush="{StaticResource PanelKant}"
+                        BorderThickness="1" CornerRadius="6" Padding="12,7" Margin="0,0,0,6">
+                  <Grid MinWidth="360">
+                    <TextBlock Text="{Binding Ord}" FontSize="12.5" FontWeight="SemiBold"
+                               HorizontalAlignment="Left" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding Hvor}" FontSize="12" Margin="0,0,80,0"
+                               HorizontalAlignment="Right" VerticalAlignment="Center"
+                               Foreground="{StaticResource TekstMeget}" />
+                    <Button Content="Søg kun her" Tag="{Binding Ord}" Click="KunDet_Klik"
+                            HorizontalAlignment="Right" VerticalAlignment="Center"
+                            Padding="9,3" FontSize="11" />
+                  </Grid>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+
+          <TextBlock FontSize="12" Margin="0,10,0,0" TextWrapping="Wrap" LineHeight="19"
+                     TextAlignment="Center" Foreground="{StaticResource TekstMeget}"
+                     Text="Husk, at et møde først kan søges, når det er skrevet ud til tekst — en optagelse alene indeholder ingen ord at lede i." />
         </StackPanel>
       </Grid>
     </Border>

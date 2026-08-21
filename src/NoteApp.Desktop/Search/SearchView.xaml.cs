@@ -298,7 +298,7 @@ public partial class SearchView : UserControl
             Rude.Visibility = fund.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
             IntetPanel.Visibility = fund.Count > 0 ? Visibility.Collapsed : Visibility.Visible;
 
-            IntetOverskrift.Text = $"Ingen fund på «{spoergsmaal}»";
+            if (fund.Count == 0) ForklarIntet(spoergsmaal, filter, ct);
 
             var steder = fund.Sum(f => f.Traef.Count);
 
@@ -308,32 +308,13 @@ public partial class SearchView : UserControl
             // laenge tallet er tocifret i millisekunder, er det det rigtige
             // valg. Begynder det at vokse, kan det ses her, foer det bliver
             // til en irritation.
-            // ============ NÅR ORDENE ALDRIG STÅR SAMMEN ============
-            //
-            // Soeger man paa to ting, og de begge findes i optagelsen uden
-            // nogensinde at blive sagt i den samme sammenhaeng, ser listen ud
-            // som en fejl: hvert sted har kun det ene ord.
-            //
-            // Det ER det rigtige svar — der er bare ikke noget sted, hvor de
-            // to ting moedes. Maalt paa et rigtigt webinar 21-08-2026 med
-            // «access indigo»: begge ord staar der mange gange, og aldrig
-            // inden for hundrede tegn af hinanden.
-            //
-            // Uden linjen her leder man efter en fejl, der ikke er der.
-            var soegeord = Soegning.Del(spoergsmaal).Count;
-            var bedst = fund.Count == 0 ? 0 : fund.Max(f => f.OrdSammen);
-
-            // Der staar HVOR MANGE af ordene der er med, ikke bare at der er
-            // noget galt. «2 af 3 ord» er en oplysning, man kan handle paa:
-            // saa ved man, at det tredje ord skal soeges for sig.
-            var spredt = soegeord > 1 && fund.Count > 0 && bedst < soegeord
-                ? $"  ·  bedste sted har {bedst} af {soegeord} ord — de står aldrig alle sammen"
-                : "";
-
+            // ALLE ORDENE STAAR I HVERT ENESTE STED, DER VISES. Derfor er der
+            // ikke laengere et forbehold at skrive her: er der et fund, er det
+            // et svar paa hele spoergsmaalet — ikke paa halvdelen af det.
             Status.Text = fund.Count == 0
                 ? $"Ingen fund  ·  {ur.ElapsedMilliseconds} ms"
                 : $"{steder} {(steder == 1 ? "sted" : "steder")} i {fund.Count} " +
-                  $"{(fund.Count == 1 ? "kilde" : "kilder")}{spredt}  ·  {ur.ElapsedMilliseconds} ms";
+                  $"{(fund.Count == 1 ? "kilde" : "kilder")}  ·  {ur.ElapsedMilliseconds} ms";
         }
         catch (OperationCanceledException)
         {
@@ -345,6 +326,66 @@ public partial class SearchView : UserControl
             Dialogs.AppDialog.Vis(Window.GetWindow(this), "Kunne ikke søge", ex.Message,
                 Dialogs.Slags.Pas_paa);
         }
+    }
+
+    /// <summary>Ét søgeord og hvor meget der er af det. Til den tomme skærm.</summary>
+    public sealed record Ordvisning(string Ord, string Hvor);
+
+    /// <summary>
+    /// Siger, HVORFOR der ikke er noget fund.
+    ///
+    /// «Ingen fund» alene er ikke et svar. To vidt forskellige ting ser ens
+    /// ud: at ordet slet ikke står nogen steder, og at det står mange steder
+    /// uden nogensinde at være i nærheden af de øvrige. Kun det første betyder,
+    /// at man skrev forkert.
+    ///
+    /// Hvert ord søges derfor for sig, og resultatet står med en knap, der
+    /// søger på netop det. Det er en søgning pr. ord og koster få
+    /// millisekunder — man ville selv gøre det manuelt bagefter.
+    /// </summary>
+    private void ForklarIntet(string spoergsmaal, Soegefilter filter, CancellationToken ct)
+    {
+        var ord = Soegning.Del(spoergsmaal);
+
+        IntetOverskrift.Text = $"Ingen fund på «{spoergsmaal}»";
+        Enkeltvis.ItemsSource = null;
+
+        if (ord.Count < 2)
+        {
+            IntetTekst.Text = filter.Tomt
+                ? "Ordet står ikke i nogen udskrift, note eller dokument."
+                : "Ordet står ikke i det, du har afgrænset til. Prøv at rydde afgrænsningen.";
+            return;
+        }
+
+        List<(string Ord, int Steder, int Kilder)> enkelt;
+        try { enkelt = Soegning.Enkeltvis(spoergsmaal, filter, ct); }
+        catch (OperationCanceledException) { return; }
+
+        var findes = enkelt.Where(e => e.Steder > 0).ToList();
+        var mangler = enkelt.Where(e => e.Steder == 0).Select(e => e.Ord).ToList();
+
+        IntetTekst.Text = mangler.Count > 0
+            ? $"«{string.Join("», «", mangler)}» står ingen steder. De øvrige ord findes."
+            : "Alle ordene findes — men de står aldrig tæt nok på hinanden til at høre sammen. " +
+              "Søg på færre ord ad gangen.";
+
+        Enkeltvis.ItemsSource = enkelt
+            .Select(e => new Ordvisning(e.Ord,
+                e.Steder == 0
+                    ? "ingen steder"
+                    : $"{e.Steder} {(e.Steder == 1 ? "sted" : "steder")} i {e.Kilder} " +
+                      $"{(e.Kilder == 1 ? "kilde" : "kilder")}"))
+            .ToList();
+    }
+
+    private void KunDet_Klik(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button b || b.Tag is not string ord) return;
+
+        Felt.Text = ord;
+        Felt.CaretIndex = Felt.Text.Length;
+        Felt.Focus();
     }
 
     /// <summary>

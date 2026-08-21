@@ -427,23 +427,28 @@ public static class Soegning
         // hinanden.
         //
         // Man har spurgt om begge dele. Saa skal man kunne se begge dele.
-        // ============ KUN DE BEDSTE STEDER — IKKE ALLE ============
+        // ============ ET STED SKAL HAVE ALLE ORDENE ============
         //
-        // Soeger man «omada espen ibm», og der findes steder med alle tre ord,
-        // skal de to-ords-steder IKKE staa i listen. Set paa skaermen
-        // 21-08-2026: listen viste raekke efter raekke med «Omada» og «Espen»,
-        // hvor det tredje ord ikke var med — og saa ser det ud, som om det
-        // sidste ord bliver ignoreret.
+        // HVERT ORD, MAN SKRIVER, SKAL SNÆVRE IND. Det er hele grunden til at
+        // skrive et ord mere.
         //
-        // Der skaeres paa ANTALLET af ord, ikke paa hele vaegten. Bonussen for
-        // et helt ord skal kunne afgoere raekkefoelgen inden for et niveau, men
-        // aldrig skille et sted fra, der har lige saa mange ord med.
+        // To udgaver før denne var forkerte, og begge blev set på skærmen
+        // 21-08-2026:
         //
-        // Findes der ingen steder med alle ordene, staar de naestbedste — og
-        // saa siger skaermen, hvor mange af ordene der er med. Et tomt svar
-        // ville vaere daarligere: ordene ER i optagelsen.
-        var bedsteNiveau = vejet.Max(v => v.Vaegt / 10);
-        var idet = vejet.Where(v => v.Vaegt / 10 == bedsteNiveau).ToList();
+        //   1. Stederne blev fundet på ÉT af ordene. «access indigo» gav otte
+        //      steder med Indigo og ikke ét med access.
+        //   2. Så blev de bedste steder vist — men «bedst» kunne stadig være
+        //      to ud af tre. «omada espen ibm» viste række efter række med
+        //      Omada og Espen, hvor IBM ikke var med.
+        //
+        // Nu skal ALLE ordene stå inden for det samme vindue. Er der ingen
+        // steder, er der intet fund — og så siger skærmen HVORFOR frem for at
+        // vise noget, der ligner et svar.
+        //
+        // Et tomt svar med en forklaring er bedre end en fyldt liste, man skal
+        // læse for at opdage, at det sidste ord blev ignoreret.
+        var idet = vejet.Where(v => v.Vaegt / 10 == ord.Length).ToList();
+        if (idet.Count == 0) return;
 
         var traef = new List<Traef>();
         var taget = new List<int>();
@@ -467,6 +472,30 @@ public static class Soegning
         if (traef.Count > 0)
             fund.Add(new Fund(slags, kilde, overskrift, tid, traef,
                               vejet.Count == 0 ? 0 : vejet.Max(v => v.Vaegt)));
+    }
+
+    /// <summary>
+    /// Hvor mange steder hvert ord står — hvert ord for sig.
+    ///
+    /// BRUGES, NÅR DER IKKE ER NOGET FUND. Uden den kan skærmen kun sige
+    /// «ingen fund», og så er man lige vidt: står ordet der slet ikke, eller
+    /// står det bare aldrig sammen med de andre? Det er to helt forskellige
+    /// svar, og kun det ene betyder, at man skrev forkert.
+    ///
+    /// Der tælles på tværs af alle kilder, som søgningen selv læser dem.
+    /// </summary>
+    public static List<(string Ord, int Steder, int Kilder)> Enkeltvis(
+        string spoergsmaal, Soegefilter? filter = null, CancellationToken ct = default)
+    {
+        filter ??= new Soegefilter();
+
+        return Del(spoergsmaal)
+            .Select(o =>
+            {
+                var f = Soeg(o, filter, ct);
+                return (o, f.Sum(x => x.Traef.Count), f.Count);
+            })
+            .ToList();
     }
 
     /// <summary>
