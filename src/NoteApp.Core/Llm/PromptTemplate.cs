@@ -53,9 +53,21 @@ public sealed class PromptTemplate
         ["noter"] = "Dine egne noter og bogmærker fra mødet",
         ["sprog"] = "Det sprog mødet blev holdt på, som Whisper fandt det",
 
+        // LINKET ER DET, DER GØR ET WEBINARREFERAT NOGET VAERD.
+        //
+        // Et webinar ligger tit online bagefter. Staar linket i dokumentet,
+        // er der vej tilbage til det, der blev VIST paa skaermen - de slides,
+        // ingen udskrift kan gengive. Uden det er dokumentet en blindgyde.
+        //
+        // Feltet er tomt ved almindelige moeder. En skabelon, der bruger det,
+        // skal derfor kunne taale, at der ikke staar noget.
+        ["kilde"] = "Linket til webinaret, hvis der blev sat et ind. Tomt ved møder",
+
         // Faelles regler, ikke en oplysning om moedet. Den hoerer hjemme i
         // systemprompten - se Deltagerregler.
-        [Deltagerregler.Felt] = "Reglerne for, hvem der kommer på deltagerlisten — fælles for alle skabeloner"
+        [Deltagerregler.Felt] = "Reglerne for, hvem der kommer på deltagerlisten — fælles for alle skabeloner",
+
+        [Sprogregler.Felt] = "Sproget, dokumentet skal skrives på. Det vælges, når dokumentet oprettes — skriv ikke selv et sprog i skabelonen"
     };
 
     public static PromptTemplate Parse(string text, string? path = null)
@@ -113,8 +125,31 @@ public sealed class PromptTemplate
     /// Alle veje til en model skal bruge DENNE frem for SystemPrompt direkte.
     /// Ellers ville en skabelon virke ét sted og ikke et andet.
     /// </summary>
-    public string RenderSystem() =>
-        SystemPrompt.Replace("{{" + Deltagerregler.Felt + "}}", Deltagerregler.Tekst);
+    public string RenderSystem() => RenderSystem(Sprogregler.Standard);
+
+    /// <summary>
+    /// Systemprompten med de fælles felter sat ind, og med dokumentets sprog.
+    ///
+    /// SPROGET SKAL MED, OGSÅ NÅR SKABELONEN IKKE BEDER OM DET. Skriver en
+    /// skabelon ikke <c>{{sprogregler}}</c>, lægges reglen til sidst. Ellers
+    /// ville valget virke i de skabeloner, der er skrevet efter ændringen, og
+    /// blive ignoreret i dem, brugeren selv har lavet — uden at noget sagde
+    /// det.
+    ///
+    /// Til sidst og ikke først: det er den sidste instruktion, en model læser
+    /// før udskriften, og den vinder over en modstridende linje længere oppe.
+    /// </summary>
+    public string RenderSystem(string dokumentsprog)
+    {
+        var s = SystemPrompt.Replace("{{" + Deltagerregler.Felt + "}}", Deltagerregler.Tekst);
+
+        var felt = "{{" + Sprogregler.Felt + "}}";
+        var regel = Sprogregler.Tekst(dokumentsprog);
+
+        return s.Contains(felt)
+            ? s.Replace(felt, regel)
+            : s.TrimEnd() + "\n\n" + regel;
+    }
 
     public string Render(IReadOnlyDictionary<string, string?> values)
     {

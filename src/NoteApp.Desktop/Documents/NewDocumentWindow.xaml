@@ -114,6 +114,24 @@
                AcceptsReturn="True" TextWrapping="Wrap" Height="46"
                VerticalScrollBarVisibility="Auto" />
 
+      <!-- ============ SPROGET VÆLGES PR. DOKUMENT ============
+           Det lå før fast i hver mødetype: alt blev dansk, uanset hvad mødet
+           var på. Behovet er ikke det samme hver gang — et referat til en
+           selv er dansk, et resumé af et engelsk webinar, der skal videre,
+           er det ikke nødvendigvis. -->
+      <TextBlock Text="Dokumentets sprog" Style="{StaticResource Underskrift}" Margin="0,12,0,0" />
+
+      <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+        <RadioButton x:Name="SprogDansk" GroupName="doksprog" Content="Dansk"
+                     IsChecked="True" FontSize="13" Margin="0,0,20,0"
+                     VerticalContentAlignment="Center" />
+        <RadioButton x:Name="SprogEngelsk" GroupName="doksprog" Content="Engelsk"
+                     FontSize="13" VerticalContentAlignment="Center" />
+      </StackPanel>
+
+      <TextBlock x:Name="Sproghjaelp" FontSize="11.5" Margin="2,6,0,0" TextWrapping="Wrap"
+                 LineHeight="17" Foreground="{StaticResource TekstMeget}" />
+
       <TextBlock x:Name="ModelTekst" FontSize="12" Margin="2,12,0,0" TextWrapping="Wrap"
                  LineHeight="19" Foreground="{StaticResource TekstMeget}" />
 

@@ -164,13 +164,17 @@ public partial class OpstartWindow : Window
     /// </summary>
     private void FyldMapper(string? vaelg)
     {
-        var punkter = new List<Punkt> { new(Mapper.Ingen, "", null) };
+        // «VÆLG EN MAPPE» OG IKKE «UDEN MAPPE».
+        //
+        // Listen står på det første punkt, indtil man vælger noget andet, og
+        // det punkt er derfor det, der opfordrer. «Uden mappe» lyder som et
+        // svar, man har givet — og så er der ingen grund til at åbne listen.
+        var punkter = new List<Punkt> { new("Vælg en mappe", "", null) };
 
         foreach (var m in Mapper.Alle(Mapper.Slags.Optagelser))
             punkter.Add(new Punkt(m, "", m));
 
         Mappevalg.ItemsSource = punkter;
-        Mappevalg.DisplayMemberPath = "Navn";
 
         Mappevalg.SelectedItem = vaelg is null
             ? punkter[0]

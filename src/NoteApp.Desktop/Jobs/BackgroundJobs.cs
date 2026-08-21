@@ -62,10 +62,15 @@ public static class BackgroundJobs
     /// på. Den skal kunne ses i koden uden at følge en boolsk værdi gennem tre
     /// metoder.
     /// </summary>
+    /// <param name="dokumentsprog">
+    /// «da» eller «en» — valgt i dialogen, ikke i skabelonen. Se
+    /// <see cref="Sprogregler"/> for hvorfor.
+    /// </param>
     public static async void LavDokumentISkyen(
         SkyModel model, PromptTemplate skabelon,
         IReadOnlyDictionary<string, string?> felter,
-        DocumentInfo skabelonInfo, string mødeMappe)
+        DocumentInfo skabelonInfo, string mødeMappe,
+        string dokumentsprog = Sprogregler.Standard)
     {
         if (Kører)
         {
@@ -108,7 +113,8 @@ public static class BackgroundJobs
             var r = await new SkyRunner(noegle).KoerAsync(
                 model, skabelon, skabelon.Render(felter), fremdrift, _afbryd.Token,
                 kilde: skabelonInfo.SourceMeetingId,
-                kildeTitel: skabelonInfo.SourceTitle);
+                kildeTitel: skabelonInfo.SourceTitle,
+                dokumentsprog: dokumentsprog);
 
             DraftStore.Save(mødeMappe, skabelon, r.SomLlmResult(),
                 motor: $"{model.Leverandoer} ({model.Hjemland})");

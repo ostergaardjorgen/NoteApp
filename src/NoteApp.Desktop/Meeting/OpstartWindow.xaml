@@ -104,7 +104,18 @@
         <ColumnDefinition Width="Auto" />
       </Grid.ColumnDefinitions>
 
-      <ComboBox x:Name="Mappevalg" Grid.Column="0" FontSize="13" Padding="10,7" />
+      <!-- MAPPEN VISES MED EN SKABELON, IKKE MED DisplayMemberPath.
+           DisplayMemberPath slog ikke igennem her, og resultatet var, at
+           rullelisten viste typen skrevet ud — «Punkt { Navn = Webinarer,
+           Under = , Vaerdi = Webinarer }». En skabelon binder til det felt,
+           der skal vises, og kan ikke falde tilbage til noget andet. -->
+      <ComboBox x:Name="Mappevalg" Grid.Column="0" FontSize="13" Padding="10,7">
+        <ComboBox.ItemTemplate>
+          <DataTemplate>
+            <TextBlock Text="{Binding Navn}" />
+          </DataTemplate>
+        </ComboBox.ItemTemplate>
+      </ComboBox>
       <Button Grid.Column="1" Content="Ny mappe…" Click="NyMappe_Klik"
               Margin="8,0,0,0" Padding="14,7" FontSize="12.5" />
     </Grid>

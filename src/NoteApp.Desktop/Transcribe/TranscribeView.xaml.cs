@@ -852,16 +852,19 @@ public partial class TranscribeView : UserControl
             return;
         }
 
+        var meta = MeetingStore.Load(valgt.Mappe);
+
         // Mødetypen fra optagelsen sendes med, saa den er forvalgt i dialogen.
+        // Sproget paa optagelsen sendes med, saa dialogen kan sige, hvad
+        // sprogvalget betyder: er de to forskellige, oversaettes der undervejs.
         var dialog = new Documents.NewDocumentWindow(valgt.Titel, skabeloner,
-                                                    MeetingStore.Load(valgt.Mappe)?.Moedetype)
+                                                    meta?.Moedetype,
+                                                    meta?.Language ?? meta?.ValgtSprogLoop ?? meta?.ValgtSprogMik)
         { Owner = Window.GetWindow(this) };
 
         if (dialog.ShowDialog() != true || dialog.Valgt is null) return;
 
         var skabelon = dialog.Valgt;
-
-        var meta = MeetingStore.Load(valgt.Mappe);
 
         var felter = new Dictionary<string, string?>
             {
@@ -871,6 +874,7 @@ public partial class TranscribeView : UserControl
                 ["varighed"] = TimeSpan.FromSeconds(valgt.Sekunder).ToString(@"h\:mm"),
                 ["noter"] = LaesNoter(valgt.Mappe),
                 ["sprog"] = meta?.Language is null ? "ikke registreret" : Transcriber.LanguageName(meta.Language),
+                ["kilde"] = meta?.Kilde ?? "",
 
             // HER LAA "ordbog": de rigtige stavemaader fra brugerens rettelser.
             // Maalt 18-08-2026 med og uden, to koersler hver: ingen forskel.
@@ -906,7 +910,8 @@ public partial class TranscribeView : UserControl
         // opsaetningen, hvor man tilslutter sig og laeser efter. Gentaget ved
         // hvert dokument bliver den noget, man klikker vaek uden at laese, og
         // saa beskytter den ingen.
-        Jobs.BackgroundJobs.LavDokumentISkyen(SkyKatalog.Standard, skabelon, felter, info, valgt.Mappe);
+        Jobs.BackgroundJobs.LavDokumentISkyen(SkyKatalog.Standard, skabelon, felter, info, valgt.Mappe,
+                                              dialog.Dokumentsprog);
 
         // DOKUMENTET LAVES ET ANDET STED, END MAN STAAR.
         //

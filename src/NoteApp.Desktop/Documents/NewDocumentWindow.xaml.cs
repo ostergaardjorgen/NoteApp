@@ -19,6 +19,10 @@ public partial class NewDocumentWindow : Window
     public PromptTemplate? Valgt { get; private set; }
     public string Titel => FeltTitel.Text.Trim();
     public string Beskrivelse => FeltBeskrivelse.Text.Trim();
+
+    /// <summary>Sproget, dokumentet skal skrives på — «da» eller «en».</summary>
+    public string Dokumentsprog => SprogEngelsk.IsChecked == true ? "en" : "da";
+
     private readonly string _optagelse;
 
     /// <param name="valgtMoedetype">
@@ -30,8 +34,13 @@ public partial class NewDocumentWindow : Window
     /// dialog, ville det første valg være et spørgsmål uden virkning, og så
     /// holder folk op med at svare på det.
     /// </param>
+    /// <param name="moedesprog">
+    /// Sprogkoden på selve optagelsen, hvis den er kendt. Bruges kun til at
+    /// sige, hvad valget betyder — er mødet engelsk og dokumentet dansk,
+    /// oversætter modellen undervejs, og det skal man vide, før man vælger.
+    /// </param>
     public NewDocumentWindow(string optagelsesTitel, IReadOnlyList<PromptTemplate> skabeloner,
-                             string? valgtMoedetype = null)
+                             string? valgtMoedetype = null, string? moedesprog = null)
     {
         InitializeComponent();
 
@@ -74,9 +83,35 @@ public partial class NewDocumentWindow : Window
         }
         else if (skabeloner.Count > 0) Skabeloner.SelectedIndex = 0;
 
+        Sproghjaelp.Text = Sprogforklaring(moedesprog);
+
+        SprogDansk.Checked += (_, _) => Sproghjaelp.Text = Sprogforklaring(moedesprog);
+        SprogEngelsk.Checked += (_, _) => Sproghjaelp.Text = Sprogforklaring(moedesprog);
+
         // Titlen saettes af Skabelon_Valgt, som fyrer paa SelectedIndex ovenfor.
         FeltTitel.Focus();
         FeltTitel.SelectAll();
+    }
+
+    /// <summary>
+    /// Hvad valget betyder — sagt ud fra, hvad optagelsen var på.
+    ///
+    /// Er de to ens, er der ingenting at forklare, og så står der heller
+    /// ingenting. Er de forskellige, oversætter modellen undervejs, og DET er
+    /// en oplysning: det er dér, fagudtryk og navne kan skride.
+    /// </summary>
+    private string Sprogforklaring(string? moedesprog)
+    {
+        if (moedesprog is null || moedesprog.Length == 0) return "";
+
+        var vaelger = Dokumentsprog;
+        if (moedesprog.StartsWith(vaelger, StringComparison.OrdinalIgnoreCase))
+            return $"Optagelsen er på {NoteApp.Core.Transcriber.LanguageName(moedesprog).ToLowerInvariant()} — " +
+                   "dokumentet bliver skrevet på det samme sprog.";
+
+        return $"Optagelsen er på {NoteApp.Core.Transcriber.LanguageName(moedesprog).ToLowerInvariant()}. " +
+               $"Dokumentet bliver oversat til {Sprogregler.Navn(vaelger).ToLowerInvariant()} undervejs. " +
+               "Navne, virksomheder og faste fagudtryk beholdes, som de blev sagt.";
     }
 
     private void Skabelon_Valgt(object sender, SelectionChangedEventArgs e)

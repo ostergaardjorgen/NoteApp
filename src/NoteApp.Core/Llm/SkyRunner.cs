@@ -326,6 +326,12 @@ public sealed class SkyRunner
     /// dagsorden, der bliver tilpasset.
     /// </param>
     /// <param name="kildeTitel">Mødets navn, som det var på afsendelsestidspunktet.</param>
+    /// <param name="dokumentsprog">
+    /// Sproget, dokumentet skal skrives på — «da» eller «en». Valgt pr.
+    /// dokument, fordi behovet ikke er det samme hver gang: et referat til en
+    /// selv skal være på dansk, et resumé af et engelsk webinar skal måske
+    /// ikke oversættes. Se <see cref="Sprogregler"/>.
+    /// </param>
     public async Task<SkyResultat> KoerAsync(
         SkyModel model,
         PromptTemplate skabelon,
@@ -333,7 +339,8 @@ public sealed class SkyRunner
         IProgress<LlmProgress>? fremdrift = null,
         CancellationToken ct = default,
         string kilde = "",
-        string kildeTitel = "")
+        string kildeTitel = "",
+        string dokumentsprog = Sprogregler.Standard)
     {
         fremdrift?.Report(new LlmProgress($"Sender til {model.Navn} ({model.Hjemland}) …"));
 
@@ -342,7 +349,7 @@ public sealed class SkyRunner
             model = model.ApiId,
             messages = new object[]
             {
-                new { role = "system", content = skabelon.RenderSystem() },
+                new { role = "system", content = skabelon.RenderSystem(dokumentsprog) },
                 new { role = "user", content = brugerPrompt }
             },
             temperature = skabelon.Temperature,

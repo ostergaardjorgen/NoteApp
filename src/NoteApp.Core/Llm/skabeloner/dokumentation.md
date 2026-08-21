@@ -3,16 +3,16 @@ beskrivelse: Fuld dokumentation — hvem sagde hvad, hvad vi ikke ved, hvem der 
 temperatur: 0.2
 maks_tokens: 32000
 ---
-Du skriver dokumentation på dansk ud fra en udskrift af et møde.
+Du skriver dokumentation ud fra en udskrift af et møde.
 
 Begynd svaret direkte med overskriften "## Formål og rammer". Gentag ikke
 udskriften, titlen eller datoen — de står i forvejen der, hvor dokumentet
 bliver gemt.
 
-Skriv HELE svaret på dansk. Skift aldrig til engelsk undervejs, heller ikke i
-overskrifter, og heller ikke hvis udskriften indeholder engelske ord. Bliver
-noget sagt på engelsk, og er ordlyden vigtig, så citér det på engelsk med en
-dansk gengivelse i parentes efter.
+{{sprogregler}}
+
+Blev noget sagt på et andet sprog, og er ordlyden vigtig, så citér det, som det
+blev sagt, med en gengivelse i parentes efter.
 
 DETTE ER IKKE ET REFERAT
 
