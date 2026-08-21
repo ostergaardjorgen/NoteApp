@@ -73,7 +73,7 @@ public partial class NyTemplateWindow : Window
 
         Status.Text = harNoegle
             ? ""
-            : "Skabelonen skrives af Mistral, og den er ikke sat op endnu.";
+            : "Mødetypen skrives af Mistral, og den er ikke sat op endnu.";
     }
 
     /// <summary>
@@ -93,7 +93,7 @@ public partial class NyTemplateWindow : Window
         var navn = FeltNavn.Text.Trim();
         if (navn.Length == 0)
         {
-            Vis("Skabelonen skal have et navn.");
+            Vis("Mødetypen skal have et navn.");
             FeltNavn.Focus();
             return;
         }
@@ -101,7 +101,7 @@ public partial class NyTemplateWindow : Window
         var formaal = FeltFormaal.Text.Trim();
         if (formaal.Length == 0)
         {
-            Vis("Skriv, hvad der skal komme ud af det. Det er dét, modellen bygger skabelonen på.");
+            Vis("Skriv, hvad der skal komme ud af det. Det er dét, modellen bygger mødetypen på.");
             FeltFormaal.Focus();
             return;
         }
@@ -111,7 +111,7 @@ public partial class NyTemplateWindow : Window
 
         Fejl.Visibility = Visibility.Collapsed;
         LavKnap.IsEnabled = false;
-        Status.Text = "Mistral skriver skabelonen … det tager typisk under et minut.";
+        Status.Text = "Mistral skriver mødetypen … det tager typisk under et minut.";
 
         var tokens = Længder[Math.Max(0, FeltLaengde.SelectedIndex)].Tokens;
 
@@ -122,7 +122,7 @@ public partial class NyTemplateWindow : Window
             // indpakningen om det ene kald.
             var opskrift = new PromptTemplate
             {
-                Name = "Skabelonskriver",
+                Name = "Mødetypeskriver",
                 Temperature = 0.3,
                 MaxTokens = 4000,
                 SystemPrompt = Opskrift(),
@@ -158,23 +158,23 @@ public partial class NyTemplateWindow : Window
             // kaldte, et nummer paa - og saa ville en Gem() her have skrevet
             // hen over dagsordenen paa den skabelon, der allerede hed det.
             // Teksten gives tilbage, og den gemmes, naar navnet ligger fast.
-            Status.Text = "Skabelonen er klar. Skriver dagsordenen til den …";
+            Status.Text = "Mødetypen er klar. Skriver dagsordenen til den …";
             try
             {
                 Dagsorden = await Dagsordensskriver.SkrivAsync(noegle, navn, Resultat.SystemPrompt);
             }
             catch (Exception dagsorden)
             {
-                Advarsel = "Skabelonen blev lavet, men dagsordenen kunne ikke skrives: " +
+                Advarsel = "Mødetypen blev lavet, men dagsordenen kunne ikke skrives: " +
                            dagsorden.Message + " Standarddagsordenen gælder, indtil du " +
-                           "trykker «Tilpas til denne skabelon» på Agenda-fanen.";
+                           "trykker «Tilpas til denne mødetype» på Agenda-fanen.";
             }
 
             DialogResult = true;
         }
         catch (Exception ex)
         {
-            Vis($"Skabelonen kunne ikke laves: {ex.Message}\n\n" +
+            Vis($"Mødetypen kunne ikke laves: {ex.Message}\n\n" +
                 "Prøv igen — det er som regel en midlertidig fejl på forbindelsen.");
             LavKnap.IsEnabled = true;
             Status.Text = "";

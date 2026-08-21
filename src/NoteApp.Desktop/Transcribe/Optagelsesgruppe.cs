@@ -73,7 +73,10 @@ public static class Optagelsesgruppe
         double sekunder = 0;
         try
         {
-            var wav = Path.Combine(mappe, "mikrofon.wav");
+            // Hovedsporet, ikke mikrofonen: et webinar har kun loopback.wav,
+            // og saa ville laengden staa som nul paa en optagelse, der varede
+            // en time.
+            var wav = OptagelseVisning.Lydfilen(mappe);
             if (File.Exists(wav)) sekunder = Transcriber.WavSeconds(wav);
         }
         catch (Exception) { }

@@ -270,7 +270,7 @@
               <TextBlock FontSize="12.5" LineHeight="20" Margin="0,8,0,0" TextWrapping="Wrap"
                          MaxWidth="720" HorizontalAlignment="Left"
                          Foreground="{StaticResource TekstSvag}"
-                         Text="Ti linjer om, hvad mødet handlede om — til at huske det med. Den kører på grafikkortet her, og intet forlader maskinen. Skal teksten være et rigtigt referat, laves det som et dokument efter en skabelon." />
+                         Text="Ti linjer om, hvad mødet handlede om — til at huske det med. Den kører på grafikkortet her, og intet forlader maskinen. Skal teksten være et rigtigt referat, laves det som et komplet Word-dokument af din online AI-model." />
 
               <TextBlock x:Name="LokalStatus" FontSize="12" Margin="0,12,0,0" TextWrapping="Wrap"
                          Foreground="{StaticResource Accent}" />
@@ -320,7 +320,7 @@
                 <TextBlock FontSize="12.5" LineHeight="20" Margin="0,8,0,0" TextWrapping="Wrap"
                            MaxWidth="620" HorizontalAlignment="Left"
                            Foreground="{StaticResource TekstSvag}"
-                           Text="Den færdige tekst bliver til et referat, en opgaveliste eller hvad du har lavet af skabeloner. Optagelsen og udskriften bliver på maskinen — kun teksten sendes, og kun til det europæiske endepunkt." />
+                           Text="Den færdige tekst bliver til et referat, en opgaveliste eller hvad du har lavet af mødetyper. Optagelsen og udskriften bliver på maskinen — kun teksten sendes, og kun til det europæiske endepunkt." />
 
                 <TextBlock x:Name="SkyStatus" FontSize="11.5" Margin="0,10,0,0" TextWrapping="Wrap"
                            Foreground="{StaticResource Accent}" />

@@ -56,13 +56,31 @@ public partial class SprogvalgWindow : Window
 
     /// <param name="toSpor">Findes gæsternes spor? Ellers spørges der kun om ét.</param>
     /// <param name="sidsteMit">Det, der blev valgt sidst for netop dette møde.</param>
-    public SprogvalgWindow(bool toSpor, string? sidsteMit, string? sidsteDeres, string moedetitel)
+    /// <param name="kunHoejttaler">
+    /// Er det ene spor højttalerens frem for mikrofonens? Sandt ved et webinar.
+    ///
+    /// Dialogen spurgte før om «dit spor — mikrofonen», uanset hvad der lå i
+    /// mappen. På et webinar er der ingen mikrofon: sporet er dét, computeren
+    /// afspillede, og den, der taler, er oplægsholderen. Et forkert navn på
+    /// sporet er ikke en detalje her — det er netop den slags, der får en til
+    /// at vælge dansk, fordi man tænker på sig selv.
+    /// </param>
+    public SprogvalgWindow(bool toSpor, string? sidsteMit, string? sidsteDeres, string moedetitel,
+                           bool kunHoejttaler = false)
     {
         InitializeComponent();
 
         Under.Text = toSpor
             ? $"«{moedetitel}» blev optaget på to spor. Hvert spor skrives ud for sig, så de to sider af mødet gerne må være på hvert sit sprog."
-            : $"«{moedetitel}» blev optaget på ét spor — mikrofonen.";
+            : kunHoejttaler
+                ? $"«{moedetitel}» blev optaget på ét spor — det, computeren afspillede."
+                : $"«{moedetitel}» blev optaget på ét spor — mikrofonen.";
+
+        if (kunHoejttaler)
+        {
+            MitNavn.Text = "Sproget i webinaret";
+            MitUnder.Text = "Det, oplægsholderen taler. Din egen mikrofon blev ikke optaget.";
+        }
 
         DeresPanel.Visibility = toSpor ? Visibility.Visible : Visibility.Collapsed;
 
@@ -75,11 +93,16 @@ public partial class SprogvalgWindow : Window
         // ER DER VALGT FOER FOR DETTE MOEDE, SIGES DET.
         //
         // Ellers ser en forudvalgt vaerdi ud som appens gaet - og saa
-        // overvejer man den ikke. Staar der, at det er ens eget valg fra
-        // sidst, er den til at stole paa.
+        // overvejer man den ikke. Staar der, at det er ens eget valg, er den
+        // til at stole paa.
+        //
+        // Der staar ikke laengere «sidst». Sproget kan nu ogsaa vaere valgt,
+        // FOER der blev optaget, og saa ville «sidst» pege paa noget, der
+        // aldrig er sket. Det, der baerer saetningen, er hvem der valgte —
+        // ikke hvornaar.
         Husket.Text = sidsteMit is null
             ? ""
-            : "Forudvalgt efter det, du valgte sidst for dette møde.";
+            : "Forudvalgt efter dit eget valg for dette møde — ikke appens gæt.";
     }
 
     private static int Nr(string? kode)

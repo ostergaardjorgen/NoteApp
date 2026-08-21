@@ -122,7 +122,7 @@ public partial class ComplianceView : UserControl
                 SkyKatalog.Standard.Navn,
                 "Tjeneste",
                 "Kører i Frankrig",
-                "Sprogmodellen, der laver et dokument ud af udskriften efter en skabelon. Kører hos leverandøren — der hentes ingen vægte, og der installeres ingenting.",
+                "Sprogmodellen, der laver et dokument ud af udskriften efter mødetypen. Kører hos leverandøren — der hentes ingen vægte, og der installeres ingenting.",
                 "Det er en tjeneste, ikke en licens. Det, der gælder, er databehandleraftalen og vilkårene ovenfor.")
 
             // HER STOD ROEST V3. Den er undersoegt og fravalgt, ikke i brug -

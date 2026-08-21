@@ -302,7 +302,62 @@ public sealed class Udskrift
     ///
     /// Et afsnit svarer til «det, den ene side sagde, før den anden svarede».
     /// Det er den enhed, man tænker i, når man læser et referat igennem.
+    ///
+    /// MEN DER SKAL VÆRE EN ENDE PÅ ET AFSNIT.
+    ///
+    /// Reglen ovenfor holder, så længe der ER to sider, der skiftes til at
+    /// tale. Er der kun ét spor — et webinar, et fysisk møde, en lydfil fra en
+    /// telefon — skifter mærkatet aldrig, og så blev HELE optagelsen til ét
+    /// afsnit. Målt på et webinar 21-08-2026: 305 segmenter blev til én replik
+    /// på 22 minutter med ét tidsstempel, 00:00:00.
+    ///
+    /// Det koster mere end læsbarhed. Tidsstemplerne er vejen tilbage til
+    /// lyden, søgningen viser et uddrag pr. afsnit, og talergenkendelsen
+    /// sætter én stemme pr. afsnit. Med ét afsnit findes ingen af delene.
+    ///
+    /// TO GRÆNSER, OG DEN ENE ER MÅLT:
+    ///
+    ///   Pausen. Målt på de 305 segmenter er hullet mellem to segmenter 0 ms i
+    ///   halvdelen af tilfældene og under 540 ms i ni ud af ti. Kun 18 huller
+    ///   var over 800 ms. Et hul over den grænse er altså ikke et snit, Whisper
+    ///   har lavet — det er en pause, der rent faktisk var der.
+    ///
+    ///   Længden. Taler nogen længe uden at trække vejret, skal der alligevel
+    ///   begynde et nyt afsnit. Men SNITTET SKAL FALDE VED ET PUNKTUM. Første
+    ///   forsøg skar stift ved fyrre sekunder, og så begyndte hvert andet
+    ///   afsnit midt i en sætning — «is room for Q&amp;A at the end». Det læser
+    ///   værre end den mur, det skulle afhjælpe, og det er umuligt at rette i.
+    ///
+    ///   Derfor: efter 25 sekunder brydes ved den FØRSTE sætning, der slutter.
+    ///   Slutter ingen — én lang sætning uden punktum — brydes der alligevel
+    ///   efter 60 sekunder. Den grænse er der kun for ikke at kunne løbe løbsk.
+    ///
+    /// Grænserne gælder BEGGE slags optagelser. En tre minutters monolog på et
+    /// tosporsmøde er lige så ulæselig som på et webinar, og to regler for det
+    /// samme ville før eller siden holde op med at ligne hinanden.
     /// </summary>
+    private const long PauseMs = 800;
+
+    private const long LangPauseMs = 2_000;
+
+    private const long BrydEfterMs = 25_000;
+
+    private const long SenestMs = 60_000;
+
+    /// <summary>
+    /// Slutter teksten en sætning? Kun dér må et afsnit brydes på længden.
+    ///
+    /// Whisper sætter tegn, og de er pålidelige nok til det her: et punktum,
+    /// et spørgsmålstegn eller et udråbstegn i slutningen af et segment er et
+    /// sætningsskel. Rammer den forkert, bliver et afsnit et par sekunder
+    /// længere eller kortere — det koster ingenting.
+    /// </summary>
+    private static bool SlutterSaetning(string tekst)
+    {
+        var t = tekst.TrimEnd();
+        return t.Length > 0 && (t[^1] == '.' || t[^1] == '!' || t[^1] == '?');
+    }
+
     public static Udskrift Af(IEnumerable<Replik> replikker)
     {
         var ud = new List<Udskriftslinje>();
@@ -311,7 +366,23 @@ public sealed class Udskrift
         {
             var sidste = ud.Count > 0 ? ud[^1] : null;
 
-            if (sidste is not null && sidste.Spor == r.Spor)
+            var laengde = sidste is null ? 0 : r.TilMs - sidste.FraMs;
+
+            // Ogsaa en PAUSE skal falde ved et punktum. Maalt paa webinaret:
+            // 13 af 44 afsnit begyndte med lille bogstav, fordi taleren trak
+            // vejret midt i en saetning. En pause paa 800 ms er et aandedrag,
+            // ikke et afsnitsskift. Kun en pause paa over to sekunder bryder
+            // uanset hvad — saa er der sket noget andet end vejrtraekning.
+            var pause = sidste is null ? 0 : r.FraMs - sidste.TilMs;
+            var slutter = sidste is not null && SlutterSaetning(sidste.Tekst);
+
+            var brydes = sidste is not null
+                         && (pause >= LangPauseMs
+                             || (pause >= PauseMs && slutter)
+                             || (laengde >= BrydEfterMs && slutter)
+                             || laengde >= SenestMs);
+
+            if (sidste is not null && sidste.Spor == r.Spor && !brydes)
             {
                 sidste.Tekst = (sidste.Tekst + " " + r.Tekst.Trim()).Trim();
                 sidste.TilMs = r.TilMs;

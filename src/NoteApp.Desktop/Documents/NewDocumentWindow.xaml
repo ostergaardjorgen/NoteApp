@@ -17,7 +17,13 @@
     </Grid.RowDefinitions>
 
     <StackPanel Grid.Row="0" Margin="0,0,0,16">
-      <TextBlock Text="Opret dokument" FontSize="20" FontWeight="SemiBold" />
+      <!-- SPØRGSMÅLET STILLES RENT, OG DET SIGER HVAD DET KOSTER.
+           «Opret dokument» sagde hverken, hvad man fik, eller at det bliver
+           lavet ude i verden. Begge dele hoerer i overskriften: det er dét,
+           der skiller den her knap fra den korte lokale opsummering, og det
+           er dét, brugeren skal kunne traeffe sit valg paa. -->
+      <TextBlock Text="Vil du have et komplet Word-dokument?" FontSize="20" FontWeight="SemiBold"
+                 TextWrapping="Wrap" />
       <TextBlock x:Name="Kilde" Style="{StaticResource Underskrift}" Margin="0,4,0,0" TextWrapping="Wrap" />
     </StackPanel>
 
@@ -38,11 +44,11 @@
     <Border Grid.Row="1" Background="{StaticResource Panel}" CornerRadius="10"
             BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
       <DockPanel>
-        <TextBlock DockPanel.Dock="Top" Text="Hvad skal der laves?" Margin="18,15,18,4"
+        <TextBlock DockPanel.Dock="Top" Text="Hvilken mødetype?" Margin="18,15,18,4"
                    FontSize="13" FontWeight="SemiBold" />
-        <TextBlock DockPanel.Dock="Top" Margin="18,0,18,10" FontSize="11.5" TextWrapping="Wrap"
-                   Foreground="{StaticResource TekstMeget}"
-                   Text="Skabelonen bestemmer, hvilke afsnit dokumentet får, og hvor langt det bliver." />
+        <TextBlock x:Name="Typehjaelp" DockPanel.Dock="Top" Margin="18,0,18,10" FontSize="11.5"
+                   TextWrapping="Wrap" Foreground="{StaticResource TekstMeget}"
+                   Text="Mødetypen bestemmer, hvilke afsnit dokumentet får, og hvor langt det bliver." />
 
         <ListBox x:Name="Skabeloner" Margin="10,0,10,10" BorderThickness="0"
                  Background="Transparent" SelectionChanged="Skabelon_Valgt"

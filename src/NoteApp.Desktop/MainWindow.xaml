@@ -86,7 +86,18 @@
           <RadioButton x:Name="NavDokumenter" GroupName="nav" Content="Dokumenter"
                        Checked="Nav_Changed"
                        Style="{StaticResource NavKnap}" />
-          <RadioButton x:Name="NavSkabeloner" GroupName="nav" Content="Skabeloner"
+          <!-- MØDETYPER, IKKE SKABELONER.
+               «Skabelon» er et ord fra tekstbehandling. Det tvinger læseren
+               til at tænke i dokumenter på et tidspunkt, hvor der ikke er
+               noget dokument — og det er dér, dokumentdelen bliver svær at
+               finde ud af. Et statusmøde, en 1:1, et kundemøde: dét kan man
+               svare på, FØR mødet går i gang, og det er derfor mødetypen nu
+               vælges, når optagelsen startes.
+
+               Filerne bag hedder stadig skabeloner. Det er med vilje: de er
+               skabeloner, når man skriver dem, og mødetyper, når man vælger
+               dem. Kun det, brugeren læser, er skiftet. -->
+          <RadioButton x:Name="NavSkabeloner" GroupName="nav" Content="Mødetyper"
                        Checked="Nav_Changed"
                        Style="{StaticResource NavKnap}" />
           <!-- AI-modeller er det eneste menupunkt med et mærkat. Grunden er,

@@ -21,9 +21,13 @@
     </Grid.RowDefinitions>
 
     <StackPanel Grid.Row="0" Margin="0,0,0,12">
-      <TextBlock Text="Skabeloner" Style="{StaticResource Overskrift}" />
+      <!-- MØDETYPER UDADTIL, SKABELONER INDADTIL.
+           Se MainWindow.xaml for hvorfor. Kort: mødetypen kan man svare på,
+           FØR mødet går i gang, og det er dér, den bliver valgt. «Skabelon»
+           kan man foerst svare paa, naar man taenker i dokumenter. -->
+      <TextBlock Text="Mødetyper" Style="{StaticResource Overskrift}" />
       <TextBlock Style="{StaticResource Underskrift}"
-                 Text="Hvad der skal laves ud af en optagelse" />
+                 Text="Hvilken slags møde det er — og hvad der skal skrives ud af det" />
     </StackPanel>
 
     <!-- HER LAA ET PANEL: "Dokumenter laves af Mistral Medium 3.5 i Europa".
@@ -38,14 +42,14 @@
       <DockPanel>
         <Button DockPanel.Dock="Right" x:Name="GemKnap" Content="Gem ændringer" Click="Gem_Click"
                 Style="{StaticResource Primaer}" MinWidth="150" IsEnabled="False"
-                ToolTip="Gem det, du har rettet i skabelonen" />
+                ToolTip="Gem det, du har rettet i mødetypen" />
 
         <Border DockPanel.Dock="Right" Width="1" Margin="10,4,14,4"
                 Background="{StaticResource PanelKant}" />
 
         <Button DockPanel.Dock="Left" x:Name="NyKnap" Style="{StaticResource IkonKnap}"
-                Click="Ny_Click" AutomationProperties.Name="Ny skabelon"
-                ToolTip="Ny skabelon — start fra en tom og skriv din egen">
+                Click="Ny_Click" AutomationProperties.Name="Ny mødetype"
+                ToolTip="Ny mødetype — start fra en tom og skriv din egen">
           <TextBlock Text="&#xE710;" FontFamily="Segoe MDL2 Assets" />
         </Button>
 
@@ -53,8 +57,8 @@
                 Background="{StaticResource PanelKant}" />
 
         <Button DockPanel.Dock="Left" x:Name="MappeKnap" Style="{StaticResource IkonKnap}"
-                Click="Mappe_Click" AutomationProperties.Name="Åbn skabelonmappen"
-                ToolTip="Åbn skabelonmappen på disken">
+                Click="Mappe_Click" AutomationProperties.Name="Åbn mappen med mødetyper"
+                ToolTip="Åbn mappen med mødetyper på disken">
           <TextBlock Text="&#xE838;" FontFamily="Segoe MDL2 Assets" />
         </Button>
 
@@ -62,8 +66,8 @@
                 Background="{StaticResource PanelKant}" />
 
         <Button DockPanel.Dock="Left" x:Name="SletKnap" Style="{StaticResource IkonKnapFare}"
-                Click="Slet_Click" IsEnabled="False" AutomationProperties.Name="Slet skabelon"
-                ToolTip="Slet den valgte skabelon. Kan ikke fortrydes">
+                Click="Slet_Click" IsEnabled="False" AutomationProperties.Name="Slet mødetype"
+                ToolTip="Slet den valgte mødetype. Kan ikke fortrydes">
           <TextBlock Text="&#xE74D;" FontFamily="Segoe MDL2 Assets" />
         </Button>
 
@@ -204,7 +208,7 @@
                 </Grid.ColumnDefinitions>
                 <TextBlock Grid.Column="0" FontSize="11.5" TextWrapping="Wrap" Margin="2,0,10,0"
                            Foreground="{StaticResource TekstMeget}"
-                           Text="Står på knappen, når du vælger skabelon." />
+                           Text="Står på knappen, når du vælger mødetype." />
                 <TextBlock Grid.Column="1" FontSize="11.5" TextWrapping="Wrap" Margin="2,0,10,0"
                            Foreground="{StaticResource TekstMeget}"
                            Text="0,0 holder sig tæt på udskriften. Over 0,4 formulerer den sig frit — og til et referat er det en fejl." />
@@ -219,7 +223,7 @@
                        VerticalScrollBarVisibility="Auto" />
               <TextBlock FontSize="11.5" Margin="2,6,0,0" TextWrapping="Wrap"
                          Foreground="{StaticResource TekstMeget}"
-                         Text="Står under navnet, når du vælger skabelon — så valget ikke er et gæt. Skriv gerne to linjer om, hvad den er god til, og hvornår man vælger den frem for de andre." />
+                         Text="Står under navnet, når du vælger mødetype — så valget ikke er et gæt. Skriv gerne to linjer om, hvad den er god til, og hvornår man vælger den frem for de andre." />
             </StackPanel>
           </TabItem>
 
@@ -242,7 +246,7 @@
                   <TextBlock Text="Fælles regler, du kan sætte ind" FontSize="12.5" FontWeight="SemiBold" />
                   <TextBlock FontSize="11.5" Margin="0,4,0,8" TextWrapping="Wrap" LineHeight="18"
                              Foreground="{StaticResource TekstMeget}"
-                             Text="Reglerne for, hvem der kommer på deltagerlisten, er de samme i alle skabeloner. Sæt feltet ind, så følger de med — rettes de ét sted, følger alle skabeloner med." />
+                             Text="Reglerne for, hvem der kommer på deltagerlisten, er de samme for alle mødetyper. Sæt feltet ind, så følger de med — rettes de ét sted, følger alle mødetyper med." />
                   <!-- {} foerst: ellers laeser XAML den kroellede parentes som en
                        markup-extension og vil ikke bygge. -->
                   <Button Content="{}{{deltagerregler}}" Tag="{}{{deltagerregler}}" Click="Systemfelt_Klik"
@@ -332,7 +336,7 @@
                            Text="Et referat kan kun indeholde det, der blev sagt. Bliver et navn aldrig nævnt, en frist aldrig aftalt eller en beslutning aldrig sagt højt, står det heller ikke i dokumentet — uanset hvor god modellen er." />
                 <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,8,0,0"
                            Foreground="{StaticResource TekstSvag}"
-                           Text="Dagsordenen herunder er bygget, så mødet af sig selv kommer omkring det, skabelonerne leder efter: hvem der er med, hvem der siger hvad, hvad der besluttes, hvad ingen kan svare på, og hvem der følger op hvornår. Den er et forslag — tilpas den frit, men de fem punkter er dem, der afgør, om udskriften kan blive til noget brugbart." />
+                           Text="Dagsordenen herunder er bygget, så mødet af sig selv kommer omkring det, mødetyperne leder efter: hvem der er med, hvem der siger hvad, hvad der besluttes, hvad ingen kan svare på, og hvem der følger op hvornår. Den er et forslag — tilpas den frit, men de fem punkter er dem, der afgør, om udskriften kan blive til noget brugbart." />
                 <TextBlock FontSize="12" LineHeight="20" TextWrapping="Wrap" Margin="0,8,0,0"
                            Foreground="{StaticResource TekstMeget}"
                            Text="Kopiér den ind i mødeindkaldelsen. Det vigtigste enkelte punkt er navnerunden: uden den har talegenkendelsen ingen navne at genkende, og så bliver «hvem sagde hvad» et gæt." />
@@ -350,12 +354,12 @@
                   <Button x:Name="AgendaKopierKnap" Content="Kopiér dagsordenen"
                           Click="KopierAgenda_Click" Padding="14,7" Margin="0,0,8,0"
                           ToolTip="Læg hele dagsordenen i udklipsholderen" />
-                  <Button x:Name="AgendaTilpasKnap" Content="Tilpas til denne skabelon"
+                  <Button x:Name="AgendaTilpasKnap" Content="Tilpas til denne mødetype"
                           Click="TilpasAgenda_Click" Padding="14,7" Margin="0,0,8,0"
-                          ToolTip="Lad Mistral skrive en dagsorden, der passer til netop denne skabelon" />
+                          ToolTip="Lad Mistral skrive en dagsorden, der passer til netop denne mødetype" />
                   <Button x:Name="AgendaNulstilKnap" Content="Tilbage til standarden"
                           Click="NulstilAgenda_Click" Padding="14,7" Visibility="Collapsed"
-                          ToolTip="Slet skabelonens egen dagsorden og brug den fælles igen" />
+                          ToolTip="Slet mødetypens egen dagsorden og brug den fælles igen" />
                 </StackPanel>
               </StackPanel>
 

@@ -21,7 +21,17 @@ public partial class NewDocumentWindow : Window
     public string Beskrivelse => FeltBeskrivelse.Text.Trim();
     private readonly string _optagelse;
 
-    public NewDocumentWindow(string optagelsesTitel, IReadOnlyList<PromptTemplate> skabeloner)
+    /// <param name="valgtMoedetype">
+    /// Mødetypen, der blev valgt, da optagelsen blev startet. Null når der
+    /// ikke blev valgt nogen.
+    ///
+    /// DEN SKAL VÆRE FORVALGT HER. Hele grunden til at spørge før mødet er, at
+    /// svaret skal bruges bagefter — kom man til at vælge forfra i den her
+    /// dialog, ville det første valg være et spørgsmål uden virkning, og så
+    /// holder folk op med at svare på det.
+    /// </param>
+    public NewDocumentWindow(string optagelsesTitel, IReadOnlyList<PromptTemplate> skabeloner,
+                             string? valgtMoedetype = null)
     {
         InitializeComponent();
 
@@ -42,10 +52,27 @@ public partial class NewDocumentWindow : Window
         // bearbejdning i EU - det er arkitekturen, ikke en egenskab ved det
         // enkelte referat. Man ved det, naar man vaelger loesningen, og faar
         // det bekraeftet i opsaetningen.
-        Kilde.Text = $"Bygges på «{optagelsesTitel}». Gemmes som Word-dokument (.docx).";
+        Kilde.Text = $"Skrives af din online AI-model ud fra udskriften af «{optagelsesTitel}» " +
+                     "og gemmes som en Word-fil (.docx). Udskriftens tekst sendes til modellen; " +
+                     "lyden bliver på maskinen.";
 
         Skabeloner.ItemsSource = skabeloner;
-        if (skabeloner.Count > 0) Skabeloner.SelectedIndex = 0;
+
+        // Mødetypen fra optagelsen er forvalgt. Findes den ikke laengere — den
+        // kan vaere slettet eller omdoebt — falder valget tilbage paa den
+        // foerste, og saa er der stadig noget at trykke paa.
+        var nr = valgtMoedetype is null
+            ? -1
+            : skabeloner.ToList().FindIndex(t =>
+                t.Name.Equals(valgtMoedetype, StringComparison.CurrentCultureIgnoreCase));
+
+        if (nr >= 0)
+        {
+            Skabeloner.SelectedIndex = nr;
+            Typehjaelp.Text = $"«{skabeloner[nr].Name}» er valgt, fordi det var mødetypen på optagelsen. " +
+                              "Vælg en anden, hvis du vil have noget andet ud af mødet.";
+        }
+        else if (skabeloner.Count > 0) Skabeloner.SelectedIndex = 0;
 
         // Titlen saettes af Skabelon_Valgt, som fyrer paa SelectedIndex ovenfor.
         FeltTitel.Focus();
@@ -79,7 +106,7 @@ public partial class NewDocumentWindow : Window
     {
         if (Skabeloner.SelectedItem is not PromptTemplate t)
         {
-            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Mangler valg", "Vælg en skabelon.", Dialogs.Slags.Valg);
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Mangler valg", "Vælg en mødetype.", Dialogs.Slags.Valg);
             return;
         }
 

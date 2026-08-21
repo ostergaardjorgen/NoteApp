@@ -126,7 +126,7 @@ public sealed class Biblioteksnode : INotifyPropertyChanged
     {
         Transcribe.OptagelseVisning o => o.Varighed,
         NoteApp.Core.Documents.DocumentInfo d =>
-            $"Skabelon: {(string.IsNullOrWhiteSpace(d.Template) ? "ukendt" : d.Template)}",
+            $"Mødetype: {(string.IsNullOrWhiteSpace(d.Template) ? "ukendt" : d.Template)}",
         NoteApp.Core.Llm.PromptTemplate t => $"Længde: op til {t.MaxTokens} tokens",
         _ => ""
     };

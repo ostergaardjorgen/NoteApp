@@ -671,8 +671,17 @@ static async Task<int> Transskriber(string[] a)
 
     // Peges der på en mappe, tages mikrofonsporet — det er det spor, der
     // altid findes, ogsaa ved fysiske moeder uden loopback.
+    // Peges der paa en mappe, tages mikrofonsporet — og findes det ikke, er
+    // det et webinar, hvor hoejttalersporet er det eneste, der blev optaget.
     var input = a[0];
-    var wav = Directory.Exists(input) ? Path.Combine(input, "mikrofon.wav") : input;
+    var wav = input;
+
+    if (Directory.Exists(input))
+    {
+        wav = Path.Combine(input, "mikrofon.wav");
+        if (!File.Exists(wav)) wav = Path.Combine(input, "loopback.wav");
+    }
+
     if (!File.Exists(wav)) { Console.Error.WriteLine($"Findes ikke: {wav}"); return 1; }
 
     var udBase = Path.Combine(Path.GetDirectoryName(wav)!,
@@ -720,19 +729,103 @@ static async Task<int> Transskriber(string[] a)
 
     // Sproget gemmes paa moedet, saa skabelonerne kan forholde sig til det
     // senere. Uden det er detekteringen kun en linje i en log, der bliver slettet.
-    if (Directory.Exists(input))
+    var moedemappe = Directory.Exists(input) ? input : Path.GetDirectoryName(wav)!;
+    var meta = MeetingStore.Load(moedemappe);
+
+    if (meta is not null)
     {
-        var meta = MeetingStore.Load(input);
-        if (meta is not null)
+        meta.Language = r.DetectedLanguage;
+        meta.LanguageProbability = r.LanguageProbability;
+
+        // Det valgte sprog huskes paa det spor, det gjaldt. Uden det ville
+        // appen skrive hele optagelsen ud igen, naeste gang der blev trykket
+        // paa knappen — den kan kun genbruge en koersel, den kan genkende.
+        if (ønsketSprog != "auto")
         {
-            meta.Language = r.DetectedLanguage;
-            meta.LanguageProbability = r.LanguageProbability;
-            MeetingStore.Save(input, meta);
+            if (Path.GetFileNameWithoutExtension(wav) == "loopback") meta.ValgtSprogLoop = ønsketSprog;
+            else meta.ValgtSprogMik = ønsketSprog;
+        }
+
+        MeetingStore.Save(moedemappe, meta);
+    }
+
+    Console.WriteLine($"Tekst     : {r.TextPath}");
+
+    // ============ ÉT SPOR SAMLES HELT FÆRDIGT ============
+    //
+    // Whisper efterlader en json og en txt pr. spor. Det, appen viser, er en
+    // ANDEN fil: replikkerne flettet, med stemmerne skilt ad og navnene sat
+    // paa. Uden det trin er en koersel her kun det halve arbejde, og resten
+    // skal goeres i appen alligevel.
+    //
+    // KUN NAAR DER ER ÉT SPOR. Har moedet baade mikrofon og hoejttaler, er
+    // fletningen af de to det egentlige arbejde, og en udskrift bygget paa det
+    // ene spor ville se faerdig ud og mangle halvdelen af samtalen. Det er
+    // vaerre end ingen udskrift.
+    var beggeSpor = File.Exists(Path.Combine(moedemappe, "mikrofon.wav"))
+                    && File.Exists(Path.Combine(moedemappe, "loopback.wav"));
+
+    if (beggeSpor)
+    {
+        Console.WriteLine();
+        Console.WriteLine("Mødet har to spor. Kør det færdigt i appen — dér skrives begge ud");
+        Console.WriteLine("og flettes til én udskrift.");
+        return 0;
+    }
+
+    var modelNavn = Path.GetFileNameWithoutExtension(s.ModelPath!).Replace("ggml-", "");
+    var replikker = Samtale.Flet(r.JsonPath, null);
+    var udskrift = Udskrift.Af(replikker);
+
+    if (Diarisering.ErInstalleret)
+    {
+        Console.WriteLine();
+        Console.Write("Skiller stemmerne ad …");
+
+        try
+        {
+            var talere = await Diarisering.KoerAsync(wav, "", null, CancellationToken.None);
+            if (talere is not null)
+            {
+                Diarisering.Gem(moedemappe, talere);
+                var sat = Diarisering.Anvend(udskrift, talere);
+                Console.WriteLine($" {talere.Stemmer} stemmer, sat på {sat} replikker");
+            }
+            else Console.WriteLine(" ingen stemmer fundet");
+        }
+        catch (Exception ex)
+        {
+            // Uden navne, som foer. En udskrift uden talere er ikke daarlig,
+            // den er bare ikke bedre.
+            Console.WriteLine($" sprunget over ({ex.Message})");
         }
     }
 
+    udskrift.GemMaskin(moedemappe, modelNavn);
 
-    Console.WriteLine($"Tekst     : {r.TextPath}");
+    var udskriftSti = Path.Combine(moedemappe, $"udskrift_{modelNavn}.txt");
+    File.WriteAllText(udskriftSti, udskrift.SomTekst(meta?.Talere),
+                      new System.Text.UTF8Encoding(false));
+
+    Console.WriteLine($"Udskrift  : {udskriftSti}");
+
+    // KLOKKEN SKAL RINGE — OGSAA NAAR KOERSLEN KOM HERFRA.
+    //
+    // Historikken er appens eneste kilde til notifikationer. Skrives linjen
+    // ikke, staar en faerdig udskrift der uden at nogen faar det at vide, og
+    // saa er forskellen paa at koere det her og at koere det i appen ikke
+    // hastighed, men om man opdager, at det er faerdigt.
+    Historik.Skriv(
+        HaendelseType.Transskription,
+        "Transskription færdig",
+        $"{TimeSpan.FromSeconds(r.AudioSeconds):hh\\:mm\\:ss} lyd · " +
+        $"sprog {Transcriber.LanguageName(r.DetectedLanguage)}" +
+        (r.LanguageProbability is double p4 ? $" ({p4 * 100:0}% sikker)" : " (valgt)") +
+        $" · RTF {r.RealTimeFactor:0.00}",
+        Udfald.Fuldført,
+        r.EngineId, udskriftSti, r.ElapsedSeconds,
+        kilde: meta?.Id.ToString() ?? "");
+
     return 0;
 }
 

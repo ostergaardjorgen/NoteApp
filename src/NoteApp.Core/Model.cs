@@ -129,6 +129,25 @@ public sealed class MeetingMetadata
     public string? Mappe { get; set; }
 
     /// <summary>
+    /// Mødetypen, valgt da optagelsen blev startet. Null betyder «ikke valgt».
+    ///
+    /// Værdien er NAVNET på en mødetype — den samme tekst, brugeren ser — og
+    /// ikke et id eller en filsti. Mødetyperne er filer i datamappen, som
+    /// brugeren selv kan rette, kopiere og slette; et id ville pege på noget,
+    /// der kan forsvinde, og en filsti ville brække, første gang datamappen
+    /// blev flyttet.
+    ///
+    /// Findes typen ikke længere, står navnet stadig. Det er den rigtige
+    /// opførsel: «det her var et statusmøde» er en oplysning om mødet, også
+    /// efter at skabelonen bag er slettet.
+    ///
+    /// HVORFOR DEN VÆLGES FØR MØDET OG IKKE BAGEFTER: den er kendt på forhånd.
+    /// Bagefter skal man oversætte sit møde til en skabelon for at komme
+    /// videre, og det er dér, dokumentdelen bliver svær at finde ud af.
+    /// </summary>
+    public string? Moedetype { get; set; }
+
+    /// <summary>
     /// Sproget, der blev VALGT til mikrofonsporet, sidst der blev skrevet ud.
     ///
     /// Huskes pr. møde og ikke som en global indstilling. Man holder ikke

@@ -148,7 +148,25 @@ public partial class MeetingView : UserControl
 
     // ------------------------------------------------------------- optagelse
 
-    private void Start_Click(object sender, RoutedEventArgs e) => Start();
+    /// <summary>
+    /// Optageknappen: der spørges om mappe, mødetype og sprog, og så optages
+    /// der.
+    ///
+    /// Fortryder man dialogen, sker der ingenting. Det er forskellen på
+    /// knappen og genvejstasten: knappen trykker man på, fordi man er klar til
+    /// at tage stilling, og genvejstasten fordi mødet allerede er begyndt.
+    /// </summary>
+    private void Start_Click(object sender, RoutedEventArgs e)
+    {
+        if (IsRecording) return;
+
+        var vindue = new OpstartWindow(OpstartWindow.Slags.Moede)
+        { Owner = Window.GetWindow(this) };
+
+        if (vindue.ShowDialog() != true) return;
+
+        Start(new Opstart(vindue.Sprog, vindue.Kilde, vindue.Mappe, vindue.Moedetype, ErWebinar: false));
+    }
 
     /// <summary>
     /// Optager et webinar: ét spor, sproget valgt på forhånd, og den stopper
@@ -162,10 +180,12 @@ public partial class MeetingView : UserControl
     {
         if (IsRecording) return;
 
-        var vindue = new WebinarWindow { Owner = Window.GetWindow(this) };
+        var vindue = new OpstartWindow(OpstartWindow.Slags.Webinar)
+        { Owner = Window.GetWindow(this) };
+
         if (vindue.ShowDialog() != true) return;
 
-        Start(new Webinaropstart(vindue.Sprog, vindue.Kilde));
+        Start(new Opstart(vindue.Sprog, vindue.Kilde, vindue.Mappe, vindue.Moedetype, ErWebinar: true));
     }
 
     /// <summary>
@@ -177,7 +197,55 @@ public partial class MeetingView : UserControl
     /// Højttalersporet tages altid med, og er det tavst hele vejen igennem,
     /// slettes det, når optagelsen stoppes.
     /// </summary>
-    public void Lynstart() => Start();
+    public void Lynstart()
+    {
+        if (IsRecording) return;
+
+        // OPTAGELSEN FØRST. SPØRGSMÅLENE BAGEFTER.
+        //
+        // Knappen spørger om mappe, mødetype og sprog, FØR der optages. Det er
+        // rigtigt dér — man trykker på den, fordi man er klar.
+        //
+        // Genvejstasten er det modsatte: den bruges, fordi mødet allerede er
+        // gået i gang, og fordi man ikke nåede at forberede sig. Lagde man den
+        // samme dialog foran, ville de første replikker gå tabt, mens man
+        // valgte en mappe — og genvejen ville holde op med at være en genvej.
+        //
+        // Derfor starter den, og dialogen kommer ovenpå den kørende optagelse.
+        // Der optages, mens man svarer, og lukker man den bare, sker der
+        // ingenting: optagelsen kører videre uden mappe og uden type.
+        Start();
+
+        if (!IsRecording) return;
+
+        Spoerg_MensDerOptages();
+    }
+
+    /// <summary>
+    /// Stiller de tre spørgsmål oven på en optagelse, der allerede kører.
+    ///
+    /// Båndet ligger over alt andet, så det skal lægges ned imens — ellers
+    /// havner dialogen BAG det, og appen ser låst ud. Præcis samme greb som
+    /// ved «kassér» på båndet.
+    /// </summary>
+    private void Spoerg_MensDerOptages()
+    {
+        var ejer = (Window?)_baand ?? Window.GetWindow(this);
+        if (_baand is not null) _baand.Topmost = false;
+
+        try
+        {
+            var vindue = new OpstartWindow(OpstartWindow.Slags.Igang) { Owner = ejer };
+            if (vindue.ShowDialog() != true) return;
+
+            Skriv_Opstart(new Opstart(vindue.Sprog, vindue.Kilde, vindue.Mappe, vindue.Moedetype,
+                                      ErWebinar: false));
+        }
+        finally
+        {
+            if (_baand is not null) _baand.Topmost = true;
+        }
+    }
 
     /// <summary>
     /// Spørger, hvad mødet skal hedde — bagefter, hvor man ved det.
@@ -241,18 +309,20 @@ public partial class MeetingView : UserControl
         }
     }
 
-    /// <summary>Kaldes både fra knappen og fra genvejstasten.</summary>
+    /// <summary>Starter uden svar på noget. Genvejstasten spørger bagefter.</summary>
     public void Start() => Start(null);
 
     /// <summary>
     /// Starter en optagelse — møde eller webinar.
     /// </summary>
-    /// <param name="webinar">
-    /// Svarene fra webinardialogen: sprog og eventuelt link. Null er et
-    /// almindeligt møde.
+    /// <param name="opstart">
+    /// Svarene fra opstartsdialogen. Null betyder et almindeligt møde, hvor
+    /// der ikke er svaret på noget.
     /// </param>
-    public void Start(Webinaropstart? webinar)
+    public void Start(Opstart? opstart)
     {
+        var webinar = opstart is { ErWebinar: true } ? opstart : null;
+
         if (IsRecording) return;
 
         var mik = AudioDevices.ResolveMicrophone(AppSettings.Current.MicrophoneId, out var fallback);
@@ -309,15 +379,7 @@ public partial class MeetingView : UserControl
 
             _session = RecordingSession.Create(type, null, mik, højttaler);
 
-            // Sproget og linket skrives ind med det samme. Sproget bruges af
-            // udskrivningen, saa den ikke spoerger; linket er vejen tilbage
-            // til det, der blev VIST, og det kan ikke skaffes bagefter.
-            if (webinar is not null)
-            {
-                _session.Meta.ValgtSprogLoop = webinar.Sprog;
-                _session.Meta.Kilde = webinar.Kilde;
-                MeetingStore.Save(_session.SessionDir, _session.Meta);
-            }
+            if (opstart is not null) Skriv_Opstart(opstart);
 
             _erWebinar = webinar is not null;
             _stilhedFra = null;
@@ -636,8 +698,47 @@ public partial class MeetingView : UserControl
 
     // ------------------------------------------------- webinaret stopper selv
 
-    /// <summary>Svarene fra webinardialogen.</summary>
-    public sealed record Webinaropstart(string Sprog, string? Kilde);
+    /// <summary>
+    /// Svarene fra opstartsdialogen: hvad optagelsen er, hvor den hører til,
+    /// og hvad der bliver talt.
+    /// </summary>
+    public sealed record Opstart(string Sprog, string? Kilde, string? Mappe, string? Moedetype,
+                                 bool ErWebinar);
+
+    /// <summary>
+    /// Skriver svarene ind på optagelsen — også hvis den allerede kører.
+    ///
+    /// ALT GEMMES MED DET SAMME. Filen skrives, mens der optages, og ikke
+    /// først når mødet stoppes: dør maskinen undervejs, er mappen og sproget
+    /// det, der gør en genoprettet optagelse til andet end en lydfil uden
+    /// ophav.
+    ///
+    /// Sproget lægges på begge spor ved et møde. De to sider taler som regel
+    /// det samme, og kan de ikke det, rettes det, når der skrives ud — dér
+    /// spørges der om hvert spor for sig. Ved et webinar er der kun ét spor,
+    /// højttalerens, og mikrofonens felt skal blive stående tomt: et sprog på
+    /// et spor, der ikke findes, ville forvirre genbruget senere.
+    /// </summary>
+    private void Skriv_Opstart(Opstart o)
+    {
+        if (_session is null) return;
+
+        var m = _session.Meta;
+
+        m.Mappe = o.Mappe;
+        m.Moedetype = o.Moedetype;
+        m.Kilde = o.Kilde;
+
+        m.ValgtSprogLoop = o.Sprog;
+        if (!o.ErWebinar) m.ValgtSprogMik = o.Sprog;
+
+        try { MeetingStore.Save(_session.SessionDir, m); }
+        catch (IOException)
+        {
+            // En optagelse maa ikke falde over en fil, der ikke kunne skrives.
+            // Den skrives igen, naar optagelsen stoppes.
+        }
+    }
 
     /// <summary>
     /// Hvor længe der skal være stille, før et webinar regnes for slut.
@@ -688,13 +789,30 @@ public partial class MeetingView : UserControl
 
         if (stille < Stilhedsgraense)
         {
-            // Der siges til, naar der er gaaet halvdelen. Ellers stopper den
-            // uden varsel, og sidder man alligevel og lytter, naar man ikke at
-            // gribe ind.
-            if (stille > TimeSpan.FromMinutes(2.5))
+            // ============ DER SIGES TIL TO GANGE ============
+            //
+            // FØRSTE MELDING KOMMER EFTER 45 SEKUNDER, og den peger på den
+            // fejl, der faktisk sker. Målt paa et rigtigt webinar 21-08-2026:
+            // afspilleren var sat paa mute, og saa afleverer programmet ingen
+            // lyd — der er intet for Windows at kopiere. Optagelsen loeb i tre
+            // minutter uden indhold, og det blev opdaget ved et tilfaelde.
+            //
+            // Foer stod der intet foer efter to en halv minut, og saa hed det
+            // «stopper om 2 min» — en nedtaelling, ikke et raad. Den fortalte
+            // hverken, hvad der var galt, eller hvad man kunne goere.
+            //
+            // 45 sekunder er valgt, fordi et webinar sjaeldent er helt tavst
+            // saa laenge, og fordi meldingen forsvinder af sig selv i samme
+            // sekund, der kommer lyd. En melding for meget koster ingenting;
+            // en for lidt koster optagelsen.
+            if (stille >= TimeSpan.FromMinutes(2.5))
             {
                 var igen = Stilhedsgraense - stille;
-                _baand?.Meld($"Stille i {stille.Minutes} min — stopper om {Math.Max(1, (int)igen.TotalMinutes)} min");
+                _baand?.Meld($"Ingen lyd i {stille.Minutes} min — stopper om {Math.Max(1, (int)igen.TotalMinutes)} min");
+            }
+            else if (stille >= TimeSpan.FromSeconds(45))
+            {
+                _baand?.Meld("Ingen lyd — er webinaret sat på mute?");
             }
 
             return;

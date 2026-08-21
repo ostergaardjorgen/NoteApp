@@ -16,7 +16,17 @@ public sealed class OptagelseVisning
     {
         Mappe = mappe;
         var meta = MeetingStore.Load(mappe);
-        var wav = Path.Combine(mappe, "mikrofon.wav");
+
+        // ============ ET WEBINAR HAR INGEN MIKROFONFIL ============
+        //
+        // Her stod «mikrofon.wav» alene, og det var rigtigt, saa laenge alle
+        // optagelser havde et mikrofonspor. Et webinar har det ikke — hele
+        // pointen er, at kun det, computeren afspiller, optages.
+        //
+        // Uden det her stod et webinar i listen som «ingen lyd» med laengden
+        // 00:00, og knappen til at skrive det ud pegede paa en fil, der ikke
+        // fandtes. Lyden var der hele tiden.
+        var wav = Lydfilen(mappe);
 
         Gruppe = Optagelsesgruppe.Af(mappe, meta);
         Emnemappe = meta?.Mappe;
@@ -76,6 +86,28 @@ public sealed class OptagelseVisning
                 .Sum(f => new FileInfo(f).Length);
         }
         catch (IOException) { Bytes = 0; }
+    }
+
+    /// <summary>
+    /// Optagelsens hovedspor: mikrofonen, eller højttaleren når der ikke er
+    /// nogen mikrofonfil.
+    ///
+    /// ÉT STED, OG ALLE SPØRGER DET SAMME STED. Filen skal findes både af
+    /// listen, af længden, af knappen der skriver ud og af transskriptionen
+    /// selv. Blev svaret regnet ud fire steder, ville de fire holde op med at
+    /// være enige — og uenigheden ville vise sig som et webinar, der stod med
+    /// «ingen lyd» ét sted og lod sig afspille et andet.
+    ///
+    /// Mikrofonen vinder, når begge findes. Et onlinemøde har begge spor, og
+    /// dér er mikrofonen hovedsporet — højttalersporet tages med ved siden af.
+    /// </summary>
+    public static string Lydfilen(string mappe)
+    {
+        var mik = Path.Combine(mappe, "mikrofon.wav");
+        if (File.Exists(mik)) return mik;
+
+        var loop = Path.Combine(mappe, "loopback.wav");
+        return File.Exists(loop) ? loop : mik;   // findes ingen af dem, er svaret det forventede navn
     }
 
     /// <summary>Dato og klokkeslæt fra og til. Til hjælpeteksten i træet.</summary>
@@ -815,11 +847,14 @@ public partial class TranscribeView : UserControl
         }
         if (skabeloner.Count == 0)
         {
-            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Ingen skabelon", "Der er ingen skabeloner. Opret en under «Skabeloner».", Dialogs.Slags.Valg);
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Ingen mødetyper",
+                "Der er ingen mødetyper. Opret en under «Mødetyper».", Dialogs.Slags.Valg);
             return;
         }
 
-        var dialog = new Documents.NewDocumentWindow(valgt.Titel, skabeloner)
+        // Mødetypen fra optagelsen sendes med, saa den er forvalgt i dialogen.
+        var dialog = new Documents.NewDocumentWindow(valgt.Titel, skabeloner,
+                                                    MeetingStore.Load(valgt.Mappe)?.Moedetype)
         { Owner = Window.GetWindow(this) };
 
         if (dialog.ShowDialog() != true || dialog.Valgt is null) return;
@@ -957,8 +992,6 @@ public partial class TranscribeView : UserControl
             return;
         }
 
-        var wav = Path.Combine(valgt.Mappe, "mikrofon.wav");
-
         // DET ANDET SPOR.
         //
         // Et onlinemoede optages paa to spor, og indtil nu blev kun
@@ -969,7 +1002,25 @@ public partial class TranscribeView : UserControl
         //
         // Findes filen ikke, var det et fysisk moede. Saa koeres der som foer.
         var loopWav = Path.Combine(valgt.Mappe, "loopback.wav");
-        var toSpor = File.Exists(loopWav);
+
+        // ============ ET WEBINAR ER ÉT SPOR — HØJTTALERENS ============
+        //
+        // Tre tilfaelde, ikke to:
+        //
+        //   fysisk moede   kun mikrofon.wav        eet spor
+        //   onlinemoede    begge filer             to spor
+        //   webinar        kun loopback.wav        eet spor
+        //
+        // Det tredje var der ikke foer, og koden gik ud fra, at mikrofonen
+        // altid fandtes. Et webinar ville derfor blive skrevet ud fra en fil,
+        // der ikke er der.
+        //
+        // Loesningen er, at hovedsporet er DET SPOR, DER FINDES, og at det
+        // andet spor kun er «det andet», naar der faktisk er to. Resten af
+        // metoden regner saa som foer.
+        var wav = OptagelseVisning.Lydfilen(valgt.Mappe);
+        var kunLoop = wav == loopWav;
+        var toSpor = !kunLoop && File.Exists(loopWav);
 
         // ============ SPROGET SPOERGES DER OM HER ============
         //
@@ -1010,8 +1061,13 @@ public partial class TranscribeView : UserControl
             if (!fortsaet) return;
         }
 
+        // Det huskede sprog for HOVEDSPORET. Paa et webinar er hovedsporet
+        // hoejttalerens, og saa er det ValgtSprogLoop, der er svaret — ikke
+        // mikrofonens, som aldrig blev optaget.
+        var sidsteHovedsprog = kunLoop ? gemtMeta?.ValgtSprogLoop : gemtMeta?.ValgtSprogMik;
+
         var sprogvalg = new SprogvalgWindow(toSpor,
-            gemtMeta?.ValgtSprogMik, gemtMeta?.ValgtSprogLoop, valgt.Titel)
+            sidsteHovedsprog, gemtMeta?.ValgtSprogLoop, valgt.Titel, kunLoop)
         { Owner = Window.GetWindow(this) };
 
         if (sprogvalg.ShowDialog() != true) return;
@@ -1020,7 +1076,12 @@ public partial class TranscribeView : UserControl
         var deresSprog = sprogvalg.DeresSprog ?? mitSprog;
 
         var modelNavn = Path.GetFileNameWithoutExtension(install.ModelPath!).Replace("ggml-", "");
-        var udBase = Path.Combine(valgt.Mappe, $"mikrofon_{modelNavn}");
+
+        // Filnavnet foelger SPORET og ikke rollen. Et webinar skrevet ud til
+        // «mikrofon_large-v3.json» ville vaere en fil, der lyver om, hvor den
+        // kom fra — og den ville kollidere den dag, en mikrofonfil blev lagt
+        // ind ved siden af.
+        var udBase = Path.Combine(valgt.Mappe, $"{(kunLoop ? "loopback" : "mikrofon")}_{modelNavn}");
         var loopUdBase = Path.Combine(valgt.Mappe, $"loopback_{modelNavn}");
 
         // ============ ET SPOR, DER IKKE HAR AENDRET SIG, KOERES IKKE IGEN ============
@@ -1045,7 +1106,7 @@ public partial class TranscribeView : UserControl
             && File.Exists(udbase + ".json") && File.Exists(udbase + ".txt")
             && File.GetLastWriteTimeUtc(udbase + ".json") > File.GetLastWriteTimeUtc(lyd);
 
-        var genbrugMik = KanGenbruges(udBase, wav, gemtMeta?.ValgtSprogMik, mitSprog);
+        var genbrugMik = KanGenbruges(udBase, wav, sidsteHovedsprog, mitSprog);
         var genbrugLoop = toSpor
                           && KanGenbruges(loopUdBase, loopWav, gemtMeta?.ValgtSprogLoop, sprogvalg.DeresSprog ?? "");
 
@@ -1234,8 +1295,17 @@ public partial class TranscribeView : UserControl
             // naeste gang.
             if (gemtMeta is not null)
             {
-                gemtMeta.ValgtSprogMik = mitSprog;
-                gemtMeta.ValgtSprogLoop = sprogvalg.DeresSprog;
+                // Sproget gemmes paa DET SPOR, det blev valgt for. Paa et
+                // webinar er hovedsporet hoejttalerens, og skreves valget saa
+                // i ValgtSprogMik, ville det staa paa et spor, der ikke
+                // findes — og genbruget ville aldrig kunne genkende sig selv.
+                if (kunLoop) gemtMeta.ValgtSprogLoop = mitSprog;
+                else
+                {
+                    gemtMeta.ValgtSprogMik = mitSprog;
+                    gemtMeta.ValgtSprogLoop = sprogvalg.DeresSprog;
+                }
+
                 try { MeetingStore.Save(valgt.Mappe, gemtMeta); } catch (IOException) { }
             }
 

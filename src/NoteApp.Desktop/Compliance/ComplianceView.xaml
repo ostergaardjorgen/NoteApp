@@ -187,7 +187,7 @@
                                  Foreground="{StaticResource Accent}" FontWeight="SemiBold" />
                       <TextBlock FontSize="12.5" LineHeight="20" Margin="0,8,0,0" TextWrapping="Wrap"
                                  Foreground="{StaticResource TekstSvag}"
-                                 Text="Skal der laves et referat eller et andet dokument, sendes udskriftens tekst til Mistral AI. Kun teksten — aldrig lyden, og aldrig dine noter, medmindre skabelonen beder om dem." />
+                                 Text="Skal der laves et referat eller et andet dokument, sendes udskriftens tekst til Mistral AI. Kun teksten — aldrig lyden, og aldrig dine noter, medmindre mødetypen beder om dem." />
                     </StackPanel>
                   </Border>
                 </Grid>

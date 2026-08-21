@@ -471,10 +471,10 @@
                              Foreground="{StaticResource TekstMeget}" />
                   <TextBlock FontSize="12" LineHeight="18" TextWrapping="Wrap" Margin="0,6,0,0"
                              Foreground="{StaticResource TekstSvag}"
-                             Text="Et rigtigt mødereferat, en opgaveliste eller et tilbud laves som et dokument efter en skabelon — og det sker i Europa hos Mistral." />
+                             Text="Et rigtigt mødereferat, en opgaveliste eller et tilbud laves som et komplet Word-dokument af din online AI-model — og den kører i Europa hos Mistral." />
                   <TextBlock FontSize="12" LineHeight="18" TextWrapping="Wrap" Margin="0,8,0,0"
                              Foreground="{StaticResource TekstMeget}"
-                             Text="Tryk «Opret dokument» øverst til højre og vælg en skabelon. Dine egne skabeloner ligger under «Skabeloner» i menuen." />
+                             Text="Tryk «Opret dokument» øverst til højre. Mødetypen fra optagelsen er valgt på forhånd — dine mødetyper ligger under «Mødetyper» i menuen." />
                 </StackPanel>
               </Border>
             </Grid>

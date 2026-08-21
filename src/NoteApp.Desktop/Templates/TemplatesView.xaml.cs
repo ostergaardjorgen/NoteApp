@@ -77,7 +77,7 @@ public partial class TemplatesView : UserControl
 
         var varUdfoldet = _rod?.ErUdfoldet ?? true;
 
-        _rod = Biblioteker.Biblioteksnode.Bibliotek("Skabeloner", "", Transcribe.Gruppe.Moede);
+        _rod = Biblioteker.Biblioteksnode.Bibliotek("Mødetyper", "", Transcribe.Gruppe.Moede);
         _rod.Antal = _skabeloner.Count;
         foreach (var t in _skabeloner)
             _rod.Boern.Add(Biblioteker.Biblioteksnode.Skabelonnode(t));
@@ -89,7 +89,7 @@ public partial class TemplatesView : UserControl
 
         if (_skabeloner.Count == 0)
         {
-            Status.Text = $"Ingen skabeloner i {PromptTemplate.Directory}. Tryk «Ny skabelon» for at lave den første.";
+            Status.Text = $"Ingen mødetyper i {PromptTemplate.Directory}. Tryk «Ny» for at lave den første.";
             Detaljer.IsEnabled = false;
             SletKnap.IsEnabled = false;
             return;
@@ -228,7 +228,7 @@ public partial class TemplatesView : UserControl
             "udskriften kan kun indeholde det, nogen sagde højt.\n\n" +
             (egen
                 ? "Den nuværende dagsorden bliver skrevet over."
-                : "Skabelonen bruger standarddagsordenen. Den bliver liggende — der laves en egen."),
+                : "Mødetypen bruger standarddagsordenen. Den bliver liggende — der laves en egen."),
             "Tilpas dagsordenen nu", "Ikke nu", Dialogs.Slags.Valg);
 
         if (!ja) return;
@@ -301,10 +301,10 @@ public partial class TemplatesView : UserControl
 
         _indlæser = false;
         GemKnap.IsEnabled = false;
-        Status.Text = t.Path is null ? "Indbygget skabelon" : t.Path;
+        Status.Text = t.Path is null ? "Indbygget mødetype" : t.Path;
 
         // EFTER _valgt er sat, ikke foer. Kaldet laa i Indlaes, hvor _valgt
-        // endnu var null - saa "Tilpas til denne skabelon" var graa paa hver
+        // endnu var null - saa "Tilpas til denne mødetype" var graa paa hver
         // eneste skabelon, fordi den spurgte om et navn, der ikke fandtes
         // endnu.
         VisAgenda();
@@ -427,7 +427,7 @@ public partial class TemplatesView : UserControl
 
         if (string.IsNullOrWhiteSpace(FeltNavn.Text))
         {
-            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Mangler navn", "Skabelonen skal have et navn.", Dialogs.Slags.Pas_paa);
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Mangler navn", "Mødetypen skal have et navn.", Dialogs.Slags.Pas_paa);
             return;
         }
 
@@ -455,7 +455,7 @@ public partial class TemplatesView : UserControl
         if (!FeltBruger.Text.Contains("{{transskription}}"))
         {
             var ja = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
-                "Mødet mangler i skabelonen",
+                "Mødet mangler i mødetypen",
                 "Feltet {{transskription}} står ikke i teksten forneden. Uden det får modellen ikke " +
                 "selve mødet at se, og udkastet bliver skrevet ud af ingenting.",
                 godkend: "Gem alligevel", annuller: "Tilbage til teksten",
@@ -481,7 +481,7 @@ public partial class TemplatesView : UserControl
         {
             MaterialeFane.IsSelected = true;
             Dialogs.AppDialog.Vis(Window.GetWindow(this), "Udskriften mangler",
-                "Skabelonen kan ikke gemmes uden feltet {{transskription}} under " +
+                "Mødetypen kan ikke gemmes uden feltet {{transskription}} under " +
                 "«Hvad modellen får». Uden det får modellen ikke selve udskriften af " +
                 "mødet, og dokumentet bliver skrevet på ingenting.",
                 Dialogs.Slags.Pas_paa);
@@ -520,7 +520,7 @@ public partial class TemplatesView : UserControl
         }
         catch (Exception ex)
         {
-            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Kunne ikke gemme", $"Skabelonen kunne ikke gemmes.\n\n{ex.Message}", Dialogs.Slags.Fejl);
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Kunne ikke gemme", $"Mødetypen kunne ikke gemmes.\n\n{ex.Message}", Dialogs.Slags.Fejl);
         }
     }
 
@@ -572,7 +572,7 @@ public partial class TemplatesView : UserControl
         }
         catch (Exception ex)
         {
-            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Kunne ikke gemme skabelonen",
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Kunne ikke gemme mødetypen",
                 ex.Message, Dialogs.Slags.Pas_paa);
         }
     }
@@ -581,15 +581,15 @@ public partial class TemplatesView : UserControl
     {
         if (_valgt?.Path is null)
         {
-            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Kan ikke slettes", "Der er ingen fil at slette — skabelonen er indbygget.", Dialogs.Slags.Valg);
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Kan ikke slettes", "Der er ingen fil at slette — mødetypen er indbygget.", Dialogs.Slags.Valg);
             return;
         }
 
         var ja = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
-            $"Slet skabelonen «{_valgt.Name}»?",
+            $"Slet mødetypen «{_valgt.Name}»?",
             $"{_valgt.Path}\n\nFilen slettes. Har du brugt den til udkast tidligere, ligger de " +
             "udkast stadig hvor de er.",
-            godkend: "Slet skabelonen", annuller: "Behold den",
+            godkend: "Slet mødetypen", annuller: "Behold den",
             slags: Dialogs.Slags.Pas_paa, godkendErStandard: false);
 
         if (!ja) return;
@@ -597,12 +597,12 @@ public partial class TemplatesView : UserControl
         try
         {
             File.Delete(_valgt.Path);
-            Status.Text = "Skabelonen er slettet.";
+            Status.Text = "Mødetypen er slettet.";
             Indlæs();
         }
         catch (Exception ex)
         {
-            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Kunne ikke slette", $"Skabelonen kunne ikke slettes.\n\n{ex.Message}", Dialogs.Slags.Fejl);
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Kunne ikke slette", $"Mødetypen kunne ikke slettes.\n\n{ex.Message}", Dialogs.Slags.Fejl);
         }
     }
 

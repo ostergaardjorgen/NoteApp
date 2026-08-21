@@ -35,8 +35,8 @@
     </StackPanel>
 
     <StackPanel Grid.Row="1">
-      <TextBlock Text="Dit spor — mikrofonen" FontSize="13" FontWeight="SemiBold" />
-      <TextBlock Style="{StaticResource Underskrift}" Margin="0,3,0,6" TextWrapping="Wrap"
+      <TextBlock x:Name="MitNavn" Text="Dit spor — mikrofonen" FontSize="13" FontWeight="SemiBold" />
+      <TextBlock x:Name="MitUnder" Style="{StaticResource Underskrift}" Margin="0,3,0,6" TextWrapping="Wrap"
                  Text="Dig og alle andre i det samme lokale." />
       <ComboBox x:Name="Mit" FontSize="13.5" Padding="9,7" />
 
