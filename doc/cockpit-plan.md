@@ -1,0 +1,291 @@
+# Cockpit — plan til gennemgang
+
+*Skrevet 21-08-2026. Et oplæg, ikke en beslutning.*
+
+## Essensen, som jeg forstår den
+
+**Transskription er ikke produktet. Det er prisen for at komme ind.**
+
+Værdien vokser med tiden og med mængden: efter to hundrede møder og webinarer er
+appen det eneste sted, hvor man kan finde ud af, hvad der *faktisk* blev sagt —
+i en dialog for fire måneder siden, på et webinar man halvt husker. Ingen anden
+kilde har det. Kalenderen siger, at mødet var der; referatet siger, hvad nogen
+huskede bagefter. Udskriften siger, hvad der blev sagt.
+
+Det har to konsekvenser, som resten af planen hænger på:
+
+**Søgningen er ikke en funktion i cockpittet. Den ER cockpittet.** Alt andet —
+dagens opgaver, webinarerne, dikteringen — er arrangement omkring den ene ting,
+der skal virke.
+
+**Værdien er bagudrettet, men arbejdet er fremadrettet.** Det, der gør appen
+uundværlig om et år, er de optagelser, man laver i dag. Derfor skal alt, der
+sænker tærsklen for at optage — webinarknappen, den planlagte optagelse — vægtes
+højere, end det ser ud på overfladen. Hvert møde, der ikke bliver optaget, er et
+hul i det arkiv, produktet lever af.
+
+---
+
+## Den beslutning, der skal træffes først
+
+**Søgningen er i dag ren tekstsammenligning.** `Soegning.Soeg` deler
+spørgsmålet i ord og kræver, at *alle* ord står i teksten. Det virker i dag med
+fire møder. Det holder ikke til to hundrede.
+
+Grunden er ikke hastighed — den er, at **man ikke husker ordene**. Man husker
+«ham fra Norge sagde noget om, at de var underdog i Danmark». Man søger på
+«underdog Danmark» og finder det. Man søger på «svag position i Danmark» og
+finder intet, selvom det er det samme.
+
+To veje:
+
+| | Leksikalsk (i dag) | Semantisk (indlejringer) |
+|---|---|---|
+| Finder | de ord, du skriver | det, du mener |
+| Koster | ingenting | en model på 100-500 MB, ét gennemløb pr. udskrift |
+| Fejler ved | omskrivninger, synonymer, bøjninger | præcise navne og tal — dér er leksikalsk bedre |
+| Kan måles | ja | ja |
+
+**Min anbefaling: begge dele, og mål det, før der bygges.** Leksikalsk er
+suverænt til «Omada», «Espen», «12 måneder». Semantisk er suverænt til «hvad
+sagde de om prissætning». Det rigtige er at køre begge og blande resultaterne —
+men det skal afgøres af en måling, ikke af en formodning.
+
+**Målingen:** tyve rigtige spørgsmål til de møder, der allerede ligger, hvor
+facit er kendt. Hvor mange finder den nuværende søgning i top tre? Det tal er
+udgangspunktet, og uden det kan man ikke vide, om en indlejringsmodel var
+pengene værd. Det er en halv dags arbejde og bør gøres før etape 1.
+
+---
+
+## Cockpittets opbygning
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│                                                              │
+│            ┌────────────────────────────────────┐            │
+│        🔍  │  Hvad leder du efter?              │  🎤        │
+│            └────────────────────────────────────┘            │
+│         [ hele tiden ▾ ] [ alle personer ▾ ] [ alt ▾ ]       │
+│                                                              │
+├──────────────────────────────────────────────────────────────┤
+│  I DAG · torsdag den 21. august                              │
+│                                                              │
+│   09:00  ①  Send tilbuddet til Espen              [ ✓ ]      │
+│   10:30  ▶  Møde med Cloudworks              [ optag nu ]     │
+│   14:00  ◉  Webinar: Identity Trends 2026    [ optag nu ]     │
+│   16:00  ③  Ring til leverandøren                 [ ✓ ]      │
+│                                                              │
+├──────────────────────────────────────────────────────────────┤
+│  OVERSKREDET (2)          DENNE UGE (5)        SENERE (11)   │
+└──────────────────────────────────────────────────────────────┘
+```
+
+**Søgefeltet er skærmens tyngdepunkt.** Stort, midt på, det første øjet møder.
+Ikke et felt i et hjørne.
+
+**Én tidslinje for i dag — ikke tre kasser.** Møder, webinarer og opgaver med et
+tidspunkt er alle sammen *ting, der sker på et klokkeslæt*. At give dem hver sin
+kasse tvinger brugeren til at læse tre lister og selv flette dem sammen. Det er
+den eneste af mine afvigelser fra oplægget, jeg vil argumentere for.
+
+**Opgaver uden tidspunkt ligger under**, grupperet efter, hvor galt det står til.
+
+---
+
+## De fire områder
+
+### 1 · Søgning
+
+**Justeringer, som du beskrev dem:**
+
+- **Periode** — hele tiden · denne uge · denne måned · i år · et selvvalgt spænd
+- **Personer** — de navne, der findes på tværs af optagelser. De er der allerede
+  i `meeting.json` under `Talere`
+- **Type** — optagelser · webinarer · dokumenter · opgaver · noter
+
+**Ensartet markering.** Den tværgående søgning viser i dag uddraget som ren
+tekst. Udskriftssøgningen markerer med gult. Det er den samme kode — `Dele()`
+og `Fremhaev_Ind` i `UdskriftView` — og den skal genbruges. **Det er den
+billigste vinding i hele planen** og bør laves med det samme.
+
+**Sammenhæng om træffet.** Udskriftssøgningen viser replikken før og efter i
+blokke med «TRÆF 3 AF 6». Den tværgående viser et uddrag på én linje. Den samme
+grund gælder begge steder: man kan ikke huske et ord uden det, der stod omkring.
+
+### 2 · Webinarer
+
+**Det væsentlige er ikke listen. Det er, at appen selv siger til.**
+
+Man tilmelder sig et webinar tre uger før og har glemt det, når det starter.
+Optagelsen, der aldrig blev lavet, er et hul i arkivet — og arkivet er
+produktet.
+
+- Læg webinaret ind: titel, dato, tidspunkt, sprog
+- Appen melder sig, når det nærmer sig, med **én knap: optag**
+- Sproget er valgt på forhånd, så der ikke skal svares på noget, mens det
+  begynder
+
+**Ét spor, og det skal forklares — for det er ikke bare hurtigere.**
+
+Et webinar er envejs. Du lytter; du taler ikke. Optages kun højttalersporet:
+
+| | To spor (møde) | Ét spor (webinar) |
+|---|---|---|
+| Fylder | 220 MB/time | 110 MB/time |
+| Skrives ud på | ~9 minutter | ~4½ minutter |
+| Ekko fra din mikrofon | skal fjernes | findes ikke |
+| Talergenkendelse | to sider at holde adskilt | ren lyd, én kilde |
+
+Det sidste punkt er det, der sjældent siges: uden dit eget spor er der intet
+ekko, ingen overlappende tale og ingen tvivl om, hvilken side der talte.
+**Udskriften bliver ikke bare hurtigere — den bliver bedre.**
+
+Derfor skal knappen forklare det, første gang den bruges. Ellers trykker folk på
+den almindelige optageknap, fordi den er den, de kender.
+
+### 3 · Opgaver
+
+**Alle opgaver, på tværs.** De ligger i dag i `opgaver.json` ved hver optagelse.
+Cockpittet samler dem og lader dig oprette nye direkte.
+
+**Farver efter hvor galt det står til:**
+
+| | |
+|---|---|
+| 🔴 rød | fristen er overskredet |
+| 🟡 gul | forfalder i dag eller i morgen |
+| 🟢 grøn | god tid |
+| ⚪ grå | ingen frist sat |
+
+**Prioritet ① ② ③** med cirkeltal. Tegnene findes i Unicode (`①`) og
+kræver ingen skrifttype, der skal hentes.
+
+Alt starter på **③**, som du foreslår. Siger man «det her er vigtigt», ryger den
+til **①**. Det er rigtigt — men det har en konsekvens, der skal med i designet:
+**når næsten alt er 3, er prioriteten ikke en sorteringsnøgle, den er et
+filter.** Listen sorteres efter dato; ①'erne er dem, man kan trække frem alene.
+Ellers bliver tallet støj.
+
+**En opgave skal kunne pege tilbage på, hvor den kom fra.** Med tasks fra to
+hundrede møder siger «send tilbuddet» ingenting uden mødet og replikken. Feltet
+`Kilde` har tidsstemplet i dag; det skal have mødet med og et klik, der åbner
+netop den replik.
+
+**Opgaver, der starter en optagelse.** En opgave kan være «optag mødet med
+Cloudworks kl. 10:30» eller «optag webinaret». Så er det den samme mekanisme som
+webinarpåmindelsen, bare med en anden anledning.
+
+**Kalenderen.** En rigtig månedsvisning, ikke et tekstfelt. Den skal kunne
+betjenes med tastaturet, og «i morgen» og «på fredag» skal kunne skrives
+direkte i feltet — det er den hurtigste vej for den, der ved, hvad han vil.
+
+### 4 · Diktafonen
+
+**To ting, den skal kunne.**
+
+**Spørg om dagen.** «Hvad er vigtigt i dag?» → dagens tidslinje læses op og
+vises. «Hvad er vigtigt i næste uge?» → samme for perioden. Det er en
+forespørgsel med et tidsrum i, og den skal forstå de almindelige måder at sige
+det på.
+
+**Diktér en uges opgaver.** Du remser op; appen laver opgaver; **listen vises,
+før noget gemmes.** Du retter tekst og datoer, tilføjer flere — i hånden eller
+med stemmen — og godkender.
+
+**Det gennemsynstrin er dét, der gør det forsvarligt**, og det er værd at sige
+hvorfor: målingen 21-08 viste, at fri dansk diktering ikke er præcis nok til at
+stole blindt på. Kommandoer kan gøres sikre med en lukket liste; en fri sætning
+kan ikke. Men en liste, man selv har set igennem og rettet, behøver ikke være
+rigtig i første forsøg. **Du har designet fejlen ud af det.**
+
+---
+
+## Det, der skal bygges nedenunder
+
+Fire ting, som flere områder deler. De skal bygges én gang og bygges rigtigt.
+
+| Byggesten | Bruges af | Bemærkning |
+|---|---|---|
+| **Dansk dato- og tidsforståelse** | opgaver, diktering, søgefiltre, webinarer | `Microsoft.Recognizers.Text` kan **ikke** dansk — efterprøvet. Skal skrives i C#: «i morgen», «på fredag», «om to uger», «den 3. marts», «kl. halv tre». Deterministisk og enhedstestbar |
+| **Et register over opgaver på tværs** | opgaveområdet, tidslinjen, diktering | Læser `opgaver.json` fra alle optagelser plus cockpittets egne |
+| **En planlægger** | webinarer, planlagte optagelser | Skal virke, når appen er lukket → Windows' opgavestyring, ikke en timer i appen |
+| **Enspors-optagelse** | webinarer | Optageren tager to spor i dag. Skal kunne tage ét |
+
+---
+
+## Rækkefølge — og hvorfor
+
+### Etape 0 · Cockpittet findes *(1-2 dage)*
+
+Nyt menupunkt øverst. Søgningen flyttes derop og gøres til skærmens
+tyngdepunkt. **Gul markering og sammenhæng i den tværgående søgning** — samme
+kode som udskriften.
+
+*Hvorfor først:* det er den billigste vinding, der findes, og det gør skærmen
+til det sted, resten kan bygges ind i.
+
+### Etape 1 · Søgningen bliver god *(1-2 uger)*
+
+Først **målingen**: tyve spørgsmål, hvor facit er kendt, mod det nuværende
+system. Derefter filtrene — periode, person, type. Og først derefter beslutningen
+om semantisk søgning, truffet på tallet.
+
+*Hvorfor nummer to:* det er produktet. Alt andet er arrangement omkring det.
+
+### Etape 2 · Opgaver på tværs *(1 uge)*
+
+Registeret, tidslinjen for i dag, farver og prioritet, kalenderen, tilbagelinket
+til replikken. Kræver datoforståelsen, som bygges her.
+
+*Hvorfor før webinarer:* datoforståelsen skal bruges af alt det følgende, og den
+er lettest at få rigtig, når den bygges til noget, der kan ses med det samme.
+
+### Etape 3 · Webinarer *(1 uge)*
+
+Registeret, påmindelsen, enspors-optagelsen. Kræver planlæggeren.
+
+*Hvorfor her:* det er det, der får mere materiale ind i arkivet — men det kræver
+to nye byggesten, og de er lettere at lave, når tidslinjen findes at vise dem i.
+
+### Etape 4 · Diktafonen *(2-3 uger)*
+
+Kommandostyring efter den målte opskrift, «hvad er vigtigt i dag», og
+diktér-en-uges-opgaver med gennemsyn.
+
+*Hvorfor sidst:* den er den sjoveste og den mest usikre. Den hviler på
+datoforståelsen fra etape 2 og på opgaveregisteret. Bygges den først, bygges den
+oven på noget, der ikke er der.
+
+---
+
+## Det, jeg vil advare imod
+
+**Påmindelsen må aldrig afbryde en optagelse.** Et vindue, der popper op midt i
+et møde, er præcis den fejl, der får folk til at slå funktionen fra. Den skal
+vente eller lande på klokken.
+
+**At afvise en påmindelse må ikke slette webinaret.** «Ikke nu» betyder ikke
+«aldrig».
+
+**Prioritet er kun værd at have, hvis den er sjælden.** Bliver alt til ①, er
+tallet væk som oplysning.
+
+**Semantisk søgning skal ikke erstatte den leksikalske.** Den er dårligere til
+navne og tal — netop dét, man oftest leder efter i et møde. De skal supplere
+hinanden.
+
+**Omfanget er 6-10 uger som beskrevet.** Hver etape skal kunne stå alene og være
+værd at bruge i sig selv. Ingen af dem må efterlade halve funktioner på skærmen.
+
+---
+
+## Det, der skal måles
+
+| Hvad | Hvordan | Grænse |
+|---|---|---|
+| Finder søgningen det, man leder efter | 20 spørgsmål med kendt facit | i top 3 |
+| Datoforståelsen | 50 danske formuleringer | ≥ 90 % rigtigt |
+| Webinar mod møde | samme lyd, ét mod to spor | tid og størrelse halveret |
+| Dikterede opgaver | 20 indtalte opgaver | hvor mange skal rettes i gennemsynet |
+| Påmindelsen | fyrer den, når appen er lukket | 100 % |
