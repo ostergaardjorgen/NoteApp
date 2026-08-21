@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -339,7 +339,13 @@ public partial class TranscribeView : UserControl
         var udfoldet = AlleKnuder().Where(k => k.ErUdfoldet).Select(Noegle).ToHashSet();
         var varValgt = _valgtKnude is null ? null : Noegle(_valgtKnude);
 
-        _rodMoeder = Biblioteker.Biblioteksnode.Bibliotek("Møder", "\uE8F1", Gruppe.Moede);
+        // «FOLDERE» OG IKKE «MØDER».
+        //
+        // Biblioteket indeholder ikke laengere kun moeder: webinarer og
+        // lydfiler lagt ind udefra ligger samme sted. Og det, man vaelger
+        // imellem i traeet, er ikke moeder — det er de foldere, man selv har
+        // lagt tingene i. Navnet skal sige, hvad man vaelger imellem.
+        _rodMoeder = Biblioteker.Biblioteksnode.Bibliotek("Foldere", "\uE8F1", Gruppe.Moede);
         _rodArkiv = Biblioteker.Biblioteksnode.Bibliotek("Arkiv", "\uE7B8", Gruppe.Arkiv);
 
         var mapper = NoteApp.Core.Mapper.Alle(NoteApp.Core.Mapper.Slags.Optagelser);
@@ -521,8 +527,8 @@ public partial class TranscribeView : UserControl
     /// REGLERNE ER STIFINDERENS: at slippe noget i en beholder lægger det i
     /// den beholder. Knuden bærer selv både gruppe og mappe, så:
     ///
-    ///   · en mappe under «Møder»  → hent frem af arkivet OG sæt mappen
-    ///   · «Møder» eller «Arkiv»   → skift gruppe, og tag den ud af mappen
+    ///   · en folder under «Foldere» → hent frem af arkivet OG sæt folderen
+    ///   · «Foldere» eller «Arkiv»  → skift gruppe, og tag den ud af folderen
     ///
     /// Det sidste er med vilje: biblioteket ER roden, og at trække noget op i
     /// roden er den måde, man tager det ud af en mappe igen.
@@ -656,7 +662,7 @@ public partial class TranscribeView : UserControl
             : $"Flyttet til «{vindue.Valgt}».";
     }
 
-    // HER LAA Fane_Klik. Fanerne «Møder» og «Arkiv» er blevet til de to
+    // HER LAA Fane_Klik. Fanerne «Foldere» og «Arkiv» er blevet til de to
     // rodknuder i bibliotekstraeet, og skiftet sker nu i Bibliotek_Valgt.
 
     // HER LAA Arkiver_Click, og med den «Arkivér»-ikonet i vaerktoejslinjen.
@@ -740,7 +746,7 @@ public partial class TranscribeView : UserControl
 
         ForklaringOverskrift.Text = "Fra lyd til tekst";
         ForklaringUnder.Text = valgt is null
-            ? "Fold «Møder» ud i træet til venstre, vælg en optagelse, og tryk «Opret transskription» øverst. Så skriver appen alt det talte ud som tekst, du kan læse, søge i og rette."
+            ? "Fold «Foldere» ud i træet til venstre, vælg en optagelse, og tryk «Opret transskription» øverst. Så skriver appen alt det talte ud som tekst, du kan læse, søge i og rette."
             : $"«{valgt.Titel}» er klar. Tryk «Opret transskription» øverst, så skriver appen alt det talte ud som tekst, du kan læse, søge i og rette.";
         Status.Text = "";
     }

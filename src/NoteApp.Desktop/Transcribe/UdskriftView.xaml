@@ -740,5 +740,26 @@
         </DockPanel>
       </TabItem>
     </TabControl>
+
+    <!-- ============ NÅR DER IKKE ER NOGEN UDSKRIFT ============
+
+         Her stod INTET. Valgte man en optagelse, der ikke var skrevet ud,
+         blev fanerne stående tomme — ingen tekst, ingen forklaring, ingen
+         knap. Man kunne ikke se forskel på «den er ikke skrevet ud endnu»,
+         «den er i gang» og «noget er gået galt».
+
+         Ruden ligger OVEN PÅ fanerne i samme række, så den dækker dem helt.
+         En halvtom fane bagved ville se ud som et resultat. -->
+    <Border x:Name="IngenUdskrift" Grid.Row="2" Visibility="Collapsed"
+            Background="{StaticResource Baggrund}">
+      <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" MaxWidth="520"
+                  Margin="30">
+        <TextBlock x:Name="IngenOverskrift" FontSize="15" FontWeight="SemiBold"
+                   TextWrapping="Wrap" HorizontalAlignment="Center" TextAlignment="Center" />
+        <TextBlock x:Name="IngenTekst" FontSize="12.5" LineHeight="21" TextWrapping="Wrap"
+                   Margin="0,10,0,0" TextAlignment="Center"
+                   Foreground="{StaticResource TekstMeget}" />
+      </StackPanel>
+    </Border>
   </Grid>
 </UserControl>

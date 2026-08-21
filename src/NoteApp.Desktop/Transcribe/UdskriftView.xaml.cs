@@ -301,9 +301,14 @@ public partial class UdskriftView : UserControl
             Hoved.Visibility = Visibility.Collapsed;
             Navnerude.IsOpen = false;
             Meld("");
+            VisIngenUdskrift(mappe);
             _indlæser = false;
             return;
         }
+
+        IngenUdskrift.Visibility = Visibility.Collapsed;
+        Faner.Visibility = Visibility.Visible;
+        _kigEfter.Stop();
 
         Hoved.Visibility = Visibility.Visible;
         Navnerude.IsOpen = false;
@@ -320,6 +325,120 @@ public partial class UdskriftView : UserControl
         _indlæser = false;
     }
 
+    /// <summary>
+    /// Forklarer, hvorfor der ikke står noget — og hvad man gør ved det.
+    ///
+    /// TRE TILSTANDE, OG DE SER ENS UD PÅ SKÆRMEN UDEN DEN HER:
+    ///
+    ///   ikke skrevet ud     der er kun lyd i mappen
+    ///   i gang lige nu      maskinens filer er ved at blive skrevet
+    ///   skrevet, ikke samlet  whisper er færdig, men udskriften mangler
+    ///
+    /// Den tredje findes, fordi en udskrivning kan være sat i gang uden for
+    /// appen. Uden den ville en optagelse, der ER skrevet ud, se ud som en,
+    /// der aldrig blev det.
+    ///
+    /// Tiden er regnet ud af den målte hastighed — 0,09 gange lydens længde
+    /// på grafikkortet her. Et skøn, der siger «et kvarter», er værd mere end
+    /// ingen oplysning: det afgør, om man venter eller laver noget andet.
+    /// </summary>
+    /// <summary>
+    /// Kigger efter, om udskriften er kommet, mens ruden står fremme.
+    ///
+    /// UDEN DEN VILLE BESKEDEN BLIVE STÅENDE, EFTER AT TEKSTEN VAR KLAR. Man
+    /// ville sidde og se på «den bliver skrevet ud lige nu» i et kvarter efter,
+    /// den var færdig — og først opdage det ved at klikke væk og tilbage.
+    ///
+    /// Den kører KUN, mens ruden er fremme, og stopper i samme sekund der er
+    /// noget at vise. En optagelse, der er skrevet ud, koster ingenting.
+    /// </summary>
+    private readonly DispatcherTimer _kigEfter = new() { Interval = TimeSpan.FromSeconds(5) };
+
+    private void VisIngenUdskrift(string mappe)
+    {
+        Faner.Visibility = Visibility.Collapsed;
+        IngenUdskrift.Visibility = Visibility.Visible;
+
+        if (!_kigEfter.IsEnabled)
+        {
+            _kigEfter.Tick += (_, _) =>
+            {
+                if (_mappe is null || _model is null || IngenUdskrift.Visibility != Visibility.Visible)
+                {
+                    _kigEfter.Stop();
+                    return;
+                }
+
+                // Vis() slukker selv for ruden og for uret, hvis der er kommet
+                // noget. Er der ikke, bliver teksten friskere: «i gang» kan
+                // vaere blevet til «mangler at blive samlet».
+                Vis(_mappe, _model);
+            };
+
+            _kigEfter.Start();
+        }
+
+        var maskinfiler = Directory.Exists(mappe)
+            ? Directory.GetFiles(mappe, "*_*.json")
+                .Where(f => !Path.GetFileName(f).StartsWith("udskrift", StringComparison.OrdinalIgnoreCase))
+                .ToList()
+            : new List<string>();
+
+        // En log, der er roert inden for et minut, betyder at motoren skriver
+        // i den lige nu. Det er det eneste spor, en koersel uden for appen
+        // efterlader — og det er nok til at sige «vent».
+        var log = Directory.Exists(mappe)
+            ? Directory.GetFiles(mappe, "*.log")
+                .Select(f => new FileInfo(f))
+                .OrderByDescending(f => f.LastWriteTimeUtc)
+                .FirstOrDefault()
+            : null;
+
+        var arbejder = log is not null
+                       && (DateTime.UtcNow - log.LastWriteTimeUtc) < TimeSpan.FromMinutes(1);
+
+        if (arbejder && maskinfiler.Count == 0)
+        {
+            IngenOverskrift.Text = "Den bliver skrevet ud lige nu";
+            IngenTekst.Text = "Teksten kommer frem her, når den er færdig, og der kommer " +
+                              "besked på klokken. Du kan roligt lave noget andet imens.";
+            return;
+        }
+
+        if (maskinfiler.Count > 0)
+        {
+            IngenOverskrift.Text = "Lyden er skrevet ud — teksten mangler at blive samlet";
+            IngenTekst.Text = arbejder
+                ? "Stemmerne bliver skilt ad lige nu. Det tager omkring et minut for hvert " +
+                  "kvarters optagelse, og så står teksten her."
+                : "Maskinens ord ligger i mappen, men de er ikke sat sammen til en udskrift. " +
+                  "Tryk «Opdatér transskription» øverst — den genbruger det, der allerede er " +
+                  "lavet, så det går hurtigt.";
+            return;
+        }
+
+        IngenOverskrift.Text = "Den er ikke skrevet ud endnu";
+
+        var sekunder = 0.0;
+        try
+        {
+            var wav = OptagelseVisning.Lydfilen(mappe);
+            if (File.Exists(wav)) sekunder = Transcriber.WavSeconds(wav);
+        }
+        catch (Exception) { /* uden et skoen staar der bare ingen tid */ }
+
+        // 0,09 gange realtid, maalt paa denne maskine 21-08-2026 paa to
+        // webinarer: 1344 sek lyd paa 122 sek, og 3218 sek lyd paa samme
+        // faktor. Der rundes op til hele minutter — et skoen, der lyder
+        // praecist, bliver troet som et loefte.
+        var skoen = sekunder <= 0
+            ? ""
+            : $" Det tager omkring {Math.Max(1, Math.Round(sekunder * 0.09 / 60)):0} minutter for denne optagelse.";
+
+        IngenTekst.Text = "Tryk «Opdatér transskription» øverst, så går den i gang." + skoen +
+                          " Det sker på denne pc — ingen lyd forlader maskinen.";
+    }
+
     public void Ryd()
     {
         _gemSenere.Stop();
@@ -334,6 +453,14 @@ public partial class UdskriftView : UserControl
         OpsumTom.Visibility = Visibility.Visible;
         Hoved.Visibility = Visibility.Collapsed;
         Navnerude.IsOpen = false;
+
+        // Ryd betyder «ingen optagelse valgt». Saa er der heller ikke noget at
+        // forklare om en manglende udskrift — ruden ville staa og sige, at man
+        // skulle trykke paa en knap, der ikke gaelder noget.
+        IngenUdskrift.Visibility = Visibility.Collapsed;
+        Faner.Visibility = Visibility.Visible;
+        _kigEfter.Stop();
+
         Meld("");
     }
 

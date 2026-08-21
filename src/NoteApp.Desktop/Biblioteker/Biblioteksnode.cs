@@ -4,7 +4,7 @@ using System.ComponentModel;
 namespace NoteApp.Desktop.Biblioteker;
 
 /// <summary>
-/// Én knude i bibliotekstræet — et bibliotek («Møder», «Arkiv»), en mappe
+/// Én knude i bibliotekstræet — et bibliotek («Foldere», «Arkiv»), en folder
 /// under det, eller en optagelse.
 ///
 /// HVORFOR OPTAGELSERNE LIGGER I SELVE TRÆET
@@ -38,7 +38,7 @@ public sealed class Biblioteksnode : INotifyPropertyChanged
         Mappe = mappe;
     }
 
-    /// <summary>Et bibliotek: «Møder» eller «Arkiv». Roden i træet.</summary>
+    /// <summary>Et bibliotek: «Foldere» eller «Arkiv». Roden i træet.</summary>
     public static Biblioteksnode Bibliotek(string navn, string glyf, Transcribe.Gruppe gruppe) =>
         new(Slags.Bibliotek, navn, glyf, gruppe, null);
 
