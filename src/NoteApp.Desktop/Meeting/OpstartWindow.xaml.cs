@@ -85,12 +85,20 @@ public partial class OpstartWindow : Window
 
         Underskrift.Text = slags switch
         {
-            Slags.Webinar => "Tre svar, og den kører. Alt kan ændres bagefter.",
+            // DEN ENE SÆTNING, DER SKAL LÆSES VED ET WEBINAR.
+            //
+            // Her stod en hel kasse om, hvorfor webinarknappen findes: ét spor
+            // mod to, megabyte i timen, minutter til udskrivning. Man har
+            // allerede trykket på knappen, når man læser det — og ingen
+            // vælger sit webinar fra, fordi det fylder 110 MB.
+            //
+            // Tilbage er det ENESTE, der har en følge for brugeren: din
+            // mikrofon optages ikke.
+            Slags.Webinar => "Der optages kun det, du hører — ikke din mikrofon. Alt herunder kan ændres bagefter.",
             Slags.Igang => "Der optages, mens du svarer. Luk vinduet, hvis du hellere vil tage det senere.",
-            _ => "Tre svar, og den kører. Alt kan ændres bagefter."
+            _ => "Alt herunder kan ændres bagefter."
         };
 
-        WebinarForklaring.Visibility = erWebinar ? Visibility.Visible : Visibility.Collapsed;
         Linkfelt.Visibility = erWebinar ? Visibility.Visible : Visibility.Collapsed;
         Stopperselv.Visibility = erWebinar ? Visibility.Visible : Visibility.Collapsed;
 
@@ -103,10 +111,6 @@ public partial class OpstartWindow : Window
 
         FortrydKnap.Content = slags == Slags.Igang ? "Ikke nu" : "Fortryd";
 
-        Bundtekst.Text = slags == Slags.Igang
-            ? "Optagelsen kører uanset hvad. Svarer du ikke, ligger den uden mappe og uden type — og begge dele kan sættes på bagefter."
-            : "Alle tre felter må stå tomme. Mappe og mødetype kan ændres bagefter; sproget vælges igen, når der skrives ud.";
-
         Fyld(erWebinar);
 
         // Startknappen faar fokus, ikke det foerste felt. Trykker man bare
@@ -117,17 +121,28 @@ public partial class OpstartWindow : Window
 
     // ------------------------------------------------------------- felterne
 
+    /// <summary>
+    /// Fylder felterne — og lægger forklaringerne i værktøjstips.
+    ///
+    /// HVORFOR FORKLARINGERNE IKKE STÅR PÅ SKÆRMEN LÆNGERE
+    ///
+    /// Hvert felt havde to-tre linjers hjælpetekst under sig. Det er dobbelt
+    /// så høj en dialog, og den skal besvares, mens et webinar går i gang.
+    /// Teksterne er ikke slettet — de ligger som tip på selve feltet, hvor de
+    /// kan hentes af den, der er i tvivl, uden at koste plads for den, der
+    /// ikke er.
+    /// </summary>
     private void Fyld(bool erWebinar)
     {
         // ---- mappen
-        MappeHjaelp.Text = erWebinar
+        Mappevalg.ToolTip = erWebinar
             ? "Læg det i en mappe nu — fx et emne eller et fag. Så samler webinarerne sig dér, hvor du senere leder efter dem."
             : "Læg det i en mappe nu — fx en kunde eller et fag. Så ligger alt om den sag samlet, og du kan søge på tværs af det hele bagefter.";
 
         FyldMapper(null);
 
         // ---- moedetypen
-        TypeHjaelp.Text = "Mødetypen bestemmer, hvordan mødet bliver skrevet ud i et dokument bagefter. Den kan også vælges senere.";
+        Typevalg.ToolTip = "Mødetypen bestemmer, hvordan mødet bliver skrevet ud i et dokument bagefter. Den kan også vælges senere.";
 
         var typer = new List<Punkt> { new("Ikke valgt", "Vælges når du laver et dokument", null) };
 
@@ -138,14 +153,16 @@ public partial class OpstartWindow : Window
         Typevalg.SelectedIndex = 0;
 
         // ---- sproget
-        SprogOverskrift.Text = erWebinar ? "HVILKET SPROG ER WEBINARET PÅ?" : "HVILKET SPROG TALES DER?";
+        SprogMaerkat.Text = erWebinar ? "SPROG PÅ WEBINARET" : "SPROG DER TALES";
 
-        SprogHjaelp.Text = erWebinar
+        Sprogvalg.ToolTip = erWebinar
             ? "Der spørges nu, fordi et webinar begynder på slaget — og fordi et engelsk webinar skrives ud på det halve af tiden, når sproget er sagt på forhånd."
             : "Appen gætter ellers sproget ud fra de første tredive sekunder. Rammer gættet forkert, bliver hele udskriften ubrugelig — og den ligner en færdig tekst.";
 
+        Link.ToolTip = "Ligger webinaret online bagefter, er linket vejen tilbage til det, der blev VIST — og det er væk fra indbakken en måned senere.";
+
         Sprogvalg.ItemsSource = SprogvalgWindow.Sprog
-            .Select(s => new { s.Kode, s.Navn })
+            .Select(s => new Punkt(s.Navn, "", s.Kode))
             .ToList();
 
         // ENGELSK ER FORVALGT VED WEBINARER, IKKE DANSK.
@@ -218,9 +235,7 @@ public partial class OpstartWindow : Window
     {
         if (Mappevalg.SelectedItem is Punkt m) Mappe = m.Vaerdi;
         if (Typevalg.SelectedItem is Punkt t) Moedetype = t.Vaerdi;
-
-        if (Sprogvalg.SelectedItem is { } valgt)
-            Sprog = (string)valgt.GetType().GetProperty("Kode")!.GetValue(valgt)!;
+        if (Sprogvalg.SelectedItem is Punkt s && s.Vaerdi is { } kode) Sprog = kode;
 
         var link = Link.Text.Trim();
         Kilde = link.Length > 0 ? link : null;
