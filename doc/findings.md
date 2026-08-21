@@ -13,6 +13,63 @@ Denne fil er hukommelsen på tværs af sessioner. Alt, der er blevet **målt**, 
 
 ---
 
+## Udtræk af navne med en lokal model — målt 21-08-2026
+
+*Spørgsmålet: kan appen svare på «find de leverandører, der er nævnt i denne
+måneds møder» uden at sende noget ud af huset?*
+
+Målt på tre rigtige optagelser med Qwen3-4B-Q4_K_M på RTX 2060.
+
+### Hele udskriften på én gang — virker ikke
+
+| Optagelse | Tid | Resultat |
+|---|---|---|
+| Møde med Cloudworks, 55 KB | 2,8 s | 1 navn, 0 % stod i udskriften |
+| Webinar, 50 KB | 28,2 s | 113 navne, **45 % fundet på** |
+
+De 113 var det samme navn igen og igen — «Limity», «Elimiti», «Limity» —
+altså en gentagelsesløkke. Det er den samme grænse, opsummeringen stødte på
+20-08: en model på 4B holder ikke til tyve tusind tokens og et løfte om at
+være præcis.
+
+### I blokke på 6.000 tegn — virker
+
+| Optagelse | Blokke | Tid | Modellen sagde | Kasseret | Tilbage |
+|---|---|---|---|---|---|
+| Cloudworks, 55 KB | 10 | 60,4 s | 117 | 25 | 92 |
+| Webinar, 22 KB | 4 | 21,4 s | 40 | 7 | 33 |
+| Webinar, 50 KB | 9 | 48,5 s | 101 | 30 | 71 |
+
+Ingen gentagelsesløkker. **Omtrent ét sekund pr. KB udskrift — cirka et minut
+pr. times møde.** Til sammenligning tager selve udskrivningen fem minutter pr.
+times lyd, så udtrækket er få procent oveni.
+
+**Efterprøvningen mod kilden kasserede 18-30 % af det, modellen sagde.** Den
+er ikke pynt: uden den ville hvert fjerde navn i registeret være opfundet, og
+det ville se lige så rigtigt ud som resten.
+
+### Det, der IKKE er løst
+
+Det, der overlever, er en blanding af rigtige leverandører — Omada, SailPoint,
+Okta, IBM, CrowdStrike, Elimity, SAP, Power BI — og almindelige ord: «dag»,
+«uge», «kunder», «ansatte», «prøve», «governance».
+
+Efterprøvningen svarer på «står ordet i udskriften», ikke på «er det et navn».
+Det andet spørgsmål mangler, og det er dét, der afgør, om et register kan
+bruges. Tre veje, alle billige og alle målbare:
+
+1. Krav om stort begyndelsesbogstav midt i en sætning
+2. Krav om at ordet optræder mindst to steder
+3. En liste over almindelige ord, der aldrig er navne
+
+**Konsekvens:** kraften er der, og arkitekturen er rigtig — træk ud ÉN gang,
+når optagelsen skrives ud, og gem det på mødet. Så er spørgsmålet et opslag i
+metadata og svarer på millisekunder, offline. Men udtrækket skal have et led
+mere, før registeret er til at stole på, og det led skal måles på de samme tre
+optagelser.
+
+---
+
 ## 1. Sprogmodeller
 
 ### 1.1 Qwen3-8B Q4_K_M — i brug
