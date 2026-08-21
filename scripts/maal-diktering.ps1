@@ -26,7 +26,18 @@
 param(
   [Parameter(Mandatory=$true)][string] $Mappe,
   [string[]] $Modeller = @('small','medium','large-v3'),
-  [string]   $Facit    = 'C:\NoteApp\doc\maaling-diktering.md'
+  [string]   $Facit    = 'C:\NoteApp\doc\maaling-diktering.md',
+
+  # Hvor mange 30 ms-vinduer i traek der skal vaere stille, foer en saetning
+  # regnes for slut. 33 er ca. et sekund.
+  [int]    $Stille  = 33,
+
+  # Hvor stor en del af klippets stoerste udsving der regnes som stilhed.
+  [double] $Graense = 0.04,
+
+  # Del kun op - spring maalingen over. Til at finde de rigtige to tal ovenfor
+  # uden at vente paa tre modeller.
+  [switch] $KunDel
 )
 
 $ErrorActionPreference = 'Stop'
@@ -83,24 +94,45 @@ $rate    = 16000
 $vindue  = [int]($rate * 0.03)          # 30 ms
 $antal   = [int](($b.Length - $data) / 2)
 
-$styrke = New-Object 'double[]' ([int]($antal / $vindue))
+# Der laeses aldrig ud over den sidste hele proeve. Regnestykket paa antal
+# vinduer kan ligge eet vindue for hoejt, naar filen ikke gaar op i 30 ms, og
+# saa laeser ToInt16 ud over bufferen. Graensen staettes eksplicit frem for at
+# blive regnet ud - den slags fejl viser sig som et nedbrud, ikke som et skaevt
+# tal.
+$sidsteByte = $b.Length - 2
+
+$styrke = New-Object 'double[]' ([Math]::Floor($antal / $vindue))
+
 for ($v = 0; $v -lt $styrke.Length; $v++) {
     $sum = 0.0
+    $talt = 0
     $fra = $data + $v * $vindue * 2
+
     for ($i = 0; $i -lt $vindue; $i += 4) {
-        $sum += [Math]::Abs([BitConverter]::ToInt16($b, $fra + $i * 2))
+        $ved = $fra + $i * 2
+        if ($ved -gt $sidsteByte) { break }
+
+        $sum += [Math]::Abs([BitConverter]::ToInt16($b, $ved))
+        $talt++
     }
-    $styrke[$v] = $sum / ($vindue / 4)
+
+    $styrke[$v] = if ($talt -gt 0) { $sum / $talt } else { 0 }
 }
 
 $top     = ($styrke | Measure-Object -Maximum).Maximum
-$graense = $top * 0.04
-$stille  = 33                            # ca. 1 sekund
+$graense = $top * $Graense
+$stille  = $Stille
 
 Write-Host ("Lyd: {0:N0} sekunder, {1} vinduer, graense {2:N0} af {3:N0}" -f
             ($antal / $rate), $styrke.Length, $graense, $top)
 
-$klip = @()
+# NAVNGIVNE FELTER OG IKKE PAR I ET ARRAY.
+#
+# "$klip += , @($a, $b)" ser rigtigt ud og virker, indtil PowerShell flader
+# arrayet ud - og saa er $klip[$i][0] pludselig et helt array frem for et tal.
+# Fejlen viser sig langt fra aarsagen, som "does not contain a method
+# op_Subtraction".
+$klip = New-Object 'System.Collections.Generic.List[object]'
 $start = -1
 $tavse = 0
 
@@ -112,13 +144,15 @@ for ($v = 0; $v -lt $styrke.Length; $v++) {
     elseif ($start -ge 0) {
         $tavse++
         if ($tavse -ge $stille) {
-            $klip += , @($start, $v - $tavse)
+            $klip.Add([pscustomobject]@{ Fra = $start; Til = ($v - $tavse) })
             $start = -1
             $tavse = 0
         }
     }
 }
-if ($start -ge 0) { $klip += , @($start, $styrke.Length - 1) }
+if ($start -ge 0) {
+    $klip.Add([pscustomobject]@{ Fra = $start; Til = ($styrke.Length - 1) })
+}
 
 Write-Host ("Fundet {0} klip" -f $klip.Count) -ForegroundColor Cyan
 
@@ -156,7 +190,7 @@ function Gem-Klip($nr, $fraVindue, $tilVindue) {
 
 $filer = @()
 for ($i = 0; $i -lt $klip.Count; $i++) {
-    $filer += Gem-Klip ($i + 1) $klip[$i][0] $klip[$i][1]
+    $filer += Gem-Klip ($i + 1) $klip[$i].Fra $klip[$i].Til
 }
 
 # ------------------------------------------------------------------- maal
@@ -171,17 +205,30 @@ function Rens($s) {
 function Ordfejl($facit, $hoert) {
     $a = (Rens $facit) -split ' '
     $c = (Rens $hoert) -split ' '
+    if ($a.Count -eq 0) { return 0 }
+
+    # PARENTESERNE OM $i-1 ER IKKE PYNT.
+    #
+    # PowerShell laeser "$d[$i-1, $j]" som et forsoeg paa at trakke 1 fra hele
+    # indekset og fejler med "Missing ']' after array index expression".
+    # Indeksudtryk med regnestykker i skal have deres egne parenteser.
     $d = New-Object 'int[,]' ($a.Count + 1), ($c.Count + 1)
+
     for ($i = 0; $i -le $a.Count; $i++) { $d[$i, 0] = $i }
     for ($j = 0; $j -le $c.Count; $j++) { $d[0, $j] = $j }
+
     for ($i = 1; $i -le $a.Count; $i++) {
         for ($j = 1; $j -le $c.Count; $j++) {
-            $pris = if ($a[$i-1] -eq $c[$j-1]) { 0 } else { 1 }
-            $d[$i, $j] = [Math]::Min([Math]::Min($d[$i-1, $j] + 1, $d[$i, $j-1] + 1),
-                                     $d[$i-1, $j-1] + $pris)
+            $pris = if ($a[($i - 1)] -eq $c[($j - 1)]) { 0 } else { 1 }
+
+            $slet   = $d[($i - 1), $j] + 1
+            $indsat = $d[$i, ($j - 1)] + 1
+            $byttet = $d[($i - 1), ($j - 1)] + $pris
+
+            $d[$i, $j] = [Math]::Min([Math]::Min($slet, $indsat), $byttet)
         }
     }
-    if ($a.Count -eq 0) { return 0 }
+
     return $d[$a.Count, $c.Count] / [double]$a.Count
 }
 
@@ -209,7 +256,13 @@ foreach ($m in $Modeller) {
         if (-not $f) { continue }
 
         $base = Join-Path $ud ("{0:00}-{1}" -f $nr, $m)
-        & $cli -m $modelfil -f $filer[$i] -l da -otxt -of $base -mc 0 --no-prints 2>&1 | Out-Null
+        # whisper skriver ALT til stderr, ogsaa naar det gaar godt. Med
+        # ErrorActionPreference = Stop ville den foerste linje om CUDA-kortet
+        # afbryde maalingen som en fejl.
+        $tidligere = $ErrorActionPreference
+        $ErrorActionPreference = 'Continue'
+        & $cli -m $modelfil -f $filer[$i] -l da -otxt -of $base -mc 0 --no-prints 2>$null | Out-Null
+        $ErrorActionPreference = $tidligere
 
         $hoert = if (Test-Path "$base.txt") { (Get-Content "$base.txt" -Raw -Encoding UTF8).Trim() } else { "" }
         $fejl  = Ordfejl $f.Tekst $hoert

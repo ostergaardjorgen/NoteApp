@@ -212,17 +212,32 @@ public partial class TranscribeView : UserControl
 
         var minutter = optagelse.Sekunder / 60.0;
 
+        // DEN FORESLÅR ET SKRIDT, DEN STILLER IKKE ET SPØRGSMÅL.
+        //
+        // Før hed den «Skal den skrives ud til tekst nu?». Det er et
+        // spørgsmål, man skal svare på uden at vide, hvad der sker bagefter —
+        // og så bliver svaret nej, fordi nej lyder som det uforpligtende.
+        //
+        // Den siger nu, hvad næste skridt ER, og hvad der sker, når det er
+        // gjort: klokken siger til. Det er dét, der gør ventetiden ligegyldig,
+        // og det er derfor, det skal stå HER frem for at blive opdaget.
         var ja = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
-            $"«{optagelse.Titel}» er gemt. Skal den skrives ud til tekst nu?",
+            $"«{optagelse.Titel}» er gemt — næste skridt er at skrive den ud",
             // hh:mm:ss og ikke mm:ss. Et moede paa 1:00:50 stod som «00:50»,
             // fordi mm klipper timerne af - og saa lignede en time et minut.
             $"Længde: {TimeSpan.FromSeconds(optagelse.Sekunder):hh\\:mm\\:ss}. " +
             $"Det tager typisk {Math.Max(1, Math.Round(minutter * 0.3)):0} til {Math.Max(2, Math.Round(minutter * 0.5)):0} minutter " +
             "på denne maskine.\n\n" +
-            "Du kan roligt lave noget andet imens — også optage et nyt møde. " +
-            "Siger du nej tak, bliver optagelsen liggende, og du kan gøre det når som helst med knappen øverst.",
-            godkend: "Ja, skriv den ud",
-            annuller: "Nej tak — senere");
+            "Du skal ikke sidde og vente. Når teksten er klar, kommer der et tal på " +
+            "klokken øverst til højre — og derfra kan du læse mødet igennem, rette " +
+            "navnene og lave et referat.\n\n" +
+            "Derfor er det værd at sætte i gang med det samme: maskinen arbejder, " +
+            "mens du laver noget andet, og du behøver ikke huske at komme tilbage. " +
+            "Du kan roligt optage et nyt møde imens.\n\n" +
+            "Venter du, bliver optagelsen liggende, og knappen «Opret transskription» " +
+            "øverst gør det samme når som helst.",
+            godkend: "Skriv den ud nu",
+            annuller: "Vent — jeg gør det senere");
 
         if (ja) Koer_Click(this, new RoutedEventArgs());
     }
