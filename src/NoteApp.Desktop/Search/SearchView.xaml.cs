@@ -1,4 +1,4 @@
-﻿using System.Windows;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Threading;
@@ -9,24 +9,73 @@ namespace NoteApp.Desktop.Search;
 /// <summary>Ét sted, ordet står — som listen viser det.</summary>
 public sealed class Traefvisning
 {
-    public Traefvisning(Fund f, Traef t, int nummer)
+    public Traefvisning(Fund f, Traef t, int nummer, string soegeord)
     {
         Fund = f;
         Traef = t;
         Nummer = $"{nummer}.";
         Uddrag = t.Uddrag;
+        Soegeord = soegeord;
     }
 
     public Fund Fund { get; }
     public Traef Traef { get; }
     public string Nummer { get; }
     public string Uddrag { get; }
+
+    /// <summary>Det, der blev søgt på — så det kan markeres i uddraget.</summary>
+    public string Soegeord { get; }
+
+    /// <summary>
+    /// Uddraget skåret op, så det søgte kan markeres med gult.
+    ///
+    /// SAMME MARKERING SOM I UDSKRIFTEN.
+    ///
+    /// Her stod uddraget som ren tekst, mens søgningen inde i en udskrift
+    /// markerede med gult. To steder, der gør det samme, skal se ens ud —
+    /// ellers skal man lære skærmene hver for sig, og man leder efter det gule
+    /// på en skærm, hvor det ikke findes.
+    ///
+    /// Der skæres på HVERT ord i søgningen. Søger man «Omada pipeline», er det
+    /// begge ord, man leder efter i teksten.
+    /// </summary>
+    public IEnumerable<(string Tekst, bool Gul)> Dele()
+    {
+        var ord = Soegeord.Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                          .Where(o => o.Length > 1)
+                          .OrderByDescending(o => o.Length)
+                          .ToList();
+
+        if (ord.Count == 0) { yield return (Uddrag, false); yield break; }
+
+        var i = 0;
+
+        while (i < Uddrag.Length)
+        {
+            var bedst = -1;
+            var laengde = 0;
+
+            foreach (var o in ord)
+            {
+                var j = Uddrag.IndexOf(o, i, StringComparison.OrdinalIgnoreCase);
+                if (j < 0) continue;
+                if (bedst < 0 || j < bedst) { bedst = j; laengde = o.Length; }
+            }
+
+            if (bedst < 0) { yield return (Uddrag[i..], false); yield break; }
+
+            if (bedst > i) yield return (Uddrag[i..bedst], false);
+
+            yield return (Uddrag.Substring(bedst, laengde), true);
+            i = bedst + laengde;
+        }
+    }
 }
 
 /// <summary>Én kilde med alle sine steder.</summary>
 public sealed class Fundvisning
 {
-    public Fundvisning(Fund f)
+    public Fundvisning(Fund f, string soegeord)
     {
         Fund = f;
         Overskrift = f.Overskrift;
@@ -42,7 +91,7 @@ public sealed class Fundvisning
             ? $"{f.Tid:dd-MM-yyyy}  ·  1 sted"
             : $"{f.Tid:dd-MM-yyyy}  ·  {f.Traef.Count} steder";
 
-        Steder = f.Traef.Select((t, n) => new Traefvisning(f, t, n + 1)).ToList();
+        Steder = f.Traef.Select((t, n) => new Traefvisning(f, t, n + 1, soegeord)).ToList();
     }
 
     public Fund Fund { get; }
@@ -160,7 +209,9 @@ public partial class SearchView : UserControl
 
             if (ct.IsCancellationRequested) return;
 
-            Liste.ItemsSource = fund.Select(f => new Fundvisning(f)).ToList();
+            Liste.ItemsSource = fund.Select(f => new Fundvisning(f, spoergsmaal)).ToList();
+
+            // Uddragene tegnes af Uddrag_Ind, naar de kommer paa skaermen.
 
             TomPanel.Visibility = Visibility.Collapsed;
             Rude.Visibility = fund.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
@@ -201,6 +252,28 @@ public partial class SearchView : UserControl
     /// Positionen er tegnnummeret i den tekst, skærmen viser — derfor kan der
     /// rulles direkte derhen frem for blot at åbne filen.
     /// </summary>
+    /// <summary>
+    /// Tegner uddraget med det søgte markeret i gult.
+    ///
+    /// Samme fremgangsmåde som i udskriften: en TextBlock kan give enkelte ord
+    /// en baggrund, hvis dens indhold bygges som stykker frem for som én
+    /// tekst — og det kan ikke bindes i XAML, så det gøres her.
+    /// </summary>
+    private void Uddrag_Ind(object sender, RoutedEventArgs e)
+    {
+        if (sender is not TextBlock tb || tb.DataContext is not Traefvisning v) return;
+
+        tb.Inlines.Clear();
+
+        foreach (var (tekst, gul) in v.Dele())
+            tb.Inlines.Add(gul
+                ? new System.Windows.Documents.Run(tekst) { Background = Gul, Foreground = PaaGul }
+                : new System.Windows.Documents.Run(tekst));
+    }
+
+    private static readonly Brush Gul = new SolidColorBrush(Color.FromRgb(0xF5, 0xD1, 0x3B));
+    private static readonly Brush PaaGul = new SolidColorBrush(Color.FromRgb(0x14, 0x18, 0x1F));
+
     private void Sted_Klik(object sender, RoutedEventArgs e)
     {
         if (sender is not Button b || b.Tag is not Traefvisning v) return;

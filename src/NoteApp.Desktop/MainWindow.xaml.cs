@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using System.Reflection;
 using System.Windows;
 using NoteApp.Core;
@@ -269,8 +269,8 @@ public partial class MainWindow : Window
 
         _startSoegning = ord;
 
-        if (NavSoeg.IsChecked == true) Indhold.Content = new Search.SearchView(ord);
-        else NavSoeg.IsChecked = true;
+        if (NavCockpit.IsChecked == true) Indhold.Content = new Search.SearchView(ord);
+        else NavCockpit.IsChecked = true;
     }
 
     private string? _startSoegning;
@@ -436,7 +436,7 @@ public partial class MainWindow : Window
             _aabnDokument = null;
             Indhold.Content = new DocumentsView(id, Brug());
         }
-        else if (NavSoeg.IsChecked == true)
+        else if (NavCockpit.IsChecked == true)
         {
             // Bygges hver gang: soegningen skal se det, der blev skrevet ud
             // for et oejeblik siden, uden at nogen genstarter appen.

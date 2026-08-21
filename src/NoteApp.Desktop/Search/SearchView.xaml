@@ -20,26 +20,50 @@
       <RowDefinition Height="*" />
     </Grid.RowDefinitions>
 
-    <StackPanel Grid.Row="0" Margin="0,0,0,14">
-      <TextBlock Text="Søg" FontSize="24" FontWeight="SemiBold" />
-      <TextBlock Style="{StaticResource Underskrift}" Margin="0,4,0,0"
-                 Text="I alt, hvad der er sagt og skrevet — udskrifter, dine noter og de færdige dokumenter." />
+    <!-- ============ SØGEFELTET ER SKÆRMENS TYNGDEPUNKT ============
+
+         Det er ikke pynt, at det står stort og midt på. Appens værdi vokser
+         med arkivet: efter to hundrede møder er det her det eneste sted, man
+         kan finde ud af, hvad der FAKTISK blev sagt. Alt andet på skærmen er
+         arrangement omkring den ene ting.
+
+         Et søgefelt i et hjørne siger, at søgning er en funktion. Et felt midt
+         på siger, at det er dét, skærmen er til. -->
+    <StackPanel Grid.Row="0" Margin="0,0,0,18" HorizontalAlignment="Center">
+      <TextBlock Text="Cockpit" FontSize="26" FontWeight="SemiBold"
+                 HorizontalAlignment="Center" />
+      <TextBlock Style="{StaticResource Underskrift}" Margin="0,5,0,0"
+                 TextAlignment="Center" MaxWidth="620" TextWrapping="Wrap"
+                 Text="Alt, der er sagt og skrevet — udskrifter, dine noter og de færdige dokumenter. Søgningen læser filerne på din maskine, og der sendes intet." />
     </StackPanel>
 
-    <Border Grid.Row="1" Background="{StaticResource Panel}" CornerRadius="10"
-            BorderBrush="{StaticResource PanelKant}" BorderThickness="1" Padding="6">
+    <Border Grid.Row="1" Background="{StaticResource Panel}" CornerRadius="12"
+            BorderBrush="{StaticResource Accent}" BorderThickness="1" Padding="8"
+            MaxWidth="820" HorizontalAlignment="Stretch">
+      <Border.Effect>
+        <DropShadowEffect BlurRadius="18" ShadowDepth="2" Opacity="0.35" Color="#FF000000" />
+      </Border.Effect>
       <Grid>
-        <TextBox x:Name="Felt" FontSize="16" Padding="12,10" BorderThickness="0"
-                 Background="Transparent" TextChanged="Felt_Aendret" />
-        <TextBlock x:Name="Pladsholder" IsHitTestVisible="False" FontSize="16"
-                   Margin="15,0,0,0" VerticalAlignment="Center"
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="Auto" />
+          <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <TextBlock Grid.Column="0" Text="&#xE721;" FontFamily="Segoe MDL2 Assets"
+                   FontSize="17" VerticalAlignment="Center" Margin="12,0,4,0"
+                   Foreground="{StaticResource Accent}" />
+
+        <TextBox x:Name="Felt" Grid.Column="1" FontSize="18" Padding="10,12"
+                 BorderThickness="0" Background="Transparent" TextChanged="Felt_Aendret" />
+        <TextBlock x:Name="Pladsholder" Grid.Column="1" IsHitTestVisible="False" FontSize="18"
+                   Margin="13,0,0,0" VerticalAlignment="Center"
                    Foreground="{StaticResource TekstMeget}"
-                   Text="Skriv et ord eller et navn — fx et kundenavn eller et systemnavn" />
+                   Text="Hvad leder du efter?" />
       </Grid>
     </Border>
 
     <TextBlock x:Name="Status" Grid.Row="2" Style="{StaticResource Underskrift}"
-               Margin="2,10,2,10" />
+               Margin="2,12,2,10" HorizontalAlignment="Center" />
 
     <!-- ===================== Resultaterne ====================== -->
     <Border Grid.Row="3" Background="{StaticResource Panel}" CornerRadius="10"
@@ -136,8 +160,13 @@
                               <TextBlock Grid.Column="0" Text="{Binding Nummer}" FontSize="11.5"
                                          Foreground="{StaticResource TekstMeget}"
                                          VerticalAlignment="Top" />
-                              <TextBlock Grid.Column="1" Text="{Binding Uddrag}" FontSize="12.5"
+                              <!-- Det soegte staar GULT, praecis som i
+                                   udskriften. To skaerme, der goer det samme,
+                                   skal se ens ud - ellers leder man efter det
+                                   gule paa den ene og finder det ikke. -->
+                              <TextBlock Grid.Column="1" FontSize="12.5"
                                          LineHeight="19" TextWrapping="Wrap"
+                                         Loaded="Uddrag_Ind"
                                          Foreground="{StaticResource TekstSvag}" />
                             </Grid>
                           </Button>

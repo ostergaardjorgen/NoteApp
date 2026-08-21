@@ -60,17 +60,30 @@
           <!-- «Optagelser» frem for «Transskribér»: menupunktet siger, hvad man
                finder derinde. Handlingen står på selve skærmen, ved den
                optagelse den hører til. -->
-          <RadioButton x:Name="NavTransskriber" GroupName="nav" Content="Optagelser"
+          <!-- ============ COCKPIT STÅR ØVERST ============
+               Det er skærmen, man begynder på, og den bærer søgningen.
+
+               HVORFOR SØGNINGEN FLYTTEDE HERTIL
+
+               Den lå mellem «Dokumenter» og «Skabeloner», fordi den dækker dem
+               begge. Det var rigtigt, så længe den var én funktion blandt
+               flere. Men appens værdi vokser med arkivet: efter to hundrede
+               møder er det ENESTE sted, man kan finde ud af, hvad der faktisk
+               blev sagt — og så er søgningen ikke en funktion, den er indgangen.
+
+               Et menupunkt nummer tre siger, at den er noget, man går hen til.
+               Øverst siger den, at den er dér, man starter. -->
+          <RadioButton x:Name="NavCockpit" GroupName="nav" Content="Cockpit"
                        Checked="Nav_Changed" IsChecked="True"
                        Style="{StaticResource NavKnap}" />
-          <RadioButton x:Name="NavDokumenter" GroupName="nav" Content="Dokumenter"
+
+          <!-- «Optagelser» frem for «Transskribér»: menupunktet siger, hvad man
+               finder derinde. Handlingen står på selve skærmen, ved den
+               optagelse den hører til. -->
+          <RadioButton x:Name="NavTransskriber" GroupName="nav" Content="Optagelser"
                        Checked="Nav_Changed"
                        Style="{StaticResource NavKnap}" />
-          <!-- SOEG staar mellem Dokumenter og Skabeloner, fordi den daekker
-               BEGGE de to over den. Et soegefelt paa Optagelser ville kun
-               kunne soege i optagelser, og det, man leder efter, er sjaeldent
-               bundet til én slags ting. -->
-          <RadioButton x:Name="NavSoeg" GroupName="nav" Content="Søg"
+          <RadioButton x:Name="NavDokumenter" GroupName="nav" Content="Dokumenter"
                        Checked="Nav_Changed"
                        Style="{StaticResource NavKnap}" />
           <RadioButton x:Name="NavSkabeloner" GroupName="nav" Content="Skabeloner"

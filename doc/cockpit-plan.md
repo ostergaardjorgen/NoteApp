@@ -144,6 +144,39 @@ ekko, ingen overlappende tale og ingen tvivl om, hvilken side der talte.
 Derfor skal knappen forklare det, første gang den bruges. Ellers trykker folk på
 den almindelige optageknap, fordi den er den, de kender.
 
+**Den skal kunne optage uden dig.**
+
+Det er den egentlige pointe, og den er større end påmindelsen: *man får sjældent
+set et webinar, man ikke prioriterer på tidspunktet.* Netop dér går viden tabt —
+ikke i de webinarer, man deltager i, men i dem, man vælger fra.
+
+Så: sæt det op i forvejen, gå til noget andet, og få udskriften bagefter.
+
+Det kræver, at optagelsen kan **slutte af sig selv**:
+
+- Kommer der ikke lyd på webinarsporet i **fem minutter**, stopper den
+- De fem minutters stilhed **klippes af**, før optagelsen gemmes
+- Det, der står i listen bagefter, er webinaret — ikke webinaret plus et kvarters
+  tomhed, fordi ingen lukkede vinduet
+
+Fem minutter er ikke tilfældigt: et webinar har pauser, en oplægsholder kan
+tie, mens et videoklip loader, og en optagelse, der stopper efter tredive
+sekunders stilhed, ville skære midt i. Tallet skal måles, når funktionen findes.
+
+**Original og oversættelse ved siden af hinanden.**
+
+Webinarer er tit på engelsk. Man vil have essensen på dansk — men man vil kunne
+slå det efter i originalen, for det er dér, fagordene står rigtigt, og det er
+originalen, man kan citere fra.
+
+Udskriften skal derfor kunne vises begge veje: **originalsproget** som det blev
+sagt, og **dansk** ved siden af. Oversættelsen kan laves lokalt af den samme
+sprogmodel, der laver opsummeringen — det er en opgave, den er god til, og det
+holder webinaret på maskinen.
+
+*Bemærk:* whisper kan selv oversætte, men **kun til engelsk**. Dansk skal komme
+fra sprogmodellen bagefter. Det er et ekstra gennemløb, ikke et flag.
+
 ### 3 · Opgaver
 
 **Alle opgaver, på tværs.** De ligger i dag i `opgaver.json` ved hver optagelse.
@@ -216,16 +249,32 @@ Fire ting, som flere områder deler. De skal bygges én gang og bygges rigtigt.
 
 ## Rækkefølge — og hvorfor
 
-### Etape 0 · Cockpittet findes *(1-2 dage)*
+### Etape 0 · Cockpittet findes *(1-2 dage)* — GJORT 21-08-2026
 
-Nyt menupunkt øverst. Søgningen flyttes derop og gøres til skærmens
-tyngdepunkt. **Gul markering og sammenhæng i den tværgående søgning** — samme
-kode som udskriften.
+Nyt menupunkt øverst. Søgningen flyttet derop og gjort til skærmens
+tyngdepunkt. **Gul markering i den tværgående søgning** — samme kode som
+udskriften.
 
 *Hvorfor først:* det er den billigste vinding, der findes, og det gør skærmen
 til det sted, resten kan bygges ind i.
 
-### Etape 1 · Søgningen bliver god *(1-2 uger)*
+### Etape 1 · Optag et webinar *(2-3 dage)*
+
+**Rykket frem.** Ikke hele webinarområdet — kun det, der skal til for at optage
+ét i dag og begynde at samle materiale:
+
+- En webinarknap, der optager **ét spor** og spørger om sproget først
+- Forklaringen af hvorfor, første gang den bruges
+- **Stop af sig selv** efter fem minutters stilhed, med stilheden klippet af
+
+Registeret, påmindelsen og oversættelsen kommer i etape 4.
+
+*Hvorfor før søgningen:* værdien er bagudrettet, men arbejdet er fremadrettet.
+Hvert webinar, der ikke bliver optaget i denne uge, er et hul i det arkiv,
+søgningen senere skal lede i. En bedre søgning i fire møder er mindre værd end
+en middelmådig søgning i fyrre.
+
+### Etape 2 · Søgningen bliver god *(1-2 uger)*
 
 Først **målingen**: tyve spørgsmål, hvor facit er kendt, mod det nuværende
 system. Derefter filtrene — periode, person, type. Og først derefter beslutningen
@@ -233,7 +282,7 @@ om semantisk søgning, truffet på tallet.
 
 *Hvorfor nummer to:* det er produktet. Alt andet er arrangement omkring det.
 
-### Etape 2 · Opgaver på tværs *(1 uge)*
+### Etape 3 · Opgaver på tværs *(1 uge)*
 
 Registeret, tidslinjen for i dag, farver og prioritet, kalenderen, tilbagelinket
 til replikken. Kræver datoforståelsen, som bygges her.
@@ -241,20 +290,22 @@ til replikken. Kræver datoforståelsen, som bygges her.
 *Hvorfor før webinarer:* datoforståelsen skal bruges af alt det følgende, og den
 er lettest at få rigtig, når den bygges til noget, der kan ses med det samme.
 
-### Etape 3 · Webinarer *(1 uge)*
+### Etape 4 · Webinarområdet gøres færdigt *(1 uge)*
 
-Registeret, påmindelsen, enspors-optagelsen. Kræver planlæggeren.
+Registeret over tilmeldte webinarer, påmindelsen, den planlagte optagelse — og oversættelsen med originalen ved siden af. Kræver planlæggeren.
 
-*Hvorfor her:* det er det, der får mere materiale ind i arkivet — men det kræver
-to nye byggesten, og de er lettere at lave, når tidslinjen findes at vise dem i.
+*Hvorfor her og ikke i etape 1:* selve optagelsen er det, der får materiale ind, og
+den kom med det samme. Resten — at appen selv siger til, og at den kan starte,
+mens man er et andet sted — kræver en planlægger, der virker med appen lukket, og
+den er lettere at bygge, når tidslinjen findes at vise resultatet i.
 
-### Etape 4 · Diktafonen *(2-3 uger)*
+### Etape 5 · Diktafonen *(2-3 uger)*
 
 Kommandostyring efter den målte opskrift, «hvad er vigtigt i dag», og
 diktér-en-uges-opgaver med gennemsyn.
 
 *Hvorfor sidst:* den er den sjoveste og den mest usikre. Den hviler på
-datoforståelsen fra etape 2 og på opgaveregisteret. Bygges den først, bygges den
+datoforståelsen fra etape 3 og på opgaveregisteret. Bygges den først, bygges den
 oven på noget, der ikke er der.
 
 ---
