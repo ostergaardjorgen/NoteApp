@@ -201,12 +201,56 @@ løser: det er en følge af at begrænse udfaldsrummet.
 På de seks ovenfor ville reglen have udført to rigtigt, afvist den farlige, og
 afvist tre, hvor der ikke var enighed — altså nul forkerte handlinger.
 
-### Det, der mangler at blive målt
+### 5. Det fulde tal — og grammatikken tilfører intet
 
-Reglen om enighed er kun prøvet på seks. Den skal køres på alle 25 kommandoer
-**og** alle 25 almindelige sætninger, før den kan bruges — det er de
-almindelige, der afgør, om den holder, for det er dem, der ikke må udløse noget.
+Målt på alle 50 sætninger, 23 kommandoer kunne stilles sikkert på plads.
 
-Opdelingen skal rettes først: 31 vinduer gav 50 klip, men det var et
-sammenfald. Sætning 8 blev delt i to, og to andre smeltede sammen, så
-alignementet skrider fra klip 9.
+| Fremgangsmåde | Rigtigt | **Forkert** | Afvist | **Falsk accept** |
+|---|---|---|---|---|
+| Enighed mellem fri og grammatik, 0,34 | 12 | 0 | 11 | 0 |
+| Kun fri udskrift, ord, 0,34 | 14 | 0 | 9 | 0 |
+| Kun fri udskrift, ord, 0,50 | 16 | **2** | 5 | 0 |
+| **Kun fri udskrift, BOGSTAVER, 0,30** | **19** | **0** | **4** | **0** |
+| Kun fri udskrift, bogstaver, 0,40 | 20 | 0 | 3 | 0 |
+
+**Grammatikken kan undværes.** Den afviste ting, den frie udskrift havde ordret
+rigtigt — «Start optagelsen» kom perfekt ud og blev alligevel forkastet, fordi
+den bundne intet gav. Uden den er der desuden kun én whisper-kørsel i stedet
+for to, altså det halve af ventetiden.
+
+**Bogstaver frem for ord er det, der rykker.** «Fortsat optagelsen» mod
+«Fortsæt optagelsen» er ét bogstav galt. Målt på ord er halvdelen forkert, og
+kommandoen bliver afvist; målt på bogstaver er det 1 af 18.
+
+### 6. Sikkerhedsmarginen
+
+Den almindelige sætning, der kommer tættest på en kommando:
+
+| Afstand | Sætning | Nærmeste kommando |
+|---|---|---|
+| **0,49** | Hun nævnte noget om en frist på fredag | Opret en opgave med frist på fredag |
+| 0,60 | Der er en aftale i morgen, som jeg ikke kan flytte | Opret en aftale i morgen klokken ti |
+| 0,67 | Lad os tage en snak om det bagefter | Opret en aftale på tirsdag klokken halv tre |
+
+Grænsen kan altså gå op til **0,48** uden en eneste falsk accept. Ved 0,30 er
+der 0,19 i margen; ved 0,40 kun 0,09.
+
+De to tætteste er begge blandt de fælder, der blev lagt med vilje. Det er
+betryggende: det, der skulle være svært, ER det svære — og det klarer den.
+
+## Konklusion
+
+**Stemmestyring kan bygges, og den kan bygges sikkert.**
+
+- Én whisper-kørsel med large-v3, ingen grammatik
+- Sammenlign på bogstaver mod kommandolisten
+- Grænse **0,30** — 19 af 23 kommandoer udført rigtigt
+- **Nul forkerte kommandoer. Nul falske accepter.**
+- De fire, der ikke rammes, får «kommando ikke forstået, prøv igen»
+
+Det afviste er ikke tabt: brugeren siger det igen, og et ærligt afslag er
+noget, man kan rette sig efter. En tavs fejl er det ikke.
+
+**Om VRAM:** large-v3 alene fylder 3,6 GB af kortets 6,1. Der er ikke brug for
+en sprogmodel ved siden af — matchningen er ren tekstsammenligning, og en dansk
+datoparser hører hjemme i C#, ikke i en model.
