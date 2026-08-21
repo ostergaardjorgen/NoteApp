@@ -25,6 +25,7 @@ try
         "sky"       => await Sky(args.Skip(1).ToArray()),
         "forventning" => Forventning(args.Skip(1).ToArray()),
         "mikrofontest" => Mikrofontest(args.Skip(1).ToArray()),
+        "maalsoegning" => Maalsoegning(),
         "recover"   => Genopret(),
         "hjaelp" or "--help" or "-h" => Hjælp(),
         _ => Ukendt(kommando)
@@ -47,6 +48,7 @@ static int Hjælp()
           transskriber  Transskriberer en optagelse:
                       noteapp transskriber <mappe-eller-wav> [--cpu]
           recover   Samler møder der aldrig blev lukket ordentligt
+          maalsoegning  Kører de tyve søgeprøver med kendt facit
           udkast    Laver et referat med en lokal model — intet forlader maskinen
           sky       Laver et referat hos en europæisk leverandør:
                       SENDER UDSKRIFTEN UD AF MASKINEN. Se «noteapp sky».
@@ -828,6 +830,137 @@ static async Task<int> Transskriber(string[] a)
 
     return 0;
 }
+
+/// <summary>
+/// De tyve søgeprøver med kendt facit.
+///
+/// HVORFOR DE LIGGER I KODEN OG IKKE I ET REGNEARK
+///
+/// Tallet skal kunne slås op igen, hver gang søgningen røres. En måling, der
+/// kræver, at nogen husker, hvad der blev spurgt om, bliver lavet én gang.
+///
+/// FACIT EFTERPRØVES FØR MÅLINGEN. Hver prøve siger, hvilken optagelse svaret
+/// står i, og der kontrolleres først, at ordene rent faktisk står dér. Er
+/// facit forkert, er målingen værdiløs — så hellere opdage det med det samme.
+///
+/// Prøverne bygger på DE OPTAGELSER, DER LÅ 21-08-2026. Ligger de ikke
+/// længere, siger kontrollen det, og målingen skal skrives om frem for at
+/// blive rettet, til den passer.
+/// </summary>
+static int Maalsoegning()
+{
+    const string cloud = "Møde med Cloudworks";
+    const string elimity = "Webinar 21. august kl. 12:10";
+    const string indigo = "Webinar 21. august kl. 15:31";
+
+    var proever = new (string Spoergsmaal, string Facit)[]
+    {
+        ("omada", cloud),
+        ("sailpoint", cloud),
+        ("crowdstrike", cloud),
+        ("gartner", cloud),
+        ("hubspot", cloud),
+        ("beyond trust", cloud),
+        ("one identity", cloud),
+        ("espen omada", cloud),
+        ("linkedin", cloud),
+        ("webinar", cloud),
+
+        ("orphaned accounts", elimity),
+        ("segregation of duties", elimity),
+        ("iso 27001", elimity),
+        ("maarten", elimity),
+        ("access review", elimity),
+
+        ("identity chaos", indigo),
+        ("power bi", indigo),
+        ("rbac", indigo),
+        ("illimiti", indigo),
+        ("data-driven", indigo)
+    };
+
+    // ---- 1. er facit rigtigt?
+    var tekster = new Dictionary<string, string>();
+
+    foreach (var m in MeetingStore.Alle())
+    {
+        var mappe = MeetingStore.FindById(m.Id.ToString())?.Mappe;
+        if (mappe is null) continue;
+
+        var txt = Directory.GetFiles(mappe, "udskrift_*.txt").FirstOrDefault();
+        if (txt is not null) tekster[m.Title ?? ""] = File.ReadAllText(txt, System.Text.Encoding.UTF8);
+    }
+
+    var facitfejl = 0;
+
+    foreach (var p in proever)
+    {
+        if (!tekster.TryGetValue(p.Facit, out var t))
+        {
+            Console.WriteLine($"MANGLER: optagelsen «{p.Facit}» ligger ikke her");
+            facitfejl++;
+            continue;
+        }
+
+        var mangler = Soegning.Del(p.Spoergsmaal)
+            .Where(o => !t.Contains(o, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        if (mangler.Count > 0)
+        {
+            Console.WriteLine($"FACIT FORKERT: «{p.Spoergsmaal}» — {string.Join(", ", mangler)} " +
+                              $"står ikke i {p.Facit}");
+            facitfejl++;
+        }
+    }
+
+    if (facitfejl > 0)
+    {
+        Console.WriteLine();
+        Console.WriteLine($"{facitfejl} fejl i facit. Målingen kan ikke bruges, før de er rettet.");
+        return 1;
+    }
+
+    Console.WriteLine($"Facit efterprøvet: alle {proever.Length} ord står i den optagelse, prøven peger på.");
+    Console.WriteLine();
+
+    // ---- 2. målingen
+    int top1 = 0, top3 = 0, væk = 0;
+    long ms = 0;
+
+    Console.WriteLine($"{"spørgsmål",-26} {"plads",6} {"kilder",7} {"steder",7} {"ms",5}");
+    Console.WriteLine(new string('-', 56));
+
+    foreach (var p in proever)
+    {
+        var ur = System.Diagnostics.Stopwatch.StartNew();
+        var fund = Soegning.Soeg(p.Spoergsmaal);
+        ur.Stop();
+
+        ms += ur.ElapsedMilliseconds;
+
+        var plads = fund.FindIndex(f => f.Overskrift == p.Facit) + 1;
+
+        if (plads == 1) top1++;
+        if (plads is >= 1 and <= 3) top3++;
+        if (plads == 0) væk++;
+
+        Console.WriteLine($"{p.Spoergsmaal,-26} {(plads == 0 ? "IKKE" : plads.ToString()),6} " +
+                          $"{fund.Count,7} {fund.Sum(f => f.Traef.Count),7} {ur.ElapsedMilliseconds,5}");
+    }
+
+    var n = proever.Length;
+
+    Console.WriteLine(new string('-', 56));
+    Console.WriteLine();
+    Console.WriteLine($"Facit på førstepladsen : {top1} af {n}  ({top1 * 100.0 / n:0} %)");
+    Console.WriteLine($"Facit i top tre        : {top3} af {n}  ({top3 * 100.0 / n:0} %)");
+    Console.WriteLine($"Slet ikke fundet       : {væk}");
+    Console.WriteLine($"Tid i gennemsnit       : {ms / (double)n:0.0} ms");
+
+    return væk == 0 ? 0 : 1;
+}
+
 
 /// <summary>
 /// Laver et Word-dokument ud af et udkast, der allerede findes.

@@ -74,10 +74,22 @@
          tyngdepunkt; en række rullelister i samme højde ville gøre det til ét
          felt blandt fire. Her er de en indsnævring af det, man lige har
          skrevet — og de er små, fordi de sjældnere bruges. -->
-    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center"
-                Margin="0,12,0,0">
+    <StackPanel Grid.Row="2" HorizontalAlignment="Center" Margin="0,12,0,0">
+    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
       <TextBlock Text="Søg kun i" FontSize="11.5" VerticalAlignment="Center"
                  Margin="0,0,10,0" Foreground="{StaticResource TekstMeget}" />
+
+      <!-- PERIODEN STÅR FØRST.
+           Det er den afgrænsning, der bruges oftest — «hvad talte vi om i
+           denne måned» er et almindeligt spørgsmål, «hvad står der på norsk»
+           er det ikke. -->
+      <ComboBox x:Name="Periodefilter" MinWidth="140" FontSize="12" Padding="8,5"
+                Margin="0,0,8,0" SelectionChanged="Periode_Aendret"
+                ToolTip="Kun optagelser fra denne periode">
+        <ComboBox.ItemTemplate>
+          <DataTemplate><TextBlock Text="{Binding Navn}" /></DataTemplate>
+        </ComboBox.ItemTemplate>
+      </ComboBox>
 
       <ComboBox x:Name="Mappefilter" MinWidth="150" FontSize="12" Padding="8,5"
                 SelectionChanged="Filter_Aendret" ToolTip="Kun optagelser i denne mappe">
@@ -103,6 +115,27 @@
       <Button x:Name="RydFilter" Content="Ryd" Click="RydFilter_Klik" Margin="8,0,0,0"
               Padding="10,5" FontSize="11.5" Visibility="Collapsed"
               ToolTip="Søg i det hele igen" />
+    </StackPanel>
+
+    <!-- ============ DEN VALGTE PERIODE ============
+         Kommer først frem, når man vælger «Fra og til» — to datovælgere, der
+         altid står fremme, ville fylde en linje for en afgrænsning, der
+         sjældent bruges. -->
+    <StackPanel x:Name="Datoraekke" Orientation="Horizontal" HorizontalAlignment="Center"
+                Margin="0,8,0,0" Visibility="Collapsed">
+      <TextBlock Text="Fra" FontSize="11.5" VerticalAlignment="Center" Margin="0,0,7,0"
+                 Foreground="{StaticResource TekstMeget}" />
+      <DatePicker x:Name="FraDato" Width="135" FontSize="12"
+                  SelectedDateChanged="Dato_Aendret" />
+
+      <TextBlock Text="til" FontSize="11.5" VerticalAlignment="Center" Margin="10,0,7,0"
+                 Foreground="{StaticResource TekstMeget}" />
+      <DatePicker x:Name="TilDato" Width="135" FontSize="12"
+                  SelectedDateChanged="Dato_Aendret" />
+
+      <TextBlock x:Name="Datofejl" FontSize="11.5" VerticalAlignment="Center" Margin="12,0,0,0"
+                 Foreground="{StaticResource Advarsel}" />
+    </StackPanel>
     </StackPanel>
 
     <TextBlock x:Name="Status" Grid.Row="3" Style="{StaticResource Underskrift}"

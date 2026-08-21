@@ -78,10 +78,71 @@ public sealed record Fund(
 ///
 /// Null eller tom betyder «alle».
 /// </summary>
-public sealed record Soegefilter(string? Sprog = null, string? Moedetype = null, string? Mappe = null)
+/// <param name="Fra">Tidligste tidspunkt, der tælles med. Null = ingen grænse.</param>
+/// <param name="Til">
+/// Seneste tidspunkt. Null = ingen grænse.
+///
+/// Den er TIL OG MED den valgte dag. Vælger man 21. august i begge ender,
+/// forventer man dagens optagelser — ikke en tom liste, fordi mødet lå klokken
+/// ti og grænsen gik ved midnat. Datovælgeren giver en dato, ikke et
+/// klokkeslæt, og så skal dagen tælle hele vejen.
+/// </param>
+public sealed record Soegefilter(string? Sprog = null, string? Moedetype = null,
+                                 string? Mappe = null,
+                                 DateTimeOffset? Fra = null, DateTimeOffset? Til = null)
 {
     private static bool Ens(string? a, string? b) =>
         string.IsNullOrWhiteSpace(a) || (b is not null && a.Equals(b, StringComparison.CurrentCultureIgnoreCase));
+
+    private bool IPerioden(DateTimeOffset t) =>
+        (Fra is null || t >= Fra) && (Til is null || t <= Til);
+
+    /// <summary>
+    /// De faste perioder.
+    ///
+    /// HVORFOR DE ER DER, NÅR MAN OGSÅ KAN VÆLGE FRA OG TIL
+    ///
+    /// «Denne måned» er ét klik. Den samme afgrænsning med to datovælgere er
+    /// fire — og man skal vide, hvilken dato måneden begyndte. De faste
+    /// perioder er ikke en genvej til det svære; de er det, man spørger om ni
+    /// gange ud af ti.
+    ///
+    /// Ugen begynder mandag. Det gør den i Danmark, og et filter, der siger
+    /// «denne uge» og tæller fra søndag, giver et forkert svar én dag om ugen —
+    /// den dag, hvor nogen faktisk kigger efter.
+    /// </summary>
+    public static (DateTimeOffset? Fra, DateTimeOffset? Til) Periode(string navn)
+    {
+        var nu = DateTime.Now;
+        var idag = nu.Date;
+
+        return navn switch
+        {
+            "idag" => (Lokal(idag), null),
+            "uge" => (Lokal(idag.AddDays(-(((int)nu.DayOfWeek + 6) % 7))), null),
+            "maaned" => (Lokal(new DateTime(nu.Year, nu.Month, 1)), null),
+            "aar" => (Lokal(new DateTime(nu.Year, 1, 1)), null),
+            _ => (null, null)
+        };
+    }
+
+    /// <summary>
+    /// En dato med DEN DAGS egen tidsforskel — ikke dagens i dag.
+    ///
+    /// MÅLT 21-08-2026: «i år» begyndte 31-12-2025 kl. 23:00. Grunden var, at
+    /// 1. januar blev bygget med sommertidens forskel på to timer, mens
+    /// januar er på én. Fejlen er en time og ét døgn for meget i hver ende af
+    /// en sommertidsgrænse — lille nok til aldrig at blive opdaget, og stor
+    /// nok til at et møde 31. december dukker op under «i år».
+    ///
+    /// Der spørges derfor tidszonen om, hvad forskellen var PÅ DEN DATO.
+    /// </summary>
+    public static DateTimeOffset Lokal(DateTime dag) =>
+        new(dag, TimeZoneInfo.Local.GetUtcOffset(dag));
+
+    /// <summary>Til og med hele den valgte dag.</summary>
+    public static DateTimeOffset SlutAfDagen(DateTime d) =>
+        Lokal(d.Date).AddDays(1).AddSeconds(-1);
 
     /// <summary>
     /// Sproget på en optagelse.
@@ -100,7 +161,8 @@ public sealed record Soegefilter(string? Sprog = null, string? Moedetype = null,
 
         return Ens(Sprog, SprogPaa(m))
                && Ens(Moedetype, m.Moedetype)
-               && Ens(Mappe, m.Mappe);
+               && Ens(Mappe, m.Mappe)
+               && IPerioden(m.StartedAt);
     }
 
     /// <summary>
@@ -117,12 +179,21 @@ public sealed record Soegefilter(string? Sprog = null, string? Moedetype = null,
         var type = string.IsNullOrWhiteSpace(d.Template) ? kilde?.Moedetype : d.Template;
         var mappe = string.IsNullOrWhiteSpace(d.Mappe) ? kilde?.Mappe : d.Mappe;
 
-        return Ens(Sprog, SprogPaa(kilde)) && Ens(Moedetype, type) && Ens(Mappe, mappe);
+        // DATOEN ER MØDETS, IKKE DOKUMENTETS.
+        //
+        // Man spørger om «møderne i denne måned». Et referat, der blev skrevet
+        // i dag af et møde fra maj, hører til i maj — ellers dukker maj-mødet
+        // op under august gennem bagdøren.
+        var tid = kilde?.StartedAt ?? d.Created;
+
+        return Ens(Sprog, SprogPaa(kilde)) && Ens(Moedetype, type) && Ens(Mappe, mappe)
+               && IPerioden(tid);
     }
 
     public bool Tomt => string.IsNullOrWhiteSpace(Sprog)
                         && string.IsNullOrWhiteSpace(Moedetype)
-                        && string.IsNullOrWhiteSpace(Mappe);
+                        && string.IsNullOrWhiteSpace(Mappe)
+                        && Fra is null && Til is null;
 
     /// <summary>
     /// En optagelse uden oplysninger — en fra før felterne fandtes, eller en
@@ -330,9 +401,24 @@ public static class Soegning
         //
         // Vaegten er, hvor mange af ordene der staar taet paa hinanden det
         // bedste sted. Er den ens, afgoer antallet, og derefter datoen.
+        // ============ KILDEN SLÅR GENFORTÆLLINGEN ============
+        //
+        // Staar ordet lige godt i en udskrift og i et dokument, der er lavet
+        // AF den udskrift, skal udskriften staa oeverst. Dokumentet er et
+        // referat af det, der blev sagt; udskriften ER det, der blev sagt.
+        //
+        // Maalt 21-08-2026 paa de tyve proever: «crowdstrike» laa paa
+        // tredjepladsen, fordi to referater af det samme moede laa foran
+        // moedet selv. Med den her linje: foerstepladsen. Ogsaa «webinar»
+        // rykkede fra fjerde til anden.
+        //
+        // Raekkefoelgen ligger i Fundtype: udskrift, note, dokument. Noten er
+        // brugerens egne ord under moedet og staar derfor foran et dokument,
+        // en model har skrevet bagefter.
         return fund
             .OrderByDescending(f => f.Vaegt)
             .ThenByDescending(f => f.Traef.Count)
+            .ThenBy(f => f.Slags)
             .ThenByDescending(f => f.Tid)
             .ToList();
     }

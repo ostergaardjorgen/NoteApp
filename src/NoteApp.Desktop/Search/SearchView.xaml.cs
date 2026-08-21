@@ -190,6 +190,19 @@ public partial class SearchView : UserControl
     /// </summary>
     private void FyldFiltre()
     {
+        // Perioderne er faste og staar altid — de afhaenger ikke af, hvad der
+        // ligger i arkivet.
+        Periodefilter.ItemsSource = new List<Filterpunkt>
+        {
+            new("Hele tiden", null),
+            new("I dag", "idag"),
+            new("Denne uge", "uge"),
+            new("Denne måned", "maaned"),
+            new("I år", "aar"),
+            new("Fra og til …", "valgt")
+        };
+        Periodefilter.SelectedIndex = 0;
+
         var mapper = new List<Filterpunkt> { new("Alle mapper", null) };
         var typer = new List<Filterpunkt> { new("Alle mødetyper", null) };
         var sprog = new List<Filterpunkt> { new("Alle sprog", null) };
@@ -224,10 +237,35 @@ public partial class SearchView : UserControl
         }
     }
 
-    private Soegefilter Filteret() => new(
-        Sprog: (Sprogfilter.SelectedItem as Filterpunkt)?.Vaerdi,
-        Moedetype: (Typefilter.SelectedItem as Filterpunkt)?.Vaerdi,
-        Mappe: (Mappefilter.SelectedItem as Filterpunkt)?.Vaerdi);
+    /// <summary>
+    /// Perioden, som den er valgt lige nu.
+    ///
+    /// «Fra og til» læser datovælgerne; alt andet er en fast periode. Er kun
+    /// den ene dato sat, gælder den ene grænse — «fra 1. august og frem» er et
+    /// rimeligt spørgsmål, og det skal ikke kræve, at man også finder på en
+    /// slutdato.
+    /// </summary>
+    private (DateTimeOffset? Fra, DateTimeOffset? Til) Perioden()
+    {
+        var valg = (Periodefilter.SelectedItem as Filterpunkt)?.Vaerdi;
+
+        if (valg != "valgt") return Soegefilter.Periode(valg ?? "");
+
+        return (
+            FraDato.SelectedDate is { } f ? Soegefilter.Lokal(f.Date) : null,
+            TilDato.SelectedDate is { } t ? Soegefilter.SlutAfDagen(t) : null);
+    }
+
+    private Soegefilter Filteret()
+    {
+        var (fra, til) = Perioden();
+
+        return new Soegefilter(
+            Sprog: (Sprogfilter.SelectedItem as Filterpunkt)?.Vaerdi,
+            Moedetype: (Typefilter.SelectedItem as Filterpunkt)?.Vaerdi,
+            Mappe: (Mappefilter.SelectedItem as Filterpunkt)?.Vaerdi,
+            Fra: fra, Til: til);
+    }
 
     private void Filter_Aendret(object sender, SelectionChangedEventArgs e)
     {
@@ -241,11 +279,57 @@ public partial class SearchView : UserControl
         Soeg();
     }
 
+    private void Periode_Aendret(object sender, SelectionChangedEventArgs e)
+    {
+        if (!IsLoaded) return;
+
+        var valgt = (Periodefilter.SelectedItem as Filterpunkt)?.Vaerdi == "valgt";
+        Datoraekke.Visibility = valgt ? Visibility.Visible : Visibility.Collapsed;
+
+        // Er der ikke valgt datoer endnu, er der ingen afgraensning at soege
+        // paa — og saa skal listen ikke tømmes, mens man leder efter
+        // datovaelgeren.
+        if (valgt && FraDato.SelectedDate is null && TilDato.SelectedDate is null)
+        {
+            RydFilter.Visibility = Filteret().Tomt ? Visibility.Collapsed : Visibility.Visible;
+            return;
+        }
+
+        Filter_Aendret(sender, e);
+    }
+
+    /// <summary>
+    /// En datovælger er ændret.
+    ///
+    /// DER SØGES IKKE PÅ EN OMVENDT PERIODE. Er «fra» efter «til», er der
+    /// ingen dage imellem, og svaret ville være en tom liste, der ligner et
+    /// resultat. Det siges i stedet.
+    /// </summary>
+    private void Dato_Aendret(object sender, SelectionChangedEventArgs e)
+    {
+        if (!IsLoaded) return;
+
+        if (FraDato.SelectedDate is { } f && TilDato.SelectedDate is { } t && f > t)
+        {
+            Datofejl.Text = "«Fra» ligger efter «til».";
+            return;
+        }
+
+        Datofejl.Text = "";
+        Filter_Aendret(sender, e);
+    }
+
     private void RydFilter_Klik(object sender, RoutedEventArgs e)
     {
         Mappefilter.SelectedIndex = 0;
         Typefilter.SelectedIndex = 0;
         Sprogfilter.SelectedIndex = 0;
+
+        FraDato.SelectedDate = null;
+        TilDato.SelectedDate = null;
+        Datofejl.Text = "";
+
+        Periodefilter.SelectedIndex = 0;
     }
 
     private async void Soeg()

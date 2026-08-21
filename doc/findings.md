@@ -13,6 +13,61 @@ Denne fil er hukommelsen på tværs af sessioner. Alt, der er blevet **målt**, 
 
 ---
 
+## Søgningen målt på tyve spørgsmål med kendt facit — 21-08-2026
+
+*Det tal, alt senere arbejde med søgningen skal måles imod. Køres igen med
+`noteapp maalsoegning`.*
+
+Tyve spørgsmål til det arkiv, der lå: et møde på en time (dansk og norsk) og
+to webinarer på 22 og 54 minutter (engelsk). Facit er den optagelse, svaret
+står i, og prøven kontrollerer FØRST, at ordene rent faktisk står dér — er
+facit forkert, er målingen værdiløs.
+
+| Mål | Resultat |
+|---|---|
+| Facit på førstepladsen | **18 af 20 — 90 %** |
+| Facit i top tre | **20 af 20 — 100 %** |
+| Slet ikke fundet | **0** |
+| Tid i gennemsnit | **4,8 ms** |
+
+### Det, målingen fandt
+
+**Dokumenter slog udskriften.** «crowdstrike» lå på tredjepladsen, fordi to
+referater AF det samme møde lå foran mødet selv. Det er forkert efter
+produktets eget princip: dokumentet er en genfortælling, udskriften er det,
+der blev sagt. Rettet med en rangordning på kildetype — udskrift, så note, så
+dokument. Det flyttede «crowdstrike» fra tredje til første og «webinar» fra
+fjerde til anden, altså 85 % → 90 % på førstepladsen.
+
+**«I år» begyndte 31-12-2025 kl. 23.** Datoen blev bygget med sommertidens
+forskel på to timer, mens januar er på én. En time og ét døgn for meget i hver
+ende af en sommertidsgrænse — lille nok til aldrig at blive opdaget, stor nok
+til at et møde 31. december dukker op under «i år». Rettet ved at spørge
+tidszonen om forskellen PÅ DEN DATO.
+
+### De to, der ikke er nummer ét — og hvorfor de får lov
+
+**«one identity»** — leverandøren One Identity står i mødet, men ordene
+«one» og «identity» står også ved siden af hinanden i det ene webinar i
+almindelig prosa. Søgningen kan ikke vide, hvilken der menes. At tvinge den
+rigtige frem ville være at tilpasse koden til prøven.
+
+**«webinar»** — ordet står i alle optagelser, fordi de handler om webinarer.
+Det er ikke et spørgsmål med ét rigtigt svar.
+
+### Hvad tallet betyder for semantisk søgning
+
+90 % på førstepladsen med rene ordsøgninger. **Beslutningen om indlejringer
+kan ikke træffes på det her tal alene** — prøverne er alle sammen ord, der
+STÅR i teksten, og det er netop dét, leksikalsk søgning er god til. Den
+måling, der mangler, er tyve spørgsmål stillet med ANDRE ord end dem, der
+blev sagt: «hvad sagde de om prissætning», «ham fra Norge om at være
+underdog». Det er dér, en indlejringsmodel enten tjener sig hjem eller ikke
+gør, og det kan først måles ærligt, når arkivet er stort nok til, at man ikke
+selv kan huske svaret.
+
+---
+
 ## Udtræk af navne med en lokal model — målt 21-08-2026
 
 *Spørgsmålet: kan appen svare på «find de leverandører, der er nævnt i denne
