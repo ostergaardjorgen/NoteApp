@@ -1,0 +1,68 @@
+<Window x:Class="NoteApp.Desktop.Meeting.MoedevagtPopup"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Er der startet et møde?"
+        Width="360" SizeToContent="Height"
+        WindowStyle="None" ResizeMode="NoResize" AllowsTransparency="True"
+        Background="Transparent" Topmost="True" ShowInTaskbar="False"
+        ShowActivated="False">
+
+  <!-- ==================== ER DER STARTET ET MØDE? ====================
+
+       DEN SPØRGER, DEN GØR IKKE NOGET.
+
+       Appen optager aldrig af sig selv. Det er ikke et teknisk forbehold —
+       det er hele grundlaget for at turde have den kørende: en optagelse
+       begynder, fordi et menneske trykkede på noget.
+
+       DEN STJÆLER IKKE FOKUS.
+
+       ShowActivated="False" og ingen modal dialog. Beskeden kommer, mens man
+       er ved at logge ind på et møde, og et vindue, der tager tastaturet midt
+       i en adgangskode eller et «unmute», ville være det, der fik folk til at
+       slå vagten fra.
+
+       Den lægger sig nede ved uret, hvor Windows' egne beskeder kommer. -->
+
+  <Border Background="#FF161A21" BorderBrush="{StaticResource Accent}" BorderThickness="1"
+          CornerRadius="10" Padding="16,14">
+    <Border.Effect>
+      <DropShadowEffect BlurRadius="18" ShadowDepth="3" Opacity="0.55" Color="#FF000000" />
+    </Border.Effect>
+
+    <StackPanel>
+
+      <Grid>
+        <TextBlock x:Name="Overskrift" FontSize="14" FontWeight="SemiBold" TextWrapping="Wrap"
+                   Margin="0,0,24,0" Foreground="{StaticResource Tekst}" />
+
+        <Button Content="✕" Click="Luk_Klik" HorizontalAlignment="Right" VerticalAlignment="Top"
+                Background="Transparent" BorderThickness="0" Padding="6,0" FontSize="12"
+                Foreground="{StaticResource TekstMeget}" Cursor="Hand"
+                ToolTip="Luk. Der spørges igen, næste gang et møde begynder." />
+      </Grid>
+
+      <TextBlock FontSize="12.5" LineHeight="19" TextWrapping="Wrap" Margin="0,6,0,0"
+                 Foreground="{StaticResource TekstSvag}"
+                 Text="Skal mødet optages? Appen optager aldrig af sig selv — der sker kun det, du trykker på." />
+
+      <!-- DEN HER LINJE SKAL STÅ.
+           Optagelsen bliver på maskinen, og netop derfor kan man se de andre i
+           øjnene og sige, hvor den ender. Teksten skal hjælpe med at give den
+           besked — aldrig med at lade være. -->
+      <TextBlock FontSize="11.5" LineHeight="17" TextWrapping="Wrap" Margin="0,8,0,0"
+                 Foreground="{StaticResource TekstMeget}"
+                 Text="Sig til de andre, at du optager. Lyden bliver på din maskine, så det er til at forklare." />
+
+      <StackPanel Orientation="Horizontal" Margin="0,14,0,0">
+        <Button Content="Optag mødet" Click="Optag_Klik" Padding="16,7" FontSize="12.5"
+                Style="{StaticResource Primaer}" />
+        <Button Content="Ikke nu" Click="Luk_Klik" Padding="14,7" Margin="8,0,0,0" FontSize="12.5" />
+      </StackPanel>
+
+      <Button x:Name="AldrigKnap" Click="Aldrig_Klik" Margin="0,10,0,0" Padding="0"
+              HorizontalAlignment="Left" Background="Transparent" BorderThickness="0"
+              FontSize="11.5" Cursor="Hand" Foreground="{StaticResource TekstMeget}" />
+    </StackPanel>
+  </Border>
+</Window>

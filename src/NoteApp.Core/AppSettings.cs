@@ -131,6 +131,31 @@ public sealed class AppSettings
 
     public double? BaandY { get; set; }
 
+    /// <summary>
+    /// Holder appen øje med, om der er startet et møde?
+    ///
+    /// SLÅET FRA SOM STANDARD, OG DET SKAL DEN BLIVE VED MED AT VÆRE.
+    ///
+    /// Funktionen slår op i Windows' eget register over, hvilke programmer der
+    /// bruger mikrofonen. Det er den samme oplysning, brugeren selv kan se
+    /// under Indstillinger, den bliver på maskinen, og der lyttes ikke med —
+    /// men det er stadig en app, der kigger efter, hvad man laver. Den slags
+    /// slår man til selv.
+    /// </summary>
+    public bool MoedevagtTil { get; set; }
+
+    /// <summary>
+    /// Programmer, der aldrig skal spørges om igen.
+    ///
+    /// Findes, fordi det ellers bliver en vagt, man slår fra. Discord, et
+    /// spil eller en diktafon bruger mikrofonen uden at være et møde, og et
+    /// spørgsmål, man afviser hver dag, er værre end intet spørgsmål.
+    ///
+    /// Der gemmes programmets sti eller pakkenavn — ikke et proces-id, som
+    /// skifter ved hver start.
+    /// </summary>
+    public List<string> MoedevagtAldrig { get; set; } = new();
+
     private static string Path => System.IO.Path.Combine(UserDataPaths.Root, "indstillinger.json");
 
     private static AppSettings? _current;

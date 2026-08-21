@@ -70,6 +70,70 @@
             </Border>
           </StackPanel>
         </Border>
+
+        <!-- ===================== Mødevagten ======================== -->
+        <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20"
+                BorderBrush="{StaticResource PanelKant}" BorderThickness="1" Margin="0,0,0,14"
+                VerticalAlignment="Top">
+          <StackPanel>
+            <TextBlock Text="Spørg, når der starter et møde" FontSize="15" FontWeight="SemiBold" />
+            <TextBlock FontSize="12.5" Margin="0,6,0,0" TextWrapping="Wrap" LineHeight="20"
+                       Foreground="{StaticResource TekstMeget}"
+                       Text="Appen kan holde øje med, om et andet program åbner din mikrofon — det gør et møde, og det gør et webinar, en video eller en streamingtjeneste ikke. Sker det, kommer der en besked nede ved uret med spørgsmålet, om mødet skal optages." />
+
+            <CheckBox x:Name="MoedevagtTil" Margin="0,14,0,0" Click="Moedevagt_Klik"
+                      Content="Spørg mig, når et program bruger mikrofonen" />
+
+            <Border Background="#FF181B22" BorderBrush="{StaticResource PanelKant}" BorderThickness="1"
+                    CornerRadius="8" Padding="14,11" Margin="24,10,0,0">
+              <StackPanel>
+                <TextBlock Text="Hvad appen kigger på" FontSize="12.5" FontWeight="SemiBold" />
+                <TextBlock FontSize="12" Margin="0,6,0,0" TextWrapping="Wrap" LineHeight="19"
+                           Foreground="{StaticResource TekstSvag}"
+                           Text="Kun Windows' egen liste over, hvilke programmer der bruger mikrofonen — den samme, du selv kan se under Indstillinger i Windows. Der lyttes ikke med, der optages ingenting, og oplysningen bliver på maskinen." />
+                <TextBlock FontSize="12" Margin="0,8,0,0" TextWrapping="Wrap" LineHeight="19"
+                           Foreground="{StaticResource TekstSvag}"
+                           Text="Der spørges først, når mikrofonen har været i brug i et halvt minut, så en diktering eller en mikrofonprøve ikke udløser noget. Og der optages aldrig af sig selv — der sker kun det, du trykker på." />
+              </StackPanel>
+            </Border>
+
+            <!-- ============ DE FRAVALGTE PROGRAMMER ============
+                 Listen SKAL kunne rettes. Et fravalg tages med ét klik i en
+                 besked, der kommer, mens man er på vej ind til et møde — og
+                 så er det også dér, man kommer til at trykke forkert. Uden en
+                 vej tilbage ville appen holde op med at spørge om det
+                 program, man rent faktisk holder sine møder i, uden at man
+                 kunne finde ud af hvorfor. -->
+            <StackPanel x:Name="FravalgtPanel" Margin="24,14,0,0" Visibility="Collapsed">
+              <TextBlock Text="Der spørges ikke om disse programmer" FontSize="12.5"
+                         FontWeight="SemiBold" />
+              <TextBlock FontSize="12" Margin="0,5,0,0" TextWrapping="Wrap" LineHeight="19"
+                         Foreground="{StaticResource TekstMeget}"
+                         Text="Fjern et program fra listen, hvis du kom til at frabede dig det — så spørges der igen næste gang." />
+
+              <ItemsControl x:Name="Fravalgte" Margin="0,10,0,0">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate>
+                    <Border Background="#FF181B22" BorderBrush="{StaticResource PanelKant}"
+                            BorderThickness="1" CornerRadius="6" Padding="12,8" Margin="0,0,0,6">
+                      <Grid>
+                        <StackPanel Margin="0,0,90,0">
+                          <TextBlock Text="{Binding Navn}" FontSize="12.5" TextWrapping="Wrap" />
+                          <TextBlock Text="{Binding Sti}" FontSize="10.5" Margin="0,2,0,0"
+                                     TextTrimming="CharacterEllipsis"
+                                     Foreground="{StaticResource TekstMeget}" />
+                        </StackPanel>
+                        <Button Content="Spørg igen" Tag="{Binding Noegle}" Click="Fravalg_Fjern"
+                                HorizontalAlignment="Right" VerticalAlignment="Center"
+                                Padding="12,5" FontSize="11.5" />
+                      </Grid>
+                    </Border>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+          </StackPanel>
+        </Border>
           </StackPanel>
         </ScrollViewer>
       </TabItem>

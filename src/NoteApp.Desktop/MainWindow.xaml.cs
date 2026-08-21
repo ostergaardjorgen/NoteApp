@@ -182,8 +182,28 @@ public partial class MainWindow : Window
         {
             _genvej.Trykket += LynstartOptagelse;
             TilslutGenvej();
+
+            // Mødevagten. Den gør intet, før den er slået til under
+            // Indstillinger — se AppSettings.MoedevagtTil for hvorfor.
+            Moedevagten.Opdater();
         };
     }
+
+    /// <summary>
+    /// Holder øje med, om et andet program åbner mikrofonen — altså om der er
+    /// startet et møde.
+    ///
+    /// Den ligger HER og ikke i MeetingView, fordi den skal virke, mens man er
+    /// et hvilket som helst sted i appen. Den starter ikke selv en optagelse;
+    /// den beder <see cref="LynstartOptagelse"/> om det, præcis som
+    /// genvejstasten gør — så der kun er ÉN vej ind i en optagelse.
+    /// </summary>
+    public Moedevagt Moedevagten => _moedevagt ??= new Moedevagt(
+        optagerAllerede: () => _moede.IsRecording,
+        startOptagelse: LynstartOptagelse,
+        ejer: () => this);
+
+    private Moedevagt? _moedevagt;
 
     /// <summary>
     /// Siger, at dokumentet er klart, og tilbyder at åbne det.

@@ -141,8 +141,75 @@ public partial class SettingsView : UserControl
         VisAutostart();
     }
 
+    // ------------------------------------------------------------ mødevagten
+
+    private void Moedevagt_Klik(object sender, RoutedEventArgs e)
+    {
+        var til = MoedevagtTil.IsChecked == true;
+
+        AppSettings.Current.MoedevagtTil = til;
+        AppSettings.Current.Save();
+
+        // Hakket skal virke med det samme. Et valg, der foerst traeder i kraft
+        // efter en genstart, er et valg, man tror er i kraft.
+        if (Window.GetWindow(this) is MainWindow hoved) hoved.Moedevagten.Opdater();
+
+        Status.Text = til
+            ? "Appen spørger nu, når et andet program bruger mikrofonen i mere end et halvt minut."
+            : "Appen holder ikke længere øje med mikrofonen.";
+
+        VisFravalgte();
+    }
+
+    /// <summary>
+    /// Et program, der har fået «spørg aldrig», sættes tilbage på listen.
+    ///
+    /// Fravalget tages med ét klik i en besked, der kommer, mens man er på vej
+    /// ind til et møde — og det er også dér, man rammer forkert. Uden den her
+    /// vej tilbage ville appen tie om netop det program, man holder sine møder
+    /// i, uden at man kunne finde ud af hvorfor.
+    /// </summary>
+    private void Fravalg_Fjern(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button b || b.Tag is not string noegle) return;
+
+        var s = AppSettings.Current;
+        s.MoedevagtAldrig.RemoveAll(n => n.Equals(noegle, StringComparison.OrdinalIgnoreCase));
+        s.Save();
+
+        VisFravalgte();
+        Status.Text = "Der spørges igen næste gang, det program bruger mikrofonen.";
+    }
+
+    /// <summary>
+    /// Listen over fravalgte programmer, med et navn man kan genkende.
+    ///
+    /// Nøglen er en sti eller et pakkenavn og kan være hundrede tegn lang.
+    /// Den står med småt under navnet — man skal kunne se, HVILKEN af to
+    /// installationer det er, uden at skulle læse en sti for at genkende
+    /// «Teams».
+    /// </summary>
+    private void VisFravalgte()
+    {
+        var liste = AppSettings.Current.MoedevagtAldrig
+            .Select(n => new
+            {
+                Noegle = n,
+                Navn = Mikrofonvagt.Navnet(n),
+                Sti = n.Replace('#', '\\')
+            })
+            .ToList();
+
+        Fravalgte.ItemsSource = liste;
+
+        FravalgtPanel.Visibility = liste.Count == 0 ? Visibility.Collapsed : Visibility.Visible;
+    }
+
     private void Indlaes()
     {
+        MoedevagtTil.IsChecked = AppSettings.Current.MoedevagtTil;
+        VisFravalgte();
+
         var mikrofoner = AudioDevices.Microphones();
         var hoejttalere = AudioDevices.Speakers();
 
