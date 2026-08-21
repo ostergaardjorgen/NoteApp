@@ -17,6 +17,7 @@
       <RowDefinition Height="Auto" />
       <RowDefinition Height="Auto" />
       <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
       <RowDefinition Height="*" />
     </Grid.RowDefinitions>
 
@@ -62,11 +63,53 @@
       </Grid>
     </Border>
 
-    <TextBlock x:Name="Status" Grid.Row="2" Style="{StaticResource Underskrift}"
-               Margin="2,12,2,10" HorizontalAlignment="Center" />
+    <!-- ============ AFGRÆNSNINGEN ============
+
+         Tre felter, og de er alle tre valgt, FØR optagelsen begyndte — mappen,
+         mødetypen og sproget vælges i opstartsdialogen. Det er dét, der gør
+         dem brugbare fra dag ét: de er ikke noget, man skal gå tilbage og
+         udfylde bagefter.
+
+         De står UNDER søgefeltet og ikke ved siden af. Søgefeltet er skærmens
+         tyngdepunkt; en række rullelister i samme højde ville gøre det til ét
+         felt blandt fire. Her er de en indsnævring af det, man lige har
+         skrevet — og de er små, fordi de sjældnere bruges. -->
+    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center"
+                Margin="0,12,0,0">
+      <TextBlock Text="Søg kun i" FontSize="11.5" VerticalAlignment="Center"
+                 Margin="0,0,10,0" Foreground="{StaticResource TekstMeget}" />
+
+      <ComboBox x:Name="Mappefilter" MinWidth="150" FontSize="12" Padding="8,5"
+                SelectionChanged="Filter_Aendret" ToolTip="Kun optagelser i denne mappe">
+        <ComboBox.ItemTemplate>
+          <DataTemplate><TextBlock Text="{Binding Navn}" /></DataTemplate>
+        </ComboBox.ItemTemplate>
+      </ComboBox>
+
+      <ComboBox x:Name="Typefilter" MinWidth="150" FontSize="12" Padding="8,5" Margin="8,0,0,0"
+                SelectionChanged="Filter_Aendret" ToolTip="Kun optagelser af denne mødetype">
+        <ComboBox.ItemTemplate>
+          <DataTemplate><TextBlock Text="{Binding Navn}" /></DataTemplate>
+        </ComboBox.ItemTemplate>
+      </ComboBox>
+
+      <ComboBox x:Name="Sprogfilter" MinWidth="130" FontSize="12" Padding="8,5" Margin="8,0,0,0"
+                SelectionChanged="Filter_Aendret" ToolTip="Kun optagelser på dette sprog">
+        <ComboBox.ItemTemplate>
+          <DataTemplate><TextBlock Text="{Binding Navn}" /></DataTemplate>
+        </ComboBox.ItemTemplate>
+      </ComboBox>
+
+      <Button x:Name="RydFilter" Content="Ryd" Click="RydFilter_Klik" Margin="8,0,0,0"
+              Padding="10,5" FontSize="11.5" Visibility="Collapsed"
+              ToolTip="Søg i det hele igen" />
+    </StackPanel>
+
+    <TextBlock x:Name="Status" Grid.Row="3" Style="{StaticResource Underskrift}"
+               Margin="2,10,2,10" HorizontalAlignment="Center" />
 
     <!-- ===================== Resultaterne ====================== -->
-    <Border Grid.Row="3" Background="{StaticResource Panel}" CornerRadius="10"
+    <Border Grid.Row="4" Background="{StaticResource Panel}" CornerRadius="10"
             BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
       <Grid>
 

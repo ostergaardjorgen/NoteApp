@@ -419,10 +419,13 @@
 
           <StackPanel x:Name="OpsumTom" VerticalAlignment="Center" HorizontalAlignment="Center"
                       MaxWidth="480">
-            <TextBlock Text="Hvad handlede mødet om?" FontSize="17" FontWeight="SemiBold"
-                       HorizontalAlignment="Center" />
-            <TextBlock FontSize="13" Margin="0,10,0,0" TextWrapping="Wrap" LineHeight="21"
-                       TextAlignment="Center" Foreground="{StaticResource TekstSvag}"
+            <!-- Overskrift og forklaring sættes i koden: et webinar spørges om
+                 noget andet end et møde. «Hvad blev der besluttet» er et
+                 spørgsmål uden svar, når nogen har undervist i en time. -->
+            <TextBlock x:Name="OpsumOverskrift" Text="Hvad handlede mødet om?" FontSize="17"
+                       FontWeight="SemiBold" HorizontalAlignment="Center" />
+            <TextBlock x:Name="OpsumForklaring" FontSize="13" Margin="0,10,0,0" TextWrapping="Wrap"
+                       LineHeight="21" TextAlignment="Center" Foreground="{StaticResource TekstSvag}"
                        Text="En kort opsummering på ti linjer: hvad der blev besluttet, hvad der blev aftalt, og hvad der stod åbent. Til at huske mødet med — ikke et dokument, du skal navngive og gemme." />
 
             <!-- ============ TO VEJE, OG FORSKELLEN STÅR DER ============
@@ -450,8 +453,8 @@
                 <StackPanel>
                   <TextBlock Text="PÅ MASKINEN" FontSize="9.5" FontWeight="SemiBold"
                              Foreground="{StaticResource Accent}" />
-                  <TextBlock FontSize="12" LineHeight="18" TextWrapping="Wrap" Margin="0,6,0,0"
-                             Foreground="{StaticResource TekstSvag}"
+                  <TextBlock x:Name="OpsumLokalTekst" FontSize="12" LineHeight="18" TextWrapping="Wrap"
+                             Margin="0,6,0,0" Foreground="{StaticResource TekstSvag}"
                              Text="Cirka et halvt minut. Intet forlader maskinen. Kort — nogle få linjer og højst fire punkter. Den skriver ikke tal, og det, den skriver, bliver efterprøvet mod udskriften." />
                   <Button x:Name="OpsumLokalKnap" Content="Kort lokal opsummering"
                           Click="OpsumLokal_Klik" Margin="0,12,0,0" Padding="14,8"

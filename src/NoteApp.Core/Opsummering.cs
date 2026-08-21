@@ -139,6 +139,65 @@ public static class Opsummering
     /// på fem linjer bærer sjældent sin egen vægt, og et forkert et koster
     /// mere, end et rigtigt gavner.
     /// </summary>
+    /// <summary>
+    /// Opskriften til et WEBINAR, lavet på maskinen.
+    ///
+    /// ET WEBINAR SKAL IKKE SPØRGES OM DET SAMME SOM ET MØDE.
+    ///
+    /// Mødeopskriften beder om «det vigtigste, der blev sagt eller aftalt», og
+    /// på et webinar er der ikke aftalt noget. Resultatet var en opsummering,
+    /// der begyndte med «Mødet handlede om …» og ledte efter beslutninger, der
+    /// ikke fandtes — set på skærmen 21-08-2026.
+    ///
+    /// Her er spørgsmålet et andet: hvad ville de lære mig, og hvad kan jeg
+    /// tage med? Det er også dét, man vil vide om et webinar, man ikke selv
+    /// nåede at se.
+    ///
+    /// Grænserne er de samme som ved møder og af samme grund: fem linjer, ingen
+    /// tal. Se <see cref="LokalOpskrift"/> for målingen bag.
+    /// </summary>
+    public static PromptTemplate LokalWebinaropskrift() => new()
+    {
+        Name = "Opsummering af webinar (på maskinen)",
+        Temperature = 0.2,
+        MaxTokens = 320,
+        SystemPrompt =
+            "Du laver en MEGET KORT opsummering af et WEBINAR ud fra en udskrift. Du " +
+            "skriver ALTID på dansk, også når webinaret blev holdt på et andet sprog.\n\n" +
+            "ET WEBINAR ER IKKE ET MØDE\n\n" +
+            "Der bliver ikke besluttet noget, og der bliver ikke aftalt noget. Nogen " +
+            "underviser. Skriv aldrig «mødet» — skriv «webinaret».\n\n" +
+            "FORMEN\n\n" +
+            "To til tre linjer om, hvad webinaret handlede om, og hvem det er relevant " +
+            "for. Derefter højst fire punkter med bindestreg, hver på én linje: det " +
+            "vigtigste, man kan tage med sig.\n\n" +
+            "Et punkt skal kunne stå alene og sige noget. «Om adgangsstyring» siger " +
+            "ingenting; «Identitet er blevet den vigtigste kontrol, fordi netværkets " +
+            "yderkant er brudt sammen» siger noget.\n\n" +
+            "Fagudtryk beholdes, som de blev sagt — også engelske. Opfind ikke danske " +
+            "ord for dem.\n\n" +
+            "Hold dig under 120 ord i alt. Bliv færdig — en opsummering, der stopper " +
+            "midt i en sætning, kan ikke bruges.\n\n" +
+            "REGLERNE\n\n" +
+            "Skriv ALDRIG et navn eller en dato, der ikke står i udskriften.\n\n" +
+            "SKRIV IKKE TAL. Ingen antal, ingen beløb, ingen procenter, ingen årstal.\n\n" +
+            "Er webinaret holdt af en leverandør, så skriv hvem der påstår noget om " +
+            "eget produkt — «Elimity oplyser, at …». Vurder aldrig selv, om det passer.\n\n" +
+            "Er du i tvivl om noget, så lad være med at skrive det.\n\n" +
+            "Svar med opsummeringen og intet andet.",
+        UserPrompt = ""
+    };
+
+    /// <summary>
+    /// Den rigtige opskrift til den slags optagelse, det er.
+    ///
+    /// ÉT STED AT VÆLGE. Kaldes opskrifterne direkte rundt omkring, får et
+    /// webinar før eller siden mødeopskriften igen — og det viser sig som en
+    /// opsummering, der leder efter beslutninger, der ikke findes.
+    /// </summary>
+    public static PromptTemplate LokalOpskrift(MeetingType type) =>
+        type == MeetingType.Webinar ? LokalWebinaropskrift() : LokalOpskrift();
+
     public static PromptTemplate LokalOpskrift() => new()
     {
         Name = "Opsummering (på maskinen)",

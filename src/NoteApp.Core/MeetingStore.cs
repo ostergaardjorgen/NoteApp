@@ -79,6 +79,29 @@ public static class MeetingStore
         return null;
     }
 
+    /// <summary>
+    /// Alle optagelsers oplysninger.
+    ///
+    /// Bruges dér, hvor spørgsmålet gælder arkivet som helhed — hvilke mapper,
+    /// mødetyper og sprog findes der overhovedet? En liste over valgmuligheder,
+    /// der ikke findes, er værre end ingen liste: den lover noget at finde.
+    ///
+    /// Der læses direkte fra disken, som alle andre steder. En optagelse uden
+    /// læsbar meeting.json springes over frem for at vælte opslaget.
+    /// </summary>
+    public static IEnumerable<MeetingMetadata> Alle()
+    {
+        if (!Directory.Exists(UserDataPaths.Meetings)) yield break;
+
+        foreach (var mappe in Directory.EnumerateDirectories(UserDataPaths.Meetings))
+        {
+            MeetingMetadata? meta = null;
+            try { meta = Load(mappe); } catch (Exception) { }
+
+            if (meta is not null) yield return meta;
+        }
+    }
+
     public static string Slug(string? title, DateTimeOffset when)
     {
         var stempel = when.ToString("yyyy-MM-dd_HH-mm");

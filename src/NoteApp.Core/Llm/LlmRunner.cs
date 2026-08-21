@@ -323,7 +323,37 @@ public sealed class LlmRunner
         // ANSI-farvekoder fra terminaludgangen.
         tekst = System.Text.RegularExpressions.Regex.Replace(tekst, @"\x1B\[[0-9;]*[A-Za-z]", "");
 
-        return tekst.Trim();
+        return FjernTaenkning(tekst).Trim();
+    }
+
+    /// <summary>
+    /// Fjerner modellens højttænkning fra svaret.
+    ///
+    /// FUNDET PÅ SKÆRMEN 21-08-2026: en opsummering begyndte med linjen
+    /// «&lt;/think&gt;». Den stod midt i det, brugeren skulle læse.
+    ///
+    /// Qwen3 skriver sin tankegang mellem &lt;think&gt; og &lt;/think&gt;.
+    /// «/no_think» i systemprompten slukker for INDHOLDET — det er derfor
+    /// kørslen faldt fra 63 til 9 sekunder — men modellen skriver stadig et
+    /// TOMT par mærker, og lukkemærket blev stående i teksten.
+    ///
+    /// Der fjernes både hele blokke og et løsrevet lukkemærke. Det løsrevne
+    /// er det almindelige tilfælde her; hele blokke findes, hvis nogen slår
+    /// tænkningen til igen på en anden model.
+    ///
+    /// Alt FØR et lukkemærke ryger med. Står der noget dér, er det tankegang —
+    /// svaret begynder efter mærket.
+    /// </summary>
+    private static string FjernTaenkning(string tekst)
+    {
+        var slut = tekst.LastIndexOf("</think>", StringComparison.OrdinalIgnoreCase);
+        if (slut >= 0) tekst = tekst[(slut + "</think>".Length)..];
+
+        // Et aabningsmaerke uden lukkemaerke: saa er hele svaret tankegang,
+        // og der er intet at vise. Maerket fjernes, og resten faar lov at
+        // staa — en halv tanke er bedre end en tom rude, og den slags svar
+        // bliver alligevel fanget af afkortningskontrollen.
+        return tekst.Replace("<think>", "", StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>

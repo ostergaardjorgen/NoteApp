@@ -1317,6 +1317,35 @@ public partial class UdskriftView : UserControl
     // --------------------------------------------------------- opsummering
 
     /// <summary>
+    /// Sætter spørgsmålet, fanen stiller — det er ikke det samme for et
+    /// webinar som for et møde.
+    ///
+    /// «Hvad blev der besluttet, hvad blev der aftalt, og hvad stod åbent» er
+    /// tre spørgsmål uden svar, når nogen har undervist i en time. Så er
+    /// spørgsmålet: hvad ville de lære mig, og hvad kan jeg tage med?
+    ///
+    /// Teksten skal passe, FØR man trykker. Trykker man på en knap, der lover
+    /// beslutninger, og får noget andet, ser resultatet forkert ud — også når
+    /// det er rigtigt.
+    /// </summary>
+    private void Spoergsmaalet()
+    {
+        var erWebinar = _meta?.Type == MeetingType.Webinar;
+
+        OpsumOverskrift.Text = erWebinar
+            ? "Hvad ville webinaret lære dig?"
+            : "Hvad handlede mødet om?";
+
+        OpsumForklaring.Text = erWebinar
+            ? "En kort opsummering: hvad webinaret handlede om, og det vigtigste, du kan tage med dig. Til at huske det med — ikke et dokument, du skal navngive og gemme."
+            : "En kort opsummering på ti linjer: hvad der blev besluttet, hvad der blev aftalt, og hvad der stod åbent. Til at huske mødet med — ikke et dokument, du skal navngive og gemme.";
+
+        OpsumLokalTekst.Text = erWebinar
+            ? "Cirka et halvt minut. Intet forlader maskinen. Kort — nogle få linjer og højst fire punkter med det, du kan tage med. Den skriver ikke tal, og det, den skriver, bliver efterprøvet mod udskriften."
+            : "Cirka et halvt minut. Intet forlader maskinen. Kort — nogle få linjer og højst fire punkter. Den skriver ikke tal, og det, den skriver, bliver efterprøvet mod udskriften.";
+    }
+
+    /// <summary>
     /// Viser opsummeringen, hvis der er lavet en.
     ///
     /// ER UDSKRIFTEN RETTET SIDEN, SIGES DET.
@@ -1327,6 +1356,8 @@ public partial class UdskriftView : UserControl
     /// </summary>
     private void VisOpsummering()
     {
+        Spoergsmaalet();
+
         if (_mappe is null) { OpsumTom.Visibility = Visibility.Visible; return; }
 
         var o = Opsummering.Hent(_mappe);
@@ -1466,20 +1497,30 @@ public partial class UdskriftView : UserControl
         void Sig(string s) { OpsumStatus.Text = s; Meld(s); }
 
         var tikker = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+        var laeser = _meta?.Type == MeetingType.Webinar ? "webinaret" : "mødet";
+
         tikker.Tick += (_, _) =>
-            Sig($"{navn} læser mødet igennem … {ur.Elapsed.TotalSeconds:0} sek.");
+            Sig($"{navn} læser {laeser} igennem … {ur.Elapsed.TotalSeconds:0} sek.");
         tikker.Start();
 
         Sig($"{navn} indlæses …");
 
         try
         {
-            var titel = _meta?.Title ?? "mødet";
+            // ET WEBINAR SPØRGES OM NOGET ANDET END ET MØDE.
+            //
+            // Både opskriften og den linje, der følger med udskriften. Stod der
+            // «Mødet hedder …» over et webinar, begyndte svaret med «Mødet
+            // handlede om …» — og så ledte den efter beslutninger, der ikke
+            // fandtes. Set på skærmen 21-08-2026.
+            var erWebinar = _meta?.Type == MeetingType.Webinar;
+            var slags = erWebinar ? "Webinaret" : "Mødet";
+            var titel = _meta?.Title ?? (erWebinar ? "webinaret" : "mødet");
 
             var svar = await new LlmRunner(cli).RunAsync(
                 model,
-                Opsummering.LokalOpskrift(),
-                $"Mødet hedder «{titel}».\n\nUdskrift:\n{tekst}");
+                Opsummering.LokalOpskrift(_meta?.Type ?? MeetingType.Online),
+                $"{slags} hedder «{titel}».\n\nUdskrift:\n{tekst}");
 
             var ren = svar.Text.Trim();
 

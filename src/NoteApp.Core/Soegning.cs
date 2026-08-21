@@ -27,12 +27,113 @@ public sealed record Traef(int Position, string Uddrag);
 /// Mødets eller dokumentets id. Det er DEN, der åbner tingen — ikke stien.
 /// En sti kan flyttes og en titel omdøbes; id'et kan ikke.
 /// </param>
+/// <param name="Vaegt">
+/// Hvor godt det bedste sted i kilden svarer på spørgsmålet — hvor mange af
+/// søgeordene der står tæt på hinanden dér.
+///
+/// Den findes, fordi ANTALLET af steder ikke er det samme som relevans. En
+/// udskrift, hvor «indigo» står tolv gange og «access» én gang i den anden
+/// ende, har tolv steder og intet svar. En, hvor de to står i den samme
+/// sætning, har ét sted og er dét, man ledte efter.
+/// </param>
 public sealed record Fund(
     Fundtype Slags,
     string Kilde,
     string Overskrift,
     DateTimeOffset Tid,
-    IReadOnlyList<Traef> Traef);
+    IReadOnlyList<Traef> Traef,
+    int Vaegt = 0)
+{
+    /// <summary>
+    /// Hvor mange af søgeordene der står tæt på hinanden det bedste sted.
+    ///
+    /// DEN SKAL KUNNE VISES. Søger man på to ord og får steder, hvor kun det
+    /// ene står, ser det ud som en fejl i søgningen — og det er det ikke:
+    /// begge ord ER i optagelsen, de bliver bare aldrig sagt i den samme
+    /// sammenhæng. Målt på et rigtigt webinar 21-08-2026 med «access indigo»:
+    /// begge ord står der mange gange, og de står aldrig inden for hundrede
+    /// tegn af hinanden.
+    ///
+    /// Uden det her tal kan skærmen ikke sige forskel på «her er svaret» og
+    /// «de to ting hører ikke sammen i den her optagelse».
+    /// </summary>
+    public int OrdSammen => Vaegt / 10;
+}
+
+/// <summary>
+/// Hvad søgningen overhovedet skal lede i.
+///
+/// HVORFOR DET IKKE ER NOK AT SØGE PÅ ORD
+///
+/// Efter to hundrede optagelser står det samme fagord i halvdelen af dem.
+/// «Access review» i kundens møder er ét spørgsmål; det samme ord i en stak
+/// engelske webinarer er et andet. Uden en afgrænsning er svaret en liste,
+/// man ikke kan overskue — og så er arkivet reelt lige så tabt som uden en
+/// søgning.
+///
+/// TRE FELTER, OG DE ER ALLE TRE VALGT, FØR OPTAGELSEN BEGYNDTE. Mappen og
+/// mødetypen vælges i opstartsdialogen; sproget gør de også. Det er dét, der
+/// gør filtrene brugbare fra dag ét — de er ikke noget, man skal gå tilbage
+/// og udfylde bagefter.
+///
+/// Null eller tom betyder «alle».
+/// </summary>
+public sealed record Soegefilter(string? Sprog = null, string? Moedetype = null, string? Mappe = null)
+{
+    private static bool Ens(string? a, string? b) =>
+        string.IsNullOrWhiteSpace(a) || (b is not null && a.Equals(b, StringComparison.CurrentCultureIgnoreCase));
+
+    /// <summary>
+    /// Sproget på en optagelse.
+    ///
+    /// Whispers eget svar vinder, fordi det er dét, teksten FAKTISK blev
+    /// skrevet ud på. Er den ikke skrevet ud endnu, gælder det, brugeren
+    /// valgte ved start — og på et webinar er det højttalersporet, fordi der
+    /// ikke er noget mikrofonspor.
+    /// </summary>
+    public static string? SprogPaa(MeetingMetadata? m) =>
+        m?.Language ?? m?.ValgtSprogLoop ?? m?.ValgtSprogMik;
+
+    public bool Passer(MeetingMetadata? m)
+    {
+        if (m is null) return Erbart();
+
+        return Ens(Sprog, SprogPaa(m))
+               && Ens(Moedetype, m.Moedetype)
+               && Ens(Mappe, m.Mappe);
+    }
+
+    /// <summary>
+    /// Et dokument bedømmes på sine EGNE oplysninger, hvor det har nogen, og
+    /// ellers på den optagelse, det er lavet af.
+    ///
+    /// Mødetypen og mappen står på dokumentet selv og kan være ændret siden;
+    /// sproget står kun på optagelsen.
+    /// </summary>
+    public bool PasserDokument(Documents.DocumentInfo d, MeetingMetadata? kilde)
+    {
+        if (Tomt) return true;
+
+        var type = string.IsNullOrWhiteSpace(d.Template) ? kilde?.Moedetype : d.Template;
+        var mappe = string.IsNullOrWhiteSpace(d.Mappe) ? kilde?.Mappe : d.Mappe;
+
+        return Ens(Sprog, SprogPaa(kilde)) && Ens(Moedetype, type) && Ens(Mappe, mappe);
+    }
+
+    public bool Tomt => string.IsNullOrWhiteSpace(Sprog)
+                        && string.IsNullOrWhiteSpace(Moedetype)
+                        && string.IsNullOrWhiteSpace(Mappe);
+
+    /// <summary>
+    /// En optagelse uden oplysninger — en fra før felterne fandtes, eller en
+    /// fra konsolprogrammet.
+    ///
+    /// Den kommer kun med, når der ikke er filtreret. Ellers ville et filter
+    /// på «Webinarer» give en liste med alt det, appen ikke ved noget om — og
+    /// et filter, der ikke filtrerer, er værre end intet filter.
+    /// </summary>
+    private bool Erbart() => Tomt;
+}
 
 /// <summary>
 /// Søgning på tværs af alle møder og dokumenter.
@@ -66,7 +167,7 @@ public sealed record Fund(
 public static class Soegning
 {
     /// <summary>Så mange tegn vises omkring et træf.</summary>
-    private const int Omkring = 80;
+    private const int Omkring = 100;
 
     /// <summary>
     /// Så mange steder tages med pr. kilde.
@@ -78,22 +179,98 @@ public static class Soegning
     private const int MaksPrKilde = 40;
 
     /// <summary>
+    /// Hvor langt to ord må stå fra hinanden for at høre sammen.
+    ///
+    /// HUNDREDE TEGN TIL HVER SIDE — omtrent en sætning eller to. Står
+    /// «access» og «Indigo» inden for det, handler stedet om begge dele. Står
+    /// de tyve minutter fra hinanden i den samme udskrift, er det to
+    /// forskellige emner, der tilfældigvis blev nævnt i det samme møde.
+    ///
+    /// Det er dét, der skiller et svar fra et sammentræf.
+    ///
+    /// DEN ER DEN SAMME SOM UDDRAGETS BREDDE, OG DET SKAL DEN BLIVE VED MED.
+    /// Var nærheden større, ville et ord kunne tælle som «tæt på» og alligevel
+    /// være klippet væk af uddraget — og så stod der en række, der lovede to
+    /// ord og viste ét. Målt med 100 mod 80: to af de fem øverste rækker på
+    /// «identity governance» viste kun det ene ord.
+    /// </summary>
+    private const int Naerhed = Omkring;
+
+    /// <summary>
+    /// Deler spørgsmålet i søgeord — og holder sammen på det, der står i
+    /// anførselstegn.
+    ///
+    /// «"access review" indigo» er to søgeord: sætningen «access review», som
+    /// skal stå ordret, og ordet «indigo». Uden anførselstegnene ville
+    /// «access» og «review» blive to krav, der kunne opfyldes hver for sig i
+    /// hver sin ende af et møde.
+    /// </summary>
+    public static List<string> Del(string spoergsmaal)
+    {
+        var ud = new List<string>();
+        var sb = new StringBuilder();
+        var iCitat = false;
+
+        foreach (var c in spoergsmaal)
+        {
+            if (c == '"')
+            {
+                iCitat = !iCitat;
+                if (!iCitat && sb.Length > 0) { ud.Add(sb.ToString().Trim()); sb.Clear(); }
+                continue;
+            }
+
+            if (c == ' ' && !iCitat)
+            {
+                if (sb.Length > 0) { ud.Add(sb.ToString().Trim()); sb.Clear(); }
+                continue;
+            }
+
+            sb.Append(c);
+        }
+
+        if (sb.Length > 0) ud.Add(sb.ToString().Trim());
+
+        return ud.Where(o => o.Length > 0).Distinct(StringComparer.CurrentCultureIgnoreCase).ToList();
+    }
+
+    /// <summary>
     /// Finder alle steder, ordene optræder.
     ///
-    /// Flere ord betyder, at de ALLE skal stå i den samme tekst — ikke
-    /// nødvendigvis ved siden af hinanden. Stederne findes på det sjældneste
-    /// af ordene: det almindelige ord stod der bare for at snævre ind.
+    /// ALLE ORD SKAL STÅ I DEN SAMME TEKST. Det er uændret — ét manglende ord
+    /// betyder, at teksten ikke er den, der blev spurgt om.
+    ///
+    /// MEN STEDERNE FINDES NU PÅ ALLE ORDENE, IKKE KUN PÅ ÉT.
+    ///
+    /// Før blev stederne fundet på det SJÆLDNESTE ord, og de øvrige ord stod
+    /// kun for at snævre ind. Det så rigtigt ud i teorien og var forkert på
+    /// skærmen: søger man «access indigo», fik man otte steder, hvor der stod
+    /// «Indigo» — og ikke ét af dem havde «access» i sig, selv om ordet stod i
+    /// udskriften. Fundet 21-08-2026.
+    ///
+    /// Nu findes hvert sted, hvert af ordene står, og stederne rangordnes
+    /// efter, HVOR MANGE af ordene der står tæt på. Et sted med begge ord slår
+    /// et sted med ét — og det er dét, man leder efter, når man skriver to ord.
     /// </summary>
-    public static List<Fund> Soeg(string spoergsmaal, CancellationToken ct = default)
+    public static List<Fund> Soeg(string spoergsmaal, CancellationToken ct = default) =>
+        Soeg(spoergsmaal, new Soegefilter(), ct);
+
+    /// <param name="filter">
+    /// Hvad der overhovedet skal ledes i. Et tomt filter betyder alt.
+    /// </param>
+    public static List<Fund> Soeg(string spoergsmaal, Soegefilter filter,
+                                  CancellationToken ct = default)
     {
-        var ord = spoergsmaal
-            .Split(' ', StringSplitOptions.RemoveEmptyEntries)
-            .Select(o => o.Trim())
-            .Where(o => o.Length > 0)
-            .ToArray();
+        var ord = Del(spoergsmaal).ToArray();
 
         var fund = new List<Fund>();
         if (ord.Length == 0) return fund;
+
+        // Moedernes oplysninger slaas op ÉN gang og genbruges til dokumenterne.
+        // Et dokument kender ikke sit eget sprog — det staar paa den optagelse,
+        // det er lavet af, og uden opslaget kunne et sprogfilter ikke gaelde
+        // dokumenter overhovedet.
+        var moeder = new Dictionary<string, MeetingMetadata>(StringComparer.OrdinalIgnoreCase);
 
         foreach (var mappe in Moedemapper())
         {
@@ -103,6 +280,10 @@ public static class Soegning
             var id = meta?.Id.ToString() ?? "";
             var titel = meta?.Title ?? Path.GetFileName(mappe);
             var tid = meta?.StartedAt ?? new DateTimeOffset(Directory.GetLastWriteTime(mappe));
+
+            if (meta is not null && id.Length > 0) moeder[id] = meta;
+
+            if (!filter.Passer(meta)) continue;
 
             // Kun ÉN udskrift pr. møde. Et onlinemøde har tre txt-filer — de
             // to spor og fletningen — og uden det her ville hvert eneste ord
@@ -120,6 +301,13 @@ public static class Soegning
         {
             ct.ThrowIfCancellationRequested();
 
+            // Et dokument arver optagelsens oplysninger, hvor det giver
+            // mening. Dets egen mødetype og mappe vinder — de kan være
+            // ændret, siden dokumentet blev lavet.
+            moeder.TryGetValue(d.SourceMeetingId ?? "", out var kilde);
+
+            if (!filter.PasserDokument(d, kilde)) continue;
+
             // Der søges i selve dokumentet. Positionerne skal passe med den
             // tekst, skærmen viser — ellers springer man det forkerte sted
             // hen. Beskrivelsen er brugerens egne ord og tages med, men uden
@@ -133,10 +321,18 @@ public static class Soegning
             Tilfoej(fund, Fundtype.Dokument, d.Id, d.Title, d.Created, tekst, ord);
         }
 
-        // Flest steder først. Ét træf er en omtale i forbifarten; tolv er dét,
-        // mødet handlede om — og det er som regel den, man leder efter.
+        // DET BEDSTE SVAR FØRST, IKKE DET FLESTE.
+        //
+        // Her stod «flest steder først», og det var forkert, saa snart man
+        // soeger paa to ting: en udskrift, hvor det ene ord staar tolv gange
+        // og det andet én gang i den anden ende, laa oeverst — over den, hvor
+        // de to stod i den samme saetning.
+        //
+        // Vaegten er, hvor mange af ordene der staar taet paa hinanden det
+        // bedste sted. Er den ens, afgoer antallet, og derefter datoen.
         return fund
-            .OrderByDescending(f => f.Traef.Count)
+            .OrderByDescending(f => f.Vaegt)
+            .ThenByDescending(f => f.Traef.Count)
             .ThenByDescending(f => f.Tid)
             .ToList();
     }
@@ -187,41 +383,148 @@ public static class Soegning
     {
         if (tekst.Length == 0 || kilde.Length == 0) return;
 
-        // ALLE ord skal stå der. Ét manglende ord betyder, at teksten ikke er
+        // Hvert ord for sig: hvor staar det henne? Listerne er sorterede af
+        // sig selv, fordi der soeges forfra.
+        var steder = ord.Select(o => Alle(tekst, o)).ToArray();
+
+        // ALLE ord skal staa der. Ét manglende ord betyder, at teksten ikke er
         // den, der blev spurgt om.
-        if (!ord.All(o => tekst.Contains(o, StringComparison.OrdinalIgnoreCase))) return;
+        if (steder.Any(s => s.Count == 0)) return;
 
-        // Stederne findes på det SJÆLDNESTE ord. Søger man «Alexander
-        // Finsburg», står «Alexander» otte steder og «Finsburg» ét — og det
-        // ene er dét, man ledte efter.
-        var bedst = ord.OrderBy(o => Antal(tekst, o)).First();
+        // ============ HVERT STED VEJES EFTER, HVOR MANGE ORD DER ER TÆT PÅ ============
+        //
+        // Et sted, hvor baade «access» og «indigo» staar inden for en sætning
+        // eller to, er et svar. Et sted, hvor kun det ene staar, er en
+        // omtale. Forskellen skal kunne ses paa raekkefoelgen, ellers er det
+        // tilfaeldigt, hvad man faar oejnene op for foerst.
+        var vejet = new List<(int Position, int Laengde, int Vaegt, int Ord)>();
 
-        var traef = new List<Traef>();
-        var i = 0;
-
-        while (traef.Count < MaksPrKilde
-               && (i = tekst.IndexOf(bedst, i, StringComparison.OrdinalIgnoreCase)) >= 0)
+        for (var w = 0; w < ord.Length; w++)
+        foreach (var p in steder[w])
         {
-            traef.Add(new Traef(i, Uddrag(tekst, i, bedst.Length)));
-            i += bedst.Length;
+            var naer = 0;
+
+            for (var a = 0; a < ord.Length; a++)
+                if (Findes(steder[a], p - Naerhed, p + ord[w].Length + Naerhed))
+                    naer++;
+
+            // Et helt ord vejer tungere end en stump inde i et andet ord.
+            // «access» i «accessories» er ikke det, nogen leder efter — men
+            // det skal stadig kunne findes, saa det er en vaegt og ikke et
+            // filter. Sammensatte ord paa dansk lever af det samme.
+            var helt = ErHeltOrd(tekst, p, ord[w].Length) ? 1 : 0;
+
+            vejet.Add((p, ord[w].Length, naer * 10 + helt, w));
+        }
+
+        // ============ TUNGEST FØRST — OG ORDENE PÅ SKIFT ============
+        //
+        // Ved lige vaegt skiftes der mellem ordene. Uden det ville listen ved
+        // en soegning paa to ting, der aldrig staar sammen, vise det ene ord
+        // hele vejen ned: «access» staar 27 steder og «indigo» 8, saa de
+        // foerste mange raekker blev «access». Maalt paa et rigtigt webinar
+        // 21-08-2026, hvor de to ord aldrig kommer naermere end 238 tegn paa
+        // hinanden.
+        //
+        // Man har spurgt om begge dele. Saa skal man kunne se begge dele.
+        var traef = new List<Traef>();
+        var taget = new List<int>();
+
+        foreach (var v in vejet
+                     .GroupBy(v => v.Vaegt)
+                     .OrderByDescending(g => g.Key)
+                     .SelectMany(g => PaaSkift(g, ord.Length)))
+        {
+            if (traef.Count >= MaksPrKilde) break;
+
+            // TO STEDER, DER OVERLAPPER, ER ÉT STED. Uden det her ville
+            // «access indigo» i den samme saetning give to raekker med
+            // naesten samme uddrag — og saa fylder det samme svar to gange.
+            if (taget.Any(t => Math.Abs(t - v.Position) < Omkring)) continue;
+
+            taget.Add(v.Position);
+            traef.Add(new Traef(v.Position, Uddrag(tekst, v.Position, v.Laengde)));
         }
 
         if (traef.Count > 0)
-            fund.Add(new Fund(slags, kilde, overskrift, tid, traef));
+            fund.Add(new Fund(slags, kilde, overskrift, tid, traef,
+                              vejet.Count == 0 ? 0 : vejet.Max(v => v.Vaegt)));
     }
 
-    private static int Antal(string tekst, string ord)
+    /// <summary>
+    /// Tager stederne på skift mellem søgeordene: først et sted for ord 1, så
+    /// et for ord 2, og forfra.
+    ///
+    /// Er ét af ordene brugt op, fortsætter de øvrige. Rækkefølgen inden for
+    /// hvert ord er den, det blev sagt i.
+    /// </summary>
+    private static IEnumerable<(int Position, int Laengde, int Vaegt, int Ord)> PaaSkift(
+        IEnumerable<(int Position, int Laengde, int Vaegt, int Ord)> steder, int antalOrd)
     {
-        var n = 0;
+        var koeer = Enumerable.Range(0, antalOrd)
+            .Select(w => steder.Where(s => s.Ord == w).OrderBy(s => s.Position).ToList())
+            .ToList();
+
+        for (var i = 0; koeer.Any(k => i < k.Count); i++)
+        foreach (var k in koeer)
+            if (i < k.Count) yield return k[i];
+    }
+
+    /// <summary>Alle steder, ordet står — forfra, så listen er sorteret.</summary>
+    private static List<int> Alle(string tekst, string ord)
+    {
+        var ud = new List<int>();
         var i = 0;
 
         while ((i = tekst.IndexOf(ord, i, StringComparison.OrdinalIgnoreCase)) >= 0)
         {
-            n++;
+            ud.Add(i);
             i += ord.Length;
+
+            // Et loft. Soeger man paa «og» i hundrede moeder, er der ikke
+            // noget svar at finde alligevel, og listen maa ikke koste et
+            // sekund pr. kilde.
+            if (ud.Count >= 2000) break;
         }
 
-        return n;
+        return ud;
+    }
+
+    /// <summary>
+    /// Er der en forekomst i intervallet? Listen er sorteret, så der ledes
+    /// binært — ellers ville hvert sted skulle sammenlignes med hvert andet,
+    /// og en times udskrift har tusinder af dem.
+    /// </summary>
+    private static bool Findes(List<int> sorteret, int fra, int til)
+    {
+        var lo = 0;
+        var hi = sorteret.Count - 1;
+
+        while (lo <= hi)
+        {
+            var m = (lo + hi) / 2;
+
+            if (sorteret[m] < fra) lo = m + 1;
+            else if (sorteret[m] > til) hi = m - 1;
+            else return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Står ordet alene — altså ikke inde i et længere ord?
+    ///
+    /// Der ses på tegnet før og efter. Er begge noget andet end bogstaver og
+    /// tal, er det et helt ord.
+    /// </summary>
+    private static bool ErHeltOrd(string tekst, int position, int laengde)
+    {
+        var foer = position == 0 || !char.IsLetterOrDigit(tekst[position - 1]);
+        var efter = position + laengde >= tekst.Length
+                    || !char.IsLetterOrDigit(tekst[position + laengde]);
+
+        return foer && efter;
     }
 
     /// <summary>

@@ -149,6 +149,8 @@ public partial class SearchView : UserControl
 
         Loaded += (_, _) =>
         {
+            FyldFiltre();
+
             if (start is { Length: > 0 })
             {
                 // Teksten saettes FOER fokus. Ellers markerer TextBox'en det
@@ -167,6 +169,83 @@ public partial class SearchView : UserControl
 
         _pause.Stop();
         _pause.Start();
+    }
+
+    // ------------------------------------------------------------- filtrene
+
+    /// <summary>Ét punkt i en filterliste: det, der vises, og det, der gælder.</summary>
+    public sealed record Filterpunkt(string Navn, string? Vaerdi);
+
+    /// <summary>
+    /// Fylder de tre filterlister med det, der FAKTISK ligger i arkivet.
+    ///
+    /// DER STÅR KUN DET, MAN KAN VÆLGE. En liste over alle tænkelige sprog
+    /// ville have tredive punkter, hvor de otteogtyve ikke giver noget. Har
+    /// man kun danske møder, er der ét sprog at vælge — og så siger listen
+    /// samtidig noget sandt om arkivet.
+    ///
+    /// Listerne bygges én gang, når skærmen åbnes. Kommer der en ny mappe til,
+    /// mens man står her, er den med næste gang; det er billigere end at læse
+    /// alle møder igennem ved hvert klik.
+    /// </summary>
+    private void FyldFiltre()
+    {
+        var mapper = new List<Filterpunkt> { new("Alle mapper", null) };
+        var typer = new List<Filterpunkt> { new("Alle mødetyper", null) };
+        var sprog = new List<Filterpunkt> { new("Alle sprog", null) };
+
+        var seteMapper = new HashSet<string>(StringComparer.CurrentCultureIgnoreCase);
+        var seteTyper = new HashSet<string>(StringComparer.CurrentCultureIgnoreCase);
+        var seteSprog = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var m in MeetingStore.Alle())
+        {
+            if (!string.IsNullOrWhiteSpace(m.Mappe) && seteMapper.Add(m.Mappe))
+                mapper.Add(new Filterpunkt(m.Mappe, m.Mappe));
+
+            if (!string.IsNullOrWhiteSpace(m.Moedetype) && seteTyper.Add(m.Moedetype))
+                typer.Add(new Filterpunkt(m.Moedetype, m.Moedetype));
+
+            if (Soegefilter.SprogPaa(m) is { Length: > 0 } s && seteSprog.Add(s))
+                sprog.Add(new Filterpunkt(Transcriber.LanguageName(s), s));
+        }
+
+        Saet(Mappefilter, mapper);
+        Saet(Typefilter, typer);
+        Saet(Sprogfilter, sprog);
+
+        static void Saet(System.Windows.Controls.ComboBox b, List<Filterpunkt> punkter)
+        {
+            // Er der kun «alle», er der intet at vaelge imellem — og en liste
+            // med ét punkt er en knap, der ikke goer noget.
+            b.ItemsSource = punkter;
+            b.SelectedIndex = 0;
+            b.IsEnabled = punkter.Count > 1;
+        }
+    }
+
+    private Soegefilter Filteret() => new(
+        Sprog: (Sprogfilter.SelectedItem as Filterpunkt)?.Vaerdi,
+        Moedetype: (Typefilter.SelectedItem as Filterpunkt)?.Vaerdi,
+        Mappe: (Mappefilter.SelectedItem as Filterpunkt)?.Vaerdi);
+
+    private void Filter_Aendret(object sender, SelectionChangedEventArgs e)
+    {
+        if (!IsLoaded) return;
+
+        RydFilter.Visibility = Filteret().Tomt ? Visibility.Collapsed : Visibility.Visible;
+
+        // Der soeges med det samme. Et filter, der foerst virker, naar man
+        // roerer soegefeltet, foeles som om det ikke virkede.
+        _pause.Stop();
+        Soeg();
+    }
+
+    private void RydFilter_Klik(object sender, RoutedEventArgs e)
+    {
+        Mappefilter.SelectedIndex = 0;
+        Typefilter.SelectedIndex = 0;
+        Sprogfilter.SelectedIndex = 0;
     }
 
     private async void Soeg()
@@ -203,8 +282,10 @@ public partial class SearchView : UserControl
 
         try
         {
+            var filter = Filteret();
+
             var ur = System.Diagnostics.Stopwatch.StartNew();
-            var fund = await Task.Run(() => Soegning.Soeg(spoergsmaal, ct), ct);
+            var fund = await Task.Run(() => Soegning.Soeg(spoergsmaal, filter, ct), ct);
             ur.Stop();
 
             if (ct.IsCancellationRequested) return;
@@ -227,10 +308,29 @@ public partial class SearchView : UserControl
             // laenge tallet er tocifret i millisekunder, er det det rigtige
             // valg. Begynder det at vokse, kan det ses her, foer det bliver
             // til en irritation.
+            // ============ NÅR ORDENE ALDRIG STÅR SAMMEN ============
+            //
+            // Soeger man paa to ting, og de begge findes i optagelsen uden
+            // nogensinde at blive sagt i den samme sammenhaeng, ser listen ud
+            // som en fejl: hvert sted har kun det ene ord.
+            //
+            // Det ER det rigtige svar — der er bare ikke noget sted, hvor de
+            // to ting moedes. Maalt paa et rigtigt webinar 21-08-2026 med
+            // «access indigo»: begge ord staar der mange gange, og aldrig
+            // inden for hundrede tegn af hinanden.
+            //
+            // Uden linjen her leder man efter en fejl, der ikke er der.
+            var soegeord = Soegning.Del(spoergsmaal).Count;
+            var bedst = fund.Count == 0 ? 0 : fund.Max(f => f.OrdSammen);
+
+            var spredt = soegeord > 1 && fund.Count > 0 && bedst < soegeord
+                ? "  ·  ordene står aldrig tæt på hinanden"
+                : "";
+
             Status.Text = fund.Count == 0
                 ? $"Ingen fund  ·  {ur.ElapsedMilliseconds} ms"
                 : $"{steder} {(steder == 1 ? "sted" : "steder")} i {fund.Count} " +
-                  $"{(fund.Count == 1 ? "kilde" : "kilder")}  ·  {ur.ElapsedMilliseconds} ms";
+                  $"{(fund.Count == 1 ? "kilde" : "kilder")}{spredt}  ·  {ur.ElapsedMilliseconds} ms";
         }
         catch (OperationCanceledException)
         {
