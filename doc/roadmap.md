@@ -194,6 +194,58 @@ skrevet. Det er halvdelen af arbejdet.
 | **Maskering før afsendelse** | Stor | Bliver mindre presserende, hvis 1.1 betyder, at man tit slet ikke sender noget |
 | **Forbrugsloft i appen** | Lille | Mistrals API har ingen vej til kontoens loft — efterprøvet 19-08, alle betalingsstier svarer 404. Skal derfor tastes ind |
 
+### Appen justerer sig selv ud fra brug — og kan skrue tilbage
+*Foreslået 21-08-2026*
+
+Appens indstillinger er fundet ved måling: talergenkendelsens tærskel på 0,80,
+kommandogrænsen på 0,30, støjgrænsen på 3 %. De er målt på ÉN stemme, ÉN
+mikrofon og ét møde. Hos en anden kunde med en anden mikrofon rammer de
+sandsynligvis ikke lige så godt.
+
+Men brugeren afslører hele tiden, hvornår appen tog fejl — uden at gøre noget
+ekstra:
+
+| Handling, der allerede findes | Hvad den fortæller |
+|---|---|
+| «Læg alle replikker uden taler hos Espen» | Stemmerne blev delt for fint |
+| Henfør én replik til en anden taler | Grænsetilfælde |
+| «Kommando ikke forstået» → siges igen → rammer | Grænsen var for stram |
+| En kommando udført, som straks fortrydes | Grænsen var for løs |
+
+Efter hver tiende transskription tælles mønstrene op. Er der en systematisk
+skævhed, kommer der et tal på klokken med **beviset**, ikke bare konklusionen:
+«I dine sidste 12 møder har du 9 gange lagt en stemme sammen med en anden. Det
+tyder på, at stemmerne bliver delt for fint.» Én knap ændrer det.
+
+**Der skal kunne skrues tilbage.** Hver ændring gemmes med dato, den gamle
+værdi og hvad der udløste den, og enhver af dem kan fortrydes. Uden det er en
+selvjusterende app noget, man ikke tør sige ja til: har man først sagt ja tre
+gange, aner man ikke, hvad indstillingerne står på, eller hvordan man kommer
+tilbage til noget, der virkede. Historikken skal desuden kunne læses — «hvad
+har appen ændret på mig?» er det første spørgsmål, nogen stiller.
+
+**Stram frit, løsn kun efter at have spurgt.** Kommandogrænsen kan strammes
+uden risiko — flere afvisninger er irriterende, ikke skadelige. At løsne den
+bevæger sig mod klippekanten: målt 21-08-2026 ligger den ved 0,48, hvor «Hun
+nævnte noget om en frist på fredag» begynder at udløse en opgave. En automatik,
+der løsner for at fange flere kommandoer, ville gå netop den vej — og den fejl,
+den så laver, er præcis den, hele designet er bygget for at undgå.
+
+**Forslagene skal være få og diskrete.** Ti-tyve møder er nok til at se en
+skævhed, ikke til at finjustere et tal. Altså 0,80 → 0,85, ikke 0,80 → 0,83.
+
+**Og det skal siges, at det kun gælder fremad.** En ændret tærskel for
+talergenkendelse virker først på kommende møder; de gamle skulle diariseres om,
+og det tager ni minutter pr. møde.
+
+**Hvorfor:** indstillingerne er i dag rigtige for én maskine, og der findes
+ingen vej til at gøre dem rigtige for en anden uden at måle forfra. Brugerens
+egne rettelser ER målingen — den laver sig selv, hvis der bliver talt efter.
+
+**Hvad der IKKE kan justeres sådan:** opsummeringens kvalitet. Efterprøvningen
+tæller ubelagte påstande, men et tal siger ikke, hvilken indstilling der skulle
+være anderledes. Og whisper-modellen har ingen knap.
+
 ---
 
 ## Målinger, der mangler
