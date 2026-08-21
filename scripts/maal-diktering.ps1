@@ -42,6 +42,17 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
+# «powershell -File» deler IKKE et array paa kommaer.
+#
+# "-Modeller small,medium,large-v3" kommer ind som EEN streng med kommaer i, og
+# saa ledes der efter en modelfil ved navn "ggml-small,medium,large-v3.bin".
+# Fejlen ser ud som om modellerne mangler. Der deles derfor her, saa baade
+# kommaer og mellemrum virker - uanset hvordan scriptet bliver kaldt.
+$Modeller = $Modeller |
+    ForEach-Object { $_ -split '[,;]' } |
+    ForEach-Object { $_.Trim() } |
+    Where-Object { $_.Length -gt 0 }
+
 $cli = 'C:\AppNoter\motor\whisper\bin\Release\whisper-cli.exe'
 if (-not (Test-Path $cli)) { throw "Finder ikke whisper: $cli" }
 
