@@ -427,10 +427,28 @@ public static class Soegning
         // hinanden.
         //
         // Man har spurgt om begge dele. Saa skal man kunne se begge dele.
+        // ============ KUN DE BEDSTE STEDER — IKKE ALLE ============
+        //
+        // Soeger man «omada espen ibm», og der findes steder med alle tre ord,
+        // skal de to-ords-steder IKKE staa i listen. Set paa skaermen
+        // 21-08-2026: listen viste raekke efter raekke med «Omada» og «Espen»,
+        // hvor det tredje ord ikke var med — og saa ser det ud, som om det
+        // sidste ord bliver ignoreret.
+        //
+        // Der skaeres paa ANTALLET af ord, ikke paa hele vaegten. Bonussen for
+        // et helt ord skal kunne afgoere raekkefoelgen inden for et niveau, men
+        // aldrig skille et sted fra, der har lige saa mange ord med.
+        //
+        // Findes der ingen steder med alle ordene, staar de naestbedste — og
+        // saa siger skaermen, hvor mange af ordene der er med. Et tomt svar
+        // ville vaere daarligere: ordene ER i optagelsen.
+        var bedsteNiveau = vejet.Max(v => v.Vaegt / 10);
+        var idet = vejet.Where(v => v.Vaegt / 10 == bedsteNiveau).ToList();
+
         var traef = new List<Traef>();
         var taget = new List<int>();
 
-        foreach (var v in vejet
+        foreach (var v in idet
                      .GroupBy(v => v.Vaegt)
                      .OrderByDescending(g => g.Key)
                      .SelectMany(g => PaaSkift(g, ord.Length)))

@@ -323,8 +323,11 @@ public partial class SearchView : UserControl
             var soegeord = Soegning.Del(spoergsmaal).Count;
             var bedst = fund.Count == 0 ? 0 : fund.Max(f => f.OrdSammen);
 
+            // Der staar HVOR MANGE af ordene der er med, ikke bare at der er
+            // noget galt. «2 af 3 ord» er en oplysning, man kan handle paa:
+            // saa ved man, at det tredje ord skal soeges for sig.
             var spredt = soegeord > 1 && fund.Count > 0 && bedst < soegeord
-                ? "  ·  ordene står aldrig tæt på hinanden"
+                ? $"  ·  bedste sted har {bedst} af {soegeord} ord — de står aldrig alle sammen"
                 : "";
 
             Status.Text = fund.Count == 0
