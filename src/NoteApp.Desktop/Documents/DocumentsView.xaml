@@ -84,7 +84,8 @@
 
     <Grid Grid.Row="3">
       <Grid.ColumnDefinitions>
-        <ColumnDefinition Width="300" />
+        <!-- Samme bredde som paa Optagelser og Moedetyper. Se TranscribeView. -->
+        <ColumnDefinition Width="225" />
         <ColumnDefinition Width="Auto" />
         <ColumnDefinition Width="*" />
       </Grid.ColumnDefinitions>

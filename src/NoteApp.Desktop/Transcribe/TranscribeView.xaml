@@ -155,7 +155,11 @@
     <!-- ======================= Træ · indhold =========================== -->
     <Grid Grid.Row="3">
       <Grid.ColumnDefinitions>
-        <ColumnDefinition Width="300" />
+        <!-- 225 og ikke 300. Traeet indeholder navne paa optagelser, ikke
+             taekst der skal laeses - pladsen goer mere gavn til hoejre, hvor
+             udskriften staar. Samme bredde paa alle tre skaerme med et
+             bibliotekstrae. -->
+        <ColumnDefinition Width="225" />
         <ColumnDefinition Width="Auto" />
         <ColumnDefinition Width="*" />
       </Grid.ColumnDefinitions>
