@@ -258,7 +258,7 @@ udskriften.
 *Hvorfor først:* det er den billigste vinding, der findes, og det gør skærmen
 til det sted, resten kan bygges ind i.
 
-### Etape 1 · Optag et webinar *(2-3 dage)*
+### Etape 1 · Optag et webinar *(2-3 dage)* — GJORT 21-08-2026
 
 **Rykket frem.** Ikke hele webinarområdet — kun det, der skal til for at optage
 ét i dag og begynde at samle materiale:
@@ -269,18 +269,72 @@ til det sted, resten kan bygges ind i.
 
 Registeret, påmindelsen og oversættelsen kommer i etape 4.
 
+**Afprøvet på to rigtige webinarer samme dag**, 22 og 54 minutter. Begge
+stoppede selv, stilheden blev klippet af, og udskrivningen tog 0,09 gange
+lydens længde. Talergenkendelsen fandt 1 stemme på det første og 4 på det
+andet.
+
+**Fem fejl, som kun kunne findes ved at bruge den:**
+
+| Fundet | Rettet i |
+|---|---|
+| Et webinar kunne slet ikke skrives ud — koden gik ud fra, at `mikrofon.wav` altid fandtes | v1.0.54 |
+| Hele optagelsen blev til ét afsnit med ét tidsstempel, når der kun var ét spor | v1.0.54 |
+| «Du kan roligt slå lyden fra» — gjaldt kun Windows' lydstyrke, ikke afspillerens mute. Kostede to minutter af et rigtigt webinar | v1.0.53 |
+| Tom fane uden forklaring, når en optagelse ikke var skrevet ud | v1.0.54 |
+| Opsummeringen bad om beslutninger og aftaler på et webinar | v1.0.55 |
+
+**Kom med undervejs, uden for planen:**
+
+- **Mappe, mødetype og sprog vælges FØR optagelsen** — én dialog til både møde
+  og webinar. Det ændrer hele dokumentflowet: mødetypen er valgt på forhånd,
+  når man laver et dokument.
+- **Skabeloner hedder mødetyper** alle de steder, brugeren læser det
+- **Mødetypen «Webinar»** — læringsmål, 5-10 takeaways med tidspunkter,
+  fagudtryk på originalsproget, skel mellem undervisning og salg
+- **Sproget vælges pr. dokument** — dansk eller engelsk, ikke låst i skabelonen
+- **Mødevagten**: appen kan spørge, når et andet program åbner mikrofonen. Målt
+  til at skelne et møde fra et webinar, en video og en streamingtjeneste
+
 *Hvorfor før søgningen:* værdien er bagudrettet, men arbejdet er fremadrettet.
 Hvert webinar, der ikke bliver optaget i denne uge, er et hul i det arkiv,
 søgningen senere skal lede i. En bedre søgning i fire møder er mindre værd end
 en middelmådig søgning i fyrre.
 
-### Etape 2 · Søgningen bliver god *(1-2 uger)*
+### Etape 2 · Søgningen bliver god *(1-2 uger)* — HALVT GJORT 21-08-2026
 
 Først **målingen**: tyve spørgsmål, hvor facit er kendt, mod det nuværende
 system. Derefter filtrene — periode, person, type. Og først derefter beslutningen
 om semantisk søgning, truffet på tallet.
 
 *Hvorfor nummer to:* det er produktet. Alt andet er arrangement omkring det.
+
+**Gjort — men i den omvendte rækkefølge, fordi fejlene viste sig ved brug:**
+
+Søgningen fandt stederne på ÉT af ordene og brugte resten til at snævre ind.
+«access indigo» gav otte steder med Indigo og ikke ét med access, selv om
+ordet stod i udskriften 27 gange. Nu findes hvert sted for hvert ord, og
+stederne vejes efter, hvor mange af ordene der står inden for hundrede tegn.
+Kun de bedste steder vises.
+
+Målt på to rigtige webinarer, andel af viste steder med alle søgeordene:
+
+| Søgning | Før | Nu |
+|---|---|---|
+| orphaned accounts | 50 % | 100 % |
+| access review | 26 % | 100 % |
+| identity governance | 17 % | 100 % |
+
+**Filtrene er lavet — men på mappe, mødetype og sprog** frem for periode,
+person og type. Grunden er, at de tre nu vælges FØR optagelsen og derfor er
+udfyldt fra dag ét. Periode og person mangler stadig; person kræver
+talernavnene, som sættes i hånden.
+
+**MÅLINGEN MANGLER STADIG, og den er porten til resten.** Tyve spørgsmål med
+kendt facit mod det nuværende system. Uden det tal kan beslutningen om
+semantisk søgning ikke træffes — kun gættes. Arkivet er nu stort nok til, at
+målingen er værd at lave: to webinarer på 22 og 54 minutter, et møde på en
+time, og et par ældre.
 
 ### Etape 3 · Opgaver på tværs *(1 uge)*
 
