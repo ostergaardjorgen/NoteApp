@@ -11,7 +11,22 @@ namespace NoteApp.Core;
 public enum MeetingType
 {
     Physical,
-    Online
+    Online,
+
+    /// <summary>
+    /// Et webinar: envejs, og derfor kun ÉT spor.
+    ///
+    /// Du lytter; du taler ikke. Optages kun højttalersporet, fylder
+    /// optagelsen det halve, skrives ud på det halve af tiden — og bliver
+    /// bedre: der er intet ekko fra din egen mikrofon, ingen overlappende
+    /// tale, og ingen tvivl om hvilken side der talte.
+    ///
+    /// Det er den eneste optagelsestype, brugeren VÆLGER på forhånd. Fysisk
+    /// mod online afgøres bagefter ved at måle, om der kom lyd på
+    /// højttalersporet — men et webinar kan ikke kendes fra et onlinemøde på
+    /// lyden alene, for de lyder ens. Forskellen er, om DU siger noget.
+    /// </summary>
+    Webinar
 }
 
 public enum TrackKind
@@ -43,6 +58,20 @@ public sealed class MeetingMetadata
 
     public int SampleRate { get; init; } = AudioFormat.SampleRate;
     public int Channels { get; init; } = 1;
+
+    /// <summary>
+    /// Adressen på det, der blev optaget. Sat ved webinarer.
+    ///
+    /// HVORFOR DEN GEMMES
+    ///
+    /// Et webinar ligger tit online bagefter. Har man udskriften og finder et
+    /// sted, hvor man vil se, hvad der blev vist på skærmen, er linket den
+    /// eneste vej tilbage — og det er væk fra indbakken en måned senere.
+    ///
+    /// Den hører til OPTAGELSEN og ikke til opsummeringen. En opsummering kan
+    /// laves om; linket skal overleve det.
+    /// </summary>
+    public string? Kilde { get; set; }
 
     /// <summary>Sat af genopretningen når mødet blev samlet fra efterladte segmenter.</summary>
     public bool RecoveredAfterCrash { get; set; }

@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -151,6 +151,24 @@ public partial class MeetingView : UserControl
     private void Start_Click(object sender, RoutedEventArgs e) => Start();
 
     /// <summary>
+    /// Optager et webinar: ét spor, sproget valgt på forhånd, og den stopper
+    /// af sig selv.
+    ///
+    /// Dialogen kommer FØR optagelsen. Et webinar begynder på slaget, og et
+    /// spørgsmål, der skal besvares, mens oplægsholderen går i gang, koster de
+    /// første minutter — dem, hvor dagsordenen bliver ridset op.
+    /// </summary>
+    private void Webinar_Click(object sender, RoutedEventArgs e)
+    {
+        if (IsRecording) return;
+
+        var vindue = new WebinarWindow { Owner = Window.GetWindow(this) };
+        if (vindue.ShowDialog() != true) return;
+
+        Start(new Webinaropstart(vindue.Sprog, vindue.Kilde));
+    }
+
+    /// <summary>
     /// Lynstart fra genvejstasten. Den gør nu nøjagtig det samme som knappen.
     ///
     /// Før målte den højttaleren i 700 ms for at gætte, om mødet var online.
@@ -224,11 +242,26 @@ public partial class MeetingView : UserControl
     }
 
     /// <summary>Kaldes både fra knappen og fra genvejstasten.</summary>
-    public void Start()
+    public void Start() => Start(null);
+
+    /// <summary>
+    /// Starter en optagelse — møde eller webinar.
+    /// </summary>
+    /// <param name="webinar">
+    /// Svarene fra webinardialogen: sprog og eventuelt link. Null er et
+    /// almindeligt møde.
+    /// </param>
+    public void Start(Webinaropstart? webinar)
     {
         if (IsRecording) return;
 
         var mik = AudioDevices.ResolveMicrophone(AppSettings.Current.MicrophoneId, out var fallback);
+
+        // MIKROFONEN SKAL FINDES — OGSÅ TIL ET WEBINAR.
+        //
+        // Den optages ikke, men enheden slås stadig op: appen skriver dens
+        // navn i mødedataene, og en optagelse uden nogen form for lydopsætning
+        // er værd at stoppe, før den begynder.
         if (mik is null)
         {
             Dialogs.AppDialog.Vis(Window.GetWindow(this), "Kan ikke optage", "Ingen mikrofon fundet.", Dialogs.Slags.Pas_paa);
@@ -240,7 +273,22 @@ public partial class MeetingView : UserControl
         var højttaler = AudioDevices.ResolveSpeaker(AppSettings.Current.SpeakerId, out _);
         _varOnline = højttaler is not null;
 
-        if (fallback)
+        // ET WEBINAR UDEN HØJTTALERSPOR ER INGEN OPTAGELSE.
+        //
+        // For et møde er en manglende højttaler bare et fysisk møde. For et
+        // webinar er det ENESTE spor væk, og så optages der ingenting. Det
+        // skal siges nu og ikke opdages bagefter som en tom fil.
+        if (webinar is not null && højttaler is null)
+        {
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Der er ingen højttaler",
+                "Et webinar optages fra det, computeren afspiller — og der er ingen " +
+                "afspilningsenhed at optage fra.\n\n" +
+                "Tilslut høretelefoner eller højttalere, og prøv igen.",
+                Dialogs.Slags.Pas_paa);
+            return;
+        }
+
+        if (fallback && webinar is null)
         {
             var ja = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
                 "Mikrofonen er skiftet",
@@ -255,8 +303,24 @@ public partial class MeetingView : UserControl
 
         try
         {
-            _session = RecordingSession.Create(
-                højttaler is not null ? MeetingType.Online : MeetingType.Physical, null, mik, højttaler);
+            var type = webinar is not null
+                ? MeetingType.Webinar
+                : højttaler is not null ? MeetingType.Online : MeetingType.Physical;
+
+            _session = RecordingSession.Create(type, null, mik, højttaler);
+
+            // Sproget og linket skrives ind med det samme. Sproget bruges af
+            // udskrivningen, saa den ikke spoerger; linket er vejen tilbage
+            // til det, der blev VIST, og det kan ikke skaffes bagefter.
+            if (webinar is not null)
+            {
+                _session.Meta.ValgtSprogLoop = webinar.Sprog;
+                _session.Meta.Kilde = webinar.Kilde;
+                MeetingStore.Save(_session.SessionDir, _session.Meta);
+            }
+
+            _erWebinar = webinar is not null;
+            _stilhedFra = null;
         }
         catch (Exception ex)
         {
@@ -276,6 +340,7 @@ public partial class MeetingView : UserControl
         GenvejPanel.Visibility = Visibility.Collapsed;
         OptagFelter.Visibility = Visibility.Visible;
         StartKnap.Visibility = Visibility.Collapsed;
+        WebinarKnap.Visibility = Visibility.Collapsed;
         UrPanel.Visibility = Visibility.Visible;
         NoteTaeller.Text = "";
         PauseKnap.Visibility = Visibility.Visible;
@@ -393,7 +458,11 @@ public partial class MeetingView : UserControl
     /// båndet. Der er spurgt dér — og et navn på noget, der skal slettes om
     /// et øjeblik, er et spørgsmål uden formål.
     /// </summary>
-    private string? Stop(bool spørgOmNavn)
+    /// <param name="navn">
+    /// Et navn, der bruges i stedet for at spørge. Sat, når et webinar stopper
+    /// af sig selv — hele pointen dér er, at ingen er til stede at spørge.
+    /// </param>
+    private string? Stop(bool spørgOmNavn, string? navn = null)
     {
         if (_session is null) return null;
 
@@ -402,6 +471,8 @@ public partial class MeetingView : UserControl
         SkjulBaand();
 
         _ur.Stop();
+        _erWebinar = false;
+        _stilhedFra = null;
 
         var mappe = _session.SessionDir;
         var længde = _session.Elapsed;
@@ -420,7 +491,10 @@ public partial class MeetingView : UserControl
         // Kasseres optagelsen fra båndet, springes der over. Der ER spurgt, og
         // et navn på noget, der bliver slettet om et øjeblik, er et spørgsmål
         // uden formål. null betyder «kassér» længere nede.
-        var titel = spørgOmNavn ? SpørgOmNavn() : null;
+        //
+        // Et webinar, der stopper af sig selv, har fået et navn med — dér er
+        // der ingen at spørge, og optagelsen skal gemmes, ikke kasseres.
+        var titel = navn ?? (spørgOmNavn ? SpørgOmNavn() : null);
 
         _session.Stop();
         _session.Dispose();
@@ -445,6 +519,7 @@ public partial class MeetingView : UserControl
         GenvejPanel.Visibility = GenvejTast.Text.Length > 0 ? Visibility.Visible : Visibility.Collapsed;
         OptagFelter.Visibility = Visibility.Collapsed;
         StartKnap.Visibility = Visibility.Visible;
+        WebinarKnap.Visibility = Visibility.Visible;
         UrPanel.Visibility = Visibility.Collapsed;
         PauseKnap.Visibility = Visibility.Collapsed;
         PauseKnap.Content = "❚❚ Pause";
@@ -554,7 +629,112 @@ public partial class MeetingView : UserControl
         // bag et skjult vindue. Det er altsaa ikke en kopi, det er visningen.
         _baand?.SaetTid(tid);
 
+        HoldOejeMedStilheden();
+
         Opdateret?.Invoke();
+    }
+
+    // ------------------------------------------------- webinaret stopper selv
+
+    /// <summary>Svarene fra webinardialogen.</summary>
+    public sealed record Webinaropstart(string Sprog, string? Kilde);
+
+    /// <summary>
+    /// Hvor længe der skal være stille, før et webinar regnes for slut.
+    ///
+    /// FEM MINUTTER ER IKKE ET TILFÆLDIGT TAL.
+    ///
+    /// Et webinar har pauser: en oplægsholder, der tier mens et videoklip
+    /// loader, et spørgsmål ingen svarer på, en teknisk afbrydelse. En
+    /// optagelse, der stopper efter tredive sekunders stilhed, ville skære
+    /// midt i — og man opdager det først, når udskriften mangler den sidste
+    /// halvdel.
+    ///
+    /// Prisen for at vente for længe er fem minutters tomhed i filen, og den
+    /// bliver klippet af igen. Prisen for at stoppe for tidligt er et halvt
+    /// webinar. De to fejl er ikke lige store.
+    /// </summary>
+    private static readonly TimeSpan Stilhedsgraense = TimeSpan.FromMinutes(5);
+
+    private DateTime? _stilhedFra;
+    private bool _erWebinar;
+
+    /// <summary>
+    /// Stopper et webinar, når der ikke har været lyd i fem minutter.
+    ///
+    /// Kun for webinarer. Et møde kan sagtens have fem minutters stilhed —
+    /// nogen deler en skærm, alle læser. At stoppe dét ville være at afbryde
+    /// mødet.
+    /// </summary>
+    private void HoldOejeMedStilheden()
+    {
+        if (!_erWebinar || _session is null || _session.IsPaused) return;
+        if (_session.Loopback is not { } spor) return;
+
+        // ReadPeak nulstiller maaleren, saa den skal kun laeses eet sted.
+        // Ingen andre i appen laeser den under optagelse.
+        var niveau = spor.ReadPeak();
+
+        if (niveau > AudioDevices.SilenceThreshold)
+        {
+            _stilhedFra = null;
+            _baand?.Meld("");
+            return;
+        }
+
+        _stilhedFra ??= DateTime.Now;
+
+        var stille = DateTime.Now - _stilhedFra.Value;
+
+        if (stille < Stilhedsgraense)
+        {
+            // Der siges til, naar der er gaaet halvdelen. Ellers stopper den
+            // uden varsel, og sidder man alligevel og lytter, naar man ikke at
+            // gribe ind.
+            if (stille > TimeSpan.FromMinutes(2.5))
+            {
+                var igen = Stilhedsgraense - stille;
+                _baand?.Meld($"Stille i {stille.Minutes} min — stopper om {Math.Max(1, (int)igen.TotalMinutes)} min");
+            }
+
+            return;
+        }
+
+        _stilhedFra = null;
+        StopWebinaret();
+    }
+
+    /// <summary>
+    /// Slutter webinaret af sig selv og klipper tavsheden af.
+    ///
+    /// Der spørges ikke om et navn. Hele pointen er, at man er et andet sted —
+    /// en dialog, der venter på et svar, ville efterlade optagelsen ugemt,
+    /// indtil nogen kom tilbage.
+    /// </summary>
+    private void StopWebinaret()
+    {
+        if (_session is null) return;
+
+        var mappe = _session.SessionDir;
+        var tid = DateTime.Now.ToString("d. MMMM 'kl.' HH:mm");
+
+        Stop(spørgOmNavn: false, navn: $"Webinar {tid}");
+
+        // Klippet sker EFTER, at sporene er samlet. Foer det findes filen ikke.
+        try
+        {
+            var wav = Path.Combine(mappe, "loopback.wav");
+            var klippet = Stilhedsklip.KlipHalen(wav);
+
+            Status.Text = klippet > 0
+                ? $"Webinaret er slut. {klippet / 60:0.0} minutters stilhed er klippet af."
+                : "Webinaret er slut.";
+        }
+        catch (Exception)
+        {
+            // Kan halen ikke klippes, er optagelsen der stadig - bare laengere.
+            Status.Text = "Webinaret er slut.";
+        }
     }
 
     // ------------------------------------------------------------- klokken

@@ -69,7 +69,9 @@ public sealed class RecordingSession : IDisposable
             StartedAt = startedAt,
             Title = title,
             MicDeviceName = microphone.FriendlyName,
-            LoopbackDeviceName = type == MeetingType.Online ? renderDevice!.FriendlyName : null
+            LoopbackDeviceName = type is MeetingType.Online or MeetingType.Webinar
+                ? renderDevice!.FriendlyName
+                : null
         };
 
         // Skriv metadata FØR optagelsen begynder. Crasher maskinen, er der
@@ -78,9 +80,21 @@ public sealed class RecordingSession : IDisposable
 
         var session = new RecordingSession(dir, meta);
 
-        session.Microphone = new TrackRecorder(TrackKind.Microphone, microphone.Id, dir,
-                                               () => session._clock.Elapsed.TotalSeconds);
-        session._tracks.Add(session.Microphone);
+        // ET WEBINAR OPTAGER IKKE DIN MIKROFON.
+        //
+        // Det er hele pointen med typen. Du lytter; du taler ikke. Uden dit
+        // spor er der intet ekko at fjerne, ingen overlappende tale, og
+        // optagelsen fylder og koster det halve at skrive ud.
+        //
+        // Det er samtidig det ENESTE, der skiller et webinar fra et onlinemøde
+        // — lyden er den samme. Derfor er det et valg, brugeren træffer, og
+        // ikke noget, der kan måles bagefter.
+        if (type != MeetingType.Webinar)
+        {
+            session.Microphone = new TrackRecorder(TrackKind.Microphone, microphone.Id, dir,
+                                                   () => session._clock.Elapsed.TotalSeconds);
+            session._tracks.Add(session.Microphone);
+        }
 
         // Højttalersporet tages med, hver gang der ER en afspilningsenhed —
         // ikke kun når nogen har sagt, at mødet er online.
@@ -169,8 +183,20 @@ public sealed class RecordingSession : IDisposable
         //
         // Det er dét, der gør, at brugeren ikke skal vælge mellem «fysisk» og
         // «online»: gættet er væk, og svaret er målt på det hele.
-        if (filer.TryGetValue(TrackKind.Loopback.ToString().ToLowerInvariant(), out var loopbackFil) ||
-            filer.TryGetValue("loopback", out loopbackFil))
+        //
+        // ET WEBINAR OMKLASSIFICERES ALDRIG.
+        //
+        // For et møde er et tavst højttalerspor svaret på «var der nogen i den
+        // anden ende» — nej, altså et fysisk møde, og sporet er spildplads.
+        //
+        // For et webinar er det den modsatte oplysning: det ENESTE spor er
+        // tavst, og så er der ingen optagelse. Slettes filen og typen laves om
+        // til «fysisk», står der en optagelse uden lyd og uden en forklaring
+        // på hvorfor. Den skal blive liggende, så det kan ses, at der blev
+        // optaget — og at der ikke kom noget.
+        if (Meta.Type != MeetingType.Webinar
+            && (filer.TryGetValue(TrackKind.Loopback.ToString().ToLowerInvariant(), out var loopbackFil)
+                || filer.TryGetValue("loopback", out loopbackFil)))
         {
             if (ErTavs(loopbackFil))
             {

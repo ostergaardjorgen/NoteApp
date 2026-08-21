@@ -140,6 +140,20 @@ public partial class OptageBaand : Window
 
     public void SaetTid(string tid) => Ur.Text = tid;
 
+    /// <summary>
+    /// En kort melding ved siden af uret — fx at et webinar er ved at være
+    /// stille længe nok til at stoppe.
+    ///
+    /// Den står, hvor tilstanden står, og ikke i en ny rude: båndet er dét,
+    /// der er tilbage af appen, mens der optages, og det skal ikke vokse.
+    /// </summary>
+    public void Meld(string tekst)
+    {
+        if (tekst.Length == 0) { SaetPause(Tilstand.Text == "PÅ PAUSE"); return; }
+
+        Tilstand.Text = tekst;
+    }
+
     public void SaetNoter(int antal) =>
         NoteTaeller.Text = antal == 0 ? "" : antal == 1 ? "1 note" : $"{antal} noter";
 

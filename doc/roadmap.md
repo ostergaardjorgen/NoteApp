@@ -55,6 +55,51 @@ navnet op. Det gælder også her.
 
 ---
 
+## Mappe og mødetype vælges, FØR der optages
+*Besluttet 21-08-2026 · ændrer flowet omkring dokumenter og skabeloner*
+
+I dag vælges mappen — og skabelonen — bagefter, når man skal lave et dokument.
+Det er der to problemer med. Bagefter er der ingen, der gider rydde op, så alt
+ender i den samme bunke; og dokumentdelen er svær at finde ud af, fordi
+skabelonvalget kommer på et tidspunkt, hvor man tror, man er færdig.
+
+**Ændringen:** når man trykker Optag — og når man starter et webinar — kommer
+der en dialog, hvor man vælger **mappe**, **mødetype** og **sprog**. Alle tre
+felter må kunne stå tomme eller stå på et fornuftigt udgangspunkt.
+
+**Sproget skal blive ved at være der.** Webinardialogen spørger allerede, og
+det samme spørgsmål hører til på en almindelig optagelse: appen gætter sproget
+ud fra de første tredive sekunder, og gætter den forkert, er hele udskriften
+ubrugelig. Det er også dét valg, der halverer tiden på et engelsk webinar. De
+tre felter skal stå i den samme dialog — ikke to dialoger oven på hinanden,
+før der overhovedet er trykket optag.
+
+**Hvorfor mappen skal vælges først:** vælges den i situationen, hvor man ved,
+hvad mødet handler om, lander materialet i den rigtige mappe fra begyndelsen.
+Og det er dét, der giver den stærke søgning på tværs af historikken: «alt om
+denne kunde», «alt fra dette fag». En søgning på tværs af en rodet bunke er en
+søgning; en søgning inden for en mappe med to års møder er et opslagsværk.
+Feltet findes allerede — `MeetingMetadata.Mappe` — så det er valget, der
+flyttes, ikke datamodellen.
+
+**Skabeloner hedder mødetyper.** Et statusmøde, en 1:1, et kundemøde, et
+webinar — det er den slags, man kan svare på, før mødet går i gang. «Skabelon»
+er et ord fra tekstbehandling, og det tvinger brugeren til at tænke i
+dokumenter på et tidspunkt, hvor der ikke er noget dokument. Navnet ændres i
+menuen og alle steder, brugeren ser det; de interne navne i koden kan blive
+stående.
+
+**Dokumentet bliver det, det er:** et tilvalg, der koster en sky-model. Så
+spørgsmålet skal stilles rent — «Vil du have oprettet et komplet Word-dokument
+med din online AI-model?» — og først dér, hvor man rent faktisk vil have et
+dokument. Ikke som en skabelonliste, man skal forstå først.
+
+**Omfang:** 305 forekomster af «skabelon» i 39 filer, hvoraf langtfra alle er
+tekst til brugeren. Arbejdet er at gennemgå hvert sted, hvor dokumenter og
+skabeloner nævnes, og få dialogen til at hænge sammen — ikke en søg-og-erstat.
+
+---
+
 ## Etape 1 — Udskriften bliver til at stole på
 
 ### 1.1 Redigering af udskriften
