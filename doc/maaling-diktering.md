@@ -132,4 +132,81 @@ falsk accept gør noget, ingen har bedt om.
 
 ## Resultater
 
-*Udfyldes, når optagelsen er lavet.*
+*Målt 21-08-2026 på en optagelse på 3:06 med Jørgens stemme og Jabra SPEAK 510.*
+
+### 1. Whisper kan dansk — når den har sammenhæng
+
+Hele optagelsen gennem large-v3 på én gang gav stort set perfekt tekst:
+
+```
+Start optagelsen · Stop optagelsen og gemt · Kasser optagelsen · Hold pause
+Fortsæt optagelsen · Opret en opgave · Opret en opgave til Asten
+Opret en opgave med frist på fredag · opret en aftale i morgen kl. 10
+opret en aftale på tirsdag kl. halv 3 · lav en kort opsummering …
+```
+
+Kun to fejl i de første ti: «gemt» for «gem», og «Asten» for «Espen».
+
+### 2. Men en enkelt kommando alene falder fra hinanden
+
+De samme sætninger, klippet ud hver for sig og kørt enkeltvis:
+
+| Facit | Hørt |
+|---|---|
+| Opret en opgave | «Opretten opgav» |
+| Stop optagelsen og gem | «Stop. Stop. Stop. Stop. Stop.» |
+| Fortsæt optagelsen | «Fortsat optagelsen» |
+
+**Det er ikke lydlængden.** Klippene blev polstret med tre sekunders stilhed i
+begge ender, så de lignede det 30-sekunders vindue, whisper er trænet på — og
+resultatet blev det samme. Det er den **sproglige sammenhæng**, der mangler:
+i hele filen får hver sætning de foregående med som kontekst, og de er alle
+sammen kommandoer, så de bekræfter hinanden.
+
+**Det er den realistiske situation.** En kommando sagt til en tom app har
+ingen forudgående sætninger. Målingen på klip er altså den rigtige, og den
+siger: rå transskription af en enkelt dansk kommando er ikke god nok.
+
+### 3. Grammatikken virker — men kun med `--grammar-rule`
+
+`--grammar` alene bliver **ignoreret lydløst**. Udgangen var tegn for tegn
+identisk med og uden. Først med `--grammar-rule root` sker der noget.
+
+Målt på seks kommandoer med en GBNF over alle 25:
+
+| Facit | Uden | Med grammatik |
+|---|---|---|
+| Kassér optagelsen | Kasser optagelsen | **Kassér optagelsen** ✓ |
+| Hold pause | Hold pause | **Hold pause** ✓ |
+| Opret en opgave | Opretten opgav | **Opret en opgave** ✓ |
+| Fortsæt optagelsen | Fortsat optagelsen | **Hold pause** ✗ |
+| Start optagelsen | Start optagelsen | *(intet)* |
+| Stop optagelsen og gem | Stop. Stop. Stop… | *(intet)* |
+
+### 4. Den farlige fejl er ny — og den kan fanges
+
+Grammatikken tvinger udgangen ind i kommandosættet. Når den rammer forkert,
+bliver resultatet derfor ikke volapyk, men **en anden gyldig kommando** — som
+ville blive udført med fuld sikkerhed. «Fortsæt optagelsen» blev til «Hold
+pause».
+
+Det er værre end ingen stemmestyring, og det er ikke noget, en bedre model
+løser: det er en følge af at begrænse udfaldsrummet.
+
+**Men de to udskrifter er uenige, netop når det går galt.** Den frie sagde
+«Fortsat optagelsen», den bundne sagde «Hold pause». Reglen skriver sig selv:
+
+> Kør begge dele. Handl kun, når de peger på den samme kommando.
+
+På de seks ovenfor ville reglen have udført to rigtigt, afvist den farlige, og
+afvist tre, hvor der ikke var enighed — altså nul forkerte handlinger.
+
+### Det, der mangler at blive målt
+
+Reglen om enighed er kun prøvet på seks. Den skal køres på alle 25 kommandoer
+**og** alle 25 almindelige sætninger, før den kan bruges — det er de
+almindelige, der afgør, om den holder, for det er dem, der ikke må udløse noget.
+
+Opdelingen skal rettes først: 31 vinduer gav 50 klip, men det var et
+sammenfald. Sætning 8 blev delt i to, og to andre smeltede sammen, så
+alignementet skrider fra klip 9.
