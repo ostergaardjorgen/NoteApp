@@ -26,6 +26,7 @@ try
         "forventning" => Forventning(args.Skip(1).ToArray()),
         "mikrofontest" => Mikrofontest(args.Skip(1).ToArray()),
         "maalsoegning" => Maalsoegning(),
+        "maaldato"  => Maaldato(),
         "recover"   => Genopret(),
         "hjaelp" or "--help" or "-h" => Hjælp(),
         _ => Ukendt(kommando)
@@ -49,6 +50,7 @@ static int Hjælp()
                       noteapp transskriber <mappe-eller-wav> [--cpu]
           recover   Samler møder der aldrig blev lukket ordentligt
           maalsoegning  Kører de tyve søgeprøver med kendt facit
+          maaldato  Måler datoforståelsen mod kendte svar
           udkast    Laver et referat med en lokal model — intet forlader maskinen
           sky       Laver et referat hos en europæisk leverandør:
                       SENDER UDSKRIFTEN UD AF MASKINEN. Se «noteapp sky».
@@ -830,6 +832,91 @@ static async Task<int> Transskriber(string[] a)
 
     return 0;
 }
+
+/// <summary>
+/// Datoforståelsen målt mod kendte svar.
+///
+/// Der regnes fra ONSDAG DEN 26. AUGUST 2026 — en fast dag, så prøven giver
+/// det samme svar hver gang den køres. En måling, der afhænger af, hvornår
+/// den blev kørt, kan ikke sammenlignes med sig selv.
+///
+/// Dagen er valgt midt i ugen med vilje: «på fredag» og «i næste uge» er
+/// først forskellige, når man ikke står på en mandag.
+/// </summary>
+static int Maaldato()
+{
+    var idag = new DateOnly(2026, 8, 26);   // onsdag
+
+    var proever = new (string Tekst, string Ventet)[]
+    {
+        // --- entydige ---
+        ("Jeg sender det i morgen", "27-08-2026"),
+        ("Vi ses i overmorgen", "28-08-2026"),
+        ("Det er klart på fredag", "28-08-2026"),
+        ("Kan du nå det på mandag?", "31-08-2026"),
+        ("Jeg vender tilbage på onsdag", "02-09-2026"),
+        ("Om to uger har vi svaret", "09-09-2026"),
+        ("Om 3 dage er den klar", "29-08-2026"),
+        ("Vi tager den om en måned", "26-09-2026"),
+        ("Fristen er den 1. september", "01-09-2026"),
+        ("Det skal være klar 15. september", "15-09-2026"),
+        ("Deadline er den 15.", "15-09-2026"),
+        ("Inden månedens udgang", "31-08-2026"),
+        ("Vi lukker det sidst på måneden", "31-08-2026"),
+        ("Det er den 1. marts", "01-03-2027"),      // passeret i aar -> naeste aar
+
+        // --- usikre, men brugbare ---
+        ("Vi kigger på det i næste uge", "31-08-2026"),
+        ("Det klarer vi i denne uge", "24-08-2026"),
+
+        // --- der er INGEN dato her ---
+        ("Vi tager den når Anders er tilbage", ""),
+        ("Det koster 15 kroner", ""),
+        ("Vi var 12 til mødet", ""),
+        ("Jeg ringer efter sommerferien", "")
+    };
+
+    int rigtige = 0, forkerte = 0, manglende = 0, falske = 0;
+
+    Console.WriteLine($"Der regnes fra {idag:dddd d. MMMM yyyy}");
+    Console.WriteLine();
+    Console.WriteLine($"{"sagt",-44} {"forstået",12} {"ventet",12}  ");
+    Console.WriteLine(new string('-', 78));
+
+    foreach (var p in proever)
+    {
+        var f = Datoforstaaelse.Find(p.Tekst, idag);
+        var fik = f is null ? "" : f.Dato.ToString("dd-MM-yyyy");
+        var ok = fik == p.Ventet;
+
+        if (ok) rigtige++;
+        else if (p.Ventet.Length == 0) falske++;      // fandt en dato, der ikke var der
+        else if (fik.Length == 0) manglende++;        // overså en dato
+        else forkerte++;                              // forstod den forkert
+
+        var maerke = ok ? "ok" : p.Ventet.Length == 0 ? "FALSK" : fik.Length == 0 ? "OVERSET" : "FORKERT";
+
+        Console.WriteLine($"{p.Tekst,-44} {(fik.Length == 0 ? "-" : fik),12} " +
+                          $"{(p.Ventet.Length == 0 ? "-" : p.Ventet),12}  {maerke}" +
+                          (f is { Sikker: false } ? "  (usikker)" : ""));
+    }
+
+    var n = proever.Length;
+
+    Console.WriteLine(new string('-', 78));
+    Console.WriteLine();
+    Console.WriteLine($"Rigtige            : {rigtige} af {n}  ({rigtige * 100.0 / n:0} %)");
+    Console.WriteLine($"Forstået forkert   : {forkerte}");
+    Console.WriteLine($"Overset            : {manglende}");
+    Console.WriteLine($"Fandt en dato, der ikke var der : {falske}");
+    Console.WriteLine();
+    Console.WriteLine(falske > 0
+        ? "EN FALSK DATO ER DEN DYRE FEJL. Den bliver til en frist, ingen har sat."
+        : "Ingen falske datoer. En overset frist opdages; en opfundet gør ikke.");
+
+    return forkerte == 0 && falske == 0 ? 0 : 1;
+}
+
 
 /// <summary>
 /// De tyve søgeprøver med kendt facit.

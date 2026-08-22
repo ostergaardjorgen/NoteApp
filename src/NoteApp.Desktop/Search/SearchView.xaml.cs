@@ -1,4 +1,4 @@
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Threading;
@@ -150,6 +150,7 @@ public partial class SearchView : UserControl
         Loaded += (_, _) =>
         {
             FyldFiltre();
+            VisOpgaver();
 
             if (start is { Length: > 0 })
             {
@@ -196,6 +197,65 @@ public partial class SearchView : UserControl
         // Fokus tilbage i feltet. Man rydder for at skrive noget andet, ikke
         // for at holde op med at soege.
         Felt.Focus();
+    }
+
+    // ------------------------------------------------------------- opgaverne
+
+    /// <summary>
+    /// De åbne opgaver på tværs af alle optagelser.
+    ///
+    /// De står i Cockpittet, fordi det er den skærm, man ser først, og fordi
+    /// spørgsmålet «hvad skal jeg gøre nu» ikke kan besvares af ét møde ad
+    /// gangen. En opgave fra et møde i maj og en fra i går står side om side —
+    /// det er dét, «på tværs» betyder.
+    ///
+    /// Der læses fra disken hver gang, skærmen åbnes eller en opgave ændres.
+    /// En liste, der kan komme ud af trit med filerne, ville vise en opgave,
+    /// man netop har krydset af.
+    /// </summary>
+    private void VisOpgaver()
+    {
+        var idag = DateOnly.FromDateTime(DateTime.Today);
+
+        List<Registeropgave> aabne;
+        try { aabne = Opgaveregister.Aabne(idag); }
+        catch (Exception) { aabne = new List<Registeropgave>(); }
+
+        Opgaverude.ItemsSource = aabne
+            .Select(r => new Opgavevisning(r, idag, VisOpgaver))
+            .ToList();
+
+        IngenOpgaver.Visibility = aabne.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+
+        var haster = aabne.Count(r => r.Hastighed(idag)
+            is Hastighed.Overskredet or Hastighed.I_dag);
+
+        OpgaveOverskrift.Text = aabne.Count == 0
+            ? "Ingen åbne opgaver"
+            : haster > 0 ? $"{haster} skal gøres nu" : "Åbne opgaver";
+
+        OpgaveTal.Text = aabne.Count == 0
+            ? ""
+            : $"{aabne.Count} i alt fra {aabne.Select(r => r.MoedeId).Distinct().Count()} optagelser";
+    }
+
+    /// <summary>
+    /// Går til den optagelse, opgaven kom fra.
+    ///
+    /// Der slås op på id og ikke på sti — mødet kan være flyttet til en anden
+    /// mappe, siden opgaven blev oprettet. Findes det ikke længere, siges det
+    /// frem for at skifte skærm og vise en tom liste.
+    /// </summary>
+    private void Opgave_Klik(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button b || b.Tag is not Opgavevisning v) return;
+        if (Window.GetWindow(this) is not MainWindow hoved) return;
+
+        if (v.MoedeId.Length == 0 || !hoved.GaaTilOptagelse(v.MoedeId))
+            Dialogs.AppDialog.Vis(hoved, "Optagelsen findes ikke længere",
+                "Den er slettet eller flyttet uden for appen, siden opgaven blev oprettet. " +
+                "Opgaven bliver stående — den er stadig din.",
+                Dialogs.Slags.Valg);
     }
 
     // ------------------------------------------------------------- filtrene
@@ -439,7 +499,109 @@ public partial class SearchView : UserControl
         }
     }
 
-    /// <summary>Ét søgeord og hvor meget der er af det. Til den tomme skærm.</summary>
+    /// <summary>Én åben opgave, som Cockpittet viser den.</summary>
+public sealed class Opgavevisning : System.ComponentModel.INotifyPropertyChanged
+{
+    private readonly Registeropgave _r;
+    private readonly DateOnly _idag;
+    private readonly Action _aendret;
+
+    public Opgavevisning(Registeropgave r, DateOnly idag, Action aendret)
+    {
+        _r = r;
+        _idag = idag;
+        _aendret = aendret;
+    }
+
+    public string Tekst => _r.Opgave.Tekst;
+
+    /// <summary>Mødets id — vejen tilbage til det, der blev sagt.</summary>
+    public string MoedeId => _r.MoedeId;
+
+    /// <summary>Hvor den kom fra — og hvem der skal gøre det.</summary>
+    public string Under
+    {
+        get
+        {
+            var dele = new List<string>();
+
+            if (_r.Opgave.Ejer.Length > 0) dele.Add(_r.Opgave.Ejer);
+            dele.Add(_r.Moedetitel);
+            if (_r.Opgave.Kilde.Length > 0) dele.Add(_r.Opgave.Kilde);
+
+            return string.Join("  ·  ", dele);
+        }
+    }
+
+    /// <summary>
+    /// Fristen, skrevet som man ville sige den.
+    ///
+    /// «i morgen» slår «23-08-2026» — man skal ikke regne for at forstå, hvor
+    /// meget det haster. Er datoen gættet ud af en tvetydig vending, står der
+    /// et spørgsmålstegn: en frist, appen har valgt, må ikke se ud som en,
+    /// nogen har sagt.
+    /// </summary>
+    public string Frist
+    {
+        get
+        {
+            if (_r.Opgave.Deadline is not { } d) return "";
+
+            var dato = DateOnly.FromDateTime(d.LocalDateTime);
+            var tekst = dato < _idag
+                ? $"{Datoforstaaelse.Skriv(dato, _idag)} — overskredet"
+                : Datoforstaaelse.Skriv(dato, _idag);
+
+            return _r.Opgave.DeadlineUsikker ? tekst + " ?" : tekst;
+        }
+    }
+
+    public Visibility Fristvis => _r.Opgave.Deadline is null ? Visibility.Collapsed : Visibility.Visible;
+
+    /// <summary>Rød, gul eller grøn — efter hvor meget der er til fristen.</summary>
+    public Brush Farve => _r.Hastighed(_idag) switch
+    {
+        Hastighed.Overskredet => Pensel("#FFE5484D"),
+        Hastighed.I_dag => Pensel("#FFE8A33D"),
+        Hastighed.Denne_uge => Pensel("#FFE8A33D"),
+        Hastighed.Senere => Pensel("#FF3DA55A"),
+        _ => Pensel("#FF3A4150")
+    };
+
+    private static Brush Pensel(string hex) =>
+        (Brush)new BrushConverter().ConvertFrom(hex)!;
+
+    public bool Faerdig
+    {
+        get => _r.Opgave.Faerdig;
+        set
+        {
+            if (_r.Opgave.Faerdig == value) return;
+
+            _r.Opgave.Faerdig = value;
+            Opgaveregister.Gem(_r);
+            _aendret();
+        }
+    }
+
+    /// <summary>0 = ingen, 1-3 = prioritet. Passer til rullelistens pladser.</summary>
+    public int Prioritetsvalg
+    {
+        get => _r.Opgave.Prioritet;
+        set
+        {
+            if (_r.Opgave.Prioritet == value) return;
+
+            _r.Opgave.Prioritet = value;
+            Opgaveregister.Gem(_r);
+            _aendret();
+        }
+    }
+
+    public event System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
+}
+
+/// <summary>Ét søgeord og hvor meget der er af det. Til den tomme skærm.</summary>
     public sealed record Ordvisning(string Ord, string Hvor);
 
     /// <summary>

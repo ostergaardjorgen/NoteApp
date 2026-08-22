@@ -175,20 +175,114 @@
             BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
       <Grid>
 
-        <!-- Tom skærm, før der er skrevet noget. Den siger, hvad der bliver
-             søgt i — ellers ved man ikke, om et manglende fund betyder, at
-             ordet ikke findes, eller at der ikke blev ledt det rigtige sted. -->
-        <StackPanel x:Name="TomPanel" VerticalAlignment="Center" HorizontalAlignment="Center"
-                    MaxWidth="520">
-          <TextBlock Text="Hvad leder du efter?" FontSize="17" FontWeight="SemiBold"
-                     HorizontalAlignment="Center" />
-          <TextBlock FontSize="13" Margin="0,10,0,0" TextWrapping="Wrap" LineHeight="21"
-                     TextAlignment="Center" Foreground="{StaticResource TekstSvag}"
-                     Text="Der søges i alle udskrifter, i de noter du skrev undervejs, og i de dokumenter appen har lavet. Flere ord betyder, at de alle skal stå i den samme tekst." />
-          <TextBlock FontSize="12.5" Margin="0,14,0,0" TextWrapping="Wrap" LineHeight="20"
-                     TextAlignment="Center" Foreground="{StaticResource TekstMeget}"
-                     Text="Søgningen læser filerne på din maskine. Der sendes intet." />
-        </StackPanel>
+        <!-- ============ NÅR DER IKKE SØGES: OPGAVERNE ============
+
+             Her stod «Hvad leder du efter?» og en forklaring på, hvad der
+             bliver søgt i. Den forklaring hører til, første gang man ser
+             skærmen — ikke hver gang man åbner appen.
+
+             Cockpittet er dét, man ser først. Så skal det svare på «hvad skal
+             jeg gøre nu», og det er opgaverne på tværs af alle møder. Søger
+             man, træder listen til side.
+
+             FORKLARINGEN ER IKKE VÆK. Den står nederst, under opgaverne, hvor
+             den kan læses af den, der leder efter den. -->
+        <ScrollViewer x:Name="TomPanel" Padding="8,8,8,12"
+                      VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+          <StackPanel>
+
+            <Grid Margin="6,4,6,10">
+              <TextBlock x:Name="OpgaveOverskrift" FontSize="15" FontWeight="SemiBold"
+                         VerticalAlignment="Center" />
+              <TextBlock x:Name="OpgaveTal" FontSize="12" HorizontalAlignment="Right"
+                         VerticalAlignment="Center" Foreground="{StaticResource TekstMeget}" />
+            </Grid>
+
+            <ItemsControl x:Name="Opgaverude">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <!-- FARVEN KOMMER FRA FRISTEN, IKKE FRA PRIORITETEN.
+                       En prioritet 1 om tre uger haster ikke i dag; en
+                       prioritet 3, der skulle have været lavet i mandags,
+                       gør. Kanten svarer på «hvad nu», tallet på «hvad er
+                       vigtigst, når jeg har tid til ét af dem». -->
+                  <Border Background="#FF181B22" BorderBrush="{Binding Farve}"
+                          BorderThickness="3,0,0,0" CornerRadius="6"
+                          Padding="13,10" Margin="0,0,0,6">
+                    <Grid>
+                      <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                      </Grid.ColumnDefinitions>
+
+                      <CheckBox Grid.Column="0" IsChecked="{Binding Faerdig, Mode=TwoWay}"
+                                VerticalAlignment="Top" Margin="0,1,10,0"
+                                ToolTip="Sæt flueben, når den er gjort" />
+
+                      <StackPanel Grid.Column="1">
+                        <TextBlock Text="{Binding Tekst}" FontSize="12.5" TextWrapping="Wrap"
+                                   LineHeight="19" />
+
+                        <!-- HERKOMSTEN ER ET LINK, IKKE EN OPLYSNING.
+                             En opgave uden vej tilbage til det, der blev sagt,
+                             er et notat. Med linket kan man høre sætningen
+                             igen og se, om den blev forstået rigtigt — og det
+                             er hele grunden til, at appen findes. -->
+                        <Button Content="{Binding Under}" Tag="{Binding}" Click="Opgave_Klik"
+                                HorizontalAlignment="Left" Margin="0,4,0,0" Padding="0"
+                                BorderThickness="0" Background="Transparent" Cursor="Hand"
+                                FontSize="11" Foreground="#FF5B9DF0"
+                                ToolTip="Gå til det sted i udskriften, opgaven kom fra">
+                          <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                              <TextBlock Text="{TemplateBinding Content}" FontSize="11"
+                                         Foreground="{TemplateBinding Foreground}"
+                                         TextWrapping="Wrap" />
+                            </ControlTemplate>
+                          </Button.Template>
+                        </Button>
+                      </StackPanel>
+
+                      <Border Grid.Column="2" CornerRadius="4" Padding="7,2" Margin="10,0,0,0"
+                              VerticalAlignment="Top" Background="#FF2C323D"
+                              Visibility="{Binding Fristvis}">
+                        <TextBlock Text="{Binding Frist}" FontSize="11"
+                                   Foreground="{Binding Farve}" />
+                      </Border>
+
+                      <ComboBox Grid.Column="3" x:Name="Pri" Width="62" Margin="8,0,0,0"
+                                FontSize="11" VerticalAlignment="Top"
+                                SelectedIndex="{Binding Prioritetsvalg, Mode=TwoWay}"
+                                ToolTip="Prioritet — 1 er vigtigst">
+                        <ComboBoxItem Content="–" />
+                        <ComboBoxItem Content="1" />
+                        <ComboBoxItem Content="2" />
+                        <ComboBoxItem Content="3" />
+                      </ComboBox>
+                    </Grid>
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <TextBlock x:Name="IngenOpgaver" FontSize="13" Margin="6,10,6,0" TextWrapping="Wrap"
+                       LineHeight="21" Foreground="{StaticResource TekstSvag}"
+                       Visibility="Collapsed"
+                       Text="Der er ingen åbne opgaver. De kommer fra fanen «Opgaver» på en optagelse, der er skrevet ud — dér foreslår appen dem ud fra det, der blev sagt, og du vælger, hvilke der bliver til noget." />
+
+            <Border Background="#FF12151B" CornerRadius="8" Padding="14,11" Margin="6,18,6,4"
+                    BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+              <StackPanel>
+                <TextBlock Text="Søgningen" FontSize="12.5" FontWeight="SemiBold" />
+                <TextBlock FontSize="12" Margin="0,6,0,0" TextWrapping="Wrap" LineHeight="19"
+                           Foreground="{StaticResource TekstMeget}"
+                           Text="Der søges i alle udskrifter, i de noter du skrev undervejs, og i de dokumenter appen har lavet. Flere ord betyder, at de alle skal stå tæt på hinanden. Filerne læses på din maskine, og der sendes intet." />
+              </StackPanel>
+            </Border>
+          </StackPanel>
+        </ScrollViewer>
 
         <ScrollViewer x:Name="Rude" Padding="8,8,8,12" Visibility="Collapsed"
                       VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">

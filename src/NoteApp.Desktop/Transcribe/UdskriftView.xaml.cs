@@ -835,6 +835,17 @@ public partial class UdskriftView : UserControl
         var kandidat = _kandidater.FirstOrDefault(x => Opgaveliste.Noegle(x.Tekst) == noegle);
         if (kandidat is null) return;
 
+        // ============ FRISTEN LÆSES UD AF DET, DER BLEV SAGT ============
+        //
+        // «Jeg sender det på fredag» er en opgave MED en frist. Skulle den
+        // sættes i hånden bagefter, ville den ikke blive sat — og en
+        // opgaveliste uden frister kan ikke sorteres efter, hvad der haster.
+        //
+        // Er vendingen tvetydig — «i næste uge» peger på syv dage — sættes
+        // datoen alligevel, men mærket som usikker. Så kan skærmen vise
+        // forskel på en frist, nogen sagde, og en, appen valgte.
+        var frist = Datoforstaaelse.Find(kandidat.Tekst, DateOnly.FromDateTime(DateTime.Today));
+
         _opgaver.Opgaver.Add(new Opgave
         {
             Tekst = kandidat.Tekst,
@@ -843,7 +854,12 @@ public partial class UdskriftView : UserControl
             Ejer = kandidat.Taler == "Din note"
                 ? Udskrift.Navn(Samtale.Herfra, _meta?.Talere)
                 : kandidat.Taler,
-            Kilde = kandidat.Tid
+            Kilde = kandidat.Tid,
+            Deadline = frist is null
+                ? null
+                : new DateTimeOffset(frist.Dato.ToDateTime(TimeOnly.MinValue),
+                                     TimeZoneInfo.Local.GetUtcOffset(frist.Dato.ToDateTime(TimeOnly.MinValue))),
+            DeadlineUsikker = frist is { Sikker: false }
         });
 
         GemOpgaver();

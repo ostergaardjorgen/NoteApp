@@ -30,6 +30,27 @@ public sealed record Opgave
     /// <summary>Senest-dato. Null betyder «ingen frist sat».</summary>
     public DateTimeOffset? Deadline { get; set; }
 
+    /// <summary>
+    /// Blev fristen sagt tydeligt, eller er den gættet ud af en vending?
+    ///
+    /// «på fredag» er entydig. «i næste uge» peger på syv dage, og appen har
+    /// valgt mandag. Forskellen skal kunne ses på skærmen — en frist, appen
+    /// har gættet, må aldrig se ud som en, nogen har sagt.
+    /// </summary>
+    public bool DeadlineUsikker { get; set; }
+
+    /// <summary>
+    /// 1, 2 eller 3 — hvor 1 er vigtigst. 0 betyder «ikke prioriteret».
+    ///
+    /// TRE TRIN OG IKKE FEM. Med fem bruger man kun tre af dem, og så er de to
+    /// øvrige noget, man skal tage stilling til uden at få noget for det.
+    ///
+    /// Prioriteten sættes af MENNESKET. Den kan ikke udledes af, hvad der blev
+    /// sagt i mødet — det, der lyder vigtigst, er tit bare det, der blev talt
+    /// længst om.
+    /// </summary>
+    public int Prioritet { get; set; }
+
     public bool Faerdig { get; set; }
 
     public DateTimeOffset Oprettet { get; init; } = DateTimeOffset.Now;
