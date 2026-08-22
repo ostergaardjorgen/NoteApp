@@ -170,252 +170,354 @@
     <TextBlock x:Name="Status" Grid.Row="3" Style="{StaticResource Underskrift}"
                Margin="2,10,2,10" HorizontalAlignment="Center" />
 
-    <!-- ===================== Resultaterne ====================== -->
-    <Border Grid.Row="4" Background="{StaticResource Panel}" CornerRadius="10"
-            BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
-      <Grid>
+    <!-- ==================== TRE SPALTER ====================
 
-        <!-- ============ NÅR DER IKKE SØGES: OPGAVERNE ============
+         MIDTEN ER SOEGNINGEN, og det er hele skaermens grund til at vaere der.
+         De to andre spalter er arrangement omkring den: til venstre det, der
+         lige er sket, til hoejre det, der skal goeres.
 
-             Her stod «Hvad leder du efter?» og en forklaring på, hvad der
-             bliver søgt i. Den forklaring hører til, første gang man ser
-             skærmen — ikke hver gang man åbner appen.
+         Soegefeltet staar OVEN OVER alle tre og ikke i midterspalten. Et
+         soegefelt, der er en tredjedel bredt, er et felt blandt flere - og
+         det er ikke, hvad det er.
 
-             Cockpittet er dét, man ser først. Så skal det svare på «hvad skal
-             jeg gøre nu», og det er opgaverne på tværs af alle møder. Søger
-             man, træder listen til side.
+         Soeger man, fylder resultaterne midten ud. Soeger man ikke, staar der
+         en kort forklaring dér i stedet. Opgaverne til hoejre bliver staaende
+         begge veje: de er ikke et svar paa en soegning, de er det, der venter.
+    -->
+    <Grid Grid.Row="4">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="250" />
+        <ColumnDefinition Width="14" />
+        <ColumnDefinition Width="*" MinWidth="380" />
+        <ColumnDefinition Width="14" />
+        <ColumnDefinition Width="340" />
+      </Grid.ColumnDefinitions>
 
-             FORKLARINGEN ER IKKE VÆK. Den står nederst, under opgaverne, hvor
-             den kan læses af den, der leder efter den. -->
-        <ScrollViewer x:Name="TomPanel" Padding="8,8,8,12"
-                      VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-          <StackPanel>
+      <!-- ============ VENSTRE: DET, DER LIGE ER SKET ============
+           En optagelse, der aldrig blev skrevet ud, er et hul i arkivet - og
+           det opdager man ikke ved at lede efter det. Her staar de nyeste med
+           deres tilstand, saa det kan ses uden at skifte skaerm. -->
+      <Border Grid.Column="0" Background="{StaticResource Panel}" CornerRadius="10"
+              BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+        <DockPanel>
+          <TextBlock DockPanel.Dock="Top" Text="SENESTE OPTAGELSER" FontSize="10"
+                     FontWeight="SemiBold" Margin="14,13,14,8"
+                     Foreground="{StaticResource TekstMeget}" />
 
-            <Grid Margin="6,4,6,10">
-              <TextBlock x:Name="OpgaveOverskrift" FontSize="15" FontWeight="SemiBold"
-                         VerticalAlignment="Center" />
-              <TextBlock x:Name="OpgaveTal" FontSize="12" HorizontalAlignment="Right"
-                         VerticalAlignment="Center" Foreground="{StaticResource TekstMeget}" />
-            </Grid>
+          <ScrollViewer Padding="7,0,7,10" VerticalScrollBarVisibility="Auto"
+                        HorizontalScrollBarVisibility="Disabled">
+            <StackPanel>
+              <ItemsControl x:Name="Senesterude">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate>
+                    <Button Tag="{Binding}" Click="Seneste_Klik" Cursor="Hand"
+                            HorizontalContentAlignment="Stretch" Margin="0,0,0,5"
+                            BorderThickness="0" Padding="0" Background="Transparent">
+                      <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                          <Border x:Name="kort" Background="#FF181B22" CornerRadius="6"
+                                  BorderBrush="{Binding Kant}" BorderThickness="3,0,0,0"
+                                  Padding="11,8">
+                            <ContentPresenter />
+                          </Border>
+                          <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                              <Setter TargetName="kort" Property="Background" Value="#FF2C323D" />
+                            </Trigger>
+                          </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                      </Button.Template>
 
-            <ItemsControl x:Name="Opgaverude">
-              <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                  <!-- FARVEN KOMMER FRA FRISTEN, IKKE FRA PRIORITETEN.
-                       En prioritet 1 om tre uger haster ikke i dag; en
-                       prioritet 3, der skulle have været lavet i mandags,
-                       gør. Kanten svarer på «hvad nu», tallet på «hvad er
-                       vigtigst, når jeg har tid til ét af dem». -->
-                  <Border Background="#FF181B22" BorderBrush="{Binding Farve}"
-                          BorderThickness="3,0,0,0" CornerRadius="6"
-                          Padding="13,10" Margin="0,0,0,6">
-                    <Grid>
-                      <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="Auto" />
-                      </Grid.ColumnDefinitions>
-
-                      <CheckBox Grid.Column="0" IsChecked="{Binding Faerdig, Mode=TwoWay}"
-                                VerticalAlignment="Top" Margin="0,1,10,0"
-                                ToolTip="Sæt flueben, når den er gjort" />
-
-                      <StackPanel Grid.Column="1">
-                        <TextBlock Text="{Binding Tekst}" FontSize="12.5" TextWrapping="Wrap"
-                                   LineHeight="19" />
-
-                        <!-- HERKOMSTEN ER ET LINK, IKKE EN OPLYSNING.
-                             En opgave uden vej tilbage til det, der blev sagt,
-                             er et notat. Med linket kan man høre sætningen
-                             igen og se, om den blev forstået rigtigt — og det
-                             er hele grunden til, at appen findes. -->
-                        <Button Content="{Binding Under}" Tag="{Binding}" Click="Opgave_Klik"
-                                HorizontalAlignment="Left" Margin="0,4,0,0" Padding="0"
-                                BorderThickness="0" Background="Transparent" Cursor="Hand"
-                                FontSize="11" Foreground="#FF5B9DF0"
-                                ToolTip="Gå til det sted i udskriften, opgaven kom fra">
-                          <Button.Template>
-                            <ControlTemplate TargetType="Button">
-                              <TextBlock Text="{TemplateBinding Content}" FontSize="11"
-                                         Foreground="{TemplateBinding Foreground}"
-                                         TextWrapping="Wrap" />
-                            </ControlTemplate>
-                          </Button.Template>
-                        </Button>
+                      <StackPanel>
+                        <TextBlock Text="{Binding Titel}" FontSize="12" TextWrapping="Wrap"
+                                   Foreground="{StaticResource Tekst}" />
+                        <TextBlock Text="{Binding Under}" FontSize="10.5" Margin="0,3,0,0"
+                                   TextWrapping="Wrap" Foreground="{StaticResource TekstMeget}" />
                       </StackPanel>
+                    </Button>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
 
-                      <Border Grid.Column="2" CornerRadius="4" Padding="7,2" Margin="10,0,0,0"
-                              VerticalAlignment="Top" Background="#FF2C323D"
-                              Visibility="{Binding Fristvis}">
-                        <TextBlock Text="{Binding Frist}" FontSize="11"
-                                   Foreground="{Binding Farve}" />
-                      </Border>
+              <TextBlock x:Name="IngenOptagelser" FontSize="12" Margin="4,6,4,0"
+                         TextWrapping="Wrap" LineHeight="18" Visibility="Collapsed"
+                         Foreground="{StaticResource TekstSvag}"
+                         Text="Der er ikke optaget noget endnu. Tryk «Optag møde» eller «Webinar» øverst." />
+            </StackPanel>
+          </ScrollViewer>
+        </DockPanel>
+      </Border>
 
-                      <ComboBox Grid.Column="3" x:Name="Pri" Width="62" Margin="8,0,0,0"
-                                FontSize="11" VerticalAlignment="Top"
-                                SelectedIndex="{Binding Prioritetsvalg, Mode=TwoWay}"
-                                ToolTip="Prioritet — 1 er vigtigst">
-                        <ComboBoxItem Content="–" />
-                        <ComboBoxItem Content="1" />
-                        <ComboBoxItem Content="2" />
-                        <ComboBoxItem Content="3" />
-                      </ComboBox>
-                    </Grid>
-                  </Border>
-                </DataTemplate>
-              </ItemsControl.ItemTemplate>
-            </ItemsControl>
+      <!-- ============ MIDTEN: SØGNINGEN ============ -->
+      <Border Grid.Column="2" Background="{StaticResource Panel}" CornerRadius="10"
+              BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+        <Grid>
 
-            <TextBlock x:Name="IngenOpgaver" FontSize="13" Margin="6,10,6,0" TextWrapping="Wrap"
-                       LineHeight="21" Foreground="{StaticResource TekstSvag}"
-                       Visibility="Collapsed"
-                       Text="Der er ingen åbne opgaver. De kommer fra fanen «Opgaver» på en optagelse, der er skrevet ud — dér foreslår appen dem ud fra det, der blev sagt, og du vælger, hvilke der bliver til noget." />
-
-            <Border Background="#FF12151B" CornerRadius="8" Padding="14,11" Margin="6,18,6,4"
-                    BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
-              <StackPanel>
-                <TextBlock Text="Søgningen" FontSize="12.5" FontWeight="SemiBold" />
-                <TextBlock FontSize="12" Margin="0,6,0,0" TextWrapping="Wrap" LineHeight="19"
-                           Foreground="{StaticResource TekstMeget}"
-                           Text="Der søges i alle udskrifter, i de noter du skrev undervejs, og i de dokumenter appen har lavet. Flere ord betyder, at de alle skal stå tæt på hinanden. Filerne læses på din maskine, og der sendes intet." />
-              </StackPanel>
-            </Border>
+          <!-- Staar der ingenting i soegefeltet, staar der her, hvad der
+               bliver soegt i. Kort - det er en oplysning, ikke en skaerm. -->
+          <StackPanel x:Name="TomPanel" VerticalAlignment="Center" HorizontalAlignment="Center"
+                      MaxWidth="440" Margin="24">
+            <TextBlock Text="Hvad leder du efter?" FontSize="16" FontWeight="SemiBold"
+                       HorizontalAlignment="Center" />
+            <TextBlock FontSize="12.5" Margin="0,10,0,0" TextWrapping="Wrap" LineHeight="20"
+                       TextAlignment="Center" Foreground="{StaticResource TekstSvag}"
+                       Text="Der søges i alle udskrifter, i de noter du skrev undervejs, og i de dokumenter appen har lavet. Flere ord betyder, at de alle skal stå tæt på hinanden." />
+            <TextBlock FontSize="12" Margin="0,12,0,0" TextWrapping="Wrap" LineHeight="19"
+                       TextAlignment="Center" Foreground="{StaticResource TekstMeget}"
+                       Text="Filerne læses på din maskine. Der sendes intet." />
           </StackPanel>
-        </ScrollViewer>
 
-        <ScrollViewer x:Name="Rude" Padding="8,8,8,12" Visibility="Collapsed"
-                      VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+          <ScrollViewer x:Name="Rude" Padding="8,8,8,12" Visibility="Collapsed"
+          VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
           <ItemsControl x:Name="Liste">
-            <ItemsControl.ItemTemplate>
-              <DataTemplate>
-                <!-- KILDEN ER EN OVERSKRIFT, IKKE EN KNAP.
-                     Foer var hele kortet klikbart og aabnede filen. Det var
-                     ikke det, man ville: staar ordet tolv steder, er
-                     spoergsmaalet hvilket af dem - ikke om filen kan aabnes.
-                     Nu staar hvert sted som sin egen linje. -->
-                <Border CornerRadius="10" Padding="0" Margin="0,0,0,10"
-                        Background="#FF181B22" BorderThickness="1"
-                        BorderBrush="{StaticResource PanelKant}">
-                  <StackPanel>
-                    <Grid Margin="14,12,14,8">
-                      <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                      </Grid.ColumnDefinitions>
+          <ItemsControl.ItemTemplate>
+          <DataTemplate>
+          <!-- KILDEN ER EN OVERSKRIFT, IKKE EN KNAP.
+          Foer var hele kortet klikbart og aabnede filen. Det var
+          ikke det, man ville: staar ordet tolv steder, er
+          spoergsmaalet hvilket af dem - ikke om filen kan aabnes.
+          Nu staar hvert sted som sin egen linje. -->
+          <Border CornerRadius="10" Padding="0" Margin="0,0,0,10"
+          Background="#FF181B22" BorderThickness="1"
+          BorderBrush="{StaticResource PanelKant}">
+          <StackPanel>
+          <Grid Margin="14,12,14,8">
+          <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="Auto" />
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="Auto" />
+          </Grid.ColumnDefinitions>
 
-                      <Border Grid.Column="0" CornerRadius="4" Padding="7,2" Margin="0,0,10,0"
-                              Background="#FF2C323D" VerticalAlignment="Center">
-                        <TextBlock Text="{Binding Maerkat}" FontSize="10.5" FontWeight="SemiBold"
-                                   Foreground="{Binding Maerkatfarve}" />
-                      </Border>
+          <Border Grid.Column="0" CornerRadius="4" Padding="7,2" Margin="0,0,10,0"
+          Background="#FF2C323D" VerticalAlignment="Center">
+          <TextBlock Text="{Binding Maerkat}" FontSize="10.5" FontWeight="SemiBold"
+          Foreground="{Binding Maerkatfarve}" />
+          </Border>
 
-                      <TextBlock Grid.Column="1" Text="{Binding Overskrift}" FontSize="13.5"
-                                 FontWeight="SemiBold" VerticalAlignment="Center"
-                                 TextTrimming="CharacterEllipsis" />
+          <TextBlock Grid.Column="1" Text="{Binding Overskrift}" FontSize="13.5"
+          FontWeight="SemiBold" VerticalAlignment="Center"
+          TextTrimming="CharacterEllipsis" />
 
-                      <TextBlock Grid.Column="2" Text="{Binding Hoejre}" FontSize="11.5"
-                                 VerticalAlignment="Center" Margin="12,0,0,0"
-                                 Foreground="{StaticResource TekstMeget}" />
-                    </Grid>
+          <TextBlock Grid.Column="2" Text="{Binding Hoejre}" FontSize="11.5"
+          VerticalAlignment="Center" Margin="12,0,0,0"
+          Foreground="{StaticResource TekstMeget}" />
+          </Grid>
 
-                    <!-- Hvert sted. Nummeret goer det muligt at tale om «det
-                         tredje sted» og finde tilbage til det. -->
-                    <ItemsControl ItemsSource="{Binding Steder}" Margin="10,0,10,10">
-                      <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                          <!-- AutomationProperties.Name skal saettes i haanden.
-                               Content er et Grid, og saa har knappen intet navn
-                               - hverken for en skaermlaeser eller for den, der
-                               proever skaermene af med UI-automatik. Samme
-                               fejl som menupunktet med maerkatet havde. -->
-                          <Button Tag="{Binding}" Click="Sted_Klik" Cursor="Hand"
-                                  AutomationProperties.Name="{Binding Uddrag}"
-                                  HorizontalContentAlignment="Stretch" Padding="0"
-                                  BorderThickness="0" Background="Transparent" Margin="0,0,0,3"
-                                  ToolTip="Gå til dette sted i teksten">
-                            <Button.Template>
-                              <ControlTemplate TargetType="Button">
-                                <Border x:Name="rk" CornerRadius="6" Padding="11,8"
-                                        Background="#FF12151B" BorderThickness="1"
-                                        BorderBrush="Transparent">
-                                  <ContentPresenter />
-                                </Border>
-                                <ControlTemplate.Triggers>
-                                  <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter TargetName="rk" Property="Background" Value="#FF2C323D" />
-                                    <Setter TargetName="rk" Property="BorderBrush" Value="{StaticResource Accent}" />
-                                  </Trigger>
-                                </ControlTemplate.Triggers>
-                              </ControlTemplate>
-                            </Button.Template>
+          <!-- Hvert sted. Nummeret goer det muligt at tale om «det
+          tredje sted» og finde tilbage til det. -->
+          <ItemsControl ItemsSource="{Binding Steder}" Margin="10,0,10,10">
+          <ItemsControl.ItemTemplate>
+          <DataTemplate>
+          <!-- AutomationProperties.Name skal saettes i haanden.
+          Content er et Grid, og saa har knappen intet navn
+          - hverken for en skaermlaeser eller for den, der
+          proever skaermene af med UI-automatik. Samme
+          fejl som menupunktet med maerkatet havde. -->
+          <Button Tag="{Binding}" Click="Sted_Klik" Cursor="Hand"
+          AutomationProperties.Name="{Binding Uddrag}"
+          HorizontalContentAlignment="Stretch" Padding="0"
+          BorderThickness="0" Background="Transparent" Margin="0,0,0,3"
+          ToolTip="Gå til dette sted i teksten">
+          <Button.Template>
+          <ControlTemplate TargetType="Button">
+          <Border x:Name="rk" CornerRadius="6" Padding="11,8"
+          Background="#FF12151B" BorderThickness="1"
+          BorderBrush="Transparent">
+          <ContentPresenter />
+          </Border>
+          <ControlTemplate.Triggers>
+          <Trigger Property="IsMouseOver" Value="True">
+          <Setter TargetName="rk" Property="Background" Value="#FF2C323D" />
+          <Setter TargetName="rk" Property="BorderBrush" Value="{StaticResource Accent}" />
+          </Trigger>
+          </ControlTemplate.Triggers>
+          </ControlTemplate>
+          </Button.Template>
 
-                            <Grid>
-                              <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="30" />
-                                <ColumnDefinition Width="*" />
-                              </Grid.ColumnDefinitions>
-                              <TextBlock Grid.Column="0" Text="{Binding Nummer}" FontSize="11.5"
-                                         Foreground="{StaticResource TekstMeget}"
-                                         VerticalAlignment="Top" />
-                              <!-- Det soegte staar GULT, praecis som i
-                                   udskriften. To skaerme, der goer det samme,
-                                   skal se ens ud - ellers leder man efter det
-                                   gule paa den ene og finder det ikke. -->
-                              <TextBlock Grid.Column="1" FontSize="12.5"
-                                         LineHeight="19" TextWrapping="Wrap"
-                                         Loaded="Uddrag_Ind"
-                                         Foreground="{StaticResource TekstSvag}" />
-                            </Grid>
-                          </Button>
-                        </DataTemplate>
-                      </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                  </StackPanel>
-                </Border>
-              </DataTemplate>
-            </ItemsControl.ItemTemplate>
+          <Grid>
+          <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="30" />
+          <ColumnDefinition Width="*" />
+          </Grid.ColumnDefinitions>
+          <TextBlock Grid.Column="0" Text="{Binding Nummer}" FontSize="11.5"
+          Foreground="{StaticResource TekstMeget}"
+          VerticalAlignment="Top" />
+          <!-- Det soegte staar GULT, praecis som i
+          udskriften. To skaerme, der goer det samme,
+          skal se ens ud - ellers leder man efter det
+          gule paa den ene og finder det ikke. -->
+          <TextBlock Grid.Column="1" FontSize="12.5"
+          LineHeight="19" TextWrapping="Wrap"
+          Loaded="Uddrag_Ind"
+          Foreground="{StaticResource TekstSvag}" />
+          </Grid>
+          </Button>
+          </DataTemplate>
+          </ItemsControl.ItemTemplate>
           </ItemsControl>
-        </ScrollViewer>
+          </StackPanel>
+          </Border>
+          </DataTemplate>
+          </ItemsControl.ItemTemplate>
+          </ItemsControl>
+          </ScrollViewer>
 
-        <StackPanel x:Name="IntetPanel" VerticalAlignment="Center" HorizontalAlignment="Center"
-                    MaxWidth="520" Visibility="Collapsed">
+          <StackPanel x:Name="IntetPanel" VerticalAlignment="Center" HorizontalAlignment="Center"
+          MaxWidth="520" Visibility="Collapsed">
           <TextBlock x:Name="IntetOverskrift" FontSize="17" FontWeight="SemiBold"
-                     HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" />
+          HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" />
           <TextBlock x:Name="IntetTekst" FontSize="13" Margin="0,10,0,0" TextWrapping="Wrap"
-                     LineHeight="21" TextAlignment="Center" Foreground="{StaticResource TekstSvag}" />
+          LineHeight="21" TextAlignment="Center" Foreground="{StaticResource TekstSvag}" />
 
           <!-- ============ HVERT ORD FOR SIG ============
-               Naar der ikke er noget fund, er spoergsmaalet ikke «findes
-               ordene», men HVILKET af dem der staar i vejen. Uden den her
-               liste maa man selv proeve sig frem ét ord ad gangen — og det
-               er praecis dét, appen kan goere paa fire millisekunder. -->
+          Naar der ikke er noget fund, er spoergsmaalet ikke «findes
+          ordene», men HVILKET af dem der staar i vejen. Uden den her
+          liste maa man selv proeve sig frem ét ord ad gangen — og det
+          er praecis dét, appen kan goere paa fire millisekunder. -->
           <ItemsControl x:Name="Enkeltvis" Margin="0,16,0,0" HorizontalAlignment="Center">
-            <ItemsControl.ItemTemplate>
-              <DataTemplate>
-                <Border Background="#FF181B22" BorderBrush="{StaticResource PanelKant}"
-                        BorderThickness="1" CornerRadius="6" Padding="12,7" Margin="0,0,0,6">
-                  <Grid MinWidth="360">
-                    <TextBlock Text="{Binding Ord}" FontSize="12.5" FontWeight="SemiBold"
-                               HorizontalAlignment="Left" VerticalAlignment="Center" />
-                    <TextBlock Text="{Binding Hvor}" FontSize="12" Margin="0,0,80,0"
-                               HorizontalAlignment="Right" VerticalAlignment="Center"
-                               Foreground="{StaticResource TekstMeget}" />
-                    <Button Content="Søg kun her" Tag="{Binding Ord}" Click="KunDet_Klik"
-                            HorizontalAlignment="Right" VerticalAlignment="Center"
-                            Padding="9,3" FontSize="11" />
-                  </Grid>
-                </Border>
-              </DataTemplate>
-            </ItemsControl.ItemTemplate>
+          <ItemsControl.ItemTemplate>
+          <DataTemplate>
+          <Border Background="#FF181B22" BorderBrush="{StaticResource PanelKant}"
+          BorderThickness="1" CornerRadius="6" Padding="12,7" Margin="0,0,0,6">
+          <Grid MinWidth="360">
+          <TextBlock Text="{Binding Ord}" FontSize="12.5" FontWeight="SemiBold"
+          HorizontalAlignment="Left" VerticalAlignment="Center" />
+          <TextBlock Text="{Binding Hvor}" FontSize="12" Margin="0,0,80,0"
+          HorizontalAlignment="Right" VerticalAlignment="Center"
+          Foreground="{StaticResource TekstMeget}" />
+          <Button Content="Søg kun her" Tag="{Binding Ord}" Click="KunDet_Klik"
+          HorizontalAlignment="Right" VerticalAlignment="Center"
+          Padding="9,3" FontSize="11" />
+          </Grid>
+          </Border>
+          </DataTemplate>
+          </ItemsControl.ItemTemplate>
           </ItemsControl>
 
           <TextBlock FontSize="12" Margin="0,10,0,0" TextWrapping="Wrap" LineHeight="19"
-                     TextAlignment="Center" Foreground="{StaticResource TekstMeget}"
-                     Text="Husk, at et møde først kan søges, når det er skrevet ud til tekst — en optagelse alene indeholder ingen ord at lede i." />
-        </StackPanel>
+          TextAlignment="Center" Foreground="{StaticResource TekstMeget}"
+          Text="Husk, at et møde først kan søges, når det er skrevet ud til tekst — en optagelse alene indeholder ingen ord at lede i." />
+          </StackPanel>
+        </Grid>
+      </Border>
+
+      <!-- ============ HØJRE: DET, DER SKAL GØRES ============
+           Opgaverne oeverst, kalenderen nedenunder naar den kommer. De to
+           hoerer sammen: den ene er hvad, den anden er hvornaar. -->
+      <Grid Grid.Column="4">
+        <Grid.RowDefinitions>
+          <RowDefinition Height="*" />
+          <RowDefinition Height="12" />
+          <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" Background="{StaticResource Panel}" CornerRadius="10"
+                BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+          <DockPanel>
+            <Grid DockPanel.Dock="Top" Margin="14,13,14,8">
+              <TextBlock x:Name="OpgaveOverskrift" FontSize="13" FontWeight="SemiBold"
+                         VerticalAlignment="Center" />
+              <TextBlock x:Name="OpgaveTal" FontSize="10.5" HorizontalAlignment="Right"
+                         VerticalAlignment="Center" Foreground="{StaticResource TekstMeget}" />
+            </Grid>
+
+            <ScrollViewer Padding="7,0,7,10" VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled">
+              <StackPanel>
+                <ItemsControl x:Name="Opgaverude">
+                <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                <!-- FARVEN KOMMER FRA FRISTEN, IKKE FRA PRIORITETEN.
+                En prioritet 1 om tre uger haster ikke i dag; en
+                prioritet 3, der skulle have været lavet i mandags,
+                gør. Kanten svarer på «hvad nu», tallet på «hvad er
+                vigtigst, når jeg har tid til ét af dem». -->
+                <Border Background="#FF181B22" BorderBrush="{Binding Farve}"
+                BorderThickness="3,0,0,0" CornerRadius="6"
+                Padding="13,10" Margin="0,0,0,6">
+                <Grid>
+                <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <CheckBox Grid.Column="0" IsChecked="{Binding Faerdig, Mode=TwoWay}"
+                VerticalAlignment="Top" Margin="0,1,10,0"
+                ToolTip="Sæt flueben, når den er gjort" />
+
+                <StackPanel Grid.Column="1">
+                <TextBlock Text="{Binding Tekst}" FontSize="12.5" TextWrapping="Wrap"
+                LineHeight="19" />
+
+                <!-- HERKOMSTEN ER ET LINK, IKKE EN OPLYSNING.
+                En opgave uden vej tilbage til det, der blev sagt,
+                er et notat. Med linket kan man høre sætningen
+                igen og se, om den blev forstået rigtigt — og det
+                er hele grunden til, at appen findes. -->
+                <Button Content="{Binding Under}" Tag="{Binding}" Click="Opgave_Klik"
+                HorizontalAlignment="Left" Margin="0,4,0,0" Padding="0"
+                BorderThickness="0" Background="Transparent" Cursor="Hand"
+                FontSize="11" Foreground="#FF5B9DF0"
+                ToolTip="Gå til det sted i udskriften, opgaven kom fra">
+                <Button.Template>
+                <ControlTemplate TargetType="Button">
+                <TextBlock Text="{TemplateBinding Content}" FontSize="11"
+                Foreground="{TemplateBinding Foreground}"
+                TextWrapping="Wrap" />
+                </ControlTemplate>
+                </Button.Template>
+                </Button>
+                </StackPanel>
+
+                <Border Grid.Column="2" CornerRadius="4" Padding="7,2" Margin="10,0,0,0"
+                VerticalAlignment="Top" Background="#FF2C323D"
+                Visibility="{Binding Fristvis}">
+                <TextBlock Text="{Binding Frist}" FontSize="11"
+                Foreground="{Binding Farve}" />
+                </Border>
+
+                <ComboBox Grid.Column="3" x:Name="Pri" Width="62" Margin="8,0,0,0"
+                FontSize="11" VerticalAlignment="Top"
+                SelectedIndex="{Binding Prioritetsvalg, Mode=TwoWay}"
+                ToolTip="Prioritet — 1 er vigtigst">
+                <ComboBoxItem Content="–" />
+                <ComboBoxItem Content="1" />
+                <ComboBoxItem Content="2" />
+                <ComboBoxItem Content="3" />
+                </ComboBox>
+                </Grid>
+                </Border>
+                </DataTemplate>
+                </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <TextBlock x:Name="IngenOpgaver" FontSize="13" Margin="6,10,6,0" TextWrapping="Wrap"
+                LineHeight="21" Foreground="{StaticResource TekstSvag}"
+                Visibility="Collapsed"
+                Text="Der er ingen åbne opgaver. De kommer fra fanen «Opgaver» på en optagelse, der er skrevet ud — dér foreslår appen dem ud fra det, der blev sagt, og du vælger, hvilke der bliver til noget." />
+              </StackPanel>
+            </ScrollViewer>
+          </DockPanel>
+        </Border>
+
+        <!-- KALENDEREN KOMMER HER.
+             Pladsen staar med vilje frem for at blive fyldt med noget andet:
+             flyttes opgaverne op eller ned, naar kalenderen kommer, er
+             skaermen lavet om to gange. -->
+        <Border Grid.Row="2" Background="{StaticResource Panel}" CornerRadius="10"
+                BorderBrush="{StaticResource PanelKant}" BorderThickness="1"
+                Padding="14,12">
+          <StackPanel>
+            <TextBlock Text="KALENDER" FontSize="10" FontWeight="SemiBold"
+                       Foreground="{StaticResource TekstMeget}" />
+            <TextBlock FontSize="11.5" Margin="0,7,0,0" TextWrapping="Wrap" LineHeight="18"
+                       Foreground="{StaticResource TekstSvag}"
+                       Text="Dagens og ugens møder kommer her, med en knap til at optage dem. Den er ikke bygget endnu." />
+          </StackPanel>
+        </Border>
       </Grid>
-    </Border>
+    </Grid>
   </Grid>
 </UserControl>

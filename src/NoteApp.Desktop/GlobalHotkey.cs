@@ -292,7 +292,53 @@ public sealed class GlobalHotkey : IDisposable
             // bedre end en app, der ikke starter.
         }
 
+        // ============ HELE TALRAEKKEN, NAAR DER ER FLERE LAYOUT ============
+        //
+        // Posterne ovenfor daekker ikke det hele. Maalt 22-08-2026 paa denne
+        // maskine: Ctrl+Shift+0 stod i tabellen, men Ctrl+Shift+1 gjorde IKKE
+        // - og den virkede alligevel ikke. Appen havde registreret den
+        // (efterproevet: en anden proces kunne ikke tage den bagefter), og
+        // intet skete, naar der blev trykket.
+        //
+        // Forklaringen er, at Windows reserverer HELE Ctrl+Shift+ciffer-
+        // raekken til at skifte til et bestemt tastaturlayout, saa snart der
+        // er mere end ét installeret. Kun de layout, der har faaet et
+        // udtrykkeligt nummer, staar i tabellen; resten af raekken er
+        // reserveret uden at staa nogen steder.
+        //
+        // Derfor spoerges der efter, hvor mange layout der er - og er der
+        // flere end ét, ryger 0 til 9 ud under ét. Prisen er ti valg paa en
+        // liste med tyve; prisen ved at lade vaere er en genvej, der ser
+        // aktiv ud og ikke goer noget.
+        if (FlereTastatursprog())
+            for (uint n = 0; n <= 9; n++)
+                taget.Add((MOD_CONTROL | MOD_SHIFT, 0x30 + n));
+
         return taget;
+    }
+
+    /// <summary>
+    /// Er der mere end ét tastaturlayout installeret?
+    ///
+    /// Listen staar under Keyboard Layout\Preload med ét nummereret felt pr.
+    /// layout. To felter betyder, at Windows har brug for en genvej til at
+    /// skifte mellem dem.
+    /// </summary>
+    private static bool FlereTastatursprog()
+    {
+        try
+        {
+            using var k = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(@"Keyboard Layout\Preload");
+            return k is not null && k.GetValueNames().Length > 1;
+        }
+        catch (Exception)
+        {
+            // Kan det ikke afgoeres, antages det VAERSTE: at der er flere.
+            // Saa vaelges en genvej uden for talraekken, og den virker uanset
+            // hvad. Et valg for lidt koster ingenting; et, der ikke virker,
+            // koster en optagelse.
+            return true;
+        }
     }
 
     private IntPtr Hook(IntPtr hwnd, int besked, IntPtr wParam, IntPtr lParam, ref bool håndteret)

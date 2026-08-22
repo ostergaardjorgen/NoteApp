@@ -134,15 +134,42 @@ public sealed class AppSettings
     /// <summary>
     /// Holder appen øje med, om der er startet et møde?
     ///
-    /// SLÅET FRA SOM STANDARD, OG DET SKAL DEN BLIVE VED MED AT VÆRE.
+    /// SLÅET TIL FRA BEGYNDELSEN — og det er en bevidst ændring.
     ///
-    /// Funktionen slår op i Windows' eget register over, hvilke programmer der
-    /// bruger mikrofonen. Det er den samme oplysning, brugeren selv kan se
-    /// under Indstillinger, den bliver på maskinen, og der lyttes ikke med —
-    /// men det er stadig en app, der kigger efter, hvad man laver. Den slags
-    /// slår man til selv.
+    /// Den var slået fra først, ud fra at en app, der kigger efter, hvad man
+    /// laver, er noget man skal slå til selv. Det var forkert som standard:
+    /// funktionen findes for at redde de møder, man glemmer at optage, og en
+    /// funktion, man skal finde og slå til, redder ingen af dem. Hvert møde,
+    /// der ikke bliver optaget, er et hul i det arkiv, hele appen lever af.
+    ///
+    /// Den bliver ved at være noget, man kan slå FRA under Indstillinger, og
+    /// dér står det stadig præcist, hvad der bliver kigget på: Windows' eget
+    /// register over, hvilke programmer der bruger mikrofonen. Den samme
+    /// oplysning, brugeren selv kan se i Windows. Der lyttes ikke med, og der
+    /// optages aldrig af sig selv — vagten kan kun spørge.
+    ///
+    /// Værdien sættes én gang ved første start, se <see cref="StandardvalgSat"/>.
     /// </summary>
     public bool MoedevagtTil { get; set; }
+
+    /// <summary>
+    /// Er standardvalgene sat én gang?
+    ///
+    /// HVORFOR DER SKAL ET FLAG TIL
+    ///
+    /// To ting skal være slået TIL fra begyndelsen: at appen starter med
+    /// Windows, og at den spørger, når et program bruger mikrofonen. Begge er
+    /// noget, man skal kunne slå FRA — ikke noget, man skal finde og slå til.
+    ///
+    /// En almindelig standardværdi kan ikke bruges til det. Slår man
+    /// mødevagten fra, gemmes «false» — og det er præcis den samme værdi som
+    /// «aldrig taget stilling». Uden flaget her ville appen slå den til igen
+    /// ved næste start, og et hak, der kommer tilbage af sig selv, er værre
+    /// end intet hak.
+    ///
+    /// Flaget sættes én gang. Derefter er det brugerens valg, der gælder.
+    /// </summary>
+    public bool StandardvalgSat { get; set; }
 
     /// <summary>
     /// Programmer, der aldrig skal spørges om igen.

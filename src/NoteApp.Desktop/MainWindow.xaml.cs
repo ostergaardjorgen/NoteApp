@@ -180,13 +180,52 @@ public partial class MainWindow : Window
         // trykker på den under et møde.
         Loaded += (_, _) =>
         {
+            SaetStandardvalg();
+
             _genvej.Trykket += LynstartOptagelse;
             TilslutGenvej();
 
-            // Mødevagten. Den gør intet, før den er slået til under
-            // Indstillinger — se AppSettings.MoedevagtTil for hvorfor.
             Moedevagten.Opdater();
         };
+    }
+
+    /// <summary>
+    /// Slår de to ting til, der skal være slået til fra begyndelsen — én gang.
+    ///
+    /// APPEN STARTER MED WINDOWS, og den SPØRGER, når et program bruger
+    /// mikrofonen. Begge skal kunne slås fra; ingen af dem skal skulle findes
+    /// og slås til.
+    ///
+    /// Grunden er den samme for begge: de findes for at redde de møder, man
+    /// glemmer at optage. Genvejstasten kan kun starte en optagelse, hvis
+    /// appen kører, og mødevagten kan kun spørge, hvis den er slået til. En
+    /// funktion, man selv skal finde, redder ingen af de møder.
+    ///
+    /// DET SKER ÉN GANG OG ALDRIG IGEN. Flaget står i indstillingerne, så et
+    /// fravalg bliver stående. Et hak, der kommer tilbage af sig selv ved
+    /// næste opstart, er værre end intet hak — så holder man op med at tro på
+    /// indstillingerne overhovedet.
+    ///
+    /// Autostarten skrives i Windows' Run-nøgle. Fejler det — en låst maskine,
+    /// en politik fra en it-afdeling — bliver flaget alligevel sat. Ellers
+    /// ville appen prøve igen ved hver eneste start og fejle hver gang.
+    /// </summary>
+    private static void SaetStandardvalg()
+    {
+        var s = AppSettings.Current;
+        if (s.StandardvalgSat) return;
+
+        s.MoedevagtTil = true;
+        s.StandardvalgSat = true;
+
+        try { Autostart.Saet(true); }
+        catch (Exception)
+        {
+            // En maskine, hvor det ikke kan lade sig goere. Appen virker
+            // uaendret; den starter bare ikke af sig selv.
+        }
+
+        s.Save();
     }
 
     /// <summary>
