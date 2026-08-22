@@ -355,7 +355,7 @@
               <TextBlock x:Name="DataSti" FontSize="13" FontFamily="Consolas" Margin="0,6,0,0" TextWrapping="Wrap" />
               <TextBlock x:Name="DataIndhold" Style="{StaticResource Underskrift}" Margin="0,6,0,0" />
               <TextBlock Style="{StaticResource Underskrift}" Margin="0,8,0,0" Foreground="{StaticResource TekstMeget}"
-                         Text="Optagelser, udskrifter, noter og dokumenter. Skifter du mappe, flyttes alt med." />
+                         Text="Optagelser, transkriptioner, noter og dokumenter. Skifter du mappe, flyttes alt med." />
             </StackPanel>
             <StackPanel Grid.Column="1" VerticalAlignment="Center">
               <Button Content="Skift mappe…" Click="SkiftData_Click" MinWidth="130" />

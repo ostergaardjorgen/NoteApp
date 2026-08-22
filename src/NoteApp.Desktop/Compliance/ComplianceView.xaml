@@ -91,7 +91,7 @@
                                  Foreground="{StaticResource Godkendt}" Margin="0,0,0,10" />
                       <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap"
                                  Foreground="{StaticResource TekstSvag}"
-                                 Text="Lyd og udskrift forlader aldrig maskinen. Det sker i appens egen kode, og den kan efterprøves." />
+                                 Text="Lyd og transkription forlader aldrig maskinen. Det sker i appens egen kode, og den kan efterprøves." />
                       <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
                                  Foreground="{StaticResource TekstSvag}"
                                  Text="Appen kan kun kalde det europæiske endepunkt. Det er spærret i koden, ikke en indstilling." />
@@ -166,7 +166,7 @@
                   <Border Grid.Column="0" Background="#FF16241C" BorderBrush="{StaticResource Godkendt}"
                           BorderThickness="1" CornerRadius="8" Padding="16,13">
                     <StackPanel>
-                      <TextBlock Text="Lyd og udskrift" FontSize="14" FontWeight="SemiBold" />
+                      <TextBlock Text="Lyd og transkription" FontSize="14" FontWeight="SemiBold" />
                       <TextBlock Text="Bliver på denne pc" FontSize="12.5" Margin="0,4,0,0"
                                  Foreground="{StaticResource Godkendt}" FontWeight="SemiBold" />
                       <TextBlock FontSize="12.5" LineHeight="20" Margin="0,8,0,0" TextWrapping="Wrap"
@@ -187,7 +187,7 @@
                                  Foreground="{StaticResource Accent}" FontWeight="SemiBold" />
                       <TextBlock FontSize="12.5" LineHeight="20" Margin="0,8,0,0" TextWrapping="Wrap"
                                  Foreground="{StaticResource TekstSvag}"
-                                 Text="Skal der laves et referat eller et andet dokument, sendes udskriftens tekst til Mistral AI. Kun teksten — aldrig lyden, og aldrig dine noter, medmindre mødetypen beder om dem." />
+                                 Text="Skal der laves et referat eller et andet dokument, sendes transkriptionens tekst til Mistral AI. Kun teksten — aldrig lyden, og aldrig dine noter, medmindre mødetypen beder om dem." />
                     </StackPanel>
                   </Border>
                 </Grid>
@@ -211,19 +211,19 @@
                            FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap" />
                 <TextBlock FontSize="12.5" LineHeight="21" Margin="0,8,0,14" TextWrapping="Wrap"
                            Foreground="{StaticResource TekstSvag}"
-                           Text="Forskellen på en lydfil og en udskrift er ikke en gradsforskel. Det er to forskellige slags oplysninger, og den ene af dem forlader aldrig din maskine." />
+                           Text="Forskellen på en lydfil og en transkription er ikke en gradsforskel. Det er to forskellige slags oplysninger, og den ene af dem forlader aldrig din maskine." />
 
                 <TextBlock Text="Lyden kan blive til biometri. Teksten kan ikke." FontSize="13.5"
                            FontWeight="SemiBold" Margin="0,0,0,4" />
                 <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,0,0,12"
                            Foreground="{StaticResource TekstSvag}"
-                           Text="En stemmeoptagelse er personoplysninger. Bliver den behandlet med det formål at genkende, HVEM der taler, er den samtidig biometriske data efter databeskyttelsesforordningens artikel 4, nr. 14 — og dermed en særlig kategori efter artikel 9, hvor kravene er skærpede. En optagelse er råstoffet til den behandling. En udskrift er det ikke: tekst kan ikke laves om til et stemmeaftryk." />
+                           Text="En stemmeoptagelse er personoplysninger. Bliver den behandlet med det formål at genkende, HVEM der taler, er den samtidig biometriske data efter databeskyttelsesforordningens artikel 4, nr. 14 — og dermed en særlig kategori efter artikel 9, hvor kravene er skærpede. En optagelse er råstoffet til den behandling. En transkription er det ikke: tekst kan ikke laves om til et stemmeaftryk." />
 
                 <TextBlock Text="Lyden indeholder mere end ordene." FontSize="13.5"
                            FontWeight="SemiBold" Margin="0,0,0,4" />
                 <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,0,0,12"
                            Foreground="{StaticResource TekstSvag}"
-                           Text="Hvem der talte, kan høres, også når navnet aldrig bliver sagt. Dertil kommer tonefald, tøven, accent og ting om helbred og sindstilstand, som ingen har sagt højt. Intet af det følger med en udskrift." />
+                           Text="Hvem der talte, kan høres, også når navnet aldrig bliver sagt. Dertil kommer tonefald, tøven, accent og ting om helbred og sindstilstand, som ingen har sagt højt. Intet af det følger med en transkription." />
 
                 <TextBlock Text="Fortæl altid deltagerne, at du optager." FontSize="13.5"
                            FontWeight="SemiBold" Margin="0,0,0,4" />
@@ -238,7 +238,7 @@
                         Padding="0,12,0,0" Margin="0,14,0,0">
                   <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap"
                              Foreground="{StaticResource Tekst}"
-                             Text="Det er et designvalg, ikke en begrænsning, der venter på at blive ophævet. Talegenkendelse i skyen ville være hurtigere, og det er fravalgt. Bliver udskriften for langsom, løses det med bedre lokale modeller — ikke ved at sende lyden væk." />
+                             Text="Det er et designvalg, ikke en begrænsning, der venter på at blive ophævet. Talegenkendelse i skyen ville være hurtigere, og det er fravalgt. Bliver transkriptionen for langsom, løses det med bedre lokale modeller — ikke ved at sende lyden væk." />
                 </Border>
               </StackPanel>
             </Border>
@@ -439,7 +439,7 @@
                        Text="Hver gang noget forlader maskinen, bogføres det her: tidspunkt, adresse, model, hvor mange tegn der gik, hvad det kostede — og en kontrolsum af de nøjagtige bytes. Også når kaldet fejler; en fejlet afsendelse har stadig sendt." />
             <TextBlock FontSize="12" LineHeight="20" Margin="0,8,0,0" TextWrapping="Wrap"
                        Foreground="{StaticResource TekstMeget}"
-                       Text="Selve teksten gemmes IKKE. Den ligger allerede ved mødet, og en kopi mere ville være endnu et sted, den kunne slippe ud fra. Kontrolsummen kan holdes op mod originalen — passer den ikke, er udskriften ændret siden." />
+                       Text="Selve teksten gemmes IKKE. Den ligger allerede ved mødet, og en kopi mere ville være endnu et sted, den kunne slippe ud fra. Kontrolsummen kan holdes op mod originalen — passer den ikke, er transkriptionen ændret siden." />
           </StackPanel>
 
           <Border DockPanel.Dock="Top" Background="{StaticResource Panel}" CornerRadius="10"

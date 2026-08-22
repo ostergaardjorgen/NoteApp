@@ -63,7 +63,7 @@ public static class Sprogmodeller
             2_497_281_312,
             "Korte opsummeringer af møder — her på maskinen.",
             "Apache-2.0",
-            "Målt hurtigst og mest præcis af de tre, der blev prøvet. En 8B kan ikke være på kortet sammen med et helt mødes udskrift.")
+            "Målt hurtigst og mest præcis af de tre, der blev prøvet. En 8B kan ikke være på kortet sammen med et helt mødes transkription.")
     };
 
     public static Sprogmodel Standard => Katalog[0];

@@ -225,7 +225,7 @@ public partial class TemplatesView : UserControl
             $"Du har ændret instruktionen til «{navn}».\n\n" +
             "Dagsordenen bestemmer, hvad der bliver sagt på mødet. Beder den ikke om " +
             "det, den nye instruktion har brug for, står felterne tomme i dokumentet — " +
-            "udskriften kan kun indeholde det, nogen sagde højt.\n\n" +
+            "transkriptionen kan kun indeholde det, nogen sagde højt.\n\n" +
             (egen
                 ? "Den nuværende dagsorden bliver skrevet over."
                 : "Mødetypen bruger standarddagsordenen. Den bliver liggende — der laves en egen."),
@@ -365,7 +365,7 @@ public partial class TemplatesView : UserControl
 
         if (manglerUdskrift)
             linjer.Add("{{transskription}} mangler. Uden det felt får modellen ikke selve " +
-                       "udskriften, og dokumentet bliver skrevet på ingenting. Der kan ikke " +
+                       "transkriptionen, og dokumentet bliver skrevet på ingenting. Der kan ikke " +
                        "gemmes, før feltet er sat ind.");
 
         if (reglerForkert)
@@ -480,9 +480,9 @@ public partial class TemplatesView : UserControl
         if (!_valgt.UserPrompt.Contains("{{transskription}}", StringComparison.OrdinalIgnoreCase))
         {
             MaterialeFane.IsSelected = true;
-            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Udskriften mangler",
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Transkriptionen mangler",
                 "Mødetypen kan ikke gemmes uden feltet {{transskription}} under " +
-                "«Hvad modellen får». Uden det får modellen ikke selve udskriften af " +
+                "«Hvad modellen får». Uden det får modellen ikke selve transkriptionen af " +
                 "mødet, og dokumentet bliver skrevet på ingenting.",
                 Dialogs.Slags.Pas_paa);
             return;

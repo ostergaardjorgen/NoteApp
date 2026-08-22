@@ -80,7 +80,7 @@
             <TextBlock Text="Det kommer med af sig selv" FontSize="12.5" FontWeight="SemiBold" />
             <TextBlock FontSize="12" LineHeight="19" Margin="0,5,0,0" TextWrapping="Wrap"
                        Foreground="{StaticResource TekstMeget}"
-                       Text="Reglerne for, hvem der kommer på deltagerlisten, sættes ind som fælles felt — de er ens for alle mødetyper. Det samme gælder kravet om at skrive på dansk og aldrig finde på tal, navne eller datoer, der ikke står i udskriften." />
+                       Text="Reglerne for, hvem der kommer på deltagerlisten, sættes ind som fælles felt — de er ens for alle mødetyper. Det samme gælder kravet om at skrive på dansk og aldrig finde på tal, navne eller datoer, der ikke står i transkriptionen." />
           </StackPanel>
         </Border>
 

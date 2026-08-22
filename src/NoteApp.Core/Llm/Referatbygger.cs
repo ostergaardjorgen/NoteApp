@@ -365,9 +365,9 @@ public sealed class Referatbygger
         MaxTokens = 1600,
 
         SystemPrompt =
-            "Du læser et stykke af en mødeudskrift og skriver ned, hvad der blev sagt.\n\n" +
+            "Du læser et stykke af en mødetranskription og skriver ned, hvad der blev sagt.\n\n" +
             "Skriv på dansk, i almindelige sætninger og afsnit.\n\n" +
-            "HVEM SIGER HVAD er det vigtigste. Udskriften har ingen navne på talerne, " +
+            "HVEM SIGER HVAD er det vigtigste. Transkriptionen har ingen navne på talerne, " +
             "så du skal slutte dig til det af sammenhængen — og du får deltagerlisten " +
             "og slutningen af forrige stykke med netop derfor. Er du i tvivl om, hvem " +
             "der sagde noget, så skriv «en af deltagerne» frem for at gætte på et navn. " +
@@ -399,8 +399,8 @@ public sealed class Referatbygger
         Temperature = 0.0,
         MaxTokens = 400,
         SystemPrompt =
-            "Du læser begyndelsen af en mødeudskrift og finder ud af, hvem der deltager.\n\n" +
-            "Udskriften har ingen navne på talerne. Folk præsenterer sig som regel selv " +
+            "Du læser begyndelsen af en mødetranskription og finder ud af, hvem der deltager.\n\n" +
+            "Transkriptionen har ingen navne på talerne. Folk præsenterer sig som regel selv " +
             "i begyndelsen — brug det.\n\n" +
             "Svar med én linje pr. person: navn, og hvad personen er, hvis det siges. " +
             "Fx «Espen Sjøl — sælger hos CloudWorks, 15-20 års erfaring med IAM».\n\n" +

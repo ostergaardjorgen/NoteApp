@@ -711,7 +711,7 @@ public partial class TranscribeView : UserControl
         KoerKnap.Content = færdig is null ? "Opret transskription" : "Opdatér transskription";
         KoerKnap.ToolTip = færdig is null
             ? "Skriv lyden ud til tekst her på maskinen"
-            : "Skriv lyden ud igen. Den nuværende udskrift bliver overskrevet";
+            : "Skriv lyden ud igen. Den nuværende transkription bliver overskrevet";
 
         // Stien til den valgte optagelse. Samme linje samme sted som paa
         // Dokumenter og Skabeloner - det er den, man skal bruge, naar en fil
@@ -834,7 +834,7 @@ public partial class TranscribeView : UserControl
                 "Opsætningen mangler et trin",
                 "Dokumenter laves af en sprogmodel i Europa, og den er ikke sat op endnu.\n\n" +
                 "Det tager et minut: du henter en nøgle hos Mistral og sætter den ind. " +
-                "Optagelse og udskrift virker uændret uden.",
+                "Optagelse og transkription virker uændret uden.",
                 godkend: "Sæt op nu",
                 annuller: "Senere",
                 slags: Dialogs.Slags.Valg);
@@ -1055,14 +1055,14 @@ public partial class TranscribeView : UserControl
         if (Udskrift.HarRettelser(valgt.Mappe))
         {
             var fortsaet = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
-                "Du har rettet i udskriften",
+                "Du har rettet i transkriptionen",
                 "Dine rettelser bliver liggende — de bliver ikke slettet af en ny " +
                 "udskrivning.\n\n" +
                 "Men de to udgaver kommer til at sige noget forskelligt: du læser " +
                 "stadig din rettede tekst, mens maskinens nye udgave ligger nedenunder. " +
                 "Vil du have maskinens nye ord frem, skal du fjerne rettelserne " +
                 "bagefter.\n\n" +
-                "Skriv kun ud igen, hvis der er noget galt med selve udskriften — " +
+                "Skriv kun ud igen, hvis der er noget galt med selve transkriptionen — " +
                 "et forkert sprog eller et spor, der manglede.",
                 godkend: "Skriv ud igen",
                 annuller: "Behold det, jeg har rettet",
@@ -1147,7 +1147,7 @@ public partial class TranscribeView : UserControl
         {
             Dialogs.AppDialog.Vis(Window.GetWindow(this), "Den er skrevet ud i forvejen",
                 "Begge spor er allerede skrevet ud på de sprog, du valgte, og lyden er ikke ændret siden. " +
-                "Vil du gøre det om alligevel, så vælg et andet sprog — eller slet udskrifterne i mappen.",
+                "Vil du gøre det om alligevel, så vælg et andet sprog — eller slet transkriptionerne i mappen.",
                 Dialogs.Slags.Valg);
             return;
         }
@@ -1420,13 +1420,13 @@ public partial class TranscribeView : UserControl
             {
                 var gennemgaa = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
                     $"«{valgt.Titel}» er skrevet ud",
-                    "Læs udskriften igennem, før der laves et dokument. To ting betaler " +
+                    "Læs transkriptionen igennem, før der laves et dokument. To ting betaler " +
                     "sig især: at rette navne og fagord, maskinen har hørt forkert, og at " +
                     "give de to spor rigtige navne i stedet for «Mig» og «Gæster».\n\n" +
-                    "Dokumentet bliver lavet af den rettede udskrift, med navnene på — " +
+                    "Dokumentet bliver lavet af den rettede transkription, med navnene på — " +
                     "så det, der står rigtigt her, står også rigtigt i referatet.\n\n" +
                     "Knappen «Opret dokument» står klar bagefter.",
-                    godkend: "Gennemgå udskriften",
+                    godkend: "Gennemgå transkriptionen",
                     annuller: "Lav et dokument nu",
                     slags: Dialogs.Slags.Godt);
 
@@ -1586,7 +1586,7 @@ public partial class TranscribeView : UserControl
     private static string SporTekst(TranscriptionResult r) =>
         File.Exists(r.JsonPath) && Path.GetFileName(r.TextPath)
             .StartsWith("udskrift_", StringComparison.Ordinal)
-            ? "flettet udskrift"
+            ? "flettet transkription"
             : "ét spor";
 
     /// <summary>
@@ -1614,8 +1614,8 @@ public partial class TranscribeView : UserControl
         // moede. Tallet i parentes er der, saa stoerrelsen ikke overrasker.
         if (transskriptioner > 0)
             hvad.Add(transskriptioner == 1
-                ? "udskriften"
-                : $"udskriften ({transskriptioner} filer: de enkelte spor og fletningen)");
+                ? "transkriptionen"
+                : $"transkriptionen ({transskriptioner} filer: de enkelte spor og fletningen)");
         if (noter) hvad.Add("noter og blokmærker");
 
         var ja = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
@@ -1668,7 +1668,7 @@ public partial class TranscribeView : UserControl
             Clipboard.SetText(tekst);
 
             var ord = tekst.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries).Length;
-            Status.Text = $"Hele udskriften er kopieret — {ord:N0} ord. Sæt den ind, hvor du vil bruge den.";
+            Status.Text = $"Hele transkriptionen er kopieret — {ord:N0} ord. Sæt den ind, hvor du vil bruge den.";
             Fremdriftsrude.Visibility = Visibility.Visible;
             Fremdrift.Visibility = Visibility.Collapsed;
             Fremdriftstal.Text = "";

@@ -56,7 +56,7 @@ public static class Mikrofontest
     /// <param name="Ialt">Ord i prøveteksten.</param>
     /// <param name="Ramt">Ord, Whisper skrev rigtigt.</param>
     /// <param name="Sekunder">Klippets længde.</param>
-    /// <param name="Udskrift">Det, Whisper hørte. Vises, så tallet kan efterprøves.</param>
+    /// <param name="Transkription">Det, Whisper hørte. Vises, så tallet kan efterprøves.</param>
     /// <param name="Afvigelser">De enkelte fejl, i tekstens rækkefølge.</param>
     public sealed record Resultat(
         int Ialt,
@@ -96,7 +96,7 @@ public static class Mikrofontest
         public string Raad => Karakter switch
         {
             Bedoemmelse.God =>
-                "Mikrofonen er god nok. Udskriften af et rigtigt møde bliver dårligere end " +
+                "Mikrofonen er god nok. Transkriptionen af et rigtigt møde bliver dårligere end " +
                 "det her, fordi folk taler i munden på hinanden og vender sig væk — men " +
                 "lyden er ikke det, der står i vejen.",
 

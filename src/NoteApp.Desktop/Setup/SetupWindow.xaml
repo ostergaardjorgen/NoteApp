@@ -55,7 +55,7 @@
             <TextBlock x:Name="DataSti" FontSize="12" FontFamily="Consolas"
                        Foreground="{StaticResource TekstSvag}" TextWrapping="Wrap" />
             <TextBlock Style="{StaticResource Underskrift}" Margin="0,6,0,0"
-                       Text="Optagelser, udskrifter, noter og dokumenter. Vælg en anden mappe, hvis du fx vil have dem på en krypteret disk." />
+                       Text="Optagelser, transkriptioner, noter og dokumenter. Vælg en anden mappe, hvis du fx vil have dem på en krypteret disk." />
           </StackPanel>
           <Button Grid.Column="1" Content="Skift…" Click="SkiftMappe_Click" VerticalAlignment="Top"
                   Margin="12,0,0,0" />

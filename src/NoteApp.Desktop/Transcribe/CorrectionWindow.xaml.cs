@@ -30,9 +30,9 @@ public partial class CorrectionWindow : Window
 
         Konsekvens.Text = antalIUdskriften switch
         {
-            0 => "Ordet står ikke i denne udskrift, men reglen gælder fremover.",
-            1 => "Ordet står ét sted i denne udskrift og bliver rettet med det samme.",
-            _ => $"Ordet står {antalIUdskriften} steder i denne udskrift og bliver rettet alle steder med det samme."
+            0 => "Ordet står ikke i denne transkription, men reglen gælder fremover.",
+            1 => "Ordet står ét sted i denne transkription og bliver rettet med det samme.",
+            _ => $"Ordet står {antalIUdskriften} steder i denne transkription og bliver rettet alle steder med det samme."
         };
 
         Loaded += (_, _) =>

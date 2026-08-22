@@ -512,7 +512,7 @@ public partial class DocumentsView : UserControl
 
         var ja = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
             $"Slet «{_valgt.Title}»?",
-            "Selve optagelsen og udskriften bliver liggende — det er kun dokumentet, der slettes. " +
+            "Selve optagelsen og transkriptionen bliver liggende — det er kun dokumentet, der slettes. " +
             "Du kan lave et nyt af den samme optagelse.",
             godkend: "Slet dokumentet", annuller: "Behold det",
             slags: Dialogs.Slags.Pas_paa, godkendErStandard: false);

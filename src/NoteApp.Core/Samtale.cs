@@ -237,7 +237,7 @@ public static class Samtale
         var harNavne = navne is not null
                        && (navne.ContainsKey(Herfra) || navne.ContainsKey(Derfra));
 
-        sb.AppendLine("SÅDAN ER UDSKRIFTEN LAVET");
+        sb.AppendLine("SÅDAN ER TRANSKRIPTIONEN LAVET");
         sb.AppendLine();
         sb.AppendLine("Mødet blev optaget på to lydspor, skrevet ud hver for sig og flettet");
         sb.AppendLine("efter tid.");

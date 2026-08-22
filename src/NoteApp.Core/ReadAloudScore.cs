@@ -8,7 +8,7 @@ namespace NoteApp.Core;
 ///
 /// Der er TO positioner, og de er ikke det samme. <see cref="Position"/> er
 /// pladsen i manuskriptet — den bruges til at sige hvad der skulle have stået.
-/// <see cref="UdskriftPosition"/> er pladsen i udskriften, og den findes, fordi
+/// <see cref="TranskriptionPosition"/> er pladsen i udskriften, og den findes, fordi
 /// udskriften er den eneste vej tilbage til LYDEN: Whisper leverer et tidsrum
 /// pr. sætning, og uden at vide hvilket ord i udskriften afvigelsen sad ved,
 /// kan man ikke finde det tidsrum og spille sætningen igen.

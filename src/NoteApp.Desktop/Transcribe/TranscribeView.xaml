@@ -54,7 +54,7 @@
              arbejdet fremad, står yderst — hvor øjet ender. -->
         <Button DockPanel.Dock="Right" x:Name="ReferatKnap" Click="Referat_Click"
                 MinWidth="150" IsEnabled="False" Padding="14,7" Content="Opret dokument"
-                ToolTip="Lav et referat eller et andet dokument ud af udskriften" />
+                ToolTip="Lav et referat eller et andet dokument ud af transkriptionen" />
 
         <!-- Kopiér staar FOER "Opret dokument", fordi det er den lettere vej
              ud: hele udskriften i udklipsholderen, saa den kan sættes ind et
@@ -63,7 +63,7 @@
         <Button DockPanel.Dock="Right" x:Name="KopierKnap" Click="Kopier_Click"
                 MinWidth="130" IsEnabled="False" Padding="14,7" Margin="0,0,8,0"
                 Content="Kopiér teksten"
-                ToolTip="Læg hele udskriften i udklipsholderen" />
+                ToolTip="Læg hele transkriptionen i udklipsholderen" />
 
         <TextBlock DockPanel.Dock="Right" Text="&#xE76C;" FontFamily="Segoe MDL2 Assets"
                    FontSize="11" VerticalAlignment="Center" Margin="10,0"
@@ -120,7 +120,7 @@
 
         <Button DockPanel.Dock="Left" x:Name="SletKnap" Style="{StaticResource IkonKnapFare}"
                 Click="Slet_Click" IsEnabled="False" AutomationProperties.Name="Slet optagelse"
-                ToolTip="Slet optagelsen med lyd og udskrift. Kan ikke fortrydes">
+                ToolTip="Slet optagelsen med lyd og transkription. Kan ikke fortrydes">
           <TextBlock Text="&#xE74D;" FontFamily="Segoe MDL2 Assets" />
         </Button>
 
@@ -390,7 +390,7 @@
 
               <TextBlock FontSize="12.5" LineHeight="20" Margin="2,18,0,0" TextWrapping="Wrap"
                          Foreground="{StaticResource TekstMeget}"
-                         Text="Teksten bliver ikke perfekt. Navne og fagord er det, der oftest rammes forkert. Udskriften kan ikke rettes her — den er, hvad maskinen hørte. Skal noget rettes, gøres det i det færdige dokument." />
+                         Text="Teksten bliver ikke perfekt. Navne og fagord er det, der oftest rammes forkert. Transkriptionen kan ikke rettes her — den er, hvad maskinen hørte. Skal noget rettes, gøres det i det færdige dokument." />
             </StackPanel>
           </ScrollViewer>
 

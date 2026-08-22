@@ -35,7 +35,7 @@
                  HorizontalAlignment="Center" />
       <TextBlock Style="{StaticResource Underskrift}" Margin="0,5,0,0"
                  TextAlignment="Center" MaxWidth="620" TextWrapping="Wrap"
-                 Text="Alt, der er sagt og skrevet — udskrifter, dine noter og de færdige dokumenter. Søgningen læser filerne på din maskine, og der sendes intet." />
+                 Text="Alt, der er sagt og skrevet — transkriptioner, dine noter og de færdige dokumenter. Søgningen læser filerne på din maskine, og der sendes intet." />
     </StackPanel>
 
     <Border Grid.Row="1" Background="{StaticResource Panel}" CornerRadius="12"
@@ -261,13 +261,66 @@
                        HorizontalAlignment="Center" />
             <TextBlock FontSize="12.5" Margin="0,10,0,0" TextWrapping="Wrap" LineHeight="20"
                        TextAlignment="Center" Foreground="{StaticResource TekstSvag}"
-                       Text="Der søges i alle udskrifter, i de noter du skrev undervejs, og i de dokumenter appen har lavet. Flere ord betyder, at de alle skal stå tæt på hinanden." />
+                       Text="Der søges i alle transkriptioner, i de noter du skrev undervejs, og i de dokumenter appen har lavet. Flere ord betyder, at de alle skal stå tæt på hinanden." />
             <TextBlock FontSize="12" Margin="0,12,0,0" TextWrapping="Wrap" LineHeight="19"
                        TextAlignment="Center" Foreground="{StaticResource TekstMeget}"
                        Text="Filerne læses på din maskine. Der sendes intet." />
           </StackPanel>
 
-          <ScrollViewer x:Name="Rude" Padding="8,8,8,12" Visibility="Collapsed"
+          <!-- ============ FANER OG SORTERING ============
+
+               Faner efter TYPE, fordi de tre slags svarer paa hver sit
+               spoergsmaal: transkriptionen er, hvad der blev SAGT, noten er,
+               hvad DU skrev ned, og dokumentet er, hvad der blev skrevet
+               bagefter. Blandet i én liste skal man laese maerkatet paa hver
+               eneste raekke for at vide, hvad man kigger paa.
+
+               Fanerne staar kun frem, naar der ER noget at vaelge imellem -
+               en faneraekke med ét punkt er ikke et valg. -->
+          <DockPanel x:Name="Resultatrude" Visibility="Collapsed">
+
+            <Grid DockPanel.Dock="Top" Margin="10,8,10,6">
+              <ItemsControl x:Name="Typefaner" HorizontalAlignment="Left">
+                <ItemsControl.ItemsPanel>
+                  <ItemsPanelTemplate><StackPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate>
+                    <Button Tag="{Binding}" Click="Fane_Klik" Cursor="Hand" Margin="0,0,6,0">
+                      <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                          <Border x:Name="f" CornerRadius="13" Padding="12,5"
+                                  Background="{Binding Flade}" BorderThickness="1"
+                                  BorderBrush="{Binding Kant}">
+                            <TextBlock Text="{Binding Navn}" FontSize="12"
+                                       Foreground="{Binding Skrift}" />
+                          </Border>
+                          <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                              <Setter TargetName="f" Property="BorderBrush"
+                                      Value="{StaticResource Accent}" />
+                            </Trigger>
+                          </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                      </Button.Template>
+                    </Button>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+
+              <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <TextBlock Text="Sortér" FontSize="11.5" VerticalAlignment="Center"
+                           Margin="0,0,8,0" Foreground="{StaticResource TekstMeget}" />
+                <ComboBox x:Name="Sortering" MinWidth="150" FontSize="12" Padding="8,4"
+                          SelectionChanged="Sortering_Aendret">
+                  <ComboBox.ItemTemplate>
+                    <DataTemplate><TextBlock Text="{Binding Navn}" /></DataTemplate>
+                  </ComboBox.ItemTemplate>
+                </ComboBox>
+              </StackPanel>
+            </Grid>
+
+          <ScrollViewer x:Name="Rude" Padding="8,0,8,12"
           VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
           <ItemsControl x:Name="Liste">
           <ItemsControl.ItemTemplate>
@@ -361,6 +414,7 @@
           </ItemsControl.ItemTemplate>
           </ItemsControl>
           </ScrollViewer>
+          </DockPanel>
 
           <StackPanel x:Name="IntetPanel" VerticalAlignment="Center" HorizontalAlignment="Center"
           MaxWidth="520" Visibility="Collapsed">
@@ -460,7 +514,7 @@
                 HorizontalAlignment="Left" Margin="0,4,0,0" Padding="0"
                 BorderThickness="0" Background="Transparent" Cursor="Hand"
                 FontSize="11" Foreground="#FF5B9DF0"
-                ToolTip="Gå til det sted i udskriften, opgaven kom fra">
+                ToolTip="Gå til det sted i transkriptionen, opgaven kom fra">
                 <Button.Template>
                 <ControlTemplate TargetType="Button">
                 <TextBlock Text="{TemplateBinding Content}" FontSize="11"

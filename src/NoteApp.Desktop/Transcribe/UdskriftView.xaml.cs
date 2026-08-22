@@ -380,7 +380,7 @@ public partial class UdskriftView : UserControl
 
         var maskinfiler = Directory.Exists(mappe)
             ? Directory.GetFiles(mappe, "*_*.json")
-                .Where(f => !Path.GetFileName(f).StartsWith("udskrift", StringComparison.OrdinalIgnoreCase))
+                .Where(f => !Path.GetFileName(f).StartsWith("transkription", StringComparison.OrdinalIgnoreCase))
                 .ToList()
             : new List<string>();
 
@@ -411,7 +411,7 @@ public partial class UdskriftView : UserControl
             IngenTekst.Text = arbejder
                 ? "Stemmerne bliver skilt ad lige nu. Det tager omkring et minut for hvert " +
                   "kvarters optagelse, og så står teksten her."
-                : "Maskinens ord ligger i mappen, men de er ikke sat sammen til en udskrift. " +
+                : "Maskinens ord ligger i mappen, men de er ikke sat sammen til en transkription. " +
                   "Tryk «Opdatér transskription» øverst — den genbruger det, der allerede er " +
                   "lavet, så det går hurtigt.";
             return;
@@ -597,7 +597,7 @@ public partial class UdskriftView : UserControl
         {
             (true, true) => $"{taler} siger ikke «{soeg}» nogen steder.",
             (true, false) => $"Ingen replikker indeholder «{soeg}».",
-            _ => $"{taler} siger ikke noget i denne udskrift."
+            _ => $"{taler} siger ikke noget i denne transkription."
         };
     }
 
@@ -803,9 +803,9 @@ public partial class UdskriftView : UserControl
             ? Visibility.Visible : Visibility.Collapsed;
 
         OpgaveTom.Text = svage > 0
-            ? "Der er ingen stærke forslag i denne udskrift. Sæt flueben i «Vis også svage forslag» " +
+            ? "Der er ingen stærke forslag i denne transkription. Sæt flueben i «Vis også svage forslag» " +
               "for at se de øvrige — eller tilføj en opgave i hånden."
-            : "Der blev ikke fundet noget, der ligner en aftale i denne udskrift. " +
+            : "Der blev ikke fundet noget, der ligner en aftale i denne transkription. " +
               "Du kan tilføje en opgave i hånden.";
     }
 
@@ -920,7 +920,7 @@ public partial class UdskriftView : UserControl
             StatDato.Text = "—";
             StatStart.Text = StatSlut.Text = StatVarighed.Text = "—";
             StatTom.Visibility = Visibility.Visible;
-            StatTom.Text = "Der er ingen udskrift at regne på endnu.";
+            StatTom.Text = "Der er ingen transkription at regne på endnu.";
             return;
         }
 
@@ -1357,8 +1357,8 @@ public partial class UdskriftView : UserControl
             : "En kort opsummering på ti linjer: hvad der blev besluttet, hvad der blev aftalt, og hvad der stod åbent. Til at huske mødet med — ikke et dokument, du skal navngive og gemme.";
 
         OpsumLokalTekst.Text = erWebinar
-            ? "Cirka et halvt minut. Intet forlader maskinen. Kort — nogle få linjer og højst fire punkter med det, du kan tage med. Den skriver ikke tal, og det, den skriver, bliver efterprøvet mod udskriften."
-            : "Cirka et halvt minut. Intet forlader maskinen. Kort — nogle få linjer og højst fire punkter. Den skriver ikke tal, og det, den skriver, bliver efterprøvet mod udskriften.";
+            ? "Cirka et halvt minut. Intet forlader maskinen. Kort — nogle få linjer og højst fire punkter med det, du kan tage med. Den skriver ikke tal, og det, den skriver, bliver efterprøvet mod transkriptionen."
+            : "Cirka et halvt minut. Intet forlader maskinen. Kort — nogle få linjer og højst fire punkter. Den skriver ikke tal, og det, den skriver, bliver efterprøvet mod transkriptionen.";
     }
 
     /// <summary>
@@ -1391,7 +1391,7 @@ public partial class UdskriftView : UserControl
 
         OpsumAdvarsel.Visibility = uenig ? Visibility.Visible : Visibility.Collapsed;
         OpsumAdvarsel.Text = uenig
-            ? "Udskriften er ændret, siden opsummeringen blev lavet. De to siger ikke nødvendigvis det samme længere — lav den om, hvis rettelserne betyder noget."
+            ? "Transkriptionen er ændret, siden opsummeringen blev lavet. De to siger ikke nødvendigvis det samme længere — lav den om, hvis rettelserne betyder noget."
             : "";
 
         Efterproev(o.Tekst);
@@ -1419,11 +1419,11 @@ public partial class UdskriftView : UserControl
         OpsumTjek.Visibility = Visibility.Visible;
 
         OpsumTjekTitel.Text = fundne.Count == 1
-            ? "Én påstand kunne ikke findes i udskriften"
-            : $"{fundne.Count} påstande kunne ikke findes i udskriften";
+            ? "Én påstand kunne ikke findes i transkriptionen"
+            : $"{fundne.Count} påstande kunne ikke findes i transkriptionen";
 
         OpsumTjekListe.Text = string.Join("\n",
-            fundne.Select(f => $"«{f.Tekst}» — {(f.Slags == "tal" ? "tallet" : "navnet")} står ikke i udskriften"));
+            fundne.Select(f => $"«{f.Tekst}» — {(f.Slags == "tal" ? "tallet" : "navnet")} står ikke i transkriptionen"));
     }
 
     private void OpsumKopier_Klik(object sender, RoutedEventArgs e)
@@ -1493,7 +1493,7 @@ public partial class UdskriftView : UserControl
         if (tekst.Trim().Length < 200)
         {
             Dialogs.AppDialog.Vis(Window.GetWindow(this), "Der er ikke nok tekst",
-                "Udskriften er for kort til, at en opsummering siger mere end teksten selv.",
+                "Transkriptionen er for kort til, at en opsummering siger mere end teksten selv.",
                 Dialogs.Slags.Valg);
             return;
         }
@@ -1536,7 +1536,7 @@ public partial class UdskriftView : UserControl
             var svar = await new LlmRunner(cli).RunAsync(
                 model,
                 Opsummering.LokalOpskrift(_meta?.Type ?? MeetingType.Online),
-                $"{slags} hedder «{titel}».\n\nUdskrift:\n{tekst}");
+                $"{slags} hedder «{titel}».\n\nTranskription:\n{tekst}");
 
             var ren = svar.Text.Trim();
 

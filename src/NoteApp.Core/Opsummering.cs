@@ -96,7 +96,7 @@ public static class Opsummering
         Temperature = 0.2,
         MaxTokens = 1200,
         SystemPrompt =
-            "Du laver en KORT opsummering af et møde ud fra en udskrift. Du skriver " +
+            "Du laver en KORT opsummering af et møde ud fra en transkription. Du skriver " +
             "ALTID på dansk, også når mødet blev holdt på et andet sprog.\n\n" +
             "FORMEN\n\n" +
             "Første afsnit: to til fire linjer om, hvad mødet handlede om, og hvad " +
@@ -107,10 +107,10 @@ public static class Opsummering
             "Til sidst én linje, der begynder med «Åbent:», hvis der er noget, ingen " +
             "kunne svare på. Er der ikke det, udelades linjen helt.\n\n" +
             "REGLERNE\n\n" +
-            "Skriv ALDRIG et tal, et navn eller en dato, der ikke står i udskriften.\n\n" +
+            "Skriv ALDRIG et tal, et navn eller en dato, der ikke står i transkriptionen.\n\n" +
             "Fyld ikke op. Var mødet kort eller uden indhold, må opsummeringen være " +
             "på tre linjer. En lang opsummering af et tyndt møde er værre end en kort.\n\n" +
-            "Er udskriften mærket med «Mig» og «Gæster», er det SIDER af mødet, ikke " +
+            "Er transkriptionen mærket med «Mig» og «Gæster», er det SIDER af mødet, ikke " +
             "navne. Brug de rigtige navne, hvis de bliver sagt undervejs — ellers " +
             "skriv «du» om den, der optog, og nævn de øvrige uden at finde på navne.\n\n" +
             "Svar med opsummeringen og intet andet. Ingen indledning, ingen " +
@@ -162,7 +162,7 @@ public static class Opsummering
         Temperature = 0.2,
         MaxTokens = 320,
         SystemPrompt =
-            "Du laver en MEGET KORT opsummering af et WEBINAR ud fra en udskrift. Du " +
+            "Du laver en MEGET KORT opsummering af et WEBINAR ud fra en transkription. Du " +
             "skriver ALTID på dansk, også når webinaret blev holdt på et andet sprog.\n\n" +
             "ET WEBINAR ER IKKE ET MØDE\n\n" +
             "Der bliver ikke besluttet noget, og der bliver ikke aftalt noget. Nogen " +
@@ -179,7 +179,7 @@ public static class Opsummering
             "Hold dig under 120 ord i alt. Bliv færdig — en opsummering, der stopper " +
             "midt i en sætning, kan ikke bruges.\n\n" +
             "REGLERNE\n\n" +
-            "Skriv ALDRIG et navn eller en dato, der ikke står i udskriften.\n\n" +
+            "Skriv ALDRIG et navn eller en dato, der ikke står i transkriptionen.\n\n" +
             "SKRIV IKKE TAL. Ingen antal, ingen beløb, ingen procenter, ingen årstal.\n\n" +
             "Er webinaret holdt af en leverandør, så skriv hvem der påstår noget om " +
             "eget produkt — «Elimity oplyser, at …». Vurder aldrig selv, om det passer.\n\n" +
@@ -204,7 +204,7 @@ public static class Opsummering
         Temperature = 0.2,
         MaxTokens = 320,
         SystemPrompt =
-            "Du laver en MEGET KORT opsummering af et møde ud fra en udskrift. Du " +
+            "Du laver en MEGET KORT opsummering af et møde ud fra en transkription. Du " +
             "skriver ALTID på dansk, også når mødet blev holdt på et andet sprog.\n\n" +
             "FORMEN\n\n" +
             "To til tre linjer om, hvad mødet handlede om. Derefter højst fire punkter " +
@@ -212,12 +212,12 @@ public static class Opsummering
             "Hold dig under 120 ord i alt. Bliv færdig — en opsummering, der stopper " +
             "midt i en sætning, kan ikke bruges.\n\n" +
             "REGLERNE\n\n" +
-            "Skriv ALDRIG et navn eller en dato, der ikke står i udskriften.\n\n" +
+            "Skriv ALDRIG et navn eller en dato, der ikke står i transkriptionen.\n\n" +
             "SKRIV IKKE TAL. Ingen antal, ingen beløb, ingen procenter, ingen årstal. " +
             "Skriv «flere kunder» frem for et antal. Er et tal helt afgørende, så skriv " +
             "den sætning af, det stod i.\n\n" +
             "Er du i tvivl om noget, så lad være med at skrive det. Det, der står, skal " +
-            "kunne genfindes i udskriften.\n\n" +
+            "kunne genfindes i transkriptionen.\n\n" +
             "Svar med opsummeringen og intet andet.",
         UserPrompt = ""
     };

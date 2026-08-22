@@ -190,7 +190,7 @@ public partial class NyTemplateWindow : Window
     /// </summary>
     private static string Opskrift() =>
         "Du skriver systemprompter til en anden sprogmodel, som skal lave dokumenter ud fra " +
-        "udskrifter af møder. Du skriver ALTID på dansk.\n\n" +
+        "transkriptioner af møder. Du skriver ALTID på dansk.\n\n" +
         "Du skal IKKE skrive et eksempel på et dokument. Du skal skrive den INSTRUKTION, " +
         "som en model skal følge for at lave sådan et dokument hver gang.\n\n" +
         "Svar med instruktionen og intet andet — ingen indledning, ingen forklaring af hvad du " +
@@ -198,7 +198,7 @@ public partial class NyTemplateWindow : Window
         "Instruktionen skal:\n" +
         "· være skrevet i bydeform til modellen\n" +
         "· sige, at hele svaret skal være på dansk\n" +
-        "· forbyde at finde på tal, navne, datoer og beslutninger, der ikke står i udskriften\n" +
+        "· forbyde at finde på tal, navne, datoer og beslutninger, der ikke står i transkriptionen\n" +
         "· beskrive dokumentets afsnit med markdown-overskrifter (##) og sige, hvad hvert " +
         "afsnit skal indeholde\n" +
         "· sige, at et afsnit udelades helt, hvis der ikke er noget at skrive i det\n\n" +
@@ -242,11 +242,11 @@ public partial class NyTemplateWindow : Window
             MaxTokens = tokens,
             SystemPrompt = system + "\n\n{{" + Deltagerregler.Felt + "}}\n",
             UserPrompt =
-                "Her er udskriften af mødet.\n\n" +
+                "Her er transkriptionen af mødet.\n\n" +
                 "Titel: {{titel}}\nDato: {{dato}}\nVarighed: {{varighed}}\n" +
                 "Mødet blev holdt på: {{sprog}}\n\n" +
                 "Mine egne noter undervejs:\n{{noter}}\n\n" +
-                "Udskrift:\n{{transskription}}"
+                "Transkription:\n{{transskription}}"
         };
     }
 

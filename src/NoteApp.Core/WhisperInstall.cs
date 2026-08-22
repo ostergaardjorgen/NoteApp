@@ -123,7 +123,7 @@ public static class WhisperInstall
             "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v3-turbo.bin",
             ModelLanguages.Multilingual,
             "Halv størrelse, omtrent dobbelt hastighed. Til en maskine, der ikke kan holde large-v3.",
-            "Bruger det halve af grafikkortet og er mærkbart hurtigere. Bedste kompromis, hvis du venter på udskriften frem for at lade den køre om natten.",
+            "Bruger det halve af grafikkortet og er mærkbart hurtigere. Bedste kompromis, hvis du venter på transkriptionen frem for at lade den køre om natten.",
             "IKKE MÅLT i dette projekt — tallene ovenfor gælder large-v3, ikke den her. Rygtet siger «næsten lige så god»; det er ikke det samme som målt."),
     };
 

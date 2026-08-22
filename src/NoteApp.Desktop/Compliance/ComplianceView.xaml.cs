@@ -115,14 +115,14 @@ public partial class ComplianceView : UserControl
                 "Qwen3 (4B)",
                 "Apache-2.0",
                 "Kører lokalt",
-                "Sprogmodellen, der laver den korte opsummering af et møde. Vægtene er Alibabas og ligger på maskinen; udskriften forlader den ikke.",
+                "Sprogmodellen, der laver den korte opsummering af et møde. Vægtene er Alibabas og ligger på maskinen; transkriptionen forlader den ikke.",
                 "Apache-2.0 er fri at sælge med. Betingelsen er, at licensteksten følger med."),
 
             new Komponent(
                 SkyKatalog.Standard.Navn,
                 "Tjeneste",
                 "Kører i Frankrig",
-                "Sprogmodellen, der laver et dokument ud af udskriften efter mødetypen. Kører hos leverandøren — der hentes ingen vægte, og der installeres ingenting.",
+                "Sprogmodellen, der laver et dokument ud af transkriptionen efter mødetypen. Kører hos leverandøren — der hentes ingen vægte, og der installeres ingenting.",
                 "Det er en tjeneste, ikke en licens. Det, der gælder, er databehandleraftalen og vilkårene ovenfor.")
 
             // HER STOD ROEST V3. Den er undersoegt og fravalgt, ikke i brug -

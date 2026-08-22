@@ -87,7 +87,7 @@ public static class Notifikationer
         Historik.Skriv(HaendelseType.Opsaetning,
             "Opsætningen mangler et trin",
             "Dokumenter laves af en sprogmodel i Europa, og den er ikke sat op endnu. " +
-            "Optagelse og udskrift virker uændret. Sæt den op under «AI-modeller».",
+            "Optagelse og transkription virker uændret. Sæt den op under «AI-modeller».",
             Udfald.SeEfter);
 
         Meld();

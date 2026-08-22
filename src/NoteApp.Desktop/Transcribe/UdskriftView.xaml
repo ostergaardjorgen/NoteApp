@@ -47,7 +47,7 @@
             <TextBlock x:Name="SoegPladsholder" Grid.Column="0" IsHitTestVisible="False"
                        FontSize="12.5" Margin="10,0,0,0" VerticalAlignment="Center"
                        Foreground="{StaticResource TekstMeget}"
-                       Text="Søg i udskriften" />
+                       Text="Søg i transkriptionen" />
 
             <!-- Krydset rydder feltet i eet klik. Et soegeord paa tyve tegn
                  skal ellers slettes tegn for tegn, eller markeres foerst - og
@@ -99,7 +99,7 @@
 
         <Button Grid.Column="3" Content="Kopiér ▾" Click="Kopier_Klik"
                 Padding="12,6" FontSize="12.5"
-                ToolTip="Kopiér udskriften — med eller uden tidsstempler og talere">
+                ToolTip="Kopiér transkriptionen — med eller uden tidsstempler og talere">
           <Button.ContextMenu>
             <ContextMenu x:Name="Kopimenu">
               <MenuItem Header="Kopiér med tidsstempel og taler" Click="KopierAlt_Klik" />
@@ -405,7 +405,7 @@
                              Foreground="{StaticResource Tekst}" />
                   <TextBlock FontSize="11" TextWrapping="Wrap" LineHeight="17" Margin="0,6,0,0"
                              Foreground="{StaticResource TekstMeget}"
-                             Text="Det kan godt være rigtigt alligevel — ordene kan stå anderledes i udskriften end i opsummeringen. Men det er ikke efterprøvet, og der er ikke slettet noget." />
+                             Text="Det kan godt være rigtigt alligevel — ordene kan stå anderledes i transkriptionen end i opsummeringen. Men det er ikke efterprøvet, og der er ikke slettet noget." />
                 </StackPanel>
               </Border>
 
@@ -455,7 +455,7 @@
                              Foreground="{StaticResource Accent}" />
                   <TextBlock x:Name="OpsumLokalTekst" FontSize="12" LineHeight="18" TextWrapping="Wrap"
                              Margin="0,6,0,0" Foreground="{StaticResource TekstSvag}"
-                             Text="Cirka et halvt minut. Intet forlader maskinen. Kort — nogle få linjer og højst fire punkter. Den skriver ikke tal, og det, den skriver, bliver efterprøvet mod udskriften." />
+                             Text="Cirka et halvt minut. Intet forlader maskinen. Kort — nogle få linjer og højst fire punkter. Den skriver ikke tal, og det, den skriver, bliver efterprøvet mod transkriptionen." />
                   <Button x:Name="OpsumLokalKnap" Content="Kort lokal opsummering"
                           Click="OpsumLokal_Klik" Margin="0,12,0,0" Padding="14,8"
                           Style="{StaticResource Primaer}" />
@@ -520,7 +520,7 @@
               <Button Grid.Column="0" x:Name="FindOpgaverKnap" Content="Find opgaver"
                       Click="FindOpgaver_Klik" Padding="14,7" FontSize="12.5"
                       Style="{StaticResource Primaer}"
-                      ToolTip="Gennemgå udskriften igen for steder, der kan være en opgave" />
+                      ToolTip="Gennemgå transkriptionen igen for steder, der kan være en opgave" />
 
               <TextBlock Grid.Column="1" x:Name="OpgaveStatus" FontSize="11.5"
                          VerticalAlignment="Center" Margin="14,0,0,0"

@@ -50,7 +50,7 @@
           <StackPanel>
             <TextBlock x:Name="TomTekst" FontSize="13.5" LineHeight="22" TextWrapping="Wrap"
                        Foreground="{StaticResource TekstMeget}" Margin="0,10,0,0"
-                       Text="Ingen noter endnu. Skriv det, der skal huskes — en beslutning, et tal, en opgave — og tryk Enter. Noten får det tidspunkt, den blev skrevet, så den kan flettes ind i udskriften det rigtige sted bagefter." />
+                       Text="Ingen noter endnu. Skriv det, der skal huskes — en beslutning, et tal, en opgave — og tryk Enter. Noten får det tidspunkt, den blev skrevet, så den kan flettes ind i transkriptionen det rigtige sted bagefter." />
 
             <ItemsControl x:Name="Noter">
               <ItemsControl.ItemTemplate>

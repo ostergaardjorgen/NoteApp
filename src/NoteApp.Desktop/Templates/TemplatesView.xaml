@@ -212,7 +212,7 @@
                            Text="Står på knappen, når du vælger mødetype." />
                 <TextBlock Grid.Column="1" FontSize="11.5" TextWrapping="Wrap" Margin="2,0,10,0"
                            Foreground="{StaticResource TekstMeget}"
-                           Text="0,0 holder sig tæt på udskriften. Over 0,4 formulerer den sig frit — og til et referat er det en fejl." />
+                           Text="0,0 holder sig tæt på transkriptionen. Over 0,4 formulerer den sig frit — og til et referat er det en fejl." />
                 <TextBlock Grid.Column="2" FontSize="11.5" TextWrapping="Wrap" Margin="2,0,0,0"
                            Foreground="{StaticResource TekstMeget}"
                            Text="Loftet over svaret. Cirka 3 tegn pr. token." />
@@ -303,7 +303,7 @@
                              FontWeight="SemiBold" />
                   <TextBlock FontSize="11.5" Margin="0,4,0,8" TextWrapping="Wrap" LineHeight="18"
                              Foreground="{StaticResource TekstMeget}"
-                             Text="Klik på et felt for at sætte det ind i teksten ovenfor. Når dokumentet laves, bliver feltet skiftet ud med mødets egne oplysninger — {{transskription}} bliver til hele udskriften." />
+                             Text="Klik på et felt for at sætte det ind i teksten ovenfor. Når dokumentet laves, bliver feltet skiftet ud med mødets egne oplysninger — {{transskription}} bliver til hele transkriptionen." />
                   <ItemsControl x:Name="Felter">
                     <ItemsControl.ItemsPanel>
                       <ItemsPanelTemplate>
@@ -337,7 +337,7 @@
                            Text="Et referat kan kun indeholde det, der blev sagt. Bliver et navn aldrig nævnt, en frist aldrig aftalt eller en beslutning aldrig sagt højt, står det heller ikke i dokumentet — uanset hvor god modellen er." />
                 <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,8,0,0"
                            Foreground="{StaticResource TekstSvag}"
-                           Text="Dagsordenen herunder er bygget, så mødet af sig selv kommer omkring det, mødetyperne leder efter: hvem der er med, hvem der siger hvad, hvad der besluttes, hvad ingen kan svare på, og hvem der følger op hvornår. Den er et forslag — tilpas den frit, men de fem punkter er dem, der afgør, om udskriften kan blive til noget brugbart." />
+                           Text="Dagsordenen herunder er bygget, så mødet af sig selv kommer omkring det, mødetyperne leder efter: hvem der er med, hvem der siger hvad, hvad der besluttes, hvad ingen kan svare på, og hvem der følger op hvornår. Den er et forslag — tilpas den frit, men de fem punkter er dem, der afgør, om transkriptionen kan blive til noget brugbart." />
                 <TextBlock FontSize="12" LineHeight="20" TextWrapping="Wrap" Margin="0,8,0,0"
                            Foreground="{StaticResource TekstMeget}"
                            Text="Kopiér den ind i mødeindkaldelsen. Det vigtigste enkelte punkt er navnerunden: uden den har talegenkendelsen ingen navne at genkende, og så bliver «hvem sagde hvad» et gæt." />

@@ -261,7 +261,7 @@
                     <TextBlock Text="Teksten sendes til sprogmodellen" FontSize="13.5" FontWeight="SemiBold" />
                     <TextBlock FontSize="12.5" LineHeight="19" TextWrapping="Wrap" Margin="0,3,0,0"
                                Foreground="{StaticResource TekstMeget}"
-                               Text="Til forskel fra udskriften sker det her ikke på maskinen. Udskriften sendes til Mistrals europæiske endepunkt. Lyden bliver liggende. Hvad det betyder, står under «Compliance»." />
+                               Text="Til forskel fra transkriptionen sker det her ikke på maskinen. Transkriptionen sendes til Mistrals europæiske endepunkt. Lyden bliver liggende. Hvad det betyder, står under «Compliance»." />
                   </StackPanel>
                 </Grid>
 
@@ -288,7 +288,7 @@
                              FontWeight="SemiBold" Foreground="{StaticResource Tekst}" />
                   <TextBlock FontSize="12.5" LineHeight="20" Margin="0,6,0,0" TextWrapping="Wrap"
                              Foreground="{StaticResource Tekst}"
-                             Text="Udskriften bliver liggende ved optagelsen, og den kan bruges igen. Blev referatet ikke, som du ville have det, laver du et nyt fra den samme udskrift med en anden mødetype — så mange gange du vil. Det gamle dokument bliver stående, indtil du selv sletter det." />
+                             Text="Transkriptionen bliver liggende ved optagelsen, og den kan bruges igen. Blev referatet ikke, som du ville have det, laver du et nyt fra den samme transkription med en anden mødetype — så mange gange du vil. Det gamle dokument bliver stående, indtil du selv sletter det." />
                 </StackPanel>
               </Border>
 

@@ -82,7 +82,7 @@ public sealed class Fundvisning
 
         (Maerkat, Maerkatfarve) = f.Slags switch
         {
-            Fundtype.Udskrift => ("UDSKRIFT", new SolidColorBrush(Color.FromRgb(0x5B, 0x9D, 0xF0))),
+            Fundtype.Udskrift => ("TRANSKRIPTION", new SolidColorBrush(Color.FromRgb(0x5B, 0x9D, 0xF0))),
             Fundtype.Note => ("DIN NOTE", new SolidColorBrush(Color.FromRgb(0x4C, 0xBE, 0x72))),
             _ => ("DOKUMENT", new SolidColorBrush(Color.FromRgb(0xC9, 0x8C, 0xF0)))
         };
@@ -325,6 +325,168 @@ public partial class SearchView : UserControl
                 Dialogs.Slags.Valg);
     }
 
+    // ------------------------------------------------- faner og sortering
+
+    /// <summary>Én fane over resultatet: en slags kilde og hvor mange der er.</summary>
+    public sealed record Fanevisning(string Navn, Fundtype? Slags, bool Valgt)
+    {
+        public Brush Flade => Valgt
+            ? (Brush)new BrushConverter().ConvertFrom("#FF33405A")!
+            : (Brush)new BrushConverter().ConvertFrom("#FF181B22")!;
+
+        public Brush Kant => Valgt
+            ? (Brush)new BrushConverter().ConvertFrom("#FF5B9DF0")!
+            : (Brush)new BrushConverter().ConvertFrom("#FF3A4150")!;
+
+        public Brush Skrift => Valgt
+            ? (Brush)new BrushConverter().ConvertFrom("#FFF4F6FA")!
+            : (Brush)new BrushConverter().ConvertFrom("#FF9BA6B8")!;
+    }
+
+    /// <summary>Én måde at sortere resultatet på.</summary>
+    public sealed record Sorteringsvalg(string Navn, string Id);
+
+    private IReadOnlyList<Fund> _fund = Array.Empty<Fund>();
+    private string _ord = "";
+    private Fundtype? _valgtType;
+
+    /// <summary>
+    /// Fanerne over resultatet — én pr. slags kilde, der faktisk er noget af.
+    ///
+    /// «Alt» står først og er valgt fra begyndelsen. Fanerne kommer kun frem,
+    /// når der er mere end én slags at vælge imellem; en fanerække med ét
+    /// punkt er ikke et valg, den er pynt.
+    ///
+    /// Rækkefølgen er den samme som relevansens: transkription, note,
+    /// dokument. Kilden først, genfortællingen sidst.
+    /// </summary>
+    private void ByggFaner()
+    {
+        var slags = new (string Navn, Fundtype Type)[]
+        {
+            ("Transkriptioner", Fundtype.Udskrift),
+            ("Noter", Fundtype.Note),
+            ("Dokumenter", Fundtype.Dokument)
+        };
+
+        var findes = slags.Where(s => _fund.Any(f => f.Slags == s.Type)).ToList();
+
+        // Er den valgte fane toemt af en ny soegning, faldes der tilbage til
+        // «Alt». Ellers ville skaermen staa tom, mens der ER resultater.
+        if (_valgtType is { } v && findes.All(s => s.Type != v)) _valgtType = null;
+
+        var faner = new List<Fanevisning> { new($"Alt ({_fund.Count})", null, _valgtType is null) };
+
+        foreach (var s in findes)
+        {
+            var antal = _fund.Count(f => f.Slags == s.Type);
+            faner.Add(new Fanevisning($"{s.Navn} ({antal})", s.Type, _valgtType == s.Type));
+        }
+
+        Typefaner.ItemsSource = faner;
+        Typefaner.Visibility = findes.Count > 1 ? Visibility.Visible : Visibility.Collapsed;
+
+        if (Sortering.ItemsSource is null)
+        {
+            // NYESTE FOERST ER STANDARDEN.
+            //
+            // Relevans er maalt bedst til at finde det rigtige moede - 90 pct
+            // paa foerstepladsen, se doc/findings.md - men det er ikke altid
+            // det, man leder efter. «Hvad talte vi om for nylig» er et
+            // almindeligt spoergsmaal, og dér er datoen svaret.
+            //
+            // Begge staar der, saa valget er brugerens.
+            Sortering.ItemsSource = new List<Sorteringsvalg>
+            {
+                new("Nyeste først", "nyeste"),
+                new("Ældste først", "aeldste"),
+                new("Bedste træf først", "traef"),
+                new("Mødetype", "moedetype")
+            };
+            Sortering.SelectedIndex = 0;
+        }
+    }
+
+    /// <summary>
+    /// Tegner listen ud fra den valgte fane og den valgte sortering.
+    ///
+    /// Der soeges IKKE forfra. Fundene ligger i _fund, og fane og sortering er
+    /// kun to maader at vise dem paa — en ny gennemloebning af alle filer for
+    /// et klik paa en fane ville vaere det samme arbejde to gange.
+    /// </summary>
+    private void TegnResultat()
+    {
+        var vist = _valgtType is null
+            ? _fund
+            : _fund.Where(f => f.Slags == _valgtType).ToList();
+
+        var id = (Sortering.SelectedItem as Sorteringsvalg)?.Id ?? "nyeste";
+
+        vist = id switch
+        {
+            "aeldste" => vist.OrderBy(f => f.Tid).ToList(),
+            "traef" => vist.OrderByDescending(f => f.Vaegt)
+                           .ThenByDescending(f => f.Traef.Count)
+                           .ThenBy(f => f.Slags)
+                           .ToList(),
+            // Moedetypen staar ikke paa fundet - den slaas op paa moedet. Er
+            // den ikke sat, staar optagelsen sidst: en tom gruppe skal ikke
+            // ligge oeverst og fylde, foer man naar dem, der ER sorteret.
+            "moedetype" => vist.OrderBy(f => Moedetypen(f).Length == 0 ? 1 : 0)
+                               .ThenBy(f => Moedetypen(f), StringComparer.CurrentCultureIgnoreCase)
+                               .ThenByDescending(f => f.Tid)
+                               .ToList(),
+            _ => vist.OrderByDescending(f => f.Tid).ToList()
+        };
+
+        Liste.ItemsSource = vist.Select(f => new Fundvisning(f, _ord)).ToList();
+    }
+
+    /// <summary>
+    /// Mødetypen på et fund. Slås op på mødet — den står ikke i selve fundet.
+    ///
+    /// Svarene huskes: den samme optagelse optræder tit flere gange i ét
+    /// resultat, og et opslag pr. række ville laese den samme fil ti gange.
+    /// </summary>
+    private readonly Dictionary<string, string> _typer = new();
+
+    private string Moedetypen(Fund f)
+    {
+        if (_typer.TryGetValue(f.Kilde, out var t)) return t;
+
+        var svar = "";
+
+        try
+        {
+            if (MeetingStore.FindById(f.Kilde) is { } fundet)
+                svar = fundet.Meta.Moedetype ?? "";
+        }
+        catch (Exception)
+        {
+            // Et dokument har ikke et moede-id. Saa er svaret tomt, og det
+            // lander nederst - det er det rigtige.
+        }
+
+        _typer[f.Kilde] = svar;
+        return svar;
+    }
+
+    private void Fane_Klik(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button b || b.Tag is not Fanevisning v) return;
+
+        _valgtType = v.Slags;
+        ByggFaner();
+        TegnResultat();
+    }
+
+    private void Sortering_Aendret(object sender, SelectionChangedEventArgs e)
+    {
+        if (!IsLoaded || _fund.Count == 0) return;
+
+        TegnResultat();
+    }
+
     // ------------------------------------------------------------- filtrene
 
     /// <summary>Ét punkt i en filterliste: det, der vises, og det, der gælder.</summary>
@@ -500,7 +662,7 @@ public partial class SearchView : UserControl
         if (spoergsmaal.Length == 0)
         {
             TomPanel.Visibility = Visibility.Visible;
-            Rude.Visibility = Visibility.Collapsed;
+            Resultatrude.Visibility = Visibility.Collapsed;
             IntetPanel.Visibility = Visibility.Collapsed;
             Status.Text = "";
             return;
@@ -528,12 +690,16 @@ public partial class SearchView : UserControl
 
             if (ct.IsCancellationRequested) return;
 
-            Liste.ItemsSource = fund.Select(f => new Fundvisning(f, spoergsmaal)).ToList();
+            _fund = fund;
+            _ord = spoergsmaal;
+
+            ByggFaner();
+            TegnResultat();
 
             // Uddragene tegnes af Uddrag_Ind, naar de kommer paa skaermen.
 
             TomPanel.Visibility = Visibility.Collapsed;
-            Rude.Visibility = fund.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+            Resultatrude.Visibility = fund.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
             IntetPanel.Visibility = fund.Count > 0 ? Visibility.Collapsed : Visibility.Visible;
 
             if (fund.Count == 0) ForklarIntet(spoergsmaal, filter, ct);
@@ -693,7 +859,7 @@ public sealed class Opgavevisning : System.ComponentModel.INotifyPropertyChanged
         if (ord.Count < 2)
         {
             IntetTekst.Text = filter.Tomt
-                ? "Ordet står ikke i nogen udskrift, note eller dokument."
+                ? "Ordet står ikke i nogen transkription, note eller dokument."
                 : "Ordet står ikke i det, du har afgrænset til. Prøv at rydde afgrænsningen.";
             return;
         }

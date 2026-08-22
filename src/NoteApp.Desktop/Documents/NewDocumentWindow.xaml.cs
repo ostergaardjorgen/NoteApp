@@ -61,8 +61,8 @@ public partial class NewDocumentWindow : Window
         // bearbejdning i EU - det er arkitekturen, ikke en egenskab ved det
         // enkelte referat. Man ved det, naar man vaelger loesningen, og faar
         // det bekraeftet i opsaetningen.
-        Kilde.Text = $"Skrives af din online AI-model ud fra udskriften af «{optagelsesTitel}» " +
-                     "og gemmes som en Word-fil (.docx). Udskriftens tekst sendes til modellen; " +
+        Kilde.Text = $"Skrives af din online AI-model ud fra transkriptionen af «{optagelsesTitel}» " +
+                     "og gemmes som en Word-fil (.docx). Transkriptionens tekst sendes til modellen; " +
                      "lyden bliver på maskinen.";
 
         Skabeloner.ItemsSource = skabeloner;

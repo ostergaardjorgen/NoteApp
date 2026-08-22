@@ -276,7 +276,7 @@ public partial class MeetingView : UserControl
             _noter.Count > 0
                 ? "Forslaget er bygget af din første note og dagens dato. Skriv henover, hvis noget andet passer bedre — typisk hvem mødet var med."
                 : "Der er ingen noter at bygge et forslag på, så her er bare datoen. Skriv typisk hvem mødet var med.",
-            "Navnet følger med til udskriften og til de dokumenter, du laver af mødet.",
+            "Navnet følger med til transkriptionen og til de dokumenter, du laver af mødet.",
             "Gem optagelsen",
             "Mødet er slut")
         { Owner = Window.GetWindow(this) };

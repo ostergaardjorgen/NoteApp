@@ -157,7 +157,7 @@ public partial class OpstartWindow : Window
 
         Sprogvalg.ToolTip = erWebinar
             ? "Der spørges nu, fordi et webinar begynder på slaget — og fordi et engelsk webinar skrives ud på det halve af tiden, når sproget er sagt på forhånd."
-            : "Appen gætter ellers sproget ud fra de første tredive sekunder. Rammer gættet forkert, bliver hele udskriften ubrugelig — og den ligner en færdig tekst.";
+            : "Appen gætter ellers sproget ud fra de første tredive sekunder. Rammer gættet forkert, bliver hele transkriptionen ubrugelig — og den ligner en færdig tekst.";
 
         Link.ToolTip = "Ligger webinaret online bagefter, er linket vejen tilbage til det, der blev VIST — og det er væk fra indbakken en måned senere.";
 

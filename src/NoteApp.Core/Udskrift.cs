@@ -103,7 +103,7 @@ public sealed class Udskrift
     /// rettelserne ikke forsvinde.
     /// </summary>
     public static string RettetSti(string mappe) =>
-        Path.Combine(mappe, "udskrift.rettet.json");
+        Path.Combine(mappe, "transkription.rettet.json");
 
     // -------------------------------------------------------------- læsning
 

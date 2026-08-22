@@ -109,7 +109,7 @@ public partial class EngineView : System.Windows.Controls.UserControl
             ? "Modellen er en fast fil. Den hentes én gang og ændrer sig ikke bagefter."
             : "Modellen er en fast fil og får ikke nye udgaver. Det samme gælder motoren: " +
               "begge dele hører til denne udgave af appen og skiftes kun med den. " +
-              "At hente igen giver præcis de samme filer og gør ikke udskriften bedre — " +
+              "At hente igen giver præcis de samme filer og gør ikke transkriptionen bedre — " +
               "det er kun værd at gøre, hvis noget er blevet beskadiget.";
         // MOTORKNAPPEN VAR SLAAET FRA, NAAR MOTOREN MANGLEDE.
         //
@@ -177,7 +177,7 @@ public partial class EngineView : System.Windows.Controls.UserControl
 
         TalerStatus.Text = Diarisering.ErInstalleret
             ? "Klar. Den kører af sig selv, hver gang en optagelse bliver skrevet ud."
-            : "Ikke fuldstændig — udskrifter får ingen navne på talerne, før filerne er på plads.";
+            : "Ikke fuldstændig — transkriptioner får ingen navne på talerne, før filerne er på plads.";
 
         TalerSti.Text = $"Filerne følger med appen og ligger i {Diarisering.Mappe}";
     }
@@ -254,7 +254,7 @@ public partial class EngineView : System.Windows.Controls.UserControl
                   "opsummeringen bedre — det er kun værd at gøre, hvis filen er blevet beskadiget."
                 : $"{m.Opgave}\n\n{m.Hvorfor}") +
             "\n\nDer sendes intet fra din maskine. Appen beder om en navngiven fil og " +
-            "modtager den; ingen optagelser, udskrifter eller noter forlader pc'en.",
+            "modtager den; ingen optagelser, transkriptioner eller noter forlader pc'en.",
             godkend: har ? $"Hent {m.SizeText} igen" : $"Hent {m.SizeText}",
             annuller: "Ikke nu",
             slags: Dialogs.Slags.Valg,
@@ -495,7 +495,7 @@ public partial class EngineView : System.Windows.Controls.UserControl
                 $"Fil: {build.FileName}\n" +
                 $"Størrelse: {build.SizeText}\n" +
                 "Hentes fra: github.com\n\n" +
-                "Det giver præcis de samme filer og gør ikke udskriften bedre. Det er " +
+                "Det giver præcis de samme filer og gør ikke transkriptionen bedre. Det er " +
                 "kun værd at gøre, hvis motoren er holdt op med at virke — for eksempel " +
                 "hvis en fil er blevet beskadiget.",
                 godkend: $"Hent {build.SizeText} igen",

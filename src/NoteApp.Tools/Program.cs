@@ -487,7 +487,7 @@ static async Task<int> Sky(string[] a)
     // glemme, fordi man har koert den foer.
     Console.WriteLine("SENDES UD AF MASKINEN");
     Console.WriteLine($"  Modtager : {model.Leverandoer}, {model.Hjemland} ({model.Navn})");
-    Console.WriteLine($"  Indhold  : hele udskriften, {tekst.Length:N0} tegn");
+    Console.WriteLine($"  Indhold  : hele transkriptionen, {tekst.Length:N0} tegn");
     Console.WriteLine($"  Skabelon : {skabelon.Name}");
     Console.WriteLine();
 
@@ -773,7 +773,7 @@ static async Task<int> Transskriber(string[] a)
     {
         Console.WriteLine();
         Console.WriteLine("Mødet har to spor. Kør det færdigt i appen — dér skrives begge ud");
-        Console.WriteLine("og flettes til én udskrift.");
+        Console.WriteLine("og flettes til én transkription.");
         return 0;
     }
 
@@ -811,7 +811,7 @@ static async Task<int> Transskriber(string[] a)
     File.WriteAllText(udskriftSti, udskrift.SomTekst(meta?.Talere),
                       new System.Text.UTF8Encoding(false));
 
-    Console.WriteLine($"Udskrift  : {udskriftSti}");
+    Console.WriteLine($"Transkription  : {udskriftSti}");
 
     // KLOKKEN SKAL RINGE — OGSAA NAAR KOERSLEN KOM HERFRA.
     //
