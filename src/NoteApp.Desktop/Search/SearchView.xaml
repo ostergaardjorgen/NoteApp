@@ -456,8 +456,8 @@
       </Border>
 
       <!-- ============ HØJRE: DET, DER SKAL GØRES ============
-           Opgaverne oeverst, kalenderen nedenunder naar den kommer. De to
-           hoerer sammen: den ene er hvad, den anden er hvornaar. -->
+           Opgaverne oeverst, kalenderen nedenunder. De to hoerer sammen:
+           den ene er hvad, den anden er hvornaar. -->
       <Grid Grid.Column="4">
         <Grid.RowDefinitions>
           <RowDefinition Height="*" />

@@ -380,9 +380,21 @@ til replikken. Kræver datoforståelsen, som bygges her.
 - **Tilbagelinket til replikken** — herkomsten under hver opgave er et link
   til det sted i transkriptionen, opgaven kom fra.
 
-**Tilbage: kalenderen og tidslinjen for i dag.** De hører sammen med etape 4's
-planlægger, som skal kunne starte en optagelse, mens appen er lukket. De to
-bør tages samlet frem for hver for sig.
+**Kalenderen kom 23-08-2026** (v1.0.64 og v1.0.65) og lukkede etapen:
+
+- **Én liste til egne og hentede aftaler.** Hvem der har lagt en aftale ind, er
+  ikke det, man leder efter, når man skal optage om fem minutter.
+- **Aftalens egne valg følger med i optagelsen** — mødetype, mappe og sprog er
+  allerede valgt, dengang aftalen blev lavet, og skal ikke vælges igen i det
+  minut, mødet begynder.
+- **Google Kalender med ét tryk.** Forbind, log ind, godkend. Der bedes om
+  `calendar.readonly`, og der sendes ingenting op.
+- **Hentede aftaler afløses ved hver hentning**, men det, brugeren selv har
+  sat på dem, bæres over. Ellers ville en hentning nulstille en mødetype, man
+  havde valgt.
+
+**Tilbage i etapen: intet.** Den planlagte optagelse — at appen kan starte,
+mens den er lukket — hører til etape 4 og står dér.
 
 *Hvorfor før webinarer:* datoforståelsen skal bruges af alt det følgende, og den
 er lettest at få rigtig, når den bygges til noget, der kan ses med det samme.
@@ -480,9 +492,25 @@ en forside.
 Egne aftaler og hentede aftaler står derfor i **én liste**. Hvem der har lagt
 dem ind, er ikke det, man leder efter, når man skal optage om fem minutter.
 
-### Der følger ingen nøgle med appen
+### Klient-id'et følger med appen — omgjort 23-08-2026
 
-Samme regel som for sprogmodellen. Et indbygget klient-id er det samme for
-alle, der har programmet: det kan læses ud af filen, misbruges i andres navn,
-og den dag det bliver spærret, holder appen op med at virke for alle på én
-gang. Id'et er gratis og hentes hos leverandøren.
+**Det stod her modsat indtil 23-08-2026:** at klient-id'et skulle hentes af
+brugeren selv, ligesom nøglen til sprogmodellen. Det blev prøvet af, og det
+holdt ikke. At oprette et cloud-projekt hos Google, slå et API til og lave et
+sæt legitimationsoplysninger er en halv times arbejde for en, der kender
+ordene. Målgruppen er studerende, iværksættere og mindre selvstændige. En
+integration, der begynder dér, bliver ikke brugt — den bliver læst og lukket.
+
+**Nu:** man trykker Forbind, logger ind hos Google, godkender, og forbindelsen
+står. Klient-id'et er appens.
+
+Forskellen på det og en API-nøgle er værd at holde fast i, for den er ikke
+kosmetisk: en Mistral-nøgle er en **regning**, og misbruges den, betaler
+nøglens ejer. Et OAuth-klient-id giver ikke adgang til noget som helst i sig
+selv. Der skal en bruger til at logge ind og godkende, og det, der kommer ud,
+er et token til DEN brugers egen kalender. Google kalder derfor selv
+skrivebordsprogrammer «public clients» og regner med, at id'et kan læses ud af
+filen.
+
+Det, der til gengæld skal være styr på, står i
+[`google-integration.md`](google-integration.md).
