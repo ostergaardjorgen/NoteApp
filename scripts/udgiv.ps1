@@ -221,6 +221,28 @@ else {
                    "talergenkendelse — udskrifter faar ingen navne paa talerne.")
 }
 
+# --- Googles klient-id -----------------------------------------------------
+#
+# APPENS EGET ID HOS GOOGLE, ikke brugerens. Kunden trykker Forbind, logger ind
+# og er faerdig - den, der skal optage et moede om fem minutter, opretter ikke
+# et cloud-projekt foerst.
+#
+# Filen ligger UDEN FOR versionsstyringen. Ikke fordi den er hemmelig - Google
+# kalder det en offentlig klient, og id og hemmelighed kan laeses ud af ethvert
+# installeret program - men fordi en legitimation i et repo bliver liggende i
+# historikken for evigt, ogsaa efter den er fjernet.
+#
+# Mangler den, udgives appen UDEN Google-integrationen, og fanen siger det paa
+# den maade. Det er ikke en fejl; det er en udgave uden den funktion.
+$googleKilde = Join-Path $Rod 'hemmeligheder\google-klient.json'
+if (Test-Path $googleKilde) {
+    Copy-Item $googleKilde $udgivTil -Force
+    Write-Host "Googles klient-id kopieret med"
+}
+else {
+    Write-Host "Ingen google-klient.json - udgives uden Google-kalenderintegration"
+}
+
 # --- Efterproev ------------------------------------------------------------
 # Et byg, der siger "faerdig" uden at filen er skiftet, er vaerre end et, der
 # fejler. Derfor kontrolleres resultatet frem for at blive antaget.

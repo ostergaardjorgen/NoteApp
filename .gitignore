@@ -82,3 +82,12 @@ CLAUDE.md
 # Kilden er markdown-filen; de her genskabes, naar der er brug for dem.
 doc/*.docx
 doc/*.pdf
+
+# Appens legitimation hos leverandoerer - Googles klient-id og lignende.
+#
+# Den er ikke hemmelig i egentlig forstand (Google kalder en desktop-app for
+# en offentlig klient), men en legitimation i et repo bliver liggende i
+# historikken for evigt, ogsaa efter den er fjernet. Den hoerer i udgivelsen,
+# ikke i koden.
+hemmeligheder/
+app/google-klient.json

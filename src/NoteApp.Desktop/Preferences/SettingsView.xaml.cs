@@ -222,21 +222,31 @@ public partial class SettingsView : UserControl
         public string Id => _i.Id;
         public string Navn => _i.Navn;
         public string Hvad => _i.Hvad;
-        public string Hvordan => _i.Hvordan;
+
+        /// <summary>
+        /// Hvad man skal gøre. Er appen ikke sat op til leverandøren, står det
+        /// HER — og ikke som en fejl, brugeren har lavet.
+        /// </summary>
+        public string Hvordan => _i.Klar && !Googleklient.ErSatOp
+            ? "Google-integrationen er ikke slået til i den her udgave af appen. Kontakt den, der har installeret den."
+            : _i.Hvordan;
 
         public string Under => $"{_i.Leverandoer} · {_i.Hjemland}";
 
         public bool ErForbundet => _o.ErForbundet;
-        public bool KanForbinde => _i.Klar && KlientId.Trim().Length > 0;
 
-        public Visibility Opsaetningsvis => _i.Klar ? Visibility.Visible : Visibility.Collapsed;
+        public Visibility Opsaetningsvis =>
+            _i.Klar && Googleklient.ErSatOp ? Visibility.Visible : Visibility.Collapsed;
+
+        public Visibility Forbundetvis => _o.ErForbundet ? Visibility.Visible : Visibility.Collapsed;
+        public Visibility Forbindvis => _o.ErForbundet ? Visibility.Collapsed : Visibility.Visible;
 
         public string Tilstand => !_i.Klar ? "KOMMER SENERE"
+            : !Googleklient.ErSatOp ? "IKKE SLÅET TIL"
             : _o.ErForbundet ? "FORBUNDET"
-            : _o.HarOpsaetning ? "KLAR TIL AT FORBINDE"
-            : "IKKE SAT OP";
+            : "IKKE FORBUNDET";
 
-        public Brush Tilstandsfarve => !_i.Klar
+        public Brush Tilstandsfarve => !_i.Klar || !Googleklient.ErSatOp
             ? (Brush)new BrushConverter().ConvertFrom("#FF9BA6B8")!
             : _o.ErForbundet
                 ? (Brush)new BrushConverter().ConvertFrom("#FF4CBE72")!
@@ -264,35 +274,7 @@ public partial class SettingsView : UserControl
             }
         }
 
-        public string KlientId
-        {
-            get => _o.KlientId;
-            set
-            {
-                if (_o.KlientId == value) return;
-
-                _o.KlientId = value;
-                Integrationsfiler.Gem(_i.Id, _o);
-                Ret(nameof(KanForbinde));
-            }
-        }
-
-        public string Hemmelighed
-        {
-            get => _o.Hemmelighed;
-            set
-            {
-                if (_o.Hemmelighed == value) return;
-
-                _o.Hemmelighed = value;
-                Integrationsfiler.Gem(_i.Id, _o);
-            }
-        }
-
         public event System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
-
-        private void Ret(string navn) =>
-            PropertyChanged?.Invoke(this, new System.ComponentModel.PropertyChangedEventArgs(navn));
     }
 
     private void VisIntegrationer()
@@ -317,11 +299,7 @@ public partial class SettingsView : UserControl
 
         var ja = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
             $"Forbind til {i.Navn}?",
-            $"Der åbner en side hos {i.Leverandoer} i din browser, hvor du logger ind og " +
-            "godkender.\n\n" +
-            "Appen beder om LÆSEADGANG til kalenderen og intet andet. Der bliver ikke " +
-            "skrevet noget tilbage, og hverken lyd, transkriptioner eller dokumenter " +
-            "sendes nogen steder hen.",
+            Googlekalender.Vejledning,
             godkend: "Åbn browseren", annuller: "Ikke nu", slags: Dialogs.Slags.Valg);
 
         if (!ja) return;
@@ -330,7 +308,7 @@ public partial class SettingsView : UserControl
 
         try
         {
-            var noegle = await Googlekalender.ForbindAsync(o.KlientId.Trim(), o.Hemmelighed.Trim());
+            var noegle = await Googlekalender.ForbindAsync();
 
             o.Opdateringsnoegle = noegle;
             o.SidsteFejl = "";
@@ -373,8 +351,7 @@ public partial class SettingsView : UserControl
 
         try
         {
-            var aftaler = await Googlekalender.HentAsync(
-                o.KlientId.Trim(), o.Hemmelighed.Trim(), o.Opdateringsnoegle);
+            var aftaler = await Googlekalender.HentAsync(o.Opdateringsnoegle);
 
             var n = Kalender.Afloes(i.Kilde, aftaler);
 
@@ -429,10 +406,6 @@ public partial class SettingsView : UserControl
         Status.Text = $"Forbindelsen til {i.Navn} er afbrudt.";
         VisIntegrationer();
     }
-
-    private void Hjaelp_Klik(object sender, RoutedEventArgs e) =>
-        Dialogs.AppDialog.Vis(Window.GetWindow(this), "Klient-id hos Google",
-            Googlekalender.Vejledning, Dialogs.Slags.Valg);
 
     private void Indlaes()
     {

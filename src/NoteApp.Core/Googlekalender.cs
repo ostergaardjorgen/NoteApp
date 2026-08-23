@@ -22,12 +22,21 @@ namespace NoteApp.Core;
 /// Det er den vej, Google selv foreskriver for et program, der kører på en
 /// pc — «loopback», hvor svaret aldrig forlader maskinen.
 ///
-/// HVORFOR DER SKAL ET KLIENT-ID TIL
+/// BRUGEREN SKAL IKKE OPRETTE NOGET
 ///
-/// Der følger ikke et med appen. Et indbygget id er det samme for alle, der
-/// har programmet: det kan læses ud af filen, misbruges i andres navn, og den
-/// dag det bliver spærret, holder appen op med at virke for alle på én gang.
-/// Id'et er gratis og hentes i Google Cloud Console. Se <see cref="Vejledning"/>.
+/// Appen har sit eget klient-id hos Google — se <see cref="Googleklient"/>.
+/// Kunden trykker «Forbind», logger ind og godkender. Det er hele forløbet.
+///
+/// Første udgave bad brugeren om selv at oprette et projekt i Google Cloud
+/// Console. Det virker teknisk og er forkert som produkt: den, der skal optage
+/// et møde om fem minutter, opretter ikke et cloud-projekt først.
+///
+/// SIKKERHEDEN LIGGER IKKE I, AT ID'ET ER HEMMELIGT
+///
+/// Det kan læses ud af ethvert installeret program, og Google ved det. Den
+/// ligger i, at godkendelsen sker i brugerens egen browser, at svaret kun
+/// sendes til maskinens loopback-adresse, og at der bruges PKCE — så en
+/// opsnappet kode ikke kan byttes til en nøgle af nogen anden.
 /// </summary>
 public static class Googlekalender
 {
@@ -47,14 +56,17 @@ public static class Googlekalender
 
     private static readonly HttpClient Http = new() { Timeout = TimeSpan.FromSeconds(30) };
 
+    /// <summary>
+    /// Hvad der sker, når man trykker Forbind. Til dialogen FØR browseren
+    /// åbner — man skal vide, hvor man bliver sendt hen, inden det sker.
+    /// </summary>
     public static string Vejledning =>
-        "Sådan får du et klient-id — det tager et par minutter og koster ingenting:\n\n" +
-        "1. Gå til console.cloud.google.com og opret et projekt.\n" +
-        "2. Slå «Google Calendar API» til under APIs & Services.\n" +
-        "3. Under «Credentials»: opret et OAuth-klient-id af typen «Desktop app».\n" +
-        "4. Kopiér klient-id og klienthemmelighed ind her.\n\n" +
-        "Id'et er dit eget. Der følger ingen med appen — et indbygget id ville " +
-        "være det samme for alle, der har programmet.";
+        "Der åbner en side hos Google i din browser.\n\n" +
+        "Log ind med den konto, din kalender ligger på, og godkend. Så er den " +
+        "forbundet — der er ikke mere at gøre.\n\n" +
+        "Appen beder om LÆSEADGANG til kalenderen og intet andet. Den kan " +
+        "hverken oprette, ændre eller slette noget hos Google, og du kan se " +
+        "det på Googles egen side, inden du godkender.";
 
     // ------------------------------------------------------------ godkendelse
 
@@ -68,11 +80,17 @@ public static class Googlekalender
     /// Der er en frist. Uden den ville appen kunne stå og lytte for evigt,
     /// fordi nogen lukkede browservinduet i stedet for at trykke annullér.
     /// </summary>
-    public static async Task<string> ForbindAsync(string klientId, string hemmelighed,
-                                                  CancellationToken ct = default)
+    public static async Task<string> ForbindAsync(CancellationToken ct = default)
     {
-        if (string.IsNullOrWhiteSpace(klientId))
-            throw new InvalidOperationException("Der mangler et klient-id.");
+        if (Googleklient.Hent() is not var (klientId, hemmelighed) || klientId.Length == 0)
+            throw new InvalidOperationException(Googleklient.Mangler);
+
+        // PKCE. Koden fra Google er kun brugbar sammen med den hemmelighed,
+        // der blev fundet paa HER - og den forlader aldrig maskinen undtagen
+        // som et hash. Uden den kunne et andet program paa maskinen, der
+        // naaede at snuppe koden, bytte den til en noegle.
+        var verifikator = Tilfaeldig();
+        var udfordring = Hash(verifikator);
 
         var port = LedigPort();
         var svarAdresse = $"http://127.0.0.1:{port}/";
@@ -89,7 +107,8 @@ public static class Googlekalender
             $"&redirect_uri={Uri.EscapeDataString(svarAdresse)}" +
             $"&response_type=code" +
             $"&scope={Uri.EscapeDataString(Omraade)}" +
-            $"&access_type=offline&prompt=consent";
+            $"&access_type=offline&prompt=consent" +
+            $"&code_challenge={udfordring}&code_challenge_method=S256";
 
         Process.Start(new ProcessStartInfo(adresse) { UseShellExecute = true });
 
@@ -127,7 +146,7 @@ public static class Googlekalender
         if (string.IsNullOrWhiteSpace(kode))
             throw new InvalidOperationException("Google sendte ikke nogen kode tilbage.");
 
-        return await ByttKodeTilNoegle(kode, klientId, hemmelighed, svarAdresse, ct);
+        return await ByttKodeTilNoegle(kode, klientId, hemmelighed, svarAdresse, verifikator, ct);
     }
 
     /// <summary>
@@ -162,7 +181,7 @@ public static class Googlekalender
 
     private static async Task<string> ByttKodeTilNoegle(string kode, string klientId,
                                                         string hemmelighed, string svarAdresse,
-                                                        CancellationToken ct)
+                                                        string verifikator, CancellationToken ct)
     {
         var krop = new FormUrlEncodedContent(new Dictionary<string, string>
         {
@@ -170,7 +189,8 @@ public static class Googlekalender
             ["client_id"] = klientId,
             ["client_secret"] = hemmelighed,
             ["redirect_uri"] = svarAdresse,
-            ["grant_type"] = "authorization_code"
+            ["grant_type"] = "authorization_code",
+            ["code_verifier"] = verifikator
         });
 
         using var svar = await Http.PostAsync(Noegler, krop, ct);
@@ -204,10 +224,12 @@ public static class Googlekalender
     /// «cancelled», og de ville ellers stå i listen som noget, der skal
     /// optages.
     /// </summary>
-    public static async Task<List<Aftale>> HentAsync(string klientId, string hemmelighed,
-                                                     string opdateringsnoegle, int dage = 14,
+    public static async Task<List<Aftale>> HentAsync(string opdateringsnoegle, int dage = 14,
                                                      CancellationToken ct = default)
     {
+        if (Googleklient.Hent() is not var (klientId, hemmelighed) || klientId.Length == 0)
+            throw new InvalidOperationException(Googleklient.Mangler);
+
         var noegle = await FriskNoegle(klientId, hemmelighed, opdateringsnoegle, ct);
 
         var fra = DateTimeOffset.Now.Date;
@@ -334,6 +356,30 @@ public static class Googlekalender
             ? a.GetString() ?? ""
             : throw new InvalidOperationException("Google sendte ingen adgangsnøgle.");
     }
+
+    /// <summary>
+    /// En tilfældig streng til PKCE. Googles krav er 43-128 tegn fra et
+    /// begrænset alfabet; base64url af 32 tilfældige byte giver 43.
+    /// </summary>
+    private static string Tilfaeldig()
+    {
+        var b = new byte[32];
+        System.Security.Cryptography.RandomNumberGenerator.Fill(b);
+        return UdenPolstring(b);
+    }
+
+    private static string Hash(string s)
+    {
+        var h = System.Security.Cryptography.SHA256.HashData(Encoding.ASCII.GetBytes(s));
+        return UdenPolstring(h);
+    }
+
+    /// <summary>
+    /// base64url: som base64, men uden polstring og med de to tegn, der ikke
+    /// kan stå i en adresse, byttet ud.
+    /// </summary>
+    private static string UdenPolstring(byte[] b) =>
+        Convert.ToBase64String(b).TrimEnd('=').Replace('+', '-').Replace('/', '_');
 
     /// <summary>En ledig port. Nul beder styresystemet om at finde en.</summary>
     private static int LedigPort()

@@ -67,7 +67,8 @@ public static class Integrationer
             Kilde: Kalenderkilde.Google,
             Hvad: "Dine aftaler læses ind i kalenderen, så du kan trykke optag direkte på et møde. " +
                   "Der bliver ikke skrevet noget tilbage til Google.",
-            Hvordan: "Kræver et klient-id fra Google Cloud Console. Det er gratis, og det er dit eget.",
+            Hvordan: "Tryk Forbind, log ind hos Google og godkend. Der er ikke mere at gøre — " +
+                     "og du kan altid afbryde forbindelsen igen.",
             Klar: true),
 
         new Integration(
@@ -86,17 +87,13 @@ public static class Integrationer
 }
 
 /// <summary>
-/// Det, en integration skal bruge for at kunne forbinde — gemt i datamappen.
+/// Det, en forbindelse efterlader: nøglen, der giver adgang, og hvordan det
+/// gik sidst.
 ///
-/// HVORFOR DER IKKE FØLGER EN NØGLE MED APPEN
-///
-/// Samme grund som ved sprogmodellen: en nøgle, der er indbygget, er den
-/// samme for alle, der har programmet. Den kan aflæses ud af filen, den kan
-/// misbruges i andres navn, og den dag den bliver spærret, holder appen op med
-/// at virke for alle på én gang.
-///
-/// Klient-id'et er brugerens eget og hentes gratis hos leverandøren. Det er en
-/// omvej — og den er den rigtige.
+/// HER LÅ OGSÅ ET KLIENT-ID, BRUGEREN SELV SKULLE HENTE. Det er væk. Appen har
+/// sit eget — se <see cref="Googleklient"/> — og kunden trykker Forbind,
+/// logger ind og er færdig. Den, der skal optage et møde om fem minutter,
+/// opretter ikke et cloud-projekt først.
 ///
 /// FILEN LIGGER I DATAMAPPEN, uden for kode-repoet pr. konstruktion. Der
 /// findes ingen .gitignore-fejl, der kan lække den, fordi den ikke er inde i
@@ -104,18 +101,6 @@ public static class Integrationer
 /// </summary>
 public sealed record Integrationsopsaetning
 {
-    public string KlientId { get; set; } = "";
-
-    /// <summary>
-    /// Klienthemmeligheden. Tom for de flows, der ikke bruger en.
-    ///
-    /// Google kalder en desktop-app for en «offentlig klient», og
-    /// hemmeligheden dér er ikke en hemmelighed i egentlig forstand — den kan
-    /// læses ud af enhver installeret app. Den skal alligevel med, fordi
-    /// Googles endepunkt kræver den.
-    /// </summary>
-    public string Hemmelighed { get; set; } = "";
-
     /// <summary>Den nøgle, der bruges til at hente aftaler. Sat efter godkendelse.</summary>
     public string Opdateringsnoegle { get; set; } = "";
 
@@ -128,7 +113,6 @@ public sealed record Integrationsopsaetning
     public string SidsteFejl { get; set; } = "";
 
     public bool ErForbundet => Opdateringsnoegle.Length > 0;
-    public bool HarOpsaetning => KlientId.Length > 0;
 }
 
 /// <summary>Læser og gemmer opsætningen for hver integration.</summary>
