@@ -1,11 +1,18 @@
 # NoteApp
 
-Windows-app, der optager et møde, skriver det ud til tekst og laver et
-referat eller et andet dokument ud af udskriften.
+Windows-app, der optager møder og webinarer, skriver dem ud til tekst og
+samler det hele ét sted, hvor man kan søge på tværs og altid finde tilbage til
+det, der faktisk blev sagt.
 
 ```
-Optagelse  →  Udskrift (Whisper, lokalt)  →  Dokument (Mistral, EU)
+Optagelse  →  Transkription (Whisper, lokalt)  →  Dokument (Mistral, EU)
 ```
+
+> ### Skal du fortsætte udviklingen?
+>
+> Læs **[`doc/fortsaet-her.md`](doc/fortsaet-her.md)** først. Den siger, hvor
+> arbejdet står, hvad der er målt, hvilke beslutninger der venter — og hvilke
+> regler der gælder, som ikke kan læses ud af koden.
 
 ## Hvor dine data er
 
