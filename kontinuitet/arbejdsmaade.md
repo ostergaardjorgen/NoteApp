@@ -131,7 +131,32 @@ Versionsnummeret sættes af scriptet ud fra den seneste commit (`vX.Y.Z: …`).
 
 Udgiv aldrig, mens der optages — `udgiv.ps1` lukker appen.
 
-## 9. Kør leverancetjek før hver commit og hvert push
+## 9. Commit og push HVER DAG
+
+Skete det ikke dagen før, er det den **første handling** på en ny dag — før
+der bygges videre på noget.
+
+```powershell
+powershell -File C:\NoteApp\scripts\sikker-kode.ps1 -Push
+```
+
+Den kører leverancetjek med `-Historik` først og stopper ved ethvert fund,
+laver et git-bundt og efterprøver, at det kan læses, og kopierer det, der
+aldrig må i git.
+
+**Reglen kom 23-08-2026, hvor der lå 75 commits, der aldrig var pushet.** De
+var ikke tabt — de fandtes bare ét sted, på den ene maskine. Et push er noget,
+man husker, lige indtil man har travlt.
+
+`udgiv.ps1` siger til, når der er upushede commits, og skriver hvor gammel den
+ældste er. Den pusher **ikke** selv: leverancetjekket skal køres først, og et
+push midt i en udgivelse ville sende arbejde af sted, ingen har set efter.
+
+Data er en anden sag og kører af sig selv — se den planlagte opgave
+«NoteApp - ugentlig backup». Kode og data er to backups, og den ene erstatter
+ikke den anden.
+
+## 10. Kør leverancetjek før hver commit og hvert push
 
 ```powershell
 powershell -File "$env:USERPROFILE\.claude\skills\leverancetjek\tjek-leverance.ps1" -Sti C:\NoteApp
@@ -139,7 +164,7 @@ powershell -File "$env:USERPROFILE\.claude\skills\leverancetjek\tjek-leverance.p
 
 Uopfordret. Se [`skills/leverancetjek/SKILL.md`](skills/leverancetjek/SKILL.md).
 
-## 10. Skriv kommentarer, der forklarer HVORFOR
+## 11. Skriv kommentarer, der forklarer HVORFOR
 
 Koden i det her projekt har usædvanligt fyldige kommentarer, og det er med
 vilje. De forklarer ikke, hvad linjen gør — de forklarer, **hvilken fejl der

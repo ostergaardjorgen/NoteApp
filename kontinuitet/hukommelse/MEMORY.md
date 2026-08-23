@@ -1,3 +1,4 @@
+- [Dagligt push](dagligt-push.md) — commit og push hver dag; er det ikke sket i går, er det dagens første handling
 - [Danske tegn i brugerfladen](dansk-tegn-i-brugerflade.md) — æ, ø og å skal staves rigtigt i alt, brugeren ser; ASCII kun i kode og commits
 - [Meld altid release-nummer](meld-altid-release-nummer.md) — versionsnummer og tidsstempel skal stå i chatten efter hver udgivelse
 - [NoteApps version kommer fra commit](noteapp-version-fra-commit.md) — udgivelser uden commit imellem får samme nummer

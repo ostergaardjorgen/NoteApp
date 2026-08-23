@@ -328,3 +328,50 @@ else {
 foreach ($g in @($genveje | Where-Object { -not $_.Her })) {
     Write-Host "  «$($g.Navn)» peger på den installerede udgave: $($g.Maal)"
 }
+
+# --- Er der pushet? --------------------------------------------------------
+#
+# DER COMMITTES OG PUSHES HVER DAG. Er det ikke sket dagen foer, er det den
+# foerste handling paa en ny dag.
+#
+# Reglen kom 23-08-2026, hvor der laa 75 commits, der aldrig var pushet. De
+# var ikke tabt - de fandtes bare ét sted, paa den her maskine. Et push er
+# noget, man husker, lige indtil man har travlt.
+#
+# Der pushes IKKE herfra. Leverancetjekket skal koeres foerst, og et push midt
+# i en udgivelse ville sende arbejde af sted, ingen har set efter. Der siges
+# til, og saa er det et valg.
+try {
+    git -C $Rod fetch origin --quiet 2>$null
+
+    $ikkePushet = 0
+    try { $ikkePushet = [int](git -C $Rod rev-list --count origin/main..HEAD 2>$null) } catch { }
+
+    if ($ikkePushet -gt 0) {
+        # Hvor gammel er den aeldste? En commit fra i dag er ikke et problem;
+        # en fra i forgaars er.
+        $aeldst = git -C $Rod log -1 --format=%cI "origin/main..HEAD" --reverse 2>$null |
+                  Select-Object -First 1
+
+        $dage = 0
+        if ($aeldst) {
+            try { $dage = [int]((Get-Date) - [datetimeoffset]::Parse($aeldst).LocalDateTime).TotalDays }
+            catch { }
+        }
+
+        Write-Host ''
+        if ($dage -ge 1) {
+            Write-Host "  $ikkePushet commit(s) er IKKE pushet - den aeldste er $dage dag(e) gammel." -ForegroundColor Yellow
+            Write-Host '  Push er dagens foerste handling:' -ForegroundColor Yellow
+        }
+        else {
+            Write-Host "  $ikkePushet commit(s) er ikke pushet endnu." -ForegroundColor Yellow
+            Write-Host '  Husk det inden fyraften:' -ForegroundColor Yellow
+        }
+        Write-Host '      powershell -File C:\NoteApp\scripts\sikker-kode.ps1 -Push'
+    }
+}
+catch {
+    # Intet netvaerk eller intet fjernlager. Udgivelsen er faerdig; det her er
+    # en paamindelse, ikke et krav.
+}
