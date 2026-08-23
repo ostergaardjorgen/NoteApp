@@ -301,7 +301,7 @@ Hvert webinar, der ikke bliver optaget i denne uge, er et hul i det arkiv,
 søgningen senere skal lede i. En bedre søgning i fire møder er mindre værd end
 en middelmådig søgning i fyrre.
 
-### Etape 2 · Søgningen bliver god *(1-2 uger)* — HALVT GJORT 21-08-2026
+### Etape 2 · Søgningen bliver god *(1-2 uger)* — GJORT 22-08-2026
 
 Først **målingen**: tyve spørgsmål, hvor facit er kendt, mod det nuværende
 system. Derefter filtrene — periode, person, type. Og først derefter beslutningen
@@ -325,21 +325,64 @@ Målt på to rigtige webinarer, andel af viste steder med alle søgeordene:
 | access review | 26 % | 100 % |
 | identity governance | 17 % | 100 % |
 
-**Filtrene er lavet — men på mappe, mødetype og sprog** frem for periode,
-person og type. Grunden er, at de tre nu vælges FØR optagelsen og derfor er
-udfyldt fra dag ét. Periode og person mangler stadig; person kræver
-talernavnene, som sættes i hånden.
+**Filtrene er lavet:** periode, mappe, mødetype og sprog. Perioden har faste
+valg — i dag, denne uge, denne måned, i år — og en fra-til med to datovælgere.
+Kun **person** mangler; den kræver talernavnene, som sættes i hånden.
 
-**MÅLINGEN MANGLER STADIG, og den er porten til resten.** Tyve spørgsmål med
-kendt facit mod det nuværende system. Uden det tal kan beslutningen om
-semantisk søgning ikke træffes — kun gættes. Arkivet er nu stort nok til, at
-målingen er værd at lave: to webinarer på 22 og 54 minutter, et møde på en
-time, og et par ældre.
+**MÅLINGEN ER LAVET 22-08-2026.** Tyve spørgsmål med kendt facit, som kan
+køres igen med `noteapp maalsoegning`:
 
-### Etape 3 · Opgaver på tværs *(1 uge)*
+| Mål | Resultat |
+|---|---|
+| Facit på førstepladsen | 18 af 20 — **90 %** |
+| Facit i top tre | 20 af 20 — **100 %** |
+| Slet ikke fundet | 0 |
+| Tid i gennemsnit | 4,8 ms |
+
+Den fandt to fejl: dokumenter lå foran den transkription, de var lavet af, og
+«i år» begyndte 31-12 kl. 23 på grund af sommertid. Begge rettet.
+
+**Færdiggjort samme dag:** faner over resultatet efter type, sortering på
+dato, relevans og mødetype — og «udskrift» hedder nu «transkription» alle de
+steder, brugeren læser det. Ordet blev læst som noget på papir.
+
+**Det, tallet IKKE svarer på:** alle tyve prøver er ord, der STÅR i teksten,
+og det er netop dét, ordsøgning er god til. Beslutningen om semantisk søgning
+kræver tyve spørgsmål stillet med ANDRE ord end dem, der blev sagt — «hvad
+sagde de om prissætning». Den måling kan først laves ærligt, når arkivet er
+stort nok til, at man ikke selv kan huske svaret. Den venter derfor, og det er
+et bevidst fravalg — ikke en glemt opgave.
+
+### Etape 3 · Opgaver på tværs *(1 uge)* — HALVT GJORT 22-08-2026
 
 Registeret, tidslinjen for i dag, farver og prioritet, kalenderen, tilbagelinket
 til replikken. Kræver datoforståelsen, som bygges her.
+
+**Gjort:**
+
+- **Dansk datoforståelse.** `Microsoft.Recognizers.Text` kan fjorten sprog, og
+  dansk er ikke et af dem — skrevet i hånden. Målt mod tyve kendte svar,
+  regnet fra en fast onsdag: **20 af 20 rigtige, 0 forstået forkert, 0
+  opfundne datoer.** Køres med `noteapp maaldato`. Tvetydige vendinger som «i
+  næste uge» sættes alligevel, men mærkes usikre med et spørgsmålstegn — en
+  frist, appen har gættet, må ikke se ud som en, nogen har sagt.
+- **Fristen læses ud af det, der blev sagt**, når en opgave oprettes fra et
+  forslag. Skulle den sættes i hånden bagefter, ville den ikke blive sat.
+- **Registeret på tværs** af alle optagelser. Hver optagelse beholder sin egen
+  opgavefil ved siden af lyden — ingen central fil, der kan blive uenig med
+  virkeligheden.
+- **Prioritet 1-3 og farver.** Farven kommer fra FRISTEN, ikke fra
+  prioriteten: en etter om tre uger haster ikke i dag, en treer fra i mandags
+  gør.
+- **Cockpittet i tre spalter.** Midten er søgningen. Til venstre de seneste
+  optagelser med gul kant, hvis de aldrig blev skrevet ud; til højre
+  opgaverne og pladsen til kalenderen.
+- **Tilbagelinket til replikken** — herkomsten under hver opgave er et link
+  til det sted i transkriptionen, opgaven kom fra.
+
+**Tilbage: kalenderen og tidslinjen for i dag.** De hører sammen med etape 4's
+planlægger, som skal kunne starte en optagelse, mens appen er lukket. De to
+bør tages samlet frem for hver for sig.
 
 *Hvorfor før webinarer:* datoforståelsen skal bruges af alt det følgende, og den
 er lettest at få rigtig, når den bygges til noget, der kan ses med det samme.
