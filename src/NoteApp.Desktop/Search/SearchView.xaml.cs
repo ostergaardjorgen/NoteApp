@@ -152,6 +152,7 @@ public partial class SearchView : UserControl
             FyldFiltre();
             VisOpgaver();
             VisSeneste();
+            VisKalender();
 
             if (start is { Length: > 0 })
             {
@@ -264,6 +265,184 @@ public partial class SearchView : UserControl
         if (Window.GetWindow(this) is not MainWindow hoved) return;
 
         hoved.GaaTilOptagelse(v.Id);
+    }
+
+    // -------------------------------------------------------------- kalenderen
+
+    /// <summary>Én aftale, som Cockpittet viser den.</summary>
+    public sealed class Aftalevisning
+    {
+        private readonly Aftale _a;
+        private readonly DateTimeOffset _nu;
+
+        public Aftalevisning(Aftale a, DateTimeOffset nu)
+        {
+            _a = a;
+            _nu = nu;
+        }
+
+        public Aftale Aftale => _a;
+
+        public string Titel => _a.Titel;
+
+        /// <summary>
+        /// Klokkeslættet — eller «nu», når den er i gang.
+        ///
+        /// Er aftalen på en anden dag, står dagen i stedet. Et klokkeslæt
+        /// uden dato på en liste, der rækker en uge frem, er ikke til at
+        /// bruge: 09:00 kan være i morgen eller på fredag.
+        /// </summary>
+        public string Klokken
+        {
+            get
+            {
+                if (_a.ErIGang(_nu)) return "nu";
+
+                return _a.Start.Date == _nu.Date
+                    ? _a.Start.LocalDateTime.ToString("HH:mm")
+                    : _a.Start.LocalDateTime.ToString("dd/MM");
+            }
+        }
+
+        /// <summary>Hvor den kommer fra, og hvad der ellers er værd at vide.</summary>
+        public string Under
+        {
+            get
+            {
+                var dele = new List<string>();
+
+                if (_a.Start.Date != _nu.Date)
+                    dele.Add(_a.Start.LocalDateTime.ToString("HH:mm"));
+
+                if (_a.Sted.Length > 0) dele.Add(_a.Sted);
+                else if (_a.Link.Length > 0) dele.Add("online");
+
+                if (_a.Kilde != Kalenderkilde.Lokal) dele.Add(_a.Kilde.ToString());
+
+                if (_a.MoedeId.Length > 0) dele.Add("optaget");
+
+                return string.Join("  ·  ", dele);
+            }
+        }
+
+        /// <summary>
+        /// Farven siger, hvor tæt den er på.
+        ///
+        /// Rød er i gang lige nu — det er dét, der skal handles på. Gul er
+        /// inden for en time. Resten er grå: en aftale i overmorgen skal ikke
+        /// råbe op.
+        /// </summary>
+        public Brush Kant
+        {
+            get
+            {
+                if (_a.MoedeId.Length > 0) return Pensel("#FF3DA55A");
+                if (_a.ErIGang(_nu)) return Pensel("#FFE5484D");
+
+                return _a.Start <= _nu.AddHours(1)
+                    ? Pensel("#FFE8A33D")
+                    : Pensel("#FF3A4150");
+            }
+        }
+
+        private static Brush Pensel(string hex) => (Brush)new BrushConverter().ConvertFrom(hex)!;
+
+        public string Knap => _a.MoedeId.Length > 0 ? "Vis" : "Optag";
+
+        public string Knaptip => _a.MoedeId.Length > 0
+            ? "Gå til optagelsen af det her møde"
+            : "Start optagelsen med aftalens mødetype, mappe og sprog";
+    }
+
+    /// <summary>
+    /// Kalenderen i Cockpittet: det, der skal ske.
+    ///
+    /// Aftalerne står i ÉN liste, uanset om de er oprettet her eller hentet
+    /// fra Google. Hvem der har lagt dem ind, er ikke det, man leder efter,
+    /// når man skal optage om fem minutter — det står med småt under titlen.
+    /// </summary>
+    private void VisKalender()
+    {
+        var nu = DateTimeOffset.Now;
+
+        List<Aftale> kommende;
+        try { kommende = Kalender.Kommende(nu); }
+        catch (Exception) { kommende = new List<Aftale>(); }
+
+        Kalenderrude.ItemsSource = kommende.Select(a => new Aftalevisning(a, nu)).ToList();
+        IngenAftaler.Visibility = kommende.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+
+        var idag = kommende.Count(a => a.Start.Date == nu.Date);
+
+        Kalenderoverskrift.Text = kommende.Count == 0
+            ? "Kalender"
+            : idag > 0 ? $"I dag · {idag}" : "Kommende";
+    }
+
+    /// <summary>
+    /// Starter optagelsen af en aftale — eller går til den, hvis den er lavet.
+    ///
+    /// AFTALENS EGNE VALG FØLGER MED. Mødetype, mappe og sprog er valgt, da
+    /// aftalen blev lagt ind, og de skal ikke vælges igen med mødet i gang.
+    /// Er de ikke sat, kommer den almindelige opstartsdialog — så er man
+    /// præcis lige så langt som uden kalenderen.
+    /// </summary>
+    private void Aftale_Klik(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button b || b.Tag is not Aftalevisning v) return;
+        if (Window.GetWindow(this) is not MainWindow hoved) return;
+
+        var a = v.Aftale;
+
+        if (a.MoedeId.Length > 0)
+        {
+            if (!hoved.GaaTilOptagelse(a.MoedeId))
+                Dialogs.AppDialog.Vis(hoved, "Optagelsen findes ikke længere",
+                    "Den er slettet eller flyttet uden for appen. Aftalen bliver stående.",
+                    Dialogs.Slags.Valg);
+
+            return;
+        }
+
+        hoved.OptagAftale(a);
+        VisKalender();
+    }
+
+    /// <summary>
+    /// Åbner en aftale, så den kan rettes eller slettes.
+    ///
+    /// En hentet aftale kan få mødetype, mappe og sprog på — det er appens
+    /// egne felter, og de findes ikke hos leverandøren. Titel og tidspunkt er
+    /// låst; de bliver overskrevet ved næste hentning.
+    /// </summary>
+    private void RetAftale_Klik(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button b || b.Tag is not Aftalevisning v) return;
+
+        var vindue = new Meeting.AftaleWindow(v.Aftale) { Owner = Window.GetWindow(this) };
+        if (vindue.ShowDialog() != true) return;
+
+        if (vindue.Slettet) Kalender.Slet(v.Aftale.Id);
+        else Kalender.Gem(vindue.Aftalen);
+
+        VisKalender();
+    }
+
+    /// <summary>
+    /// En aftale, man selv lægger ind.
+    ///
+    /// DEN SKAL KUNNE LAVES UDEN EN INTEGRATION. Målgruppen er studerende og
+    /// mindre selvstændige, og en del af dem har hverken Google Workspace
+    /// eller Microsoft 365. En kalender, der kræver en konto hos Google for at
+    /// virke, er ubrugelig for dem.
+    /// </summary>
+    private void NyAftale_Klik(object sender, RoutedEventArgs e)
+    {
+        var vindue = new Meeting.AftaleWindow(null) { Owner = Window.GetWindow(this) };
+        if (vindue.ShowDialog() != true) return;
+
+        Kalender.Gem(vindue.Aftalen);
+        VisKalender();
     }
 
     // ------------------------------------------------------------- opgaverne

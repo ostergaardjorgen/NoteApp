@@ -205,10 +205,240 @@ public partial class SettingsView : UserControl
         FravalgtPanel.Visibility = liste.Count == 0 ? Visibility.Collapsed : Visibility.Visible;
     }
 
+    // ---------------------------------------------------------- integrationer
+
+    /// <summary>Én integration, som fanen viser den.</summary>
+    public sealed class Integrationsvisning : System.ComponentModel.INotifyPropertyChanged
+    {
+        private readonly Integration _i;
+        private readonly Integrationsopsaetning _o;
+
+        public Integrationsvisning(Integration i, Integrationsopsaetning o)
+        {
+            _i = i;
+            _o = o;
+        }
+
+        public string Id => _i.Id;
+        public string Navn => _i.Navn;
+        public string Hvad => _i.Hvad;
+        public string Hvordan => _i.Hvordan;
+
+        public string Under => $"{_i.Leverandoer} · {_i.Hjemland}";
+
+        public bool ErForbundet => _o.ErForbundet;
+        public bool KanForbinde => _i.Klar && KlientId.Trim().Length > 0;
+
+        public Visibility Opsaetningsvis => _i.Klar ? Visibility.Visible : Visibility.Collapsed;
+
+        public string Tilstand => !_i.Klar ? "KOMMER SENERE"
+            : _o.ErForbundet ? "FORBUNDET"
+            : _o.HarOpsaetning ? "KLAR TIL AT FORBINDE"
+            : "IKKE SAT OP";
+
+        public Brush Tilstandsfarve => !_i.Klar
+            ? (Brush)new BrushConverter().ConvertFrom("#FF9BA6B8")!
+            : _o.ErForbundet
+                ? (Brush)new BrushConverter().ConvertFrom("#FF4CBE72")!
+                : (Brush)new BrushConverter().ConvertFrom("#FFE8A33D")!;
+
+        /// <summary>
+        /// Linjen under knapperne: hvornår der sidst blev hentet, og hvad der
+        /// kom ud af det.
+        ///
+        /// EN FEJL SKAL STÅ, TIL DEN ER VÆK. Uden den ville en integration,
+        /// der er holdt op med at virke, se ud som en, der bare ikke har
+        /// hentet noget endnu — og de to kræver hver sin handling.
+        /// </summary>
+        public string Sidst
+        {
+            get
+            {
+                if (_o.SidsteFejl.Length > 0) return "Sidste forsøg gik galt: " + _o.SidsteFejl;
+
+                if (_o.SidstHentet is not { } t) return "";
+
+                return $"Hentede {_o.SidsteAntal} " +
+                       $"{(_o.SidsteAntal == 1 ? "aftale" : "aftaler")} " +
+                       $"{t.LocalDateTime:d. MMMM 'kl.' HH:mm}.";
+            }
+        }
+
+        public string KlientId
+        {
+            get => _o.KlientId;
+            set
+            {
+                if (_o.KlientId == value) return;
+
+                _o.KlientId = value;
+                Integrationsfiler.Gem(_i.Id, _o);
+                Ret(nameof(KanForbinde));
+            }
+        }
+
+        public string Hemmelighed
+        {
+            get => _o.Hemmelighed;
+            set
+            {
+                if (_o.Hemmelighed == value) return;
+
+                _o.Hemmelighed = value;
+                Integrationsfiler.Gem(_i.Id, _o);
+            }
+        }
+
+        public event System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
+
+        private void Ret(string navn) =>
+            PropertyChanged?.Invoke(this, new System.ComponentModel.PropertyChangedEventArgs(navn));
+    }
+
+    private void VisIntegrationer()
+    {
+        Integrationsliste.ItemsSource = Integrationer.Alle
+            .Select(i => new Integrationsvisning(i, Integrationsfiler.Hent(i.Id)))
+            .ToList();
+    }
+
+    /// <summary>
+    /// Godkender hos leverandøren. Browseren åbnes, og appen venter på svaret.
+    ///
+    /// Der spørges FØRST. Handlingen sender brugeren ud af appen og ind på en
+    /// side hos Google, og det skal man vide, inden browseren springer op.
+    /// </summary>
+    private async void Forbind_Klik(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button b || b.Tag is not string id) return;
+        if (Integrationer.Find(id) is not { } i) return;
+
+        var o = Integrationsfiler.Hent(id);
+
+        var ja = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
+            $"Forbind til {i.Navn}?",
+            $"Der åbner en side hos {i.Leverandoer} i din browser, hvor du logger ind og " +
+            "godkender.\n\n" +
+            "Appen beder om LÆSEADGANG til kalenderen og intet andet. Der bliver ikke " +
+            "skrevet noget tilbage, og hverken lyd, transkriptioner eller dokumenter " +
+            "sendes nogen steder hen.",
+            godkend: "Åbn browseren", annuller: "Ikke nu", slags: Dialogs.Slags.Valg);
+
+        if (!ja) return;
+
+        Status.Text = $"Venter på godkendelse i browseren …";
+
+        try
+        {
+            var noegle = await Googlekalender.ForbindAsync(o.KlientId.Trim(), o.Hemmelighed.Trim());
+
+            o.Opdateringsnoegle = noegle;
+            o.SidsteFejl = "";
+            Integrationsfiler.Gem(id, o);
+
+            Status.Text = $"{i.Navn} er forbundet.";
+            VisIntegrationer();
+
+            await Hent(id);
+        }
+        catch (Exception ex)
+        {
+            o.SidsteFejl = ex.Message;
+            Integrationsfiler.Gem(id, o);
+
+            Status.Text = "Forbindelsen blev ikke oprettet.";
+            VisIntegrationer();
+
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Kunne ikke forbinde",
+                ex.Message, Dialogs.Slags.Pas_paa);
+        }
+    }
+
+    private async void Hent_Klik(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button { Tag: string id }) await Hent(id);
+    }
+
+    /// <summary>
+    /// Henter aftalerne ind. Alt fra kilden afløses — se Kalender.Afloes.
+    /// </summary>
+    private async Task Hent(string id)
+    {
+        if (Integrationer.Find(id) is not { } i) return;
+
+        var o = Integrationsfiler.Hent(id);
+        if (!o.ErForbundet) return;
+
+        Status.Text = $"Henter aftaler fra {i.Navn} …";
+
+        try
+        {
+            var aftaler = await Googlekalender.HentAsync(
+                o.KlientId.Trim(), o.Hemmelighed.Trim(), o.Opdateringsnoegle);
+
+            var n = Kalender.Afloes(i.Kilde, aftaler);
+
+            o.SidstHentet = DateTimeOffset.Now;
+            o.SidsteAntal = n;
+            o.SidsteFejl = "";
+            Integrationsfiler.Gem(id, o);
+
+            Status.Text = $"Hentede {n} {(n == 1 ? "aftale" : "aftaler")} fra {i.Navn}.";
+        }
+        catch (Exception ex)
+        {
+            o.SidsteFejl = ex.Message;
+            Integrationsfiler.Gem(id, o);
+
+            Status.Text = "Aftalerne kunne ikke hentes.";
+        }
+
+        VisIntegrationer();
+    }
+
+    /// <summary>
+    /// Glemmer forbindelsen — og de aftaler, den havde hentet.
+    ///
+    /// AFTALERNE SKAL MED VÆK. Bliver de stående, kan appen ikke længere holde
+    /// dem opdaterede, og en aflyst aftale ville stå der for evigt.
+    /// </summary>
+    private void Afbryd_Klik(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button b || b.Tag is not string id) return;
+        if (Integrationer.Find(id) is not { } i) return;
+
+        var ja = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
+            $"Afbryd forbindelsen til {i.Navn}?",
+            "De aftaler, appen har hentet derfra, forsvinder fra kalenderen. Dine egne " +
+            "aftaler bliver stående.\n\n" +
+            "Du kan forbinde igen senere — klient-id'et bliver ikke slettet.",
+            godkend: "Afbryd forbindelsen", annuller: "Behold den",
+            slags: Dialogs.Slags.Pas_paa, godkendErStandard: false);
+
+        if (!ja) return;
+
+        var o = Integrationsfiler.Hent(id);
+        o.Opdateringsnoegle = "";
+        o.SidstHentet = null;
+        o.SidsteAntal = 0;
+        o.SidsteFejl = "";
+        Integrationsfiler.Gem(id, o);
+
+        Kalender.Fjern(i.Kilde);
+
+        Status.Text = $"Forbindelsen til {i.Navn} er afbrudt.";
+        VisIntegrationer();
+    }
+
+    private void Hjaelp_Klik(object sender, RoutedEventArgs e) =>
+        Dialogs.AppDialog.Vis(Window.GetWindow(this), "Klient-id hos Google",
+            Googlekalender.Vejledning, Dialogs.Slags.Valg);
+
     private void Indlaes()
     {
         MoedevagtTil.IsChecked = AppSettings.Current.MoedevagtTil;
         VisFravalgte();
+        VisIntegrationer();
 
         var mikrofoner = AudioDevices.Microphones();
         var hoejttalere = AudioDevices.Speakers();

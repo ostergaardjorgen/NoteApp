@@ -146,6 +146,27 @@ public partial class MainWindow : Window
         // nemt som "nu": man trykker bare paa knappen, naar man vil.
         _moede.FærdigMedMøde += mappe =>
         {
+            // AFTALEN FÅR OPTAGELSENS ID. Uden den forbindelse er kalenderen
+            // og arkivet to lister, man selv skal sammenholde.
+            if (_venterAftale is { } aftale)
+            {
+                try
+                {
+                    if (MeetingStore.Load(mappe) is { } meta)
+                    {
+                        aftale.MoedeId = meta.Id.ToString();
+                        Kalender.Gem(aftale);
+                    }
+                }
+                catch (Exception)
+                {
+                    // Kan forbindelsen ikke gemmes, staar optagelsen der
+                    // stadig. Den er det vaerdifulde; linket er en bekvemmelighed.
+                }
+
+                _venterAftale = null;
+            }
+
             _aabnOptagelse = mappe;
             _spoergOmUdskrift = true;
             NavTransskriber.IsChecked = true;
@@ -438,6 +459,60 @@ public partial class MainWindow : Window
         // faktisk blev registreret, staar oeverst til hoejre og i
         // bemaerkningen - dér hoerer en midlertidig tilstand hjemme.
     }
+
+    /// <summary>
+    /// Starter optagelsen af en aftale fra kalenderen.
+    ///
+    /// AFTALENS EGNE VALG FØLGER MED — mappe, mødetype og sprog er valgt, da
+    /// aftalen blev lagt ind. De skal ikke vælges igen med mødet i gang; det
+    /// er hele grunden til, at de kan sættes på en aftale.
+    ///
+    /// ER DE IKKE SAT, SPØRGES DER SOM SÆDVANLIG. Så er man præcis lige så
+    /// langt som uden kalenderen, og aftalen har i det mindste sparet én ting:
+    /// man skal ikke lede efter optageknappen.
+    ///
+    /// Aftalen får optagelsens id med, når mødet er slut. Det er DEN
+    /// forbindelse, der lukker ringen: kalenderen siger, at mødet var der, og
+    /// optagelsen siger, hvad der blev sagt.
+    /// </summary>
+    public void OptagAftale(Aftale a)
+    {
+        if (_moede.IsRecording)
+        {
+            Dialogs.AppDialog.Vis(this, "Der optages allerede",
+                "Stop den igangværende optagelse først.", Dialogs.Slags.Valg);
+            return;
+        }
+
+        // Mangler noget af det, aftalen skulle have svaret paa, spoerges der.
+        // Sproget alene er ikke nok til at springe dialogen over: uden en
+        // mappe lander optagelsen samme sted som alt andet, og det er dét,
+        // hele opstartsdialogen er sat i verden for at undgaa.
+        if (a.Sprog.Length == 0 || a.Mappe.Length == 0)
+        {
+            var slags = a.ErWebinar
+                ? OpstartWindow.Slags.Webinar
+                : OpstartWindow.Slags.Moede;
+
+            var vindue = new OpstartWindow(slags) { Owner = this };
+            if (vindue.ShowDialog() != true) return;
+
+            a.Mappe = vindue.Mappe ?? a.Mappe;
+            a.Moedetype = vindue.Moedetype ?? a.Moedetype;
+            a.Sprog = vindue.Sprog;
+        }
+
+        _venterAftale = a;
+
+        _moede.Start(new MeetingView.Opstart(
+            a.Sprog, a.Link.Length > 0 ? a.Link : null,
+            a.Mappe.Length > 0 ? a.Mappe : null,
+            a.Moedetype.Length > 0 ? a.Moedetype : null,
+            a.ErWebinar));
+    }
+
+    /// <summary>Aftalen, den igangværende optagelse hører til. Null uden for en aftale.</summary>
+    private Aftale? _venterAftale;
 
     /// <summary>
     /// Genvejstasten er trykket. Vinduet hentes frem, og optagelsen går i gang

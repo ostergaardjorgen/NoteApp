@@ -437,3 +437,52 @@ værd at bruge i sig selv. Ingen af dem må efterlade halve funktioner på skær
 | Webinar mod møde | samme lyd, ét mod to spor | tid og størrelse halveret |
 | Dikterede opgaver | 20 indtalte opgaver | hvor mange skal rettes i gennemsynet |
 | Påmindelsen | fyrer den, når appen er lukket | 100 % |
+
+---
+
+## Integrationer — retningen, besluttet 22-08-2026
+
+**Der kommer flere, og de skal ligge samme sted.** Google Kalender er den
+første, Microsoft 365 den næste. Forskellen på dem er kun, hvor man henter en
+nøgle og hvilken adresse der bliver spurgt; alt det andet — godkendelsen,
+afløsningen ved hver hentning, at aftalerne forsvinder igen, når man slår fra
+— er det samme. Skrives den ene som et særtilfælde, bliver den anden det også.
+
+Derfor: **en egen fane under Indstillinger**, en liste over integrationer, og
+den samme opsætning for hver. Microsoft står med som «kommer senere» frem for
+slet ikke at stå der — den, der bruger Microsoft, skal kunne se, at det er på
+vej, og ikke lede efter en indstilling, der ikke findes.
+
+### Hvorfor det ikke bryder løftet om EU
+
+Appens hovedregel er, at data bliver på maskinen, og at det, der skal
+behandles i skyen, behandles i EU. En kalenderintegration vender den om:
+aftalerne ligger **allerede** hos Google eller Microsoft, og appen henter dem
+ned. Der sendes ingenting op.
+
+Har kunden valgt Google Workspace eller Microsoft 365, har de selv taget
+stilling til, at mødetitler og deltagere ligger hos en amerikansk leverandør.
+Appen ændrer ikke på det; den læser det, der er der.
+
+**Det, der aldrig sendes ad den vej:** lyden, transkriptionerne, noterne og
+dokumenterne. Der bedes om ét område — `calendar.readonly` — og det står i
+koden, hvor det kan efterprøves. Brugeren ser det desuden på Googles egen side,
+når der godkendes; det er ikke appen, der fortæller, hvad den beder om.
+
+### Kalenderen skal virke uden
+
+Det er ikke en overgangsløsning. Målgruppen er studerende, iværksættere og
+mindre selvstændige, og en del af dem har hverken Google Workspace eller
+Microsoft 365. En kalender, der kræver en konto hos Google for at virke, er
+ubrugelig for dem — og så er den ikke en kalender, den er en integration med
+en forside.
+
+Egne aftaler og hentede aftaler står derfor i **én liste**. Hvem der har lagt
+dem ind, er ikke det, man leder efter, når man skal optage om fem minutter.
+
+### Der følger ingen nøgle med appen
+
+Samme regel som for sprogmodellen. Et indbygget klient-id er det samme for
+alle, der har programmet: det kan læses ud af filen, misbruges i andres navn,
+og den dag det bliver spærret, holder appen op med at virke for alle på én
+gang. Id'et er gratis og hentes hos leverandøren.

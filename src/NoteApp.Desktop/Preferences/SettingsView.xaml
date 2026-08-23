@@ -339,6 +339,118 @@
         </ScrollViewer>
       </TabItem>
 
+      <!-- ==================== INTEGRATIONER ====================
+
+           EGEN FANE, FORDI DER KOMMER FLERE. Google er den første, Microsoft
+           365 den næste, og forskellen på dem er kun, hvor man henter en
+           nøgle. Lå Google under «Opstart» eller «Filer», ville den næste
+           skulle lægges et tredje sted.
+
+           DET, DER GØR DEN HER FANE ANDERLEDES END RESTEN AF APPEN, SKAL
+           STÅ ØVERST. Alt andet bliver på maskinen; her taler appen med en
+           amerikansk leverandør. Det er i orden — men det skal siges, og det
+           skal siges før knapperne, ikke under dem. -->
+      <TabItem Header="Integrationer" Style="{StaticResource Fane}">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+          <StackPanel>
+
+            <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20"
+                    BorderBrush="{StaticResource PanelKant}" BorderThickness="1" Margin="0,0,0,14">
+              <StackPanel>
+                <TextBlock Text="Kalendere fra andre tjenester" FontSize="15" FontWeight="SemiBold" />
+                <TextBlock FontSize="12.5" Margin="0,6,0,0" TextWrapping="Wrap" LineHeight="20"
+                           Foreground="{StaticResource TekstMeget}"
+                           Text="Appen kan læse dine aftaler ind i kalenderen, så du kan trykke optag direkte på et møde. Kalenderen virker også uden — du kan altid oprette aftaler her i appen." />
+
+                <Border Background="#FF181B22" BorderBrush="{StaticResource Accent}"
+                        BorderThickness="3,0,0,0" CornerRadius="4" Padding="14,11" Margin="0,14,0,0">
+                  <StackPanel>
+                    <TextBlock Text="Hvad der bliver sendt — og hvad der ikke gør"
+                               FontSize="12.5" FontWeight="SemiBold" />
+                    <TextBlock FontSize="12" Margin="0,7,0,0" TextWrapping="Wrap" LineHeight="19"
+                               Foreground="{StaticResource Tekst}"
+                               Text="Der HENTES aftaler ned. Der sendes ingenting op — appen beder om læseadgang til kalenderen og intet andet, og den kan hverken oprette eller ændre noget hos leverandøren." />
+                    <TextBlock FontSize="12" Margin="0,7,0,0" TextWrapping="Wrap" LineHeight="19"
+                               Foreground="{StaticResource Tekst}"
+                               Text="Lyden, transkriptionerne, dine noter og dokumenterne forlader aldrig maskinen ad denne vej. En kalenderintegration giver adgang til at læse en kalender." />
+                    <TextBlock FontSize="12" Margin="0,7,0,0" TextWrapping="Wrap" LineHeight="19"
+                               Foreground="{StaticResource TekstMeget}"
+                               Text="Google og Microsoft er amerikanske. Bruger du deres kalender i forvejen, ligger dine mødetitler og deltagere der allerede — appen læser det, der er der." />
+                  </StackPanel>
+                </Border>
+              </StackPanel>
+            </Border>
+
+            <ItemsControl x:Name="Integrationsliste">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20"
+                          BorderBrush="{StaticResource PanelKant}" BorderThickness="1"
+                          Margin="0,0,0,14">
+                    <StackPanel>
+
+                      <Grid>
+                        <StackPanel Margin="0,0,120,0">
+                          <TextBlock Text="{Binding Navn}" FontSize="15" FontWeight="SemiBold" />
+                          <TextBlock Text="{Binding Under}" FontSize="12" Margin="0,4,0,0"
+                                     TextWrapping="Wrap" Foreground="{StaticResource TekstMeget}" />
+                        </StackPanel>
+
+                        <Border CornerRadius="4" Padding="9,3" HorizontalAlignment="Right"
+                                VerticalAlignment="Top" Background="#FF2C323D">
+                          <TextBlock Text="{Binding Tilstand}" FontSize="10.5"
+                                     FontWeight="SemiBold" Foreground="{Binding Tilstandsfarve}" />
+                        </Border>
+                      </Grid>
+
+                      <TextBlock Text="{Binding Hvad}" FontSize="12.5" Margin="0,12,0,0"
+                                 TextWrapping="Wrap" LineHeight="20"
+                                 Foreground="{StaticResource TekstSvag}" />
+
+                      <TextBlock Text="{Binding Hvordan}" FontSize="12" Margin="0,7,0,0"
+                                 TextWrapping="Wrap" LineHeight="19"
+                                 Foreground="{StaticResource TekstMeget}" />
+
+                      <!-- Felterne staar kun frem for den, der ER klar, og de
+                           er tomme for en integration, der ikke er bygget. -->
+                      <StackPanel Visibility="{Binding Opsaetningsvis}" Margin="0,14,0,0">
+                        <TextBlock Text="KLIENT-ID" FontSize="9.5" FontWeight="SemiBold"
+                                   Foreground="{StaticResource TekstMeget}" />
+                        <TextBox Text="{Binding KlientId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 FontSize="12" Padding="9,6" Margin="0,5,0,0" />
+
+                        <TextBlock Text="KLIENTHEMMELIGHED" FontSize="9.5" FontWeight="SemiBold"
+                                   Margin="0,10,0,0" Foreground="{StaticResource TekstMeget}" />
+                        <TextBox Text="{Binding Hemmelighed, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 FontSize="12" Padding="9,6" Margin="0,5,0,0" />
+
+                        <StackPanel Orientation="Horizontal" Margin="0,14,0,0">
+                          <Button Content="Forbind" Tag="{Binding Id}" Click="Forbind_Klik"
+                                  Style="{StaticResource Primaer}" Padding="18,8"
+                                  IsEnabled="{Binding KanForbinde}" />
+                          <Button Content="Hent aftaler nu" Tag="{Binding Id}" Click="Hent_Klik"
+                                  Padding="14,8" Margin="8,0,0,0"
+                                  IsEnabled="{Binding ErForbundet}" />
+                          <Button Content="Afbryd forbindelsen" Tag="{Binding Id}" Click="Afbryd_Klik"
+                                  Padding="14,8" Margin="8,0,0,0"
+                                  IsEnabled="{Binding ErForbundet}" />
+                          <Button Content="Sådan får du et id" Tag="{Binding Id}" Click="Hjaelp_Klik"
+                                  Padding="14,8" Margin="8,0,0,0" />
+                        </StackPanel>
+
+                        <TextBlock Text="{Binding Sidst}" FontSize="11.5" Margin="0,12,0,0"
+                                   TextWrapping="Wrap" LineHeight="18"
+                                   Foreground="{StaticResource TekstMeget}" />
+                      </StackPanel>
+                    </StackPanel>
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
       <TabItem Header="Filer" Style="{StaticResource Fane}">
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
           <StackPanel>
