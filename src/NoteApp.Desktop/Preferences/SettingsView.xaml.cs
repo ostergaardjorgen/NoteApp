@@ -41,7 +41,7 @@ public partial class SettingsView : UserControl
         _timer = new DispatcherTimer(DispatcherPriority.Background) { Interval = TimeSpan.FromMilliseconds(100) };
         _timer.Tick += (_, _) => OpdaterMaalere();
 
-        Loaded += (_, _) => { Indlaes(); VisAutostart(); OpdaterFiler(); VisKrav(); VisPlads(); };
+        Loaded += (_, _) => { Indlaes(); VisAutostart(); OpdaterFiler(); VisKrav(); VisPlads(); VisOvervaagede(); };
         Unloaded += (_, _) => { _timer.Stop(); StopProber(); AfbrydTest(); };
     }
 
@@ -1175,6 +1175,207 @@ public partial class SettingsView : UserControl
     }
 
     // ------------------------------------------------------------ datamappen
+
+    // ==================== OVERVAAGEDE MAPPER ====================
+    //
+    // Roadmap 2.2. Hele mekanikken ligger i NoteApp.Core.Overvaagning; her er
+    // kun skaermen. Metoden er skrevet ned i doc/overvaagede-mapper.md.
+
+    /// <summary>
+    /// Én række i listen. Skriver sig selv tilbage, når hakket ændres, så
+    /// «læg ind automatisk» virker uden en gem-knap — der er ingen andre
+    /// steder på skærmen, hvor man skal gemme noget.
+    /// </summary>
+    public sealed class Mappevisning
+    {
+        public required string Sti { get; init; }
+        public required string Linje { get; init; }
+
+        private bool _automatisk;
+
+        public bool Automatisk
+        {
+            get => _automatisk;
+            set
+            {
+                if (_automatisk == value) return;
+                _automatisk = value;
+
+                var alle = Overvaagning.Mapper();
+                var min = alle.FirstOrDefault(m =>
+                    string.Equals(m.Sti, Sti, StringComparison.OrdinalIgnoreCase));
+
+                if (min is null) return;
+
+                min.Automatisk = value;
+                Overvaagning.Gem(alle);
+            }
+        }
+
+        public static Mappevisning Af(Overvaagetmappe m)
+        {
+            var dele = new List<string>();
+
+            if (m.Herkomst.Length > 0) dele.Add(m.Herkomst);
+            dele.Add(m.Undermapper ? "med undermapper" : "kun mappen selv");
+
+            if (!Directory.Exists(m.Sti)) dele.Add("MAPPEN FINDES IKKE LÆNGERE");
+
+            return new Mappevisning
+            {
+                Sti = m.Sti,
+                Linje = string.Join("  ·  ", dele),
+                _automatisk = m.Automatisk
+            };
+        }
+    }
+
+    /// <summary>En skytjeneste på maskinen, og om NoteApp-mappen findes i den.</summary>
+    private sealed record Skyvisning(string Navn, string Sti, string Knap, bool Kan);
+
+    private void VisOvervaagede()
+    {
+        var mapper = Overvaagning.Mapper();
+
+        Overvaagede.ItemsSource = mapper.Select(Mappevisning.Af).ToList();
+        IngenOvervaagede.Visibility = mapper.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+
+        // SKYTJENESTERNE. De staar altid, ogsaa naar mappen allerede
+        // overvaages - saa kan man se, at appen HAR fundet dem, i stedet for
+        // at sidde og lede efter en knap, der ikke er der.
+        var vaagne = mapper.Select(m => m.Sti).ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        Skytjenester.ItemsSource = Overvaagning.Synkroniseringsroedder()
+            .Select(r =>
+            {
+                var mappe = Path.Combine(r.Rod, Overvaagning.Standardmappe);
+
+                if (vaagne.Contains(mappe))
+                    return new Skyvisning(r.Navn, mappe, "Overvåges", false);
+
+                return Directory.Exists(mappe)
+                    ? new Skyvisning(r.Navn, mappe, "Overvåg den", true)
+                    : new Skyvisning(r.Navn, r.Rod, "Opret NoteApp-mappen", true);
+            })
+            .ToList();
+
+        var set = Overvaagning.Husket();
+
+        Bogen.Text = set == 0
+            ? "Der er ikke taget stilling til nogen filer endnu."
+            : set == 1
+                ? "Der er taget stilling til én fil. Den bliver ikke tilbudt igen."
+                : $"Der er taget stilling til {set} filer. De bliver ikke tilbudt igen.";
+    }
+
+    private void TilfoejMappe_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new Microsoft.Win32.OpenFolderDialog
+        {
+            Title = "Vælg mappen, der skal holdes øje med",
+            Multiselect = false
+        };
+
+        if (dialog.ShowDialog(Window.GetWindow(this)) != true) return;
+
+        Tilfoej(dialog.FolderName, "Tilføjet af dig");
+    }
+
+    private void OpretSkymappe_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button { Tag: string sti }) return;
+
+        // Knappen staar med to betydninger, og Tag afgoer hvilken: findes
+        // NoteApp-mappen, er stien mappen selv; findes den ikke, er stien
+        // skytjenestens rod, og saa skal mappen oprettes foerst.
+        var navn = Path.GetFileName(sti.TrimEnd('\\'));
+
+        var mappe = string.Equals(navn, Overvaagning.Standardmappe, StringComparison.OrdinalIgnoreCase)
+            ? sti
+            : Path.Combine(sti, Overvaagning.Standardmappe);
+
+        try
+        {
+            Directory.CreateDirectory(mappe);
+        }
+        catch (Exception ex)
+        {
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Mappen kunne ikke oprettes",
+                ex.Message, Dialogs.Slags.Pas_paa);
+            return;
+        }
+
+        Tilfoej(mappe, "Skytjeneste");
+    }
+
+    private void Tilfoej(string sti, string herkomst)
+    {
+        var alle = Overvaagning.Mapper();
+
+        if (alle.Any(m => string.Equals(m.Sti, sti, StringComparison.OrdinalIgnoreCase)))
+        {
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Den holdes der allerede øje med",
+                $"«{sti}» står allerede på listen.", Dialogs.Slags.Valg);
+            return;
+        }
+
+        // DATAMAPPEN MAA IKKE OVERVAAGES.
+        //
+        // Appens egne optagelser ligger der som mikrofon.wav. Blev mappen
+        // overvaaget, ville hver eneste optagelse blive tilbudt som en "ny
+        // fil udefra" og kunne laegges ind som en kopi af sig selv.
+        if (Ligger(sti, UserDataPaths.Root))
+        {
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Den mappe kan ikke overvåges",
+                "Det er appens egen datamappe. Alle optagelser ligger der i forvejen, "
+                + "og de ville blive tilbudt som nye filer.", Dialogs.Slags.Pas_paa);
+            return;
+        }
+
+        alle.Add(new Overvaagetmappe { Sti = sti, Herkomst = herkomst, Aktiv = true });
+        Overvaagning.Gem(alle);
+
+        VisOvervaagede();
+    }
+
+    /// <summary>Ligger stien i eller er den lig med mappen?</summary>
+    private static bool Ligger(string sti, string mappe)
+    {
+        try
+        {
+            var a = Path.GetFullPath(sti).TrimEnd('\\') + "\\";
+            var b = Path.GetFullPath(mappe).TrimEnd('\\') + "\\";
+
+            return a.StartsWith(b, StringComparison.OrdinalIgnoreCase)
+                || b.StartsWith(a, StringComparison.OrdinalIgnoreCase);
+        }
+        catch (Exception) { return false; }
+    }
+
+    private void FjernMappe_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button { Tag: string sti }) return;
+
+        var alle = Overvaagning.Mapper();
+        alle.RemoveAll(m => string.Equals(m.Sti, sti, StringComparison.OrdinalIgnoreCase));
+
+        Overvaagning.Gem(alle);
+        VisOvervaagede();
+    }
+
+    private void GlemSete_Click(object sender, RoutedEventArgs e)
+    {
+        var svar = Dialogs.AppDialog.Spoerg(Window.GetWindow(this), "Tilbyd alle filer igen?",
+            "Hver lydfil i de overvågede mapper bliver tilbudt igen — også dem, du "
+            + "har sagt nej til. Optagelser, der allerede er lagt ind, bliver ikke rørt, "
+            + "men filerne bag dem kan lægges ind endnu en gang.",
+            "Glem hvad der er set", slags: Dialogs.Slags.Pas_paa, godkendErStandard: false);
+
+        if (!svar) return;
+
+        Overvaagning.GlemAlt();
+        VisOvervaagede();
+    }
 
     private void SkiftData_Click(object sender, RoutedEventArgs e)
     {

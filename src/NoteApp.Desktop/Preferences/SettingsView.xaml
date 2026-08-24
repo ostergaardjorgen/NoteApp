@@ -794,6 +794,130 @@
           </StackPanel>
         </Border>
 
+        <!-- ====================== Overvaagede mapper ======================
+
+             HVORFOR DEN LIGGER UNDER FILER OG IKKE UNDER INTEGRATIONER
+
+             Fordi det ikke ER en integration. Der er ingen konto, ingen
+             noegle og ingen tjeneste - appen kigger i en mappe paa disken.
+             Laa den under Integrationer, ville den love noget, den ikke
+             goer, og staa paa Compliance-siden uden at hoere til der. -->
+        <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20" Margin="0,0,0,14"
+                BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+          <StackPanel>
+            <TextBlock Text="Overvågede mapper" FontSize="15" FontWeight="SemiBold" />
+
+            <TextBlock Style="{StaticResource Underskrift}" Margin="0,6,0,0" TextWrapping="Wrap"
+                       Foreground="{StaticResource TekstMeget}"
+                       Text="Peg appen på en mappe. Dukker der en lydfil op, bliver den tilbudt på Optagelser. Kildefilen røres aldrig — der kopieres, og originalen bliver liggende." />
+
+            <!-- METODEN, KORT. Den lange udgave staar i
+                 doc/overvaagede-mapper.md, men det, der har betydning for, om
+                 man tror paa funktionen, skal staa HER, hvor den slaas til. -->
+            <Border Background="{StaticResource Baggrund}" CornerRadius="8" Padding="14,12"
+                    Margin="0,14,0,0" BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+              <StackPanel>
+                <TextBlock Text="SÅDAN KIGGER DEN" FontSize="9.5" FontWeight="SemiBold"
+                           Foreground="{StaticResource TekstMeget}" Margin="0,0,0,8" />
+
+                <TextBlock FontSize="12" LineHeight="19" TextWrapping="Wrap"
+                           Foreground="{StaticResource TekstSvag}"
+                           Text="&#x2022;  Hvert minut, så længe appen er åben. Der kigges også, når du selv beder om det." />
+                <TextBlock FontSize="12" LineHeight="19" TextWrapping="Wrap" Margin="0,4,0,0"
+                           Foreground="{StaticResource TekstSvag}"
+                           Text="&#x2022;  Der læses aldrig i en fil, kun navn, størrelse og dato. Filer i iCloud og OneDrive ligger tit kun i skyen, og at læse dem ville hente hele mappen ned." />
+                <TextBlock FontSize="12" LineHeight="19" TextWrapping="Wrap" Margin="0,4,0,0"
+                           Foreground="{StaticResource TekstSvag}"
+                           Text="&#x2022;  En fil skal have ligget stille i tyve sekunder. Ellers kan den nå at blive lagt ind, mens den stadig kopieres." />
+                <TextBlock FontSize="12" LineHeight="19" TextWrapping="Wrap" Margin="0,4,0,0"
+                           Foreground="{StaticResource TekstSvag}"
+                           Text="&#x2022;  Hver fil tilbydes én gang. Siger du nej, kommer den ikke igen." />
+              </StackPanel>
+            </Border>
+
+            <ItemsControl x:Name="Overvaagede" Margin="0,16,0,0">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <Border Background="{StaticResource Baggrund}" CornerRadius="8" Padding="14,12"
+                          Margin="0,0,0,8" BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+                    <Grid>
+                      <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                      </Grid.ColumnDefinitions>
+
+                      <StackPanel Grid.Column="0" Margin="0,0,14,0">
+                        <TextBlock Text="{Binding Sti}" FontSize="12.5" FontFamily="Consolas"
+                                   TextWrapping="Wrap" Foreground="{StaticResource Tekst}" />
+                        <TextBlock Text="{Binding Linje}" FontSize="11.5" Margin="0,4,0,0"
+                                   TextWrapping="Wrap" Foreground="{StaticResource TekstMeget}" />
+                      </StackPanel>
+
+                      <CheckBox Grid.Column="1" IsChecked="{Binding Automatisk, Mode=TwoWay}"
+                                VerticalAlignment="Center" FontSize="12" Margin="0,0,14,0"
+                                Content="Læg ind automatisk"
+                                ToolTip="Uden hak bliver filen tilbudt på Optagelser, og du bestemmer" />
+
+                      <Button Grid.Column="2" Content="Fjern" Click="FjernMappe_Click"
+                              Tag="{Binding Sti}" Padding="14,6" VerticalAlignment="Center" />
+                    </Grid>
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <TextBlock x:Name="IngenOvervaagede" FontSize="12.5" TextWrapping="Wrap"
+                       Margin="0,16,0,0" Visibility="Collapsed"
+                       Foreground="{StaticResource TekstMeget}"
+                       Text="Ingen mapper overvåges. Tilføj en, eller opret NoteApp-mappen i en af de skytjenester, der findes på maskinen." />
+
+            <!-- SKYTJENESTERNE, DER ER FUNDET.
+                 De findes ved at spoerge Windows selv om, hvor de
+                 synkroniserer hen. At gaette paa stier under brugermappen
+                 blev proevet og fejlede. -->
+            <ItemsControl x:Name="Skytjenester" Margin="0,14,0,0">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <Grid Margin="0,0,0,6">
+                    <Grid.ColumnDefinitions>
+                      <ColumnDefinition Width="*" />
+                      <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" Margin="0,0,14,0" VerticalAlignment="Center">
+                      <TextBlock Text="{Binding Navn}" FontSize="12.5" FontWeight="SemiBold" />
+                      <TextBlock Text="{Binding Sti}" FontSize="11" FontFamily="Consolas"
+                                 TextWrapping="Wrap" Foreground="{StaticResource TekstMeget}" />
+                    </StackPanel>
+                    <Button Grid.Column="1" Content="{Binding Knap}" Click="OpretSkymappe_Click"
+                            Tag="{Binding Sti}" Padding="14,6" VerticalAlignment="Center"
+                            IsEnabled="{Binding Kan}" />
+                  </Grid>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <Grid Margin="0,16,0,0">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+              </Grid.ColumnDefinitions>
+
+              <TextBlock x:Name="Bogen" Grid.Column="0" FontSize="11.5" TextWrapping="Wrap"
+                         VerticalAlignment="Center" Margin="0,0,14,0"
+                         Foreground="{StaticResource TekstMeget}" />
+
+              <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <Button Content="Glem hvad der er set" Click="GlemSete_Click" Padding="14,7"
+                        Margin="0,0,10,0"
+                        ToolTip="Alle filer i mapperne bliver tilbudt igen, også dem du har sagt nej til" />
+                <Button Content="Tilføj mappe…" Click="TilfoejMappe_Click" Padding="16,7"
+                        Style="{StaticResource Primaer}" />
+              </StackPanel>
+            </Grid>
+          </StackPanel>
+        </Border>
+
         <!-- ========================== Datamappen =========================== -->
         <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20" Margin="0,0,0,14"
                 BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
@@ -811,7 +935,7 @@
             </StackPanel>
             <StackPanel Grid.Column="1" VerticalAlignment="Center">
               <Button Content="Skift mappe…" Click="SkiftData_Click" MinWidth="130" />
-              <Button Content=".bn mappen" Click="AabnData_Click" Margin="0,8,0,0" MinWidth="130" />
+              <Button Content="Åbn mappen" Click="AabnData_Click" Margin="0,8,0,0" MinWidth="130" />
             </StackPanel>
           </Grid>
         </Border>

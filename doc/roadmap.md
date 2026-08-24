@@ -157,7 +157,7 @@ der skal konverteres.
 HERFRA og DERFRA — alt står som ét. Det står tre steder: på optagelsen i træet, øverst på udskriften, og som sit eget ikon i listen.
 
 ### 2.2 Overvåget mappe (iCloud, Google Drev, OneDrive)
-**IKKE BYGGET · næste tur** *Lille · bygger på 2.1, som nu er færdig*
+**FÆRDIG 24-08** *Lille · bygger på 2.1*
 
 Peg appen på en mappe. Dukker der en lydfil op, tilbyder den at lægge den ind.
 
@@ -167,7 +167,13 @@ synkroniserer til en helt almindelig lokal mappe. Derfor kræver det her
 kun en mappe på disken. Optager du på iPhone med iCloud slået til, ligger filen
 på pc'en af sig selv.
 
-**Én ting er lært af 2.1 og skal med her:** iCloud lægger kun en pladsholder på disken. Filen fylder nul, indtil nogen læser den, og attributten hedder `RECALL_ON_DATA_ACCESS`. En overvågning, der måler på filstørrelsen, ser derfor ingenting — og en, der bare læser løs, henter hver eneste fil ned. Begge dele er forkerte.
+**Sådan blev det.** Metoden er skrevet ned i `overvaagede-mapper.md` — den står også kort på skærmen, hvor man slår den til. De fire regler, der bærer den: der kigges hvert minut, der læses aldrig i en fil, en fil skal have ligget stille i tyve sekunder, og hver fil tilbydes én gang.
+
+**Pladsholderne blev håndteret, som 2.1 forudsagde.** iCloud lægger kun en pladsholder på disken; filen fylder nul, indtil nogen læser den. Derfor læses der aldrig i en fil under scanningen — kun navn, størrelse og dato. En pladsholder er stadig et fund, og at den skal hentes ned, står på skærmen, før man trykker.
+
+**Skytjenesterne findes ved at spørge Windows**, ikke ved at gætte på stier under brugermappen. Det gæt blev prøvet og fejlede: iCloud Drive lå i `C:\iCloudDrive`, slet ikke under brugeren.
+
+**Som standard overvåges ingenting.** Appen finder skytjenesterne og tilbyder én mappe i hver — `<skytjeneste>\NoteApp` — men listen er tom, indtil nogen siger ja. En app, der begynder at kigge i mapper af sig selv, er ikke en funktion.
 
 Et rigtigt API mod de tre tjenester bliver først nødvendigt, hvis man vil
 undvære synkroniseringsklienten. Det er en senere beslutning, ikke en

@@ -209,6 +209,8 @@ public partial class TranscribeView : UserControl
     public TranscribeView(string? aabnMappe, bool spoerg, int position)
     {
         InitializeComponent();
+        LytEfterFund();
+
         IndlaesOptagelser();
         VisSeneste();
 
@@ -666,6 +668,88 @@ public partial class TranscribeView : UserControl
         _valgtKnude = knude;
         knude.ErValgt = true;
         OpdaterValg();
+    }
+
+    // ============ NYE FILER I DE OVERVAAGEDE MAPPER (roadmap 2.2) ============
+    //
+    // Selve kiggeriet ligger i Jobs.Mappevagt. Her vises kun det, den fandt.
+
+    private void LytEfterFund()
+    {
+        Jobs.Mappevagt.Aendret += VisFund;
+
+        // Er en fil lagt ind af sig selv, skal listen vise den med det samme.
+        // Ellers staar der en optagelse i mappen, som skaermen ikke kender.
+        Jobs.Mappevagt.Lagtind += mappe =>
+        {
+            IndlaesOptagelser();
+            VaelgOptagelse(mappe);
+            Status.Text = "En lydfil er lagt ind af sig selv fra en overvåget mappe.";
+        };
+
+        Unloaded += (_, _) => Jobs.Mappevagt.Aendret -= VisFund;
+
+        VisFund();
+    }
+
+    private void VisFund()
+    {
+        var ventende = Jobs.Mappevagt.Ventende;
+
+        if (ventende.Count == 0)
+        {
+            Fundbjaelke.Visibility = Visibility.Collapsed;
+            return;
+        }
+
+        var foerste = ventende[0];
+
+        Fundtekst.Text = ventende.Count == 1
+            ? "Ny lydfil fundet"
+            : $"{ventende.Count} nye lydfiler fundet";
+
+        // DEN OEVERSTE FIL VISES MED NAVN. En optaelling alene siger ikke,
+        // hvad man tager stilling til - og «tre filer» kan lige saa godt vaere
+        // tre podcasts som gaarsdagens moede.
+        var stoerrelse = foerste.Bytes >= 1024L * 1024
+            ? $"{foerste.Bytes / 1024.0 / 1024.0:0.#} MB"
+            : $"{foerste.Bytes / 1024.0:0} KB";
+
+        var linjer = new List<string>
+        {
+            $"{foerste.Filnavn}  ·  {stoerrelse}  ·  {foerste.Aendret:dd-MM HH:mm}",
+            $"i {foerste.Mappenavn}"
+        };
+
+        if (foerste.KunISkyen)
+            linjer.Add("Ligger kun i skyen — den hentes ned, når den lægges ind.");
+
+        if (ventende.Count > 1)
+            linjer.Add($"Der er {ventende.Count - 1} mere bagefter.");
+
+        Fundlinje.Text = string.Join("\n", linjer);
+        Fundbjaelke.Visibility = Visibility.Visible;
+    }
+
+    private async void FundLaegInd_Click(object sender, RoutedEventArgs e)
+    {
+        if (Jobs.Mappevagt.Ventende.FirstOrDefault() is not { } fund) return;
+
+        // Bogen skrives FOER indlaesningen. Gaar indlaesningen galt, er filen
+        // stadig afgjort - ellers ville en fil, der ikke kan laeses, blive
+        // tilbudt igen hvert minut, resten af dagen.
+        Jobs.Mappevagt.Afgjort(fund.Sti);
+
+        await IndlaesFiler(new[] { fund.Sti }, fund.Folder ?? Valgtmappe());
+    }
+
+    private void FundAfvis_Click(object sender, RoutedEventArgs e)
+    {
+        if (Jobs.Mappevagt.Ventende.FirstOrDefault() is not { } fund) return;
+
+        Jobs.Mappevagt.Afgjort(fund.Sti);
+
+        Status.Text = $"«{fund.Filnavn}» bliver ikke tilbudt igen. Filen ligger, hvor den lå.";
     }
 
     // ===================== INDLÆSNING AF LYDFILER =====================

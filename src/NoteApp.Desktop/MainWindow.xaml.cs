@@ -1,4 +1,4 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Reflection;
 using System.Windows;
 using NoteApp.Core;
@@ -267,6 +267,10 @@ public partial class MainWindow : Window
 
             // Bjaelken skal foelge transskriptionen paa ALLE skaerme.
             Jobs.Udskriftsvagt.Aendret += VisUdskrift;
+
+            // Mapperne, brugeren har peget paa. Starter tomt og koster
+            // ingenting, naar der ikke er nogen - se Mappevagt.Kig.
+            Jobs.Mappevagt.Start();
         };
     }
 
