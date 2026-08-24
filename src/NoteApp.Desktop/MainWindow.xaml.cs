@@ -80,6 +80,55 @@ public partial class MainWindow : Window
         });
     }
 
+    // ------------------------------------------------ transskription i gang
+
+    /// <summary>
+    /// Viser i bjælken nederst, at en optagelse bliver skrevet ud.
+    ///
+    /// DEN SAMME BJÆLKE SOM DOKUMENTER, og af samme grund: der skal være ÉT
+    /// sted, hvor man kan se, at noget kører. Fremdriften stod før kun på
+    /// Optagelser-skærmen, og skiftede man til Cockpittet, var der intet spor
+    /// af, at noget var i gang — på en kørsel, der tager fire et halvt minut
+    /// for hvert kvarters lyd.
+    ///
+    /// DOKUMENTER HAR FORTRINSRET. Kører der en dokumentkørsel, bliver den
+    /// stående; den kan afbrydes fra bjælken, og en transskription, der
+    /// overtog den, ville fjerne den knap midt i noget.
+    ///
+    /// DER ER INGEN AFBRYD-KNAP HER. Transskriptionen afbrydes på den skærm,
+    /// den kører på. To steder at stoppe det samme er to steder at lede efter
+    /// en fejl.
+    /// </summary>
+    private void VisUdskrift()
+    {
+        Dispatcher.Invoke(() =>
+        {
+            if (BackgroundJobs.Kører) return;
+
+            if (!Jobs.Udskriftsvagt.Koerer)
+            {
+                JobBjaelke.Visibility = Visibility.Collapsed;
+                return;
+            }
+
+            JobBjaelke.Visibility = Visibility.Visible;
+
+            JobHvad.Text = Jobs.Udskriftsvagt.Navn;
+            JobBesked.Text = Jobs.Udskriftsvagt.Besked;
+            JobDetaljer.Visibility = Visibility.Collapsed;
+
+            JobBar.Visibility = Visibility.Visible;
+            JobBar.IsIndeterminate = Jobs.Udskriftsvagt.Procent < 0;
+            if (Jobs.Udskriftsvagt.Procent >= 0) JobBar.Value = Jobs.Udskriftsvagt.Procent;
+
+            JobPrik.Fill = (System.Windows.Media.Brush)FindResource("Accent");
+
+            JobAfbrydKnap.Visibility = Visibility.Collapsed;
+            JobVisKnap.Visibility = Visibility.Collapsed;
+            JobLukKnap.Visibility = Visibility.Collapsed;
+        });
+    }
+
     private void JobVis_Click(object sender, RoutedEventArgs e)
     {
         _aabnDokument = _færdigtDokument;
@@ -215,6 +264,9 @@ public partial class MainWindow : Window
             // Vagten skal starte med appen. Foerst naar den bliver LAEST, findes
             // den - og en vagt, ingen har spurgt efter, kigger aldrig paa uret.
             _ = Kalendervagten;
+
+            // Bjaelken skal foelge transskriptionen paa ALLE skaerme.
+            Jobs.Udskriftsvagt.Aendret += VisUdskrift;
         };
     }
 

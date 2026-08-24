@@ -1171,6 +1171,14 @@ public partial class TranscribeView : UserControl
         Status.Text = kunStemmer
             ? "Finder stemmerne i optagelsen …"
             : "Indlæser modellen … det tager typisk et halvt minut første gang";
+
+        // VAGTEN SKAL VIDE DET, saa bjaelken oeverst kan staa paa ALLE
+        // skaerme. Fremdriften stod foer kun her, og skiftede man skaerm, var
+        // der intet spor af, at noget koerte.
+        Jobs.Udskriftsvagt.Start(
+            Valgt?.Mappe ?? "",
+            Valgt?.Titel ?? "Optagelsen",
+            kunStemmer ? "Finder stemmerne …" : "Indlæser modellen …");
         Resultat.Ryd();
 
         // Forklaringen bliver staaende, mens der koeres. Det er praecis dér,
@@ -1200,6 +1208,10 @@ public partial class TranscribeView : UserControl
             Fremdrift.IsIndeterminate = false;
             Fremdrift.Value = (sporNr * 100.0 + p.Percent) / sporIAlt;
             Fremdriftstal.Text = $"{Fremdrift.Value:0} %";
+
+            Jobs.Udskriftsvagt.Fremdrift(Fremdrift.Value,
+                sporIAlt > 1 ? $"Skriver lyden ud — spor {sporNr + 1} af {sporIAlt}"
+                             : "Skriver lyden ud");
 
             // HVAD DER SKRIVES UD, IKKE HVAD SPORET HEDDER.
             //
@@ -1448,6 +1460,8 @@ public partial class TranscribeView : UserControl
         }
         finally
         {
+            Jobs.Udskriftsvagt.Slut();
+
             Fremdriftsrude.Visibility = Visibility.Collapsed;
             Fremdrift.IsIndeterminate = false;
             AfbrydKnap.Visibility = Visibility.Collapsed;
@@ -1728,19 +1742,28 @@ public partial class TranscribeView : UserControl
                     var skrevet = mappe is not null
                                   && System.IO.Directory.GetFiles(mappe, "udskrift_*.txt").Length > 0;
 
+                    // SKRIVES DEN UD LIGE NU, ER DET DÉT, DER SKAL STAA.
+                    // «ikke skrevet ud» paa en optagelse, motoren er i gang
+                    // med, er ikke bare upraecist - det er svaret paa netop
+                    // det spoergsmaal, man kigger for at faa.
+                    var igang = Jobs.Udskriftsvagt.ErIGang(mappe);
+
                     var laengde = TimeSpan.FromSeconds(m.DurationSeconds);
 
                     var under = $"{m.StartedAt.LocalDateTime:dd-MM HH:mm}" +
                                 (m.DurationSeconds > 0
                                     ? $"  ·  {(laengde.TotalHours >= 1 ? laengde.ToString(@"h\:mm\:ss") : laengde.ToString(@"mm\:ss"))}"
                                     : "") +
-                                (skrevet ? "" : "  ·  ikke skrevet ud");
+                                (igang ? "  ·  skrives ud nu …"
+                                       : skrevet ? "" : "  ·  ikke skrevet ud");
 
                     return new Senestevisning(
                         m.Title ?? "Uden navn",
                         under,
                         m.Id.ToString(),
-                        (System.Windows.Media.Brush)new System.Windows.Media.BrushConverter().ConvertFrom(skrevet ? "#FF3A4150" : "#FFE8A33D")!);
+                        (System.Windows.Media.Brush)new System.Windows.Media.BrushConverter()
+                            .ConvertFrom(igang ? "#FF5B9DF0"
+                                       : skrevet ? "#FF3A4150" : "#FFE8A33D")!);
                 })
                 .ToList();
         }
