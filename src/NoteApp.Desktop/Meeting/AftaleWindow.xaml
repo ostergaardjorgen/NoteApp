@@ -115,6 +115,27 @@
         <CheckBox x:Name="ErWebinar" Margin="0,12,0,0" FontSize="12"
                   Content="Optag som webinar — kun det, computeren afspiller" />
 
+        <!-- OGSAA PAA EN HENTET AFTALE. Feltet er appens eget og findes ikke
+             hos Google, saa det kan saettes paa hvad som helst i kalenderen. -->
+        <CheckBox x:Name="OptagAutomatisk" Margin="0,10,0,0" FontSize="12"
+                  Checked="Automatisk_Skiftet" Unchecked="Automatisk_Skiftet"
+                  Content="Start optagelsen automatisk, når mødet begynder" />
+
+        <TextBlock x:Name="AutomatiskNote" Margin="24,3,0,0" FontSize="11"
+                   TextWrapping="Wrap" Visibility="Collapsed"
+                   Foreground="{StaticResource Advarsel}"
+                   Text="Optagelsen begynder to minutter før. Det kræver, at NoteApp kører — et program, der er lukket, kan ikke starte en optagelse. Flyttes mødet, flytter optagelsen med." />
+
+        <!-- MEET PAA EN HENTET AFTALE.
+             Den staar kun paa en Google-aftale uden link. Er der allerede et
+             moedelink, er der ikke noget at tilfoeje - og en knap, der laver
+             et moederum nummer to, er en fejl, ikke en mulighed. -->
+        <Button x:Name="TilfoejMeetKnap" Content="Tilføj et Google Meet-link"
+                Click="TilfoejMeet_Klik" HorizontalAlignment="Left"
+                Margin="0,12,0,0" Padding="12,6" FontSize="12"
+                Visibility="Collapsed"
+                ToolTip="Opretter et mødelokale hos Google og lægger linket på aftalen" />
+
         <!-- Hakket vises kun, naar der ER en forbindelse. Et afkrydsningsfelt,
              der ikke kan bruges, er et spoergsmaal om hvorfor. -->
         <CheckBox x:Name="OpretHosGoogle" Margin="0,10,0,0" FontSize="12"

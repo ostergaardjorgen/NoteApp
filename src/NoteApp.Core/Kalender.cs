@@ -77,6 +77,32 @@ public sealed record Aftale
     /// <summary>Skal det optages som et webinar — ét spor?</summary>
     public bool ErWebinar { get; set; }
 
+    /// <summary>
+    /// Skal optagelsen starte af sig selv, når mødet begynder?
+    ///
+    /// DEN KRÆVER, AT APPEN KØRER. Der findes ingen vej udenom: en optagelse
+    /// er en proces, der skal være i gang, og et program, der ikke kører, kan
+    /// ikke starte den. Det står i indstillingerne, så det ikke bliver noget,
+    /// man opdager den dag, et møde ikke blev optaget.
+    ///
+    /// FLYTTES MØDET HOS GOOGLE, FLYTTER OPTAGELSEN MED. Markeringen hænger på
+    /// aftalen, ikke på et klokkeslæt — tidspunktet læses forfra ved hver
+    /// hentning, og vagten kigger på det, der står nu.
+    ///
+    /// Feltet er appens eget. Det findes ikke hos Google, og det bæres derfor
+    /// over ved hver hentning som mødetype, mappe og sprog.
+    /// </summary>
+    public bool OptagAutomatisk { get; set; }
+
+    /// <summary>
+    /// Sat, når vagten har startet optagelsen — så den ikke gør det igen.
+    ///
+    /// Uden den ville et møde, man kasserede efter to minutter, blive startet
+    /// forfra ved næste kig på uret. Den nulstilles, hvis mødet flyttes til et
+    /// nyt tidspunkt: så er det en ny lejlighed, ikke den samme igen.
+    /// </summary>
+    public DateTimeOffset? Startet { get; set; }
+
     public DateTimeOffset Slutter => Slut ?? Start.AddHours(1);
 
     public bool ErIGang(DateTimeOffset nu) => nu >= Start.AddMinutes(-5) && nu <= Slutter;
@@ -234,6 +260,15 @@ public static class Kalender
                 ny.Sprog = gammel.Sprog;
                 ny.ErWebinar = gammel.ErWebinar;
                 ny.MoedeId = gammel.MoedeId;
+                ny.OptagAutomatisk = gammel.OptagAutomatisk;
+
+                // FLYTTES MOEDET, ER DET EN NY LEJLIGHED.
+                //
+                // «Startet» huskes kun, saa laenge tidspunktet er det samme.
+                // Rykker moedet en time, skal vagten optage paa det nye
+                // tidspunkt - ellers ville en flytning stille og roligt
+                // afmelde optagelsen, og det ville se ud som en fejl i vagten.
+                ny.Startet = ny.Start == gammel.Start ? gammel.Startet : null;
             }
 
             alle.Add(ny);

@@ -183,6 +183,24 @@ public sealed class AppSettings
     /// </summary>
     public List<string> MoedevagtAldrig { get; set; } = new();
 
+    /// <summary>
+    /// Har brugeren kvitteret for at have læst, hvad en integration betyder?
+    ///
+    /// EN INTEGRATION KAN IKKE SLÅS TIL, FØR DEN ER SAT.
+    ///
+    /// Alt andet i appen bliver på maskinen. En kalenderintegration er det
+    /// ene sted, hvor appen taler med en amerikansk leverandør, og det er en
+    /// beslutning — ikke en indstilling. En knap, man kan trykke på uden at
+    /// have læst noget, gør teksten ovenover til pynt.
+    ///
+    /// Den spørges ÉN gang og huskes. Et spørgsmål, der kommer igen hver
+    /// gang, læses ikke anden gang.
+    ///
+    /// Den blokerer ikke noget som helst andet. Kalenderen, optagelsen og
+    /// resten af appen virker uændret uden den.
+    /// </summary>
+    public bool IntegrationerLaest { get; set; }
+
     private static string Path => System.IO.Path.Combine(UserDataPaths.Root, "indstillinger.json");
 
     private static AppSettings? _current;

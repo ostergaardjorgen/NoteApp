@@ -207,6 +207,10 @@ public partial class MainWindow : Window
             TilslutGenvej();
 
             Moedevagten.Opdater();
+
+            // Vagten skal starte med appen. Foerst naar den bliver LAEST, findes
+            // den - og en vagt, ingen har spurgt efter, kigger aldrig paa uret.
+            _ = Kalendervagten;
         };
     }
 
@@ -262,6 +266,27 @@ public partial class MainWindow : Window
         optagerAllerede: () => _moede.IsRecording,
         startOptagelse: LynstartOptagelse,
         ejer: () => this);
+
+    private Kalendervagt? _kalendervagt;
+
+    /// <summary>
+    /// Vagten, der starter optagelsen på de aftaler, der er markeret til det.
+    ///
+    /// DER SPØRGES IKKE, når den går i gang. Mødet er ved at begynde, og der
+    /// sidder måske ingen ved maskinen — en dialog ville stå og vente, mens
+    /// mødet blev holdt.
+    ///
+    /// Vinduet hentes frem, så det er til at se, at der optages. Ellers ville
+    /// den eneste besked være optagebåndet, og det kan ligge bag et andet
+    /// program.
+    /// </summary>
+    public Kalendervagt Kalendervagten => _kalendervagt ??= new Kalendervagt(
+        optagerAllerede: () => _moede.IsRecording,
+        start: a =>
+        {
+            App.HentFrem(this);
+            OptagAftale(a, spoerg: false);
+        });
 
     private Moedevagt? _moedevagt;
 
@@ -475,12 +500,26 @@ public partial class MainWindow : Window
     /// forbindelse, der lukker ringen: kalenderen siger, at mødet var der, og
     /// optagelsen siger, hvad der blev sagt.
     /// </summary>
-    public void OptagAftale(Aftale a)
+    /// <param name="spoerg">
+    /// Må der spørges, hvis aftalen mangler mappe eller sprog?
+    ///
+    /// FALSK, NÅR VAGTEN STARTER. Mødet er ved at begynde, og der sidder
+    /// måske ingen ved maskinen. En dialog ville stå og vente, mens de første
+    /// ti minutter blev sagt — og optagelse må aldrig kunne blokeres. Så
+    /// hellere en optagelse i den forkerte mappe end ingen optagelse; mappen
+    /// kan flyttes bagefter, replikkerne kan ikke.
+    /// </param>
+    public void OptagAftale(Aftale a, bool spoerg = true)
     {
         if (_moede.IsRecording)
         {
-            Dialogs.AppDialog.Vis(this, "Der optages allerede",
-                "Stop den igangværende optagelse først.", Dialogs.Slags.Valg);
+            // Vagten spoerger selv, om der optages, foer den kalder her. Sker
+            // det alligevel, er det ikke noget, der skal afbryde nogen midt i
+            // et moede.
+            if (spoerg)
+                Dialogs.AppDialog.Vis(this, "Der optages allerede",
+                    "Stop den igangværende optagelse først.", Dialogs.Slags.Valg);
+
             return;
         }
 
@@ -488,7 +527,7 @@ public partial class MainWindow : Window
         // Sproget alene er ikke nok til at springe dialogen over: uden en
         // mappe lander optagelsen samme sted som alt andet, og det er dét,
         // hele opstartsdialogen er sat i verden for at undgaa.
-        if (a.Sprog.Length == 0 || a.Mappe.Length == 0)
+        if (spoerg && (a.Sprog.Length == 0 || a.Mappe.Length == 0))
         {
             var slags = a.ErWebinar
                 ? OpstartWindow.Slags.Webinar

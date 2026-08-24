@@ -553,10 +553,23 @@
                         </Grid.ColumnDefinitions>
 
                         <StackPanel Grid.Column="0" Margin="0,0,14,0">
-                          <TextBox Text="{Binding Tekst, UpdateSourceTrigger=PropertyChanged}"
-                                   FontSize="13" TextWrapping="Wrap" AcceptsReturn="True"
+
+                          <!-- NAVNET OEVERST, FORDI DET ER DET, MAN SER ANDRE
+                               STEDER. Listerne viser navnet; hele teksten
+                               laeses foerst, naar man standser op ved den ene.
+                               Staar navnet nederst, retter man det aldrig. -->
+                          <TextBox Text="{Binding Navn, UpdateSourceTrigger=PropertyChanged}"
+                                   FontSize="13" FontWeight="SemiBold"
                                    BorderThickness="0" Padding="0" Background="Transparent"
-                                   Foreground="{StaticResource Tekst}" />
+                                   Foreground="{StaticResource Tekst}"
+                                   ToolTip="Det korte navn — det, der står på listen i Cockpittet" />
+
+                          <TextBox Text="{Binding Tekst, UpdateSourceTrigger=PropertyChanged}"
+                                   FontSize="12.5" TextWrapping="Wrap" AcceptsReturn="True"
+                                   Margin="0,4,0,0"
+                                   BorderThickness="0" Padding="0" Background="Transparent"
+                                   Foreground="{StaticResource TekstSvag}"
+                                   ToolTip="Hele opgaven — det, der blev sagt" />
                           <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
                             <TextBlock Text="{Binding Ejer}" FontSize="11.5" FontWeight="SemiBold"
                                        Foreground="{StaticResource Accent}"

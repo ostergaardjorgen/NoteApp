@@ -190,10 +190,45 @@ public sealed class Opgavevisning : INotifyPropertyChanged
 
     public Visibility EjerSynlig => _o.Ejer.Length > 0 ? Visibility.Visible : Visibility.Collapsed;
 
+    /// <summary>
+    /// Det korte navn — det, listerne viser.
+    ///
+    /// Er det tomt, VISES det udledte navn i feltet, så man kan se, hvad der
+    /// står andre steder. Skriver man i det, bliver det til et rigtigt navn.
+    /// Der gemmes ikke et udledt navn af sig selv: så ville et gæt blive til
+    /// noget, der ser ud, som om nogen havde valgt det.
+    /// </summary>
+    public string Navn
+    {
+        get => _o.Navn.Length > 0 ? _o.Navn : _o.Visningsnavn;
+        set
+        {
+            var nyt = (value ?? "").Trim();
+
+            // Skriver man praecis det udledte navn, er der ikke truffet et
+            // valg - og saa skal feltet blive ved med at foelge teksten.
+            if (nyt == _o.Visningsnavn && _o.Navn.Length == 0) return;
+            if (_o.Navn == nyt) return;
+
+            _o.Navn = nyt;
+            Meld();
+            _gem();
+        }
+    }
+
     public string Tekst
     {
         get => _o.Tekst;
-        set { if (_o.Tekst == value) return; _o.Tekst = value; Meld(); _gem(); }
+        set
+        {
+            if (_o.Tekst == value) return;
+
+            _o.Tekst = value;
+
+            Meld();
+            Meld(nameof(Navn));   // det udledte navn foelger teksten
+            _gem();
+        }
     }
 
     public DateTime? Deadline

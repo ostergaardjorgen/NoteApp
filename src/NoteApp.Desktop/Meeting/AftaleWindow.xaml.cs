@@ -145,6 +145,60 @@ public partial class AftaleWindow : Window
     }
 
     /// <summary>
+    /// Betingelsen siges, når hakket sættes — ikke som en advarsel hele tiden.
+    ///
+    /// At appen skal køre, er kun interessant for den, der faktisk vælger
+    /// automatisk optagelse. Står det altid, læses det aldrig.
+    /// </summary>
+    private void Automatisk_Skiftet(object sender, RoutedEventArgs e)
+    {
+        AutomatiskNote.Visibility = OptagAutomatisk.IsChecked == true
+            ? Visibility.Visible
+            : Visibility.Collapsed;
+    }
+
+    /// <summary>
+    /// Lægger et Google Meet-link på en aftale, der allerede findes hos Google.
+    ///
+    /// Aftalen gemmes med det samme. Går man ud af vinduet med Fortryd
+    /// bagefter, er linket der stadig — det ER oprettet hos Google, og et
+    /// felt, der siger noget andet, ville være forkert.
+    /// </summary>
+    private async void TilfoejMeet_Klik(object sender, RoutedEventArgs e)
+    {
+        TilfoejMeetKnap.IsEnabled = false;
+        Fejl.Text = "";
+
+        try
+        {
+            var noegle = Integrationsfiler.Hent("google").Opdateringsnoegle;
+
+            if (noegle.Length == 0)
+            {
+                Fejl.Text = "Der er ikke forbindelse til Google lige nu.";
+                return;
+            }
+
+            var link = await Googlekalender.TilfoejMeetAsync(Aftalen.FremmedId, noegle);
+
+            Aftalen.Link = link;
+            Kalender.Gem(Aftalen);
+
+            Link.Text = link;
+
+            TilfoejMeetKnap.Visibility = Visibility.Collapsed;
+        }
+        catch (Exception ex)
+        {
+            Fejl.Text = ex.Message;
+        }
+        finally
+        {
+            TilfoejMeetKnap.IsEnabled = true;
+        }
+    }
+
+    /// <summary>
     /// Undervalgene hører til hakket ovenfor og vises kun sammen med det.
     /// </summary>
     private void Google_Skiftet(object sender, RoutedEventArgs e)
@@ -198,6 +252,29 @@ public partial class AftaleWindow : Window
         Sprogvalg.SelectedItem = sprog.FirstOrDefault(p => p.Vaerdi == Aftalen.Sprog) ?? sprog[0];
 
         ErWebinar.IsChecked = Aftalen.ErWebinar;
+
+        OptagAutomatisk.IsChecked = Aftalen.OptagAutomatisk;
+        AutomatiskNote.Visibility = Aftalen.OptagAutomatisk
+            ? Visibility.Visible : Visibility.Collapsed;
+
+        // Meet-knappen: kun paa en hentet aftale, der ikke allerede har et
+        // link, og kun naar der ER forbindelse at gaa igennem.
+        var kanMeet = false;
+
+        try
+        {
+            kanMeet = Aftalen.Kilde == Kalenderkilde.Google
+                   && Aftalen.FremmedId.Length > 0
+                   && Aftalen.Link.Length == 0
+                   && Integrationsfiler.Hent("google").ErForbundet;
+        }
+        catch (Exception)
+        {
+            // Kan opsaetningen ikke laeses, vises knappen ikke. En knap, der
+            // fejler, naar man trykker, er vaerre end en, der ikke er der.
+        }
+
+        TilfoejMeetKnap.Visibility = kanMeet ? Visibility.Visible : Visibility.Collapsed;
     }
 
     /// <summary>Halve timer hele døgnet. Feltet kan skrives i, hvis noget andet skal bruges.</summary>
@@ -269,6 +346,15 @@ public partial class AftaleWindow : Window
         Aftalen.Moedetype = (Typevalg.SelectedItem as Punkt)?.Vaerdi ?? "";
         Aftalen.Sprog = (Sprogvalg.SelectedItem as Punkt)?.Vaerdi ?? "";
         Aftalen.ErWebinar = ErWebinar.IsChecked == true;
+
+        // SLAAS DEN TIL PAA NY, ER DET EN NY LEJLIGHED. «Startet» ryddes, saa
+        // vagten optager igen - ellers ville et hak, man saetter tilbage efter
+        // en kasseret optagelse, ingenting goere.
+        var automatisk = OptagAutomatisk.IsChecked == true;
+
+        if (automatisk && !Aftalen.OptagAutomatisk) Aftalen.Startet = null;
+
+        Aftalen.OptagAutomatisk = automatisk;
 
         SkalOpHosGoogle = OpretHosGoogle.Visibility == Visibility.Visible
                        && OpretHosGoogle.IsChecked == true;

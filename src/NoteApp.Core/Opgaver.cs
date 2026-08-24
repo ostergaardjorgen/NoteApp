@@ -17,7 +17,59 @@ public sealed record Opgave
 {
     public Guid Id { get; init; } = Guid.NewGuid();
 
+    /// <summary>
+    /// Det korte navn — det, listen viser.
+    ///
+    /// HVORFOR DER ER TO FELTER OG IKKE ÉT
+    ///
+    /// En opgave, der kommer fra en transkription, er en hel sætning, som
+    /// nogen sagde: «ja, jeg sender det reviderede budget til Tina, når hun
+    /// har været igennem tallene fra Q3». Den sætning er guld værd, når man
+    /// bagefter skal vide, hvad der egentlig blev aftalt — og ubrugelig som
+    /// linje på en liste med tyve andre.
+    ///
+    /// Navnet er dét, man skimmer. Beskrivelsen er dét, man læser, når man
+    /// standser op ved den ene.
+    ///
+    /// Tom på gamle opgaver, der blev lavet før feltet fandtes. Derfor
+    /// udledes navnet af teksten, når det mangler — se <see cref="Visningsnavn"/>.
+    /// Der skrives ikke et udledt navn ned i filen: gættet ville så blive til
+    /// noget, der ser ud, som om nogen havde valgt det.
+    /// </summary>
+    public string Navn { get; set; } = "";
+
+    /// <summary>Hele opgaven — det, der blev sagt, eller det, man selv skrev.</summary>
     public string Tekst { get; set; } = "";
+
+    /// <summary>
+    /// Navnet, som listen skal vise det.
+    ///
+    /// Mangler navnet, klippes teksten ved den første sætning eller ved et
+    /// ordskel. Der klippes ikke midt i et ord — en afkortning, der ender i
+    /// «budgettet til Ti», ser ud som en fejl og ikke som en forkortelse.
+    /// </summary>
+    public string Visningsnavn => Navn.Length > 0 ? Navn : Kort(Tekst);
+
+    /// <summary>Har opgaven mere at fortælle, end navnet viser?</summary>
+    public bool HarMere =>
+        Tekst.Length > 0 && !string.Equals(Tekst.Trim(), Visningsnavn.Trim(),
+                                           StringComparison.Ordinal);
+
+    internal static string Kort(string tekst, int maks = 70)
+    {
+        var t = tekst.Trim();
+        if (t.Length == 0) return "";
+
+        // Foerste saetning, hvis den er kort nok. Et punktum er et bedre
+        // klippested end en tegntaelling, fordi nogen har sat det.
+        var punkt = t.IndexOfAny(new[] { '.', '!', '?', '\n' });
+        if (punkt > 0 && punkt <= maks) return t[..punkt].Trim();
+
+        if (t.Length <= maks) return t;
+
+        var skel = t.LastIndexOf(' ', maks);
+        return (skel > maks / 2 ? t[..skel] : t[..maks]).TrimEnd() + "…";
+    }
 
     /// <summary>
     /// Hvem der skal gøre det. Sat ud fra HVEM DER SAGDE DET — ikke gættet.

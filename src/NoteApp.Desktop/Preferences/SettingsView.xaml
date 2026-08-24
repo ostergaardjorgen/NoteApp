@@ -42,6 +42,29 @@
                        Foreground="{StaticResource TekstMeget}"
                        Text="Genvejstasten kan kun starte en optagelse, hvis appen kører. Derfor hænger de to ting sammen." />
 
+            <!-- HVORFOR DET STAAR HER OG IKKE KUN VED HAKKET PAA AFTALEN.
+                 Betingelsen gaelder tre funktioner, ikke én, og den er den
+                 samme hver gang: et program, der ikke koerer, kan ikke starte
+                 en optagelse. Staar det kun i en enkelt dialog, opdager man
+                 det foerste gang et moede IKKE blev optaget - og dér er det
+                 for sent. -->
+            <Border Background="#FF181B22" BorderBrush="{StaticResource Accent}"
+                    BorderThickness="3,0,0,0" CornerRadius="4" Padding="14,11" Margin="0,12,0,0">
+              <StackPanel>
+                <TextBlock Text="NoteApp virker bedst, når den altid kører"
+                           FontSize="12.5" FontWeight="SemiBold" />
+                <TextBlock FontSize="12" Margin="0,7,0,0" TextWrapping="Wrap" LineHeight="19"
+                           Foreground="{StaticResource Tekst}"
+                           Text="Tre ting kan kun ske, mens appen er åben: genvejstasten kan starte en optagelse, mødevagten kan spørge, når et program bruger mikrofonen, og en aftale, du har markeret til automatisk optagelse, kan gå i gang af sig selv." />
+                <TextBlock FontSize="12" Margin="0,7,0,0" TextWrapping="Wrap" LineHeight="19"
+                           Foreground="{StaticResource Tekst}"
+                           Text="Det er ikke en begrænsning, der kan laves om. En optagelse er noget, der skal være i gang, og et lukket program kan ikke starte den — heller ikke med en planlagt opgave i Windows, for de første sekunder ville gå med at hente programmet ind." />
+                <TextBlock FontSize="12" Margin="0,7,0,0" TextWrapping="Wrap" LineHeight="19"
+                           Foreground="{StaticResource TekstMeget}"
+                           Text="Appen fylder ingenting, når der ikke optages. Derfor er «Start NoteApp, når jeg logger på Windows» slået til fra begyndelsen — og derfor kan du slå den fra." />
+              </StackPanel>
+            </Border>
+
             <CheckBox x:Name="StartMedWindows" Margin="0,14,0,0" Click="Autostart_Klik"
                       Content="Start NoteApp, når jeg logger på Windows" />
             <TextBlock x:Name="AutostartStatus" FontSize="12" Margin="24,6,0,0" TextWrapping="Wrap"
@@ -378,6 +401,20 @@
                                Text="Google og Microsoft er amerikanske. Bruger du deres kalender i forvejen, ligger dine mødetitler og deltagere der allerede — appen læser det, der er der." />
                   </StackPanel>
                 </Border>
+
+                <!-- KVITTERINGEN LAASER KNAPPERNE OP.
+                     En knap, man kan trykke paa uden at have laest noget, goer
+                     teksten ovenover til pynt. Der spoerges ÉN gang og huskes;
+                     et spoergsmaal, der kommer igen hver gang, laeses ikke
+                     anden gang. -->
+                <CheckBox x:Name="IntegrationerLaest" Margin="0,14,0,0"
+                          Click="IntegrationerLaest_Klik"
+                          Content="Dette er læst og forstået" />
+
+                <TextBlock x:Name="LaestNote" FontSize="11.5" Margin="24,5,0,0"
+                           TextWrapping="Wrap" LineHeight="18"
+                           Foreground="{StaticResource TekstMeget}"
+                           Text="Sæt hakket for at kunne aktivere en integration. Du kan altid afbryde forbindelsen igen." />
               </StackPanel>
             </Border>
 
@@ -420,9 +457,11 @@
                            cloud-projekt først. Appen har sit eget id nu. -->
                       <StackPanel Visibility="{Binding Opsaetningsvis}" Margin="0,14,0,0">
                         <StackPanel Orientation="Horizontal">
-                          <Button Content="Forbind" Tag="{Binding Id}" Click="Forbind_Klik"
+                          <Button Content="Aktiver" Tag="{Binding Id}" Click="Forbind_Klik"
                                   Style="{StaticResource Primaer}" Padding="20,8"
-                                  Visibility="{Binding Forbindvis}" />
+                                  Visibility="{Binding Forbindvis}"
+                                  IsEnabled="{Binding MaaAktivere}"
+                                  ToolTip="{Binding Aktivertip}" />
                           <Button Content="Hent aftaler nu" Tag="{Binding Id}" Click="Hent_Klik"
                                   Padding="14,8" Visibility="{Binding Forbundetvis}" />
                           <Button Content="Afbryd forbindelsen" Tag="{Binding Id}" Click="Afbryd_Klik"

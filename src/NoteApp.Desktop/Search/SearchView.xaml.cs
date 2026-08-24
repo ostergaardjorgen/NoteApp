@@ -321,6 +321,12 @@ public partial class SearchView : UserControl
 
                 if (_a.MoedeId.Length > 0) dele.Add("optaget");
 
+                // DET SKAL KUNNE SES PAA LISTEN. En aftale, der starter en
+                // optagelse af sig selv, maa ikke goere det som en
+                // overraskelse - og markeringen er sat i et vindue, man
+                // lukkede for en uge siden.
+                else if (_a.OptagAutomatisk) dele.Add("optager selv");
+
                 return string.Join("  ·  ", dele);
             }
         }
@@ -465,6 +471,12 @@ public partial class SearchView : UserControl
     /// Kan browseren ikke åbnes, siges det. Aftalen ER oprettet, og det må
     /// ikke se ud, som om noget gik tabt.
     /// </summary>
+    /// <summary>Folder opgavens beskrivelse ud eller sammen igen.</summary>
+    private void Mere_Klik(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button { Tag: Opgavevisning v }) v.FoldetUd = !v.FoldetUd;
+    }
+
     private void AabnHosGoogle(string webadresse)
     {
         if (webadresse.Length == 0) return;
@@ -1016,6 +1028,45 @@ public sealed class Opgavevisning : System.ComponentModel.INotifyPropertyChanged
 
     public string Tekst => _r.Opgave.Tekst;
 
+    /// <summary>Det korte navn — det, listen viser. Højst to linjer.</summary>
+    public string Navn => _r.Opgave.Visningsnavn;
+
+    /// <summary>
+    /// Hele opgaven. Vises først, når man folder den ud.
+    ///
+    /// EN LISTE, DER VISER ALT, KAN IKKE SKIMMES. Fem opgaver på fire linjer
+    /// hver fylder en skærm, og så er overblikket væk — og overblikket er hele
+    /// grunden til, at de står i Cockpittet.
+    /// </summary>
+    public string Beskrivelse => _r.Opgave.Tekst;
+
+    /// <summary>Er der mere at folde ud, end navnet allerede viser?</summary>
+    public Visibility Merevis =>
+        _r.Opgave.HarMere ? Visibility.Visible : Visibility.Collapsed;
+
+    private bool _foldetUd;
+
+    /// <summary>Er beskrivelsen foldet ud lige nu?</summary>
+    public bool FoldetUd
+    {
+        get => _foldetUd;
+        set
+        {
+            if (_foldetUd == value) return;
+
+            _foldetUd = value;
+
+            Meld(nameof(FoldetUd));
+            Meld(nameof(Beskrivelsesvis));
+            Meld(nameof(Mereknap));
+        }
+    }
+
+    public Visibility Beskrivelsesvis =>
+        _foldetUd && _r.Opgave.HarMere ? Visibility.Visible : Visibility.Collapsed;
+
+    public string Mereknap => _foldetUd ? "Skjul" : "Mere";
+
     /// <summary>Mødets id — vejen tilbage til det, der blev sagt.</summary>
     public string MoedeId => _r.MoedeId;
 
@@ -1100,6 +1151,9 @@ public sealed class Opgavevisning : System.ComponentModel.INotifyPropertyChanged
     }
 
     public event System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
+
+    private void Meld(string navn) =>
+        PropertyChanged?.Invoke(this, new System.ComponentModel.PropertyChangedEventArgs(navn));
 }
 
 /// <summary>Ét søgeord og hvor meget der er af det. Til den tomme skærm.</summary>

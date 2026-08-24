@@ -241,6 +241,19 @@ public partial class SettingsView : UserControl
         public Visibility Forbundetvis => _o.ErForbundet ? Visibility.Visible : Visibility.Collapsed;
         public Visibility Forbindvis => _o.ErForbundet ? Visibility.Collapsed : Visibility.Visible;
 
+        /// <summary>
+        /// Må der aktiveres? Først når kvitteringen øverst er sat.
+        ///
+        /// Knappen er GRÅ og ikke skjult. En knap, der ikke er der, er der
+        /// ingen, der leder efter — og så finder man aldrig ud af, hvad der
+        /// mangler. En grå knap med et svar i sin tooltip er selv forklaringen.
+        /// </summary>
+        public bool MaaAktivere => AppSettings.Current.IntegrationerLaest;
+
+        public string Aktivertip => MaaAktivere
+            ? "Åbner en side hos leverandøren, hvor du logger ind og godkender"
+            : "Sæt hakket «Dette er læst og forstået» øverst først";
+
         public string Tilstand => !_i.Klar ? "KOMMER SENERE"
             : !Googleklient.ErSatOp ? "IKKE SLÅET TIL"
             : _o.ErForbundet ? "FORBUNDET"
@@ -279,9 +292,30 @@ public partial class SettingsView : UserControl
 
     private void VisIntegrationer()
     {
+        IntegrationerLaest.IsChecked = AppSettings.Current.IntegrationerLaest;
+
+        LaestNote.Visibility = AppSettings.Current.IntegrationerLaest
+            ? Visibility.Collapsed : Visibility.Visible;
+
         Integrationsliste.ItemsSource = Integrationer.Alle
             .Select(i => new Integrationsvisning(i, Integrationsfiler.Hent(i.Id)))
             .ToList();
+    }
+
+    /// <summary>
+    /// Kvitteringen for at have læst, hvad en integration betyder.
+    ///
+    /// Den låser Aktiver-knapperne op. Tages hakket af igen, låses de igen —
+    /// en forbindelse, der allerede står, bliver ikke afbrudt af det. Det ville
+    /// være at straffe nogen for at klikke forkert, og forbindelsen kan
+    /// afbrydes med den knap, der er sat i verden til det.
+    /// </summary>
+    private void IntegrationerLaest_Klik(object sender, RoutedEventArgs e)
+    {
+        AppSettings.Current.IntegrationerLaest = IntegrationerLaest.IsChecked == true;
+        AppSettings.Current.Save();
+
+        VisIntegrationer();
     }
 
     /// <summary>

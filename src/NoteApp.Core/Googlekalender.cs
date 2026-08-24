@@ -429,6 +429,76 @@ public static class Googlekalender
         return new Googlesvar(v, Moedelink(doc.RootElement), Tekst(doc.RootElement, "htmlLink"));
     }
 
+    /// <summary>
+    /// Lægger et Google Meet-link på en aftale, der allerede findes hos Google.
+    ///
+    /// Svarer med linket.
+    ///
+    /// DEN ÆNDRER INTET ANDET. Der sendes en PATCH med conferenceData og intet
+    /// andet felt — titel, tidspunkt, sted og deltagere er, som de var. En
+    /// hentet aftale hører hjemme hos Google, og appen skal ikke rette i den,
+    /// fordi nogen bad om et mødelink.
+    ///
+    /// conferenceDataVersion=1 skal med. Uden den bliver anmodningen tavst
+    /// ignoreret: Google svarer 200, aftalen er uændret, og der er ingen fejl
+    /// at gå efter.
+    /// </summary>
+    public static async Task<string> TilfoejMeetAsync(string fremmedId, string opdateringsnoegle,
+                                                      CancellationToken ct = default)
+    {
+        if (Googleklient.Hent() is not var (klientId, hemmelighed) || klientId.Length == 0)
+            throw new InvalidOperationException(Googleklient.Mangler);
+
+        if (string.IsNullOrWhiteSpace(fremmedId))
+            throw new InvalidOperationException(
+                "Aftalen findes ikke hos Google, så der kan ikke lægges et mødelink på den.");
+
+        var noegle = await FriskNoegle(klientId, hemmelighed, opdateringsnoegle, ct);
+
+        var krop = new Dictionary<string, object?>
+        {
+            ["conferenceData"] = new Dictionary<string, object?>
+            {
+                ["createRequest"] = new Dictionary<string, object?>
+                {
+                    ["requestId"] = Guid.NewGuid().ToString("N"),
+                    ["conferenceSolutionKey"] = new Dictionary<string, string>
+                    {
+                        ["type"] = "hangoutsMeet"
+                    }
+                }
+            }
+        };
+
+        var adresse = $"{Aftaler}/{Uri.EscapeDataString(fremmedId)}?conferenceDataVersion=1";
+
+        using var anmodning = new HttpRequestMessage(HttpMethod.Patch, adresse)
+        {
+            Content = new StringContent(JsonSerializer.Serialize(krop),
+                                        Encoding.UTF8, "application/json")
+        };
+
+        anmodning.Headers.Authorization = new("Bearer", noegle);
+
+        using var svar = await Http.SendAsync(anmodning, ct);
+        var tekst = await svar.Content.ReadAsStringAsync(ct);
+
+        if (!svar.IsSuccessStatusCode)
+            throw new InvalidOperationException($"Google svarede {(int)svar.StatusCode}. {Kort(tekst)}");
+
+        using var doc = JsonDocument.Parse(tekst);
+
+        var link = Moedelink(doc.RootElement);
+
+        if (link.Length == 0)
+            throw new InvalidOperationException(
+                "Google oprettede ikke et mødelokale. Det sker, hvis kontoen ikke " +
+                "har Google Meet, eller hvis aftalen ligger i en kalender, du ikke " +
+                "kan redigere.");
+
+        return link;
+    }
+
     private static List<Aftale> Laes(string json)
     {
         var ud = new List<Aftale>();

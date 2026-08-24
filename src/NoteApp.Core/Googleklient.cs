@@ -123,6 +123,20 @@ public static class Googleklient
         foreach (var f in fundne) yield return f;
     }
 
+    /// <summary>
+    /// Navnene skal matches UDEN hensyn til store og små bogstaver.
+    ///
+    /// System.Text.Json er versalfølsom som standard. Googles fil skriver
+    /// «installed» og «client_id»; egenskaberne hedder Installed og har et
+    /// JsonPropertyName. Uden det her blev filen læst uden en eneste fejl —
+    /// og hvert felt kom ud som null. Appen sagde så «ikke slået til» om en
+    /// fil, der lå lige der og var helt i orden. Fundet 24-08-2026.
+    /// </summary>
+    private static readonly JsonSerializerOptions Laesning = new()
+    {
+        PropertyNameCaseInsensitive = true
+    };
+
     private static (string, string)? Laes(string sti)
     {
         try
@@ -133,13 +147,13 @@ public static class Googleklient
 
             // Googles eget format foerst. Det er det, folk faktisk har paa
             // disken, og det kan kendes paa «installed».
-            var g = JsonSerializer.Deserialize<Googlefil>(tekst);
+            var g = JsonSerializer.Deserialize<Googlefil>(tekst, Laesning);
             var afsnit = g?.Installed ?? g?.Web;
 
             if (!string.IsNullOrWhiteSpace(afsnit?.ClientId))
                 return (afsnit.ClientId.Trim(), (afsnit.ClientSecret ?? "").Trim());
 
-            var f = JsonSerializer.Deserialize<Fil>(tekst);
+            var f = JsonSerializer.Deserialize<Fil>(tekst, Laesning);
 
             if (f is not null && !string.IsNullOrWhiteSpace(f.KlientId))
                 return (f.KlientId.Trim(), (f.Hemmelighed ?? "").Trim());
