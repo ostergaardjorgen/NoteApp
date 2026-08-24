@@ -28,6 +28,11 @@ public partial class App : Application
 
         DispatcherUnhandledException += VisFejl;
 
+        // Titellinjen paa ALLE vinduer - ogsaa dem, der endnu ikke findes.
+        // Skal staa foer det foerste vindue aabner; opsaetningsvinduet lige
+        // nedenfor er det foerste, og det skal ogsaa vaere moerkt.
+        Vinduesramme.SlaaTil();
+
         // Foerste start: hvor filerne skal ligge, og hentning af Whisper.
         // Uden motoren kan appen optage, men ikke skrive ud - og det opdager
         // man foerst efter det foerste moede, hvis der ikke spoerges her.
