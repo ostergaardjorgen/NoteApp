@@ -118,6 +118,18 @@
         <Border DockPanel.Dock="Left" Width="1" Margin="6,4,8,4"
                 Background="{StaticResource PanelKant}" />
 
+        <!-- RYD LYDEN PAA DEN ENE OPTAGELSE.
+             Et heldagsseminar fylder en halv gigabyte. Har man skrevet det ud
+             og laest teksten igennem, er der ingen grund til at vente et aar
+             paa den automatiske oprydning. Knappen staar KUN, naar der er en
+             udskrift og en lydfil - ellers er der ingenting at rydde. -->
+        <Button DockPanel.Dock="Left" x:Name="RydLydKnap" Style="{StaticResource IkonKnap}"
+                Click="RydLyd_Click" IsEnabled="False"
+                AutomationProperties.Name="Ryd lyden"
+                ToolTip="Slet lydfilerne, men behold transkriptionen">
+          <TextBlock Text="&#xEC4E;" FontFamily="Segoe MDL2 Assets" />
+        </Button>
+
         <Button DockPanel.Dock="Left" x:Name="SletKnap" Style="{StaticResource IkonKnapFare}"
                 Click="Slet_Click" IsEnabled="False" AutomationProperties.Name="Slet optagelse"
                 ToolTip="Slet optagelsen med lyd og transkription. Kan ikke fortrydes">

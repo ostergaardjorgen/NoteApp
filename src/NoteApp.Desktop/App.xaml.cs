@@ -28,6 +28,25 @@ public partial class App : Application
 
         DispatcherUnhandledException += VisFejl;
 
+        // LYDEN RYDDES OP VED OPSTART, ikke mens man arbejder.
+        //
+        // Det er den eneste stund, hvor ingenting er i gang: ingen optagelse,
+        // ingen udskrift, ingen aaben fil. En sletning midt i en arbejdsdag
+        // ville ramme netop den fil, der var i brug.
+        //
+        // Den siger ingenting. Et vindue ved opstart om noget, brugeren har
+        // besluttet én gang under Indstillinger, er stoej - og tallet staar
+        // paa Filer-fanen, naar man vil se det.
+        try
+        {
+            var dage = AppSettings.Current.SletLydEfterDage;
+            if (dage > 0) Lydoprydning.Ryd(dage);
+        }
+        catch (Exception)
+        {
+            // En oprydning maa aldrig kunne forhindre appen i at aabne.
+        }
+
         // Titellinjen paa ALLE vinduer - ogsaa dem, der endnu ikke findes.
         // Skal staa foer det foerste vindue aabner; opsaetningsvinduet lige
         // nedenfor er det foerste, og det skal ogsaa vaere moerkt.

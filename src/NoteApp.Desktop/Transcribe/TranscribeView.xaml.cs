@@ -695,6 +695,13 @@ public partial class TranscribeView : UserControl
     {
         var valgt = Valgt;
         KoerKnap.IsEnabled = valgt?.HarLyd == true && _afbryd is null;
+
+        // «Ryd lyden» kraever BEGGE dele: en lydfil at slette og en udskrift
+        // at beholde. Uden teksten er det ikke oprydning - saa er moedet vaek.
+        RydLydKnap.IsEnabled = valgt is { HarLyd: true }
+                            && _afbryd is null
+                            && Lydoprydning.Lydstoerrelse(valgt.Mappe) > 0
+                            && FindTekst(valgt.Mappe) is not null;
         AabnKnap.IsEnabled = valgt is not null;
         SletKnap.IsEnabled = valgt is not null && _afbryd is null;
 
@@ -1436,6 +1443,14 @@ public partial class TranscribeView : UserControl
             // Tilbuddet om et dokument står stadig — men som den anden knap.
             // Der spørges KUN, når der er en nøgle at gøre det med. Et tilbud,
             // der ender i «du mangler noget», er ikke et tilbud.
+            // ET LANGT MOEDE FYLDER NOK TIL AT VAERE VAERD AT TAGE STILLING
+            // TIL - og lige nu er det rigtige tidspunkt.
+            //
+            // Man har netop set teksten og kan bedoemme, om den er god nok.
+            // Et spoergsmaal en uge senere kan man ikke svare paa, og et
+            // spoergsmaal efter HVERT moede er en vane, ikke et samtykke.
+            SpoergOmLangLyd(valgt);
+
             // KOERSLEN ER SLUT HER, OG DET SKAL VAGTEN VIDE NU.
             //
             // Slut() laa i finally, altsaa EFTER dialogen nedenfor. Saa stod
@@ -1506,6 +1521,97 @@ public partial class TranscribeView : UserControl
             _afbryd = null;
             KoerKnap.IsEnabled = Valgt is { HarLyd: true };
         }
+    }
+
+    /// <summary>
+    /// Spørger, om lyden skal ryddes med det samme — kun på et langt møde.
+    ///
+    /// HVORFOR KUN DE LANGE
+    ///
+    /// Et almindeligt møde fylder ikke nok til at være værd at tage stilling
+    /// til. Et heldagsseminar fylder en halv gigabyte, og det er dét, man
+    /// opdager en dag, disken er fuld.
+    ///
+    /// Grænsen står under Indstillinger og er to timer som standard. Nul
+    /// betyder «spørg aldrig».
+    ///
+    /// DER SPØRGES IKKE, HVIS LYDEN ALLEREDE RYDDES OM KORT TID. Har man sat
+    /// fristen til tredive dage, er spørgsmålet overflødigt — og et
+    /// overflødigt spørgsmål er dét, der får folk til at klikke uden at læse.
+    /// </summary>
+    private void SpoergOmLangLyd(OptagelseVisning valgt)
+    {
+        var graense = AppSettings.Current.SpoergOmLydOverMinutter;
+        if (graense <= 0) return;
+
+        if (valgt.Sekunder < graense * 60) return;
+
+        var bytes = Lydoprydning.Lydstoerrelse(valgt.Mappe);
+        if (bytes == 0) return;
+
+        var frist = AppSettings.Current.SletLydEfterDage;
+        if (frist > 0 && frist <= 60) return;
+
+        var timer = TimeSpan.FromSeconds(valgt.Sekunder);
+
+        var ja = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
+            "Skal lyden ryddes nu?",
+            $"«{valgt.Titel}» varede {timer:h\\:mm} og fylder {Maal(bytes)} som lyd. "
+            + $"Transkriptionen fylder til sammenligning en brøkdel af det.\n\n"
+            + "Lyden bruges kun til at skrive optagelsen ud igen med en bedre model, "
+            + "køre talergenkendelsen om, eller høre efter om maskinen hørte rigtigt. "
+            + "Har du læst teksten igennem og er tilfreds, er der ingen grund til at "
+            + "beholde den.\n\n"
+            + "Teksten, dine noter og opgaverne bliver liggende uanset hvad.",
+            godkend: "Ryd lyden nu", annuller: "Behold den",
+            slags: Dialogs.Slags.Valg, godkendErStandard: false);
+
+        if (!ja) return;
+
+        var frigivet = Lydoprydning.RydEn(valgt.Mappe);
+        if (frigivet > 0) Status.Text = $"Lyden er ryddet — {Maal(frigivet)} frigivet.";
+    }
+
+    /// <summary>
+    /// Rydder lyden på den valgte optagelse. Teksten bliver.
+    ///
+    /// DER SPØRGES, OG DER STÅR HVOR MEGET DET FYLDER. Et tal er forskellen
+    /// på et valg og et klik — og sletningen kan ikke fortrydes.
+    /// </summary>
+    private void RydLyd_Click(object sender, RoutedEventArgs e)
+    {
+        if (Valgt is not { } valgt) return;
+
+        var bytes = Lydoprydning.Lydstoerrelse(valgt.Mappe);
+        if (bytes == 0) return;
+
+        var ja = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
+            $"Ryd lyden på «{valgt.Titel}»?",
+            $"Det frigiver {Maal(bytes)}. Transkriptionen, dine noter og opgaverne bliver liggende.\n\n"
+            + "Bagefter kan optagelsen ikke skrives ud igen, talergenkendelsen ikke køres om, "
+            + "og du kan ikke høre efter, om maskinen hørte rigtigt.\n\n"
+            + "Det kan ikke fortrydes.",
+            godkend: "Ryd lyden", annuller: "Behold den",
+            slags: Dialogs.Slags.Pas_paa, godkendErStandard: false);
+
+        if (!ja) return;
+
+        var frigivet = Lydoprydning.RydEn(valgt.Mappe);
+
+        Status.Text = frigivet > 0
+            ? $"Lyden er ryddet — {Maal(frigivet)} frigivet."
+            : "Lyden kunne ikke slettes. Er filen i brug?";
+
+        IndlaesOptagelser();
+        VisSeneste();
+    }
+
+    /// <summary>Bytes skrevet, som man ville sige det.</summary>
+    private static string Maal(long bytes)
+    {
+        if (bytes >= 1024L * 1024 * 1024) return $"{bytes / 1024.0 / 1024.0 / 1024.0:0.0} GB";
+        if (bytes >= 1024L * 1024) return $"{bytes / 1024.0 / 1024.0:0} MB";
+        return $"{bytes / 1024.0:0} KB";
     }
 
     private void VisResultat(TranscriptionResult r)

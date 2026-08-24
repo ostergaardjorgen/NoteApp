@@ -638,6 +638,162 @@
       <TabItem Header="Filer" Style="{StaticResource Fane}">
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
           <StackPanel>
+        <!-- ===================== Plads og lydfiler =========================
+
+             HVORFOR DEN HER SEKTION FINDES
+
+             En times moede fylder 220 MB som lyd og 56 KB som tekst. Efter et
+             aars brug er lyden titusind gange saa meget som det, man faktisk
+             slaar op i - og det er maalt, at lyden IKKE kan komprimeres uden
+             at oedelaegge udskriften af moeder med flere sprog (findings 9.2).
+             Saa er sletning det eneste haandtag, der er tilbage.
+
+             TALLENE STAAR FOERST OG VALGET BAGEFTER. Man kan ikke tage
+             stilling til, hvor laenge lyden skal blive liggende, uden at vide
+             hvad den fylder. -->
+        <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20" Margin="0,0,0,14"
+                BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+          <StackPanel>
+            <TextBlock Text="Plads og lydfiler" FontSize="15" FontWeight="SemiBold" />
+            <TextBlock FontSize="12.5" Margin="0,6,0,0" TextWrapping="Wrap" LineHeight="20"
+                       Foreground="{StaticResource TekstMeget}"
+                       Text="Lyden er det eneste i appen, der fylder noget. Teksten, dine noter, opgaverne og dokumenterne fylder tilsammen mindre end ét enkelt møde gør som lyd." />
+
+            <!-- BJAELKEN. Den siger paa ét blik, hvad disken gaar til:
+                 blaat er appens lyd, graat er alt det andet, moerkt er
+                 ledigt. -->
+            <Border CornerRadius="4" Height="26" Margin="0,16,0,0" Background="#FF181B22"
+                    BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+              <Grid>
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition x:Name="SoejleLyd" Width="0*" />
+                  <ColumnDefinition x:Name="SoejleAndet" Width="0*" />
+                  <ColumnDefinition x:Name="SoejleFri" Width="1*" />
+                </Grid.ColumnDefinitions>
+
+                <Border Grid.Column="0" Background="#FF5B9DF0" />
+                <Border Grid.Column="1" Background="#FF3A4150" />
+              </Grid>
+            </Border>
+
+            <Grid Margin="0,10,0,0">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+              </Grid.ColumnDefinitions>
+
+              <StackPanel Grid.Column="0">
+                <StackPanel Orientation="Horizontal">
+                  <Border Width="10" Height="10" CornerRadius="2" Background="#FF5B9DF0"
+                          VerticalAlignment="Center" Margin="0,0,7,0" />
+                  <TextBlock Text="LYDFILER" FontSize="9.5" FontWeight="SemiBold"
+                             VerticalAlignment="Center"
+                             Foreground="{StaticResource TekstMeget}" />
+                </StackPanel>
+                <TextBlock x:Name="PladsLyd" FontSize="17" FontWeight="SemiBold" Margin="0,4,0,0" />
+                <TextBlock x:Name="PladsLydUnder" FontSize="11" Margin="0,2,0,0"
+                           TextWrapping="Wrap" Foreground="{StaticResource TekstMeget}" />
+              </StackPanel>
+
+              <StackPanel Grid.Column="1">
+                <StackPanel Orientation="Horizontal">
+                  <Border Width="10" Height="10" CornerRadius="2" Background="#FF3A4150"
+                          VerticalAlignment="Center" Margin="0,0,7,0" />
+                  <TextBlock Text="ALT DET ANDET" FontSize="9.5" FontWeight="SemiBold"
+                             VerticalAlignment="Center"
+                             Foreground="{StaticResource TekstMeget}" />
+                </StackPanel>
+                <TextBlock x:Name="PladsBrugt" FontSize="17" FontWeight="SemiBold" Margin="0,4,0,0" />
+                <TextBlock x:Name="PladsBrugtUnder" FontSize="11" Margin="0,2,0,0"
+                           TextWrapping="Wrap" Foreground="{StaticResource TekstMeget}" />
+              </StackPanel>
+
+              <StackPanel Grid.Column="2">
+                <TextBlock Text="LEDIGT" FontSize="9.5" FontWeight="SemiBold"
+                           Foreground="{StaticResource TekstMeget}" />
+                <TextBlock x:Name="PladsFri" FontSize="17" FontWeight="SemiBold" Margin="0,4,0,0" />
+                <TextBlock x:Name="PladsFriUnder" FontSize="11" Margin="0,2,0,0"
+                           TextWrapping="Wrap" Foreground="{StaticResource TekstMeget}" />
+              </StackPanel>
+            </Grid>
+
+            <!-- ============ HVOR LAENGE LYDEN BLIVER LIGGENDE ============ -->
+            <Border Background="#FF181B22" BorderBrush="{StaticResource PanelKant}" BorderThickness="1"
+                    CornerRadius="8" Padding="14,12" Margin="0,18,0,0">
+              <StackPanel>
+                <TextBlock Text="Hvor længe lyden bliver liggende" FontSize="13" FontWeight="SemiBold" />
+                <TextBlock FontSize="12" Margin="0,6,0,0" TextWrapping="Wrap" LineHeight="19"
+                           Foreground="{StaticResource TekstSvag}"
+                           Text="Når en optagelse er skrevet ud, er det teksten, du bruger. Lyden kan ryddes efter et stykke tid — så beholder du mødet uden at beholde de 220 MB." />
+
+                <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                  <ComboBox x:Name="Lydfrist" Width="230" FontSize="12.5" Padding="8,5"
+                            SelectionChanged="Lydfrist_Valgt">
+                    <ComboBox.ItemTemplate>
+                      <DataTemplate><TextBlock Text="{Binding Navn}" /></DataTemplate>
+                    </ComboBox.ItemTemplate>
+                  </ComboBox>
+
+                  <Button x:Name="RydNuKnap" Content="Ryd nu" Click="RydLyd_Klik"
+                          Margin="10,0,0,0" Padding="14,6" FontSize="12"
+                          ToolTip="Rydder lyden på de optagelser, der allerede er ældre end fristen" />
+                </StackPanel>
+
+                <TextBlock x:Name="Lydfriststatus" FontSize="11.5" Margin="2,9,0,0"
+                           TextWrapping="Wrap" LineHeight="18"
+                           Foreground="{StaticResource TekstMeget}" />
+
+                <!-- SPOERGSMAALET EFTER ET LANGT MOEDE.
+                     Et almindeligt moede fylder ikke nok til at vaere vaerd at
+                     tage stilling til. Et heldagsseminar fylder en halv
+                     gigabyte, og det er dét, man opdager en dag, disken er
+                     fuld. Der spoerges KUN én gang, lige efter udskriften -
+                     dér, hvor man netop har set teksten. -->
+                <StackPanel Orientation="Horizontal" Margin="0,14,0,0">
+                  <TextBlock Text="Spørg efter møder over" FontSize="12.5"
+                             VerticalAlignment="Center" Margin="0,0,10,0"
+                             Foreground="{StaticResource TekstSvag}" />
+
+                  <ComboBox x:Name="Spoergegraense" Width="150" FontSize="12.5" Padding="8,5"
+                            SelectionChanged="Spoergegraense_Valgt">
+                    <ComboBox.ItemTemplate>
+                      <DataTemplate><TextBlock Text="{Binding Navn}" /></DataTemplate>
+                    </ComboBox.ItemTemplate>
+                  </ComboBox>
+                </StackPanel>
+
+                <TextBlock FontSize="11.5" Margin="2,7,0,0" TextWrapping="Wrap" LineHeight="18"
+                           Foreground="{StaticResource TekstMeget}"
+                           Text="Så snart et langt møde er skrevet ud, spørger appen, om lyden skal ryddes med det samme — og skriver, hvor meget den fylder. Du kan altid rydde en enkelt optagelse fra Optagelser-skærmen." />
+              </StackPanel>
+            </Border>
+
+            <!-- ============ HVAD DER GAAR TABT ============
+                 Den staar som en advarsel og ikke som en fodnote. En
+                 sletning, man fortryder om et aar, kan ikke goeres om. -->
+            <Border Background="#FF181B22" BorderBrush="{StaticResource Advarsel}"
+                    BorderThickness="3,0,0,0" CornerRadius="4" Padding="14,11" Margin="0,12,0,0">
+              <StackPanel>
+                <TextBlock Text="Det, du ikke kan bagefter" FontSize="12.5" FontWeight="SemiBold"
+                           Foreground="{StaticResource Advarsel}" />
+
+                <TextBlock FontSize="12" Margin="0,7,0,0" TextWrapping="Wrap" LineHeight="19"
+                           Foreground="{StaticResource Tekst}"
+                           Text="Skrive optagelsen ud igen med en bedre model. Køre talergenkendelsen om. Og høre efter, om maskinen hørte rigtigt — det er dét, der oftest er brug for, når et navn eller et fagord ser forkert ud." />
+
+                <TextBlock FontSize="12" Margin="0,8,0,0" TextWrapping="Wrap" LineHeight="19"
+                           Foreground="{StaticResource TekstMeget}"
+                           Text="At klikke på en sætning og høre den er ikke bygget endnu, men står på listen. Den kan kun bruges på optagelser, hvor lyden stadig er der — og det er grunden til, at standarden er et helt år og ikke en måned." />
+
+                <TextBlock FontSize="12" Margin="0,8,0,0" TextWrapping="Wrap" LineHeight="19"
+                           Foreground="{StaticResource TekstMeget}"
+                           Text="Teksten, dine noter, opgaverne og dokumenterne røres aldrig. Og en optagelse, der ikke er skrevet ud, ryddes aldrig — så ville der ikke være noget tilbage." />
+              </StackPanel>
+            </Border>
+          </StackPanel>
+        </Border>
+
         <!-- ========================== Datamappen =========================== -->
         <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20" Margin="0,0,0,14"
                 BorderBrush="{StaticResource PanelKant}" BorderThickness="1">

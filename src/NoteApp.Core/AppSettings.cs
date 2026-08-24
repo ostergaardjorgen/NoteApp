@@ -260,6 +260,43 @@ public sealed class AppSettings
     /// </summary>
     public string OptagenoteEn { get; set; } = "";
 
+    /// <summary>
+    /// Hvor mange dage efter udskriften lydfilen ryddes. 0 = aldrig.
+    ///
+    /// ET ÅR SOM STANDARD, og det er et bevidst langt tal.
+    ///
+    /// Lyden fylder titusind gange så meget som teksten, og den kan ikke
+    /// komprimeres uden at ødelægge udskriften af møder med flere sprog — se
+    /// findings 9.2. Så er sletning det eneste håndtag, der er tilbage.
+    ///
+    /// Men uden lyden kan man ikke skrive optagelsen ud igen med en bedre
+    /// model, ikke køre talergenkendelsen om, og ikke høre efter, om maskinen
+    /// hørte rigtigt. Det sidste er ikke bygget endnu — at klikke på en
+    /// sætning og høre den — og det er netop dét, der bliver umuligt for
+    /// gamle optagelser, hvis lyden er væk.
+    ///
+    /// Et år er langt nok til, at man har brugt mødet færdigt, og kort nok
+    /// til, at disken ikke løber fuld af noget, ingen åbner.
+    ///
+    /// NUL BETYDER «LAD VÆRE» — ikke «med det samme». Et felt, hvor en tom
+    /// værdi sletter alt, er en fælde.
+    /// </summary>
+    public int SletLydEfterDage { get; set; } = 365;
+
+    /// <summary>
+    /// Hvor langt et møde skal være, før appen spørger om at rydde lyden med
+    /// det samme. Minutter. 0 = spørg aldrig.
+    ///
+    /// TO TIMER SOM STANDARD. Et almindeligt møde fylder ikke nok til at være
+    /// værd at tage stilling til; et heldagsseminar fylder en halv gigabyte,
+    /// og det er dét, man opdager en dag, disken er fuld.
+    ///
+    /// Der spørges KUN én gang, lige efter udskriften — dér, hvor man netop
+    /// har set teksten og kan bedømme, om den er god nok. Et spørgsmål, der
+    /// kommer en uge senere, kan man ikke svare på.
+    /// </summary>
+    public int SpoergOmLydOverMinutter { get; set; } = 120;
+
     private static string Path => System.IO.Path.Combine(UserDataPaths.Root, "indstillinger.json");
 
     private static AppSettings? _current;

@@ -30,6 +30,7 @@ try
         "google"    => await Google(args.Skip(1).ToArray()),
         "opgaver"   => Opgaver(),
         "lydproeve" => Lydproeve(args.Skip(1).ToArray()),
+        "plads"     => Plads(args.Skip(1).ToArray()),
         "recover"   => Genopret(),
         "hjaelp" or "--help" or "-h" => Hjælp(),
         _ => Ukendt(kommando)
@@ -59,6 +60,8 @@ static int Hjælp()
           opgaver   Viser alle opgaver og hvor de kom fra
           lydproeve Komprimerer en optagelse og pakker den ud igen:
                       noteapp lydproeve <wav> [kbit ...]
+          plads     Viser hvad lyden fylder, og hvad der kan ryddes:
+                      noteapp plads [--ryd] [--dage N]
           udkast    Laver et referat med en lokal model — intet forlader maskinen
           sky       Laver et referat hos en europæisk leverandør:
                       SENDER UDSKRIFTEN UD AF MASKINEN. Se «noteapp sky».
@@ -1605,4 +1608,57 @@ static string? Valgtsprog(string? mappe)
         // at afvise at skrive ud.
         return null;
     }
+}
+
+
+// ----------------------------------------------------------------- plads
+//
+// Efterproever pladsopgoerelsen og oprydningen UDEN at slette noget.
+//
+// Den findes, fordi et tal paa en skaerm ikke er efterproevet, bare fordi det
+// staar der. Her kan det holdes op mod, hvad der faktisk ligger paa disken.
+static int Plads(string[] a)
+{
+    var ryd = a.Contains("--ryd");
+    var dage = 365;
+
+    var i = Array.IndexOf(a, "--dage");
+    if (i >= 0 && i + 1 < a.Length && int.TryParse(a[i + 1], out var d)) dage = d;
+
+    var o = Lydoprydning.Opgoer();
+
+    Console.WriteLine();
+    Console.WriteLine($"Drev      : {o.DrevNavn}");
+    Console.WriteLine($"I alt     : {o.IAltGb:0.0} GB");
+    Console.WriteLine($"Brugt     : {o.BrugtGb:0.0} GB  ({100 - o.FriAndel:0} %)");
+    Console.WriteLine($"Ledigt    : {o.FritGb:0.0} GB  ({o.FriAndel:0} %)");
+    Console.WriteLine();
+    Console.WriteLine($"Lydfiler  : {o.LydGb:0.00} GB i {o.LydFiler} filer");
+    Console.WriteLine($"            {o.LydAndelAfDisk:0.00} % af disken · {o.LydAndelAfBrugt:0.00} % af det brugte");
+    Console.WriteLine($"Resten    : {o.RestBytes / 1024.0 / 1024.0:0.0} MB tekst, dokumenter og modeller");
+    Console.WriteLine();
+
+    foreach (var n in new[] { 30, 90, 180, 365, 730 })
+    {
+        var k = Lydoprydning.Kandidater(n);
+        var b = k.Sum(x => x.Bytes) / 1024.0 / 1024.0;
+
+        Console.WriteLine($"  efter {n,4} dage:  {k.Count,3} optagelse(r)  ·  {b,8:0.0} MB");
+    }
+
+    Console.WriteLine();
+
+    if (!ryd)
+    {
+        Console.WriteLine("Der er ikke slettet noget. Det her er kun en opgoerelse.");
+        Console.WriteLine("Tilfoej --ryd [--dage N] for at rydde. Standard er 365 dage.");
+        return 0;
+    }
+
+    var (filer, bytes) = Lydoprydning.Ryd(dage);
+
+    Console.WriteLine($"RYDDET: {filer} lydfil(er), {bytes / 1024.0 / 1024.0:0.0} MB frigivet " +
+                      $"paa optagelser aeldre end {dage} dage.");
+
+    return 0;
 }

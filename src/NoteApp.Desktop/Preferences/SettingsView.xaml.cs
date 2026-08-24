@@ -41,7 +41,7 @@ public partial class SettingsView : UserControl
         _timer = new DispatcherTimer(DispatcherPriority.Background) { Interval = TimeSpan.FromMilliseconds(100) };
         _timer.Tick += (_, _) => OpdaterMaalere();
 
-        Loaded += (_, _) => { Indlaes(); VisAutostart(); OpdaterFiler(); VisKrav(); };
+        Loaded += (_, _) => { Indlaes(); VisAutostart(); OpdaterFiler(); VisKrav(); VisPlads(); };
         Unloaded += (_, _) => { _timer.Stop(); StopProber(); AfbrydTest(); };
     }
 
@@ -312,6 +312,179 @@ public partial class SettingsView : UserControl
     /// være at straffe nogen for at klikke forkert, og forbindelsen kan
     /// afbrydes med den knap, der er sat i verden til det.
     /// </summary>
+    // ------------------------------------------------- plads og lydfiler
+
+    /// <summary>Ét valg i rullelisten over, hvor længe lyden bliver liggende.</summary>
+    private sealed record Fristvalg(string Navn, int Dage);
+
+    private bool _fylderFrist;
+
+    /// <summary>
+    /// Pladsen, som den ser ud lige nu — og hvad lyden fylder af den.
+    ///
+    /// TALLENE LÆSES FRA DISKEN HVER GANG. Et regnskab, der holdes ved lige,
+    /// kommer ud af trit med virkeligheden, og det her tal er præcis dét, man
+    /// åbner skærmen for at få at vide.
+    /// </summary>
+    private void VisPlads()
+    {
+        Pladsopgoerelse o;
+        try { o = Lydoprydning.Opgoer(); }
+        catch (Exception) { return; }
+
+        PladsLyd.Text = Maal(o.LydBytes);
+        PladsLydUnder.Text = o.LydFiler == 0
+            ? "Ingen lydfiler endnu."
+            : $"{o.LydFiler} filer · {o.LydAndelAfDisk:0.0} % af disken";
+
+        PladsBrugt.Text = $"{o.BrugtGb - o.LydGb:0.0} GB";
+        PladsBrugtUnder.Text = $"Windows, dine programmer og NoteApps tekst " +
+                               $"({Maal(o.RestBytes)})";
+
+        PladsFri.Text = $"{o.FritGb:0.0} GB";
+        PladsFriUnder.Text = $"{o.FriAndel:0} % af {o.IAltGb:0} GB på {o.DrevNavn}";
+
+        // Soejlen. Nul-bredde paa en stjerne er lovligt og betyder «ingenting».
+        SoejleLyd.Width = new GridLength(Math.Max(0, o.LydBytes), GridUnitType.Star);
+        SoejleAndet.Width = new GridLength(Math.Max(0, o.DrevIAlt - o.DrevFrit - o.LydBytes), GridUnitType.Star);
+        SoejleFri.Width = new GridLength(Math.Max(1, o.DrevFrit), GridUnitType.Star);
+
+        VisFrist();
+        VisSpoergegraense();
+    }
+
+    private static string Maal(long bytes)
+    {
+        if (bytes >= 1024L * 1024 * 1024) return $"{bytes / 1024.0 / 1024.0 / 1024.0:0.0} GB";
+        if (bytes >= 1024L * 1024) return $"{bytes / 1024.0 / 1024.0:0} MB";
+        return $"{bytes / 1024.0:0} KB";
+    }
+
+    /// <summary>
+    /// Fristvalget og hvad det ville rydde lige nu.
+    ///
+    /// DER STÅR, HVAD DET VILLE KOSTE — ikke bare hvad valget hedder. «Efter
+    /// et år» siger ingenting; «rydder 3 optagelser og frigiver 1,2 GB» er et
+    /// tal, man kan tage stilling til.
+    /// </summary>
+    private void VisFrist()
+    {
+        var valg = new[]
+        {
+            new Fristvalg("Ryd aldrig — behold lyden", 0),
+            new Fristvalg("Efter 30 dage", 30),
+            new Fristvalg("Efter 90 dage", 90),
+            new Fristvalg("Efter 180 dage", 180),
+            new Fristvalg("Efter 1 år (standard)", 365),
+            new Fristvalg("Efter 2 år", 730)
+        };
+
+        var dage = AppSettings.Current.SletLydEfterDage;
+
+        _fylderFrist = true;
+        Lydfrist.ItemsSource = valg;
+        Lydfrist.SelectedItem = valg.FirstOrDefault(v => v.Dage == dage) ?? valg[4];
+        _fylderFrist = false;
+
+        List<Lydkandidat> klar;
+        try { klar = Lydoprydning.Kandidater(dage); }
+        catch (Exception) { klar = new List<Lydkandidat>(); }
+
+        var bytes = klar.Sum(k => k.Bytes);
+
+        RydNuKnap.IsEnabled = klar.Count > 0;
+
+        Lydfriststatus.Text = dage <= 0
+            ? "Lyden bliver liggende, indtil du selv sletter den. Du kan altid rydde en enkelt optagelse fra Optagelser-skærmen."
+            : klar.Count == 0
+                ? $"Ingen optagelser er ældre end {dage} dage endnu. Der ryddes automatisk, når appen åbnes."
+                : $"{klar.Count} optagelse(r) er klar til at blive ryddet — det ville frigive {Maal(bytes)}. Det sker af sig selv, næste gang appen åbnes.";
+    }
+
+    /// <summary>Hvornår et møde er langt nok til, at der spørges.</summary>
+    private void VisSpoergegraense()
+    {
+        var valg = new[]
+        {
+            new Fristvalg("Spørg aldrig", 0),
+            new Fristvalg("1 time", 60),
+            new Fristvalg("2 timer (standard)", 120),
+            new Fristvalg("3 timer", 180),
+            new Fristvalg("4 timer", 240)
+        };
+
+        var m = AppSettings.Current.SpoergOmLydOverMinutter;
+
+        _fylderFrist = true;
+        Spoergegraense.ItemsSource = valg;
+        Spoergegraense.SelectedItem = valg.FirstOrDefault(v => v.Dage == m) ?? valg[2];
+        _fylderFrist = false;
+    }
+
+    private void Spoergegraense_Valgt(object sender, SelectionChangedEventArgs e)
+    {
+        if (_fylderFrist || Spoergegraense.SelectedItem is not Fristvalg v) return;
+
+        AppSettings.Current.SpoergOmLydOverMinutter = v.Dage;
+        AppSettings.Current.Save();
+
+        Status.Text = v.Dage <= 0
+            ? "Der spørges ikke om lyden efter en udskrift."
+            : $"Der spørges efter møder over {v.Dage} minutter.";
+    }
+
+    private void Lydfrist_Valgt(object sender, SelectionChangedEventArgs e)
+    {
+        if (_fylderFrist || Lydfrist.SelectedItem is not Fristvalg v) return;
+
+        AppSettings.Current.SletLydEfterDage = v.Dage;
+        AppSettings.Current.Save();
+
+        VisFrist();
+
+        Status.Text = v.Dage <= 0
+            ? "Lydfiler bliver liggende."
+            : $"Lydfiler ryddes {v.Dage} dage efter, optagelsen er skrevet ud.";
+    }
+
+    /// <summary>
+    /// Rydder nu, i stedet for at vente til næste opstart.
+    ///
+    /// DER SPØRGES, OG DER STÅR HVOR MEGET. Sletningen kan ikke fortrydes, og
+    /// et tal er forskellen på et valg og et klik.
+    /// </summary>
+    private void RydLyd_Klik(object sender, RoutedEventArgs e)
+    {
+        var dage = AppSettings.Current.SletLydEfterDage;
+
+        List<Lydkandidat> klar;
+        try { klar = Lydoprydning.Kandidater(dage); }
+        catch (Exception) { return; }
+
+        if (klar.Count == 0) return;
+
+        var bytes = klar.Sum(k => k.Bytes);
+
+        var ja = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
+            $"Ryd lyden på {klar.Count} optagelse(r)?",
+            $"Det frigiver {Maal(bytes)}.\n\n" +
+            "Teksten, dine noter, opgaverne og dokumenterne bliver liggende. " +
+            "Det, du ikke kan bagefter, er at skrive optagelsen ud igen, køre " +
+            "talergenkendelsen om eller høre efter, om maskinen hørte rigtigt.\n\n" +
+            "Det kan ikke fortrydes.",
+            godkend: "Ryd lyden", annuller: "Behold den",
+            slags: Dialogs.Slags.Pas_paa, godkendErStandard: false);
+
+        if (!ja) return;
+
+        var (filer, frigivet) = Lydoprydning.Ryd(dage);
+
+        Status.Text = $"{filer} lydfil(er) ryddet — {Maal(frigivet)} frigivet.";
+
+        VisPlads();
+        OpdaterFiler();
+    }
+
     // ------------------------------------------------- krav til maskinen
 
     /// <summary>Ét krav, som listen viser det — med farven på den her maskines svar.</summary>
