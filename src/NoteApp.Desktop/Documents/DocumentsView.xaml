@@ -88,6 +88,12 @@
         <ColumnDefinition Width="225" />
         <ColumnDefinition Width="Auto" />
         <ColumnDefinition Width="*" />
+        <ColumnDefinition Width="12" />
+        <!-- SENESTE DOKUMENTER. Samme form og samme bredde som «Seneste
+             optagelser» paa Optagelser-skaermen. To paneler, der goer det
+             samme, skal se ens ud - ellers skal man laere skaermene hver for
+             sig. -->
+        <ColumnDefinition Width="260" />
       </Grid.ColumnDefinitions>
 
       <Border Grid.Column="0" Background="{StaticResource Panel}" CornerRadius="10"
@@ -379,6 +385,62 @@
             </StackPanel>
           </ScrollViewer>
         </Grid>
+      </Border>
+
+      <!-- ==================== SENESTE DOKUMENTER ======================
+
+           Det, der lige er lavet, staar oeverst. Et dokument bliver laest kort
+           efter, det er skrevet - og saa er det ikke i traeet, man leder, men
+           efter «den dér, jeg lige lavede». -->
+      <Border Grid.Column="4" Background="{StaticResource Panel}" CornerRadius="10"
+              BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+        <DockPanel>
+          <TextBlock DockPanel.Dock="Top" Text="SENESTE DOKUMENTER" FontSize="10"
+                     FontWeight="SemiBold" Margin="14,13,14,8"
+                     Foreground="{StaticResource TekstMeget}" />
+
+          <ScrollViewer Padding="7,0,7,10" VerticalScrollBarVisibility="Auto"
+                        HorizontalScrollBarVisibility="Disabled">
+            <StackPanel>
+              <ItemsControl x:Name="Senesterude">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate>
+                    <Button Tag="{Binding}" Click="Seneste_Klik" Cursor="Hand"
+                            HorizontalContentAlignment="Stretch" Margin="0,0,0,5"
+                            BorderThickness="0" Padding="0" Background="Transparent">
+                      <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                          <Border x:Name="kort" Background="#FF181B22" CornerRadius="6"
+                                  BorderBrush="#FFC98CF0" BorderThickness="3,0,0,0"
+                                  Padding="11,8">
+                            <ContentPresenter />
+                          </Border>
+                          <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                              <Setter TargetName="kort" Property="Background" Value="#FF2C323D" />
+                            </Trigger>
+                          </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                      </Button.Template>
+
+                      <StackPanel>
+                        <TextBlock Text="{Binding Titel}" FontSize="12" TextWrapping="Wrap"
+                                   Foreground="{StaticResource Tekst}" />
+                        <TextBlock Text="{Binding Under}" FontSize="10.5" Margin="0,3,0,0"
+                                   TextWrapping="Wrap" Foreground="{StaticResource TekstMeget}" />
+                      </StackPanel>
+                    </Button>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+
+              <TextBlock x:Name="IngenSeneste" FontSize="12" Margin="4,6,4,0"
+                         TextWrapping="Wrap" LineHeight="18" Visibility="Collapsed"
+                         Foreground="{StaticResource TekstSvag}"
+                         Text="Der er ikke lavet dokumenter endnu. Vælg en optagelse under Optagelser og tryk «Opret dokument»." />
+            </StackPanel>
+          </ScrollViewer>
+        </DockPanel>
       </Border>
     </Grid>
   </Grid>

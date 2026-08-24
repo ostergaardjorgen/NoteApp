@@ -188,6 +188,7 @@ public partial class TranscribeView : UserControl
     {
         InitializeComponent();
         IndlaesOptagelser();
+        VisSeneste();
 
         if (aabnMappe is null) return;
 
@@ -1691,5 +1692,90 @@ public partial class TranscribeView : UserControl
         var mappe = _sidsteMappe ?? Valgt?.Mappe;
         if (mappe is null) return;
         Process.Start(new ProcessStartInfo("explorer.exe", $"\"{mappe}\"") { UseShellExecute = true });
+    }
+
+    // --------------------------------------------------- seneste optagelser
+
+    /// <summary>Én optagelse i panelet til højre.</summary>
+    public sealed record Senestevisning(string Titel, string Under, string Id,
+                                        System.Windows.Media.Brush Kant);
+
+    /// <summary>
+    /// De nyeste optagelser og deres tilstand.
+    ///
+    /// HVORFOR DE STÅR HER
+    ///
+    /// En optagelse, der aldrig blev skrevet ud, er et hul i arkivet — og det
+    /// opdager man ikke ved at lede efter det. Den står her med en gul kant, så
+    /// hullet kan ses uden at lede efter det.
+    ///
+    /// Kun de seks nyeste. Listen er en påmindelse, ikke et arkiv; hele
+    /// arkivet står i træet til venstre.
+    /// </summary>
+    private void VisSeneste()
+    {
+        List<Senestevisning> liste;
+
+        try
+        {
+            liste = MeetingStore.Alle()
+                .OrderByDescending(m => m.StartedAt)
+                .Take(6)
+                .Select(m =>
+                {
+                    var mappe = MeetingStore.FindById(m.Id.ToString())?.Mappe;
+
+                    var skrevet = mappe is not null
+                                  && System.IO.Directory.GetFiles(mappe, "udskrift_*.txt").Length > 0;
+
+                    var laengde = TimeSpan.FromSeconds(m.DurationSeconds);
+
+                    var under = $"{m.StartedAt.LocalDateTime:dd-MM HH:mm}" +
+                                (m.DurationSeconds > 0
+                                    ? $"  ·  {(laengde.TotalHours >= 1 ? laengde.ToString(@"h\:mm\:ss") : laengde.ToString(@"mm\:ss"))}"
+                                    : "") +
+                                (skrevet ? "" : "  ·  ikke skrevet ud");
+
+                    return new Senestevisning(
+                        m.Title ?? "Uden navn",
+                        under,
+                        m.Id.ToString(),
+                        (System.Windows.Media.Brush)new System.Windows.Media.BrushConverter().ConvertFrom(skrevet ? "#FF3A4150" : "#FFE8A33D")!);
+                })
+                .ToList();
+        }
+        catch (Exception)
+        {
+            liste = new List<Senestevisning>();
+        }
+
+        Senesterude.ItemsSource = liste;
+        IngenOptagelser.Visibility = liste.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    /// <summary>
+    /// Vælger optagelsen i træet.
+    ///
+    /// DER BYGGES IKKE EN NY SKÆRM. I Cockpittet gik det gennem
+    /// MainWindow.GaaTilOptagelse, fordi man skulle et andet sted hen. Her ER
+    /// vi på skærmen, og at bygge den forfra ville nulstille træets foldede
+    /// grene og rulle listen op — for at lande på noget, der lå ét klik væk.
+    /// </summary>
+    private void Seneste_Klik(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button b || b.Tag is not Senestevisning v) return;
+
+        string? mappe = null;
+        try { mappe = MeetingStore.FindById(v.Id)?.Mappe; } catch (Exception) { }
+
+        if (mappe is null)
+        {
+            // Slettet uden for appen, mens skaermen stod aaben. Listen laeses
+            // forfra, saa den holder op med at love noget, der ikke er der.
+            VisSeneste();
+            return;
+        }
+
+        VaelgOptagelse(mappe);
     }
 }

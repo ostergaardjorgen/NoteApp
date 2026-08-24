@@ -151,7 +151,6 @@ public partial class SearchView : UserControl
         {
             FyldFiltre();
             VisOpgaver();
-            VisSeneste();
             VisKalender();
 
             if (start is { Length: > 0 })
@@ -199,72 +198,6 @@ public partial class SearchView : UserControl
         // Fokus tilbage i feltet. Man rydder for at skrive noget andet, ikke
         // for at holde op med at soege.
         Felt.Focus();
-    }
-
-    // --------------------------------------------------- seneste optagelser
-
-    /// <summary>Én optagelse i venstre spalte.</summary>
-    public sealed record Senestevisning(string Titel, string Under, string Id, Brush Kant);
-
-    /// <summary>
-    /// De nyeste optagelser og deres tilstand.
-    ///
-    /// HVORFOR DE STÅR I COCKPITTET
-    ///
-    /// En optagelse, der aldrig blev skrevet ud, er et hul i arkivet — og det
-    /// opdager man ikke ved at lede efter det. Den står her med en gul kant,
-    /// så det kan ses uden at skifte skærm.
-    ///
-    /// Kun de seks nyeste. Listen er en påmindelse, ikke et arkiv; hele
-    /// arkivet ligger under Optagelser.
-    /// </summary>
-    private void VisSeneste()
-    {
-        List<Senestevisning> liste;
-
-        try
-        {
-            liste = MeetingStore.Alle()
-                .OrderByDescending(m => m.StartedAt)
-                .Take(6)
-                .Select(m =>
-                {
-                    var mappe = MeetingStore.FindById(m.Id.ToString())?.Mappe;
-
-                    var skrevet = mappe is not null
-                                  && System.IO.Directory.GetFiles(mappe, "udskrift_*.txt").Length > 0;
-
-                    var laengde = TimeSpan.FromSeconds(m.DurationSeconds);
-
-                    var under = $"{m.StartedAt.LocalDateTime:dd-MM HH:mm}" +
-                                (m.DurationSeconds > 0
-                                    ? $"  ·  {(laengde.TotalHours >= 1 ? laengde.ToString(@"h\:mm\:ss") : laengde.ToString(@"mm\:ss"))}"
-                                    : "") +
-                                (skrevet ? "" : "  ·  ikke skrevet ud");
-
-                    return new Senestevisning(
-                        m.Title ?? "Uden navn",
-                        under,
-                        m.Id.ToString(),
-                        (Brush)new BrushConverter().ConvertFrom(skrevet ? "#FF3A4150" : "#FFE8A33D")!);
-                })
-                .ToList();
-        }
-        catch (Exception)
-        {
-            liste = new List<Senestevisning>();
-        }
-
-        Senesterude.ItemsSource = liste;
-        IngenOptagelser.Visibility = liste.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
-    }
-
-    private void Seneste_Klik(object sender, RoutedEventArgs e)
-    {
-        if (sender is not Button b || b.Tag is not Senestevisning v) return;
-        if (Window.GetWindow(this) is not MainWindow hoved) return;
-
-        hoved.GaaTilOptagelse(v.Id);
     }
 
     // -------------------------------------------------------------- kalenderen

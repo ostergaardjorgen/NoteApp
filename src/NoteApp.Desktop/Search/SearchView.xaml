@@ -193,61 +193,95 @@
         <ColumnDefinition Width="340" />
       </Grid.ColumnDefinitions>
 
-      <!-- ============ VENSTRE: DET, DER LIGE ER SKET ============
-           En optagelse, der aldrig blev skrevet ud, er et hul i arkivet - og
-           det opdager man ikke ved at lede efter det. Her staar de nyeste med
-           deres tilstand, saa det kan ses uden at skifte skaerm. -->
-      <Border Grid.Column="0" Background="{StaticResource Panel}" CornerRadius="10"
-              BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
-        <DockPanel>
-          <TextBlock DockPanel.Dock="Top" Text="SENESTE OPTAGELSER" FontSize="10"
-                     FontWeight="SemiBold" Margin="14,13,14,8"
-                     Foreground="{StaticResource TekstMeget}" />
+      <!-- ============ VENSTRE: DET, DER SKAL SKE ============
 
-          <ScrollViewer Padding="7,0,7,10" VerticalScrollBarVisibility="Auto"
-                        HorizontalScrollBarVisibility="Disabled">
-            <StackPanel>
-              <ItemsControl x:Name="Senesterude">
-                <ItemsControl.ItemTemplate>
-                  <DataTemplate>
-                    <Button Tag="{Binding}" Click="Seneste_Klik" Cursor="Hand"
-                            HorizontalContentAlignment="Stretch" Margin="0,0,0,5"
-                            BorderThickness="0" Padding="0" Background="Transparent">
-                      <Button.Template>
-                        <ControlTemplate TargetType="Button">
-                          <Border x:Name="kort" Background="#FF181B22" CornerRadius="6"
-                                  BorderBrush="{Binding Kant}" BorderThickness="3,0,0,0"
-                                  Padding="11,8">
-                            <ContentPresenter />
-                          </Border>
-                          <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                              <Setter TargetName="kort" Property="Background" Value="#FF2C323D" />
-                            </Trigger>
-                          </ControlTemplate.Triggers>
-                        </ControlTemplate>
-                      </Button.Template>
+           KALENDEREN STAAR TIL VENSTRE, fordi den laeses foerst. Dagen
+           begynder med «hvad sker der i dag», ikke med «hvad lavede jeg
+           sidst» - og en aftale er det eneste her, der har et klokkeslaet,
+           man kan naa at komme for sent til.
 
-                      <StackPanel>
-                        <TextBlock Text="{Binding Titel}" FontSize="12" TextWrapping="Wrap"
-                                   Foreground="{StaticResource Tekst}" />
+           «Seneste optagelser» stod her og er flyttet til Optagelser-
+           skaermen. Den hoerer hjemme dér, hvor man arbejder med optagelser,
+           og den fyldte den plads, kalenderen har brug for.
+
+           Aftalerne kommer fra appens egen kalender OG fra dem, der er hentet
+           ind. De staar i én liste - hvem der har lagt dem ind, er ikke det,
+           man leder efter, naar man skal optage om fem minutter. -->
+        <!-- ============ KALENDEREN ============
+
+             Den staar UNDER opgaverne og ikke over. Opgaverne er det, der
+             skal goeres; kalenderen er det, der skal ske. Det foerste kan man
+             handle paa lige nu, det andet venter paa et klokkeslaet.
+
+             Aftalerne kommer fra appens egen kalender OG fra dem, der er
+             hentet ind. De staar i én liste - hvem der har lagt dem ind, er
+             ikke det, man leder efter, naar man skal optage om fem minutter. -->
+        <Border Grid.Column="0" Background="{StaticResource Panel}" CornerRadius="10"
+                BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+          <DockPanel>
+            <Grid DockPanel.Dock="Top" Margin="14,13,14,8">
+              <TextBlock x:Name="Kalenderoverskrift" FontSize="13" FontWeight="SemiBold"
+                         VerticalAlignment="Center" />
+              <Button Content="Ny aftale" Click="NyAftale_Klik" HorizontalAlignment="Right"
+                      VerticalAlignment="Center" Padding="10,3" FontSize="11" />
+            </Grid>
+
+            <ScrollViewer VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled">
+              <StackPanel>
+            <ItemsControl x:Name="Kalenderrude" Margin="7,0,7,10">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <Border Background="#FF181B22" BorderBrush="{Binding Kant}"
+                          BorderThickness="3,0,0,0" CornerRadius="6"
+                          Padding="11,8" Margin="0,0,0,5">
+                    <Grid>
+                      <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                      </Grid.ColumnDefinitions>
+
+                      <TextBlock Grid.Column="0" Text="{Binding Klokken}" FontSize="12"
+                                 FontFamily="Consolas" VerticalAlignment="Top"
+                                 Margin="0,1,10,0" Foreground="{Binding Kant}" />
+
+                      <StackPanel Grid.Column="1">
+                        <!-- Titlen aabner aftalen. En aftale, man ikke kan
+                             rette, er en aftale, man sletter og laver om. -->
+                        <Button Tag="{Binding}" Click="RetAftale_Klik" Cursor="Hand"
+                                HorizontalAlignment="Left" Padding="0" BorderThickness="0"
+                                Background="Transparent"
+                                ToolTip="Ret aftalen">
+                          <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                              <TextBlock Text="{Binding Titel}" FontSize="12" TextWrapping="Wrap"
+                                         Foreground="{StaticResource Tekst}" />
+                            </ControlTemplate>
+                          </Button.Template>
+                        </Button>
                         <TextBlock Text="{Binding Under}" FontSize="10.5" Margin="0,3,0,0"
                                    TextWrapping="Wrap" Foreground="{StaticResource TekstMeget}" />
                       </StackPanel>
-                    </Button>
-                  </DataTemplate>
-                </ItemsControl.ItemTemplate>
-              </ItemsControl>
 
-              <TextBlock x:Name="IngenOptagelser" FontSize="12" Margin="4,6,4,0"
-                         TextWrapping="Wrap" LineHeight="18" Visibility="Collapsed"
-                         Foreground="{StaticResource TekstSvag}"
-                         Text="Der er ikke optaget noget endnu. Tryk «Optag møde» eller «Webinar» øverst." />
-            </StackPanel>
-          </ScrollViewer>
-        </DockPanel>
-      </Border>
+                      <Button Grid.Column="2" Content="{Binding Knap}" Tag="{Binding}"
+                              Click="Aftale_Klik" VerticalAlignment="Top" Margin="8,0,0,0"
+                              Padding="10,4" FontSize="11"
+                              ToolTip="{Binding Knaptip}" />
+                    </Grid>
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
 
+            <TextBlock x:Name="IngenAftaler" FontSize="11.5" Margin="14,0,14,14"
+                       TextWrapping="Wrap" LineHeight="18" Visibility="Collapsed"
+                       Foreground="{StaticResource TekstSvag}"
+                       Text="Ingen aftaler i kalenderen. Opret en her — eller forbind Google Kalender under Indstillinger, så bliver de hentet ind af sig selv." />
+              </StackPanel>
+            </ScrollViewer>
+          </DockPanel>
+        </Border>
       <!-- ============ MIDTEN: SØGNINGEN ============ -->
       <Border Grid.Column="2" Background="{StaticResource Panel}" CornerRadius="10"
               BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
@@ -456,16 +490,12 @@
       </Border>
 
       <!-- ============ HØJRE: DET, DER SKAL GØRES ============
-           Opgaverne oeverst, kalenderen nedenunder. De to hoerer sammen:
-           den ene er hvad, den anden er hvornaar. -->
-      <Grid Grid.Column="4">
-        <Grid.RowDefinitions>
-          <RowDefinition Height="*" />
-          <RowDefinition Height="12" />
-          <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
 
-        <Border Grid.Row="0" Background="{StaticResource Panel}" CornerRadius="10"
+           Opgaverne har hele hoejden nu. Kalenderen laa nedenunder og er
+           flyttet til venstre spalte: den ene er hvad, den anden er hvornaar,
+           og de to laeses ikke i samme oejeblik. -->
+      <Grid Grid.Column="4">
+        <Border Background="{StaticResource Panel}" CornerRadius="10"
                 BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
           <DockPanel>
             <Grid DockPanel.Dock="Top" Margin="14,13,14,8">
@@ -593,76 +623,6 @@
           </DockPanel>
         </Border>
 
-        <!-- ============ KALENDEREN ============
-
-             Den staar UNDER opgaverne og ikke over. Opgaverne er det, der
-             skal goeres; kalenderen er det, der skal ske. Det foerste kan man
-             handle paa lige nu, det andet venter paa et klokkeslaet.
-
-             Aftalerne kommer fra appens egen kalender OG fra dem, der er
-             hentet ind. De staar i én liste - hvem der har lagt dem ind, er
-             ikke det, man leder efter, naar man skal optage om fem minutter. -->
-        <Border Grid.Row="2" Background="{StaticResource Panel}" CornerRadius="10"
-                BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
-          <StackPanel>
-            <Grid Margin="14,13,14,8">
-              <TextBlock x:Name="Kalenderoverskrift" FontSize="13" FontWeight="SemiBold"
-                         VerticalAlignment="Center" />
-              <Button Content="Ny aftale" Click="NyAftale_Klik" HorizontalAlignment="Right"
-                      VerticalAlignment="Center" Padding="10,3" FontSize="11" />
-            </Grid>
-
-            <ItemsControl x:Name="Kalenderrude" Margin="7,0,7,10">
-              <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                  <Border Background="#FF181B22" BorderBrush="{Binding Kant}"
-                          BorderThickness="3,0,0,0" CornerRadius="6"
-                          Padding="11,8" Margin="0,0,0,5">
-                    <Grid>
-                      <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                      </Grid.ColumnDefinitions>
-
-                      <TextBlock Grid.Column="0" Text="{Binding Klokken}" FontSize="12"
-                                 FontFamily="Consolas" VerticalAlignment="Top"
-                                 Margin="0,1,10,0" Foreground="{Binding Kant}" />
-
-                      <StackPanel Grid.Column="1">
-                        <!-- Titlen aabner aftalen. En aftale, man ikke kan
-                             rette, er en aftale, man sletter og laver om. -->
-                        <Button Tag="{Binding}" Click="RetAftale_Klik" Cursor="Hand"
-                                HorizontalAlignment="Left" Padding="0" BorderThickness="0"
-                                Background="Transparent"
-                                ToolTip="Ret aftalen">
-                          <Button.Template>
-                            <ControlTemplate TargetType="Button">
-                              <TextBlock Text="{Binding Titel}" FontSize="12" TextWrapping="Wrap"
-                                         Foreground="{StaticResource Tekst}" />
-                            </ControlTemplate>
-                          </Button.Template>
-                        </Button>
-                        <TextBlock Text="{Binding Under}" FontSize="10.5" Margin="0,3,0,0"
-                                   TextWrapping="Wrap" Foreground="{StaticResource TekstMeget}" />
-                      </StackPanel>
-
-                      <Button Grid.Column="2" Content="{Binding Knap}" Tag="{Binding}"
-                              Click="Aftale_Klik" VerticalAlignment="Top" Margin="8,0,0,0"
-                              Padding="10,4" FontSize="11"
-                              ToolTip="{Binding Knaptip}" />
-                    </Grid>
-                  </Border>
-                </DataTemplate>
-              </ItemsControl.ItemTemplate>
-            </ItemsControl>
-
-            <TextBlock x:Name="IngenAftaler" FontSize="11.5" Margin="14,0,14,14"
-                       TextWrapping="Wrap" LineHeight="18" Visibility="Collapsed"
-                       Foreground="{StaticResource TekstSvag}"
-                       Text="Ingen aftaler i kalenderen. Opret en her — eller forbind Google Kalender under Indstillinger, så bliver de hentet ind af sig selv." />
-          </StackPanel>
-        </Border>
       </Grid>
     </Grid>
   </Grid>

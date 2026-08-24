@@ -100,6 +100,10 @@ public partial class DocumentsView : UserControl
     {
         _alle = DocumentStore.LoadAll().ToList();
 
+        // Panelet til hoejre laeses samtidig med traeet. To lister over de
+        // samme filer maa ikke kunne komme ud af trit.
+        VisSeneste();
+
         // En mappe, der er i brug, skal staa i traeet - ogsaa hvis
         // mapper.json er gaaet tabt. Ellers ville dokumenterne falde ud af
         // deres mappe, uden at nogen havde flyttet dem.
@@ -306,6 +310,74 @@ public partial class DocumentsView : UserControl
     /// null, naar markeringen staar paa en mappe - saa skal knapperne blive
     /// graa, og detaljeruden skal vaek.
     /// </summary>
+    // ------------------------------------------------- seneste dokumenter
+
+    /// <summary>Ét dokument i panelet til højre.</summary>
+    public sealed record Senestevisning(string Titel, string Under, string Id);
+
+    /// <summary>
+    /// De nyeste dokumenter.
+    ///
+    /// Et dokument bliver læst kort efter, det er skrevet — og så er det ikke
+    /// i træet, man leder, men efter «den dér, jeg lige lavede».
+    ///
+    /// Kun de seks nyeste. Listen er en genvej, ikke et arkiv; hele arkivet
+    /// står i træet til venstre.
+    /// </summary>
+    private void VisSeneste()
+    {
+        List<Senestevisning> liste;
+
+        try
+        {
+            liste = _alle
+                .OrderByDescending(d => d.Created)
+                .Take(6)
+                .Select(d =>
+                {
+                    var dele = new List<string> { d.Created.LocalDateTime.ToString("dd-MM HH:mm") };
+
+                    if (d.SourceTitle.Length > 0) dele.Add(d.SourceTitle);
+                    else if (d.Mappe is { Length: > 0 } m) dele.Add(m);
+
+                    return new Senestevisning(
+                        d.Title.Length > 0 ? d.Title : "Uden navn",
+                        string.Join("  ·  ", dele),
+                        d.Id);
+                })
+                .ToList();
+        }
+        catch (Exception)
+        {
+            liste = new List<Senestevisning>();
+        }
+
+        Senesterude.ItemsSource = liste;
+        IngenSeneste.Visibility = liste.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    /// <summary>
+    /// Vælger dokumentet.
+    ///
+    /// Der bygges ikke en ny skærm — vi ER på den. Se den tilsvarende i
+    /// TranscribeView; de to paneler skal opføre sig ens.
+    /// </summary>
+    private void Seneste_Klik(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button b || b.Tag is not Senestevisning v) return;
+
+        var d = _alle.FirstOrDefault(x => x.Id == v.Id);
+
+        if (d is null)
+        {
+            // Slettet, mens skaermen stod aaben. Listen laeses forfra.
+            Indlæs();
+            return;
+        }
+
+        Vis(d);
+    }
+
     private void Vis(DocumentInfo? valgtDokument)
     {
         if (valgtDokument is not { } d)

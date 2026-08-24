@@ -162,6 +162,12 @@
         <ColumnDefinition Width="225" />
         <ColumnDefinition Width="Auto" />
         <ColumnDefinition Width="*" />
+        <ColumnDefinition Width="12" />
+        <!-- SENESTE OPTAGELSER. Den stod i Cockpittet og fyldte den plads,
+             kalenderen har brug for - og den hoerer hjemme her, hvor man
+             arbejder med optagelser. 260 raekker til en titel og en linje
+             med dato, laengde og tilstand. -->
+        <ColumnDefinition Width="260" />
       </Grid.ColumnDefinitions>
 
       <!-- =========================== Biblioteker ====================== -->
@@ -404,6 +410,65 @@
                maskinen overhovedet. -->
           <local:UdskriftView x:Name="Resultat" Grid.Row="0" Visibility="Collapsed" />
         </Grid>
+      </Border>
+
+      <!-- ==================== SENESTE OPTAGELSER ======================
+
+           En optagelse, der aldrig blev skrevet ud, er et hul i arkivet - og
+           det opdager man ikke ved at lede efter det. Her staar de nyeste med
+           en gul kant, hvis teksten mangler.
+
+           Kun de seks nyeste. Listen er en paamindelse, ikke et arkiv; hele
+           arkivet staar i traeet til venstre. -->
+      <Border Grid.Column="4" Background="{StaticResource Panel}" CornerRadius="10"
+              BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+        <DockPanel>
+          <TextBlock DockPanel.Dock="Top" Text="SENESTE OPTAGELSER" FontSize="10"
+                     FontWeight="SemiBold" Margin="14,13,14,8"
+                     Foreground="{StaticResource TekstMeget}" />
+
+          <ScrollViewer Padding="7,0,7,10" VerticalScrollBarVisibility="Auto"
+                        HorizontalScrollBarVisibility="Disabled">
+            <StackPanel>
+              <ItemsControl x:Name="Senesterude">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate>
+                    <Button Tag="{Binding}" Click="Seneste_Klik" Cursor="Hand"
+                            HorizontalContentAlignment="Stretch" Margin="0,0,0,5"
+                            BorderThickness="0" Padding="0" Background="Transparent">
+                      <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                          <Border x:Name="kort" Background="#FF181B22" CornerRadius="6"
+                                  BorderBrush="{Binding Kant}" BorderThickness="3,0,0,0"
+                                  Padding="11,8">
+                            <ContentPresenter />
+                          </Border>
+                          <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                              <Setter TargetName="kort" Property="Background" Value="#FF2C323D" />
+                            </Trigger>
+                          </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                      </Button.Template>
+
+                      <StackPanel>
+                        <TextBlock Text="{Binding Titel}" FontSize="12" TextWrapping="Wrap"
+                                   Foreground="{StaticResource Tekst}" />
+                        <TextBlock Text="{Binding Under}" FontSize="10.5" Margin="0,3,0,0"
+                                   TextWrapping="Wrap" Foreground="{StaticResource TekstMeget}" />
+                      </StackPanel>
+                    </Button>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+
+              <TextBlock x:Name="IngenOptagelser" FontSize="12" Margin="4,6,4,0"
+                         TextWrapping="Wrap" LineHeight="18" Visibility="Collapsed"
+                         Foreground="{StaticResource TekstSvag}"
+                         Text="Der er ikke optaget noget endnu. Tryk «Optag møde» eller «Webinar» øverst." />
+            </StackPanel>
+          </ScrollViewer>
+        </DockPanel>
       </Border>
     </Grid>
   </Grid>
