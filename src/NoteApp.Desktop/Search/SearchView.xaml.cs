@@ -531,7 +531,13 @@ public partial class SearchView : UserControl
         if (sender is not Button b || b.Tag is not Opgavevisning v) return;
         if (Window.GetWindow(this) is not MainWindow hoved) return;
 
-        if (v.MoedeId.Length == 0 || !hoved.GaaTilOptagelse(v.MoedeId))
+        // TOM MoedeId ER IKKE EN FEJL. Opgaven er skrevet i haanden og har
+        // aldrig haft en optagelse bag sig. Knappen vises slet ikke i det
+        // tilfaelde - se Linkvis - men skulle den alligevel blive trykket, er
+        // «findes ikke laengere» det forkerte svar: der var aldrig noget.
+        if (v.MoedeId.Length == 0) return;
+
+        if (!hoved.GaaTilOptagelse(v.MoedeId))
             Dialogs.AppDialog.Vis(hoved, "Optagelsen findes ikke længere",
                 "Den er slettet eller flyttet uden for appen, siden opgaven blev oprettet. " +
                 "Opgaven bliver stående — den er stadig din.",
@@ -976,6 +982,20 @@ public sealed class Opgavevisning : System.ComponentModel.INotifyPropertyChanged
     /// <summary>Er der mere at folde ud, end navnet allerede viser?</summary>
     public Visibility Merevis =>
         _r.Opgave.HarMere ? Visibility.Visible : Visibility.Collapsed;
+
+    /// <summary>
+    /// Er herkomsten et LINK — eller bare en oplysning?
+    ///
+    /// EN OPGAVE UDEN OPTAGELSE HAR INGEN VEJ TILBAGE. Den er skrevet i
+    /// hånden, og der findes ingen replik at høre igen. Et link, der åbner
+    /// «optagelsen findes ikke længere», er værre end ingen link: det får
+    /// noget, der er helt i orden, til at se ud som et tab.
+    /// </summary>
+    public Visibility Linkvis =>
+        _r.MoedeId.Length > 0 ? Visibility.Visible : Visibility.Collapsed;
+
+    public Visibility Kildevis =>
+        _r.MoedeId.Length > 0 ? Visibility.Collapsed : Visibility.Visible;
 
     private bool _foldetUd;
 

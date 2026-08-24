@@ -557,11 +557,20 @@
                 er et notat. Med linket kan man høre sætningen
                 igen og se, om den blev forstået rigtigt — og det
                 er hele grunden til, at appen findes. -->
-                <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                <!-- WrapPanel og ikke StackPanel. Spalten er smal, og
+                     herkomsten kan vaere lang; med en vandret stak blev
+                     «Mere» skubbet ud over kanten og var der bare ikke. -->
+                <WrapPanel Margin="0,4,0,0">
 
+                <!-- HERKOMSTEN ER ET LINK, NAAR DER ER NOGET AT GAA TILBAGE
+                     TIL. En opgave, man selv har skrevet, har ingen replik at
+                     hoere igen - saa staar den som en oplysning i graat. Et
+                     blaat link, der aabner «findes ikke laengere», faar noget
+                     helt normalt til at se ud som et tab. -->
                 <Button Content="{Binding Under}" Tag="{Binding}" Click="Opgave_Klik"
                 Padding="0" BorderThickness="0" Background="Transparent" Cursor="Hand"
                 FontSize="11" Foreground="#FF5B9DF0"
+                Visibility="{Binding Linkvis}"
                 ToolTip="Gå til det sted i transkriptionen, opgaven kom fra">
                 <Button.Template>
                 <ControlTemplate TargetType="Button">
@@ -571,6 +580,10 @@
                 </ControlTemplate>
                 </Button.Template>
                 </Button>
+
+                <TextBlock Text="{Binding Under}" FontSize="11" TextWrapping="Wrap"
+                Visibility="{Binding Kildevis}"
+                Foreground="{StaticResource TekstMeget}" />
 
                 <!-- Knappen staar kun, naar der ER mere at folde ud. En knap,
                      der ikke goer noget, laerer man at lade vaere med at
@@ -585,11 +598,12 @@
                 <Button.Template>
                 <ControlTemplate TargetType="Button">
                 <TextBlock Text="{TemplateBinding Content}" FontSize="11"
+                TextDecorations="Underline"
                 Foreground="{TemplateBinding Foreground}" />
                 </ControlTemplate>
                 </Button.Template>
                 </Button>
-                </StackPanel>
+                </WrapPanel>
                 </StackPanel>
 
                 <Border Grid.Column="2" CornerRadius="4" Padding="7,2" Margin="10,0,0,0"
