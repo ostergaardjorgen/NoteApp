@@ -173,6 +173,8 @@ Et rigtigt API mod de tre tjenester bliver først nødvendigt, hvis man vil
 undvære synkroniseringsklienten. Det er en senere beslutning, ikke en
 forudsætning.
 
+**En iPhone-app, der optager direkte ind i mappen**, er undersøgt og beskrevet i `iphone-app.md`. Mødeoptageren kan bygges; en telefonsamtale kan ikke optages af nogen app på iOS. Den overvågede mappe bør bygges først — uden den skal filen læses ind i hånden hver gang.
+
 ---
 
 ## Etape 3 — Møderne får en tidslinje
