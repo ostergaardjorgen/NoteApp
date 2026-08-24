@@ -415,17 +415,24 @@ public partial class SearchView : UserControl
     /// egne felter, og de findes ikke hos leverandøren. Titel og tidspunkt er
     /// låst; de bliver overskrevet ved næste hentning.
     /// </summary>
-    private void RetAftale_Klik(object sender, RoutedEventArgs e)
+    private async void RetAftale_Klik(object sender, RoutedEventArgs e)
     {
         if (sender is not Button b || b.Tag is not Aftalevisning v) return;
 
         var vindue = new Meeting.AftaleWindow(v.Aftale) { Owner = Window.GetWindow(this) };
         if (vindue.ShowDialog() != true) return;
 
-        if (vindue.Slettet) Kalender.Slet(v.Aftale.Id);
-        else Kalender.Gem(vindue.Aftalen);
+        if (vindue.Slettet)
+        {
+            Kalender.Slet(v.Aftale.Id);
+            VisKalender();
+            return;
+        }
 
+        Kalender.Gem(vindue.Aftalen);
         VisKalender();
+
+        await LaegOpHosGoogle(vindue);
     }
 
     /// <summary>
@@ -436,13 +443,53 @@ public partial class SearchView : UserControl
     /// eller Microsoft 365. En kalender, der kræver en konto hos Google for at
     /// virke, er ubrugelig for dem.
     /// </summary>
-    private void NyAftale_Klik(object sender, RoutedEventArgs e)
+    private async void NyAftale_Klik(object sender, RoutedEventArgs e)
     {
         var vindue = new Meeting.AftaleWindow(null) { Owner = Window.GetWindow(this) };
         if (vindue.ShowDialog() != true) return;
 
         Kalender.Gem(vindue.Aftalen);
         VisKalender();
+
+        await LaegOpHosGoogle(vindue);
+    }
+
+    /// <summary>
+    /// Lægger aftalen op hos Google, hvis brugeren satte hak.
+    ///
+    /// DEN KØRER EFTER, AT AFTALEN ER GEMT LOKALT. Går oplægningen galt, står
+    /// aftalen der stadig — den er ikke gået tabt, fordi nettet var nede. Den
+    /// omvendte rækkefølge ville gøre appens egen kalender afhængig af en
+    /// tjeneste, den er bygget til at kunne undvære.
+    ///
+    /// FREMMED-ID'ET GEMMES PÅ DEN LOKALE AFTALE. Uden det ville den samme
+    /// aftale komme retur ved næste hentning og stå to gange. Se spærren i
+    /// Kalender.Afloes.
+    /// </summary>
+    private async Task LaegOpHosGoogle(Meeting.AftaleWindow vindue)
+    {
+        if (!vindue.SkalOpHosGoogle) return;
+
+        try
+        {
+            var noegle = Integrationsfiler.Hent("google").Opdateringsnoegle;
+            if (noegle.Length == 0) return;
+
+            var fremmedId = await Googlekalender.OpretAsync(vindue.Aftalen, noegle);
+
+            vindue.Aftalen.FremmedId = fremmedId;
+            Kalender.Gem(vindue.Aftalen);
+            VisKalender();
+        }
+        catch (Exception ex)
+        {
+            // AFTALEN ER GEMT. Det her er ikke en fejl, der skal se ud som om
+            // arbejdet gik tabt - kun som at den ene halvdel manglede.
+            Dialogs.AppDialog.Vis(Window.GetWindow(this),
+                "Aftalen kom ikke i Google Kalender",
+                "Den er gemt i NoteApp. Det var oplægningen hos Google, der ikke "
+                + "lykkedes." + Environment.NewLine + Environment.NewLine + ex.Message);
+        }
     }
 
     // ------------------------------------------------------------- opgaverne

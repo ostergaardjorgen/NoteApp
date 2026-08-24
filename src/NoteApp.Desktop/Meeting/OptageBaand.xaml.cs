@@ -20,6 +20,16 @@ public partial class OptageBaand : Window
     public event Action? Annuller;
     public event Action<string>? Note_Skrevet;
 
+    /// <summary>
+    /// Der blev trykket paa kontakten «Vis appen» / «Skjul appen».
+    ///
+    /// Baandet ved ikke selv, hvilket vindue der skal frem - det ejer
+    /// ingenting. Den, der lytter, skifter og melder tilbage med
+    /// <see cref="SaetAppSynlig"/>, saa knappen aldrig kan komme til at vise
+    /// en anden tilstand end den, vinduet faktisk staar i.
+    /// </summary>
+    public event Action? SkiftAppVisning;
+
     private readonly Storyboard _blink;
 
     public OptageBaand()
@@ -179,7 +189,30 @@ public partial class OptageBaand : Window
         }
     }
 
+    /// <summary>
+    /// Skriver paa kontakten, hvad et klik goer NU.
+    ///
+    /// Kaldes af den, der rent faktisk skjulte eller viste vinduet - aldrig af
+    /// klikket selv. Gik visningen galt, staar knappen dermed stadig og siger
+    /// sandheden om, hvor vinduet er.
+    /// </summary>
+    public void SaetAppSynlig(bool synlig)
+    {
+        if (synlig)
+        {
+            VisAppKnap.Content = "▲ Skjul appen";
+            VisAppKnap.ToolTip = "Skjul appen igen. Optagelsen fortsætter, og båndet bliver liggende.";
+        }
+        else
+        {
+            VisAppKnap.Content = "▼ Vis appen";
+            VisAppKnap.ToolTip = "Vis hele appen frem. Optagelsen fortsætter, og båndet bliver liggende.";
+        }
+    }
+
     // ------------------------------------------------------------- knapper
+
+    private void VisApp_Klik(object sender, RoutedEventArgs e) => SkiftAppVisning?.Invoke();
 
     private void Pause_Klik(object sender, RoutedEventArgs e) => Pause?.Invoke();
 

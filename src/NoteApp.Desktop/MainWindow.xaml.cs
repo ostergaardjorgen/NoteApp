@@ -520,9 +520,7 @@ public partial class MainWindow : Window
     /// </summary>
     private void LynstartOptagelse()
     {
-        if (WindowState == WindowState.Minimized) WindowState = WindowState.Normal;
-        Show();
-        Activate();
+        App.HentFrem(this);
 
         _moede.Lynstart();
     }

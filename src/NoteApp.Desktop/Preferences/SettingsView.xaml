@@ -369,7 +369,7 @@
                                FontSize="12.5" FontWeight="SemiBold" />
                     <TextBlock FontSize="12" Margin="0,7,0,0" TextWrapping="Wrap" LineHeight="19"
                                Foreground="{StaticResource Tekst}"
-                               Text="Der HENTES aftaler ned. Der sendes ingenting op — appen beder om læseadgang til kalenderen og intet andet, og den kan hverken oprette eller ændre noget hos leverandøren." />
+                               Text="Aftaler HENTES ned. Den anden vej sker kun, når du selv sætter hak ved «Opret også hos leverandøren» på en aftale — og så er det aftalens titel, tidspunkt og sted, intet andet. Lyd, transkriptioner, noter og dokumenter går aldrig den vej." />
                     <TextBlock FontSize="12" Margin="0,7,0,0" TextWrapping="Wrap" LineHeight="19"
                                Foreground="{StaticResource Tekst}"
                                Text="Lyden, transkriptionerne, dine noter og dokumenterne forlader aldrig maskinen ad denne vej. En kalenderintegration giver adgang til at læse en kalender." />

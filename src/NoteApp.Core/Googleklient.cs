@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace NoteApp.Core;
 
@@ -47,6 +48,24 @@ public static class Googleklient
     private sealed record Fil(string KlientId, string Hemmelighed);
 
     /// <summary>
+    /// Googles EGEN fil, som den hentes fra konsollen.
+    ///
+    /// Den ser sådan ud, og der er ingen grund til at bede nogen om at skrive
+    /// den om i hånden:
+    ///
+    ///     { "installed": { "client_id": "...", "client_secret": "..." } }
+    ///
+    /// Et hjemmelavet format, der SKAL bruges, er et ekstra sted at lave en
+    /// tastefejl — og fejlen viser sig først som «invalid_client» hos Google,
+    /// hvor ingen leder efter den.
+    /// </summary>
+    private sealed record Googlefil(Googleafsnit? Installed, Googleafsnit? Web);
+
+    private sealed record Googleafsnit(
+        [property: JsonPropertyName("client_id")] string? ClientId,
+        [property: JsonPropertyName("client_secret")] string? ClientSecret);
+
+    /// <summary>
     /// Filen ligger ved siden af programmet.
     ///
     /// AppContext.BaseDirectory er exe-mappen — også for en enkeltfils-udgivelse,
@@ -67,15 +86,63 @@ public static class Googleklient
         if (!string.IsNullOrWhiteSpace(id))
             return _hentet = (id.Trim(), (hem ?? "").Trim());
 
+        foreach (var sti in Steder())
+        {
+            var fundet = Laes(sti);
+            if (fundet is not null) return _hentet = fundet.Value;
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Hvor der ledes, i den rækkefølge.
+    ///
+    /// Filen ved siden af programmet er den rigtige — den kommer med
+    /// udgivelsen. Men Googles egen fil hedder noget i retning af
+    /// `client_secret_386…apps.googleusercontent.com.json`, og den, der lige
+    /// har hentet den, har den liggende i mappen med det navn. At kræve en
+    /// omdøbning først er en fejlkilde uden gevinst.
+    /// </summary>
+    private static IEnumerable<string> Steder()
+    {
+        yield return Sti;
+
+        var mappe = Path.GetDirectoryName(Sti);
+        if (mappe is null) yield break;
+
+        string[] fundne;
+
+        try { fundne = Directory.GetFiles(mappe, "client_secret*.json"); }
+        catch (Exception) { yield break; }
+
+        // Fast raekkefoelge. Ligger der to, skal det vaere den samme hver gang
+        // - ellers virker appen forskelligt fra start til start.
+        Array.Sort(fundne, StringComparer.OrdinalIgnoreCase);
+
+        foreach (var f in fundne) yield return f;
+    }
+
+    private static (string, string)? Laes(string sti)
+    {
         try
         {
-            if (File.Exists(Sti))
-            {
-                var f = JsonSerializer.Deserialize<Fil>(File.ReadAllText(Sti, Encoding.UTF8));
+            if (!File.Exists(sti)) return null;
 
-                if (f is not null && !string.IsNullOrWhiteSpace(f.KlientId))
-                    return _hentet = (f.KlientId.Trim(), (f.Hemmelighed ?? "").Trim());
-            }
+            var tekst = File.ReadAllText(sti, Encoding.UTF8);
+
+            // Googles eget format foerst. Det er det, folk faktisk har paa
+            // disken, og det kan kendes paa «installed».
+            var g = JsonSerializer.Deserialize<Googlefil>(tekst);
+            var afsnit = g?.Installed ?? g?.Web;
+
+            if (!string.IsNullOrWhiteSpace(afsnit?.ClientId))
+                return (afsnit.ClientId.Trim(), (afsnit.ClientSecret ?? "").Trim());
+
+            var f = JsonSerializer.Deserialize<Fil>(tekst);
+
+            if (f is not null && !string.IsNullOrWhiteSpace(f.KlientId))
+                return (f.KlientId.Trim(), (f.Hemmelighed ?? "").Trim());
         }
         catch (Exception)
         {

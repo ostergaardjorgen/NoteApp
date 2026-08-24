@@ -60,6 +60,25 @@
 
       <Rectangle Width="1" Height="26" Fill="#FF39404D" Margin="14,0,14,0" />
 
+      <!-- ÉN KONTAKT, DER SKIFTER BEGGE VEJE.
+           Appen skal kunne rulles ud og foldes sammen igen midt i en
+           optagelse, fx naar den vises frem for andre. Teksten SKIFTER, saa
+           man kan se, hvad et klik goer nu; en kontakt, hvor man ikke kan se,
+           hvilken vej den staar, bliver gaettet paa.
+
+           Den ligger her til venstre og ikke ude ved Stop og Kassér. Et
+           fejlklik paa en knap, der bare viser et vindue, koster ingenting -
+           et fejlklik paa naboen koster optagelsen.
+
+           Det er en KNAP og ikke hele fladen: hele fladen traekker vinduet,
+           og et traek maa ikke ogsaa taelle som et klik. En Button tager selv
+           imod museklikket, saa traek-handleren paa Border aldrig ser det. -->
+      <Button x:Name="VisAppKnap" Click="VisApp_Klik" Cursor="Hand"
+              Content="▼ Vis appen" Padding="14,7" FontSize="12.5"
+              ToolTip="Vis hele appen frem. Optagelsen fortsætter, og båndet bliver liggende." />
+
+      <Rectangle Width="1" Height="26" Fill="#FF39404D" Margin="14,0,14,0" />
+
       <!-- Noterne skal kunne skrives HER.
            Kunne de kun skrives i appen, og appen er væk, ville funktionen
            reelt være væk under mødet — som er det eneste tidspunkt, den er

@@ -45,23 +45,39 @@ public partial class App : Application
     }
 
     /// <summary>
-    /// Henter vinduet frem, når nogen forsøger at starte appen igen.
+    /// Henter et vindue rigtigt frem.
     ///
-    /// Kaldes fra en baggrundstråd, så alt skal over på UI-tråden først.
-    /// Var vinduet minimeret — fx startet med Windows — skal det også ud af
-    /// den tilstand; ellers blinker det bare i proceslinjen, og så ligner
-    /// spærren, at der ikke skete noget.
+    /// DER ER TRE TRIN, OG DE ER ALLE TRE NOEDVENDIGE.
+    ///
+    /// Show() alene er ikke nok. Var vinduet minimeret - fx startet med
+    /// Windows, eller lagt ned af brugeren - bliver det bare ved at vaere
+    /// minimeret, og det ligner, at der ikke skete noget. Og har et ANDET
+    /// program fokus, lander vinduet bag det uden Activate(); saa blinker der
+    /// kun en knap i proceslinjen.
+    ///
+    /// DEN HER STAAR ET STED, OG KUN ET STED.
+    ///
+    /// Sekvensen fandtes foer i tre kopier: genvejstasten, spaerren mod to
+    /// instanser, og vejen tilbage fra optagebaandet. Tre kopier af det samme
+    /// kommer ud af trit - rettes den ene, glemmes de to.
     /// </summary>
-    private void KomFrem() => Dispatcher.Invoke(() =>
+    public static void HentFrem(Window? v)
     {
-        if (MainWindow is not { } v) return;
+        if (v is null) return;
 
         if (v.WindowState == WindowState.Minimized)
             v.WindowState = WindowState.Normal;
 
         v.Show();
         v.Activate();
-    });
+    }
+
+    /// <summary>
+    /// Henter vinduet frem, når nogen forsøger at starte appen igen.
+    ///
+    /// Kaldes fra en baggrundstråd, så alt skal over på UI-tråden først.
+    /// </summary>
+    private void KomFrem() => Dispatcher.Invoke(() => HentFrem(MainWindow));
 
     private bool _startMinimeret;
 

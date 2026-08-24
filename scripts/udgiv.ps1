@@ -234,13 +234,26 @@ else {
 #
 # Mangler den, udgives appen UDEN Google-integrationen, og fanen siger det paa
 # den maade. Det er ikke en fejl; det er en udgave uden den funktion.
-$googleKilde = Join-Path $Rod 'hemmeligheder\google-klient.json'
-if (Test-Path $googleKilde) {
-    Copy-Item $googleKilde $udgivTil -Force
-    Write-Host "Googles klient-id kopieret med"
+#
+# BEGGE FILNAVNE TAGES MED. Googles egen fil hedder
+# «client_secret_386...apps.googleusercontent.com.json», og appen laeser den
+# nu, som den er - at kraeve en omdoebning foerst var en fejlkilde uden
+# gevinst.
+$hemmeligMappe = Join-Path $Rod 'hemmeligheder'
+
+$googleFiler = @()
+if (Test-Path $hemmeligMappe) {
+    $googleFiler = @(Get-ChildItem $hemmeligMappe -File |
+                     Where-Object { $_.Name -eq 'google-klient.json' -or
+                                    $_.Name -like 'client_secret*.json' })
+}
+
+if ($googleFiler.Count -gt 0) {
+    foreach ($g in $googleFiler) { Copy-Item $g.FullName $udgivTil -Force }
+    Write-Host "Googles klient-id kopieret med ($($googleFiler.Count) fil)"
 }
 else {
-    Write-Host "Ingen google-klient.json - udgives uden Google-kalenderintegration"
+    Write-Host "Intet Google-klient-id - udgives uden kalenderintegration"
 }
 
 # --- Efterproev ------------------------------------------------------------

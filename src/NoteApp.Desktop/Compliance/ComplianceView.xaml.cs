@@ -48,6 +48,7 @@ public partial class ComplianceView : UserControl
 
         Endepunkt.Text = SkyKatalog.Endpoint;
 
+        VisGoogletilstand();
         VisKvitteringer();
 
         var whisper = WhisperInstall.Standard;
@@ -131,6 +132,33 @@ public partial class ComplianceView : UserControl
             // doc/maaling-whisper.md, og licensforholdet (OpenRAIL-M med
             // brugsbegraensninger, der skal videregives) er noteret dér.
         };
+    }
+
+    /// <summary>
+    /// Står forbindelsen til Google lige nu?
+    ///
+    /// DEN STÅR PÅ COMPLIANCE-SIDEN OG IKKE KUN UNDER INDSTILLINGER. Siden
+    /// beskriver, hvad der KAN ske; om det faktisk sker, afhænger af, om
+    /// integrationen er slået til. Uden tilstanden skal man to skærme væk for
+    /// at vide, om afsnittet overhovedet angår én.
+    /// </summary>
+    private void VisGoogletilstand()
+    {
+        var forbundet = false;
+
+        try { forbundet = Integrationsfiler.Hent("google").ErForbundet; }
+        catch (Exception)
+        {
+            // Kan opsaetningen ikke laeses, siges der «ikke forbundet». Det er
+            // det forsigtige svar: at paastaa en forbindelse, der maaske ikke
+            // findes, er den forkerte fejl paa netop den her side.
+        }
+
+        GoogleTilstand.Text = forbundet ? "FORBUNDET" : "IKKE FORBUNDET";
+
+        GoogleTilstand.Foreground = forbundet
+            ? (System.Windows.Media.Brush)FindResource("Godkendt")
+            : (System.Windows.Media.Brush)FindResource("TekstMeget");
     }
 
     private void Dpa_Klik(object sender, RoutedEventArgs e) => Aabn("https://legal.mistral.ai");

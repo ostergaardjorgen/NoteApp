@@ -32,7 +32,7 @@
                  Text="Hvor dine data går hen, hvem der kan røre dem, og hvilke licenser der følger med." />
     </StackPanel>
 
-    <!-- FEM FANER FREM FOR EN LANG RULLE.
+    <!-- FANER FREM FOR EN LANG RULLE.
          Siden var over to skaerme lang, og det, der betyder mest - hvad vi
          ved, og hvad vi ikke ved - laa oeverst og forsvandt, saa snart man
          rullede. En compliance-side laeses ikke forfra hver gang; man kommer
@@ -87,7 +87,7 @@
                   <Border Grid.Column="0" Background="#FF16241C" BorderBrush="{StaticResource Godkendt}"
                           BorderThickness="1" CornerRadius="8" Padding="16,13">
                     <StackPanel>
-                      <TextBlock Text="DET, VI VED" FontSize="11" FontWeight="SemiBold"
+                      <TextBlock Text="DET, DER ER EFTERPRØVET" FontSize="11" FontWeight="SemiBold"
                                  Foreground="{StaticResource Godkendt}" Margin="0,0,0,10" />
                       <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap"
                                  Foreground="{StaticResource TekstSvag}"
@@ -113,7 +113,7 @@
                   <Border Grid.Column="2" Background="#FF2A1A1A" BorderBrush="{StaticResource FejlTekst}"
                           BorderThickness="1" CornerRadius="8" Padding="16,13">
                     <StackPanel>
-                      <TextBlock Text="DET, VI IKKE VED" FontSize="11" FontWeight="SemiBold"
+                      <TextBlock Text="DET, DER ER UAFKLARET" FontSize="11" FontWeight="SemiBold"
                                  Foreground="{StaticResource FejlTekst}" Margin="0,0,0,10" />
                       <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap"
                                  Foreground="{StaticResource TekstSvag}"
@@ -366,6 +366,165 @@
                 </Border>
               </StackPanel>
             </Border>
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
+      <!-- ================= ANDRE INTEGRATIONER =====================
+           EN EGEN FANE, FORDI DET ER EN ANDEN SLAGS AFTALE.
+
+           Resten af siden handler om Mistral: en leverandoer, appen SENDER
+           noget til. En kalenderintegration er det modsatte - data ligger der
+           i forvejen, og appen henter dem ned. Blandes de to sammen paa den
+           samme side, laeser man den ene som den anden, og saa er begge
+           forklaret forkert. -->
+      <TabItem Header="Andre integrationer" Style="{StaticResource Fane}">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+          <StackPanel>
+
+            <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20,16"
+                    BorderBrush="{StaticResource PanelKant}" BorderThickness="1" Margin="0,0,0,14">
+              <StackPanel>
+                <TextBlock Text="DEN ANDEN VEJ RUNDT" FontSize="10.5" FontWeight="SemiBold"
+                           Foreground="{StaticResource TekstMeget}" Margin="0,0,0,10" />
+
+                <TextBlock FontSize="13" LineHeight="22" TextWrapping="Wrap"
+                           Foreground="{StaticResource TekstSvag}"
+                           Text="Resten af denne side handler om det, appen SENDER: en transkription til en sprogmodel i Europa. En kalenderintegration er det modsatte. Dine aftaler ligger allerede hos Google eller Microsoft, og appen henter dem ned, så du kan trykke optag direkte på et møde." />
+
+                <TextBlock FontSize="13" LineHeight="22" TextWrapping="Wrap" Margin="0,10,0,0"
+                           Foreground="{StaticResource TekstSvag}"
+                           Text="Har du valgt Google Workspace eller Microsoft 365, har du allerede taget stilling til, at mødetitler og deltagere ligger hos en amerikansk leverandør. Appen ændrer ikke på det. Den læser det, der er der i forvejen." />
+
+                <Border Background="#FF16241C" BorderBrush="{StaticResource Godkendt}"
+                        BorderThickness="1" CornerRadius="8" Padding="16,13" Margin="0,14,0,0">
+                  <StackPanel>
+                    <TextBlock Text="KALENDEREN VIRKER UDEN" FontSize="11" FontWeight="SemiBold"
+                               Foreground="{StaticResource Godkendt}" Margin="0,0,0,8" />
+                    <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap"
+                               Foreground="{StaticResource TekstSvag}"
+                               Text="Det er ikke en overgangsløsning. Appens egen kalender er den rigtige kalender, og den kræver ingen konto nogen steder. En integration lægger aftaler oveni; slår du den fra, forsvinder de hentede igen, og dine egne bliver stående." />
+                  </StackPanel>
+                </Border>
+              </StackPanel>
+            </Border>
+
+            <!-- ================== GOOGLE KALENDER ==================== -->
+            <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20,16"
+                    BorderBrush="{StaticResource PanelKant}" BorderThickness="1" Margin="0,0,0,14">
+              <StackPanel>
+                <Grid Margin="0,0,0,12">
+                  <TextBlock Text="GOOGLE KALENDER" FontSize="10.5" FontWeight="SemiBold"
+                             Foreground="{StaticResource TekstMeget}" />
+                  <TextBlock x:Name="GoogleTilstand" FontSize="11" HorizontalAlignment="Right"
+                             Foreground="{StaticResource TekstMeget}" />
+                </Grid>
+
+                <Grid>
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="14" />
+                    <ColumnDefinition Width="*" />
+                  </Grid.ColumnDefinitions>
+
+                  <Border Grid.Column="0" Background="#FF16241C" BorderBrush="{StaticResource Godkendt}"
+                          BorderThickness="1" CornerRadius="8" Padding="16,13">
+                    <StackPanel>
+                      <TextBlock Text="DET, APPEN MÅ" FontSize="11" FontWeight="SemiBold"
+                                 Foreground="{StaticResource Godkendt}" Margin="0,0,0,10" />
+                      <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap"
+                                 Foreground="{StaticResource TekstSvag}"
+                                 Text="Læse dine aftaler: titel, tidspunkt, sted og mødelink." />
+                      <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
+                                 Foreground="{StaticResource TekstSvag}"
+                                 Text="Oprette en aftale — men kun den, du selv sætter hak ved. Der oprettes intet af sig selv." />
+                      <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
+                                 Foreground="{StaticResource TekstSvag}"
+                                 Text="Der bedes om ÉT område: calendar.events. Det står i koden og kan efterprøves — og du ser det på Googles egen side, inden du godkender." />
+                    </StackPanel>
+                  </Border>
+
+                  <Border Grid.Column="2" Background="#FF2A1A1A" BorderBrush="{StaticResource FejlTekst}"
+                          BorderThickness="1" CornerRadius="8" Padding="16,13">
+                    <StackPanel>
+                      <TextBlock Text="DET, APPEN IKKE KAN" FontSize="11" FontWeight="SemiBold"
+                                 Foreground="{StaticResource FejlTekst}" Margin="0,0,0,10" />
+                      <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap"
+                                 Foreground="{StaticResource TekstSvag}"
+                                 Text="Se din mail, dine filer eller dine kontakter. Området rækker ikke dertil, og grænsen håndhæves af Google — ikke af appen." />
+                      <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
+                                 Foreground="{StaticResource TekstSvag}"
+                                 Text="Sende lyd, transkriptioner, noter eller dokumenter. Der findes ingen vej i appen, der lægger dem i en kalender." />
+                      <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
+                                 Foreground="{StaticResource TekstSvag}"
+                                 Text="Se din adgangskode. Godkendelsen sker i din egen browser hos Google." />
+                    </StackPanel>
+                  </Border>
+                </Grid>
+
+                <Border Background="#FF181B22" CornerRadius="8" Padding="16,13" Margin="0,14,0,0"
+                        BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+                  <StackPanel>
+                    <TextBlock Text="Det, der bliver sendt op — og hvornår" FontSize="12.5"
+                               FontWeight="SemiBold" Foreground="{StaticResource Tekst}" />
+                    <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
+                               Foreground="{StaticResource TekstSvag}"
+                               Text="Kun når du sætter hak ved «Opret også i Google Kalender» på en aftale. Så sendes aftalens titel, tidspunkt og sted. Mødetype, mappe og sprog bliver her — de er appens egne og vedkommer ikke Google." />
+                    <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
+                               Foreground="{StaticResource TekstSvag}"
+                               Text="Uden hakket sker der ingen afsendelse overhovedet. Hentningen går kun den ene vej." />
+                  </StackPanel>
+                </Border>
+
+                <Border Background="#FF181B22" CornerRadius="8" Padding="16,13" Margin="0,10,0,0"
+                        BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+                  <StackPanel>
+                    <TextBlock Text="Når du afbryder forbindelsen" FontSize="12.5"
+                               FontWeight="SemiBold" Foreground="{StaticResource Tekst}" />
+                    <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
+                               Foreground="{StaticResource TekstSvag}"
+                               Text="Nøgler og hentede aftaler slettes fra maskinen. Dine egne aftaler bliver stående. En aftale, du har fået oprettet hos Google, bliver liggende dér — den skal slettes i Google, hvis den skal væk." />
+                    <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
+                               Foreground="{StaticResource TekstSvag}"
+                               Text="Adgangen kan også trækkes tilbage hos Google selv, under din kontos sikkerhedsindstillinger. Det virker, uanset hvad appen gør." />
+                  </StackPanel>
+                </Border>
+              </StackPanel>
+            </Border>
+
+            <!-- ================== DET UAFKLAREDE ===================== -->
+            <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20,16"
+                    BorderBrush="{StaticResource Advarsel}" BorderThickness="1" Margin="0,0,0,14">
+              <StackPanel>
+                <TextBlock Text="DET, DER SKAL VÆRE KLART" FontSize="10.5" FontWeight="SemiBold"
+                           Foreground="{StaticResource Advarsel}" Margin="0,0,0,10" />
+
+                <TextBlock FontSize="12.5" LineHeight="22" TextWrapping="Wrap"
+                           Foreground="{StaticResource TekstSvag}"
+                           Text="Mødetitler og deltagere er personoplysninger. De ligger hos Google, både før og efter appen henter dem — men når de er hentet, ligger de også på denne maskine." />
+
+                <TextBlock FontSize="12.5" LineHeight="22" TextWrapping="Wrap" Margin="0,10,0,0"
+                           Foreground="{StaticResource TekstSvag}"
+                           Text="Google er en amerikansk leverandør. Det er en anden vurdering end den, resten af denne side handler om, hvor sprogmodellen er valgt europæisk med vilje. Her er valget dit: integrationen er slået fra, indtil du selv slår den til." />
+
+                <TextBlock FontSize="12.5" LineHeight="22" TextWrapping="Wrap" Margin="0,10,0,0"
+                           Foreground="{StaticResource TekstSvag}"
+                           Text="Optager du et møde med andre til stede, gælder det samme som altid: sig det højt, at der optages. En aftale i kalenderen er ikke et samtykke." />
+              </StackPanel>
+            </Border>
+
+            <!-- ================== MICROSOFT ========================== -->
+            <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20,16"
+                    BorderBrush="{StaticResource PanelKant}" BorderThickness="1" Margin="0,0,0,14">
+              <StackPanel>
+                <TextBlock Text="MICROSOFT 365-KALENDER" FontSize="10.5" FontWeight="SemiBold"
+                           Foreground="{StaticResource TekstMeget}" Margin="0,0,0,8" />
+                <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap"
+                           Foreground="{StaticResource TekstSvag}"
+                           Text="Bygges, når Google-vejen står og virker. Formen bliver den samme: et område, der kun rækker til aftaler, godkendelse i din egen browser, og intet der sendes op uden dit hak. Den står her nu, så det er til at se, hvad der er på vej — ikke for at lede efter en indstilling, der ikke findes endnu." />
+              </StackPanel>
+            </Border>
+
           </StackPanel>
         </ScrollViewer>
       </TabItem>

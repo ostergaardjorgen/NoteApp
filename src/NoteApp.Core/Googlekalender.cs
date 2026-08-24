@@ -10,10 +10,27 @@ namespace NoteApp.Core;
 ///
 /// HVAD DEN GØR, OG HVAD DEN ALDRIG GØR
 ///
-/// Den LÆSER kalenderen. Der er bedt om ét område — `calendar.readonly` — og
-/// det er hele adgangen. Appen kan ikke oprette, ændre eller slette en aftale
-/// hos Google, og den sender ingenting op. Områdenavnet står i koden og kan
-/// efterprøves; det er ikke et løfte, det er en grænse, Google håndhæver.
+/// Den LÆSER kalenderen, og den kan oprette en aftale — men KUN den, brugeren
+/// selv sætter hak ved. Der er bedt om ét område, `calendar.events`, og det er
+/// hele adgangen: aftaler. Appen kan ikke røre indstillinger, ikke oprette
+/// eller slette kalendere, og den kan ikke se noget som helst andet i kontoen.
+/// Områdenavnet står i koden og kan efterprøves; det er ikke et løfte, det er
+/// en grænse, Google håndhæver.
+///
+/// HVORFOR IKKE BARE calendar.readonly
+///
+/// Det var det, der blev bedt om indtil 24-08-2026, og det var ærligere at
+/// skrive om — «der sendes ingenting op» er en stærk sætning. Men en
+/// kalender, man kun kan læse, er en kalender, der lever to steder: aftalen,
+/// man laver i appen, findes ikke på telefonen. Det er ikke en integration,
+/// det er en visning.
+///
+/// Området blev udvidet, MENS DER VAR NUL BRUGERE. Tilføjes et område bagefter,
+/// skal hver eneste, der har forbundet, igennem godkendelsen igen.
+///
+/// DET, DER ALDRIG SENDES: lyden, transkriptionerne, noterne og dokumenterne.
+/// Der findes ingen kodesti, der lægger dem i en aftale, og området giver ikke
+/// adgang til andet end aftaler alligevel.
 ///
 /// GODKENDELSEN FOREGÅR I BRUGERENS EGEN BROWSER
 ///
@@ -43,12 +60,13 @@ public static class Googlekalender
     public const string Id = "google";
 
     /// <summary>
-    /// Kun læseadgang til kalenderen. Intet andet område bedes der om.
+    /// Aftaler, og intet andet i kontoen. Området rækker til at læse aftaler
+    /// og til at oprette dem — det sidste sker kun, når brugeren sætter hak.
     ///
     /// Den, der godkender, får det at se på Googles egen side — det er ikke
     /// appen, der fortæller, hvad den beder om. Derfor kan det efterprøves.
     /// </summary>
-    private const string Omraade = "https://www.googleapis.com/auth/calendar.readonly";
+    private const string Omraade = "https://www.googleapis.com/auth/calendar.events";
 
     private const string Godkend = "https://accounts.google.com/o/oauth2/v2/auth";
     private const string Noegler = "https://oauth2.googleapis.com/token";
@@ -58,15 +76,36 @@ public static class Googlekalender
 
     /// <summary>
     /// Hvad der sker, når man trykker Forbind. Til dialogen FØR browseren
-    /// åbner — man skal vide, hvor man bliver sendt hen, inden det sker.
+    /// åbner — man skal vide, hvad man giver adgang til, inden det sker.
+    ///
+    /// DEN ER SKREVET SOM ET SAMTYKKE OG IKKE SOM EN VEJLEDNING. Adgangen
+    /// rækker længere end før: appen kan nu også oprette en aftale. Det sker
+    /// stadig kun på et hak, brugeren selv sætter — men en udvidet adgang, der
+    /// præsenteres som «tryk her, så er du forbundet», er ikke oplyst samtykke,
+    /// uanset hvor pænt det står.
+    ///
+    /// Teksten siger tre ting i den rækkefølge, folk har brug for dem: hvad
+    /// appen MÅ, hvad den GØR af sig selv, og hvad den ALDRIG sender.
     /// </summary>
     public static string Vejledning =>
-        "Der åbner en side hos Google i din browser.\n\n" +
-        "Log ind med den konto, din kalender ligger på, og godkend. Så er den " +
-        "forbundet — der er ikke mere at gøre.\n\n" +
-        "Appen beder om LÆSEADGANG til kalenderen og intet andet. Den kan " +
-        "hverken oprette, ændre eller slette noget hos Google, og du kan se " +
-        "det på Googles egen side, inden du godkender.";
+        "Der åbner en side hos Google i din browser. Log ind med den konto, " +
+        "din kalender ligger på, og godkend.\n\n" +
+        "DETTE FÅR APPEN LOV TIL\n" +
+        "Ét område: dine aftaler. Appen kan læse dem, og den kan oprette en " +
+        "aftale. Den kan ikke se din mail, dine filer, dine kontakter eller " +
+        "noget andet i kontoen — området rækker ikke dertil, og det er Google, " +
+        "der håndhæver grænsen.\n\n" +
+        "DETTE GØR DEN AF SIG SELV\n" +
+        "Henter dine aftaler ned, så du kan trykke optag direkte på et møde. " +
+        "Der bliver hverken oprettet eller ændret noget hos Google, medmindre " +
+        "du sætter hak ved «Opret også i Google Kalender» på en aftale.\n\n" +
+        "DETTE SENDES ALDRIG\n" +
+        "Lyd, transkriptioner, noter og dokumenter. Der findes ingen vej i " +
+        "appen, der lægger dem i en kalender.\n\n" +
+        "Aftaler hos Google er personoplysninger — titler og deltagere — og de " +
+        "ligger hos en amerikansk leverandør. Læs «Andre integrationer» under " +
+        "Compliance, inden du forbinder. Du kan afbryde forbindelsen igen når " +
+        "som helst, og så forsvinder de hentede aftaler.";
 
     // ------------------------------------------------------------ godkendelse
 
@@ -129,16 +168,37 @@ public static class Googlekalender
 
             kontekst = await venter;
         }
-        finally
+        catch (Exception)
         {
-            // Doeren lukkes, uanset hvordan det gik.
+            // Gik det galt, er der ingen browser at svare - saa lukkes doeren
+            // her.
             try { lytter.Stop(); } catch (Exception) { }
+            throw;
         }
 
-        var kode = kontekst.Request.QueryString["code"];
-        var fejl = kontekst.Request.QueryString["error"];
+        string? kode;
+        string? fejl;
 
-        await SvarIBrowseren(kontekst, fejl is null);
+        try
+        {
+            kode = kontekst.Request.QueryString["code"];
+            fejl = kontekst.Request.QueryString["error"];
+
+            await SvarIBrowseren(kontekst, fejl is null);
+        }
+        finally
+        {
+            // FOERST HER. Doeren maa ikke lukkes, foer browseren har faaet sit
+            // svar.
+            //
+            // Stod Stop() i et finally lige efter GetContextAsync, blev
+            // svarstroemmen revet ned, inden der var skrevet paa den. Brugeren
+            // saa en tom side, og appen sagde «Cannot access a disposed
+            // object: ThreadPoolBoundHandle» - en besked, der ikke paa nogen
+            // maade peger paa, at det var vores egen oprydning, der kom for
+            // tidligt. Fundet 24-08-2026, foerste gang forloebet blev koert.
+            try { lytter.Stop(); } catch (Exception) { }
+        }
 
         if (fejl is not null)
             throw new InvalidOperationException($"Google svarede: {fejl}");
@@ -252,6 +312,79 @@ public static class Googlekalender
         return Laes(tekst);
     }
 
+    /// <summary>
+    /// Lægger en aftale op i Google. Svarer med aftalens id dér.
+    ///
+    /// DEN KALDES KUN, NÅR BRUGEREN HAR SAT HAK. Der er ingen sti i appen, der
+    /// sender noget op af sig selv — hverken ved en hentning, ved en optagelse
+    /// eller når en aftale rettes uden hakket. Det er hele forskellen på en
+    /// integration, man kan overskue, og en, man ikke tør slå til.
+    ///
+    /// DER SENDES FIRE FELTER: titel, start, slut og sted eller link. Ikke
+    /// mødetype, ikke mappe, ikke sprog — de er appens egne og vedkommer ikke
+    /// Google. Og aldrig lyd, transkriptioner, noter eller dokumenter; der er
+    /// ikke noget felt at lægge dem i, og området giver ikke adgang til det.
+    ///
+    /// TIDSZONEN SENDES MED. Google gætter ellers på kalenderens egen, og en
+    /// aftale, der lander en time forkert, er værre end en, der fejler.
+    /// </summary>
+    public static async Task<string> OpretAsync(Aftale aftale, string opdateringsnoegle,
+                                                CancellationToken ct = default)
+    {
+        if (Googleklient.Hent() is not var (klientId, hemmelighed) || klientId.Length == 0)
+            throw new InvalidOperationException(Googleklient.Mangler);
+
+        var noegle = await FriskNoegle(klientId, hemmelighed, opdateringsnoegle, ct);
+
+        var zone = TimeZoneInfo.Local.Id;
+
+        var krop = new Dictionary<string, object?>
+        {
+            ["summary"] = aftale.Titel,
+            ["start"] = new Dictionary<string, string>
+            {
+                ["dateTime"] = aftale.Start.ToString("yyyy-MM-ddTHH:mm:sszzz"),
+                ["timeZone"] = zone
+            },
+            ["end"] = new Dictionary<string, string>
+            {
+                ["dateTime"] = aftale.Slutter.ToString("yyyy-MM-ddTHH:mm:sszzz"),
+                ["timeZone"] = zone
+            }
+        };
+
+        // Stedet og linket er det samme felt hos Google, naar der ikke er tale
+        // om et Meet-moede. Et link i «location» er klikbart i deres app.
+        var hvor = aftale.Link.Length > 0 ? aftale.Link : aftale.Sted;
+        if (hvor.Length > 0) krop["location"] = hvor;
+
+        using var anmodning = new HttpRequestMessage(HttpMethod.Post, Aftaler)
+        {
+            Content = new StringContent(JsonSerializer.Serialize(krop),
+                                        Encoding.UTF8, "application/json")
+        };
+
+        anmodning.Headers.Authorization = new("Bearer", noegle);
+
+        using var svar = await Http.SendAsync(anmodning, ct);
+        var tekst = await svar.Content.ReadAsStringAsync(ct);
+
+        if (!svar.IsSuccessStatusCode)
+            throw new InvalidOperationException($"Google svarede {(int)svar.StatusCode}. {Kort(tekst)}");
+
+        using var doc = JsonDocument.Parse(tekst);
+
+        // Uden id'et kan aftalen ikke genkendes ved naeste hentning, og saa
+        // ville den staa dobbelt. Et tomt svar er derfor en fejl, ikke en
+        // detalje - selv om aftalen ER oprettet hos Google.
+        if (!doc.RootElement.TryGetProperty("id", out var id) || id.GetString() is not { Length: > 0 } v)
+            throw new InvalidOperationException(
+                "Aftalen blev oprettet hos Google, men der kom intet id tilbage. " +
+                "Den kan komme til at staa dobbelt ved naeste hentning.");
+
+        return v;
+    }
+
     private static List<Aftale> Laes(string json)
     {
         var ud = new List<Aftale>();
@@ -346,9 +479,23 @@ public static class Googlekalender
         var tekst = await svar.Content.ReadAsStringAsync(ct);
 
         if (!svar.IsSuccessStatusCode)
-            throw new InvalidOperationException(
-                $"Adgangen til Google virker ikke længere ({(int)svar.StatusCode}). " +
-                $"Forbind igen under Indstillinger. {Kort(tekst)}");
+        {
+            // invalid_grant betyder, at noeglen er udloebet eller trukket
+            // tilbage - ikke at der er noget galt med nettet. Forskellen
+            // afgoer, om man skal forbinde igen eller bare vente, og en
+            // besked, der ikke skelner, sender folk det forkerte sted hen.
+            //
+            // DET SKER HVER UGE, SAA LAENGE APPEN STAAR SOM «TESTING» HOS
+            // GOOGLE: opdateringsnoegler til en app i test udloeber efter syv
+            // dage. Det er ikke en fejl i appen, og det skal beskeden sige.
+            var udloebet = tekst.Contains("invalid_grant", StringComparison.OrdinalIgnoreCase);
+
+            throw new InvalidOperationException(udloebet
+                ? "Forbindelsen til Google er udløbet. Tryk Forbind igen under " +
+                  "Indstillinger → Integrationer. Dine aftaler i appen er urørte."
+                : $"Der kunne ikke hentes fra Google ({(int)svar.StatusCode}). " +
+                  $"{Kort(tekst)}");
+        }
 
         using var doc = JsonDocument.Parse(tekst);
 

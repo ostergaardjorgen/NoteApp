@@ -20,12 +20,25 @@ fem minutter, opretter ikke et cloud-projekt først.
 
 1. **Opret et projekt** på `console.cloud.google.com`.
 2. **Slå Google Calendar API til** under APIs & Services → Library.
-3. **Konfigurér samtykkeskærmen** (OAuth consent screen):
-   - Brugertype: **External**, hvis appen skal kunne bruges af andre end din
-     egen organisation.
-   - Områder: kun `.../auth/calendar.readonly`. Ikke flere — hvert ekstra
-     område er noget, brugeren skal godkende, og noget, Google skal
-     efterprøve.
+3. **Konfigurer samtykkeskærmen.** Google har delt den op i flere sider under
+   **Google Auth Platform**, og de tre, der skal bruges, hedder:
+
+   | Side | Hvad der skal stå |
+   |---|---|
+   | **Branding** | Appens navn, support-mail og udviklerkontakt |
+   | **Audience** | Brugertype **External** — og **Test users** |
+   | **Data Access** | Områderne |
+
+   - **Brugertype: External.** Internal virker kun for konti i din egen
+     organisation, og appen skal ud til studerende og selvstændige.
+   - **Test users → Add users:** den adresse, hvis kalender der skal læses.
+     Står den ikke der, afviser Google login'et med `access_denied`, og
+     fejlteksten nævner ikke testbrugere med et ord. **Det er det trin, der
+     bliver overset** — ikke mindst fordi det lå på selve samtykkeskærmen i
+     den gamle udgave af konsollen og nu ligger under Audience.
+   - **Områder: kun `.../auth/calendar.events`.** Den rummer læsning i
+     forvejen, så `calendar.readonly` skal IKKE med — hvert ekstra område er
+     noget, brugeren skal godkende, og noget, Google skal efterprøve.
 4. **Opret et klient-id** under Credentials → Create credentials → OAuth
    client ID → **Desktop app**.
 

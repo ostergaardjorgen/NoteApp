@@ -446,6 +446,7 @@ public partial class MeetingView : UserControl
         _baand.Stop += () => Stop();
         _baand.Annuller += Kassér_FraBaand;
         _baand.Note_Skrevet += TilføjNote;
+        _baand.SkiftAppVisning += SkiftAppVisning;
 
         _baand.SaetPause(false);
         _baand.SaetNoter(0);
@@ -459,6 +460,67 @@ public partial class MeetingView : UserControl
         {
             _skjultVindue = ejer;
             ejer.Hide();
+            _baand.SaetAppSynlig(false);
+        }
+    }
+
+    /// <summary>
+    /// Kontakten paa baandet: rul appen ud, fold den sammen igen.
+    ///
+    /// HVORFOR DEN SKAL KUNNE BEGGE VEJE MIDT I EN OPTAGELSE:
+    /// appen bliver vist frem for andre MENS der optages. Man skal kunne tage
+    /// den frem, pege paa den, og laegge den vaek igen - uden at lede efter et
+    /// vindue i proceslinjen, og uden at optagelsen maerker det.
+    ///
+    /// BAANDET BLIVER LIGGENDE, OGSAA NAAR APPEN ER FREMME.
+    /// Det er Topmost, saa det ligger oven paa hovedvinduet. Skjulte vi det,
+    /// mens appen var fremme, ville beviset for, at der optages, vaere vaek
+    /// praecis mens der bliver kigget med - og vejen tilbage med.
+    ///
+    /// DER SKJULES, DER LUKKES IKKE. Samme grund som ved start: optagelsen maa
+    /// ikke haenge paa, at et vindue overlever.
+    ///
+    /// HELE METODEN ER PAKKET IND. En optagelse maa aldrig kunne rives ned af,
+    /// at et vindue ikke ville frem. Gaar det galt, bliver baandet - og
+    /// optagelsen - staaende, og teksten paa knappen roeres ikke, saa den
+    /// bliver ved at sige sandheden om, hvor vinduet er.
+    /// </summary>
+    private void SkiftAppVisning()
+    {
+        try
+        {
+            // _skjultVindue foerst: er vinduet skjult, kan Window.GetWindow
+            // stadig finde det, men vi ved allerede hvilket det er.
+            var vindue = _skjultVindue ?? Window.GetWindow(this);
+            if (vindue is null) return;
+
+            // Minimeret taeller som «ikke fremme» - ellers ville det foerste
+            // klik efter en minimering skjule et vindue, brugeren ikke kan se,
+            // og kontakten ville staa forkert resten af moedet.
+            var erFremme = vindue.IsVisible && vindue.WindowState != WindowState.Minimized;
+
+            if (erFremme)
+            {
+                vindue.Hide();
+            }
+            else
+            {
+                // Samme vej frem som genvejstasten og spaerren mod to
+                // instanser bruger. Show() alene raekker ikke, naar et andet
+                // program har fokus.
+                App.HentFrem(vindue);
+            }
+
+            // Vinduet er stadig vores at rydde op i, naar moedet slutter -
+            // ogsaa naar brugeren selv har hentet det frem imellemtiden.
+            _skjultVindue = vindue;
+
+            _baand?.SaetAppSynlig(!erFremme);
+        }
+        catch (Exception)
+        {
+            // Optagelsen koerer videre. Et vindue, der ikke ville frem, maa
+            // ikke koste moedet.
         }
     }
 
@@ -472,8 +534,10 @@ public partial class MeetingView : UserControl
 
         if (_skjultVindue is null) return;
 
-        _skjultVindue.Show();
-        _skjultVindue.Activate();
+        // Samme vej frem som kontakten paa baandet og genvejstasten. Vinduet
+        // kan vaere fremme i forvejen - brugeren kan selv have hentet det -
+        // og saa er det her uden virkning.
+        App.HentFrem(_skjultVindue);
         _skjultVindue = null;
     }
 

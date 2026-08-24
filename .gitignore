@@ -91,3 +91,8 @@ doc/*.pdf
 # ikke i koden.
 hemmeligheder/
 app/google-klient.json
+
+# Googles EGEN fil hedder client_secret_<tal>-<tegn>.apps.googleusercontent.com
+# .json, og appen laeser den nu, som den hentes - uden omdoebning. Saa skal
+# det navn ogsaa vaere daekket, ellers gaar den med i naeste commit fra app/.
+client_secret*.json

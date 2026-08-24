@@ -35,7 +35,11 @@ public sealed record Integration(
 /// Appens hovedregel er, at data bliver på maskinen, og at det, der skal
 /// behandles i skyen, behandles i EU. En kalenderintegration bryder ikke den
 /// regel — den vender den om: aftalerne ligger allerede hos Google eller
-/// Microsoft, og appen HENTER dem ned. Der sendes ingenting op.
+/// Microsoft, og appen HENTER dem ned.
+///
+/// Den anden vej sker kun på brugerens udtrykkelige valg: en aftale, der laves
+/// i appen, kommer kun i Google, hvis der sættes hak ved det. Der er intet, der
+/// sendes op af sig selv.
 ///
 /// Har man valgt Google Workspace eller Microsoft 365, har man selv taget
 /// stilling til, at mødetitler og deltagere ligger hos en amerikansk
@@ -66,7 +70,7 @@ public static class Integrationer
             Hjemland: "USA",
             Kilde: Kalenderkilde.Google,
             Hvad: "Dine aftaler læses ind i kalenderen, så du kan trykke optag direkte på et møde. " +
-                  "Der bliver ikke skrevet noget tilbage til Google.",
+                  "En aftale, du laver her, kommer kun i Google, hvis du sætter hak ved det.",
             Hvordan: "Tryk Forbind, log ind hos Google og godkend. Der er ikke mere at gøre — " +
                      "og du kan altid afbryde forbindelsen igen.",
             Klar: true),
@@ -77,7 +81,8 @@ public static class Integrationer
             Leverandoer: "Microsoft",
             Hjemland: "USA",
             Kilde: Kalenderkilde.Microsoft,
-            Hvad: "Det samme som Google Kalender: aftalerne læses ind, og der skrives intet tilbage.",
+            Hvad: "Det samme som Google Kalender: aftalerne læses ind, og du vælger selv, " +
+                  "om en aftale herfra også skal oprettes dér.",
             Hvordan: "Bygges, når Google-vejen står og virker. Formen bliver den samme.",
             Klar: false)
     };

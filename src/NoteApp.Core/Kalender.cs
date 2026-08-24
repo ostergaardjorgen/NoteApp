@@ -206,10 +206,27 @@ public static class Kalender
 
         alle.RemoveAll(a => a.Kilde == kilde);
 
+        // EGNE AFTALER, DER OGSAA ER LAGT OP, SKAL IKKE KOMME RETUR SOM EN
+        // FREMMED AFTALE.
+        //
+        // Saetter man hak i «Opret ogsaa i Google», findes aftalen to steder:
+        // her som en LOKAL aftale, og hos Google. Ved naeste hentning kommer
+        // den tilbage - og uden det her ville den staa to gange i listen, med
+        // den samme titel og det samme tidspunkt.
+        //
+        // Den lokale er den rigtige. Det er DEN, der kan rettes, og det er den,
+        // moedetype, mappe og sprog haenger paa. Google har en kopi.
+        var egneOppe = alle.Where(a => a.Kilde == Kalenderkilde.Lokal
+                                    && a.FremmedId.Length > 0)
+                           .Select(a => a.FremmedId)
+                           .ToHashSet(StringComparer.Ordinal);
+
         var n = 0;
 
         foreach (var ny in hentede)
         {
+            if (egneOppe.Contains(ny.FremmedId)) continue;
+
             if (gamle.TryGetValue(ny.FremmedId, out var gammel))
             {
                 ny.Moedetype = gammel.Moedetype;

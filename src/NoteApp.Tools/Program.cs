@@ -27,6 +27,7 @@ try
         "mikrofontest" => Mikrofontest(args.Skip(1).ToArray()),
         "maalsoegning" => Maalsoegning(),
         "maaldato"  => Maaldato(),
+        "google"    => await Google(args.Skip(1).ToArray()),
         "recover"   => Genopret(),
         "hjaelp" or "--help" or "-h" => Hjælp(),
         _ => Ukendt(kommando)
@@ -51,6 +52,8 @@ static int Hjælp()
           recover   Samler møder der aldrig blev lukket ordentligt
           maalsoegning  Kører de tyve søgeprøver med kendt facit
           maaldato  Måler datoforståelsen mod kendte svar
+          google    Efterprøver Google Kalender-forbindelsen hele vejen:
+                      noteapp google [dage]
           udkast    Laver et referat med en lokal model — intet forlader maskinen
           sky       Laver et referat hos en europæisk leverandør:
                       SENDER UDSKRIFTEN UD AF MASKINEN. Se «noteapp sky».
@@ -1259,6 +1262,136 @@ static int Genopret()
         foreach (var (spor, opgørelse) in resultat)
             Console.WriteLine($"  {s.Title}\\{spor}.wav — {TimeSpan.FromSeconds(opgørelse.Seconds):hh\\:mm\\:ss} reddet");
     }
+
+    return 0;
+}
+
+
+// --------------------------------------------------------------- google
+//
+// EFTERPROEVER FORBINDELSEN HELE VEJEN uden at starte appen.
+//
+// Den findes, fordi integrationen ellers kun kan proeves ved at aabne
+// programmet og trykke Forbind - og det kan man ikke, mens der optages.
+// Her koeres praecis de samme to kald, appen bruger: ForbindAsync og
+// HentAsync. Virker det her, virker knappen.
+//
+// Den GEMMER ingenting. Opdateringsnoeglen skrives ikke til noget, og
+// indstillingerne roeres ikke. En proeve, der aendrer tilstand, er ikke en
+// proeve - saa ved man bagefter ikke, om appen virker, eller om proeven
+// efterlod noget.
+static async Task<int> Google(string[] a)
+{
+    var dage = 14;
+    if (a.Length > 0 && int.TryParse(a[0], out var d) && d > 0) dage = d;
+
+    Console.WriteLine();
+    Console.WriteLine("Google Kalender - efterproevning");
+    Console.WriteLine();
+
+    // 1. Er appen sat op?
+    var klient = Googleklient.Hent();
+
+    if (klient is null)
+    {
+        Console.WriteLine("IKKE SAT OP");
+        Console.WriteLine();
+        Console.WriteLine(Googleklient.Mangler);
+        Console.WriteLine();
+        Console.WriteLine($"Filen soeges her:  {Googleklient.Sti}");
+        Console.WriteLine("Se doc/google-integration.md for de fire trin.");
+        return 1;
+    }
+
+    var (id, hemmelighed) = klient.Value;
+
+    // Kun halen af id'et. Hele id'et i en terminal ender i en skaermbillede
+    // eller en logfil, og der er ingen grund til at det skal.
+    var hale = id.Length > 24 ? "..." + id[^24..] : id;
+
+    Console.WriteLine($"Klient-id   {hale}");
+    Console.WriteLine($"Hemmelighed {(hemmelighed.Length > 0 ? "sat" : "MANGLER")}");
+    Console.WriteLine();
+
+    if (!id.EndsWith(".apps.googleusercontent.com", StringComparison.OrdinalIgnoreCase))
+        Console.WriteLine("BEMAERK: id'et slutter normalt paa .apps.googleusercontent.com");
+
+    // 2. Godkendelsen. Browseren aabner.
+    Console.WriteLine("Browseren aabner nu. Log ind, og godkend adgang til kalenderen.");
+    Console.WriteLine("Der bedes om ét omraade: calendar.events - aftaler, og intet");
+    Console.WriteLine("andet i kontoen. Den her proeve LAESER kun.");
+    Console.WriteLine();
+
+    string noegle;
+
+    try
+    {
+        noegle = await Googlekalender.ForbindAsync();
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine();
+        Console.WriteLine("FORBINDELSEN LYKKEDES IKKE");
+        Console.WriteLine($"  {ex.Message}");
+        Console.WriteLine();
+        Console.WriteLine("De hyppigste aarsager:");
+        Console.WriteLine("  access_denied      din konto staar ikke som testbruger paa");
+        Console.WriteLine("                     samtykkeskaermen - tilfoej den dér");
+        Console.WriteLine("  invalid_client     id eller hemmelighed passer ikke, eller");
+        Console.WriteLine("                     klienten er ikke oprettet som «Desktop app»");
+        Console.WriteLine("  Calendar API ...   API'et er ikke slaaet til paa projektet");
+        return 1;
+    }
+
+    Console.WriteLine("GODKENDT. Opdateringsnoeglen er modtaget.");
+    Console.WriteLine();
+
+    // 3. Kan der rent faktisk hentes noget? En godkendelse, der ikke kan
+    //    hente en aftale, er ikke en virkende integration.
+    List<Aftale> aftaler;
+
+    try
+    {
+        aftaler = await Googlekalender.HentAsync(noegle, dage);
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine("HENTNINGEN LYKKEDES IKKE");
+        Console.WriteLine($"  {ex.Message}");
+        return 1;
+    }
+
+    Console.WriteLine($"{aftaler.Count} aftale(r) i de naeste {dage} dage.");
+    Console.WriteLine();
+
+    foreach (var aft in aftaler.Take(20))
+    {
+        var naar = aft.Start.ToString("ddd dd-MM HH:mm");
+        var hvor = aft.Link.Length > 0 ? "  [moedelink]"
+                 : aft.Sted.Length > 0 ? $"  [{aft.Sted}]"
+                 : "";
+
+        Console.WriteLine($"  {naar}  {aft.Titel}{hvor}");
+    }
+
+    if (aftaler.Count > 20) Console.WriteLine($"  ... og {aftaler.Count - 20} mere");
+
+    Console.WriteLine();
+
+    if (aftaler.Count == 0)
+    {
+        Console.WriteLine("Ingen aftaler fundet. Det er ikke en fejl i sig selv -");
+        Console.WriteLine("men laeg en aftale i kalenderen og koer igen, hvis du vil");
+        Console.WriteLine("se, at der ogsaa kommer noget IND.");
+    }
+    else
+    {
+        Console.WriteLine("Integrationen virker hele vejen.");
+    }
+
+    Console.WriteLine();
+    Console.WriteLine("Der er ikke gemt noget. Tryk Forbind i appen for at");
+    Console.WriteLine("etablere forbindelsen dér.");
 
     return 0;
 }

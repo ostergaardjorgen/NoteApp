@@ -24,6 +24,17 @@ public partial class AftaleWindow : Window
     /// <summary>Sat, hvis brugeren valgte at slette aftalen.</summary>
     public bool Slettet { get; private set; }
 
+    /// <summary>
+    /// Skal aftalen også oprettes hos Google?
+    ///
+    /// DEN LÆSES AF DEN, DER GEMMER — ikke her. Et kald ud på nettet midt i et
+    /// gem ville låse vinduet, mens der ventes, og en aftale, der ikke kan
+    /// gemmes lokalt, fordi Google er nede, er den forkerte afhængighed.
+    /// Aftalen gemmes først; oplægningen er noget, der sker bagefter og kan
+    /// gå galt for sig.
+    /// </summary>
+    public bool SkalOpHosGoogle { get; private set; }
+
     private sealed record Punkt(string Navn, string? Vaerdi);
 
     public AftaleWindow(Aftale? aftale)
@@ -63,8 +74,61 @@ public partial class AftaleWindow : Window
         Til.IsEnabled = Aftalen.KanRettes;
         Link.IsEnabled = Aftalen.KanRettes;
 
+        VisGooglehakket(ny);
+
         Fyld();
         Loaded += (_, _) => Titel.Focus();
+    }
+
+    /// <summary>
+    /// Hakket «Opret også i Google Kalender».
+    ///
+    /// DET VISES KUN, NÅR DER ER EN FORBINDELSE. Et felt, man ikke kan bruge,
+    /// er et spørgsmål om hvorfor — og svaret ville være en henvisning til en
+    /// anden skærm, midt i en aftale, man er ved at lægge ind.
+    ///
+    /// DET ER SLÅET FRA SOM UDGANGSPUNKT. At sende noget op er et valg, og et
+    /// forudsat ja er ikke et valg. Den, der vil have alle sine aftaler i
+    /// Google, sætter hakket hver gang; det er billigere end at opdage, at
+    /// noget stod i en delt kalender, man ikke havde tænkt over.
+    ///
+    /// EN HENTET AFTALE LIGGER DER I FORVEJEN, og en aftale, der allerede er
+    /// lagt op, skal ikke op igen — så ville der komme to.
+    /// </summary>
+    private void VisGooglehakket(bool erNy)
+    {
+        var kan = false;
+
+        try
+        {
+            kan = Googleklient.ErSatOp
+               && Integrationsfiler.Hent("google").ErForbundet
+               && Aftalen.Kilde == Kalenderkilde.Lokal
+               && Aftalen.FremmedId.Length == 0;
+        }
+        catch (Exception)
+        {
+            // Kan opsaetningen ikke laeses, er svaret «nej». En aftale skal
+            // kunne laegges ind, ogsaa naar integrationen driller.
+        }
+
+        if (!kan)
+        {
+            // Er den allerede lagt op, siges det - ellers ser det ud, som om
+            // valget forsvandt.
+            if (Aftalen.Kilde == Kalenderkilde.Lokal && Aftalen.FremmedId.Length > 0)
+            {
+                GoogleForklaring.Text = "Aftalen ligger også i Google Kalender.";
+                GoogleForklaring.Visibility = Visibility.Visible;
+            }
+
+            return;
+        }
+
+        OpretHosGoogle.Visibility = Visibility.Visible;
+        GoogleForklaring.Visibility = Visibility.Visible;
+
+        if (!erNy) OpretHosGoogle.Content = "Opret den i Google Kalender nu";
     }
 
     private static DateTimeOffset Naeste()
@@ -182,6 +246,9 @@ public partial class AftaleWindow : Window
         Aftalen.Moedetype = (Typevalg.SelectedItem as Punkt)?.Vaerdi ?? "";
         Aftalen.Sprog = (Sprogvalg.SelectedItem as Punkt)?.Vaerdi ?? "";
         Aftalen.ErWebinar = ErWebinar.IsChecked == true;
+
+        SkalOpHosGoogle = OpretHosGoogle.Visibility == Visibility.Visible
+                       && OpretHosGoogle.IsChecked == true;
 
         DialogResult = true;
     }

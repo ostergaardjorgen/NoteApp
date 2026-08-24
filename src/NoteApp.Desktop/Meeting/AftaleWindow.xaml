@@ -114,6 +114,17 @@
 
         <CheckBox x:Name="ErWebinar" Margin="0,12,0,0" FontSize="12"
                   Content="Optag som webinar — kun det, computeren afspiller" />
+
+        <!-- Hakket vises kun, naar der ER en forbindelse. Et afkrydsningsfelt,
+             der ikke kan bruges, er et spoergsmaal om hvorfor. -->
+        <CheckBox x:Name="OpretHosGoogle" Margin="0,10,0,0" FontSize="12"
+                  Visibility="Collapsed"
+                  Content="Opret også i Google Kalender" />
+
+        <TextBlock x:Name="GoogleForklaring" Margin="24,3,0,0" FontSize="11"
+                   TextWrapping="Wrap" Visibility="Collapsed"
+                   Foreground="{StaticResource TekstMeget}"
+                   Text="Titel, tidspunkt og sted sendes op. Mødetype, mappe og sprog bliver her — og lyd, transkriptioner og noter sendes aldrig." />
       </StackPanel>
     </Border>
 

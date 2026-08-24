@@ -388,7 +388,7 @@ til replikken. Kræver datoforståelsen, som bygges her.
   allerede valgt, dengang aftalen blev lavet, og skal ikke vælges igen i det
   minut, mødet begynder.
 - **Google Kalender med ét tryk.** Forbind, log ind, godkend. Der bedes om
-  `calendar.readonly`, og der sendes ingenting op.
+  `calendar.events`, og den anden vej sker kun på et udtrykkeligt valg.
 - **Hentede aftaler afløses ved hver hentning**, men det, brugeren selv har
   sat på dem, bæres over. Ellers ville en hentning nulstille en mødetype, man
   havde valgt.
@@ -470,16 +470,23 @@ vej, og ikke lede efter en indstilling, der ikke findes.
 Appens hovedregel er, at data bliver på maskinen, og at det, der skal
 behandles i skyen, behandles i EU. En kalenderintegration vender den om:
 aftalerne ligger **allerede** hos Google eller Microsoft, og appen henter dem
-ned. Der sendes ingenting op.
+ned. Den anden vej sker kun på et udtrykkeligt valg, aftale for aftale.
 
 Har kunden valgt Google Workspace eller Microsoft 365, har de selv taget
 stilling til, at mødetitler og deltagere ligger hos en amerikansk leverandør.
 Appen ændrer ikke på det; den læser det, der er der.
 
 **Det, der aldrig sendes ad den vej:** lyden, transkriptionerne, noterne og
-dokumenterne. Der bedes om ét område — `calendar.readonly` — og det står i
-koden, hvor det kan efterprøves. Brugeren ser det desuden på Googles egen side,
-når der godkendes; det er ikke appen, der fortæller, hvad den beder om.
+dokumenterne. Der bedes om ét område — `calendar.events` — og det står i koden,
+hvor det kan efterprøves. Området rækker til aftaler og intet andet: ikke
+indstillinger, ikke oprettelse af kalendere, ikke resten af kontoen. Brugeren
+ser det desuden på Googles egen side, når der godkendes; det er ikke appen, der
+fortæller, hvad den beder om.
+
+**Området blev udvidet fra `calendar.readonly` 24-08-2026**, fordi en kalender,
+man kun kan læse, lever to steder: aftalen, man laver i appen, findes ikke på
+telefonen. Det skete, mens der var nul brugere — tilføjes et område bagefter,
+skal hver eneste, der har forbundet, igennem godkendelsen igen.
 
 ### Kalenderen skal virke uden
 
