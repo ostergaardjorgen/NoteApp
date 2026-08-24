@@ -163,9 +163,21 @@ $filer = @(
        Til = 'forbudte-termer.txt' }
     @{ Fra = Join-Path $env:USERPROFILE '.claude\CLAUDE.md'
        Til = 'globale-regler-CLAUDE.md' }
-    @{ Fra = Join-Path $Rod 'hemmeligheder\google-klient.json'
-       Til = 'google-klient.json' }
 )
+
+# Googles egen fil hedder client_secret_<tal>.apps.googleusercontent.com.json,
+# og appen laeser den nu, som den hentes. Uden det her stod der «findes ikke
+# endnu» om en legitimation, der laa lige der - og den er praecis den slags
+# fil, det her script findes for: den kan ikke genskabes fra noget.
+$hemmeligMappe = Join-Path $Rod 'hemmeligheder'
+
+if (Test-Path $hemmeligMappe) {
+    foreach ($g in @(Get-ChildItem $hemmeligMappe -File |
+                     Where-Object { $_.Name -eq 'google-klient.json' -or
+                                    $_.Name -like 'client_secret*.json' })) {
+        $filer += @{ Fra = $g.FullName; Til = $g.Name }
+    }
+}
 
 foreach ($f in $filer) {
     if (Test-Path $f.Fra) {
