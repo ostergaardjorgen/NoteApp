@@ -199,6 +199,7 @@ public partial class AftaleWindow : Window
             Kalender.Gem(Aftalen);
 
             Link.Text = link;
+            VisLinkknap();
 
             TilfoejMeetKnap.Visibility = Visibility.Collapsed;
         }
@@ -222,6 +223,38 @@ public partial class AftaleWindow : Window
             : Visibility.Collapsed;
     }
 
+    /// <summary>
+    /// «Åbn mødet» står kun, når der ER et link at åbne.
+    ///
+    /// Uden den skulle man over i Google Kalender for at trykke på det samme
+    /// link — og så er kalenderen her en visning, man alligevel forlader.
+    /// </summary>
+    private void VisLinkknap()
+    {
+        var t = Link.Text.Trim();
+
+        AabnLinkKnap.Visibility =
+            t.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
+            t.StartsWith("https://", StringComparison.OrdinalIgnoreCase)
+                ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    private void AabnLink_Klik(object sender, RoutedEventArgs e)
+    {
+        var adresse = Link.Text.Trim();
+        if (adresse.Length == 0) return;
+
+        try
+        {
+            System.Diagnostics.Process.Start(
+                new System.Diagnostics.ProcessStartInfo(adresse) { UseShellExecute = true });
+        }
+        catch (Exception ex)
+        {
+            Fejl.Text = "Kunne ikke åbne linket: " + ex.Message;
+        }
+    }
+
     private static DateTimeOffset Naeste()
     {
         var nu = DateTimeOffset.Now;
@@ -239,10 +272,46 @@ public partial class AftaleWindow : Window
         Fra.ItemsSource = tider;
         Til.ItemsSource = tider;
 
-        Fra.Text = Aftalen.Start.LocalDateTime.ToString("HH:mm");
-        Til.Text = Aftalen.Slutter.LocalDateTime.ToString("HH:mm");
+        // KLOKKESLAETTET SAETTES, NAAR VINDUET ER TEGNET.
+        //
+        // Fra og Til er redigerbare rullelister, og tekstfeltet inde i dem
+        // findes foerst, naar skabelonen er anvendt. Saettes .Text i
+        // konstruktoeren, forsvinder den igen - og saa stod tiderne TOMME paa
+        // en aftale hentet fra Google, hvor de heller ikke kunne rettes.
+        // Fundet 24-08-2026.
+        var fraTekst = Aftalen.Start.LocalDateTime.ToString("HH:mm");
+        var tilTekst = Aftalen.Slutter.LocalDateTime.ToString("HH:mm");
+
+        Loaded += (_, _) =>
+        {
+            Fra.Text = fraTekst;
+            Til.Text = tilTekst;
+        };
+
+        // Passer tiden paa en halv time, kan den vaelges direkte. Det virker
+        // ogsaa foer skabelonen er anvendt, og saa staar der noget med det
+        // samme frem for et blink.
+        if (tider.Contains(fraTekst)) Fra.SelectedItem = fraTekst;
+        if (tider.Contains(tilTekst)) Til.SelectedItem = tilTekst;
+
+        // EN HENTET AFTALE VISER TIDEN SOM TEKST. Felterne var laaste
+        // alligevel, og en laast datovaelger ser ud som noget, der er gaaet i
+        // stykker - se den hvide kasse, der gav anledning til det her.
+        if (!Aftalen.KanRettes)
+        {
+            Tidsfelter.Visibility = Visibility.Collapsed;
+            Laasttid.Visibility = Visibility.Visible;
+
+            var dag = Aftalen.Start.LocalDateTime;
+
+            Tidslinje.Text = Aftalen.Slut is null
+                ? $"{dag:dddd d. MMMM}  ·  {fraTekst}"
+                : $"{dag:dddd d. MMMM}  ·  {fraTekst} – {tilTekst}";
+        }
 
         Link.Text = Aftalen.Link.Length > 0 ? Aftalen.Link : Aftalen.Sted;
+
+        VisLinkknap();
 
         // ---- mappen
         var mapper = new List<Punkt> { new("Vælg en mappe", null) };

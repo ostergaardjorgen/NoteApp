@@ -29,6 +29,7 @@ try
         "maaldato"  => Maaldato(),
         "google"    => await Google(args.Skip(1).ToArray()),
         "opgaver"   => Opgaver(),
+        "lydproeve" => Lydproeve(args.Skip(1).ToArray()),
         "recover"   => Genopret(),
         "hjaelp" or "--help" or "-h" => Hjælp(),
         _ => Ukendt(kommando)
@@ -56,6 +57,8 @@ static int Hjælp()
           google    Efterprøver Google Kalender-forbindelsen hele vejen:
                       noteapp google [dage]
           opgaver   Viser alle opgaver og hvor de kom fra
+          lydproeve Komprimerer en optagelse og pakker den ud igen:
+                      noteapp lydproeve <wav> [kbit ...]
           udkast    Laver et referat med en lokal model — intet forlader maskinen
           sky       Laver et referat hos en europæisk leverandør:
                       SENDER UDSKRIFTEN UD AF MASKINEN. Se «noteapp sky».
@@ -1446,3 +1449,117 @@ static int Opgaver()
 
     return 0;
 }
+
+
+// ------------------------------------------------------------- lydproeve
+//
+// KAN VI KOMPRIMERE LYDEN?
+//
+// En times moede fylder 110 MB pr. spor som ukomprimeret PCM. Zoom oplyser
+// 200 MB i timen for VIDEO. Sammenligningen er ukomprimeret mod komprimeret,
+// og spoergsmaalet er, om vi kan lukke det hul uden at oedelaegge udskriften.
+//
+// Den her koder til AAC med Windows' EGEN Media Foundation - ingen ny binaer,
+// ingen ffmpeg paa 40-80 MB. Bagefter pakkes filen ud igen til 16 kHz mono
+// PCM, som whisper skal have den, saa resultatet kan transskriberes og maales
+// mod facitlisten.
+//
+// DER MAALES, DER KONKLUDERES IKKE HER. Kommandoen skriver stoerrelser. Om
+// udskriften bliver lige saa god, afgoeres af maal-noejagtighed.ps1 bagefter.
+static int Lydproeve(string[] a)
+{
+    if (a.Length == 0)
+    {
+        Console.WriteLine("Brug: noteapp lydproeve <wav> [kbit ...]");
+        Console.WriteLine("      standard: 24 32 48 64");
+        return 0;
+    }
+
+    var kilde = a[0];
+
+    if (!File.Exists(kilde))
+    {
+        Console.Error.WriteLine($"Findes ikke: {kilde}");
+        return 1;
+    }
+
+    var bitrater = a.Skip(1).Select(x => int.TryParse(x, out var n) ? n : 0)
+                            .Where(n => n > 0).ToArray();
+
+    if (bitrater.Length == 0) bitrater = new[] { 24, 32, 48, 64 };
+
+    var udmappe = Path.Combine(Path.GetDirectoryName(kilde)!, "lydproeve");
+    Directory.CreateDirectory(udmappe);
+
+    var raa = new FileInfo(kilde).Length;
+
+    using (var laes = new NAudio.Wave.WaveFileReader(kilde))
+    {
+        Console.WriteLine();
+        Console.WriteLine($"Kilde   : {Path.GetFileName(kilde)}");
+        Console.WriteLine($"Format  : {laes.WaveFormat.SampleRate} Hz, " +
+                          $"{laes.WaveFormat.Channels} kanal(er), {laes.WaveFormat.BitsPerSample} bit");
+        Console.WriteLine($"Laengde : {laes.TotalTime:hh\\:mm\\:ss}");
+        Console.WriteLine($"Fylder  : {raa / 1024.0 / 1024.0:0.0} MB " +
+                          $"({raa / 1024.0 / 1024.0 / laes.TotalTime.TotalHours:0.0} MB/time)");
+        Console.WriteLine();
+    }
+
+    NAudio.MediaFoundation.MediaFoundationApi.Startup();
+
+    Console.WriteLine("  kbit/s    komprimeret       MB/time     mod PCM   udpakket til");
+    Console.WriteLine("  " + new string('-', 68));
+
+    foreach (var kbit in bitrater)
+    {
+        var m4a = Path.Combine(udmappe, $"proeve-{kbit}.m4a");
+        var udpakket = Path.Combine(udmappe, $"proeve-{kbit}.wav");
+
+        try
+        {
+            using (var laes = new NAudio.Wave.WaveFileReader(kilde))
+                NAudio.Wave.MediaFoundationEncoder.EncodeToAac(laes, m4a, kbit * 1000);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"  {kbit,6}    KAN IKKE: {Kort(ex.Message)}");
+            continue;
+        }
+
+        // UD IGEN TIL 16 kHz MONO. Whisper skal have praecis det format, og
+        // en proeve, der ikke kan pakkes ud, er ikke en proeve.
+        try
+        {
+            using var ind = new NAudio.Wave.MediaFoundationReader(m4a);
+
+            var maal = new NAudio.Wave.WaveFormat(16000, 16, 1);
+
+            using var omsaet = new NAudio.Wave.MediaFoundationResampler(ind, maal) { ResamplerQuality = 60 };
+            NAudio.Wave.WaveFileWriter.CreateWaveFile(udpakket, omsaet);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"  {kbit,6}    kodet, men kunne ikke pakkes ud: {Kort(ex.Message)}");
+            continue;
+        }
+
+        var lille = new FileInfo(m4a).Length;
+
+        double timer;
+        using (var laes = new NAudio.Wave.WaveFileReader(kilde)) timer = laes.TotalTime.TotalHours;
+
+        Console.WriteLine($"  {kbit,6}    {lille / 1024.0 / 1024.0,8:0.00} MB    " +
+                          $"{lille / 1024.0 / 1024.0 / timer,8:0.0}    " +
+                          $"{(double)raa / lille,6:0.0}x    {Path.GetFileName(udpakket)}");
+    }
+
+    Console.WriteLine();
+    Console.WriteLine($"Filerne ligger i {udmappe}");
+    Console.WriteLine();
+    Console.WriteLine("NAESTE SKRIDT: transskriber hver .wav og maal mod facitlisten.");
+    Console.WriteLine("En mindre fil er ingenting vaerd, hvis udskriften bliver daarligere.");
+
+    return 0;
+}
+
+static string Kort(string s) => s.Length <= 90 ? s : s[..90] + " ...";

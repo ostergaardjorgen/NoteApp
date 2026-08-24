@@ -161,6 +161,95 @@
         </ScrollViewer>
       </TabItem>
 
+      <!-- ==================== KRAV TIL MASKINEN ====================
+
+           EN LISTE OVER ANBEFALEDE SPECIFIKATIONER LAESES ÉN GANG OG GLEMMES.
+           Spoergsmaalet, folk faktisk har, er «virker det paa MIN maskine» -
+           og det kan appen svare paa, fordi den koerer paa den.
+
+           DER KONKLUDERES IKKE «FOR LANGSOM». Appen kan optage og skrive ud
+           paa naesten hvad som helst; forskellen er, hvor laenge man venter.
+           Et roedt kryds ville sige, at noget ikke virker, og det ville vaere
+           forkert. -->
+      <TabItem Header="Krav til maskinen" Style="{StaticResource Fane}">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+          <StackPanel>
+
+            <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20"
+                    BorderBrush="{StaticResource PanelKant}" BorderThickness="1" Margin="0,0,0,14">
+              <StackPanel>
+                <TextBlock Text="Anbefalet minimum" FontSize="15" FontWeight="SemiBold" />
+                <TextBlock FontSize="12.5" Margin="0,6,0,0" TextWrapping="Wrap" LineHeight="20"
+                           Foreground="{StaticResource TekstMeget}"
+                           Text="Alt arbejdet sker på din egen maskine — udskrift, søgning, talergenkendelse og den korte opsummering. Derfor betyder maskinen noget, og derfor står der, hvad DEN HER maskine har." />
+
+                <ItemsControl x:Name="Kravliste" Margin="0,14,0,0">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                      <Border Background="#FF181B22" BorderBrush="{Binding Kant}"
+                              BorderThickness="3,0,0,0" CornerRadius="6"
+                              Padding="14,11" Margin="0,0,0,8">
+                        <StackPanel>
+                          <Grid>
+                            <TextBlock Text="{Binding Hvad}" FontSize="13" FontWeight="SemiBold"
+                                       TextWrapping="Wrap" Margin="0,0,120,0" />
+                            <TextBlock Text="{Binding Har}" FontSize="11.5"
+                                       HorizontalAlignment="Right" VerticalAlignment="Top"
+                                       Foreground="{Binding Kant}" />
+                          </Grid>
+                          <TextBlock Text="{Binding Hvorfor}" FontSize="12" Margin="0,6,0,0"
+                                     TextWrapping="Wrap" LineHeight="19"
+                                     Foreground="{StaticResource TekstSvag}" />
+                        </StackPanel>
+                      </Border>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </StackPanel>
+            </Border>
+
+            <!-- FORBEHOLDENE. De staar her og ikke i en fodnote: det er dem,
+                 der afgoer, om appen passer til den, der laeser. -->
+            <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20"
+                    BorderBrush="{StaticResource Advarsel}" BorderThickness="1" Margin="0,0,0,14">
+              <StackPanel>
+                <TextBlock Text="FORBEHOLD" FontSize="10.5" FontWeight="SemiBold"
+                           Foreground="{StaticResource Advarsel}" Margin="0,0,0,10" />
+
+                <TextBlock FontSize="12.5" Margin="0,0,0,0" TextWrapping="Wrap" LineHeight="21"
+                           Foreground="{StaticResource TekstSvag}"
+                           Text="Kun Windows. Appen bygger på Windows' egen lydmotor og på Windows' liste over programmer, der bruger mikrofonen. Der findes ingen udgave til Mac eller Linux, og det er ikke en oversættelse væk." />
+
+                <TextBlock FontSize="12.5" Margin="0,10,0,0" TextWrapping="Wrap" LineHeight="21"
+                           Foreground="{StaticResource TekstSvag}"
+                           Text="Appen skal køre, for at tre ting virker: genvejstasten, mødevagten og automatisk optagelse af en aftale. Et lukket program kan ikke starte en optagelse." />
+
+                <TextBlock FontSize="12.5" Margin="0,10,0,0" TextWrapping="Wrap" LineHeight="21"
+                           Foreground="{StaticResource TekstSvag}"
+                           Text="Uden NVIDIA-kort kører udskriften på processoren. Den virker, men en times møde tager længere end mødet selv varede. Optagelsen er upåvirket." />
+
+                <TextBlock FontSize="12.5" Margin="0,10,0,0" TextWrapping="Wrap" LineHeight="21"
+                           Foreground="{StaticResource TekstSvag}"
+                           Text="Lyden fylder. En times møde med to spor er 220 MB, fordi lyden gemmes ukomprimeret — det giver den bedste udskrift. Teksten fylder 56 KB, og lyden kan slettes, når den er skrevet ud." />
+
+                <TextBlock FontSize="12.5" Margin="0,10,0,0" TextWrapping="Wrap" LineHeight="21"
+                           Foreground="{StaticResource TekstSvag}"
+                           Text="Nøjagtigheden er ikke 100 %. Målt: 92,3 % på dansk, 90,5 % på engelsk, 83,1 % når der skiftes mellem sprogene midt i en sætning. Navne og fagord er det, der oftest rammes forkert." />
+
+                <TextBlock FontSize="12.5" Margin="0,10,0,0" TextWrapping="Wrap" LineHeight="21"
+                           Foreground="{StaticResource TekstSvag}"
+                           Text="Appen kan skille de to SIDER af et onlinemøde — din mikrofon og det, computeren afspiller. Den kan ikke kende de enkelte personer i den anden ende fra hinanden." />
+
+                <TextBlock FontSize="12.5" Margin="0,10,0,0" TextWrapping="Wrap" LineHeight="21"
+                           Foreground="{StaticResource TekstSvag}"
+                           Text="Et fysisk møde i et lokale optages gennem din mikrofon alene. Det virker, men afstanden til den, der taler, afgør, hvor godt det bliver." />
+              </StackPanel>
+            </Border>
+
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
       <TabItem Header="Lyd" Style="{StaticResource Fane}">
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
           <StackPanel>

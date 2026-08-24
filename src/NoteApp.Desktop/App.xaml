@@ -384,6 +384,47 @@
       <Setter Property="CaretBrush" Value="{StaticResource Tekst}" />
     </Style>
 
+    <!-- DATOVAELGEREN ARVER HELLER IKKE TEMAET.
+         Uden den her staar den som en HVID kasse midt i en moerk skaerm - og
+         vaerst naar den er laast, hvor WPF's standardchrome slaar helt
+         igennem. Feltet inde i den er en DatePickerTextBox, som skal saettes
+         for sig; den arver ikke den almindelige TextBox-stil. -->
+    <Style TargetType="DatePickerTextBox">
+      <Setter Property="Background" Value="#FF181B22" />
+      <Setter Property="Foreground" Value="{StaticResource Tekst}" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="CaretBrush" Value="{StaticResource Tekst}" />
+      <Setter Property="Padding" Value="6,4" />
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="DatePickerTextBox">
+            <Border Background="{TemplateBinding Background}"
+                    BorderThickness="0" Padding="{TemplateBinding Padding}">
+              <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center" />
+            </Border>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
+    <Style TargetType="DatePicker">
+      <Setter Property="Background" Value="#FF181B22" />
+      <Setter Property="Foreground" Value="{StaticResource Tekst}" />
+      <Setter Property="BorderBrush" Value="{StaticResource PanelKant}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="FontFamily" Value="Segoe UI" />
+      <Setter Property="FontSize" Value="13" />
+      <Setter Property="Padding" Value="2" />
+      <Style.Triggers>
+        <!-- LAAST BETYDER DAEMPET, IKKE HVID. Et felt, man ikke kan rette,
+             skal se ud som noget, der er laast - ikke som noget, der er
+             gaaet i stykker. -->
+        <Trigger Property="IsEnabled" Value="False">
+          <Setter Property="Opacity" Value="0.6" />
+        </Trigger>
+      </Style.Triggers>
+    </Style>
+
     <!-- ComboBox og DataGrid arver ikke temaet af sig selv: uden disse to
          står dropdowns hvide og gitterets overskrifter mørke på mørk bund. -->
     <!-- Hele skabelonen skrives ud, fordi WPF's standardchrome er hvid og

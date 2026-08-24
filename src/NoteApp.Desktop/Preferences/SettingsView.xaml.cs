@@ -41,7 +41,7 @@ public partial class SettingsView : UserControl
         _timer = new DispatcherTimer(DispatcherPriority.Background) { Interval = TimeSpan.FromMilliseconds(100) };
         _timer.Tick += (_, _) => OpdaterMaalere();
 
-        Loaded += (_, _) => { Indlaes(); VisAutostart(); OpdaterFiler(); };
+        Loaded += (_, _) => { Indlaes(); VisAutostart(); OpdaterFiler(); VisKrav(); };
         Unloaded += (_, _) => { _timer.Stop(); StopProber(); AfbrydTest(); };
     }
 
@@ -312,6 +312,36 @@ public partial class SettingsView : UserControl
     /// være at straffe nogen for at klikke forkert, og forbindelsen kan
     /// afbrydes med den knap, der er sat i verden til det.
     /// </summary>
+    // ------------------------------------------------- krav til maskinen
+
+    /// <summary>Ét krav, som listen viser det — med farven på den her maskines svar.</summary>
+    public sealed record Kravvisning(string Hvad, string Har, string Hvorfor, Brush Kant);
+
+    /// <summary>
+    /// Kravene, målt mod maskinen appen kører på.
+    ///
+    /// GULT OG IKKE RØDT, når noget mangler. Appen kan optage og skrive ud på
+    /// næsten hvad som helst; forskellen er, hvor længe man venter. Et rødt
+    /// kryds ville sige, at noget ikke virker.
+    /// </summary>
+    private void VisKrav()
+    {
+        List<Krav> krav;
+        try { krav = Maskinkrav.Alle(); }
+        catch (Exception) { krav = new List<Krav>(); }
+
+        Kravliste.ItemsSource = krav.Select(k => new Kravvisning(
+            k.Hvad,
+            k.Har,
+            k.Hvorfor,
+            (Brush)new BrushConverter().ConvertFrom(k.Slags switch
+            {
+                Kravsvar.Opfyldt => "#FF4CBE72",
+                Kravsvar.Mangler => "#FFE8A33D",
+                _ => "#FF3A4150"
+            })!)).ToList();
+    }
+
     // ---------------------------------------------- noten i indkaldelsen
 
     /// <summary>
