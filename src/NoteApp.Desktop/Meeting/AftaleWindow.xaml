@@ -157,7 +157,7 @@
                     Content="Tilføj et Google Meet-link" />
           <TextBlock Margin="24,2,0,0" FontSize="11" TextWrapping="Wrap"
                      Foreground="{StaticResource TekstMeget}"
-                     Text="Linket kommer med tilbage, så mødet kan startes herfra. Sætter du også hak i «Start optagelsen automatisk», følger der en oplysning med i indkaldelsen om, at mødet planlægges optaget, at lyden bliver på din computer — og at man kan sige fra. Teksten kan rettes under Indstillinger → Integrationer." />
+                     Text="Linket kommer med tilbage, så mødet kan startes herfra. Sætter du også hak i «Start optagelsen automatisk», følger der en oplysning med i indkaldelsen: at der optages LYD og ikke video, at lyden bliver på din computer — og at man kan sige fra. Teksten kan rettes under Indstillinger → Integrationer, på dansk og engelsk." />
 
           <CheckBox x:Name="InviterGaester" FontSize="12" Margin="0,9,0,0"
                     Content="Jeg vil invitere gæster" />

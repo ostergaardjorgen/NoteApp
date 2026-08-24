@@ -435,7 +435,7 @@
                 <TextBlock Text="Teksten i mødeindkaldelsen" FontSize="15" FontWeight="SemiBold" />
                 <TextBlock FontSize="12.5" Margin="0,6,0,0" TextWrapping="Wrap" LineHeight="20"
                            Foreground="{StaticResource TekstMeget}"
-                           Text="Er en aftale markeret til at blive optaget, skrives den her tekst i indkaldelsen sammen med mødelinket. Deltagerne får det at vide før mødet, hvor de kan nå at sige fra — ikke i det øjeblik optagelsen begynder. Et mødelink alene udløser den ikke: man holder også online-møder, der ikke skal optages." />
+                           Text="Er en aftale markeret til at blive optaget, skrives den her tekst i indkaldelsen sammen med mødelinket. Deltagerne får det at vide før mødet, hvor de kan nå at sige fra — ikke i det øjeblik optagelsen begynder. Et mødelink alene udløser den ikke: man holder også online-møder, der ikke skal optages. Læg mærke til, at første linje siger LYD og ikke video: «mødet optages» læses i dag som «mødet filmes», og det er en langt større ting at sige ja til." />
 
                 <!-- TO SPROG, FORDI EN INDKALDELSE PAA DANSK TIL EN, DER IKKE
                      LAESER DANSK, IKKE ER EN OPLYSNING. Retten til at sige fra

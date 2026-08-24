@@ -103,6 +103,12 @@ public static class Googlekalender
     /// noget. Der skal stå, hvem man siger det til, hvornår det kan siges, og
     /// hvad der så sker — ellers er det en oplysning og ikke et valg.
     ///
+    /// OMFANGET STÅR ØVERST, OG DET ER MED VILJE. «Mødet optages» læses i dag
+    /// som «mødet filmes» — det er blevet almindeligt, og folk siger nej til
+    /// det. Her optages der KUN lyd, og det er en langt mindre ting at sige ja
+    /// til. Står det ikke i første linje, bliver der sagt nej til noget, appen
+    /// slet ikke gør.
+    ///
     /// Formen er med vilje juridisk: faste overskrifter, adskilt fra resten af
     /// indkaldelsen, uden salgstone. Den skal kunne læses af en, der ikke
     /// kender appen, og stå sig, hvis nogen spørger bagefter.
@@ -120,24 +126,28 @@ public static class Googlekalender
     /// behandles hos en databehandler i EU.
     /// </summary>
     public const string StandardOptagenote =
-        "Mødet planlægges optaget med NoteApp.\n" +
+        "Der optages LYD fra mødet med NoteApp. Der optages ikke video.\n" +
         "\n" +
         "— — — — — — — — — —\n" +
-        "OPLYSNING OM OPTAGELSE\n" +
+        "OPLYSNING OM LYDOPTAGELSE\n" +
         "\n" +
-        "Formål: Optagelsen anvendes til at udarbejde referat og noter fra mødet.\n" +
+        "Omfang: Der optages alene lyd. Der optages hverken video, " +
+        "kamerabillede eller skærm, og der gemmes ingen billeder af mødet.\n" +
         "\n" +
-        "Behandling: Lydoptagelsen behandles lokalt på arrangørens computer og " +
-        "overføres ikke til eksterne tjenester. Vælger arrangøren at få " +
-        "udarbejdet et referat med en sprogmodel, behandles den udskrevne tekst " +
-        "— ikke lyden — hos en databehandler i EU.\n" +
+        "Formål: Optagelsen anvendes til at udarbejde referat og noter fra " +
+        "mødet.\n" +
         "\n" +
-        "Indsigelse: Du kan gøre indsigelse mod at blive optaget. Meddel det til " +
-        "arrangøren forud for mødet eller ved mødets begyndelse; optagelsen " +
-        "undlades da.\n" +
+        "Behandling: Lydoptagelsen behandles lokalt på arrangørens computer " +
+        "og overføres ikke til eksterne tjenester. Vælger arrangøren at få " +
+        "udarbejdet et referat med en sprogmodel, behandles den udskrevne " +
+        "tekst — ikke lyden — hos en databehandler i EU.\n" +
         "\n" +
-        "Sletning: Du kan til enhver tid anmode arrangøren om at få optagelsen " +
-        "og den udskrevne tekst slettet.\n" +
+        "Indsigelse: Du kan gøre indsigelse mod at blive optaget. Meddel det " +
+        "til arrangøren forud for mødet eller ved mødets begyndelse; " +
+        "optagelsen undlades da.\n" +
+        "\n" +
+        "Sletning: Du kan til enhver tid anmode arrangøren om at få " +
+        "lydoptagelsen og den udskrevne tekst slettet.\n" +
         "\n" +
         "Ansvarlig: Mødets arrangør er dataansvarlig for optagelsen.";
 
@@ -154,25 +164,29 @@ public static class Googlekalender
     /// sprog: så afhænger det af, hvem der læser hvilken.
     /// </summary>
     public const string StandardOptagenoteEn =
-        "This meeting is planned to be recorded using NoteApp.\n" +
+        "The AUDIO of this meeting is planned to be recorded using NoteApp. " +
+        "No video is recorded.\n" +
         "\n" +
         "— — — — — — — — — —\n" +
-        "NOTICE OF RECORDING\n" +
+        "NOTICE OF AUDIO RECORDING\n" +
         "\n" +
-        "Purpose: The recording is used to produce minutes and notes from " +
-        "the meeting.\n" +
+        "Scope: Audio only. No video, camera image or screen is recorded, and " +
+        "no images of the meeting are stored.\n" +
+        "\n" +
+        "Purpose: The recording is used to produce minutes and notes from the " +
+        "meeting.\n" +
         "\n" +
         "Processing: The audio recording is processed locally on the " +
         "organiser's computer and is not transferred to external services. " +
         "If the organiser chooses to have minutes drafted using a language " +
-        "model, the transcribed text — not the audio — is processed by a " +
-        "data processor within the EU.\n" +
+        "model, the transcribed text — not the audio — is processed by a data " +
+        "processor within the EU.\n" +
         "\n" +
         "Objection: You may object to being recorded. Please tell the " +
-        "organiser before the meeting or at its start, and no recording " +
-        "will be made.\n" +
+        "organiser before the meeting or at its start, and no recording will " +
+        "be made.\n" +
         "\n" +
-        "Deletion: You may at any time ask the organiser to delete the " +
+        "Deletion: You may at any time ask the organiser to delete the audio " +
         "recording and the transcribed text.\n" +
         "\n" +
         "Controller: The meeting organiser is the data controller for the " +
