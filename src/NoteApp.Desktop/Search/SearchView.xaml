@@ -185,12 +185,21 @@
          begge veje: de er ikke et svar paa en soegning, de er det, der venter.
     -->
     <Grid Grid.Row="4">
+      <!-- SPALTERNE KAN TRAEKKES, OG BREDDEN HUSKES.
+           En bredde, man selv har trukket paa plads, og som er vaek i morgen,
+           er vaerre end en fast bredde: saa traekker man den samme spalte hver
+           dag. Bredderne gemmes i indstillingerne, naar traekket slippes.
+
+           De to yderspalter er lige brede fra begyndelsen. Kalenderen og
+           opgaverne er lige meget vaerd - den ene er hvad, den anden er
+           hvornaar - og en smallere kalender var det, der gjorde datoen
+           ulaeselig. -->
       <Grid.ColumnDefinitions>
-        <ColumnDefinition Width="250" />
-        <ColumnDefinition Width="14" />
-        <ColumnDefinition Width="*" MinWidth="380" />
-        <ColumnDefinition Width="14" />
-        <ColumnDefinition Width="340" />
+        <ColumnDefinition x:Name="Venstrespalte" Width="340" MinWidth="220" />
+        <ColumnDefinition Width="Auto" />
+        <ColumnDefinition Width="*" MinWidth="320" />
+        <ColumnDefinition Width="Auto" />
+        <ColumnDefinition x:Name="Hoejrespalte" Width="340" MinWidth="220" />
       </Grid.ColumnDefinitions>
 
       <!-- ============ VENSTRE: DET, DER SKAL SKE ============
@@ -232,6 +241,24 @@
             <ItemsControl x:Name="Kalenderrude" Margin="7,0,7,10">
               <ItemsControl.ItemTemplate>
                 <DataTemplate>
+                  <StackPanel>
+
+                  <!-- DAGSOVERSKRIFTEN.
+                       Datoen stod foer inde i hver aftale, klemt sammen med
+                       klokkeslaet, sted og kilde. Fire oplysninger paa én
+                       linje i en smal spalte betyder, at ingen af dem kan
+                       laeses - og datoen er dén, man leder efter foerst.
+
+                       Nu staar den ét sted pr. dag, stort nok til at blive
+                       set, og aftalerne under den behoever kun deres
+                       klokkeslaet. «I DAG» er gult; resten er graat. -->
+                  <StackPanel Visibility="{Binding Dagsvis}" Margin="2,10,0,6">
+                    <TextBlock Text="{Binding Dagsnavn}" FontSize="11.5"
+                               FontWeight="SemiBold" Foreground="{Binding Dagsfarve}" />
+                    <TextBlock Text="{Binding Dagsdato}" FontSize="10.5" Margin="0,1,0,0"
+                               Foreground="{StaticResource TekstMeget}" />
+                  </StackPanel>
+
                   <Border Background="#FF181B22" BorderBrush="{Binding Kant}"
                           BorderThickness="3,0,0,0" CornerRadius="6"
                           Padding="11,8" Margin="0,0,0,5">
@@ -242,9 +269,10 @@
                         <ColumnDefinition Width="Auto" />
                       </Grid.ColumnDefinitions>
 
-                      <TextBlock Grid.Column="0" Text="{Binding Klokken}" FontSize="12"
-                                 FontFamily="Consolas" VerticalAlignment="Top"
-                                 Margin="0,1,10,0" Foreground="{Binding Kant}" />
+                      <TextBlock Grid.Column="0" Text="{Binding Klokken}" FontSize="13"
+                                 FontFamily="Consolas" FontWeight="SemiBold"
+                                 VerticalAlignment="Top"
+                                 Margin="0,0,10,0" Foreground="{Binding Kant}" />
 
                       <StackPanel Grid.Column="1">
                         <!-- Titlen aabner aftalen. En aftale, man ikke kan
@@ -270,6 +298,7 @@
                               ToolTip="{Binding Knaptip}" />
                     </Grid>
                   </Border>
+                  </StackPanel>
                 </DataTemplate>
               </ItemsControl.ItemTemplate>
             </ItemsControl>
@@ -282,6 +311,14 @@
             </ScrollViewer>
           </DockPanel>
         </Border>
+      <!-- Greb mellem kalenderen og soegningen. Bredden er 14 som foer -
+           mellemrummet ER grebet, saa der ikke bliver bredere af at kunne
+           traekke i det. -->
+      <GridSplitter Grid.Column="1" Width="14" HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch" Background="Transparent"
+                    DragCompleted="Spalte_Trukket"
+                    ToolTip="Træk for at ændre bredden" />
+
       <!-- ============ MIDTEN: SØGNINGEN ============ -->
       <Border Grid.Column="2" Background="{StaticResource Panel}" CornerRadius="10"
               BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
@@ -488,6 +525,11 @@
           </StackPanel>
         </Grid>
       </Border>
+
+      <GridSplitter Grid.Column="3" Width="14" HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch" Background="Transparent"
+                    DragCompleted="Spalte_Trukket"
+                    ToolTip="Træk for at ændre bredden" />
 
       <!-- ============ HØJRE: DET, DER SKAL GØRES ============
 

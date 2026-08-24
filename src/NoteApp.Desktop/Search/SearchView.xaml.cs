@@ -149,6 +149,7 @@ public partial class SearchView : UserControl
 
         Loaded += (_, _) =>
         {
+            HentSpaltebredder();
             FyldFiltre();
             VisOpgaver();
             VisKalender();
@@ -163,6 +164,58 @@ public partial class SearchView : UserControl
 
             Felt.Focus();
         };
+    }
+
+    // ------------------------------------------------------- spaltebredderne
+
+    /// <summary>
+    /// Sætter spalterne, som de stod sidst.
+    ///
+    /// Nul betyder «aldrig rørt», og så bliver standardbredden fra XAML'en
+    /// stående. Det er ikke det samme som en spalte, nogen har trukket helt
+    /// sammen — den har sin mindstebredde og er derfor aldrig nul.
+    ///
+    /// Der gemmes IKKE en bredde for midterspalten. Den er «*» og tager, hvad
+    /// der bliver til overs; gemte man den, ville skærmen se forkert ud, den
+    /// dag appen åbnes på en anden opløsning.
+    /// </summary>
+    private void HentSpaltebredder()
+    {
+        try
+        {
+            var v = AppSettings.Current.CockpitVenstre;
+            var h = AppSettings.Current.CockpitHoejre;
+
+            if (v > 0) Venstrespalte.Width = new GridLength(v);
+            if (h > 0) Hoejrespalte.Width = new GridLength(h);
+        }
+        catch (Exception)
+        {
+            // Kan indstillingerne ikke laeses, staar standardbredderne. En
+            // spaltebredde er ikke noget at vaelte en skaerm for.
+        }
+    }
+
+    /// <summary>
+    /// Gemmer bredden, når trækket slippes — ikke undervejs.
+    ///
+    /// Undervejs ville filen blive skrevet mange gange i sekundet for et tal,
+    /// der først betyder noget, når musen slippes.
+    /// </summary>
+    private void Spalte_Trukket(object sender,
+                                System.Windows.Controls.Primitives.DragCompletedEventArgs e)
+    {
+        try
+        {
+            AppSettings.Current.CockpitVenstre = Venstrespalte.ActualWidth;
+            AppSettings.Current.CockpitHoejre = Hoejrespalte.ActualWidth;
+            AppSettings.Current.Save();
+        }
+        catch (Exception)
+        {
+            // Kan den ikke gemmes, staar bredden alligevel resten af
+            // sessionen. Det er den mindst irriterende maade at fejle paa.
+        }
     }
 
     private void Felt_Aendret(object sender, TextChangedEventArgs e)
@@ -219,23 +272,39 @@ public partial class SearchView : UserControl
         public string Titel => _a.Titel;
 
         /// <summary>
+        /// Dagsoverskriften — «I DAG», «I MORGEN» eller «TORSDAG».
+        ///
+        /// DEN STÅR OVER DAGENS FØRSTE AFTALE OG IKKE PÅ HVER ENKELT.
+        ///
+        /// Datoen stod før inde i hver aftale, klemt sammen med klokkeslæt,
+        /// sted og kilde: «25-08 · 14:00 · Microsoft Teams-møde · Google».
+        /// Fire oplysninger på én linje i en smal spalte betyder, at ingen af
+        /// dem kan læses — og datoen er dén, man leder efter først.
+        ///
+        /// Med en overskrift pr. dag står datoen ét sted, stort nok til at
+        /// blive set, og aftalerne under den behøver kun deres klokkeslæt.
+        /// </summary>
+        public string Dagsnavn { get; set; } = "";
+
+        /// <summary>Datoen under dagsnavnet — «24. august».</summary>
+        public string Dagsdato { get; set; } = "";
+
+        /// <summary>Er det her dagens første aftale?</summary>
+        public Visibility Dagsvis =>
+            Dagsnavn.Length > 0 ? Visibility.Visible : Visibility.Collapsed;
+
+        /// <summary>I dag skal skille sig ud — det er den dag, man kan nå noget på.</summary>
+        public Brush Dagsfarve =>
+            _a.Start.Date == _nu.Date ? Pensel("#FFE8A33D") : Pensel("#FF9BA6B8");
+
+        /// <summary>
         /// Klokkeslættet — eller «nu», når den er i gang.
         ///
-        /// Er aftalen på en anden dag, står dagen i stedet. Et klokkeslæt
-        /// uden dato på en liste, der rækker en uge frem, er ikke til at
-        /// bruge: 09:00 kan være i morgen eller på fredag.
+        /// Kun tidspunktet. Dagen står i overskriften ovenover, og at gentage
+        /// den på hver aftale ville tage den plads, titlen har brug for.
         /// </summary>
-        public string Klokken
-        {
-            get
-            {
-                if (_a.ErIGang(_nu)) return "nu";
-
-                return _a.Start.Date == _nu.Date
-                    ? _a.Start.LocalDateTime.ToString("HH:mm")
-                    : _a.Start.LocalDateTime.ToString("dd/MM");
-            }
-        }
+        public string Klokken =>
+            _a.ErIGang(_nu) ? "nu" : _a.Start.LocalDateTime.ToString("HH:mm");
 
         /// <summary>Hvor den kommer fra, og hvad der ellers er værd at vide.</summary>
         public string Under
@@ -243,9 +312,6 @@ public partial class SearchView : UserControl
             get
             {
                 var dele = new List<string>();
-
-                if (_a.Start.Date != _nu.Date)
-                    dele.Add(_a.Start.LocalDateTime.ToString("HH:mm"));
 
                 if (_a.Sted.Length > 0) dele.Add(_a.Sted);
                 else if (_a.Link.Length > 0) dele.Add("online");
@@ -300,6 +366,16 @@ public partial class SearchView : UserControl
     /// fra Google. Hvem der har lagt dem ind, er ikke det, man leder efter,
     /// når man skal optage om fem minutter — det står med småt under titlen.
     /// </summary>
+    /// <summary>
+    /// Dansk, uanset hvad Windows står på.
+    ///
+    /// Ugedage og måneder skal hedde det samme for alle, der bruger appen.
+    /// Kører Windows på engelsk, ville kalenderen ellers sige «Thursday» midt
+    /// i en dansk skærm.
+    /// </summary>
+    private static readonly System.Globalization.CultureInfo Dansk =
+        System.Globalization.CultureInfo.GetCultureInfo("da-DK");
+
     private void VisKalender()
     {
         var nu = DateTimeOffset.Now;
@@ -308,14 +384,52 @@ public partial class SearchView : UserControl
         try { kommende = Kalender.Kommende(nu); }
         catch (Exception) { kommende = new List<Aftale>(); }
 
-        Kalenderrude.ItemsSource = kommende.Select(a => new Aftalevisning(a, nu)).ToList();
+        // DAGSOVERSKRIFTEN SAETTES PAA DAGENS FOERSTE AFTALE.
+        //
+        // Alternativet var to slags rækker i den samme liste - en overskrift
+        // og en aftale - og det kræver en skabelonvælger og en type, der ikke
+        // er en aftale. Her bærer aftalen selv sin overskrift, og skabelonen
+        // skjuler den bare på de øvrige.
+        //
+        // Listen kommer sorteret fra Kalender.Kommende, saa «foerste paa
+        // dagen» er den, hvis dato er en anden end den forriges.
+        var visninger = kommende.Select(a => new Aftalevisning(a, nu)).ToList();
+
+        var forrige = DateTime.MinValue;
+
+        foreach (var v in visninger)
+        {
+            var dag = v.Aftale.Start.LocalDateTime.Date;
+            if (dag == forrige) continue;
+
+            forrige = dag;
+
+            var iDag = dag == nu.LocalDateTime.Date;
+            var iMorgen = dag == nu.LocalDateTime.Date.AddDays(1);
+
+            // Ugedagen med stort forbogstav. Dansk skriver dem med lille, men
+            // som overskrift laeses «Torsdag» hurtigere end «torsdag» - og
+            // ToUpper paa hele ordet ville raabe.
+            var ugedag = dag.ToString("dddd", Dansk);
+
+            v.Dagsnavn = iDag ? "I DAG"
+                       : iMorgen ? "I MORGEN"
+                       : char.ToUpper(ugedag[0]) + ugedag[1..];
+
+            v.Dagsdato = dag.ToString("d. MMMM", Dansk);
+        }
+
+        Kalenderrude.ItemsSource = visninger;
         IngenAftaler.Visibility = kommende.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
 
-        var idag = kommende.Count(a => a.Start.Date == nu.Date);
-
+        // Overskriften sagde foer «I dag · 2». Nu staar «I DAG» som den
+        // foerste dagsoverskrift inde i listen, og to steder, der siger det
+        // samme, er ét sted for meget. Her staar antallet i stedet - det
+        // svarer paa «hvor meget ligger der forude», som listen ikke selv
+        // svarer paa, foer man har rullet den igennem.
         Kalenderoverskrift.Text = kommende.Count == 0
             ? "Kalender"
-            : idag > 0 ? $"I dag · {idag}" : "Kommende";
+            : $"Kalender · {kommende.Count}";
     }
 
     /// <summary>

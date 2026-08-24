@@ -201,6 +201,22 @@ public sealed class AppSettings
     /// </summary>
     public bool IntegrationerLaest { get; set; }
 
+    /// <summary>
+    /// Bredden på Cockpittets venstre spalte — kalenderen.
+    ///
+    /// SPALTEBREDDER ER ET VALG, DER SKAL OVERLEVE EN GENSTART. En bredde,
+    /// man selv har trukket på plads, og som er væk i morgen, er værre end en
+    /// fast bredde: så trækker man den samme spalte hver dag.
+    ///
+    /// Nul betyder «aldrig rørt» og giver standardbredden. Det er ikke det
+    /// samme som en spalte, nogen har trukket helt sammen — den får sin
+    /// mindstebredde.
+    /// </summary>
+    public double CockpitVenstre { get; set; }
+
+    /// <summary>Bredden på Cockpittets højre spalte — opgaverne.</summary>
+    public double CockpitHoejre { get; set; }
+
     private static string Path => System.IO.Path.Combine(UserDataPaths.Root, "indstillinger.json");
 
     private static AppSettings? _current;
