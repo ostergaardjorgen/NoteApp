@@ -418,6 +418,48 @@
               </StackPanel>
             </Border>
 
+            <!-- ============ NOTEN I MOEDEINDKALDELSEN ============
+
+                 DEN STAAR HER OG IKKE I AFTALEVINDUET. Den er en indstilling,
+                 man saetter én gang - ikke et valg, man traeffer for hvert
+                 moede. Laa den i aftalevinduet, skulle den laeses igennem hver
+                 gang, man lavede en aftale.
+
+                 DEN KAN RETTES, MEN IKKE FJERNES. Appen opfordrer ALTID til at
+                 fortaelle deltagerne, at der optages; et tomt felt er ikke et
+                 valg om at lade vaere, det er et felt, ingen har udfyldt - og
+                 saa bruges standarden. -->
+            <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20"
+                    BorderBrush="{StaticResource PanelKant}" BorderThickness="1" Margin="0,0,0,14">
+              <StackPanel>
+                <TextBlock Text="Teksten i mødeindkaldelsen" FontSize="15" FontWeight="SemiBold" />
+                <TextBlock FontSize="12.5" Margin="0,6,0,0" TextWrapping="Wrap" LineHeight="20"
+                           Foreground="{StaticResource TekstMeget}"
+                           Text="Når appen laver et Google Meet-link til en aftale, skrives den her tekst i indkaldelsen. Deltagerne får det at vide før mødet, hvor de kan nå at sige fra — ikke i det øjeblik optagelsen begynder." />
+
+                <TextBox x:Name="Optagenote" Margin="0,14,0,0" FontSize="12"
+                         MinHeight="200" MaxHeight="320" Padding="12,10"
+                         TextWrapping="Wrap" AcceptsReturn="True"
+                         VerticalScrollBarVisibility="Auto"
+                         VerticalContentAlignment="Top"
+                         TextChanged="Optagenote_Aendret" />
+
+                <TextBlock FontSize="11.5" Margin="2,7,0,0" TextWrapping="Wrap" LineHeight="18"
+                           Foreground="{StaticResource TekstMeget}"
+                           Text="Ryd feltet for at komme tilbage til standardteksten. Den kan ikke slås helt fra: en optagelse, ingen har fået at vide, er ikke noget appen hjælper med." />
+
+                <StackPanel Orientation="Horizontal" Margin="0,14,0,0">
+                  <Button Content="Gem teksten" Click="GemNote_Klik" Padding="18,8"
+                          Style="{StaticResource Primaer}" />
+                  <Button Content="Nulstil til standard" Click="NulstilNote_Klik"
+                          Padding="14,8" Margin="10,0,0,0" />
+                  <TextBlock x:Name="Notestatus" FontSize="11.5" Margin="14,0,0,0"
+                             VerticalAlignment="Center"
+                             Foreground="{StaticResource TekstMeget}" />
+                </StackPanel>
+              </StackPanel>
+            </Border>
+
             <ItemsControl x:Name="Integrationsliste">
               <ItemsControl.ItemTemplate>
                 <DataTemplate>

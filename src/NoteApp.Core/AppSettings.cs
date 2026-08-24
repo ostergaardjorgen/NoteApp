@@ -238,6 +238,19 @@ public sealed class AppSettings
     /// <summary>Var vinduet maksimeret? Så åbnes det maksimeret igen.</summary>
     public bool VinduetMaksimeret { get; set; }
 
+    /// <summary>
+    /// Teksten, der skrives i mødeindkaldelsen, når appen laver et Meet-link.
+    /// Tom betyder «brug standarden» — se Googlekalender.StandardOptagenote.
+    ///
+    /// ORDLYDEN HØRER TIL DEN, DER HOLDER MØDET. Et firma har sin egen
+    /// formulering, en underviser en anden, og en tekst, man ikke må røre,
+    /// bliver til en, man arbejder udenom.
+    ///
+    /// Den kan rettes, men ikke fjernes: står feltet tomt, bruges standarden.
+    /// Appen opfordrer ALTID til at fortælle deltagerne, at der optages.
+    /// </summary>
+    public string Optagenote { get; set; } = "";
+
     private static string Path => System.IO.Path.Combine(UserDataPaths.Root, "indstillinger.json");
 
     private static AppSettings? _current;

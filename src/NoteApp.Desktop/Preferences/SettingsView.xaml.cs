@@ -292,6 +292,8 @@ public partial class SettingsView : UserControl
 
     private void VisIntegrationer()
     {
+        VisNote();
+
         IntegrationerLaest.IsChecked = AppSettings.Current.IntegrationerLaest;
 
         LaestNote.Visibility = AppSettings.Current.IntegrationerLaest
@@ -310,6 +312,66 @@ public partial class SettingsView : UserControl
     /// være at straffe nogen for at klikke forkert, og forbindelsen kan
     /// afbrydes med den knap, der er sat i verden til det.
     /// </summary>
+    // ---------------------------------------------- noten i indkaldelsen
+
+    /// <summary>
+    /// Fylder feltet med den tekst, der faktisk bliver brugt.
+    ///
+    /// Har man ikke skrevet sin egen, står standarden i feltet — ikke en tom
+    /// rude med «her kunne der stå noget». Man skal kunne LÆSE, hvad der
+    /// bliver sendt ud i ens navn, uden først at skulle fremkalde det.
+    /// </summary>
+    private void VisNote()
+    {
+        _fylderNote = true;
+        Optagenote.Text = Googlekalender.Optagenote;
+        _fylderNote = false;
+
+        Notestatus.Text = AppSettings.Current.Optagenote.Length > 0
+            ? "Din egen tekst." : "Standardteksten.";
+    }
+
+    /// <summary>
+    /// Sandt, mens feltet fyldes fra koden.
+    ///
+    /// Uden det ville VisNote's egen skrivning tælle som en ændring, og
+    /// statuslinjen ville sige «ikke gemt» om noget, ingen havde rørt.
+    /// </summary>
+    private bool _fylderNote;
+
+    private void Optagenote_Aendret(object sender, TextChangedEventArgs e)
+    {
+        if (_fylderNote) return;
+
+        Notestatus.Text = "Ikke gemt endnu.";
+    }
+
+    private void GemNote_Klik(object sender, RoutedEventArgs e)
+    {
+        var tekst = Optagenote.Text.Trim();
+
+        // ER DEN LIG STANDARDEN, GEMMES DER INGENTING. Så følger noten med,
+        // den dag standarden bliver bedre — i stedet for at stå fast på den
+        // ordlyd, der tilfældigvis var i feltet den dag, man trykkede gem.
+        AppSettings.Current.Optagenote =
+            tekst == Googlekalender.StandardOptagenote.Trim() ? "" : tekst;
+
+        AppSettings.Current.Save();
+
+        VisNote();
+        Notestatus.Text = AppSettings.Current.Optagenote.Length > 0
+            ? "Gemt. Din egen tekst bruges." : "Gemt. Standardteksten bruges.";
+    }
+
+    private void NulstilNote_Klik(object sender, RoutedEventArgs e)
+    {
+        AppSettings.Current.Optagenote = "";
+        AppSettings.Current.Save();
+
+        VisNote();
+        Notestatus.Text = "Nulstillet til standardteksten.";
+    }
+
     private void IntegrationerLaest_Klik(object sender, RoutedEventArgs e)
     {
         AppSettings.Current.IntegrationerLaest = IntegrationerLaest.IsChecked == true;

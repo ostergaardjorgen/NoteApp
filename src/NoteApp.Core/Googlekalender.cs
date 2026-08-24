@@ -94,14 +94,81 @@ public static class Googlekalender
     /// Deltagerne får den at vide FØR mødet, hvor de kan nå at sige fra — ikke
     /// i det øjeblik optagelsen begynder.
     ///
-    /// «PLANLÆGGER AT OPTAGE» og ikke «bliver optaget». Et Meet-link er ikke
-    /// et løfte om, at der bliver trykket optag, og en indkaldelse, der siger
+    /// «PLANLÆGGES OPTAGET» og ikke «bliver optaget». Et Meet-link er ikke et
+    /// løfte om, at der bliver trykket optag, og en indkaldelse, der siger
     /// noget, der ikke skete, er værre end ingen note.
+    ///
+    /// RETTEN TIL AT SIGE NEJ STÅR MED, OG DEN STÅR KONKRET. «Sig til, hvis du
+    /// helst er fri» er en høflighed; en modtager ved ikke, om det betyder
+    /// noget. Der skal stå, hvem man siger det til, hvornår det kan siges, og
+    /// hvad der så sker — ellers er det en oplysning og ikke et valg.
+    ///
+    /// Formen er med vilje juridisk: faste overskrifter, adskilt fra resten af
+    /// indkaldelsen, uden salgstone. Den skal kunne læses af en, der ikke
+    /// kender appen, og stå sig, hvis nogen spørger bagefter.
+    ///
+    /// LYDEN OG TEKSTEN ER IKKE DET SAMME, OG DET SKAL STÅ.
+    ///
+    /// Her stod først «lyd og udskrevet tekst deles ikke med eksterne
+    /// tjenester». Lyden forlader aldrig maskinen, og dét er sandt — men
+    /// vælger arrangøren at få lavet et referat, sendes TEKSTEN til Mistral.
+    /// Sætningen ville altså være usand netop i det tilfælde, hvor nogen
+    /// bagefter kiggede efter. En ansvarsfraskrivelse, der ikke holder, er
+    /// værre end ingen.
+    ///
+    /// Den siger derfor to ting hver for sig: lyden bliver, teksten kan
+    /// behandles hos en databehandler i EU.
     /// </summary>
-    public const string Optagenote =
-        "Mødet planlægges optaget med NoteApp.\n\n" +
-        "Lyden og den udskrevne tekst bliver på arrangørens egen computer og " +
-        "deles ikke med eksterne tjenester. Sig til, hvis du helst er fri.";
+    public const string StandardOptagenote =
+        "Mødet planlægges optaget med NoteApp.\n" +
+        "\n" +
+        "— — — — — — — — — —\n" +
+        "OPLYSNING OM OPTAGELSE\n" +
+        "\n" +
+        "Formål: Optagelsen anvendes til at udarbejde referat og noter fra mødet.\n" +
+        "\n" +
+        "Behandling: Lydoptagelsen behandles lokalt på arrangørens computer og " +
+        "overføres ikke til eksterne tjenester. Vælger arrangøren at få " +
+        "udarbejdet et referat med en sprogmodel, behandles den udskrevne tekst " +
+        "— ikke lyden — hos en databehandler i EU.\n" +
+        "\n" +
+        "Indsigelse: Du kan gøre indsigelse mod at blive optaget. Meddel det til " +
+        "arrangøren forud for mødet eller ved mødets begyndelse; optagelsen " +
+        "undlades da.\n" +
+        "\n" +
+        "Sletning: Du kan til enhver tid anmode arrangøren om at få optagelsen " +
+        "og den udskrevne tekst slettet.\n" +
+        "\n" +
+        "Ansvarlig: Mødets arrangør er dataansvarlig for optagelsen.";
+
+    /// <summary>
+    /// Den note, der faktisk skrives — brugerens egen, hvis der er sat en.
+    ///
+    /// DEN KAN RETTES, MEN IKKE FJERNES. Ordlyden hører til den, der holder
+    /// mødet: et firma har sin egen formulering, en underviser en anden, og
+    /// en tekst, man ikke må røre, bliver til en, man arbejder udenom.
+    ///
+    /// Står feltet tomt, bruges standarden. Appen opfordrer ALTID til at
+    /// fortælle deltagerne, at der optages, og et tomt felt er ikke et valg
+    /// om at lade være — det er et felt, ingen har udfyldt.
+    /// </summary>
+    public static string Optagenote
+    {
+        get
+        {
+            try
+            {
+                var egen = AppSettings.Current.Optagenote;
+                if (!string.IsNullOrWhiteSpace(egen)) return egen.Trim();
+            }
+            catch (Exception)
+            {
+                // Kan indstillingerne ikke laeses, staar standarden.
+            }
+
+            return StandardOptagenote;
+        }
+    }
 
     private const string Godkend = "https://accounts.google.com/o/oauth2/v2/auth";
     private const string Noegler = "https://oauth2.googleapis.com/token";

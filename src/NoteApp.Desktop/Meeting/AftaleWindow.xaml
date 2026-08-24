@@ -157,7 +157,7 @@
                     Content="Tilføj et Google Meet-link" />
           <TextBlock Margin="24,2,0,0" FontSize="11" TextWrapping="Wrap"
                      Foreground="{StaticResource TekstMeget}"
-                     Text="Linket kommer med tilbage, så mødet kan startes herfra. I indkaldelsen skrives, at mødet planlægges optaget — og at lyden bliver på din computer. Deltagerne skal vide det før mødet, ikke i det øjeblik optagelsen begynder." />
+                     Text="Linket kommer med tilbage, så mødet kan startes herfra. I indkaldelsen skrives med småt, at mødet planlægges optaget, at lyden bliver på din computer — og at man kan sige fra. Deltagerne skal vide det før mødet, ikke i det øjeblik optagelsen begynder." />
 
           <CheckBox x:Name="InviterGaester" FontSize="12" Margin="0,9,0,0"
                     Content="Jeg vil invitere gæster" />
