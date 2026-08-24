@@ -190,6 +190,13 @@ public partial class TranscribeView : UserControl
         IndlaesOptagelser();
         VisSeneste();
 
+        // Panelet til hoejre skal foelge med, mens der skrives ud - ellers
+        // staar der «ikke skrevet ud» paa den optagelse, motoren arbejder paa.
+        void Foelgmed() => Dispatcher.Invoke(VisSeneste);
+
+        Jobs.Udskriftsvagt.Aendret += Foelgmed;
+        Unloaded += (_, _) => Jobs.Udskriftsvagt.Aendret -= Foelgmed;
+
         if (aabnMappe is null) return;
 
         VaelgOptagelse(AlleKnuder()
@@ -1429,6 +1436,16 @@ public partial class TranscribeView : UserControl
             // Tilbuddet om et dokument står stadig — men som den anden knap.
             // Der spørges KUN, når der er en nøgle at gøre det med. Et tilbud,
             // der ender i «du mangler noget», er ikke et tilbud.
+            // KOERSLEN ER SLUT HER, OG DET SKAL VAGTEN VIDE NU.
+            //
+            // Slut() laa i finally, altsaa EFTER dialogen nedenfor. Saa stod
+            // der «skrives ud nu …» i listen, mens man laeste et spoergsmaal
+            // om, hvad der skulle ske BAGEFTER - og hang der, indtil man
+            // svarede. Transskriptionen er faerdig; dialogen handler om det
+            // naeste skridt.
+            Jobs.Udskriftsvagt.Slut();
+            VisSeneste();
+
             if (SkyNoegle.Hent() is not null)
             {
                 var gennemgaa = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
@@ -1443,9 +1460,29 @@ public partial class TranscribeView : UserControl
                     annuller: "Lav et dokument nu",
                     slags: Dialogs.Slags.Godt);
 
-                // Udskriften er allerede på skærmen, så «Gennemgå» er at blive
-                // staaende. Det er den anden knap, der foerer et sted hen.
-                if (!gennemgaa) Referat_Click(this, new RoutedEventArgs());
+                if (gennemgaa)
+                {
+                    // «GENNEMGAA» SKAL FOERE HEN TIL TEKSTEN - ogsaa naar man
+                    // ikke staar paa skaermen laengere.
+                    //
+                    // Her stod «udskriften er allerede paa skaermen, saa
+                    // Gennemgaa er at blive staaende». Det holdt, dengang man
+                    // var noedt til at blive. Nu kan man forlade skaermen,
+                    // mens der skrives ud - det er hele pointen med bjaelken -
+                    // og saa landede man paa en tom Optagelser-skaerm uden
+                    // noget valgt. Knappen lovede noget, den ikke gjorde.
+                    var id = MeetingStore.Load(valgt.Mappe)?.Id.ToString();
+
+                    if (Window.GetWindow(this) is MainWindow hoved
+                        && id is { Length: > 0 })
+                    {
+                        hoved.GaaTilOptagelse(id);
+                    }
+                }
+                else
+                {
+                    Referat_Click(this, new RoutedEventArgs());
+                }
             }
             _sidsteMappe = valgt.Mappe;
         }
