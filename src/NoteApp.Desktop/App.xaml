@@ -398,10 +398,22 @@
       <Setter Property="Template">
         <Setter.Value>
           <ControlTemplate TargetType="DatePickerTextBox">
-            <Border Background="{TemplateBinding Background}"
+            <Border x:Name="flade" Background="{TemplateBinding Background}"
                     BorderThickness="0" Padding="{TemplateBinding Padding}">
               <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center" />
             </Border>
+
+            <!-- LAAST SKAL VAERE MOERKT, IKKE GRAAT.
+                 WPF's egen skabelon maler en lys flade, naar feltet er slaaet
+                 fra, og resultatet var en graa kasse midt i en moerk skaerm -
+                 den lignede noget, der var gaaet i stykker, ikke noget, der
+                 var laast. Set to steder, foer aarsagen stod klar. -->
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsEnabled" Value="False">
+                <Setter TargetName="flade" Property="Background" Value="#FF181B22" />
+                <Setter Property="Foreground" Value="{StaticResource TekstMeget}" />
+              </Trigger>
+            </ControlTemplate.Triggers>
           </ControlTemplate>
         </Setter.Value>
       </Setter>

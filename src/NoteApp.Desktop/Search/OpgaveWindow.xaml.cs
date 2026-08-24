@@ -57,12 +57,24 @@ public partial class OpgaveWindow : Window
 
             Navn.IsReadOnly = true;
             Beskrivelse.IsReadOnly = true;
-            Frist.IsEnabled = false;
 
-            Fejl.Foreground = (System.Windows.Media.Brush)FindResource("TekstMeget");
-            Fejl.Text = "Opgaven kommer fra Google Tasks. Tekst og frist rettes dér — "
-                      + "her kan du sætte prioritet og krydse den af, og afkrydsningen "
-                      + "sendes op igen.";
+            // FRISTEN SOM TEKST. En laast datovaelger staar som en graa kasse
+            // midt i en moerk skaerm og ser ud som noget, der er gaaet i
+            // stykker.
+            Frist.Visibility = System.Windows.Visibility.Collapsed;
+            Fristtekst.Visibility = System.Windows.Visibility.Visible;
+
+            Fristtekst.Text = r.Opgave.Deadline is { } f
+                ? f.LocalDateTime.ToString("d. MMMM yyyy")
+                : "ingen frist";
+
+            // NOTET STAAR FOR SIG, ikke i Fejl-feltet. Det laa i samme celle
+            // som knapperne og loeb ind under dem.
+            Googlenote.Text = "Opgaven kommer fra Google Tasks. Tekst og frist rettes dér — "
+                            + "her kan du sætte prioritet og krydse den af, og "
+                            + "afkrydsningen sendes op igen.";
+
+            Googlenote.Visibility = System.Windows.Visibility.Visible;
         }
 
         Herkomst.Text = string.Join("  ·  ", dele);

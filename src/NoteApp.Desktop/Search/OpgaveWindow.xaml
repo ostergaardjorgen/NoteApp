@@ -75,6 +75,14 @@
         <TextBlock Text="FRIST" FontSize="9.5" FontWeight="SemiBold"
                    Margin="2,0,0,6" Foreground="{StaticResource TekstMeget}" />
         <DatePicker x:Name="Frist" Width="150" FontSize="12.5" />
+
+        <!-- EN LAAST DATOVAELGER SER UD SOM NOGET, DER ER GAAET I STYKKER.
+             Den staar som en graa kasse midt i en moerk skaerm - samme fejl
+             som paa aftalen, og samme svar: naar den ikke kan rettes, staar
+             datoen som tekst i stedet. -->
+        <TextBlock x:Name="Fristtekst" FontSize="13.5" Width="150"
+                   Visibility="Collapsed" Margin="0,6,0,0"
+                   Foreground="{StaticResource Tekst}" />
       </StackPanel>
 
       <StackPanel Grid.Column="2">
@@ -94,17 +102,35 @@
                 Content="Opgaven er gjort" />
     </Grid>
 
-    <Grid Grid.Row="5" Margin="0,20,0,0">
-      <TextBlock x:Name="Fejl" FontSize="12" TextWrapping="Wrap"
-                 VerticalAlignment="Center" HorizontalAlignment="Left"
-                 Foreground="{StaticResource Advarsel}" />
+    <StackPanel Grid.Row="5" Margin="0,16,0,0">
 
-      <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-        <Button Content="Luk" Click="Luk_Klik" Padding="18,8" Margin="0,0,10,0"
-                ToolTip="Lukker uden at gemme" />
-        <Button Content="Gem og luk" Click="Gem_Klik" Padding="20,8"
-                Style="{StaticResource Primaer}" IsDefault="True" />
-      </StackPanel>
-    </Grid>
+      <!-- NOTET HAR SIN EGEN PLADS.
+           Det laa i SAMME celle som knapperne, venstrestillet, og loeb ind
+           under dem: «her kan du saette prioritet o…» og saa var resten vaek.
+           En forklaring, man ikke kan laese til ende, er ikke en forklaring. -->
+      <TextBlock x:Name="Googlenote" FontSize="11.5" TextWrapping="Wrap"
+                 LineHeight="18" Visibility="Collapsed" Margin="2,0,2,12"
+                 Foreground="{StaticResource TekstMeget}" />
+
+      <!-- To spalter frem for et overlap. Med Left og Right i den samme celle
+           er det bredden paa dagen, der afgoer, om teksten kan laeses. -->
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+
+        <TextBlock x:Name="Fejl" Grid.Column="0" FontSize="12" TextWrapping="Wrap"
+                   VerticalAlignment="Center" Margin="2,0,14,0"
+                   Foreground="{StaticResource Advarsel}" />
+
+        <StackPanel Grid.Column="1" Orientation="Horizontal">
+          <Button Content="Luk" Click="Luk_Klik" Padding="18,8" Margin="0,0,10,0"
+                  ToolTip="Lukker uden at gemme" />
+          <Button Content="Gem og luk" Click="Gem_Klik" Padding="20,8"
+                  Style="{StaticResource Primaer}" IsDefault="True" />
+        </StackPanel>
+      </Grid>
+    </StackPanel>
   </Grid>
 </Window>
