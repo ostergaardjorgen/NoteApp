@@ -455,6 +455,35 @@ public partial class SearchView : UserControl
     }
 
     /// <summary>
+    /// Åbner aftalen på Googles egen side, så der kan inviteres gæster.
+    ///
+    /// DET ER DÉR, KONTAKTERNE ER. Invitationer sendes af Google, svarene
+    /// lander hos Google, og navnene ligger i Googles adressebog. En
+    /// deltagerliste bygget her ville være en dårligere kopi af en skærm,
+    /// brugeren kender — og hver adresse skulle tastes forfra.
+    ///
+    /// Kan browseren ikke åbnes, siges det. Aftalen ER oprettet, og det må
+    /// ikke se ud, som om noget gik tabt.
+    /// </summary>
+    private void AabnHosGoogle(string webadresse)
+    {
+        if (webadresse.Length == 0) return;
+
+        try
+        {
+            System.Diagnostics.Process.Start(
+                new System.Diagnostics.ProcessStartInfo(webadresse) { UseShellExecute = true });
+        }
+        catch (Exception)
+        {
+            Dialogs.AppDialog.Vis(Window.GetWindow(this),
+                "Aftalen er oprettet hos Google",
+                "Browseren kunne ikke åbnes herfra. Åbn Google Kalender og find "
+                + "aftalen dér for at invitere gæster.");
+        }
+    }
+
+    /// <summary>
     /// Lægger aftalen op hos Google, hvis brugeren satte hak.
     ///
     /// DEN KØRER EFTER, AT AFTALEN ER GEMT LOKALT. Går oplægningen galt, står
@@ -475,11 +504,24 @@ public partial class SearchView : UserControl
             var noegle = Integrationsfiler.Hent("google").Opdateringsnoegle;
             if (noegle.Length == 0) return;
 
-            var fremmedId = await Googlekalender.OpretAsync(vindue.Aftalen, noegle);
+            var svar = await Googlekalender.OpretAsync(
+                vindue.Aftalen, noegle, vindue.SkalHaveMeet);
 
-            vindue.Aftalen.FremmedId = fremmedId;
+            vindue.Aftalen.FremmedId = svar.Id;
+
+            // MEET-LINKET SKAL TILBAGE I APPEN. Uden det er mødet klikbart hos
+            // Google og dødt her — og så er kalenderen i Cockpittet noget, man
+            // alligevel skal forlade for at komme med til mødet.
+            //
+            // Det overskriver ikke et link, brugeren selv har skrevet. Har man
+            // sat et Teams-link ind, er det dét, mødet foregår på.
+            if (svar.Moedelink.Length > 0 && vindue.Aftalen.Link.Length == 0)
+                vindue.Aftalen.Link = svar.Moedelink;
+
             Kalender.Gem(vindue.Aftalen);
             VisKalender();
+
+            if (vindue.SkalInvitere) AabnHosGoogle(svar.Webadresse);
         }
         catch (Exception ex)
         {

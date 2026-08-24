@@ -35,6 +35,19 @@ public partial class AftaleWindow : Window
     /// </summary>
     public bool SkalOpHosGoogle { get; private set; }
 
+    /// <summary>Skal aftalen have et Google Meet-link?</summary>
+    public bool SkalHaveMeet { get; private set; }
+
+    /// <summary>
+    /// Skal aftalen åbnes hos Google bagefter, så der kan inviteres gæster?
+    ///
+    /// GÆSTER INVITERES IKKE HERFRA, og det er et bevidst fravalg. Kontakterne
+    /// ligger hos Google, invitationen sendes af Google, og svarene lander hos
+    /// Google. En deltagerliste bygget her ville være en dårligere kopi af en
+    /// skærm, brugeren kender — og hver eneste adresse skulle tastes forfra.
+    /// </summary>
+    public bool SkalInvitere { get; private set; }
+
     private sealed record Punkt(string Navn, string? Vaerdi);
 
     public AftaleWindow(Aftale? aftale)
@@ -129,6 +142,16 @@ public partial class AftaleWindow : Window
         GoogleForklaring.Visibility = Visibility.Visible;
 
         if (!erNy) OpretHosGoogle.Content = "Opret den i Google Kalender nu";
+    }
+
+    /// <summary>
+    /// Undervalgene hører til hakket ovenfor og vises kun sammen med det.
+    /// </summary>
+    private void Google_Skiftet(object sender, RoutedEventArgs e)
+    {
+        Googlevalg.Visibility = OpretHosGoogle.IsChecked == true
+            ? Visibility.Visible
+            : Visibility.Collapsed;
     }
 
     private static DateTimeOffset Naeste()
@@ -249,6 +272,9 @@ public partial class AftaleWindow : Window
 
         SkalOpHosGoogle = OpretHosGoogle.Visibility == Visibility.Visible
                        && OpretHosGoogle.IsChecked == true;
+
+        SkalHaveMeet = SkalOpHosGoogle && MedMeet.IsChecked == true;
+        SkalInvitere = SkalOpHosGoogle && InviterGaester.IsChecked == true;
 
         DialogResult = true;
     }

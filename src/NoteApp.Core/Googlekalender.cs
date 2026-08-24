@@ -55,6 +55,20 @@ namespace NoteApp.Core;
 /// sendes til maskinens loopback-adresse, og at der bruges PKCE — så en
 /// opsnappet kode ikke kan byttes til en nøgle af nogen anden.
 /// </summary>
+/// <summary>
+/// Svaret, når en aftale er lagt op hos Google.
+///
+/// DER RETURNERES TRE TING OG IKKE KUN ET ID, fordi alle tre skal bruges med
+/// det samme og ikke kan hentes igen uden endnu et kald:
+///
+///   Id           genkender aftalen ved næste hentning, så den ikke står dobbelt
+///   Moedelink    Meet-linket — det skal tilbage i appen, ellers er mødet
+///                klikbart hos Google og dødt her
+///   Webadresse   aftalen på Googles egen side. Den bruges, når der skal
+///                inviteres gæster: det er dér, man har sine kontakter
+/// </summary>
+public sealed record Googlesvar(string Id, string Moedelink, string Webadresse);
+
 public static class Googlekalender
 {
     public const string Id = "google";
@@ -328,8 +342,9 @@ public static class Googlekalender
     /// TIDSZONEN SENDES MED. Google gætter ellers på kalenderens egen, og en
     /// aftale, der lander en time forkert, er værre end en, der fejler.
     /// </summary>
-    public static async Task<string> OpretAsync(Aftale aftale, string opdateringsnoegle,
-                                                CancellationToken ct = default)
+    public static async Task<Googlesvar> OpretAsync(Aftale aftale, string opdateringsnoegle,
+                                                    bool medMeet = true,
+                                                    CancellationToken ct = default)
     {
         if (Googleklient.Hent() is not var (klientId, hemmelighed) || klientId.Length == 0)
             throw new InvalidOperationException(Googleklient.Mangler);
@@ -358,7 +373,36 @@ public static class Googlekalender
         var hvor = aftale.Link.Length > 0 ? aftale.Link : aftale.Sted;
         if (hvor.Length > 0) krop["location"] = hvor;
 
-        using var anmodning = new HttpRequestMessage(HttpMethod.Post, Aftaler)
+        // ---- Google Meet
+        //
+        // Et Meet-link laves ikke ved at skrive en adresse i et felt. Google
+        // SKAL bede om det, og det sker med en createRequest med et id, der er
+        // vores eget. Id'et goer kaldet gentageligt: sendes det samme to gange,
+        // laver Google ikke to moederum.
+        //
+        // conferenceDataVersion=1 skal med paa adressen. Uden den bliver hele
+        // conferenceData tavst ignoreret - aftalen bliver oprettet, bare uden
+        // link, og der kommer ingen fejl at gaa efter.
+        var adresse = Aftaler;
+
+        if (medMeet)
+        {
+            krop["conferenceData"] = new Dictionary<string, object?>
+            {
+                ["createRequest"] = new Dictionary<string, object?>
+                {
+                    ["requestId"] = Guid.NewGuid().ToString("N"),
+                    ["conferenceSolutionKey"] = new Dictionary<string, string>
+                    {
+                        ["type"] = "hangoutsMeet"
+                    }
+                }
+            };
+
+            adresse += "?conferenceDataVersion=1";
+        }
+
+        using var anmodning = new HttpRequestMessage(HttpMethod.Post, adresse)
         {
             Content = new StringContent(JsonSerializer.Serialize(krop),
                                         Encoding.UTF8, "application/json")
@@ -382,7 +426,7 @@ public static class Googlekalender
                 "Aftalen blev oprettet hos Google, men der kom intet id tilbage. " +
                 "Den kan komme til at staa dobbelt ved naeste hentning.");
 
-        return v;
+        return new Googlesvar(v, Moedelink(doc.RootElement), Tekst(doc.RootElement, "htmlLink"));
     }
 
     private static List<Aftale> Laes(string json)
@@ -448,6 +492,26 @@ public static class Googlekalender
     {
         var meet = Tekst(p, "hangoutLink");
         if (meet.Length > 0) return meet;
+
+        // conferenceData er den anden vej til det samme.
+        //
+        // NAAR ET MEET-RUM LIGE ER BESTILT, er hangoutLink ikke altid udfyldt i
+        // svaret - rummet kan staa som «pending» et oejeblik. Linket ligger til
+        // gengaeld i entryPoints med det samme. Uden det her ville et nyoprettet
+        // moede af og til komme uden link, og det ville se tilfaeldigt ud, for
+        // det ville virke de fleste gange.
+        if (p.TryGetProperty("conferenceData", out var konf)
+            && konf.TryGetProperty("entryPoints", out var indgange)
+            && indgange.ValueKind == JsonValueKind.Array)
+        {
+            foreach (var indgang in indgange.EnumerateArray())
+            {
+                if (Tekst(indgang, "entryPointType") != "video") continue;
+
+                var uri = Tekst(indgang, "uri");
+                if (uri.Length > 0) return uri;
+            }
+        }
 
         var beskrivelse = Tekst(p, "description");
 
