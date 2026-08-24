@@ -112,6 +112,43 @@ public sealed record Opgave
 
     public bool Faerdig { get; set; }
 
+    /// <summary>
+    /// Hvornår den blev krydset af. Null, hvis den aldrig er blevet det.
+    ///
+    /// DEN FINDES, FOR AT DAGENS AFKRYDSEDE KAN BLIVE STÅENDE DAGEN UD.
+    ///
+    /// En opgave, der forsvinder i det sekund, man sætter fluebenet, giver
+    /// ingen kvittering — man ved ikke, om man ramte den rigtige, og man kan
+    /// ikke fortryde uden at lede efter den. Den bliver stående, dæmpet, til
+    /// dagen er slut. I morgen er den væk.
+    ///
+    /// SÆT DEN DER, HVOR FLUEBENET SÆTTES — ikke i Faerdig-egenskabens setter.
+    /// System.Text.Json sætter egenskaber i den rækkefølge, de står i FILEN,
+    /// og en setter, der skriver «nu» ind, ville overskrive den gemte dato,
+    /// hver gang en gammel opgave blev læst ind i den forkerte rækkefølge.
+    /// </summary>
+    public DateTimeOffset? Faerdiggjort { get; set; }
+
+    /// <summary>Blev den krydset af i dag?</summary>
+    public bool FaerdigIDag(DateOnly idag) =>
+        Faerdig && Faerdiggjort is { } t
+                && DateOnly.FromDateTime(t.LocalDateTime) == idag;
+
+    /// <summary>
+    /// Sætter fluebenet og husker hvornår.
+    ///
+    /// Ét sted frem for tre. Fluebenet kan sættes i Cockpittet, i
+    /// opgavevinduet og i transkriptionen, og datoen skal følge med alle tre
+    /// steder — den slags glemmes det fjerde sted, det bliver brugt.
+    /// </summary>
+    public void SaetFaerdig(bool faerdig)
+    {
+        if (Faerdig == faerdig) return;
+
+        Faerdig = faerdig;
+        Faerdiggjort = faerdig ? DateTimeOffset.Now : null;
+    }
+
     public DateTimeOffset Oprettet { get; init; } = DateTimeOffset.Now;
 
     /// <summary>Tidsstemplet i optagelsen, opgaven kom fra. Tom ved en manuel opgave.</summary>

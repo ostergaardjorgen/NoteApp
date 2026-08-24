@@ -125,6 +125,10 @@ public partial class MainWindow : Window
         NoteApp.Core.Notifikationer.MeldManglendeOpsaetning(
             NoteApp.Core.Llm.SkyNoegle.Hent() is null);
 
+        // Vinduets maal, foer det tegnes. Saettes de senere, ser man vinduet
+        // springe fra standardstoerrelsen til den gemte.
+        HentVinduesstoerrelse();
+
         // Efter en oplæsning peger kvitteringen videre til transskription.
         // Skærmskiftet skal ske her, fordi det er MainWindow, der ejer
         // navigationen — og fordi menupunktet skal markeres med, ellers
@@ -686,7 +690,78 @@ public partial class MainWindow : Window
     {
         if (!_moede.StopHvisIGang()) { e.Cancel = true; return; }
 
+        GemVinduesstoerrelse();
+
         _genvej.Dispose();
         base.OnClosing(e);
+    }
+
+    /// <summary>
+    /// Husker, hvor stort vinduet stod.
+    ///
+    /// DER GEMMES «RESTORE»-MAALENE, ikke de aktuelle. Er vinduet maksimeret,
+    /// er ActualWidth hele skærmen — og gemte man det, ville vinduet fylde
+    /// skærmen ud, også når man bagefter trykker gendan. RestoreBounds er
+    /// målene, det havde, FØR det blev maksimeret, og det er dem, man vil
+    /// tilbage til.
+    ///
+    /// POSITIONEN GEMMES IKKE. En skærm, der er koblet fra siden i går, ville
+    /// betyde et vindue, ingen kan se — en langt værre fejl end at åbne midt
+    /// på skærmen.
+    /// </summary>
+    private void GemVinduesstoerrelse()
+    {
+        try
+        {
+            var maksimeret = WindowState == WindowState.Maximized;
+
+            var maal = maksimeret || WindowState == WindowState.Minimized
+                ? RestoreBounds
+                : new Rect(Left, Top, ActualWidth, ActualHeight);
+
+            // Et minimeret vindue uden gemte maal giver et tomt rektangel.
+            // Saa gemmes der ingenting frem for et vindue paa nul gange nul.
+            if (maal.Width >= MinWidth && maal.Height >= MinHeight)
+            {
+                AppSettings.Current.VinduesBredde = maal.Width;
+                AppSettings.Current.VinduesHoejde = maal.Height;
+            }
+
+            AppSettings.Current.VinduetMaksimeret = maksimeret;
+            AppSettings.Current.Save();
+        }
+        catch (Exception)
+        {
+            // En stoerrelse er ikke noget at forhindre en nedlukning for.
+        }
+    }
+
+    /// <summary>
+    /// Sætter vinduet, som det stod sidst.
+    ///
+    /// MAALENE KLEMMES IND PAA EN SKAERM, DER FINDES. Har man kørt appen på en
+    /// bred skærm og starter den på den bærbare, ville et vindue på 3400
+    /// pixel række langt ud over kanten — med lukkeknappen uden for skærmen.
+    /// </summary>
+    private void HentVinduesstoerrelse()
+    {
+        try
+        {
+            var b = AppSettings.Current.VinduesBredde;
+            var h = AppSettings.Current.VinduesHoejde;
+
+            if (b >= MinWidth && h >= MinHeight)
+            {
+                Width = Math.Min(b, SystemParameters.WorkArea.Width);
+                Height = Math.Min(h, SystemParameters.WorkArea.Height);
+            }
+
+            if (AppSettings.Current.VinduetMaksimeret)
+                WindowState = WindowState.Maximized;
+        }
+        catch (Exception)
+        {
+            // Saa staar maalene fra XAML'en. Appen skal aabne.
+        }
     }
 }

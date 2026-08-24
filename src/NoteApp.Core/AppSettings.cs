@@ -217,6 +217,27 @@ public sealed class AppSettings
     /// <summary>Bredden på Cockpittets højre spalte — opgaverne.</summary>
     public double CockpitHoejre { get; set; }
 
+    /// <summary>
+    /// Hovedvinduets størrelse, som det stod, da appen sidst blev lukket.
+    ///
+    /// STØRRELSEN ER ET VALG, DER SKAL OVERLEVE EN GENSTART — af samme grund
+    /// som spaltebredderne. Har man trukket vinduet ud over en bred skærm,
+    /// fordi der skal være plads til kalenderen, er det irriterende at gøre
+    /// det igen hver morgen.
+    ///
+    /// Positionen gemmes IKKE. En skærm, der er koblet fra siden i går, ville
+    /// betyde et vindue, ingen kan se — og det er en langt værre fejl end at
+    /// åbne midt på skærmen. Windows placerer det selv.
+    ///
+    /// Nul betyder «aldrig gemt» og giver målene fra XAML'en.
+    /// </summary>
+    public double VinduesBredde { get; set; }
+
+    public double VinduesHoejde { get; set; }
+
+    /// <summary>Var vinduet maksimeret? Så åbnes det maksimeret igen.</summary>
+    public bool VinduetMaksimeret { get; set; }
+
     private static string Path => System.IO.Path.Combine(UserDataPaths.Root, "indstillinger.json");
 
     private static AppSettings? _current;

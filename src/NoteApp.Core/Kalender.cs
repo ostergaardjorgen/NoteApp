@@ -107,6 +107,14 @@ public sealed record Aftale
 
     public bool ErIGang(DateTimeOffset nu) => nu >= Start.AddMinutes(-5) && nu <= Slutter;
 
+    /// <summary>
+    /// Er mødet forbi? Vises grå, så det er tydeligt, at det er sket.
+    ///
+    /// Kun brugbart om dagens egne aftaler — dem fra i går står slet ikke i
+    /// listen. Se <see cref="Kalender.Kommende"/>.
+    /// </summary>
+    public bool ErOverstaaet(DateTimeOffset nu) => Slutter < nu;
+
     /// <summary>Kan aftalen rettes her i appen?</summary>
     public bool KanRettes => Kilde == Kalenderkilde.Lokal;
 }
@@ -183,13 +191,43 @@ public static class Kalender
     /// næste, man vil vide, hvad der kommer — ikke at der ikke er mere i dag.
     /// Derfor fyldes der op fremad, indtil der er noget at se på.
     /// </summary>
+    /// <summary>
+    /// Det, der skal ske — og det, der ALLEREDE er sket i dag.
+    ///
+    /// DAGENS OVERSTÅEDE MØDER BLIVER STÅENDE, TIL DAGEN ER SLUT.
+    ///
+    /// Første udgave fjernede en aftale i det øjeblik, den var forbi. Det er
+    /// forkert: klokken to om eftermiddagen er spørgsmålet ikke kun «hvad
+    /// mangler jeg», men også «hvad nåede jeg» — og et møde, der forsvinder
+    /// fra listen, ser ud som et møde, der aldrig var der. Det gælder især
+    /// det, man skulle have optaget og glemte.
+    ///
+    /// De vises grå, så det er tydeligt, at de er overstået. Se
+    /// <see cref="Aftale.ErOverstaaet"/>.
+    ///
+    /// I MORGEN ER DE VÆK. En liste, der bærer i går med sig, er ikke en
+    /// kalender; den er en historik, og den findes et andet sted.
+    ///
+    /// Maksimum tælles på de KOMMENDE. Har man haft fem møder i dag og har to
+    /// tilbage, skal begge de to kunne ses — ellers ville en travl formiddag
+    /// skubbe eftermiddagen ud af skærmen.
+    /// </summary>
     public static List<Aftale> Kommende(DateTimeOffset nu, int maks = 6)
     {
-        var alle = Alle().Where(a => a.Slutter >= nu).OrderBy(a => a.Start).ToList();
+        var alle = Alle();
 
-        var idag = alle.Where(a => a.Start.Date == nu.Date).ToList();
+        var overstaaet = alle
+            .Where(a => a.Slutter < nu && a.Start.Date == nu.Date)
+            .OrderBy(a => a.Start)
+            .ToList();
 
-        return idag.Count >= maks ? idag.Take(maks).ToList() : alle.Take(maks).ToList();
+        var fremad = alle.Where(a => a.Slutter >= nu).OrderBy(a => a.Start).ToList();
+
+        var idag = fremad.Where(a => a.Start.Date == nu.Date).ToList();
+
+        var valgte = idag.Count >= maks ? idag.Take(maks) : fremad.Take(maks);
+
+        return overstaaet.Concat(valgte).ToList();
     }
 
     public static void Gem(Aftale a)

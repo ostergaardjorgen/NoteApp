@@ -343,12 +343,26 @@ public partial class SearchView : UserControl
             {
                 if (_a.MoedeId.Length > 0) return Pensel("#FF3DA55A");
                 if (_a.ErIGang(_nu)) return Pensel("#FFE5484D");
+                if (_a.ErOverstaaet(_nu)) return Pensel("#FF2E333D");
 
                 return _a.Start <= _nu.AddHours(1)
                     ? Pensel("#FFE8A33D")
                     : Pensel("#FF3A4150");
             }
         }
+
+        /// <summary>
+        /// Overståede møder står dæmpet.
+        ///
+        /// DE BLIVER STÅENDE DAGEN UD, fordi spørgsmålet klokken to ikke kun
+        /// er «hvad mangler jeg», men også «hvad nåede jeg» — og et møde, der
+        /// forsvinder, ser ud som et møde, der aldrig var der.
+        ///
+        /// Halv gennemsigtighed frem for en grå farve på hvert element:
+        /// dæmper hele kortet på én gang, også kanten og knappen, og kan ikke
+        /// komme ud af trit med resten, den dag farverne ændres.
+        /// </summary>
+        public double Daempning => _a.ErOverstaaet(_nu) ? 0.45 : 1.0;
 
         private static Brush Pensel(string hex) => (Brush)new BrushConverter().ConvertFrom(hex)!;
 
@@ -1129,6 +1143,19 @@ public sealed class Opgavevisning : System.ComponentModel.INotifyPropertyChanged
     public Registeropgave Opgave => _r;
 
     /// <summary>
+    /// En opgave, der er krydset af i dag, står dæmpet.
+    ///
+    /// DEN BLIVER STÅENDE DAGEN UD. En opgave, der forsvinder i det sekund,
+    /// man sætter fluebenet, giver ingen kvittering: man ved ikke, om man
+    /// ramte den rigtige, og man kan ikke fortryde uden at lede efter den.
+    /// I morgen er den væk.
+    ///
+    /// Fluebenet kan stadig trykkes — Opacity slår ikke klik fra. Det er
+    /// netop dét, der gør fortrydelsen mulig.
+    /// </summary>
+    public double Daempning => _r.Opgave.Faerdig ? 0.45 : 1.0;
+
+    /// <summary>
     /// Er herkomsten et LINK — eller bare en oplysning?
     ///
     /// EN OPGAVE UDEN OPTAGELSE HAR INGEN VEJ TILBAGE. Den er skrevet i
@@ -1206,7 +1233,9 @@ public sealed class Opgavevisning : System.ComponentModel.INotifyPropertyChanged
         {
             if (_r.Opgave.Faerdig == value) return;
 
-            _r.Opgave.Faerdig = value;
+            // SaetFaerdig og ikke Faerdig = value: datoen skal foelge med,
+            // saa opgaven kan blive staaende daempet dagen ud.
+            _r.Opgave.SaetFaerdig(value);
             Opgaveregister.Gem(_r);
             _aendret();
         }

@@ -99,9 +99,20 @@ public static class Opgaveregister
     /// men de er heller ikke noget, der skal ske i dag, og en liste, der
     /// begynder med tyve fristløse punkter, bliver ikke læst til ende.
     /// </summary>
+    /// <remarks>
+    /// DAGENS AFKRYDSEDE ER MED — dæmpet og nederst.
+    ///
+    /// En opgave, der forsvinder i det sekund, man sætter fluebenet, giver
+    /// ingen kvittering: man ved ikke, om man ramte den rigtige, og man kan
+    /// ikke fortryde uden at lede efter den. Den bliver stående dagen ud og
+    /// er væk i morgen.
+    ///
+    /// De havner nederst af sig selv — Hastighed.Faerdig er sidste værdi i
+    /// enum'en, og der sorteres på den.
+    /// </remarks>
     public static List<Registeropgave> Aabne(DateOnly idag) =>
         Alle()
-            .Where(r => !r.Opgave.Faerdig)
+            .Where(r => !r.Opgave.Faerdig || r.Opgave.FaerdigIDag(idag))
             .OrderBy(r => (int)r.Hastighed(idag))
             .ThenBy(r => r.Opgave.Prioritet == 0 ? 4 : r.Opgave.Prioritet)
             .ThenBy(r => r.Opgave.Deadline ?? DateTimeOffset.MaxValue)

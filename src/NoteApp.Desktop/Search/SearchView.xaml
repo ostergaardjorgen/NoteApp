@@ -13,14 +13,168 @@
        frem for noget, man bare gør. -->
 
   <Grid Margin="24,20,24,20">
-    <Grid.RowDefinitions>
-      <RowDefinition Height="Auto" />
-      <RowDefinition Height="Auto" />
-      <RowDefinition Height="Auto" />
-      <RowDefinition Height="Auto" />
-      <RowDefinition Height="*" />
-    </Grid.RowDefinitions>
 
+    <!-- ==================== TRE SPALTER ====================
+
+         MIDTEN ER SOEGNINGEN, og det er hele skaermens grund til at vaere der.
+         De to andre spalter er arrangement omkring den: til venstre det, der
+         lige er sket, til hoejre det, der skal goeres.
+
+         SOEGEFELTET STOD FOER OVEN OVER ALLE TRE. Det var en hel skaermbredde
+         brugt paa ét felt, og til gengaeld begyndte kalenderen og opgaverne
+         foerst en tredjedel nede - med tom plads til venstre og hoejre for
+         soegefeltet, som ingen kunne bruge til noget.
+
+         Nu bor soegningen i sin egen spalte sammen med sit resultat. De to
+         hoerer sammen: man skriver og laeser svaret det samme sted. Og de to
+         andre spalter faar hele hoejden, som de faar brug for, saa snart der
+         er mere end fem aftaler i kalenderen.
+
+         Soeger man, fylder resultaterne midten ud. Soeger man ikke, staar der
+         en kort forklaring dér i stedet. Opgaverne til hoejre bliver staaende
+         begge veje: de er ikke et svar paa en soegning, de er det, der venter.
+    -->
+    <Grid>
+      <!-- SPALTERNE KAN TRAEKKES, OG BREDDEN HUSKES.
+           En bredde, man selv har trukket paa plads, og som er vaek i morgen,
+           er vaerre end en fast bredde: saa traekker man den samme spalte hver
+           dag. Bredderne gemmes i indstillingerne, naar traekket slippes.
+
+           De to yderspalter er lige brede fra begyndelsen. Kalenderen og
+           opgaverne er lige meget vaerd - den ene er hvad, den anden er
+           hvornaar - og en smallere kalender var det, der gjorde datoen
+           ulaeselig. -->
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition x:Name="Venstrespalte" Width="340" MinWidth="220" />
+        <ColumnDefinition Width="Auto" />
+        <ColumnDefinition Width="*" MinWidth="320" />
+        <ColumnDefinition Width="Auto" />
+        <ColumnDefinition x:Name="Hoejrespalte" Width="340" MinWidth="220" />
+      </Grid.ColumnDefinitions>
+
+      <!-- ============ VENSTRE: DET, DER SKAL SKE ============
+
+           KALENDEREN STAAR TIL VENSTRE, fordi den laeses foerst. Dagen
+           begynder med «hvad sker der i dag», ikke med «hvad lavede jeg
+           sidst» - og en aftale er det eneste her, der har et klokkeslaet,
+           man kan naa at komme for sent til.
+
+           «Seneste optagelser» stod her og er flyttet til Optagelser-
+           skaermen. Den hoerer hjemme dér, hvor man arbejder med optagelser,
+           og den fyldte den plads, kalenderen har brug for.
+
+           Aftalerne kommer fra appens egen kalender OG fra dem, der er hentet
+           ind. De staar i én liste - hvem der har lagt dem ind, er ikke det,
+           man leder efter, naar man skal optage om fem minutter. -->
+        <Border Grid.Column="0" Background="{StaticResource Panel}" CornerRadius="10"
+                BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+          <DockPanel>
+            <Grid DockPanel.Dock="Top" Margin="14,13,14,8">
+              <TextBlock x:Name="Kalenderoverskrift" FontSize="13" FontWeight="SemiBold"
+                         VerticalAlignment="Center" />
+              <Button Content="Ny aftale" Click="NyAftale_Klik" HorizontalAlignment="Right"
+                      VerticalAlignment="Center" Padding="10,3" FontSize="11" />
+            </Grid>
+
+            <ScrollViewer VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled">
+              <StackPanel>
+            <ItemsControl x:Name="Kalenderrude" Margin="7,0,7,10">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <StackPanel>
+
+                  <!-- DAGSOVERSKRIFTEN.
+                       Datoen stod foer inde i hver aftale, klemt sammen med
+                       klokkeslaet, sted og kilde. Fire oplysninger paa én
+                       linje i en smal spalte betyder, at ingen af dem kan
+                       laeses - og datoen er dén, man leder efter foerst.
+
+                       Nu staar den ét sted pr. dag, stort nok til at blive
+                       set, og aftalerne under den behoever kun deres
+                       klokkeslaet. «I DAG» er gult; resten er graat. -->
+                  <StackPanel Visibility="{Binding Dagsvis}" Margin="2,10,0,6">
+                    <TextBlock Text="{Binding Dagsnavn}" FontSize="11.5"
+                               FontWeight="SemiBold" Foreground="{Binding Dagsfarve}" />
+                    <TextBlock Text="{Binding Dagsdato}" FontSize="10.5" Margin="0,1,0,0"
+                               Foreground="{StaticResource TekstMeget}" />
+                  </StackPanel>
+
+                  <!-- Opacity og ikke en graa farve paa hvert element: den
+                       daemper hele kortet paa én gang - kant, tekst og knap -
+                       og kan ikke komme ud af trit med resten, den dag
+                       farverne aendres. -->
+                  <Border Background="#FF181B22" BorderBrush="{Binding Kant}"
+                          BorderThickness="3,0,0,0" CornerRadius="6"
+                          Padding="11,8" Margin="0,0,0,5"
+                          Opacity="{Binding Daempning}">
+                    <Grid>
+                      <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                      </Grid.ColumnDefinitions>
+
+                      <TextBlock Grid.Column="0" Text="{Binding Klokken}" FontSize="13"
+                                 FontFamily="Consolas" FontWeight="SemiBold"
+                                 VerticalAlignment="Top"
+                                 Margin="0,0,10,0" Foreground="{Binding Kant}" />
+
+                      <StackPanel Grid.Column="1">
+                        <!-- Titlen aabner aftalen. En aftale, man ikke kan
+                             rette, er en aftale, man sletter og laver om. -->
+                        <Button Tag="{Binding}" Click="RetAftale_Klik" Cursor="Hand"
+                                HorizontalAlignment="Left" Padding="0" BorderThickness="0"
+                                Background="Transparent"
+                                ToolTip="Ret aftalen">
+                          <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                              <TextBlock Text="{Binding Titel}" FontSize="12" TextWrapping="Wrap"
+                                         Foreground="{StaticResource Tekst}" />
+                            </ControlTemplate>
+                          </Button.Template>
+                        </Button>
+                        <TextBlock Text="{Binding Under}" FontSize="10.5" Margin="0,3,0,0"
+                                   TextWrapping="Wrap" Foreground="{StaticResource TekstMeget}" />
+                      </StackPanel>
+
+                      <Button Grid.Column="2" Content="{Binding Knap}" Tag="{Binding}"
+                              Click="Aftale_Klik" VerticalAlignment="Top" Margin="8,0,0,0"
+                              Padding="10,4" FontSize="11"
+                              ToolTip="{Binding Knaptip}" />
+                    </Grid>
+                  </Border>
+                  </StackPanel>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <TextBlock x:Name="IngenAftaler" FontSize="11.5" Margin="14,0,14,14"
+                       TextWrapping="Wrap" LineHeight="18" Visibility="Collapsed"
+                       Foreground="{StaticResource TekstSvag}"
+                       Text="Ingen aftaler i kalenderen. Opret en her — eller forbind Google Kalender under Indstillinger, så bliver de hentet ind af sig selv." />
+              </StackPanel>
+            </ScrollViewer>
+          </DockPanel>
+        </Border>
+      <!-- Greb mellem kalenderen og soegningen. Bredden er 14 som foer -
+           mellemrummet ER grebet, saa der ikke bliver bredere af at kunne
+           traekke i det. -->
+      <GridSplitter Grid.Column="1" Width="14" HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch" Background="Transparent"
+                    DragCompleted="Spalte_Trukket"
+                    ToolTip="Træk for at ændre bredden" />
+
+      <!-- ============ MIDTEN: SØGNINGEN ============ -->
+      <Border Grid.Column="2" Background="{StaticResource Panel}" CornerRadius="10"
+              BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+        <Grid Margin="18,16,18,0">
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+          </Grid.RowDefinitions>
+
+          <StackPanel Grid.Row="0">
     <!-- ============ SØGEFELTET ER SKÆRMENS TYNGDEPUNKT ============
 
          Det er ikke pynt, at det står stort og midt på. Appens værdi vokser
@@ -30,7 +184,7 @@
 
          Et søgefelt i et hjørne siger, at søgning er en funktion. Et felt midt
          på siger, at det er dét, skærmen er til. -->
-    <StackPanel Grid.Row="0" Margin="0,0,0,18" HorizontalAlignment="Center">
+    <StackPanel Margin="0,0,0,14" HorizontalAlignment="Center">
       <TextBlock Text="Cockpit" FontSize="26" FontWeight="SemiBold"
                  HorizontalAlignment="Center" />
       <TextBlock Style="{StaticResource Underskrift}" Margin="0,5,0,0"
@@ -38,7 +192,7 @@
                  Text="Alt, der er sagt og skrevet — transkriptioner, dine noter og de færdige dokumenter. Søgningen læser filerne på din maskine, og der sendes intet." />
     </StackPanel>
 
-    <Border Grid.Row="1" Background="{StaticResource Panel}" CornerRadius="12"
+    <Border Background="{StaticResource Panel}" CornerRadius="12"
             BorderBrush="{StaticResource Accent}" BorderThickness="1" Padding="8"
             MaxWidth="820" HorizontalAlignment="Stretch">
       <Border.Effect>
@@ -103,7 +257,7 @@
          tyngdepunkt; en række rullelister i samme højde ville gøre det til ét
          felt blandt fire. Her er de en indsnævring af det, man lige har
          skrevet — og de er små, fordi de sjældnere bruges. -->
-    <StackPanel Grid.Row="2" HorizontalAlignment="Center" Margin="0,12,0,0">
+    <StackPanel HorizontalAlignment="Center" Margin="0,12,0,0">
     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
       <TextBlock Text="Søg kun i" FontSize="11.5" VerticalAlignment="Center"
                  Margin="0,0,10,0" Foreground="{StaticResource TekstMeget}" />
@@ -167,162 +321,11 @@
     </StackPanel>
     </StackPanel>
 
-    <TextBlock x:Name="Status" Grid.Row="3" Style="{StaticResource Underskrift}"
-               Margin="2,10,2,10" HorizontalAlignment="Center" />
+    <TextBlock x:Name="Status" Style="{StaticResource Underskrift}"
+               Margin="2,10,2,4" HorizontalAlignment="Center" />
+          </StackPanel>
 
-    <!-- ==================== TRE SPALTER ====================
-
-         MIDTEN ER SOEGNINGEN, og det er hele skaermens grund til at vaere der.
-         De to andre spalter er arrangement omkring den: til venstre det, der
-         lige er sket, til hoejre det, der skal goeres.
-
-         Soegefeltet staar OVEN OVER alle tre og ikke i midterspalten. Et
-         soegefelt, der er en tredjedel bredt, er et felt blandt flere - og
-         det er ikke, hvad det er.
-
-         Soeger man, fylder resultaterne midten ud. Soeger man ikke, staar der
-         en kort forklaring dér i stedet. Opgaverne til hoejre bliver staaende
-         begge veje: de er ikke et svar paa en soegning, de er det, der venter.
-    -->
-    <Grid Grid.Row="4">
-      <!-- SPALTERNE KAN TRAEKKES, OG BREDDEN HUSKES.
-           En bredde, man selv har trukket paa plads, og som er vaek i morgen,
-           er vaerre end en fast bredde: saa traekker man den samme spalte hver
-           dag. Bredderne gemmes i indstillingerne, naar traekket slippes.
-
-           De to yderspalter er lige brede fra begyndelsen. Kalenderen og
-           opgaverne er lige meget vaerd - den ene er hvad, den anden er
-           hvornaar - og en smallere kalender var det, der gjorde datoen
-           ulaeselig. -->
-      <Grid.ColumnDefinitions>
-        <ColumnDefinition x:Name="Venstrespalte" Width="340" MinWidth="220" />
-        <ColumnDefinition Width="Auto" />
-        <ColumnDefinition Width="*" MinWidth="320" />
-        <ColumnDefinition Width="Auto" />
-        <ColumnDefinition x:Name="Hoejrespalte" Width="340" MinWidth="220" />
-      </Grid.ColumnDefinitions>
-
-      <!-- ============ VENSTRE: DET, DER SKAL SKE ============
-
-           KALENDEREN STAAR TIL VENSTRE, fordi den laeses foerst. Dagen
-           begynder med «hvad sker der i dag», ikke med «hvad lavede jeg
-           sidst» - og en aftale er det eneste her, der har et klokkeslaet,
-           man kan naa at komme for sent til.
-
-           «Seneste optagelser» stod her og er flyttet til Optagelser-
-           skaermen. Den hoerer hjemme dér, hvor man arbejder med optagelser,
-           og den fyldte den plads, kalenderen har brug for.
-
-           Aftalerne kommer fra appens egen kalender OG fra dem, der er hentet
-           ind. De staar i én liste - hvem der har lagt dem ind, er ikke det,
-           man leder efter, naar man skal optage om fem minutter. -->
-        <!-- ============ KALENDEREN ============
-
-             Den staar UNDER opgaverne og ikke over. Opgaverne er det, der
-             skal goeres; kalenderen er det, der skal ske. Det foerste kan man
-             handle paa lige nu, det andet venter paa et klokkeslaet.
-
-             Aftalerne kommer fra appens egen kalender OG fra dem, der er
-             hentet ind. De staar i én liste - hvem der har lagt dem ind, er
-             ikke det, man leder efter, naar man skal optage om fem minutter. -->
-        <Border Grid.Column="0" Background="{StaticResource Panel}" CornerRadius="10"
-                BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
-          <DockPanel>
-            <Grid DockPanel.Dock="Top" Margin="14,13,14,8">
-              <TextBlock x:Name="Kalenderoverskrift" FontSize="13" FontWeight="SemiBold"
-                         VerticalAlignment="Center" />
-              <Button Content="Ny aftale" Click="NyAftale_Klik" HorizontalAlignment="Right"
-                      VerticalAlignment="Center" Padding="10,3" FontSize="11" />
-            </Grid>
-
-            <ScrollViewer VerticalScrollBarVisibility="Auto"
-                          HorizontalScrollBarVisibility="Disabled">
-              <StackPanel>
-            <ItemsControl x:Name="Kalenderrude" Margin="7,0,7,10">
-              <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                  <StackPanel>
-
-                  <!-- DAGSOVERSKRIFTEN.
-                       Datoen stod foer inde i hver aftale, klemt sammen med
-                       klokkeslaet, sted og kilde. Fire oplysninger paa én
-                       linje i en smal spalte betyder, at ingen af dem kan
-                       laeses - og datoen er dén, man leder efter foerst.
-
-                       Nu staar den ét sted pr. dag, stort nok til at blive
-                       set, og aftalerne under den behoever kun deres
-                       klokkeslaet. «I DAG» er gult; resten er graat. -->
-                  <StackPanel Visibility="{Binding Dagsvis}" Margin="2,10,0,6">
-                    <TextBlock Text="{Binding Dagsnavn}" FontSize="11.5"
-                               FontWeight="SemiBold" Foreground="{Binding Dagsfarve}" />
-                    <TextBlock Text="{Binding Dagsdato}" FontSize="10.5" Margin="0,1,0,0"
-                               Foreground="{StaticResource TekstMeget}" />
-                  </StackPanel>
-
-                  <Border Background="#FF181B22" BorderBrush="{Binding Kant}"
-                          BorderThickness="3,0,0,0" CornerRadius="6"
-                          Padding="11,8" Margin="0,0,0,5">
-                    <Grid>
-                      <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                      </Grid.ColumnDefinitions>
-
-                      <TextBlock Grid.Column="0" Text="{Binding Klokken}" FontSize="13"
-                                 FontFamily="Consolas" FontWeight="SemiBold"
-                                 VerticalAlignment="Top"
-                                 Margin="0,0,10,0" Foreground="{Binding Kant}" />
-
-                      <StackPanel Grid.Column="1">
-                        <!-- Titlen aabner aftalen. En aftale, man ikke kan
-                             rette, er en aftale, man sletter og laver om. -->
-                        <Button Tag="{Binding}" Click="RetAftale_Klik" Cursor="Hand"
-                                HorizontalAlignment="Left" Padding="0" BorderThickness="0"
-                                Background="Transparent"
-                                ToolTip="Ret aftalen">
-                          <Button.Template>
-                            <ControlTemplate TargetType="Button">
-                              <TextBlock Text="{Binding Titel}" FontSize="12" TextWrapping="Wrap"
-                                         Foreground="{StaticResource Tekst}" />
-                            </ControlTemplate>
-                          </Button.Template>
-                        </Button>
-                        <TextBlock Text="{Binding Under}" FontSize="10.5" Margin="0,3,0,0"
-                                   TextWrapping="Wrap" Foreground="{StaticResource TekstMeget}" />
-                      </StackPanel>
-
-                      <Button Grid.Column="2" Content="{Binding Knap}" Tag="{Binding}"
-                              Click="Aftale_Klik" VerticalAlignment="Top" Margin="8,0,0,0"
-                              Padding="10,4" FontSize="11"
-                              ToolTip="{Binding Knaptip}" />
-                    </Grid>
-                  </Border>
-                  </StackPanel>
-                </DataTemplate>
-              </ItemsControl.ItemTemplate>
-            </ItemsControl>
-
-            <TextBlock x:Name="IngenAftaler" FontSize="11.5" Margin="14,0,14,14"
-                       TextWrapping="Wrap" LineHeight="18" Visibility="Collapsed"
-                       Foreground="{StaticResource TekstSvag}"
-                       Text="Ingen aftaler i kalenderen. Opret en her — eller forbind Google Kalender under Indstillinger, så bliver de hentet ind af sig selv." />
-              </StackPanel>
-            </ScrollViewer>
-          </DockPanel>
-        </Border>
-      <!-- Greb mellem kalenderen og soegningen. Bredden er 14 som foer -
-           mellemrummet ER grebet, saa der ikke bliver bredere af at kunne
-           traekke i det. -->
-      <GridSplitter Grid.Column="1" Width="14" HorizontalAlignment="Stretch"
-                    VerticalAlignment="Stretch" Background="Transparent"
-                    DragCompleted="Spalte_Trukket"
-                    ToolTip="Træk for at ændre bredden" />
-
-      <!-- ============ MIDTEN: SØGNINGEN ============ -->
-      <Border Grid.Column="2" Background="{StaticResource Panel}" CornerRadius="10"
-              BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
-        <Grid>
+        <Grid Grid.Row="1">
 
           <!-- Staar der ingenting i soegefeltet, staar der her, hvad der
                bliver soegt i. Kort - det er en oplysning, ikke en skaerm. -->
@@ -524,6 +527,7 @@
           Text="Husk, at et møde først kan søges, når det er skrevet ud til tekst — en optagelse alene indeholder ingen ord at lede i." />
           </StackPanel>
         </Grid>
+        </Grid>
       </Border>
 
       <GridSplitter Grid.Column="3" Width="14" HorizontalAlignment="Stretch"
@@ -570,6 +574,7 @@
                 <Border Background="#FF181B22" BorderBrush="{Binding Farve}"
                 BorderThickness="3,0,0,0" CornerRadius="6"
                 Padding="13,10" Margin="0,0,0,6"
+                Opacity="{Binding Daempning}"
                 Tag="{Binding}" MouseLeftButtonUp="Opgave_Aabn"
                 Cursor="Hand" ToolTip="Åbn opgaven">
                 <Grid>

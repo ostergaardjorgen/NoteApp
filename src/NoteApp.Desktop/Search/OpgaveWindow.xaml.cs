@@ -114,7 +114,7 @@ public partial class OpgaveWindow : Window
         if (Frist.SelectedDate is not null) _r.Opgave.DeadlineUsikker = false;
 
         _r.Opgave.Prioritet = Prioritet.SelectedIndex;
-        _r.Opgave.Faerdig = Faerdig.IsChecked == true;
+        _r.Opgave.SaetFaerdig(Faerdig.IsChecked == true);
 
         try
         {
