@@ -1,7 +1,41 @@
-# NoteApp til iPhone — plan
+# NoteApp til iPhone — undersøgt og parkeret
 
-*Skrevet 24-08-2026. Alle påstande om, hvad iOS kan og ikke kan, er slået op
-og har en kilde nederst.*
+> **PARKERET 24-08-2026, samme dag som den blev undersøgt.**
+>
+> Sporet bliver ikke bygget nu. Dokumentet står, fordi undersøgelsen er det
+> værdifulde: spørgsmålet «kan vi ikke optage telefonsamtaler på iPhone»
+> kommer igen, og svaret tager en halv dag at finde frem til anden gang.
+>
+> **Intet herunder er en aftale om at bygge noget.** Etaperne står, som de
+> blev skrevet, så arbejdet kan tages op, hvis forudsætningerne ændrer sig —
+> se nederst.
+
+*Alle påstande om, hvad iOS kan og ikke kan, er slået op og har en kilde
+nederst. Kontrollér dem igen, hvis dokumentet læses længe efter august 2026 —
+iOS ændrer sig, og særligt EU-forholdene kan flytte sig.*
+
+---
+
+## De fem ting, der er værd at huske
+
+1. **Ingen app kan optage lyden fra et almindeligt opkald.** Mikrofonen er
+   opkaldets alene, også på højttaler — og ekkoundertrykkelsen fjerner
+   aktivt modpartens stemme fra mikrofonsignalet.
+2. **En app kan ikke åbne sig selv.** Genveje har ingen udløser for opkald
+   overhovedet, og `CXCallObserver` melder kun, mens appen allerede kører.
+3. **Apples egen opkaldsoptagelse er slået fra i hele EU og kan ikke dansk.**
+   Når Apples egen er lukket her, findes der ingen bagdør for andre.
+4. **En VoIP-app må optage sin egen lyd.** Ringer man op gennem appen, falder
+   alle tre mure — og CallKit giver samtidig CarPlay og Siri, som en
+   noteapp ellers ikke kan få.
+5. **Den billigste vej kræver ingen app.** Et nummer hos en nordisk udbyder,
+   der viderestiller til mobilen og optager undervejs. Filen lander på egen
+   maskine, og NoteApp læser den ind.
+
+**Én ting følger ikke med i parkeringen**, fordi den gælder Windows-siden
+allerede i dag: iCloud lægger kun en **pladsholder** på disken. Filen fylder
+nul, indtil nogen læser den. En overvåget mappe, der måler på
+filstørrelsen, ser derfor ingenting. Det står ved punkt 2.2 i roadmappen.
 
 ---
 
@@ -350,6 +384,31 @@ regel som resten af NoteApp: **der oplyses altid om, at der optages.**
 Punkt 2.2 i roadmappen, den overvågede mappe, bør bygges **før** iPhone-appen.
 Uden den skal filen læses ind i hånden hver gang, og så er halvdelen af
 gevinsten væk.
+
+---
+
+## Hvad der skulle ændre sig, før sporet tages op igen
+
+Parkeringen er ikke en dom over idéen. Den er et regnestykke, der ikke går op
+lige nu: en Mac, 99 USD om året, og et produkt mere at vedligeholde — og den
+halvdel, der var mest efterspurgt, kan ikke lade sig gøre.
+
+Tre ting kunne ændre det:
+
+- **Kunder nok til at bære et produkt mere.** En iPhone-app er ikke en
+  funktion; det er en installation, en opdateringscyklus og en
+  App Store-konto, der skal passes.
+- **At nogen efterspørger opkaldsoptagelse så hårdt**, at den nordiske
+  VoIP-vej er en forretning i sig selv. Så begynder man med vej 2, ikke med
+  en app.
+- **At EU åbner for Apples egen funktion.** Sker det, er halvdelen af
+  problemet løst af Apple, og tilbage står kun at hente filen ud af Noter.
+  Det er en helt anden og meget mindre opgave.
+
+Indtil videre er svaret på «jeg vil have mine møder fra telefonen ind i
+NoteApp» det, der blev bygget 24-08: læs lydfilen ind. Den virker for enhver
+telefon, enhver diktafon og enhver kollega, der sender en fil — og den krævede
+hverken en Mac eller en årlig afgift.
 
 ---
 

@@ -173,7 +173,7 @@ Et rigtigt API mod de tre tjenester bliver først nødvendigt, hvis man vil
 undvære synkroniseringsklienten. Det er en senere beslutning, ikke en
 forudsætning.
 
-**En iPhone-app, der optager direkte ind i mappen**, er undersøgt og beskrevet i `iphone-app.md`. Mødeoptageren kan bygges; en telefonsamtale kan ikke optages af nogen app på iOS. Den overvågede mappe bør bygges først — uden den skal filen læses ind i hånden hver gang.
+**En iPhone-app, der optager direkte ind i mappen, er undersøgt og parkeret** — se `iphone-app.md` og posten på listen nedenfor. Den overvågede mappe står på egne ben og bliver ikke mindre værd af det: den virker for enhver telefon, enhver diktafon og enhver kollega, der sender en fil.
 
 ---
 
@@ -301,6 +301,42 @@ egne rettelser ER målingen — den laver sig selv, hvis der bliver talt efter.
 **Hvad der IKKE kan justeres sådan:** opsummeringens kvalitet. Efterprøvningen
 tæller ubelagte påstande, men et tal siger ikke, hvilken indstilling der skulle
 være anderledes. Og whisper-modellen har ingen knap.
+
+---
+
+### NoteApp på iPhone — **PARKERET 24-08-2026**
+*Foreslået og undersøgt 24-08-2026 · hele undersøgelsen står i `iphone-app.md`*
+
+En app, der optager møder og telefonsamtaler på telefonen og lægger lyden i en
+mappe ved navn NoteApp i iCloud. Undersøgt til bunds og lagt væk igen — ikke
+fordi den er dårlig, men fordi den koster en Mac, 99 USD om året og et
+selvstændigt produkt at vedligeholde, og fordi den halvdel, der var mest
+efterspurgt, ikke kan lade sig gøre.
+
+**Hvorfor den skal blive stående her:** spørgsmålet «kan vi ikke optage
+telefonsamtaler på iPhone» kommer igen. Svaret er slået op og har kilder, og
+det tager en halv dag at finde frem til anden gang.
+
+**Det korte af, hvad vi lærte:**
+
+- Ingen app kan optage lyden fra et almindeligt opkald. Mikrofonen er
+  opkaldets alene, også på højttaler.
+- En app kan ikke åbne sig selv, når et opkald begynder. Genveje har ingen
+  udløser for opkald overhovedet.
+- Apples egen opkaldsoptagelse fra iOS 18.1 er **slået fra i hele EU** og kan
+  **ikke dansk**. Når Apples egen er lukket her, er der ingen bagdør.
+- **Men en VoIP-app må optage sin egen lyd.** Ringer man op gennem appen,
+  falder alle tre mure. Fire veje er beskrevet, og den billigste kræver
+  ingen app: et nummer hos en nordisk udbyder, der viderestiller til mobilen
+  og optager undervejs.
+
+**Det, der IKKE er parkeret med den**, fordi det gælder Windows-siden: iCloud
+lægger kun en pladsholder på disken, så en overvåget mappe (2.2), der måler
+på filstørrelsen, ser ingenting. Det er noteret under 2.2.
+
+**Hvad der skulle ændre sig, før den tages op igen:** at der er kunder nok til
+at bære et produkt mere — eller at nogen efterspørger opkaldsoptagelse så
+hårdt, at den nordiske VoIP-vej er en forretning i sig selv.
 
 ---
 
