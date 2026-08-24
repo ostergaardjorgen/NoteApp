@@ -104,15 +104,26 @@
                        daemper hele kortet paa én gang - kant, tekst og knap -
                        og kan ikke komme ud af trit med resten, den dag
                        farverne aendres. -->
+                  <!-- HELE KORTET ER KLIKBART - samme som opgaverne.
+                       Her sad titlen som en knap, og teksten var det ENESTE,
+                       der kunne rammes. Paa en kort titel er det et maal paa
+                       halvanden centimeter i en liste, man skimmer, og resten
+                       af kortet gjorde ingenting.
+
+                       «Optag»-knappen sad her ogsaa. Den er vaek: en knap, der
+                       goer det, kortet lige saa godt kan aabne, er et led for
+                       meget - og optagelsen startes nu inde i vinduet, hvor
+                       man samtidig kan se, hvad der bliver optaget som. -->
                   <Border Background="#FF181B22" BorderBrush="{Binding Kant}"
                           BorderThickness="3,0,0,0" CornerRadius="6"
                           Padding="11,8" Margin="0,0,0,5"
-                          Opacity="{Binding Daempning}">
+                          Opacity="{Binding Daempning}"
+                          Tag="{Binding}" MouseLeftButtonUp="RetAftale_Klik"
+                          Cursor="Hand" ToolTip="Åbn aftalen">
                     <Grid>
                       <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
                       </Grid.ColumnDefinitions>
 
                       <TextBlock Grid.Column="0" Text="{Binding Klokken}" FontSize="13"
@@ -121,27 +132,11 @@
                                  Margin="0,0,10,0" Foreground="{Binding Kant}" />
 
                       <StackPanel Grid.Column="1">
-                        <!-- Titlen aabner aftalen. En aftale, man ikke kan
-                             rette, er en aftale, man sletter og laver om. -->
-                        <Button Tag="{Binding}" Click="RetAftale_Klik" Cursor="Hand"
-                                HorizontalAlignment="Left" Padding="0" BorderThickness="0"
-                                Background="Transparent"
-                                ToolTip="Ret aftalen">
-                          <Button.Template>
-                            <ControlTemplate TargetType="Button">
-                              <TextBlock Text="{Binding Titel}" FontSize="12" TextWrapping="Wrap"
-                                         Foreground="{StaticResource Tekst}" />
-                            </ControlTemplate>
-                          </Button.Template>
-                        </Button>
+                        <TextBlock Text="{Binding Titel}" FontSize="12" TextWrapping="Wrap"
+                                   Foreground="{StaticResource Tekst}" />
                         <TextBlock Text="{Binding Under}" FontSize="10.5" Margin="0,3,0,0"
                                    TextWrapping="Wrap" Foreground="{StaticResource TekstMeget}" />
                       </StackPanel>
-
-                      <Button Grid.Column="2" Content="{Binding Knap}" Tag="{Binding}"
-                              Click="Aftale_Klik" VerticalAlignment="Top" Margin="8,0,0,0"
-                              Padding="10,4" FontSize="11"
-                              ToolTip="{Binding Knaptip}" />
                     </Grid>
                   </Border>
                   </StackPanel>

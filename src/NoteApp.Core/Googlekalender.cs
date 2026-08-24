@@ -82,6 +82,27 @@ public static class Googlekalender
     /// </summary>
     private const string Omraade = "https://www.googleapis.com/auth/calendar.events";
 
+    /// <summary>
+    /// Det, der skrives i mødeindkaldelsen, når appen laver et Meet-link.
+    ///
+    /// APPEN OPFORDRER ALTID TIL AT FORTÆLLE, AT DER OPTAGES. Det er ikke kun
+    /// jura. Det er produktets stærkeste argument: fordi lyden bliver på
+    /// maskinen, kan den, der optager, se de andre i øjnene og sige, hvor
+    /// optagelsen ender.
+    ///
+    /// Den står i indkaldelsen og ikke kun på skærmen hos den, der optager.
+    /// Deltagerne får den at vide FØR mødet, hvor de kan nå at sige fra — ikke
+    /// i det øjeblik optagelsen begynder.
+    ///
+    /// «PLANLÆGGER AT OPTAGE» og ikke «bliver optaget». Et Meet-link er ikke
+    /// et løfte om, at der bliver trykket optag, og en indkaldelse, der siger
+    /// noget, der ikke skete, er værre end ingen note.
+    /// </summary>
+    public const string Optagenote =
+        "Mødet planlægges optaget med NoteApp.\n\n" +
+        "Lyden og den udskrevne tekst bliver på arrangørens egen computer og " +
+        "deles ikke med eksterne tjenester. Sig til, hvis du helst er fri.";
+
     private const string Godkend = "https://accounts.google.com/o/oauth2/v2/auth";
     private const string Noegler = "https://oauth2.googleapis.com/token";
     private const string Aftaler = "https://www.googleapis.com/calendar/v3/calendars/primary/events";
@@ -400,6 +421,10 @@ public static class Googlekalender
             };
 
             adresse += "?conferenceDataVersion=1";
+
+            // Deltagerne skal vide det, FOER moedet - ikke i det oejeblik
+            // optagelsen begynder. Se Optagenote.
+            krop["description"] = Optagenote;
         }
 
         using var anmodning = new HttpRequestMessage(HttpMethod.Post, adresse)
@@ -455,8 +480,21 @@ public static class Googlekalender
 
         var noegle = await FriskNoegle(klientId, hemmelighed, opdateringsnoegle, ct);
 
+        // DEN EKSISTERENDE BESKRIVELSE HENTES FOERST.
+        //
+        // En PATCH med «description» ERSTATTER feltet. Skrev vi bare noten
+        // ind, ville alt, arrangoeren havde skrevet i indkaldelsen - dagsorden,
+        // links, aftaler - vaere vaek. Det ville vaere et rigtigt tab, og det
+        // ville ske i stilhed.
+        var beskrivelse = await HentBeskrivelse(fremmedId, noegle, ct);
+
+        var samlet = beskrivelse.Contains("NoteApp", StringComparison.OrdinalIgnoreCase)
+            ? beskrivelse
+            : beskrivelse.Length > 0 ? beskrivelse.TrimEnd() + "\n\n" + Optagenote : Optagenote;
+
         var krop = new Dictionary<string, object?>
         {
+            ["description"] = samlet,
             ["conferenceData"] = new Dictionary<string, object?>
             {
                 ["createRequest"] = new Dictionary<string, object?>
@@ -497,6 +535,37 @@ public static class Googlekalender
                 "kan redigere.");
 
         return link;
+    }
+
+    /// <summary>
+    /// Beskrivelsen på en aftale hos Google.
+    ///
+    /// Tom, hvis den ikke kan læses. Så skrives noten alene — det er bedre end
+    /// at lade være, og det værste, der kan ske, er en beskrivelse, der skal
+    /// skrives igen. Alternativet var at afvise mødelinket, fordi ét felt ikke
+    /// kunne hentes.
+    /// </summary>
+    private static async Task<string> HentBeskrivelse(string fremmedId, string noegle,
+                                                      CancellationToken ct)
+    {
+        try
+        {
+            using var anmodning = new HttpRequestMessage(HttpMethod.Get,
+                $"{Aftaler}/{Uri.EscapeDataString(fremmedId)}");
+
+            anmodning.Headers.Authorization = new("Bearer", noegle);
+
+            using var svar = await Http.SendAsync(anmodning, ct);
+            if (!svar.IsSuccessStatusCode) return "";
+
+            using var doc = JsonDocument.Parse(await svar.Content.ReadAsStringAsync(ct));
+
+            return Tekst(doc.RootElement, "description");
+        }
+        catch (Exception)
+        {
+            return "";
+        }
     }
 
     private static List<Aftale> Laes(string json)

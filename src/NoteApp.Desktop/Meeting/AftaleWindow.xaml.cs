@@ -25,6 +25,15 @@ public partial class AftaleWindow : Window
     public bool Slettet { get; private set; }
 
     /// <summary>
+    /// Sat, hvis der skal optages — eller gås til optagelsen, hvis den findes.
+    ///
+    /// Vinduet starter ikke selv optagelsen. Det ejer ikke optageren, og en
+    /// dialog, der lukker sig selv OG sætter tyve minutters optagelse i gang,
+    /// er svær at følge med i. Den, der åbnede vinduet, gør det.
+    /// </summary>
+    public bool SkalOptage { get; private set; }
+
+    /// <summary>
     /// Skal aftalen også oprettes hos Google?
     ///
     /// DEN LÆSES AF DEN, DER GEMMER — ikke her. Et kald ud på nettet midt i et
@@ -275,6 +284,33 @@ public partial class AftaleWindow : Window
         }
 
         TilfoejMeetKnap.Visibility = kanMeet ? Visibility.Visible : Visibility.Collapsed;
+
+        // Optageknappen staar ikke paa en ny aftale, man er ved at lave. Man
+        // laegger en aftale ind til paa torsdag; skal der optages NU, er der
+        // «Optag moede» oeverst i appen.
+        OptagKnap.Visibility = Aftalen.Titel.Length > 0
+            ? Visibility.Visible : Visibility.Collapsed;
+
+        OptagKnap.Content = Aftalen.MoedeId.Length > 0 ? "Vis optagelsen" : "Optag mødet";
+    }
+
+    /// <summary>
+    /// Gemmer og beder om at få optagelsen startet.
+    ///
+    /// DER GEMMES FØRST. Har man rettet mappen og derefter trykket optag,
+    /// skal optagelsen bruge den nye mappe — ikke den, der stod, da vinduet
+    /// blev åbnet.
+    /// </summary>
+    private void Optag_Klik(object sender, RoutedEventArgs e)
+    {
+        SkalOptage = true;
+
+        // Gem_Klik saetter DialogResult og lukker. Fejler valideringen, staar
+        // vinduet aabent - og saa skal flaget tages tilbage, ellers ville et
+        // senere «Gem aftalen» ogsaa starte en optagelse.
+        Gem_Klik(sender, e);
+
+        if (DialogResult != true) SkalOptage = false;
     }
 
     /// <summary>Halve timer hele døgnet. Feltet kan skrives i, hvis noget andet skal bruges.</summary>

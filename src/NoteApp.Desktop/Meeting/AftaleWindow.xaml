@@ -134,7 +134,7 @@
                 Click="TilfoejMeet_Klik" HorizontalAlignment="Left"
                 Margin="0,12,0,0" Padding="12,6" FontSize="12"
                 Visibility="Collapsed"
-                ToolTip="Opretter et mødelokale hos Google og lægger linket på aftalen" />
+                ToolTip="Opretter et mødelokale hos Google, lægger linket på aftalen og skriver i indkaldelsen, at mødet planlægges optaget" />
 
         <!-- Hakket vises kun, naar der ER en forbindelse. Et afkrydsningsfelt,
              der ikke kan bruges, er et spoergsmaal om hvorfor. -->
@@ -157,7 +157,7 @@
                     Content="Tilføj et Google Meet-link" />
           <TextBlock Margin="24,2,0,0" FontSize="11" TextWrapping="Wrap"
                      Foreground="{StaticResource TekstMeget}"
-                     Text="Linket kommer med tilbage, så mødet kan startes herfra." />
+                     Text="Linket kommer med tilbage, så mødet kan startes herfra. I indkaldelsen skrives, at mødet planlægges optaget — og at lyden bliver på din computer. Deltagerne skal vide det før mødet, ikke i det øjeblik optagelsen begynder." />
 
           <CheckBox x:Name="InviterGaester" FontSize="12" Margin="0,9,0,0"
                     Content="Jeg vil invitere gæster" />
@@ -176,6 +176,17 @@
               HorizontalAlignment="Left" Padding="14,8" Visibility="Collapsed" />
 
       <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+        <!-- OPTAGELSEN STARTES HERFRA.
+             «Optag»-knappen sad paa kortet i kalenderen og er flyttet ind.
+             Her kan man se, hvad der bliver optaget SOM - mappe, moedetype og
+             sprog staar lige ovenover - foer man trykker. Paa kortet var det
+             en knap, der startede tyve minutters optagelse uden at vise, hvad
+             den ville goere.
+
+             Den gemmer aftalen foerst. Har man rettet mappen og saa trykket
+             optag, skal optagelsen bruge den nye mappe. -->
+        <Button x:Name="OptagKnap" Content="Optag mødet" Click="Optag_Klik"
+                Padding="16,8" Margin="0,0,10,0" Visibility="Collapsed" />
         <Button Content="Fortryd" Click="Fortryd_Klik" Padding="16,8" Margin="0,0,10,0" />
         <Button x:Name="GemKnap" Content="Gem aftalen" Click="Gem_Klik"
                 Padding="20,8" Style="{StaticResource Primaer}" IsDefault="True" />

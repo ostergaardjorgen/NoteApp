@@ -366,11 +366,6 @@ public partial class SearchView : UserControl
 
         private static Brush Pensel(string hex) => (Brush)new BrushConverter().ConvertFrom(hex)!;
 
-        public string Knap => _a.MoedeId.Length > 0 ? "Vis" : "Optag";
-
-        public string Knaptip => _a.MoedeId.Length > 0
-            ? "Gå til optagelsen af det her møde"
-            : "Start optagelsen med aftalens mødetype, mappe og sprog";
     }
 
     /// <summary>
@@ -447,35 +442,6 @@ public partial class SearchView : UserControl
     }
 
     /// <summary>
-    /// Starter optagelsen af en aftale — eller går til den, hvis den er lavet.
-    ///
-    /// AFTALENS EGNE VALG FØLGER MED. Mødetype, mappe og sprog er valgt, da
-    /// aftalen blev lagt ind, og de skal ikke vælges igen med mødet i gang.
-    /// Er de ikke sat, kommer den almindelige opstartsdialog — så er man
-    /// præcis lige så langt som uden kalenderen.
-    /// </summary>
-    private void Aftale_Klik(object sender, RoutedEventArgs e)
-    {
-        if (sender is not Button b || b.Tag is not Aftalevisning v) return;
-        if (Window.GetWindow(this) is not MainWindow hoved) return;
-
-        var a = v.Aftale;
-
-        if (a.MoedeId.Length > 0)
-        {
-            if (!hoved.GaaTilOptagelse(a.MoedeId))
-                Dialogs.AppDialog.Vis(hoved, "Optagelsen findes ikke længere",
-                    "Den er slettet eller flyttet uden for appen. Aftalen bliver stående.",
-                    Dialogs.Slags.Valg);
-
-            return;
-        }
-
-        hoved.OptagAftale(a);
-        VisKalender();
-    }
-
-    /// <summary>
     /// Åbner en aftale, så den kan rettes eller slettes.
     ///
     /// En hentet aftale kan få mødetype, mappe og sprog på — det er appens
@@ -484,7 +450,7 @@ public partial class SearchView : UserControl
     /// </summary>
     private async void RetAftale_Klik(object sender, RoutedEventArgs e)
     {
-        if (sender is not Button b || b.Tag is not Aftalevisning v) return;
+        if (sender is not FrameworkElement { Tag: Aftalevisning v }) return;
 
         var vindue = new Meeting.AftaleWindow(v.Aftale) { Owner = Window.GetWindow(this) };
         if (vindue.ShowDialog() != true) return;
@@ -500,6 +466,35 @@ public partial class SearchView : UserControl
         VisKalender();
 
         await LaegOpHosGoogle(vindue);
+
+        // OPTAGELSEN TIL SIDST. Aftalen er gemt, og er den lagt op hos
+        // Google, er moedelinket kommet med tilbage - saa har optagelsen det
+        // link, den skal aabne.
+        if (vindue.SkalOptage) Optag(vindue.Aftalen);
+    }
+
+    /// <summary>
+    /// Starter optagelsen af en aftale — eller går til den, hvis den findes.
+    ///
+    /// Ét sted, fordi det kaldes fra to: knappen inde i aftalevinduet og
+    /// vagten, der starter af sig selv.
+    /// </summary>
+    private void Optag(Aftale a)
+    {
+        if (Window.GetWindow(this) is not MainWindow hoved) return;
+
+        if (a.MoedeId.Length > 0)
+        {
+            if (!hoved.GaaTilOptagelse(a.MoedeId))
+                Dialogs.AppDialog.Vis(hoved, "Optagelsen findes ikke længere",
+                    "Den er slettet eller flyttet uden for appen. Aftalen bliver stående.",
+                    Dialogs.Slags.Valg);
+
+            return;
+        }
+
+        hoved.OptagAftale(a);
+        VisKalender();
     }
 
     /// <summary>
