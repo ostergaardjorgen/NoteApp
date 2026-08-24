@@ -541,3 +541,74 @@ Det er forskellen på de to mekanismer: ordlisten påvirker en model, vi ikke ka
 Tre ting findes nu: at lære en regel (`noteapp laer`), at anvende reglerne automatisk, og at prøve dem af på en fil (`noteapp laer --proev`).
 
 Det, der mangler, er **opsamlingen**: der er endnu ingen skærm, hvor man retter et ord i en transskription og får det gemt som en regel. Indtil den findes, skal reglerne skrives ind i hånden, og så bliver de ikke skrevet ind. Det er det næste stykke arbejde, og det er dét, der afgør, om appen faktisk bliver bedre af at blive brugt.
+
+---
+
+## 9 · Hvad en times møde fylder — lyd mod tekst
+
+*Målt 24-08-2026 på seks rigtige optagelser i `C:\AppNoter\Optagelser`.*
+
+| Møde | Længde | Lyd (WAV) | Udskrift |
+|---|---|---|---|
+| Kundemøde, to spor | 61 min | 223 MB | 56,5 KB |
+| Webinar, ét spor | 59 min | 98 MB | 50,5 KB |
+| Møde, to spor | 27 min | 41 MB | 22,6 KB |
+
+**Teksten fylder omkring en firetusindedel af lyden.** Det er den, der kan
+søges i og gemmes i årevis uden at fylde noget.
+
+**Konsekvensen — og den går imod et argument, der ellers lå lige for:** vores
+lydfil fylder MERE end en videooptagelse i skyen. Zoom oplyser selv cirka
+200 MB pr. time for video ([kilde](https://support.zoom.com/hc/en/article?id=zm_kb&sysparm_article=KB0067670)),
+og en times møde med to spor fylder 223 MB hos os. WAV er ukomprimeret med
+vilje, fordi det giver den bedste udskrift.
+
+«NoteApp fylder mindre end video» må derfor ikke siges om lydfilen. Det gælder
+teksten, og det gælder, at lyden ligger på egen disk og kan slettes, når
+teksten er i hus. Se [`salgsargumenter.md`](salgsargumenter.md), punkt 3.
+
+### 9.1 Hvorfor lyd kan fylde det samme som video
+
+*Målt 24-08-2026 direkte i WAV-hovederne på alle syv lydfiler.*
+
+Alle optagelser er **16 000 Hz, 1 kanal, 16 bit, ukomprimeret PCM**:
+
+    256 kbit/s  =  32 000 byte/s  =  109,9 MB pr. time pr. spor
+
+Et onlinemøde har to spor — mikrofonen og det, computeren afspiller — så en
+times møde er **220 MB**. Det passer med de 223 MB, der blev målt på filerne.
+
+**Sammenligningen er ikke lyd mod video. Den er UKOMPRIMERET mod KOMPRIMERET.**
+
+Rå video i 1280×720 ved 25 billeder i sekundet (4:2:0, 8 bit) fylder
+
+    1280 × 720 × 1,5 byte × 25  =  34,6 MB/s  ≈  118 GB pr. time
+
+Zoom oplyser cirka 200 MB pr. time. Deres H.264 skærer altså **omkring en
+faktor 600** væk — mest fordi et møde er stillestående hoveder på en fast
+baggrund, hvor næsten intet ændrer sig fra billede til billede.
+
+Vores PCM skærer **ingenting** væk. Hver eneste sample ligger som den blev
+målt. Det er ikke, fordi lyd er stort; det er, fordi vi ikke komprimerer.
+
+**Hvad komprimering ville betyde:**
+
+| | pr. time, ét spor | to spor |
+|---|---|---|
+| PCM 16 kHz 16 bit (i dag) | 110 MB | 220 MB |
+| Opus 24 kbit/s | 10,8 MB | 21,6 MB |
+| Opus 32 kbit/s | 14,4 MB | 28,8 MB |
+
+Med Opus ved 24 kbit/s ville en times møde fylde **21,6 MB mod Zooms 200 MB** —
+altså cirka en niendedel. Så holder «fylder mindre end video» også om lyden.
+
+**Fravalg, der bliver stående:** komprimering EFTER udskriften er lavet er
+ikke bygget. Whisper skal have 16 kHz PCM ind, så en komprimeret fil skal
+pakkes ud igen før en ny udskrift — det er derfor, det skal ske bagefter og
+ikke ved optagelsen.
+
+**Det, der IKKE er målt:** om en udskrift af Opus-lyd er lige så god som af
+PCM. Bitraten er valgt ud fra, hvad Opus regnes for at klare til tale — ikke
+ud fra en måling på vores egne prøvetekster. Den måling skal laves, før noget
+komprimeres for alvor; en udskrift, der bliver dårligere, koster mere end de
+sparede gigabyte.

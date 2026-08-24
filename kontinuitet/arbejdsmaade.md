@@ -156,7 +156,24 @@ Data er en anden sag og kører af sig selv — se den planlagte opgave
 «NoteApp - ugentlig backup». Kode og data er to backups, og den ene erstatter
 ikke den anden.
 
-## 10. Kør leverancetjek før hver commit og hvert push
+## 10. Salgsargumenterne skal følge produktet
+
+[`../doc/salgsargumenter.md`](../doc/salgsargumenter.md) er argumenter, der
+kan tages frem over for en kunde. Hvert punkt står med sit belæg — og med
+**det, der ikke må siges**.
+
+**Ændrer produktet sig, ændres argumentet i samme arbejdsgang.** Et
+salgsargument, der var sandt i august, er det farligste sted at have en gammel
+oplysning: det er dét, der bliver sagt højt til en kunde, og der er ingen, der
+retter det undervejs.
+
+Dokumentet indeholder også de påstande, vi IKKE kan komme med — «vi er
+GDPR-compliant», «alt bliver på din maskine», et CO2-tal. De står der, så de
+ikke bliver sagt ved et uheld.
+
+Bliver noget målt, som i dag står som et skøn, skal skønnet erstattes.
+
+## 11. Kør leverancetjek før hver commit og hvert push
 
 ```powershell
 powershell -File "$env:USERPROFILE\.claude\skills\leverancetjek\tjek-leverance.ps1" -Sti C:\NoteApp
@@ -164,7 +181,7 @@ powershell -File "$env:USERPROFILE\.claude\skills\leverancetjek\tjek-leverance.p
 
 Uopfordret. Se [`skills/leverancetjek/SKILL.md`](skills/leverancetjek/SKILL.md).
 
-## 11. Skriv kommentarer, der forklarer HVORFOR
+## 12. Skriv kommentarer, der forklarer HVORFOR
 
 Koden i det her projekt har usædvanligt fyldige kommentarer, og det er med
 vilje. De forklarer ikke, hvad linjen gør — de forklarer, **hvilken fejl der
