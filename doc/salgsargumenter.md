@@ -109,9 +109,16 @@ i timen.
 
 Det er altså ikke lyd mod video. Det er ukomprimeret mod komprimeret.
 
-*Åbent punkt: med Opus ved 24 kbit/s ville en times møde fylde 21,6 MB mod
-Zooms 200 MB — en niendedel. Ikke bygget, og det er ikke målt, om udskriften
-bliver lige så god af komprimeret lyd. Se [`findings.md`](findings.md) 9.1.*
+**Det er målt, hvad komprimering ville koste** — 24-08-2026, på en oplæsning
+med kendt facit: AAC ved 32 kbit/s fylder **7,9 gange mindre** og giver 10,15 %
+ordfejl mod 9,98 % for ukomprimeret. Forskellen er sandsynligvis støj.
+
+En times møde ville gå fra 220 MB til 28 MB — altså en syvendedel af Zooms
+video frem for mere end den.
+
+*Ikke bygget endnu, og kun målt på dansk oplæsning. Sig det som det er: «vi har
+målt, at det kan lade sig gøre, og vi har ikke bygget det.» Se
+[`findings.md`](findings.md) 9.2.*
 
 ---
 

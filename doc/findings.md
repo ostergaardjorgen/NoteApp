@@ -612,3 +612,55 @@ PCM. Bitraten er valgt ud fra, hvad Opus regnes for at klare til tale — ikke
 ud fra en måling på vores egne prøvetekster. Den måling skal laves, før noget
 komprimeres for alvor; en udskrift, der bliver dårligere, koster mere end de
 sparede gigabyte.
+
+### 9.2 Koster komprimering nøjagtighed? Målt.
+
+*Målt 24-08-2026 på oplæsningen «Fase0-oplaesning-dansk» — 15 minutter, 2.365
+ord med kendt facit. Kodet med Windows' egen Media Foundation (AAC), pakket ud
+igen til 16 kHz mono PCM og skrevet ud med whisper large-v3.*
+
+| Lyd | Fylder pr. time | Ordfejlrate | Fagtermer | Negationer |
+|---|---|---|---|---|
+| PCM 16 kHz 16 bit | 109,9 MB | **9,98 %** | 12 af 19 | 11 af 17 |
+| AAC 32 kbit/s | 14,0 MB · **7,9×** mindre | 10,15 % | 11 af 19 | 11 af 17 |
+| AAC 24 kbit/s | 10,5 MB · **10,5×** mindre | 10,91 % | 12 af 19 | 11 af 17 |
+
+**Ved 32 kbit/s koster komprimeringen 0,17 procentpoint.** Det er intet mod en
+faktor otte i plads. Ved 24 kbit/s koster den 0,93 point — målbart, men stadig
+lille.
+
+**FORSKELLEN ER SANDSYNLIGVIS STØJ, OG DET SKAL STÅ.** Rækkefølgen er ikke
+monoton: 24 kbit/s beholder tolv fagtermer, 32 kbit/s kun elleve. Hjalp mere
+båndbredde entydigt, ville 32 være mindst lige så god på alle mål. Det er den
+ikke. Så det rigtige at sige er: **ingen målbar forskel ved 32 kbit/s, muligvis
+en lille ved 24** — ikke «32 er 0,17 point dårligere».
+
+**Målingen dækker ÉN oplæsning, ÉN stemme, ÉT sprog og gode forhold.** Et
+rigtigt møde har to spor, folk der taler i munden på hinanden og skiftende
+afstand til mikrofonen. Engelsk og blandet dansk-engelsk er IKKE målt. Det skal
+de, før noget komprimeres for alvor.
+
+#### En fælde, der næsten kom i findings
+
+Første kørsel gav 18,65 % for PCM — altså at komprimeret lyd var BEDRE end
+ukomprimeret. Det var forkert, og grunden er værd at huske: `udskrift_*.txt` er
+den SAMMENFLETTEDE to-spors udskrift med talermærkater, og mærkaterne tæller
+med som 251 ekstra ord. Sammenligningen skal ske mod det rå enkeltspor,
+`mikrofon_large-v3.txt`.
+
+**Et resultat, der vender den forventede retning om, er som regel en fejl i
+målingen — ikke et gennembrud.**
+
+#### Hvad det ville betyde
+
+En times møde med to spor: **220 MB i dag, 28 MB med AAC 32**. Zoom oplyser
+200 MB i timen for video, så NoteApp ville fylde omkring en syvendedel af en
+videooptagelse frem for at fylde mere.
+
+Ingen ny binær: NAudio bruger Windows' egen Media Foundation. Ffmpeg ville have
+kostet 40-80 MB og en afhængighed mere at holde opdateret.
+
+**Ikke bygget.** Komprimeringen skal ske EFTER udskriften — whisper skal have
+16 kHz PCM ind — og de to øvrige sprog skal måles først.
+
+    noteapp lydproeve <wav> [kbit ...]

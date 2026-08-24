@@ -714,11 +714,26 @@ static async Task<int> Transskriber(string[] a)
         Console.Write($"\r  {p.Message,-40}");
     });
 
-    // --sprog da laaser sproget; uden det finder Whisper det selv. Detektering
-    // er standard, fordi et engelsk moede transskriberet som dansk giver
-    // volapyk frem for en fejl — og volapyk ligner et resultat.
+    // --sprog da laaser sproget. Uden det bruges DET SPROG, DER BLEV VALGT,
+    // DA DER BLEV OPTAGET - og kun hvis der ikke er valgt noget, finder
+    // Whisper det selv.
+    //
+    // DET VAR EN RIGTIG FEJL. Vaerktoejet gaettede altid selv, ogsaa naar
+    // brugeren havde valgt engelsk i opstartsdialogen. Paa et engelsk moede
+    // med lange stille stykker i mikrofonsporet gaettede den NORSK med 66 %
+    // sikkerhed og skrev «Teksting av Nicolai Winther» ud af stilheden.
+    //
+    // Den samme optagelse gav altsaa to forskellige resultater alt efter,
+    // hvilken doer man kom ind ad. Et valg, brugeren har truffet, skal gaelde
+    // begge veje. Fundet 24-08-2026.
     var i = Array.IndexOf(a, "--sprog");
-    var ønsketSprog = i >= 0 && i + 1 < a.Length ? a[i + 1] : "auto";
+
+    var ønsketSprog = i >= 0 && i + 1 < a.Length
+        ? a[i + 1]
+        : Valgtsprog(Directory.Exists(input) ? input : Path.GetDirectoryName(input)) ?? "auto";
+
+    if (i < 0 && ønsketSprog != "auto")
+        Console.WriteLine($"Sprog     : {ønsketSprog} — valgt da der blev optaget");
 
     var r = await motor.RunAsync(
         new TranscriptionRequest(wav, s.ModelPath!, udBase, ønsketSprog, "", a.Contains("--cpu")),
@@ -1563,3 +1578,31 @@ static int Lydproeve(string[] a)
 }
 
 static string Kort(string s) => s.Length <= 90 ? s : s[..90] + " ...";
+
+
+/// <summary>
+/// Det sprog, brugeren valgte i opstartsdialogen.
+///
+/// Loopback-sporet foerst: paa et webinar er det DET, der bliver talt, og
+/// mikrofonen er tavs. Er der ikke valgt noget, gives der null, og saa
+/// finder Whisper det selv.
+/// </summary>
+static string? Valgtsprog(string? mappe)
+{
+    if (mappe is null || !Directory.Exists(mappe)) return null;
+
+    try
+    {
+        var meta = MeetingStore.Load(mappe);
+
+        var valgt = meta?.ValgtSprogLoop ?? meta?.ValgtSprogMik;
+
+        return string.IsNullOrWhiteSpace(valgt) ? null : valgt;
+    }
+    catch (Exception)
+    {
+        // Kan filen ikke laeses, gaettes sproget som foer. Det er bedre end
+        // at afvise at skrive ud.
+        return null;
+    }
+}
