@@ -475,7 +475,7 @@
                                Text="Vælger du et Google Meet-link, beder appen Google om at oprette mødelokalet. Linket kommer med tilbage, så mødet kan startes fra kalenderen her." />
                     <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
                                Foreground="{StaticResource TekstSvag}"
-                               Text="Samtidig skrives der i indkaldelsen, at mødet planlægges optaget, og at lyden bliver på din computer. Det er ikke til at slå fra: deltagerne skal kunne nå at sige fra, og det er hele grundlaget for at optage et møde med andre til stede. Har aftalen allerede en beskrivelse, bliver den stående — noten lægges under." />
+                               Text="Er aftalen markeret til at blive optaget, skrives der samtidig i indkaldelsen, at mødet planlægges optaget, at lyden bliver på din computer — og at man kan gøre indsigelse. Deltagerne skal kunne nå at sige fra; det er hele grundlaget for at optage et møde med andre til stede. Ordlyden kan rettes under Indstillinger, men ikke fjernes. Har aftalen allerede en beskrivelse, bliver den stående — oplysningen lægges under." />
                     <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
                                Foreground="{StaticResource TekstSvag}"
                                Text="Gæster inviteres ALDRIG herfra. Vælger du at invitere, åbnes aftalen i Google Kalender i din browser, og du inviterer dér. Appen ser hverken dine kontakter eller hvem du sender til — der bedes ikke om adgang til kontakter." />

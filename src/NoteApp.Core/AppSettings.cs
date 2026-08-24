@@ -251,6 +251,15 @@ public sealed class AppSettings
     /// </summary>
     public string Optagenote { get; set; } = "";
 
+    /// <summary>
+    /// Den engelske udgave. Bruges, når mødets sprog ikke er dansk.
+    ///
+    /// EN INDKALDELSE PÅ DANSK TIL EN, DER IKKE LÆSER DANSK, ER IKKE EN
+    /// OPLYSNING. Retten til at sige fra er kun værd at have, hvis den kan
+    /// læses.
+    /// </summary>
+    public string OptagenoteEn { get; set; } = "";
+
     private static string Path => System.IO.Path.Combine(UserDataPaths.Root, "indstillinger.json");
 
     private static AppSettings? _current;

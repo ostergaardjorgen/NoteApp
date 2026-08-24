@@ -6,6 +6,20 @@ using System.Text.Json;
 namespace NoteApp.Core;
 
 /// <summary>
+/// Svaret, når en aftale er lagt op hos Google.
+///
+/// DER RETURNERES TRE TING OG IKKE KUN ET ID, fordi alle tre skal bruges med
+/// det samme og ikke kan hentes igen uden endnu et kald:
+///
+///   Id           genkender aftalen ved næste hentning, så den ikke står dobbelt
+///   Moedelink    Meet-linket — det skal tilbage i appen, ellers er mødet
+///                klikbart hos Google og dødt her
+///   Webadresse   aftalen på Googles egen side. Den bruges, når der skal
+///                inviteres gæster: det er dér, man har sine kontakter
+/// </summary>
+public sealed record Googlesvar(string Id, string Moedelink, string Webadresse);
+
+/// <summary>
 /// Henter aftaler fra Google Kalender.
 ///
 /// HVAD DEN GØR, OG HVAD DEN ALDRIG GØR
@@ -55,20 +69,6 @@ namespace NoteApp.Core;
 /// sendes til maskinens loopback-adresse, og at der bruges PKCE — så en
 /// opsnappet kode ikke kan byttes til en nøgle af nogen anden.
 /// </summary>
-/// <summary>
-/// Svaret, når en aftale er lagt op hos Google.
-///
-/// DER RETURNERES TRE TING OG IKKE KUN ET ID, fordi alle tre skal bruges med
-/// det samme og ikke kan hentes igen uden endnu et kald:
-///
-///   Id           genkender aftalen ved næste hentning, så den ikke står dobbelt
-///   Moedelink    Meet-linket — det skal tilbage i appen, ellers er mødet
-///                klikbart hos Google og dødt her
-///   Webadresse   aftalen på Googles egen side. Den bruges, når der skal
-///                inviteres gæster: det er dér, man har sine kontakter
-/// </summary>
-public sealed record Googlesvar(string Id, string Moedelink, string Webadresse);
-
 public static class Googlekalender
 {
     public const string Id = "google";
@@ -142,6 +142,43 @@ public static class Googlekalender
         "Ansvarlig: Mødets arrangør er dataansvarlig for optagelsen.";
 
     /// <summary>
+    /// Den engelske udgave.
+    ///
+    /// EN INDKALDELSE PÅ DANSK TIL EN, DER IKKE LÆSER DANSK, ER IKKE EN
+    /// OPLYSNING. Retten til at sige fra er kun værd at have, hvis den kan
+    /// læses — og et møde, hvor sproget er sat til engelsk, har med sikkerhed
+    /// deltagere, der ikke læser dansk.
+    ///
+    /// Det er en oversættelse af den danske, ikke en anden tekst. To udgaver,
+    /// der siger noget forskelligt, er værre end én, der er på det forkerte
+    /// sprog: så afhænger det af, hvem der læser hvilken.
+    /// </summary>
+    public const string StandardOptagenoteEn =
+        "This meeting is planned to be recorded using NoteApp.\n" +
+        "\n" +
+        "— — — — — — — — — —\n" +
+        "NOTICE OF RECORDING\n" +
+        "\n" +
+        "Purpose: The recording is used to produce minutes and notes from " +
+        "the meeting.\n" +
+        "\n" +
+        "Processing: The audio recording is processed locally on the " +
+        "organiser's computer and is not transferred to external services. " +
+        "If the organiser chooses to have minutes drafted using a language " +
+        "model, the transcribed text — not the audio — is processed by a " +
+        "data processor within the EU.\n" +
+        "\n" +
+        "Objection: You may object to being recorded. Please tell the " +
+        "organiser before the meeting or at its start, and no recording " +
+        "will be made.\n" +
+        "\n" +
+        "Deletion: You may at any time ask the organiser to delete the " +
+        "recording and the transcribed text.\n" +
+        "\n" +
+        "Controller: The meeting organiser is the data controller for the " +
+        "recording.";
+
+    /// <summary>
     /// Den note, der faktisk skrives — brugerens egen, hvis der er sat en.
     ///
     /// DEN KAN RETTES, MEN IKKE FJERNES. Ordlyden hører til den, der holder
@@ -152,22 +189,35 @@ public static class Googlekalender
     /// fortælle deltagerne, at der optages, og et tomt felt er ikke et valg
     /// om at lade være — det er et felt, ingen har udfyldt.
     /// </summary>
-    public static string Optagenote
-    {
-        get
-        {
-            try
-            {
-                var egen = AppSettings.Current.Optagenote;
-                if (!string.IsNullOrWhiteSpace(egen)) return egen.Trim();
-            }
-            catch (Exception)
-            {
-                // Kan indstillingerne ikke laeses, staar standarden.
-            }
+    public static string Optagenote => Note("");
 
-            return StandardOptagenote;
+    /// <summary>
+    /// Noten på det sprog, mødet holdes på.
+    ///
+    /// SPROGET KOMMER FRA AFTALEN. Er der valgt engelsk til optagelsen, er
+    /// det fordi mødet holdes på engelsk — og så skal indkaldelsen være det
+    /// også. Er der intet valgt, er dansk det rigtige gæt: appen er dansk.
+    /// </summary>
+    /// <param name="sprogkode">Aftalens sprog. Tom betyder dansk.</param>
+    public static string Note(string sprogkode)
+    {
+        var engelsk = sprogkode.Length > 0
+                   && !sprogkode.StartsWith("da", StringComparison.OrdinalIgnoreCase);
+
+        try
+        {
+            var egen = engelsk
+                ? AppSettings.Current.OptagenoteEn
+                : AppSettings.Current.Optagenote;
+
+            if (!string.IsNullOrWhiteSpace(egen)) return egen.Trim();
         }
+        catch (Exception)
+        {
+            // Kan indstillingerne ikke laeses, staar standarden.
+        }
+
+        return engelsk ? StandardOptagenoteEn : StandardOptagenote;
     }
 
     private const string Godkend = "https://accounts.google.com/o/oauth2/v2/auth";
@@ -430,8 +480,18 @@ public static class Googlekalender
     /// TIDSZONEN SENDES MED. Google gætter ellers på kalenderens egen, og en
     /// aftale, der lander en time forkert, er værre end en, der fejler.
     /// </summary>
+    /// <param name="medMeet">Skal Google oprette et mødelokale?</param>
+    /// <param name="medNote">
+    /// Skal oplysningen om optagelse med i indkaldelsen?
+    ///
+    /// KUN NÅR MØDET FAKTISK SKAL OPTAGES. Et Meet-link er ikke i sig selv en
+    /// beslutning om at optage — man laver også online-møder, man ikke skal
+    /// have referat af. En indkaldelse, der varsler en optagelse, der aldrig
+    /// kommer, er en, folk holder op med at læse.
+    /// </param>
     public static async Task<Googlesvar> OpretAsync(Aftale aftale, string opdateringsnoegle,
                                                     bool medMeet = true,
+                                                    bool medNote = false,
                                                     CancellationToken ct = default)
     {
         if (Googleklient.Hent() is not var (klientId, hemmelighed) || klientId.Length == 0)
@@ -488,11 +548,11 @@ public static class Googlekalender
             };
 
             adresse += "?conferenceDataVersion=1";
-
-            // Deltagerne skal vide det, FOER moedet - ikke i det oejeblik
-            // optagelsen begynder. Se Optagenote.
-            krop["description"] = Optagenote;
         }
+
+        // Deltagerne skal vide det, FOER moedet - ikke i det oejeblik
+        // optagelsen begynder. Men kun naar der FAKTISK skal optages.
+        if (medNote) krop["description"] = Note(aftale.Sprog);
 
         using var anmodning = new HttpRequestMessage(HttpMethod.Post, adresse)
         {
@@ -535,7 +595,14 @@ public static class Googlekalender
     /// ignoreret: Google svarer 200, aftalen er uændret, og der er ingen fejl
     /// at gå efter.
     /// </summary>
+    /// <param name="medNote">
+    /// Skal oplysningen om optagelse med? Kun når mødet faktisk skal optages —
+    /// et mødelink er ikke i sig selv en beslutning om at optage.
+    /// </param>
+    /// <param name="sprogkode">Mødets sprog — afgør, om noten er dansk eller engelsk.</param>
     public static async Task<string> TilfoejMeetAsync(string fremmedId, string opdateringsnoegle,
+                                                      bool medNote = false,
+                                                      string sprogkode = "",
                                                       CancellationToken ct = default)
     {
         if (Googleklient.Hent() is not var (klientId, hemmelighed) || klientId.Length == 0)
@@ -553,15 +620,8 @@ public static class Googlekalender
         // ind, ville alt, arrangoeren havde skrevet i indkaldelsen - dagsorden,
         // links, aftaler - vaere vaek. Det ville vaere et rigtigt tab, og det
         // ville ske i stilhed.
-        var beskrivelse = await HentBeskrivelse(fremmedId, noegle, ct);
-
-        var samlet = beskrivelse.Contains("NoteApp", StringComparison.OrdinalIgnoreCase)
-            ? beskrivelse
-            : beskrivelse.Length > 0 ? beskrivelse.TrimEnd() + "\n\n" + Optagenote : Optagenote;
-
         var krop = new Dictionary<string, object?>
         {
-            ["description"] = samlet,
             ["conferenceData"] = new Dictionary<string, object?>
             {
                 ["createRequest"] = new Dictionary<string, object?>
@@ -574,6 +634,24 @@ public static class Googlekalender
                 }
             }
         };
+
+        // NOTEN KUN NAAR DER FAKTISK SKAL OPTAGES.
+        //
+        // Den eksisterende beskrivelse hentes foerst: en PATCH med
+        // «description» ERSTATTER feltet, og skrev vi bare noten ind,
+        // ville dagsorden, links og aftaler vaere vaek. Det ville vaere et
+        // rigtigt tab, og det ville ske i stilhed.
+        if (medNote)
+        {
+            var beskrivelse = await HentBeskrivelse(fremmedId, noegle, ct);
+
+            var note = Note(sprogkode);
+
+            krop["description"] =
+                beskrivelse.Contains("NoteApp", StringComparison.OrdinalIgnoreCase) ? beskrivelse
+                : beskrivelse.Length > 0 ? beskrivelse.TrimEnd() + "\n\n" + note
+                : note;
+        }
 
         var adresse = $"{Aftaler}/{Uri.EscapeDataString(fremmedId)}?conferenceDataVersion=1";
 

@@ -324,11 +324,19 @@ public partial class SettingsView : UserControl
     private void VisNote()
     {
         _fylderNote = true;
-        Optagenote.Text = Googlekalender.Optagenote;
+        Optagenote.Text = Googlekalender.Note("da");
+        OptagenoteEn.Text = Googlekalender.Note("en");
         _fylderNote = false;
 
-        Notestatus.Text = AppSettings.Current.Optagenote.Length > 0
-            ? "Din egen tekst." : "Standardteksten.";
+        var egne = (AppSettings.Current.Optagenote.Length > 0 ? 1 : 0)
+                 + (AppSettings.Current.OptagenoteEn.Length > 0 ? 1 : 0);
+
+        Notestatus.Text = egne switch
+        {
+            2 => "Begge tekster er dine egne.",
+            1 => "Den ene tekst er din egen.",
+            _ => "Standardteksterne."
+        };
     }
 
     /// <summary>
@@ -348,28 +356,32 @@ public partial class SettingsView : UserControl
 
     private void GemNote_Klik(object sender, RoutedEventArgs e)
     {
-        var tekst = Optagenote.Text.Trim();
-
         // ER DEN LIG STANDARDEN, GEMMES DER INGENTING. Så følger noten med,
         // den dag standarden bliver bedre — i stedet for at stå fast på den
         // ordlyd, der tilfældigvis var i feltet den dag, man trykkede gem.
+        var dansk = Optagenote.Text.Trim();
+        var engelsk = OptagenoteEn.Text.Trim();
+
         AppSettings.Current.Optagenote =
-            tekst == Googlekalender.StandardOptagenote.Trim() ? "" : tekst;
+            dansk == Googlekalender.StandardOptagenote.Trim() ? "" : dansk;
+
+        AppSettings.Current.OptagenoteEn =
+            engelsk == Googlekalender.StandardOptagenoteEn.Trim() ? "" : engelsk;
 
         AppSettings.Current.Save();
 
         VisNote();
-        Notestatus.Text = AppSettings.Current.Optagenote.Length > 0
-            ? "Gemt. Din egen tekst bruges." : "Gemt. Standardteksten bruges.";
+        Notestatus.Text = "Gemt.";
     }
 
     private void NulstilNote_Klik(object sender, RoutedEventArgs e)
     {
         AppSettings.Current.Optagenote = "";
+        AppSettings.Current.OptagenoteEn = "";
         AppSettings.Current.Save();
 
         VisNote();
-        Notestatus.Text = "Nulstillet til standardteksten.";
+        Notestatus.Text = "Nulstillet til standardteksterne.";
     }
 
     private void IntegrationerLaest_Klik(object sender, RoutedEventArgs e)

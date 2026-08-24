@@ -153,6 +153,31 @@ public sealed record Opgave
 
     /// <summary>Tidsstemplet i optagelsen, opgaven kom fra. Tom ved en manuel opgave.</summary>
     public string Kilde { get; init; } = "";
+
+    /// <summary>
+    /// Optagelsen, opgaven kom fra. Tom, når den ikke kom fra et møde.
+    ///
+    /// HERKOMSTEN ER EN OPLYSNING PÅ OPGAVEN — IKKE DENS ADRESSE.
+    ///
+    /// Indtil 24-08-2026 lå opgaven i optagelsens mappe, og mappen VAR
+    /// herkomsten. Det holdt, så længe alle opgaver kom fra et møde. En
+    /// opgave, man skriver i hånden, gør ikke — og en, der hentes fra Google,
+    /// slet ikke. De skulle så have et opdigtet hjem i en mappe, der lod som
+    /// om, der var optaget noget.
+    ///
+    /// Nu ligger alle opgaver samlet, og de bærer selv, hvor de kom fra. Se
+    /// <see cref="Opgavelager"/>.
+    /// </summary>
+    public string MoedeId { get; set; } = "";
+
+    /// <summary>
+    /// Mødets titel, som den var, da opgaven blev lavet.
+    ///
+    /// Den GEMMES frem for at blive slået op. Slettes optagelsen, kan
+    /// herkomsten stadig læses — «Møde med Tina, 12. august» siger noget, hvor
+    /// et id, der ikke findes, ikke siger noget.
+    /// </summary>
+    public string Moedetitel { get; set; } = "";
 }
 
 /// <summary>
@@ -167,10 +192,26 @@ public sealed record Opgave
 /// </summary>
 public sealed class Opgaveliste
 {
+    /// <summary>
+    /// Kun ved indlæsning af den GAMLE fil. Opgaver ligger i Opgavelager nu.
+    /// Feltet bliver stående, så flytningen kan læse dem ud af de gamle filer.
+    /// </summary>
     public List<Opgave> Opgaver { get; init; } = new();
+
     public List<string> Afvist { get; init; } = new();
 
-    public static string Sti(string mappe) => Path.Combine(mappe, "opgaver.json");
+    /// <summary>
+    /// Afvisningerne ligger i «afvist.json» ved siden af optagelsen.
+    ///
+    /// EGET FILNAVN, FORDI OPGAVERNE ER FLYTTET UD. De lå begge i
+    /// «opgaver.json», og den fil flyttes nu til det fælles lager. Blev de
+    /// ved med at dele navn, ville flytningen og afvisningerne skiftes til at
+    /// skrive oven i hinanden. Se <see cref="Opgavelager"/>.
+    /// </summary>
+    public static string Sti(string mappe) => Path.Combine(mappe, "afvist.json");
+
+    /// <summary>Den gamle fil. Læses ved flytningen, skrives aldrig mere.</summary>
+    public static string GammelSti(string mappe) => Path.Combine(mappe, "opgaver.json");
 
     private static readonly JsonSerializerOptions Format = new()
     {
@@ -219,7 +260,12 @@ public sealed class Opgaveliste
         if (!Afvist.Contains(n)) Afvist.Add(n);
     }
 
-    /// <summary>Er der allerede oprettet en opgave af den her tekst?</summary>
-    public bool ErOprettet(string tekst) =>
-        Opgaver.Any(o => Noegle(o.Tekst) == Noegle(tekst));
+    /// <summary>
+    /// Er der allerede oprettet en opgave af den her tekst?
+    ///
+    /// Opgaverne kommer udefra nu — listen kender dem ikke selv, siden de
+    /// flyttede til det fælles lager.
+    /// </summary>
+    public static bool ErOprettet(string tekst, IEnumerable<Opgave> opgaver) =>
+        opgaver.Any(o => Noegle(o.Tekst) == Noegle(tekst));
 }

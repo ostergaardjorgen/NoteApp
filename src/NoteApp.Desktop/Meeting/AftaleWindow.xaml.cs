@@ -188,7 +188,12 @@ public partial class AftaleWindow : Window
                 return;
             }
 
-            var link = await Googlekalender.TilfoejMeetAsync(Aftalen.FremmedId, noegle);
+            // Noten kun naar moedet er markeret til at blive optaget.
+            // Et moedelink er ikke i sig selv en beslutning om at optage.
+            var link = await Googlekalender.TilfoejMeetAsync(
+                Aftalen.FremmedId, noegle,
+                medNote: OptagAutomatisk.IsChecked == true,
+                sprogkode: (Sprogvalg.SelectedItem as Punkt)?.Vaerdi ?? "");
 
             Aftalen.Link = link;
             Kalender.Gem(Aftalen);

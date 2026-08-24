@@ -1,10 +1,20 @@
 namespace NoteApp.Core;
 
-/// <summary>En opgave med det møde, den kom fra.</summary>
-/// <param name="Mappe">Optagelsens mappe på disken — dér ligger opgavefilen.</param>
-/// <param name="MoedeId">Mødets id. Det er DEN, der åbner mødet, ikke stien.</param>
-public sealed record Registeropgave(Opgave Opgave, string Mappe, string MoedeId, string Moedetitel)
+/// <summary>
+/// En opgave, som listerne viser den.
+///
+/// HERKOMSTEN LIGGER PAA OPGAVEN SELV. Typen havde før en Mappe — stien til
+/// optagelsen, hvor opgavefilen lå. Den findes ikke mere: alle opgaver ligger
+/// samlet, og hvor de kom fra, er felter på opgaven. Se <see cref="Opgavelager"/>.
+///
+/// Typen bliver stående, fordi skærmene binder til den — og fordi den er det
+/// naturlige sted at regne hastigheden ud.
+/// </summary>
+public sealed record Registeropgave(Opgave Opgave)
 {
+    public string MoedeId => Opgave.MoedeId;
+    public string Moedetitel => Opgave.Moedetitel.Length > 0 ? Opgave.Moedetitel : "Skrevet i hånden";
+
     /// <summary>Hvor presserende er den — set fra i dag?</summary>
     public Hastighed Hastighed(DateOnly idag)
     {
@@ -44,50 +54,28 @@ public enum Hastighed
 }
 
 /// <summary>
-/// Alle opgaver på tværs af alle optagelser.
+/// Opgaverne, som skærmene skal bruge dem: sorteret, filtreret og med
+/// herkomsten på.
 ///
-/// HVORFOR DE IKKE LIGGER I ÉN FIL
+/// SELVE OPBEVARINGEN LIGGER I <see cref="Opgavelager"/>, og dér står også,
+/// hvorfor opgaver flyttede ud af optagelsernes mapper 24-08-2026.
 ///
-/// Hver optagelse har sin egen `opgaver.json` ved siden af lyden. Det er
-/// bevidst: sletter man et møde, forsvinder dets opgaver med det, en
-/// sikkerhedskopi af mappen indeholder alt om mødet, og der er ingen central
-/// fil, der kan blive uenig med virkeligheden.
-///
-/// Prisen er, at et samlet overblik skal læse alle mapper igennem. Målt: en
-/// mappe koster et filopslag, og der er tale om hundredvis, ikke millioner.
-/// Det er den samme afvejning som i søgningen — læs kilden, hold ikke en kopi.
+/// Der læses fra disken ved hvert opslag. Det er den samme afvejning som i
+/// søgningen — læs kilden, hold ikke en kopi, der kan blive uenig med den.
 /// </summary>
 public static class Opgaveregister
 {
     /// <summary>
-    /// Alle opgaver, nyeste møde først.
+    /// Alle opgaver, nyeste først.
     ///
     /// Der læses direkte fra disken hver gang. En liste, der kan komme ud af
-    /// trit med filerne, ville vise en opgave, man netop har krydset af.
+    /// trit med filen, ville vise en opgave, man netop har krydset af.
     /// </summary>
-    public static List<Registeropgave> Alle()
-    {
-        var ud = new List<Registeropgave>();
-
-        if (!Directory.Exists(UserDataPaths.Meetings)) return ud;
-
-        foreach (var mappe in Directory.EnumerateDirectories(UserDataPaths.Meetings))
-        {
-            if (!File.Exists(Opgaveliste.Sti(mappe))) continue;
-
-            MeetingMetadata? meta = null;
-            try { meta = MeetingStore.Load(mappe); } catch (Exception) { }
-
-            var liste = Opgaveliste.Hent(mappe);
-
-            foreach (var o in liste.Opgaver)
-                ud.Add(new Registeropgave(o, mappe,
-                    meta?.Id.ToString() ?? "",
-                    meta?.Title ?? Path.GetFileName(mappe)));
-        }
-
-        return ud;
-    }
+    public static List<Registeropgave> Alle() =>
+        Opgavelager.Alle()
+            .OrderByDescending(o => o.Oprettet)
+            .Select(o => new Registeropgave(o))
+            .ToList();
 
     /// <summary>
     /// De opgaver, der ikke er færdige — sorteret efter, hvad man skal se på.
@@ -119,20 +107,13 @@ public static class Opgaveregister
             .ToList();
 
     /// <summary>
-    /// Gemmer en ændret opgave tilbage i den fil, den kom fra.
+    /// Gemmer en ændret opgave.
     ///
-    /// Der læses ind igen først. Filen kan være ændret, siden listen blev
-    /// bygget — man kan have haft mødet åbent i den anden ende af appen — og
-    /// et blindt overskriv ville smide den anden ændring væk.
+    /// Lageret læser filen ind igen først. Den kan være ændret, siden listen
+    /// blev bygget — man kan have haft opgaven åben i den anden ende af appen
+    /// — og et blindt overskriv ville smide den anden ændring væk.
     /// </summary>
-    public static void Gem(Registeropgave r)
-    {
-        var liste = Opgaveliste.Hent(r.Mappe);
-        var nr = liste.Opgaver.FindIndex(o => o.Id == r.Opgave.Id);
+    public static void Gem(Registeropgave r) => Opgavelager.Gem(r.Opgave);
 
-        if (nr < 0) liste.Opgaver.Add(r.Opgave);
-        else liste.Opgaver[nr] = r.Opgave;
-
-        liste.Gem(r.Mappe);
-    }
+    public static void Slet(Registeropgave r) => Opgavelager.Slet(r.Opgave.Id);
 }

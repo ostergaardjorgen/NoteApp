@@ -770,7 +770,11 @@ public partial class UdskriftView : UserControl
 
     // -------------------------------------------------------------- opgaver
 
+    /// <summary>Mødets afviste forslag. Opgaverne selv ligger i Opgavelager.</summary>
     private Opgaveliste _opgaver = new();
+
+    /// <summary>Mødets egne opgaver, læst ud af det fælles lager.</summary>
+    private List<Opgave> _moedeopgaver = new();
     private List<Opgavekandidat> _kandidater = new();
 
     /// <summary>
@@ -791,6 +795,15 @@ public partial class UdskriftView : UserControl
         }
 
         _opgaver = Opgaveliste.Hent(_mappe);
+
+        // OPGAVERNE KOMMER FRA DET FAELLES LAGER og ikke fra moedets mappe.
+        // Der filtreres paa moedets id: en opgave baerer selv, hvor den kom
+        // fra. Se Opgavelager for hvorfor de flyttede.
+        var moedeId = _meta?.Id.ToString() ?? "";
+
+        _moedeopgaver = moedeId.Length == 0
+            ? new List<Opgave>()
+            : Opgavelager.Alle().Where(o => o.MoedeId == moedeId).ToList();
         _kandidater = Opgavefund.Find(_udskrift, _meta?.Talere, _mappe);
 
         TegnOpgaver();
@@ -810,7 +823,8 @@ public partial class UdskriftView : UserControl
         // Et forslag, der allerede er sagt ja eller nej til, skal ikke staa
         // igen. Ellers ville listen se ud, som om intet blev gemt.
         var tilbage = _kandidater
-            .Where(k => !_opgaver.ErAfvist(k.Tekst) && !_opgaver.ErOprettet(k.Tekst))
+            .Where(k => !_opgaver.ErAfvist(k.Tekst)
+                     && !Opgaveliste.ErOprettet(k.Tekst, _moedeopgaver))
             .ToList();
 
         var svage = tilbage.Count(k => k.Styrke < Opgavefund.Vises);
@@ -844,9 +858,30 @@ public partial class UdskriftView : UserControl
               "Du kan tilføje en opgave i hånden.";
     }
 
+    /// <summary>
+    /// Gemmer begge dele: opgaverne i det fælles lager, afvisningerne hos
+    /// mødet.
+    ///
+    /// De to hører hver sit sted. En opgave er brugerens og overlever, at
+    /// optagelsen slettes; en afvisning giver kun mening for netop den
+    /// transkription, den blev sagt nej til i.
+    /// </summary>
     private void GemOpgaver()
     {
         if (_mappe is null) return;
+
+        try
+        {
+            var alle = Opgavelager.Alle();
+            var mine = _moedeopgaver.Select(o => o.Id).ToHashSet();
+
+            alle.RemoveAll(o => mine.Contains(o.Id));
+            alle.AddRange(_moedeopgaver);
+
+            Opgavelager.Gem(alle);
+        }
+        catch (IOException) { }
+
         try { _opgaver.Gem(_mappe); } catch (IOException) { }
     }
 
@@ -915,7 +950,12 @@ public partial class UdskriftView : UserControl
 
     private void NyOpgave_Klik(object sender, RoutedEventArgs e)
     {
-        _opgaver.Opgaver.Add(new Opgave { Tekst = "" });
+        _moedeopgaver.Add(new Opgave
+        {
+            Tekst = "",
+            MoedeId = _meta?.Id.ToString() ?? "",
+            Moedetitel = _meta?.Title ?? ""
+        });
         GemOpgaver();
         TegnOpgaver();
     }

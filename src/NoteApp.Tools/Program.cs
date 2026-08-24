@@ -28,6 +28,7 @@ try
         "maalsoegning" => Maalsoegning(),
         "maaldato"  => Maaldato(),
         "google"    => await Google(args.Skip(1).ToArray()),
+        "opgaver"   => Opgaver(),
         "recover"   => Genopret(),
         "hjaelp" or "--help" or "-h" => Hjælp(),
         _ => Ukendt(kommando)
@@ -54,6 +55,7 @@ static int Hjælp()
           maaldato  Måler datoforståelsen mod kendte svar
           google    Efterprøver Google Kalender-forbindelsen hele vejen:
                       noteapp google [dage]
+          opgaver   Viser alle opgaver og hvor de kom fra
           udkast    Laver et referat med en lokal model — intet forlader maskinen
           sky       Laver et referat hos en europæisk leverandør:
                       SENDER UDSKRIFTEN UD AF MASKINEN. Se «noteapp sky».
@@ -1392,6 +1394,55 @@ static async Task<int> Google(string[] a)
     Console.WriteLine();
     Console.WriteLine("Der er ikke gemt noget. Tryk Forbind i appen for at");
     Console.WriteLine("etablere forbindelsen dér.");
+
+    return 0;
+}
+
+
+// -------------------------------------------------------------- opgaver
+//
+// Viser, hvad der ligger i opgavelageret, og hvor hver opgave kom fra.
+//
+// Den findes, fordi opgaver flyttede ud af optagelsernes mapper 24-08-2026.
+// En flytning af brugerens data skal kunne EFTERPROEVES foer den slippes
+// loes - ikke bare bygges og haabes paa.
+static int Opgaver()
+{
+    var alle = Opgavelager.Alle();
+
+    Console.WriteLine();
+    Console.WriteLine($"Opgavelager: {Opgavelager.Fil}");
+    Console.WriteLine($"{alle.Count} opgave(r)");
+    Console.WriteLine();
+
+    foreach (var o in alle.OrderByDescending(x => x.Oprettet))
+    {
+        var maerker = new List<string>();
+
+        if (o.Faerdig) maerker.Add("faerdig");
+        if (o.Prioritet > 0) maerker.Add("pri " + o.Prioritet);
+        if (o.Deadline is { } d) maerker.Add(d.LocalDateTime.ToString("dd-MM-yyyy"));
+
+        maerker.Add(o.MoedeId.Length > 0 ? "fra: " + o.Moedetitel : "skrevet i haanden");
+
+        Console.WriteLine($"  {o.Visningsnavn}");
+        Console.WriteLine($"      {string.Join("  ·  ", maerker)}");
+    }
+
+    Console.WriteLine();
+
+    // Er der noget tilbage i de gamle mapper? Saa gik flytningen ikke helt
+    // igennem, og det skal siges - ikke opdages ved at en opgave mangler.
+    var tilbage = 0;
+
+    if (Directory.Exists(UserDataPaths.Meetings))
+        foreach (var m in Directory.EnumerateDirectories(UserDataPaths.Meetings))
+            if (File.Exists(Opgaveliste.GammelSti(m))) tilbage++;
+
+    if (tilbage > 0)
+        Console.WriteLine($"BEMAERK: {tilbage} mappe(r) har stadig en gammel opgaver.json.");
+    else
+        Console.WriteLine("Ingen gamle opgavefiler tilbage i optagelsesmapperne.");
 
     return 0;
 }

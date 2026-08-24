@@ -604,8 +604,12 @@ public partial class SearchView : UserControl
             var noegle = Integrationsfiler.Hent("google").Opdateringsnoegle;
             if (noegle.Length == 0) return;
 
+            // NOTEN KUN NAAR MOEDET SKAL OPTAGES. Aftalens eget hak afgoer
+            // det - en indkaldelse, der varsler en optagelse, der aldrig
+            // kommer, er en, folk holder op med at laese.
             var svar = await Googlekalender.OpretAsync(
-                vindue.Aftalen, noegle, vindue.SkalHaveMeet);
+                vindue.Aftalen, noegle, vindue.SkalHaveMeet,
+                medNote: vindue.Aftalen.OptagAutomatisk);
 
             vindue.Aftalen.FremmedId = svar.Id;
 

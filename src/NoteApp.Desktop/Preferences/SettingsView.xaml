@@ -435,18 +435,40 @@
                 <TextBlock Text="Teksten i mødeindkaldelsen" FontSize="15" FontWeight="SemiBold" />
                 <TextBlock FontSize="12.5" Margin="0,6,0,0" TextWrapping="Wrap" LineHeight="20"
                            Foreground="{StaticResource TekstMeget}"
-                           Text="Når appen laver et Google Meet-link til en aftale, skrives den her tekst i indkaldelsen. Deltagerne får det at vide før mødet, hvor de kan nå at sige fra — ikke i det øjeblik optagelsen begynder." />
+                           Text="Er en aftale markeret til at blive optaget, skrives den her tekst i indkaldelsen sammen med mødelinket. Deltagerne får det at vide før mødet, hvor de kan nå at sige fra — ikke i det øjeblik optagelsen begynder. Et mødelink alene udløser den ikke: man holder også online-møder, der ikke skal optages." />
 
-                <TextBox x:Name="Optagenote" Margin="0,14,0,0" FontSize="12"
-                         MinHeight="200" MaxHeight="320" Padding="12,10"
-                         TextWrapping="Wrap" AcceptsReturn="True"
-                         VerticalScrollBarVisibility="Auto"
-                         VerticalContentAlignment="Top"
-                         TextChanged="Optagenote_Aendret" />
+                <!-- TO SPROG, FORDI EN INDKALDELSE PAA DANSK TIL EN, DER IKKE
+                     LAESER DANSK, IKKE ER EN OPLYSNING. Retten til at sige fra
+                     er kun vaerd at have, hvis den kan laeses - og et moede,
+                     hvor sproget er sat til engelsk, har med sikkerhed
+                     deltagere, der ikke laeser dansk.
+
+                     Sproget vaelges IKKE her. Det tages fra aftalen: er moedet
+                     sat til engelsk, er indkaldelsen det ogsaa. -->
+                <TabControl Margin="0,14,0,0" Style="{StaticResource Fanerude}">
+
+                  <TabItem Header="Dansk" Style="{StaticResource Fane}">
+                    <TextBox x:Name="Optagenote" FontSize="12"
+                             MinHeight="220" MaxHeight="320" Padding="12,10"
+                             TextWrapping="Wrap" AcceptsReturn="True"
+                             VerticalScrollBarVisibility="Auto"
+                             VerticalContentAlignment="Top"
+                             TextChanged="Optagenote_Aendret" />
+                  </TabItem>
+
+                  <TabItem Header="English" Style="{StaticResource Fane}">
+                    <TextBox x:Name="OptagenoteEn" FontSize="12"
+                             MinHeight="220" MaxHeight="320" Padding="12,10"
+                             TextWrapping="Wrap" AcceptsReturn="True"
+                             VerticalScrollBarVisibility="Auto"
+                             VerticalContentAlignment="Top"
+                             TextChanged="Optagenote_Aendret" />
+                  </TabItem>
+                </TabControl>
 
                 <TextBlock FontSize="11.5" Margin="2,7,0,0" TextWrapping="Wrap" LineHeight="18"
                            Foreground="{StaticResource TekstMeget}"
-                           Text="Ryd feltet for at komme tilbage til standardteksten. Den kan ikke slås helt fra: en optagelse, ingen har fået at vide, er ikke noget appen hjælper med." />
+                           Text="Sproget vælges ikke her — det tages fra aftalen. Er mødet sat til engelsk, bruges den engelske tekst. Ryd et felt for at komme tilbage til standardteksten; den kan ikke slås helt fra, for en optagelse, ingen har fået at vide, er ikke noget appen hjælper med." />
 
                 <StackPanel Orientation="Horizontal" Margin="0,14,0,0">
                   <Button Content="Gem teksten" Click="GemNote_Klik" Padding="18,8"

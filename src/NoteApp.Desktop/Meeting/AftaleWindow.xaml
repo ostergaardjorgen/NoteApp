@@ -134,7 +134,7 @@
                 Click="TilfoejMeet_Klik" HorizontalAlignment="Left"
                 Margin="0,12,0,0" Padding="12,6" FontSize="12"
                 Visibility="Collapsed"
-                ToolTip="Opretter et mødelokale hos Google, lægger linket på aftalen og skriver i indkaldelsen, at mødet planlægges optaget" />
+                ToolTip="Opretter et mødelokale hos Google og lægger linket på aftalen. Er mødet markeret til automatisk optagelse, skrives oplysningen om optagelse også i indkaldelsen" />
 
         <!-- Hakket vises kun, naar der ER en forbindelse. Et afkrydsningsfelt,
              der ikke kan bruges, er et spoergsmaal om hvorfor. -->
@@ -157,7 +157,7 @@
                     Content="Tilføj et Google Meet-link" />
           <TextBlock Margin="24,2,0,0" FontSize="11" TextWrapping="Wrap"
                      Foreground="{StaticResource TekstMeget}"
-                     Text="Linket kommer med tilbage, så mødet kan startes herfra. I indkaldelsen skrives med småt, at mødet planlægges optaget, at lyden bliver på din computer — og at man kan sige fra. Deltagerne skal vide det før mødet, ikke i det øjeblik optagelsen begynder." />
+                     Text="Linket kommer med tilbage, så mødet kan startes herfra. Sætter du også hak i «Start optagelsen automatisk», følger der en oplysning med i indkaldelsen om, at mødet planlægges optaget, at lyden bliver på din computer — og at man kan sige fra. Teksten kan rettes under Indstillinger → Integrationer." />
 
           <CheckBox x:Name="InviterGaester" FontSize="12" Margin="0,9,0,0"
                     Content="Jeg vil invitere gæster" />
