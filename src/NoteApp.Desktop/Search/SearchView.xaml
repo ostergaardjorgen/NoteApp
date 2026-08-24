@@ -516,9 +516,20 @@
                 prioritet 3, der skulle have været lavet i mandags,
                 gør. Kanten svarer på «hvad nu», tallet på «hvad er
                 vigtigst, når jeg har tid til ét af dem». -->
+                <!-- HELE KORTET ER KLIKBART.
+                     Her stod en «Mere»-knap. Den fyldte en linje i en smal
+                     spalte for at goere det, kortet lige saa godt kan goere
+                     selv - og en knap, der aabner det, man lige har trykket
+                     paa, er et led for meget.
+
+                     Fluebenet, prioriteten og herkomstlinket ligger inden i.
+                     De haandterer selv deres klik og markerer dem som
+                     behandlede, saa de naar aldrig herud. -->
                 <Border Background="#FF181B22" BorderBrush="{Binding Farve}"
                 BorderThickness="3,0,0,0" CornerRadius="6"
-                Padding="13,10" Margin="0,0,0,6">
+                Padding="13,10" Margin="0,0,0,6"
+                Tag="{Binding}" MouseLeftButtonUp="Opgave_Aabn"
+                Cursor="Hand" ToolTip="Åbn opgaven">
                 <Grid>
                 <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
@@ -546,11 +557,6 @@
                 <TextBlock Text="{Binding Navn}" FontSize="12.5" TextWrapping="Wrap"
                 LineHeight="19" MaxHeight="38" TextTrimming="CharacterEllipsis" />
 
-                <!-- Resten. Den fylder ingenting, foer nogen beder om den. -->
-                <TextBlock Text="{Binding Beskrivelse}" FontSize="12"
-                TextWrapping="Wrap" LineHeight="19" Margin="0,6,0,0"
-                Foreground="{StaticResource TekstSvag}"
-                Visibility="{Binding Beskrivelsesvis}" />
 
                 <!-- HERKOMSTEN ER ET LINK, IKKE EN OPLYSNING.
                 En opgave uden vej tilbage til det, der blev sagt,
@@ -584,25 +590,6 @@
                 <TextBlock Text="{Binding Under}" FontSize="11" TextWrapping="Wrap"
                 Visibility="{Binding Kildevis}"
                 Foreground="{StaticResource TekstMeget}" />
-
-                <!-- Knappen staar kun, naar der ER mere at folde ud. En knap,
-                     der ikke goer noget, laerer man at lade vaere med at
-                     trykke paa - ogsaa de gange, hvor den ville have gjort
-                     noget. -->
-                <Button Content="{Binding Mereknap}" Tag="{Binding}" Click="Mere_Klik"
-                Margin="10,0,0,0" Padding="0" BorderThickness="0"
-                Background="Transparent" Cursor="Hand"
-                FontSize="11" Foreground="{StaticResource TekstMeget}"
-                Visibility="{Binding Merevis}"
-                ToolTip="Vis hele opgaven">
-                <Button.Template>
-                <ControlTemplate TargetType="Button">
-                <TextBlock Text="{TemplateBinding Content}" FontSize="11"
-                TextDecorations="Underline"
-                Foreground="{TemplateBinding Foreground}" />
-                </ControlTemplate>
-                </Button.Template>
-                </Button>
                 </WrapPanel>
                 </StackPanel>
 

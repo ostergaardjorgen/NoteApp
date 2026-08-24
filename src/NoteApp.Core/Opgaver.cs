@@ -55,7 +55,14 @@ public sealed record Opgave
         Tekst.Length > 0 && !string.Equals(Tekst.Trim(), Visningsnavn.Trim(),
                                            StringComparison.Ordinal);
 
-    internal static string Kort(string tekst, int maks = 70)
+    /// <summary>
+    /// Klipper en tekst ned til et navn.
+    ///
+    /// Offentlig, fordi opgavevinduet skal kunne kende forskel på et navn,
+    /// brugeren har valgt, og det udledte, feltet blev fyldt med. Uden den
+    /// forskel ville et gæt blive gemt som noget, nogen havde besluttet.
+    /// </summary>
+    public static string Kort(string tekst, int maks = 70)
     {
         var t = tekst.Trim();
         if (t.Length == 0) return "";

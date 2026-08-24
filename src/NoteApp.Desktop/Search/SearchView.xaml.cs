@@ -404,10 +404,42 @@ public partial class SearchView : UserControl
     /// Kan browseren ikke åbnes, siges det. Aftalen ER oprettet, og det må
     /// ikke se ud, som om noget gik tabt.
     /// </summary>
-    /// <summary>Folder opgavens beskrivelse ud eller sammen igen.</summary>
-    private void Mere_Klik(object sender, RoutedEventArgs e)
+    /// <summary>
+    /// Åbner opgaven i sit eget vindue.
+    ///
+    /// LISTEN ER IKKE ET ARBEJDSBORD. Den viser opgaven på to linjer, så tyve
+    /// af dem kan skimmes; skal en af dem rettes, skal der være plads til at
+    /// læse den og skrive i den.
+    ///
+    /// Der læses forfra bagefter — også når der ikke blev gemt. Det koster et
+    /// filopslag pr. mappe, og alternativet er en liste, der kan komme ud af
+    /// trit med filerne.
+    /// </summary>
+    private void Opgave_Aabn(object sender, System.Windows.Input.MouseButtonEventArgs e)
     {
-        if (sender is Button { Tag: Opgavevisning v }) v.FoldetUd = !v.FoldetUd;
+        if (sender is not FrameworkElement { Tag: Opgavevisning v }) return;
+
+        // FLUEBENET, PRIORITETEN OG HERKOMSTLINKET LIGGER INDEN I KORTET.
+        //
+        // De markerer selv deres klik som behandlede, saa de burde aldrig naa
+        // herud. «Burde» er ikke godt nok: en rulleliste, hvis punkter tegnes
+        // i et popup-lag, foelger ikke altid den regel, og resultatet ville
+        // vaere et vindue, der springer op, hver gang man saetter en prioritet.
+        //
+        // Derfor gaas der op gennem traeet fra dét, der faktisk blev ramt.
+        if (e.OriginalSource is DependencyObject ramt)
+        {
+            for (var p = ramt; p is not null && p != sender; p = System.Windows.Media.VisualTreeHelper.GetParent(p))
+            {
+                if (p is System.Windows.Controls.Primitives.ButtonBase or ComboBox or ComboBoxItem)
+                    return;
+            }
+        }
+
+        var vindue = new OpgaveWindow(v.Opgave) { Owner = Window.GetWindow(this) };
+        vindue.ShowDialog();
+
+        if (vindue.Gemt) VisOpgaver();
     }
 
     private void AabnHosGoogle(string webadresse)
@@ -979,9 +1011,8 @@ public sealed class Opgavevisning : System.ComponentModel.INotifyPropertyChanged
     /// </summary>
     public string Beskrivelse => _r.Opgave.Tekst;
 
-    /// <summary>Er der mere at folde ud, end navnet allerede viser?</summary>
-    public Visibility Merevis =>
-        _r.Opgave.HarMere ? Visibility.Visible : Visibility.Collapsed;
+    /// <summary>Opgaven bag visningen — til vinduet, der åbner den.</summary>
+    public Registeropgave Opgave => _r;
 
     /// <summary>
     /// Er herkomsten et LINK — eller bare en oplysning?
@@ -997,28 +1028,6 @@ public sealed class Opgavevisning : System.ComponentModel.INotifyPropertyChanged
     public Visibility Kildevis =>
         _r.MoedeId.Length > 0 ? Visibility.Collapsed : Visibility.Visible;
 
-    private bool _foldetUd;
-
-    /// <summary>Er beskrivelsen foldet ud lige nu?</summary>
-    public bool FoldetUd
-    {
-        get => _foldetUd;
-        set
-        {
-            if (_foldetUd == value) return;
-
-            _foldetUd = value;
-
-            Meld(nameof(FoldetUd));
-            Meld(nameof(Beskrivelsesvis));
-            Meld(nameof(Mereknap));
-        }
-    }
-
-    public Visibility Beskrivelsesvis =>
-        _foldetUd && _r.Opgave.HarMere ? Visibility.Visible : Visibility.Collapsed;
-
-    public string Mereknap => _foldetUd ? "Skjul" : "Mere";
 
     /// <summary>Mødets id — vejen tilbage til det, der blev sagt.</summary>
     public string MoedeId => _r.MoedeId;
