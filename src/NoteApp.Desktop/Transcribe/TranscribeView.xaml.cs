@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -52,6 +52,18 @@ public sealed class OptagelseVisning
 
         HarLyd = File.Exists(wav) && Sekunder > 0;
         if (!HarLyd) Detaljer += " · ingen lyd";
+
+        // ============ KOM DEN UDEFRA? ============
+        //
+        // En indlaest fil har ÉT spor. Optagelser herfra har to, HERFRA og
+        // DERFRA, og hele fletningen og talernavnene bygger paa det. Det er
+        // ikke noget, brugeren skal opdage, naar udskriften er faerdig og alt
+        // staar under det samme navn - saa det staar her, paa optagelsen.
+        ErIndlaest = meta?.Indlaest is not null;
+
+        Indlaestfra = meta?.Indlaest is { } kilde
+            ? $"Indlæst fra {kilde.Filnavn} — ét spor, så alt står som én taler"
+            : "";
 
         // HELE TIDSRUMMET, TIL HJAELPETEKSTEN.
         //
@@ -115,6 +127,16 @@ public sealed class OptagelseVisning
 
     /// <summary>Hvor længe mødet varede, skrevet ud. Til hjælpeteksten i træet.</summary>
     public string Varighed { get; } = "";
+
+    /// <summary>Sand, når lyden kom ind som en fil udefra og ikke blev optaget her.</summary>
+    public bool ErIndlaest { get; }
+
+    /// <summary>
+    /// «Indlæst fra …» til hjælpeteksten. Tom streng for alt, appen selv har
+    /// optaget — tom betyder «skriv ikke noget», og skabelonen folder linjen
+    /// sammen af sig selv.
+    /// </summary>
+    public string Indlaestfra { get; } = "";
 
     /// <summary>Stien på disken. IKKE brugerens mappe — se <see cref="Emnemappe"/>.</summary>
     public string Mappe { get; }
@@ -497,12 +519,49 @@ public partial class TranscribeView : UserControl
 
     private void Trae_TraekOver(object sender, DragEventArgs e)
     {
+        // FILER FRA STIFINDEREN ER EN ANDEN SLAGS TRÆK.
+        //
+        // En optagelse, der traekkes rundt i traeet, FLYTTES. En fil udefra
+        // KOPIERES - originalen bliver liggende i iCloud eller paa
+        // skrivebordet. Musen skal vise de to ting forskelligt, for det er
+        // den eneste besked, brugeren faar, foer han slipper.
+        if (ErFiltraek(e))
+        {
+            var folder = BeholderUnderMusen(e);
+            foreach (var k in AlleKnuder()) k.ErDropmaal = ReferenceEquals(k, folder);
+
+            e.Effects = DragDropEffects.Copy;
+            e.Handled = true;
+            return;
+        }
+
         var maal = MaalUnderMusen(e);
 
         foreach (var k in AlleKnuder()) k.ErDropmaal = ReferenceEquals(k, maal);
 
         e.Effects = maal is null ? DragDropEffects.None : DragDropEffects.Move;
         e.Handled = true;
+    }
+
+    /// <summary>
+    /// Er det filer fra Stifinderen — og er der en lydfil imellem?
+    ///
+    /// Der siges nej til et træk uden lydfiler i, så musen viser
+    /// forbudsskiltet med det samme. En afvisning FØR slippet er en
+    /// oplysning; en efter er en fejlmeddelelse.
+    /// </summary>
+    private static bool ErFiltraek(DragEventArgs e) =>
+        e.Data.GetDataPresent(DataFormats.FileDrop)
+        && e.Data.GetData(DataFormats.FileDrop) is string[] { Length: > 0 } filer
+        && filer.Any(Indlaesning.Kendes);
+
+    /// <summary>Folderen under musen, eller null når der ikke er nogen.</summary>
+    private Biblioteker.Biblioteksnode? BeholderUnderMusen(DragEventArgs e)
+    {
+        var ramt = Trae.InputHitTest(e.GetPosition(Trae)) as DependencyObject;
+        var knude = FindOpad<TreeViewItem>(ramt)?.DataContext as Biblioteker.Biblioteksnode;
+
+        return knude is { ErBeholder: true } ? knude : null;
     }
 
     private void Trae_TraekForlod(object sender, DragEventArgs e) => RydDropmaal();
@@ -545,9 +604,20 @@ public partial class TranscribeView : UserControl
     /// ikke kan gå galt halvvejs og efterlade en optagelse et sted, ingen
     /// leder.
     /// </summary>
-    private void Trae_Slip(object sender, DragEventArgs e)
+    private async void Trae_Slip(object sender, DragEventArgs e)
     {
         RydDropmaal();
+
+        // Filer fra Stifinderen foerst. Slippes de paa en folder, lander de
+        // i den folder; slippes de ved siden af, lander de uden folder.
+        if (ErFiltraek(e) && e.Data.GetData(DataFormats.FileDrop) is string[] filer)
+        {
+            var folder = BeholderUnderMusen(e);
+            if (folder is not null) folder.ErUdfoldet = true;
+
+            await IndlaesFiler(filer, folder?.Mappe);
+            return;
+        }
 
         var maal = MaalUnderMusen(e);
         if (maal is null) return;
@@ -596,6 +666,135 @@ public partial class TranscribeView : UserControl
         _valgtKnude = knude;
         knude.ErValgt = true;
         OpdaterValg();
+    }
+
+    // ===================== INDLÆSNING AF LYDFILER =====================
+    //
+    // To veje ind, fordi de to slags brugere er forskellige: knappen for den,
+    // der leder efter en funktion, og traek og slip for den, der allerede har
+    // filen fremme i Stifinder. Begge ender i IndlaesFiler.
+
+    /// <summary>Kører der en indlæsning lige nu? To ad gangen ville skrive i træet samtidig.</summary>
+    private bool _indlaeser;
+
+    private async void Indlaes_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new Microsoft.Win32.OpenFileDialog
+        {
+            Title = "Vælg lydfilen",
+            Filter = Indlaesning.Filter,
+            Multiselect = true,
+            CheckFileExists = true
+        };
+
+        if (dialog.ShowDialog(Window.GetWindow(this)) != true) return;
+
+        // MAPPEN FØLGER MARKERINGEN.
+        //
+        // Staar man i en kundes folder og laeser en fil ind, hoerer den til
+        // dér. Alternativet - altid at lande uden for mapperne - ville goere
+        // en flytning til en fast del af hver eneste indlaesning.
+        await IndlaesFiler(dialog.FileNames, Valgtmappe());
+    }
+
+    /// <summary>
+    /// Folderen, en ny optagelse skal lande i, ud fra det, der er markeret.
+    /// Null betyder «uden folder».
+    /// </summary>
+    private string? Valgtmappe() =>
+        _valgtKnude is null ? null
+        : _valgtKnude.ErBeholder ? _valgtKnude.Mappe
+        : _valgtKnude.Optagelse?.Emnemappe;
+
+    /// <summary>
+    /// Læser lydfilerne ind som optagelser.
+    ///
+    /// SELVE OMSÆTNINGEN KØRER UDEN FOR SKÆRMTRÅDEN. En times lyd tager
+    /// omkring et minut, og et vindue, der står stille i et minut, ser ud
+    /// som et program, der er gået ned.
+    ///
+    /// EN OPTAGELSE, DER KØRER, RØRES IKKE. Indlæsningen tager hverken
+    /// mikrofonen eller grafikkortet, og den venter ikke på en
+    /// transskription. Optagelse må aldrig kunne blokeres af noget andet.
+    /// </summary>
+    private async Task IndlaesFiler(IReadOnlyList<string> stier, string? mappe)
+    {
+        if (_indlaeser || stier.Count == 0) return;
+
+        var kendte = stier.Where(Indlaesning.Kendes).ToList();
+        var ukendte = stier.Where(f => !Indlaesning.Kendes(f)).ToList();
+
+        if (kendte.Count == 0)
+        {
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Den slags fil kan ikke læses",
+                "Der kan læses lydfiler af typen "
+                + string.Join(", ", Indlaesning.Endelser)
+                + ".\n\nDet, der blev sluppet, er "
+                + string.Join(", ", ukendte.Select(Path.GetExtension).Distinct())
+                + ".", Dialogs.Slags.Valg);
+            return;
+        }
+
+        _indlaeser = true;
+        IndlaesKnap.IsEnabled = false;
+
+        var lagtInd = new List<string>();
+        var fejlede = new List<string>();
+
+        try
+        {
+            foreach (var fil in kendte)
+            {
+                var navn = Path.GetFileName(fil);
+
+                // Meldingerne kommer fra baggrundstraaden. Progress<T> fanger
+                // synkroniseringskonteksten her, saa de lander paa
+                // skaermtraaden af sig selv.
+                var melding = new Progress<string>(t =>
+                    Status.Text = kendte.Count == 1 ? t : $"{navn}: {t}");
+
+                Status.Text = $"Læser {navn} ind …";
+
+                try
+                {
+                    var svar = await Task.Run(() => Indlaesning.Indlaes(fil, mappe: mappe, melding: melding));
+                    lagtInd.Add(svar.Mappe);
+
+                    Historik.Skriv(HaendelseType.Optagelse, Path.GetFileNameWithoutExtension(fil),
+                                   $"Indlæst fra {navn}", sti: svar.Mappe);
+                }
+                catch (Exception ex)
+                {
+                    fejlede.Add($"{navn}: {ex.Message}");
+                }
+            }
+        }
+        finally
+        {
+            _indlaeser = false;
+            IndlaesKnap.IsEnabled = true;
+        }
+
+        IndlaesOptagelser();
+
+        // Den SIDSTE vaelges. Laeser man fem filer ind, er det den, der lige
+        // kom, man kigger efter - og de fire andre staar lige over den.
+        if (lagtInd.Count > 0) VaelgOptagelse(lagtInd[^1]);
+
+        Status.Text = (lagtInd.Count, fejlede.Count) switch
+        {
+            (0, _) => "Ingen af filerne kunne læses ind.",
+            (1, 0) => "Læst ind. Tryk «Opret transskription» for at skrive den ud.",
+            (_, 0) => $"{lagtInd.Count} lydfiler læst ind.",
+            var (ok, fejl) => $"{ok} læst ind, {fejl} kunne ikke."
+        };
+
+        if (fejlede.Count > 0)
+        {
+            Dialogs.AppDialog.Vis(Window.GetWindow(this),
+                fejlede.Count == 1 ? "Filen kunne ikke læses" : "Nogle filer kunne ikke læses",
+                string.Join("\n\n", fejlede), Dialogs.Slags.Pas_paa);
+        }
     }
 
     private void NyMappe_Click(object sender, RoutedEventArgs e)

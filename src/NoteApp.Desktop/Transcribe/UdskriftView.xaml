@@ -1,4 +1,4 @@
-<UserControl x:Class="NoteApp.Desktop.Transcribe.UdskriftView"
+﻿<UserControl x:Class="NoteApp.Desktop.Transcribe.UdskriftView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
@@ -217,6 +217,24 @@
             <TextBlock x:Name="IntetFundet" FontSize="13" Margin="10,20,10,0"
                        TextWrapping="Wrap" Visibility="Collapsed"
                        Foreground="{StaticResource TekstSvag}" />
+
+            <!-- ============ LYDEN KOM UDEFRA ============
+
+                 En optagelse herfra har to sider, HERFRA og DERFRA, og hele
+                 udskriften bygger på det: hvem der sagde hvad, navnene på
+                 talerne, fletningen af de to spor.
+
+                 En fil fra en telefon har ét spor. Alt står under den samme
+                 taler, uanset hvor mange der var med — og det kan ikke
+                 skilles ad bagefter. Står det ikke her, opdages det først,
+                 når nogen undrer sig over, at gæsten aldrig siger noget. -->
+            <Border x:Name="Indlaestnote" Visibility="Collapsed"
+                    Background="#FF1D2530" CornerRadius="0,6,6,0"
+                    BorderBrush="{StaticResource Accent}" BorderThickness="3,0,0,0"
+                    Padding="12,9" Margin="4,6,4,14">
+              <TextBlock x:Name="Indlaesttekst" FontSize="12" TextWrapping="Wrap"
+                         LineHeight="19" Foreground="{StaticResource TekstSvag}" />
+            </Border>
 
             <ItemsControl x:Name="Liste">
               <ItemsControl.ItemTemplate>

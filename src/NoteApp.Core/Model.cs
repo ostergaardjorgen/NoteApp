@@ -176,6 +176,38 @@ public sealed class MeetingMetadata
     public Dictionary<string, string> Talere { get; init; } = new();
 
     public Dictionary<string, string> Tracks { get; init; } = new();
+
+    /// <summary>
+    /// Sat, når optagelsen kom ind som en fil udefra — en talememo fra
+    /// telefonen, en diktafon, et webinar nogen sendte. Null for alt, appen
+    /// selv har optaget.
+    ///
+    /// Feltet bærer én oplysning, som skærmene har brug for: der er kun ÉT
+    /// spor. En optagelse herfra har to sider, HERFRA og DERFRA, og hele
+    /// fletningen bygger på det. En fil udefra har alt på én stribe, og hvem
+    /// der sagde hvad, kan ikke skilles ad bagefter. Det skal stå, ikke
+    /// opdages.
+    /// </summary>
+    public Indlaesningskilde? Indlaest { get; set; }
+}
+
+/// <summary>Hvor en indlæst lydfil kom fra. Ren dokumentation — intet i appen handler på den.</summary>
+public sealed class Indlaesningskilde
+{
+    public string Filnavn { get; set; } = "";
+
+    /// <summary>
+    /// Hele stien, filen blev læst fra. Gemmes, fordi spørgsmålet
+    /// «hvor kom den her fra» kommer måneder senere, hvor filnavnet alene
+    /// ikke er nok. Kildefilen røres aldrig; stien er et spor, ikke en
+    /// forbindelse.
+    /// </summary>
+    public string Sti { get; set; } = "";
+
+    public DateTimeOffset Tidspunkt { get; set; }
+
+    /// <summary>Størrelsen på den fil, der blev læst — ikke på den wav, der kom ud.</summary>
+    public long Bytes { get; set; }
 }
 
 /// <summary>

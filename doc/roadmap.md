@@ -139,19 +139,25 @@ skal fremgå, så ingen tror, maskinen har genkendt stemmerne.
 ## Etape 2 — Materialet kan komme ind udefra
 
 ### 2.1 Upload af lydfiler
-**IKKE BYGGET · næste tur** *Middel · ingen afhængigheder*
+**FÆRDIG 24-08** *Middel · ingen afhængigheder*
 
 Træk en lydfil ind, og behandl den som en optagelse. Særligt fra telefon:
 iPhones taleoptagelser er `.m4a`, og Whisper skal bruge 16 kHz mono WAV — så
 der skal konverteres.
 
-**Afklaret undervejs:** spørgsmålet om ffmpeg er faldet af sig selv. Lydoprydningen og komprimeringsmålingen bruger allerede NAudio med Windows' egne kodeks til at læse og skrive AAC, og `.m4a` fra en telefon går samme vej. Der skal altså ingen ekstra binær med i installationen.
+**Ffmpeg blev ikke nødvendig.** Windows' egne kodeks gennem Media Foundation læser `.m4a`, `.mp3`, `.aac`, `.wma`, `.flac`, `.mp4` og `.wav` og skriver dem om til de 16 kHz mono, whisper.cpp skal have. Ingen ekstra binær i installationen.
 
-**Bemærk:** en optagelse fra telefonen har ét spor. Så er der ingen opdeling i
-HERFRA og DERFRA — alt står som ét. Det skal siges i udskriften, ikke opdages.
+**Sådan blev det.** Knappen står ved siden af «Ny mappe» på Optagelser, og filer kan trækkes ind i listen fra Stifinderen — slippes de på en folder, lander de i den folder. Resultatet er en helt almindelig optagelsesmappe, så transskription, søgning, dokumenter og lydoprydning ikke behøver at vide, hvor lyden kom fra. Kildefilen kopieres og flyttes aldrig: den ligger typisk i en synkroniseret mappe, og en flytning ville slette den på telefonen.
+
+**Efterprøvet 24-08** på en talememo fra en iPhone, hentet gennem iCloud: 29 sekunders lyd blev læst ind på 0,4 sekund og skrevet ud som dansk tekst med 99 % sprogsikkerhed. Optagelsen dateres efter filens egen dato, ikke efter hvornår den blev læst ind.
+
+**En fil, der kun ligger i skyen**, hentes ned ved første læsning. Det siges, mens det sker — ellers ser en hentning ud som en app, der er gået i stå.
+
+**Bemærket — og sagt:** en optagelse fra telefonen har ét spor. Så er der ingen opdeling i
+HERFRA og DERFRA — alt står som ét. Det står tre steder: på optagelsen i træet, øverst på udskriften, og som sit eget ikon i listen.
 
 ### 2.2 Overvåget mappe (iCloud, Google Drev, OneDrive)
-**IKKE BYGGET** *Lille · bygger på 2.1*
+**IKKE BYGGET · næste tur** *Lille · bygger på 2.1, som nu er færdig*
 
 Peg appen på en mappe. Dukker der en lydfil op, tilbyder den at lægge den ind.
 
@@ -160,6 +166,8 @@ synkroniserer til en helt almindelig lokal mappe. Derfor kræver det her
 **ingen OAuth, ingen tokens og ingen ny leverandør i Compliance** — appen ser
 kun en mappe på disken. Optager du på iPhone med iCloud slået til, ligger filen
 på pc'en af sig selv.
+
+**Én ting er lært af 2.1 og skal med her:** iCloud lægger kun en pladsholder på disken. Filen fylder nul, indtil nogen læser den, og attributten hedder `RECALL_ON_DATA_ACCESS`. En overvågning, der måler på filstørrelsen, ser derfor ingenting — og en, der bare læser løs, henter hver eneste fil ned. Begge dele er forkerte.
 
 Et rigtigt API mod de tre tjenester bliver først nødvendigt, hvis man vil
 undvære synkroniseringsklienten. Det er en senere beslutning, ikke en

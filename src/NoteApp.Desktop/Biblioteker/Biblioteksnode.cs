@@ -55,8 +55,16 @@ public sealed class Biblioteksnode : INotifyPropertyChanged
         new(Slags.Optagelse, t.Name, "\uE8A5", Transcribe.Gruppe.Moede, null) { Emne = t };
 
     /// <summary>En optagelse. Kan trækkes, men ikke slippes noget i.</summary>
+    // TRE TEGN, IKKE TO.
+    //
+    // Mikrofonen betyder «optaget her». En fil, der er laest ind udefra, er
+    // ikke optaget her - og at give den mikrofonen ville sige noget forkert
+    // om, hvor lyden kom fra. Er den skrevet ud, vinder dokumentet, for saa
+    // er det teksten, man leder efter.
     public static Biblioteksnode Optagelsesnode(Transcribe.OptagelseVisning o) =>
-        new(Slags.Optagelse, o.Titel, o.ErSkrevetUd ? "\uE8A5" : "\uE720", o.Gruppe, o.Emnemappe)
+        new(Slags.Optagelse, o.Titel,
+            o.ErSkrevetUd ? "\uE8A5" : o.ErIndlaest ? "\uE8E5" : "\uE720",
+            o.Gruppe, o.Emnemappe)
         {
             Emne = o
         };

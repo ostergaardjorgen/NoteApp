@@ -88,6 +88,20 @@
           <TextBlock Text="&#xE8F4;" FontFamily="Segoe MDL2 Assets" />
         </Button>
 
+        <!-- INDLÆS EN LYDFIL UDEFRA.
+             Den står ved siden af «Ny mappe», fordi de to er de eneste
+             knapper her, der LAVER noget. Resten flytter rundt på det, der
+             allerede er.
+
+             Møder holdes ikke altid ved pc'en. En talememo fra telefonen er
+             lige så meget et møde som et onlinemøde, og uden en vej ind er
+             appen kun noget værd for det, den selv var med til. -->
+        <Button DockPanel.Dock="Left" x:Name="IndlaesKnap" Style="{StaticResource IkonKnap}"
+                Click="Indlaes_Click" AutomationProperties.Name="Indlæs lydfil"
+                ToolTip="Indlæs en lydfil udefra — eller træk den ind i listen">
+          <TextBlock Text="&#xE898;" FontFamily="Segoe MDL2 Assets" />
+        </Button>
+
         <Border DockPanel.Dock="Left" Width="1" Margin="6,4,8,4"
                 Background="{StaticResource PanelKant}" />
 
@@ -247,6 +261,25 @@
                       <TextBlock Text="{Binding Optagelse.Tidsrum}" FontSize="12.5" />
                       <TextBlock Text="{Binding Optagelse.Varighed}" FontSize="12.5"
                                  Margin="0,3,0,0" />
+
+                      <!-- KUN PÅ INDLÆSTE FILER. Tom tekst folder sig selv
+                           væk, så en almindelig optagelse ser ud som før. -->
+                      <TextBlock Text="{Binding Optagelse.Indlaestfra}" FontSize="12"
+                                 Margin="0,6,0,0" TextWrapping="Wrap"
+                                 Foreground="{StaticResource TekstMeget}">
+                        <TextBlock.Style>
+                          <Style TargetType="TextBlock">
+                            <Style.Triggers>
+                              <DataTrigger Binding="{Binding Optagelse.Indlaestfra}" Value="">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                              </DataTrigger>
+                              <DataTrigger Binding="{Binding Optagelse.Indlaestfra}" Value="{x:Null}">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                              </DataTrigger>
+                            </Style.Triggers>
+                          </Style>
+                        </TextBlock.Style>
+                      </TextBlock>
                     </StackPanel>
                   </Border.ToolTip>
                   <StackPanel Orientation="Horizontal">

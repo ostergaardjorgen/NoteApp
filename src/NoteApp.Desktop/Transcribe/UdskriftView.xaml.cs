@@ -1,4 +1,4 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.IO;
 using System.Text;
 using System.Windows;
@@ -339,6 +339,25 @@ public partial class UdskriftView : UserControl
             VisIngenUdskrift(mappe);
             _indlæser = false;
             return;
+        }
+
+        // KOM LYDEN UDEFRA, SKAL DET STAA - OGSAA HER.
+        //
+        // Traeet siger det, men den, der laeser udskriften, er ikke
+        // noedvendigvis den, der laeste filen ind. Uden linjen ser en
+        // enkeltsporet udskrift ud som en optagelse, hvor gaesten var tavs.
+        if (_meta?.Indlaest is { } kom)
+        {
+            Indlaesttekst.Text =
+                $"Lyden er læst ind fra {kom.Filnavn}. Den har ét spor, så alt står "
+                + "under den samme taler — også hvis flere var med. Hvem der sagde "
+                + "hvad, kan ikke skilles ad bagefter, men navnet kan rettes.";
+
+            Indlaestnote.Visibility = Visibility.Visible;
+        }
+        else
+        {
+            Indlaestnote.Visibility = Visibility.Collapsed;
         }
 
         IngenUdskrift.Visibility = Visibility.Collapsed;
