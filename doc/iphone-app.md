@@ -26,6 +26,9 @@ gøre. Der er tre mure, og de er alle tre Apples, ikke vores:
 3. En app kan ikke åbne sig selv. Der findes ingen måde at få NoteApp frem på
    skærmen, fordi et opkald begynder.
 
+Siri kan heller ikke diktere samtalen — og Apples egen optagefunktion fra
+iOS 18.1 er slået fra i hele EU og kan ikke dansk. Se afsnit 1.
+
 Det betyder, at punkterne om «dukker selv op», «Optagelse accepteres ikke» og
 «spørg efter samtalen» ikke kan bygges, som de er stillet op. Men **det, de
 skal opnå, kan næsten opnås ad en anden vej** — se afsnittet om diktatet.
@@ -54,6 +57,31 @@ telefonen.
 næste. Retningslinje 2.5.14 kræver udtrykkeligt samtykke og en tydelig
 visuel eller hørbar besked under hele optagelsen. En app, hvis formål er at
 optage opkald, kommer ikke igennem.
+
+**Kan Siri diktere samtalen?** Nej, og der er to grunde, der hver for sig er
+nok.
+
+Diktering skriver det ned, **mikrofonen** hører. Modpartens stemme kommer
+aldrig forbi mikrofonen — den går ud gennem ørestykket eller højttaleren. Og
+sætter man samtalen på højttaler, arbejder iOS' ekkoundertrykkelse aktivt
+imod: dens hele opgave er at trykke modpartens lyd ud af mikrofonsignalet, så
+den anden ikke hører sig selv. Selv i det bedste tilfælde ville dikteringen
+altså kun få **din egen halvdel** af samtalen.
+
+Dertil kommer den samme mur som ovenfor: dikteringen skal bruge mikrofonen,
+og den har opkaldet.
+
+**Apple kan det selv — men ikke her.** Fra iOS 18.1 kan Telefon-appen optage
+et opkald og skrive det ud i Noter. Det er nøjagtig det, der efterspurgtes,
+og det er lukket ad to veje på én gang:
+
+- Funktionen er **slået fra i hele EU**, Danmark iberegnet. Knappen findes
+  ikke på telefonen.
+- Udskrivningen kan **ikke dansk**. Den findes på engelsk, spansk,
+  mandarin, kantonesisk og koreansk.
+
+Det er værd at vide, før der bruges tid på at lede: når Apples egen
+funktion er lukket i Danmark, er der ingen bagdør for andre.
 
 ### 2. Appen kan ikke dukke op af sig selv
 
@@ -220,4 +248,7 @@ gevinsten væk.
 - [App suspended when interrupt CXCallObserver in Background Mode, Apple Developer Forums](https://developer.apple.com/forums/thread/664277) — appen suspenderes omkring tredive sekunder efter
 - [Event triggers in Shortcuts, Apple Support](https://support.apple.com/guide/shortcuts/event-triggers-apd932ff833f/ios) og [Communication triggers](https://support.apple.com/guide/shortcuts/communication-triggers-apdd711f9dff/ios) — ingen udløser for telefonopkald
 - [In-Depth Guide to iCloud Documents, fatbobman](https://fatbobman.com/en/posts/in-depth-guide-to-icloud-documents/) — `NSUbiquitousContainerName` og synlighed i Filer-appen
+- [iOS 18 — Call Recording, Wikipedia](https://en.wikipedia.org/wiki/IOS_18) og
+  [iOS 18.1 Call Record — how to test when based in Europe, Apple Developer Forums](https://developer.apple.com/forums/thread/764221)
+  — optagefunktionen er slået fra i EU, og udskrivningen findes ikke på dansk
 - [iPhone Recording Stops After a Phone Call, BlackBox](https://blackboxrecorder.in/fix/iphone-recording-stops-after-call) — opkaldet tager mikrofonen eksklusivt
