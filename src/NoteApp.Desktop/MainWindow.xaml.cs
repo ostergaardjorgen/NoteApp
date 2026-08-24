@@ -271,6 +271,11 @@ public partial class MainWindow : Window
             // Mapperne, brugeren har peget paa. Starter tomt og koster
             // ingenting, naar der ikke er nogen - se Mappevagt.Kig.
             Jobs.Mappevagt.Start();
+
+            // Aftaler og opgaver hentes hvert kvarter - og med det samme her,
+            // saa dagen er rigtig, naar man saetter sig. Koster ingenting,
+            // naar ingen integration er forbundet.
+            Jobs.Synkvagt.Start();
         };
     }
 

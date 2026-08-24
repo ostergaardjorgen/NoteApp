@@ -281,9 +281,15 @@ public partial class SettingsView : UserControl
 
                 if (_o.SidstHentet is not { } t) return "";
 
+                // DER STAAR OGSAA, AT DET SKER AF SIG SELV.
+                //
+                // Ellers ser linjen ud, som om hentningen KUN sker, naar man
+                // trykker - og saa staar man og trykker for en sikkerheds
+                // skyld, hver gang man er i tvivl.
                 return $"Hentede {_o.SidsteAntal} " +
                        $"{(_o.SidsteAntal == 1 ? "aftale" : "aftaler")} " +
-                       $"{t.LocalDateTime:d. MMMM 'kl.' HH:mm}.";
+                       $"{t.LocalDateTime:d. MMMM 'kl.' HH:mm}. " +
+                       "Der hentes af sig selv hvert kvarter, mens appen er åben.";
             }
         }
 

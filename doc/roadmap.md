@@ -215,7 +215,7 @@ kalender.
 
 **Der hentes kun, når nogen beder om det.** Der er et synkroniseringsikon på kalenderen og på opgaverne i Cockpittet, med en linje under, der siger, hvornår der sidst blev hentet. Det kom 24-08, fordi en aftale oprettet direkte i Google ikke dukkede op — og den eneste vej frem var at gå to skærme væk til Indstillinger og trykke på en knap, man skulle vide fandtes.
 
-**Automatisk hentning er endnu ikke bygget** og er den næste beslutning på det her punkt: hvor tit, og skal den køre, mens man optager.
+**Og der hentes af sig selv hvert kvarter** samt ved opstart — også mens der optages. Vagten rører hverken mikrofonen, grafikkortet eller disken ud over to små filer, så der er intet, den kan komme i vejen for. Fejler en hentning, står fejlen på integrationens linje og under ikonet — der kommer aldrig en besked midt i et møde, fordi Google ikke svarede.
 
 ### 3.4 Microsoft 365-kalender
 **IKKE BYGGET** *Stor · efter 3.3*

@@ -90,7 +90,7 @@
                           Style="{StaticResource IkonKnap}" Margin="0,0,6,0"
                           Visibility="Collapsed"
                           AutomationProperties.Name="Hent aftaler fra Google"
-                          ToolTip="Hent aftalerne fra Google nu">
+                          ToolTip="Hent aftalerne fra Google nu. Der hentes også af sig selv hvert kvarter">
                     <TextBlock x:Name="Kalendersynkglyf" Text="&#xE895;"
                                FontFamily="Segoe MDL2 Assets" FontSize="13" />
                   </Button>
@@ -582,7 +582,7 @@
                           Style="{StaticResource IkonKnap}" Margin="6,0,0,0"
                           Visibility="Collapsed"
                           AutomationProperties.Name="Hent opgaver fra Google"
-                          ToolTip="Hent opgaverne fra Google Tasks nu">
+                          ToolTip="Hent opgaverne fra Google Tasks nu. Der hentes også af sig selv hvert kvarter">
                     <TextBlock x:Name="Opgavesynkglyf" Text="&#xE895;"
                                FontFamily="Segoe MDL2 Assets" FontSize="13" />
                   </Button>

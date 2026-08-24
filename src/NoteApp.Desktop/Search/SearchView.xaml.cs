@@ -147,6 +147,8 @@ public partial class SearchView : UserControl
         _pause = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(220) };
         _pause.Tick += (_, _) => { _pause.Stop(); Soeg(); };
 
+        LytEfterSynk();
+
         Loaded += (_, _) =>
         {
             HentSpaltebredder();
@@ -692,6 +694,27 @@ public partial class SearchView : UserControl
     // andet end at sige "ingen kalender er forbundet", er stoej.
 
     private bool _synker;
+
+    /// <summary>
+    /// Lytter efter den automatiske hentning.
+    ///
+    /// Uden det ville en aftale, der kom ind kl. 10.15, først dukke op, når
+    /// man skiftede skærm frem og tilbage — og så ville hentningen være
+    /// usynlig lige dér, hvor den skulle gøre en forskel.
+    /// </summary>
+    private void LytEfterSynk()
+    {
+        Jobs.Synkvagt.Hentet += Synkkom;
+        Unloaded += (_, _) => Jobs.Synkvagt.Hentet -= Synkkom;
+    }
+
+    private void Synkkom()
+    {
+        // Der hentes udenom brugeren, saa listerne skal bygges forfra. Det er
+        // billigt: begge laeser een fil hver.
+        VisKalender();
+        VisOpgaver();
+    }
 
     private void VisSynktilstand()
     {
