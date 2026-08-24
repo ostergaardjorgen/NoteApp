@@ -69,12 +69,40 @@
         <Border Grid.Column="0" Background="{StaticResource Panel}" CornerRadius="10"
                 BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
           <DockPanel>
-            <Grid DockPanel.Dock="Top" Margin="14,13,14,8">
-              <TextBlock x:Name="Kalenderoverskrift" FontSize="13" FontWeight="SemiBold"
-                         VerticalAlignment="Center" />
-              <Button Content="Ny aftale" Click="NyAftale_Klik" HorizontalAlignment="Right"
-                      VerticalAlignment="Center" Padding="10,3" FontSize="11" />
-            </Grid>
+            <!-- ============ OVERSKRIFT MED SYNKRONISERING ============
+
+                 IKONET FINDES, FORDI DER IKKE HENTES AF SIG SELV.
+
+                 En aftale, der oprettes direkte i Google, er ikke i NoteApp,
+                 foer nogen henter den. Det laa foer KUN under Indstillinger,
+                 og en funktion, man skal gaa to skaerme vaek for at finde,
+                 findes ikke i praksis. Nu staar den, hvor aftalerne staar.
+
+                 Linjen under siger, hvornaar der sidst blev hentet. Uden den
+                 er ikonet en knap, man trykker paa for en sikkerheds skyld. -->
+            <StackPanel DockPanel.Dock="Top" Margin="14,13,14,8">
+              <Grid>
+                <TextBlock x:Name="Kalenderoverskrift" FontSize="13" FontWeight="SemiBold"
+                           VerticalAlignment="Center" />
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"
+                            VerticalAlignment="Center">
+                  <Button x:Name="Kalendersynk" Click="Kalendersynk_Klik"
+                          Style="{StaticResource IkonKnap}" Margin="0,0,6,0"
+                          Visibility="Collapsed"
+                          AutomationProperties.Name="Hent aftaler fra Google"
+                          ToolTip="Hent aftalerne fra Google nu">
+                    <TextBlock x:Name="Kalendersynkglyf" Text="&#xE895;"
+                               FontFamily="Segoe MDL2 Assets" FontSize="13" />
+                  </Button>
+                  <Button Content="Ny aftale" Click="NyAftale_Klik"
+                          VerticalAlignment="Center" Padding="10,3" FontSize="11" />
+                </StackPanel>
+              </Grid>
+
+              <TextBlock x:Name="Kalendersynklinje" FontSize="10" Margin="0,4,0,0"
+                         Visibility="Collapsed" TextWrapping="Wrap"
+                         Foreground="{StaticResource TekstMeget}" />
+            </StackPanel>
 
             <ScrollViewer VerticalScrollBarVisibility="Auto"
                           HorizontalScrollBarVisibility="Disabled">
@@ -539,12 +567,32 @@
         <Border Background="{StaticResource Panel}" CornerRadius="10"
                 BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
           <DockPanel>
-            <Grid DockPanel.Dock="Top" Margin="14,13,14,8">
-              <TextBlock x:Name="OpgaveOverskrift" FontSize="13" FontWeight="SemiBold"
-                         VerticalAlignment="Center" />
-              <TextBlock x:Name="OpgaveTal" FontSize="10.5" HorizontalAlignment="Right"
-                         VerticalAlignment="Center" Foreground="{StaticResource TekstMeget}" />
-            </Grid>
+            <!-- Samme som kalenderen. Opgaverne fra Google henter sig
+                 heller ikke selv, og de kommer fra en HELT anden godkendelse
+                 - saa de skal kunne hentes hver for sig. -->
+            <StackPanel DockPanel.Dock="Top" Margin="14,13,14,8">
+              <Grid>
+                <TextBlock x:Name="OpgaveOverskrift" FontSize="13" FontWeight="SemiBold"
+                           VerticalAlignment="Center" />
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"
+                            VerticalAlignment="Center">
+                  <TextBlock x:Name="OpgaveTal" FontSize="10.5" VerticalAlignment="Center"
+                             Foreground="{StaticResource TekstMeget}" />
+                  <Button x:Name="Opgavesynk" Click="Opgavesynk_Klik"
+                          Style="{StaticResource IkonKnap}" Margin="6,0,0,0"
+                          Visibility="Collapsed"
+                          AutomationProperties.Name="Hent opgaver fra Google"
+                          ToolTip="Hent opgaverne fra Google Tasks nu">
+                    <TextBlock x:Name="Opgavesynkglyf" Text="&#xE895;"
+                               FontFamily="Segoe MDL2 Assets" FontSize="13" />
+                  </Button>
+                </StackPanel>
+              </Grid>
+
+              <TextBlock x:Name="Opgavesynklinje" FontSize="10" Margin="0,4,0,0"
+                         Visibility="Collapsed" TextWrapping="Wrap"
+                         Foreground="{StaticResource TekstMeget}" />
+            </StackPanel>
 
             <ScrollViewer Padding="7,0,7,10" VerticalScrollBarVisibility="Auto"
                           HorizontalScrollBarVisibility="Disabled">

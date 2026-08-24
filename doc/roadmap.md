@@ -213,6 +213,10 @@ kalender.
 
 **Det, der mangler, er hos Google, ikke i koden:** verifikationen af appen. Indtil den er igennem, udløber adgangen efter syv dage. Der ligger opgaver i Cockpittet om hjemmeside, privatlivspolitik og demovideo.
 
+**Der hentes kun, når nogen beder om det.** Der er et synkroniseringsikon på kalenderen og på opgaverne i Cockpittet, med en linje under, der siger, hvornår der sidst blev hentet. Det kom 24-08, fordi en aftale oprettet direkte i Google ikke dukkede op — og den eneste vej frem var at gå to skærme væk til Indstillinger og trykke på en knap, man skulle vide fandtes.
+
+**Automatisk hentning er endnu ikke bygget** og er den næste beslutning på det her punkt: hvor tit, og skal den køre, mens man optager.
+
 ### 3.4 Microsoft 365-kalender
 **IKKE BYGGET** *Stor · efter 3.3*
 

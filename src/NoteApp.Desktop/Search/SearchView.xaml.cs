@@ -439,6 +439,8 @@ public partial class SearchView : UserControl
         Kalenderoverskrift.Text = kommende.Count == 0
             ? "Kalender"
             : $"Kalender · {kommende.Count}";
+
+        VisSynktilstand();
     }
 
     /// <summary>
@@ -676,6 +678,100 @@ public partial class SearchView : UserControl
         OpgaveTal.Text = aabne.Count == 0
             ? ""
             : $"{aabne.Count} i alt fra {aabne.Select(r => r.MoedeId).Distinct().Count()} optagelser";
+
+        VisSynktilstand();
+    }
+
+    // ==================== HENT FRA GOOGLE, MANUELT ====================
+    //
+    // Der hentes IKKE af sig selv. En aftale, der oprettes direkte i Google,
+    // er ikke i NoteApp, foer nogen henter den - og det laa foer kun under
+    // Indstillinger, hvor ingen leder efter det.
+    //
+    // Ikonet staar kun, naar der ER noget at hente fra. En knap, der ikke kan
+    // andet end at sige "ingen kalender er forbundet", er stoej.
+
+    private bool _synker;
+
+    private void VisSynktilstand()
+    {
+        var kalender = Synkronisering.Kalenderklar;
+        var opgaver = Synkronisering.Opgaverklar;
+
+        Kalendersynk.Visibility = kalender ? Visibility.Visible : Visibility.Collapsed;
+        Kalendersynklinje.Visibility = kalender ? Visibility.Visible : Visibility.Collapsed;
+
+        Opgavesynk.Visibility = opgaver ? Visibility.Visible : Visibility.Collapsed;
+        Opgavesynklinje.Visibility = opgaver ? Visibility.Visible : Visibility.Collapsed;
+
+        if (_synker) return;
+
+        if (kalender) Kalendersynklinje.Text = Synkronisering.Siden(Synkronisering.SidstKalender());
+        if (opgaver) Opgavesynklinje.Text = Synkronisering.Siden(Synkronisering.SidstOpgaver());
+    }
+
+    private async void Kalendersynk_Klik(object sender, RoutedEventArgs e)
+    {
+        if (_synker) return;
+
+        _synker = true;
+        Kalendersynk.IsEnabled = false;
+        Kalendersynklinje.Text = "Henter fra Google …";
+
+        try
+        {
+            var svar = await Synkronisering.Kalenderen();
+
+            // Listen bygges forfra UANSET udfaldet. Kom der aftaler ind, skal
+            // de ses; kom der ingen, skal linjen alligevel rettes.
+            _synker = false;
+            VisKalender();
+
+            Kalendersynklinje.Text = svar.Lykkedes
+                ? $"{svar.Besked} · {Synkronisering.Siden(Synkronisering.SidstKalender())}"
+                : svar.Besked;
+        }
+        catch (Exception ex)
+        {
+            _synker = false;
+            Kalendersynklinje.Text = ex.Message;
+        }
+        finally
+        {
+            _synker = false;
+            Kalendersynk.IsEnabled = true;
+        }
+    }
+
+    private async void Opgavesynk_Klik(object sender, RoutedEventArgs e)
+    {
+        if (_synker) return;
+
+        _synker = true;
+        Opgavesynk.IsEnabled = false;
+        Opgavesynklinje.Text = "Henter fra Google …";
+
+        try
+        {
+            var svar = await Synkronisering.Opgaverne();
+
+            _synker = false;
+            VisOpgaver();
+
+            Opgavesynklinje.Text = svar.Lykkedes
+                ? $"{svar.Besked} · {Synkronisering.Siden(Synkronisering.SidstOpgaver())}"
+                : svar.Besked;
+        }
+        catch (Exception ex)
+        {
+            _synker = false;
+            Opgavesynklinje.Text = ex.Message;
+        }
+        finally
+        {
+            _synker = false;
+            Opgavesynk.IsEnabled = true;
+        }
     }
 
     /// <summary>

@@ -679,14 +679,17 @@ public partial class SettingsView : UserControl
     }
 
     /// <summary>
-    /// Henter aftalerne ind. Alt fra kilden afløses — se Kalender.Afloes.
+    /// Henter aftaler eller opgaver ind.
+    ///
+    /// SELVE HENTNINGEN LIGGER I Core.Synkronisering, fordi Cockpittet gør
+    /// præcis det samme, når man trykker på synkroniseringsikonet dér. To
+    /// steder, der hentede hver for sig, ville før eller siden bogføre
+    /// «sidst hentet» forskelligt — og så kan man ikke stole på nogen af dem.
     /// </summary>
     private async Task Hent(string id)
     {
         if (Integrationer.Find(id) is not { } i) return;
-
-        var o = Integrationsfiler.Hent(id);
-        if (!o.ErForbundet) return;
+        if (!Integrationsfiler.Hent(id).ErForbundet) return;
 
         var opgaver = id == Googleopgaver.Id;
 
@@ -694,37 +697,13 @@ public partial class SettingsView : UserControl
             ? $"Henter opgaver fra {i.Navn} …"
             : $"Henter aftaler fra {i.Navn} …";
 
-        try
-        {
-            int n;
+        var svar = opgaver
+            ? await Synkronisering.Opgaverne()
+            : await Synkronisering.Kalenderen();
 
-            if (opgaver)
-            {
-                var hentede = await Googleopgaver.HentAsync(o.Opdateringsnoegle);
-                n = Opgavelager.Afloes(Opgavekilde.Google, hentede);
-            }
-            else
-            {
-                var aftaler = await Googlekalender.HentAsync(o.Opdateringsnoegle);
-                n = Kalender.Afloes(i.Kilde, aftaler);
-            }
-
-            o.SidstHentet = DateTimeOffset.Now;
-            o.SidsteAntal = n;
-            o.SidsteFejl = "";
-            Integrationsfiler.Gem(id, o);
-
-            Status.Text = opgaver
-                ? $"Hentede {n} {(n == 1 ? "opgave" : "opgaver")} fra {i.Navn}."
-                : $"Hentede {n} {(n == 1 ? "aftale" : "aftaler")} fra {i.Navn}.";
-        }
-        catch (Exception ex)
-        {
-            o.SidsteFejl = ex.Message;
-            Integrationsfiler.Gem(id, o);
-
-            Status.Text = "Aftalerne kunne ikke hentes.";
-        }
+        Status.Text = svar.Lykkedes
+            ? $"{svar.Besked} fra {i.Navn}."
+            : svar.Besked;
 
         VisIntegrationer();
     }
