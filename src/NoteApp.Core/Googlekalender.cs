@@ -373,7 +373,12 @@ public static class Googlekalender
             kode = kontekst.Request.QueryString["code"];
             fejl = kontekst.Request.QueryString["error"];
 
-            await SvarIBrowseren(kontekst, fejl is null);
+            // Omraadet afgoer, hvad der staar paa siden. Der er ét sted, det
+            // kan udledes fra, og det er dét, der faktisk blev bedt om.
+            var hvad = omraade.Contains("tasks", StringComparison.OrdinalIgnoreCase)
+                ? "Opgaverne" : "Kalenderen";
+
+            await SvarIBrowseren(kontekst, fejl is null, hvad);
         }
         finally
         {
@@ -404,7 +409,13 @@ public static class Googlekalender
     /// Den skal sige, at man kan lukke vinduet. Uden det bliver man stående og
     /// venter på, at der sker noget mere.
     /// </summary>
-    private static async Task SvarIBrowseren(HttpListenerContext k, bool gik)
+    /// <param name="hvad">
+    /// Det, der blev forbundet — «Kalenderen», «Opgaverne». Siden sagde
+    /// «Kalenderen er forbundet», uanset hvad man havde trykket på, og det
+    /// var forkert i det øjeblik der kom en integration mere. En kvittering,
+    /// der siger noget andet end det, man gjorde, er værre end ingen.
+    /// </param>
+    private static async Task SvarIBrowseren(HttpListenerContext k, bool gik, string hvad)
     {
         var side =
             "<!doctype html><html lang=\"da\"><meta charset=\"utf-8\">" +
@@ -413,7 +424,7 @@ public static class Googlekalender
             "display:flex;align-items:center;justify-content:center;height:100vh;margin:0\">" +
             "<div style=\"text-align:center;max-width:30rem;padding:2rem\">" +
             (gik
-                ? "<h1 style=\"font-size:1.4rem\">Kalenderen er forbundet</h1>" +
+                ? $"<h1 style=\"font-size:1.4rem\">{hvad} er forbundet</h1>" +
                   "<p style=\"color:#9ba6b8\">Du kan lukke det her vindue og gå tilbage til NoteApp.</p>"
                 : "<h1 style=\"font-size:1.4rem\">Det blev ikke til noget</h1>" +
                   "<p style=\"color:#9ba6b8\">Godkendelsen blev afbrudt. Luk vinduet og prøv igen i NoteApp.</p>") +

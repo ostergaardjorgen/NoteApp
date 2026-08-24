@@ -1444,7 +1444,16 @@ static int Opgaver()
         if (o.Prioritet > 0) maerker.Add("pri " + o.Prioritet);
         if (o.Deadline is { } d) maerker.Add(d.LocalDateTime.ToString("dd-MM-yyyy"));
 
-        maerker.Add(o.MoedeId.Length > 0 ? "fra: " + o.Moedetitel : "skrevet i haanden");
+        // HERKOMSTEN AFGOER DET, IKKE MOEDE-ID'ET.
+        //
+        // Her stod «skrevet i haanden» paa alt uden et moede - ogsaa paa de
+        // opgaver, der lige var hentet fra Google. Det er den slags fejl, der
+        // faar en til at tro, at integrationen ikke virkede.
+        maerker.Add(o.Herkomst == Opgavekilde.Google
+            ? $"Google Tasks: {o.Moedetitel}"
+            : o.MoedeId.Length > 0
+                ? "fra: " + o.Moedetitel
+                : "skrevet i haanden");
 
         Console.WriteLine($"  {o.Visningsnavn}");
         Console.WriteLine($"      {string.Join("  ·  ", maerker)}");
