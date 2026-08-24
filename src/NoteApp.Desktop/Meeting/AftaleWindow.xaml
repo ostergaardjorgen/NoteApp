@@ -31,6 +31,20 @@
                Margin="2,18,0,6" Foreground="{StaticResource TekstMeget}" />
     <TextBox x:Name="Titel" FontSize="13.5" Padding="10,7" />
 
+    <!-- ARRANGOEREN. Kun paa en hentet aftale - en, man selv har lavet, har
+         ikke nogen. «Catch-up - Relation» siger ingenting om, hvem man skal
+         tale med; det goer navnet. -->
+    <StackPanel x:Name="Arrangoerrude" Margin="0,14,0,0" Visibility="Collapsed">
+      <TextBlock Text="INDKALDT AF" FontSize="9.5" FontWeight="SemiBold" Margin="2,0,0,6"
+                 Foreground="{StaticResource TekstMeget}" />
+      <TextBlock x:Name="Arrangoer" FontSize="14" TextWrapping="Wrap"
+                 Foreground="{StaticResource Tekst}" />
+      <TextBlock x:Name="Arrangoernote" FontSize="11" Margin="0,3,0,0" TextWrapping="Wrap"
+                 Visibility="Collapsed"
+                 Foreground="{StaticResource Advarsel}"
+                 Text="Du er selv arrangør. Så er det dig, der skal sige det til deltagerne, hvis mødet optages." />
+    </StackPanel>
+
     <!-- EN HENTET AFTALE VISER TIDEN SOM TEKST.
          Felterne var laaste alligevel, og en laast datovaelger er tre
          kontroller, der ser ud som noget, der er gaaet i stykker. Her staar

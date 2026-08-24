@@ -46,6 +46,27 @@ public sealed record Aftale
     /// <summary>Stedet, hvis det er et fysisk møde.</summary>
     public string Sted { get; set; } = "";
 
+    /// <summary>
+    /// Hvem der har indkaldt til mødet. Tom på en aftale, man selv har lavet.
+    ///
+    /// HVORFOR DEN STÅR PÅ SKÆRMEN
+    ///
+    /// «Catch-up – Relation» siger ingenting om, hvem man skal tale med, og
+    /// det gør klokkeslættet heller ikke. Arrangøren er tit det eneste i en
+    /// hentet aftale, der forklarer, hvad mødet er — især på de titler, folk
+    /// giver deres gentagne møder.
+    ///
+    /// Det er også dét, der afgør, om man skal sige noget om optagelsen: er
+    /// man selv arrangør, er det ens eget ansvar at nævne det.
+    ///
+    /// Navnet gemmes, ikke slås op. Google oplyser det ved hentningen, og en
+    /// aftale skal kunne læses, også når der ikke er forbindelse.
+    /// </summary>
+    public string Arrangoer { get; set; } = "";
+
+    /// <summary>Er det brugeren selv, der har indkaldt?</summary>
+    public bool ErEgetMoede { get; set; }
+
     public Kalenderkilde Kilde { get; set; } = Kalenderkilde.Lokal;
 
     /// <summary>

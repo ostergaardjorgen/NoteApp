@@ -309,6 +309,23 @@ public partial class AftaleWindow : Window
                 : $"{dag:dddd d. MMMM}  ·  {fraTekst} – {tilTekst}";
         }
 
+        // ARRANGOEREN. Kun naar der ER en - en aftale, man selv har lavet i
+        // appen, har ingen.
+        if (Aftalen.Arrangoer.Length > 0)
+        {
+            Arrangoerrude.Visibility = Visibility.Visible;
+
+            Arrangoer.Text = Aftalen.ErEgetMoede
+                ? Aftalen.Arrangoer + "  (dig)"
+                : Aftalen.Arrangoer;
+
+            // ER MAN SELV ARRANGOER, ER DET ENS EGET ANSVAR AT NAEVNE
+            // OPTAGELSEN. Det staar her, hvor man traeffer valget om at optage
+            // - ikke i en vejledning, ingen laeser.
+            Arrangoernote.Visibility = Aftalen.ErEgetMoede
+                ? Visibility.Visible : Visibility.Collapsed;
+        }
+
         Link.Text = Aftalen.Link.Length > 0 ? Aftalen.Link : Aftalen.Sted;
 
         VisLinkknap();

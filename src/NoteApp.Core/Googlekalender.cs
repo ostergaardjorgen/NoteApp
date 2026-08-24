@@ -764,12 +764,44 @@ public static class Googlekalender
                 Sted = Tekst(p, "location"),
                 Link = Moedelink(p),
                 Kilde = Kalenderkilde.Google,
-                FremmedId = Tekst(p, "id")
+                FremmedId = Tekst(p, "id"),
+                Arrangoer = Arrangoeren(p),
+                ErEgetMoede = ErEgen(p)
             });
         }
 
         return ud;
     }
+
+    /// <summary>
+    /// Hvem der har indkaldt. Navnet, hvis Google har et — ellers adressen.
+    ///
+    /// «organizer» og ikke «creator»: den, der ejer mødet, er den, man skal
+    /// svare. En sekretær, der har oprettet det, er ikke den, mødet er med.
+    /// </summary>
+    private static string Arrangoeren(JsonElement p)
+    {
+        if (!p.TryGetProperty("organizer", out var o)) return "";
+
+        var navn = Tekst(o, "displayName");
+        if (navn.Length > 0) return navn;
+
+        var post = Tekst(o, "email");
+
+        // Kun den del foer snabel-a, naar der ikke er et navn. En hel adresse
+        // fylder en linje i en smal spalte og siger ikke mere.
+        var snabel = post.IndexOf('@');
+        return snabel > 0 ? post[..snabel] : post;
+    }
+
+    /// <summary>
+    /// Er det brugerens eget møde? Google sætter «self» på den, der er logget
+    /// ind.
+    /// </summary>
+    private static bool ErEgen(JsonElement p) =>
+        p.TryGetProperty("organizer", out var o)
+        && o.TryGetProperty("self", out var s)
+        && s.ValueKind == JsonValueKind.True;
 
     private static string Tekst(JsonElement e, string navn) =>
         e.TryGetProperty(navn, out var v) ? v.GetString() ?? "" : "";
