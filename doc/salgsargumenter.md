@@ -37,6 +37,16 @@ NoteApp optager **kun lyd**. Der findes ingen kodesti, der gemmer et billede;
 appen har aldrig set skærmen eller kameraet. Det står i første linje af den
 mødeindkaldelse, appen skriver — se Indstillinger → Integrationer.
 
+**Kald det «mødetransskription», ikke «optagelse».** Det er dét, det er:
+formålet er den skrevne tekst, og lydoptagelsen er midlet. Zoom skriver det på
+den måde, og de har ret — «mødet optages» får folk til at tænke på en fil,
+nogen kan finde frem om to år.
+
+Men nævn optagelsen i samme åndedrag. Der optages faktisk lyd, og det er dét,
+man siger ja eller nej til. En formulering, der skjuler det bag et pænere ord,
+holder ikke, hvis nogen spørger bagefter — og så har man mistet mere end det
+ene punkt.
+
 **Sig ikke:** at det er «lovligt uden samtykke» eller lignende. Det afhænger af
 land, sammenhæng og hvem der deltager, og det er ikke noget, en app kan
 erklære på kundens vegne.

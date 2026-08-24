@@ -103,6 +103,17 @@ public static class Googlekalender
     /// noget. Der skal stå, hvem man siger det til, hvornår det kan siges, og
     /// hvad der så sker — ellers er det en oplysning og ikke et valg.
     ///
+    /// DEN SIGER «MØDETRANSSKRIPTION» OG IKKE «OPTAGELSE».
+    ///
+    /// Det er dét, det er: formålet er den skrevne tekst, og lydoptagelsen er
+    /// midlet. Zoom skriver det på den måde, og de har ret — «mødet optages»
+    /// får folk til at tænke på en fil, nogen kan finde frem om to år.
+    ///
+    /// Men optagelsen NÆVNES i samme åndedrag. Der optages faktisk lyd, og
+    /// det er dét, man siger ja eller nej til; en formulering, der skjulte
+    /// det bag et pænere ord, ville være en, der ikke holdt, hvis nogen
+    /// spurgte bagefter.
+    ///
     /// OMFANGET STÅR ØVERST, OG DET ER MED VILJE. «Mødet optages» læses i dag
     /// som «mødet filmes» — det er blevet almindeligt, og folk siger nej til
     /// det. Her optages der KUN lyd, og det er en langt mindre ting at sige ja
@@ -126,13 +137,15 @@ public static class Googlekalender
     /// behandles hos en databehandler i EU.
     /// </summary>
     public const string StandardOptagenote =
-        "Der optages LYD fra mødet med NoteApp. Der optages ikke video.\n" +
+        "Der anvendes mødetransskription til det her møde. Det kræver, at " +
+        "LYDEN optages. Der optages ikke video.\n" +
         "\n" +
         "— — — — — — — — — —\n" +
-        "OPLYSNING OM LYDOPTAGELSE\n" +
+        "OPLYSNING OM MØDETRANSSKRIPTION\n" +
         "\n" +
-        "Omfang: Der optages alene lyd. Der optages hverken video, " +
-        "kamerabillede eller skærm, og der gemmes ingen billeder af mødet.\n" +
+        "Omfang: Der optages alene lyd, og formålet er den skrevne tekst. " +
+        "Der optages hverken video, kamerabillede eller skærm, og der gemmes " +
+        "ingen billeder af mødet.\n" +
         "\n" +
         "Formål: Optagelsen anvendes til at udarbejde referat og noter fra " +
         "mødet.\n" +
@@ -164,14 +177,15 @@ public static class Googlekalender
     /// sprog: så afhænger det af, hvem der læser hvilken.
     /// </summary>
     public const string StandardOptagenoteEn =
-        "The AUDIO of this meeting is planned to be recorded using NoteApp. " +
-        "No video is recorded.\n" +
+        "Meeting transcription is used for this meeting. This requires the " +
+        "AUDIO to be recorded. No video is recorded.\n" +
         "\n" +
         "— — — — — — — — — —\n" +
-        "NOTICE OF AUDIO RECORDING\n" +
+        "NOTICE OF MEETING TRANSCRIPTION\n" +
         "\n" +
-        "Scope: Audio only. No video, camera image or screen is recorded, and " +
-        "no images of the meeting are stored.\n" +
+        "Scope: Audio only, and the purpose is the written transcript. No " +
+        "video, camera image or screen is recorded, and no images of the " +
+        "meeting are stored.\n" +
         "\n" +
         "Purpose: The recording is used to produce minutes and notes from the " +
         "meeting.\n" +
