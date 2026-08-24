@@ -1,6 +1,7 @@
 # Roadmap
 
 *Skrevet om 20-08-2026, efter at retningen blev lagt fast.*
+*Status efterprøvet mod koden 24-08-2026 — mærkaterne nedenfor er læst i kilden, ikke husket.*
 
 ## Hvor produktet er på vej hen
 
@@ -27,6 +28,7 @@ sidst» spørgsmål, appen kan svare på.
 ---
 
 ## Den beslutning, der skal træffes først
+**AFKLARET · bygget som foreslået, alle tre punkter**
 
 **Hvad sker der med en rettet udskrift, når man kører transskriptionen om?**
 
@@ -52,6 +54,8 @@ lå nogen filer at røre.
 
 Punkt 3 er det samme princip, der har reddet os hele vejen: gem id'et, slå
 navnet op. Det gælder også her.
+
+**Sådan blev det.** Rettelser ligger i deres egen fil (`Udskrift.GemRettet`), og gengivelsen `udskrift_<model>.txt` skrives om, så dokumenter og søgning læser det rettede. Talernavnene står i `meeting.json` og sættes på ved visning.
 
 ---
 
@@ -103,7 +107,7 @@ skabeloner nævnes, og få dialogen til at hænge sammen — ikke en søg-og-ers
 ## Etape 1 — Udskriften bliver til at stole på
 
 ### 1.1 Redigering af udskriften
-*Stor · ingen afhængigheder · **start her***
+**FÆRDIG** *Stor · ingen afhængigheder*
 
 Udskriften bliver en rigtig teksteditor: tidsstempler i margen, talerens navn
 på hver replik, og mulighed for at rette. Gemmes løbende.
@@ -112,11 +116,12 @@ på hver replik, og mulighed for at rette. Gemmes løbende.
 funktion på listen, der kan reducere, hvor meget der sendes i skyen. Kan man
 finpudse selv, behøver man ikke bede en model om at rydde op.
 
-**Skal afklares:** beslutningen ovenfor. Og om der skal være fortryd på tværs
-af sessioner.
+Hver replik er et felt, man kan skrive i, med tidsstempel og taler ved siden af; der gemmes af sig selv kort efter sidste tastetryk.
+
+**Tilbage:** fortryd på tværs af sessioner. Det er ikke bygget, og det er heller ikke afklaret, om det skal være der — den maskingenererede udgave ligger urørt ved siden af, så der er altid en vej tilbage til udgangspunktet.
 
 ### 1.2 Navne på talerne
-*Middel · bygger på to-spor-udskriften (færdig)*
+**FÆRDIG** *Middel · bygger på to-spor-udskriften*
 
 I dag står der HERFRA og DERFRA. Man skal kunne sætte navne på — sine egne og
 gæsternes — og navnene skal huskes pr. person, så de foreslås næste gang de
@@ -134,21 +139,19 @@ skal fremgå, så ingen tror, maskinen har genkendt stemmerne.
 ## Etape 2 — Materialet kan komme ind udefra
 
 ### 2.1 Upload af lydfiler
-*Middel · ingen afhængigheder*
+**IKKE BYGGET · næste tur** *Middel · ingen afhængigheder*
 
 Træk en lydfil ind, og behandl den som en optagelse. Særligt fra telefon:
 iPhones taleoptagelser er `.m4a`, og Whisper skal bruge 16 kHz mono WAV — så
 der skal konverteres.
 
-**Skal afklares:** hvad der konverterer. En ekstra binær (ffmpeg) er 40-80 MB
-og en ny ting at holde opdateret; alternativet er at afkode `.m4a` med Windows'
-egne kodeks, som er der i forvejen.
+**Afklaret undervejs:** spørgsmålet om ffmpeg er faldet af sig selv. Lydoprydningen og komprimeringsmålingen bruger allerede NAudio med Windows' egne kodeks til at læse og skrive AAC, og `.m4a` fra en telefon går samme vej. Der skal altså ingen ekstra binær med i installationen.
 
 **Bemærk:** en optagelse fra telefonen har ét spor. Så er der ingen opdeling i
 HERFRA og DERFRA — alt står som ét. Det skal siges i udskriften, ikke opdages.
 
 ### 2.2 Overvåget mappe (iCloud, Google Drev, OneDrive)
-*Lille · bygger på 2.1*
+**IKKE BYGGET** *Lille · bygger på 2.1*
 
 Peg appen på en mappe. Dukker der en lydfil op, tilbyder den at lægge den ind.
 
@@ -167,7 +170,7 @@ forudsætning.
 ## Etape 3 — Møderne får en tidslinje
 
 ### 3.1 Kalender, lokal
-*Middel · ingen afhængigheder*
+**FÆRDIG** *Middel · ingen afhængigheder*
 
 Opret og se møder i appen. Tidspunkt, titel, deltagere, sted eller link. Et
 møde kan knyttes til en optagelse, og en optagelse til et møde.
@@ -177,48 +180,46 @@ en kalender, der kræver en konto hos Google for at virke, er ubrugelig for den,
 der ikke vil have en.
 
 ### 3.2 Startside — dagens overblik
-*Middel · bygger på 3.1*
+**FÆRDIG** *Middel · bygger på 3.1*
 
 Forsiden bliver dagen og den kommende uge: hvad der sker i dag, hvad der ligger
 forude, hvad der er sket, og hvad der venter — en optagelse, der aldrig blev
 skrevet ud, et dokument, der aldrig blev åbnet, et åbent punkt uden frist.
 
 ### 3.3 Google Kalender
-*Stor · bygger på 3.1*
+**FÆRDIG · verifikation hos Google udestår** *Stor · bygger på 3.1*
 
 Læs møderne fra Google. Opret møder derfra — **og lad være, når man beder om
 det.** Et møde, der er markeret som privat i appen, må aldrig havne i en delt
 kalender.
 
-**Compliance-konsekvens, der skal afklares først:** det bliver den anden
-tjeneste, appen taler med, og den første, hvor appen holder et fremmed token.
-Kalenderdata er personoplysninger — titler og deltagere. Det skal stå på
-Compliance-siden, og kvitteringerne skal dække det, ligesom de dækker Mistral.
+**Compliance-konsekvensen er håndteret:** Google står på Compliance-siden under «Andre integrationer» med tilstand, områder og hvad der læses og skrives, og der er en popup, man skal kvittere for, før forbindelsen oprettes.
+
+**Det, der mangler, er hos Google, ikke i koden:** verifikationen af appen. Indtil den er igennem, udløber adgangen efter syv dage. Der ligger opgaver i Cockpittet om hjemmeside, privatlivspolitik og demovideo.
 
 ### 3.4 Microsoft 365-kalender
-*Stor · efter 3.3 · afventer*
+**IKKE BYGGET** *Stor · efter 3.3*
 
-Samme som 3.3. Tages først, når Google-vejen står og virker.
+Samme som 3.3. Google-vejen står nu og virker, så spærringen er væk — men den bør vente, til Googles verifikation er i hus. Bliver der brug for at ændre på områder eller samtykke undervejs, er det bedre at lære det ét sted end to.
 
 ---
 
 ## Etape 4 — Det hænger sammen
 
 ### 4.1 Søgning på datoer, personer og metadata
-*Middel · bygger på 1.2 og 3.1*
+**DELVIST** *Middel · bygger på 1.2 og 3.1*
 
-Søgningen er i dag fritekst. Den skal kunne svare på «hvad talte vi med Espen
-om i august» — altså søge på person, på dato og på mødetype, ikke kun på ord.
+Søgningen kan i dag filtrere på dato, mappe, mødetype og sprog. **Personen mangler** — «hvad talte vi med Espen om i august» kan endnu ikke besvares. Navnene findes nu (1.2), men de står i `meeting.json` og indgår ikke i det, der søges i.
 
 ### 4.2 Mødeserier
-*Middel · bygger på 3.1*
+**IKKE BYGGET** *Middel · bygger på 3.1*
 
 Et ugentligt statusmøde er ikke tredive løsrevne møder. Dokumentet skal vide,
 hvad der blev besluttet sidst, og skabelonen skal kunne spørge: hvad er der
 sket siden? Åbne punkter bæres videre, indtil nogen lukker dem.
 
 ### 4.3 Noterne bliver til strukturen
-*Middel/stor · bygger på 1.1*
+**IKKE BYGGET** *Middel/stor · bygger på 1.1, som nu er færdig*
 
 Skriver du «budget?» klokken 14:12, skal dokumentet have et afsnit om
 budgettet. Dine noter er din prioritering — det eneste signal i hele kæden om,
@@ -233,7 +234,7 @@ skrevet. Det er halvdelen af arbejdet.
 
 | Punkt | Indsats | Bemærkning |
 |---|---|---|
-| **Åbne punkter som ét register** | Lille | Billigste vinding, der er tilbage. Bliver bedre efter 3.1, men kan laves nu |
+| ~~**Åbne punkter som ét register**~~ | — | **FÆRDIG 24-08.** Alle opgaver ligger i én fil, `Opgaver/opgaver.json`, og vises samlet i Cockpittet |
 | **Klik på en sætning, hør den** | Lille/middel | Tidsstemplerne findes. Hører naturligt sammen med 1.1 |
 | **Mål mødet, ikke modellen** | Middel | Hvor meget var uhørligt, hvor mange talte i munden på hinanden, hvem sagde aldrig sit navn |
 | **Maskering før afsendelse** | Stor | Bliver mindre presserende, hvis 1.1 betyder, at man tit slet ikke sender noget |
@@ -290,6 +291,28 @@ egne rettelser ER målingen — den laver sig selv, hvis der bliver talt efter.
 **Hvad der IKKE kan justeres sådan:** opsummeringens kvalitet. Efterprøvningen
 tæller ubelagte påstande, men et tal siger ikke, hvilken indstilling der skulle
 være anderledes. Og whisper-modellen har ingen knap.
+
+---
+
+## Bygget uden for etaperne, 24-08-2026
+
+De står her, fordi de ikke var på listen, da den blev skrevet — og en roadmap,
+der kun nævner det planlagte, giver et forkert billede af, hvor produktet er.
+
+| Hvad | Hvorfor det kom nu |
+|---|---|
+| **Google Tasks** | Opgaver skrevet i Google dukker op i Cockpittet, og et flueben her krydser dem af der. Eget samtykke, eget område |
+| **Sletning af lydfiler efter tid** | Standard 365 dage, og aldrig uden en udskrift. Med oversigt over diskplads i MB/GB og procent, og et spørgsmål straks efter lange møder |
+| **Note om mødetransskription i invitationen** | Dansk og engelsk, kan rettes, og sættes kun på møder, der faktisk er markeret til optagelse |
+| **Automatisk optagelse fra kalenderen** | Flytter mødet sig i Google, flytter optagelsen med. Kræver at appen kører — det står under Indstillinger |
+| **Anbefalet minimumskonfiguration** | Læser maskinen og siger, hvad der er opfyldt, i stedet for at liste krav, brugeren selv skal måle |
+| **Spalter, man kan trække i** | Bredden huskes. Kalender og opgaver starter fra toppen, søgning og resultat er sat sammen |
+| **Salgsargumenter som dokument** | `doc/salgsargumenter.md` — hvert argument med sit belæg og med det, der **ikke** må siges |
+
+**Målt og fravalgt: komprimering af lyden.** Ét sprog tåler 32 kbit/s uden tab,
+men blandet dansk-engelsk går fra 20,08 % til 40,57 % ordfejl. Appen kan ikke
+vide på forhånd, hvilken slags møde det er, så lyden bliver ukomprimeret.
+Målingen står i `doc/findings.md` §9.2.
 
 ---
 

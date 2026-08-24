@@ -408,7 +408,7 @@
 
               <TextBlock FontSize="12.5" LineHeight="20" Margin="2,18,0,0" TextWrapping="Wrap"
                          Foreground="{StaticResource TekstMeget}"
-                         Text="Teksten bliver ikke perfekt. Navne og fagord er det, der oftest rammes forkert. Transkriptionen kan ikke rettes her — den er, hvad maskinen hørte. Skal noget rettes, gøres det i det færdige dokument." />
+                         Text="Teksten bliver ikke perfekt. Navne og fagord er det, der oftest rammes forkert. Du kan rette den selv: klik i en replik og skriv. Rettelsen gemmes for sig, så den, maskinen hørte, ikke går tabt — og det er den rettede tekst, dokumenter og søgning bruger." />
             </StackPanel>
           </ScrollViewer>
 
