@@ -79,15 +79,36 @@ $Data = Join-Path $env:LOCALAPPDATA 'NoteApp'
 if ($env:NOTEAPP_DATA) { $Data = $env:NOTEAPP_DATA }
 if (Test-Path 'C:\AppNoter') { $Data = 'C:\AppNoter' }
 
+$Resultater = Join-Path $Rod 'fase0\resultater'
+
 function Wer($tekstfil, $facitfil) {
     if (-not (Test-Path $tekstfil)) { return $null }
 
-    $svar = & (Join-Path $PSScriptRoot 'maal-noejagtighed.ps1') `
-                -Transskription $tekstfil -Reference $facitfil 2>&1
+    # DER LAESES FRA CSV'EN, IKKE FRA SKAERMEN.
+    #
+    # maal-noejagtighed.ps1 skriver med Write-Host, og Write-Host gaar til
+    # VAERTEN - ikke i pipelinen. Alt, hvad man forsoeger at fange, er derfor
+    # tomt, uanset hvor tydeligt tallet staar paa skaermen. Tabellen stod tom
+    # to gange, foer det gik op for mig.
+    #
+    # Scriptet gemmer til gengaeld en CSV, og den er den rigtige kilde: den
+    # er lavet til at blive laest af noget andet.
+    $foer = Get-ChildItem $Resultater -Filter 'noejagtighed_*.csv' -ErrorAction SilentlyContinue |
+            Select-Object -ExpandProperty FullName
 
-    foreach ($linje in $svar) {
-        if ("$linje" -match 'Ordfejlrate \(WER\)\s*:\s*([\d,\.]+)\s*%') {
-            return [double](($matches[1]) -replace ',', '.')
+    & (Join-Path $PSScriptRoot 'maal-noejagtighed.ps1') `
+        -Transskription $tekstfil -Reference $facitfil | Out-Null
+
+    $navn = [IO.Path]::GetFileNameWithoutExtension($tekstfil)
+
+    $nyeste = Get-ChildItem $Resultater -Filter 'noejagtighed_*.csv' -ErrorAction SilentlyContinue |
+              Sort-Object LastWriteTime -Descending | Select-Object -First 1
+
+    if (-not $nyeste) { return $null }
+
+    foreach ($r in (Import-Csv $nyeste.FullName)) {
+        if ($r.Transskription -eq $navn) {
+            return [double](($r.WER) -replace ',', '.')
         }
     }
 

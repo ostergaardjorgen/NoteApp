@@ -109,16 +109,18 @@ i timen.
 
 Det er altså ikke lyd mod video. Det er ukomprimeret mod komprimeret.
 
-**Det er målt, hvad komprimering ville koste** — 24-08-2026, på en oplæsning
-med kendt facit: AAC ved 32 kbit/s fylder **7,9 gange mindre** og giver 10,15 %
-ordfejl mod 9,98 % for ukomprimeret. Forskellen er sandsynligvis støj.
+**Det er målt, hvad komprimering ville koste — og svaret er: for meget.**
 
-En times møde ville gå fra 220 MB til 28 MB — altså en syvendedel af Zooms
-video frem for mere end den.
+24-08-2026, på tre oplæsninger med kendt facit. På ét sprog er komprimering
+gratis: engelsk ved 32 kbit/s giver præcis samme ordfejlrate som ukomprimeret.
+Men på **blandet dansk-engelsk** går ordfejlraten fra 20 % til 41 %.
 
-*Ikke bygget endnu, og kun målt på dansk oplæsning. Sig det som det er: «vi har
-målt, at det kan lade sig gøre, og vi har ikke bygget det.» Se
-[`findings.md`](findings.md) 9.2.*
+Netop det møde — en dansk samtale med én engelsk gæst — er det, appen skal
+kunne. Så lyden bliver ukomprimeret indtil videre.
+
+**Sig ikke «vi komprimerer snart».** Det er målt, at det ikke kan lade sig gøre
+uden at ødelægge den slags møder, og en lovet forbedring, der ikke kommer, er
+værre end en ærlig begrænsning. Se [`findings.md`](findings.md) 9.2.
 
 ---
 
@@ -255,6 +257,7 @@ oplysning — det er det, der bliver sagt højt til en kunde.
 
 Det gælder især:
 
-- Komprimeres lyden en dag, skal punkt 3 skrives om
+- Komprimeres lyden en dag, skal punkt 3 skrives om — men det er målt, at
+  det koster for meget på blandet sprog, så det sker ikke lige nu
 - Kommer der en Microsoft-integration, skal punkt 2 have den med
 - Bliver noget målt, som i dag står som et skøn, skal skønnet erstattes

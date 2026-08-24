@@ -613,54 +613,71 @@ ud fra en måling på vores egne prøvetekster. Den måling skal laves, før nog
 komprimeres for alvor; en udskrift, der bliver dårligere, koster mere end de
 sparede gigabyte.
 
-### 9.2 Koster komprimering nøjagtighed? Målt.
+### 9.2 Koster komprimering nøjagtighed? Ja — på blandet sprog koster den alt.
 
-*Målt 24-08-2026 på oplæsningen «Fase0-oplaesning-dansk» — 15 minutter, 2.365
-ord med kendt facit. Kodet med Windows' egen Media Foundation (AAC), pakket ud
-igen til 16 kHz mono PCM og skrevet ud med whisper large-v3.*
+*Målt 24-08-2026 på de tre oplæsninger med kendt facit. Lyden kodet til AAC
+med Windows' egen Media Foundation, pakket ud igen til 16 kHz mono PCM og
+skrevet ud med whisper large-v3. **Sproget låst**, så komprimeringen er den
+eneste variabel. Kør igen med `scripts\maal-komprimering.ps1`.*
 
-| Lyd | Fylder pr. time | Ordfejlrate | Fagtermer | Negationer |
-|---|---|---|---|---|
-| PCM 16 kHz 16 bit | 109,9 MB | **9,98 %** | 12 af 19 | 11 af 17 |
-| AAC 32 kbit/s | 14,0 MB · **7,9×** mindre | 10,15 % | 11 af 19 | 11 af 17 |
-| AAC 24 kbit/s | 10,5 MB · **10,5×** mindre | 10,91 % | 12 af 19 | 11 af 17 |
+**Ordfejlrate i procent — lavere er bedre:**
 
-**Ved 32 kbit/s koster komprimeringen 0,17 procentpoint.** Det er intet mod en
-faktor otte i plads. Ved 24 kbit/s koster den 0,93 point — målbart, men stadig
-lille.
+| Prøve | PCM 110 MB/t | AAC 24 · 10,5× mindre | AAC 32 · 7,9× mindre |
+|---|---|---|---|
+| Dansk, 2.365 ord | **9,98** | 10,91 | 10,15 |
+| Engelsk, 602 ord | **9,47** | 9,97 | **9,47** |
+| Blandet dansk-engelsk, 488 ord | **20,08** | 33,61 | **40,57** |
 
-**FORSKELLEN ER SANDSYNLIGVIS STØJ, OG DET SKAL STÅ.** Rækkefølgen er ikke
-monoton: 24 kbit/s beholder tolv fagtermer, 32 kbit/s kun elleve. Hjalp mere
-båndbredde entydigt, ville 32 være mindst lige så god på alle mål. Det er den
-ikke. Så det rigtige at sige er: **ingen målbar forskel ved 32 kbit/s, muligvis
-en lille ved 24** — ikke «32 er 0,17 point dårligere».
+#### Konklusionen, og den er ikke den, jeg forventede
 
-**Målingen dækker ÉN oplæsning, ÉN stemme, ÉT sprog og gode forhold.** Et
-rigtigt møde har to spor, folk der taler i munden på hinanden og skiftende
-afstand til mikrofonen. Engelsk og blandet dansk-engelsk er IKKE målt. Det skal
-de, før noget komprimeres for alvor.
+**På ét sprog er komprimering gratis.** Engelsk ved 32 kbit/s giver præcis
+samme ordfejlrate som ukomprimeret — 9,47 mod 9,47. Dansk koster 0,17
+procentpoint. Begge er inden for støj.
 
-#### En fælde, der næsten kom i findings
+**På blandet sprog er den ødelæggende.** Ordfejlraten går fra 20 % til 34 % ved
+24 kbit/s og til **41 %** ved 32. Det er ikke en forringelse, det er en anden
+tekst.
 
-Første kørsel gav 18,65 % for PCM — altså at komprimeret lyd var BEDRE end
-ukomprimeret. Det var forkert, og grunden er værd at huske: `udskrift_*.txt` er
-den SAMMENFLETTEDE to-spors udskrift med talermærkater, og mærkaterne tæller
-med som 251 ekstra ord. Sammenligningen skal ske mod det rå enkeltspor,
-`mikrofon_large-v3.txt`.
+**Og forskellen peger den forkerte vej: 32 kbit/s er VÆRRE end 24.** Mere
+båndbredde giver et dårligere resultat. Det udelukker en simpel forklaring om
+tabt detalje — så ville mere altid være bedre. Noget i kodningen forstyrrer
+modellens håndtering af sprogskiftet midt i en sætning, og hvad det er, ved vi
+ikke.
+
+#### Hvad det betyder for produktet
+
+**Komprimering kan ikke slås til for alt.** Appen ved ikke på forhånd, om et
+møde bliver ensproget: en dansk samtale med én engelsk gæst ligner et dansk
+møde, lige indtil gæsten siger noget. Netop det møde er det, der bliver
+ødelagt.
+
+Tre veje, ingen af dem gratis:
+
+1. **Lad være.** Lyden fylder 220 MB i timen, og det er prisen for en udskrift,
+   der kan bruges. Det er dét, der gælder indtil videre.
+2. **Komprimér kun, når sproget er valgt og enkelt** — og lad brugeren vide, at
+   den mulighed forsvinder, hvis mødet viser sig at være blandet.
+3. **Find ud af hvorfor.** At 32 er værre end 24 er et spor, ikke støj: 488 ord
+   og syv procentpoints forskel er for meget til at være tilfældigt.
+
+**Målingen dækker ÉN oplæsning pr. sprog i gode forhold.** Den blandede prøve
+er den mindste — 488 ord. Men effekten er tyve gange større end forskellen
+mellem PCM og AAC på de to andre, og den er ensrettet på begge bitrater.
+
+#### To fælder undervejs, begge af samme slags
+
+**Første kørsel gav 18,65 % for dansk PCM** — altså at komprimeret lyd var
+BEDRE end ukomprimeret. Forkert: `udskrift_*.txt` er den sammenflettede
+to-spors udskrift med talermærkater, og mærkaterne tæller med som 251 ekstra
+ord. Sammenligningen skal ske mod det rå enkeltspor, `mikrofon_large-v3.txt`.
+
+**Tabellen i måle­scriptet stod tom tre gange i træk.**
+`maal-noejagtighed.ps1` skriver med `Write-Host`, og **Write-Host går til
+værten — ikke i pipelinen**. Alt, man forsøger at fange, er tomt, uanset hvor
+tydeligt tallet står på skærmen. Løsningen er at læse den CSV, scriptet i
+forvejen gemmer; den er lavet til at blive læst af noget andet.
 
 **Et resultat, der vender den forventede retning om, er som regel en fejl i
-målingen — ikke et gennembrud.**
+målingen — men ikke altid.** Første gang var det en fejl. Anden gang, hvor 32
+kbit/s slog 24 på blandet sprog, var det virkeligheden.
 
-#### Hvad det ville betyde
-
-En times møde med to spor: **220 MB i dag, 28 MB med AAC 32**. Zoom oplyser
-200 MB i timen for video, så NoteApp ville fylde omkring en syvendedel af en
-videooptagelse frem for at fylde mere.
-
-Ingen ny binær: NAudio bruger Windows' egen Media Foundation. Ffmpeg ville have
-kostet 40-80 MB og en afhængighed mere at holde opdateret.
-
-**Ikke bygget.** Komprimeringen skal ske EFTER udskriften — whisper skal have
-16 kHz PCM ind — og de to øvrige sprog skal måles først.
-
-    noteapp lydproeve <wav> [kbit ...]
