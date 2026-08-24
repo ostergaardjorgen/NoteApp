@@ -30,8 +30,11 @@ Siri kan heller ikke diktere samtalen — og Apples egen optagefunktion fra
 iOS 18.1 er slået fra i hele EU og kan ikke dansk. Se afsnit 1.
 
 Det betyder, at punkterne om «dukker selv op», «Optagelse accepteres ikke» og
-«spørg efter samtalen» ikke kan bygges, som de er stillet op. Men **det, de
-skal opnå, kan næsten opnås ad en anden vej** — se afsnittet om diktatet.
+«spørg efter samtalen» ikke kan bygges for et **almindeligt** opkald.
+
+**Men de kan alle sammen bygges, hvis appen selv ringer op.** Reglen gælder
+en anden apps lyd — sin egen må en app godt optage. Det ændrer billedet nok
+til, at det har sit eget afsnit: «Vejen udenom».
 
 ---
 
@@ -202,6 +205,116 @@ fortælle deltagerne, at der optages.
 
 ---
 
+## Vejen udenom: appen skal selv ringe op
+
+Alt ovenfor handler om **Telefon-appens** opkald. Reglen er, at ingen app må
+røre en anden apps lyd — og det gælder begge veje: heller ikke NoteApp må
+lytte med på Telefon-appen.
+
+Men **sin egen lyd må en app godt røre.** Går opkaldet gennem en VoIP-app,
+ligger begge stemmer inde i den app selv, og så er optagelse en helt
+almindelig ting at gøre. Det er også forklaringen på, at der ligger apps i
+App Store, der optager opkald: de ringer selv op, eller de kobler en
+konferencebro ind på linjen.
+
+**Og der er en gevinst oveni.** En VoIP-app må bruge CallKit, og så opfører
+opkaldet sig som et rigtigt opkald: det kommer frem på låseskærmen, det kan
+tages i CarPlay, og det kan startes med Siri. Den CarPlay-mur, der står i
+afsnit 3, gælder ikke for opkald. **Det løser håndfri-problemet i bilen.**
+
+### Fire veje, og de koster noget forskelligt
+
+**1. Lån en app, der optager i forvejen**
+*Lille arbejde · og det står og falder med, hvor lyden lander*
+
+HubSpot, Aircall, Dialpad, RingCentral og flere har opkald i deres egen
+mobilapp, optager samtalen, og lader dig hente filen bagefter. HubSpots
+opkaldstjeneste i mobilappen optager, og lydfilens adresse ligger på
+`hs_call_recording_url`, som kan hentes med
+`GET /crm/v3/objects/calls?properties=hs_call_recording_url`.
+
+Der skal **slet ingen iPhone-app bygges**. Der skal bygges et stykke på
+Windows-siden, der henter optagelserne ned og lægger dem ind — og indlæsningen
+findes allerede.
+
+**Men lyden ligger i deres sky**, for HubSpots vedkommende typisk i USA. Det
+er præcis dét, NoteApp sælges på ikke at gøre.
+
+**Og dét er grunden til at kigge dansk og nordisk.** Vejen holder, hvis
+udbyderen er i EU:
+
+- **Flexfone** (drevet af Dstny, dansk, med TDC som netværk) og **Telavox**
+  har begge optagelse som en del af løsningen. Telavox optager både ind- og
+  udgående og lader dig hente filerne i appen eller portalen.
+- **Om der findes et åbent API til at hente dem automatisk, kunne jeg ikke
+  efterprøve.** Hos den slags erhvervsudbydere er API-adgang som regel en
+  partneraftale og ikke en selvbetjeningsside. Det er et opkald til en
+  sælger, ikke en søgning — og det er det første, der skal afklares, hvis
+  vejen skal bruges.
+
+**2. En nordisk udbyder med et åbent API — den vej, der kan bygges i morgen**
+*Lille til middel · og den kræver ingen iPhone-app overhovedet*
+
+**46elks** er svensk og har et offentligt API, der er efterprøvet:
+
+- `recordcall` optager **hele samtalen** og sender et webhook med et link,
+  når opkaldet slutter.
+- Optagelsen kan leveres **direkte til en adresse, du selv vælger** — altså
+  til din egen maskine eller server, i stedet for at blive liggende hos dem.
+- Ellers hentes den med `GET https://api.46elks.com/a1/recordings/{id}`, og
+  **der er 72 timer til at gøre det.** Efter det er den væk.
+- Både SIP og WebRTC understøttes, så NoteApp kan enten være telefonen selv
+  eller bare være det, opkaldet føres igennem.
+
+**Den billigste første prøve ligger her, og den kræver ingen app:** et nummer
+hos udbyderen, der viderestiller til din mobil og optager undervejs. Filen
+lander på din egen maskine, og NoteApp læser den ind. Så kan det måles, om
+optagne opkald overhovedet er noget værd i praksis — før der bygges en
+iPhone-app for at få dem.
+
+**3. NoteApp ringer selv op**
+*Stor · og den, der giver den fulde oplevelse*
+
+NoteApp bliver sin egen lille telefon: et nummer hos en udbyder, opkald ud og
+ind, CallKit så det ser ud som et rigtigt opkald.
+
+Det afgørende er, at optagelsen kan ske **på telefonen** — appen har jo lyden
+selv — og gå direkte i mappen i iCloud. Udbyderen transporterer samtalen, men
+gemmer den ikke.
+
+Det flytter grænsen ét sted, og det skal formuleres ærligt i
+salgsargumenterne: et telefonopkald bliver altid båret af et teleselskab. Det
+har det altid gjort, også uden NoteApp. Argumentet er og bliver, at
+**optagelsen** ikke uploades — og det holder her.
+
+Arbejdet er til gengæld rigtigt: en VoIP-klient er WebRTC eller SIP,
+push-beskeder for indgående opkald, lydsessioner, netværk der falder ud
+midt i en køretur. Det er større end resten af iPhone-appen tilsammen.
+
+**4. Egen central**
+*Størst · fuld kontrol*
+
+3CX eller Asterisk på en server, du selv ejer. Optagelsen sker på centralen og
+forlader aldrig noget, du ikke bestemmer over. Det er svaret, hvis en kunde
+med en it-afdeling spørger — ikke svaret for en selvstændig med en iPhone.
+
+### Hvad det ikke løser
+
+Ringer nogen dig op på dit **almindelige nummer**, er du tilbage i
+Telefon-appen, og så gælder alle tre mure igen. En VoIP-vej virker kun for de
+opkald, der føres gennem den. Skal det være alle, skal nummeret flyttes — og
+det er en beslutning om ens telefoni, ikke om en app.
+
+### Juraen bliver ikke lettere
+
+At appen **må** optage, betyder ikke, at man må lade være med at sige det.
+App Store-retningslinje 2.5.14 kræver samtykke og en tydelig besked under hele
+optagelsen, og modparten sidder på en almindelig telefon og kan ikke se en
+skærm. Beskeden skal derfor være **hørbar** — en linje, der læses op, når
+optagelsen begynder. Det er også sådan, Apples egen funktion gør det.
+
+---
+
 ## Hvad det kræver af dig
 
 | | |
@@ -251,4 +364,20 @@ gevinsten væk.
 - [iOS 18 — Call Recording, Wikipedia](https://en.wikipedia.org/wiki/IOS_18) og
   [iOS 18.1 Call Record — how to test when based in Europe, Apple Developer Forums](https://developer.apple.com/forums/thread/764221)
   — optagefunktionen er slået fra i EU, og udskrivningen findes ikke på dansk
+- [Receive calls in HubSpot when using calling apps, HubSpot docs](https://developers.hubspot.com/docs/guides/apps/extensions/calling-extensions/receive-incoming-calls)
+  og [Fetching Call Recording Over API, HubSpot Community](https://community.hubspot.com/t/fetching-call-recording-over-api/115431)
+  — `hs_call_recording_url` på opkaldsobjektet
+- [HubSpot Calls from Mobile (iOS og Android), HubSpot Community](https://community.hubspot.com/t5/Releases-and-Updates/Live-HubSpot-Calls-from-Mobile-iOS-amp-Android/ba-p/713273)
+  — opkald og optagelse fra mobilappen på betalte pladser
+- [Mastering VoIP Audio with CallKit and WebRTC on iOS](https://medium.com/@tsivilko/mastering-voip-audio-with-callkit-and-webrtc-on-ios-0f2092402331)
+  — en VoIP-app ejer sin egen lyd
+- [3CX self-hosted, 3CX Forums](https://www.3cx.com/community/threads/3cx-integration-with-a-self-hosted-ai-eu-data-protection-considerations.136377/)
+  — central på egen server
+- [46elks: Recordcall — record an entire call](https://46elks.com/docs/voice-recordcall),
+  [View phone call recording using ID](https://46elks.com/docs/get-recording-id) og
+  [API-overblik](https://46elks.com/docs/overview) — webhook med link, 72 timers frist,
+  levering til egen adresse, SIP og WebRTC
+- [Flexfone](https://www.flexfone.dk/) — dansk, drevet af Dstny, TDC som netværk
+- [Telavox: IP-telefoni](https://telavox.dk/funktioner/ip-telefoni/) — optager både ind-
+  og udgående, filerne hentes i app eller portal
 - [iPhone Recording Stops After a Phone Call, BlackBox](https://blackboxrecorder.in/fix/iphone-recording-stops-after-call) — opkaldet tager mikrofonen eksklusivt
