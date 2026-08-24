@@ -44,6 +44,27 @@ public partial class OpgaveWindow : Window
         dele.Add(r.Moedetitel);
         if (r.Opgave.Kilde.Length > 0) dele.Add("fra " + r.Opgave.Kilde);
 
+        // EN OPGAVE FRA GOOGLE RETTES DÉR, IKKE HER.
+        //
+        // Teksten kommer fra Google og bliver overskrevet ved næste hentning.
+        // Felter, man kan skrive i, og som bliver rullet tilbage en time
+        // senere, er værre end felter, der er låst.
+        //
+        // Fluebenet er undtagelsen: DET går begge veje.
+        if (r.Opgave.Herkomst == Opgavekilde.Google)
+        {
+            dele.Insert(0, "Google Tasks");
+
+            Navn.IsReadOnly = true;
+            Beskrivelse.IsReadOnly = true;
+            Frist.IsEnabled = false;
+
+            Fejl.Foreground = (System.Windows.Media.Brush)FindResource("TekstMeget");
+            Fejl.Text = "Opgaven kommer fra Google Tasks. Tekst og frist rettes dér — "
+                      + "her kan du sætte prioritet og krydse den af, og afkrydsningen "
+                      + "sendes op igen.";
+        }
+
         Herkomst.Text = string.Join("  ·  ", dele);
 
         Navn.Text = r.Opgave.Navn.Length > 0 ? r.Opgave.Navn : r.Opgave.Visningsnavn;

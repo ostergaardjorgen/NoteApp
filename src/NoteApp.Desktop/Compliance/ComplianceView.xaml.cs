@@ -156,6 +156,16 @@ public partial class ComplianceView : UserControl
 
         GoogleTilstand.Text = forbundet ? "FORBUNDET" : "IKKE FORBUNDET";
 
+        var opgaver = false;
+        try { opgaver = Integrationsfiler.Hent(Googleopgaver.Id).ErForbundet; }
+        catch (Exception) { }
+
+        Opgavetilstand.Text = opgaver ? "FORBUNDET" : "IKKE FORBUNDET";
+
+        Opgavetilstand.Foreground = opgaver
+            ? (System.Windows.Media.Brush)FindResource("Godkendt")
+            : (System.Windows.Media.Brush)FindResource("TekstMeget");
+
         GoogleTilstand.Foreground = forbundet
             ? (System.Windows.Media.Brush)FindResource("Godkendt")
             : (System.Windows.Media.Brush)FindResource("TekstMeget");

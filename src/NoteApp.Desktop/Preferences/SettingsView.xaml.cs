@@ -601,6 +601,31 @@ public partial class SettingsView : UserControl
     /// Der spørges FØRST. Handlingen sender brugeren ud af appen og ind på en
     /// side hos Google, og det skal man vide, inden browseren springer op.
     /// </summary>
+    /// <summary>
+    /// Hvad man siger ja til, når opgaverne forbindes.
+    ///
+    /// EN EGEN TEKST, FORDI DET ER EN ANDEN AFTALE END KALENDEREN. Kalenderen
+    /// læser noget, der allerede lå hos Google. Her går det begge veje, og det
+    /// skal stå i første afsnit — ikke i en fodnote.
+    /// </summary>
+    private const string Opgavevejledning =
+        "Der åbner en side hos Google i din browser. Log ind og godkend.\n\n" +
+        "DETTE FÅR APPEN LOV TIL\n" +
+        "Ét område: dine opgaver i Google Tasks. Appen kan læse dem og krydse " +
+        "dem af. Den kan ikke se din kalender, din mail, dine filer eller " +
+        "noget andet i kontoen.\n\n" +
+        "DET GÅR BEGGE VEJE\n" +
+        "Opgaver, du skriver i Google, dukker op i Cockpittet. Krydser du en " +
+        "af dem af her, bliver den også krydset af hos Google. Det er hele " +
+        "meningen: ét sted at holde øje med, ikke to.\n\n" +
+        "DETTE SENDES ALDRIG\n" +
+        "Opgaver, appen selv har fundet i et møde, lægges IKKE op. De kommer " +
+        "fra en transkription, og et referats indhold skal ikke ende i skyen, " +
+        "fordi man slog opgaver til. Lyd, transkriptioner, noter og dokumenter " +
+        "sendes heller aldrig.\n\n" +
+        "Det er en egen godkendelse, adskilt fra kalenderen. Du kan afbryde " +
+        "den igen når som helst, og så forsvinder de hentede opgaver.";
+
     private async void Forbind_Klik(object sender, RoutedEventArgs e)
     {
         if (sender is not Button b || b.Tag is not string id) return;
@@ -608,9 +633,11 @@ public partial class SettingsView : UserControl
 
         var o = Integrationsfiler.Hent(id);
 
+        var erOpgaver = id == Googleopgaver.Id;
+
         var ja = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
             $"Forbind til {i.Navn}?",
-            Googlekalender.Vejledning,
+            erOpgaver ? Opgavevejledning : Googlekalender.Vejledning,
             godkend: "Åbn browseren", annuller: "Ikke nu", slags: Dialogs.Slags.Valg);
 
         if (!ja) return;
@@ -619,7 +646,10 @@ public partial class SettingsView : UserControl
 
         try
         {
-            var noegle = await Googlekalender.ForbindAsync();
+            // EGET OMRAADE, EGEN NOEGLE. Den, der kun vil dele sin kalender,
+            // skal ikke se «og dine opgaver» paa Googles skaerm.
+            var noegle = await Googlekalender.ForbindAsync(
+                erOpgaver ? Googleopgaver.Omraade : "");
 
             o.Opdateringsnoegle = noegle;
             o.SidsteFejl = "";
@@ -658,20 +688,35 @@ public partial class SettingsView : UserControl
         var o = Integrationsfiler.Hent(id);
         if (!o.ErForbundet) return;
 
-        Status.Text = $"Henter aftaler fra {i.Navn} …";
+        var opgaver = id == Googleopgaver.Id;
+
+        Status.Text = opgaver
+            ? $"Henter opgaver fra {i.Navn} …"
+            : $"Henter aftaler fra {i.Navn} …";
 
         try
         {
-            var aftaler = await Googlekalender.HentAsync(o.Opdateringsnoegle);
+            int n;
 
-            var n = Kalender.Afloes(i.Kilde, aftaler);
+            if (opgaver)
+            {
+                var hentede = await Googleopgaver.HentAsync(o.Opdateringsnoegle);
+                n = Opgavelager.Afloes(Opgavekilde.Google, hentede);
+            }
+            else
+            {
+                var aftaler = await Googlekalender.HentAsync(o.Opdateringsnoegle);
+                n = Kalender.Afloes(i.Kilde, aftaler);
+            }
 
             o.SidstHentet = DateTimeOffset.Now;
             o.SidsteAntal = n;
             o.SidsteFejl = "";
             Integrationsfiler.Gem(id, o);
 
-            Status.Text = $"Hentede {n} {(n == 1 ? "aftale" : "aftaler")} fra {i.Navn}.";
+            Status.Text = opgaver
+                ? $"Hentede {n} {(n == 1 ? "opgave" : "opgaver")} fra {i.Navn}."
+                : $"Hentede {n} {(n == 1 ? "aftale" : "aftaler")} fra {i.Navn}.";
         }
         catch (Exception ex)
         {

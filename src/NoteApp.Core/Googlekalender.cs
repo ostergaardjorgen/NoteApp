@@ -299,7 +299,16 @@ public static class Googlekalender
     /// Der er en frist. Uden den ville appen kunne stå og lytte for evigt,
     /// fordi nogen lukkede browservinduet i stedet for at trykke annullér.
     /// </summary>
-    public static async Task<string> ForbindAsync(CancellationToken ct = default)
+    /// <param name="omraade">
+    /// Hvad der bedes om adgang til. Tom betyder kalenderens område.
+    ///
+    /// HVER INTEGRATION HAR SIT EGET LOGIN OG SIN EGEN NØGLE. Det koster en
+    /// godkendelse mere, og det er prisen værd: den, der kun vil dele sin
+    /// kalender, skal ikke se «og dine opgaver» på Googles skærm. Et samtykke,
+    /// der dækker mere end det, man bad om, er ikke et samtykke.
+    /// </param>
+    public static async Task<string> ForbindAsync(string omraade = "",
+                                                  CancellationToken ct = default)
     {
         if (Googleklient.Hent() is not var (klientId, hemmelighed) || klientId.Length == 0)
             throw new InvalidOperationException(Googleklient.Mangler);
@@ -325,7 +334,7 @@ public static class Googlekalender
             $"{Godkend}?client_id={Uri.EscapeDataString(klientId)}" +
             $"&redirect_uri={Uri.EscapeDataString(svarAdresse)}" +
             $"&response_type=code" +
-            $"&scope={Uri.EscapeDataString(Omraade)}" +
+            $"&scope={Uri.EscapeDataString(omraade.Length > 0 ? omraade : Omraade)}" +
             $"&access_type=offline&prompt=consent" +
             $"&code_challenge={udfordring}&code_challenge_method=S256";
 
@@ -872,6 +881,23 @@ public static class Googlekalender
     /// betyde, at der lå en brugbar adgang i en fil hele tiden. Den varige
     /// nøgle skal ligge et sted — den friske behøver ikke.
     /// </summary>
+    /// <summary>
+    /// En frisk adgangsnøgle ud fra den varige. Til de andre Google-dele.
+    ///
+    /// Den ligger HER, fordi klient-id, PKCE og nøgleudvekslingen kun findes
+    /// ét sted. To kopier af det samme kommer ud af trit — og den, der kommer
+    /// ud af trit, opdager man som «forbindelsen virker i kalenderen, men ikke
+    /// i opgaverne».
+    /// </summary>
+    public static async Task<string> FriskNoegleTil(string opdateringsnoegle,
+                                                    CancellationToken ct = default)
+    {
+        if (Googleklient.Hent() is not var (klientId, hemmelighed) || klientId.Length == 0)
+            throw new InvalidOperationException(Googleklient.Mangler);
+
+        return await FriskNoegle(klientId, hemmelighed, opdateringsnoegle, ct);
+    }
+
     private static async Task<string> FriskNoegle(string klientId, string hemmelighed,
                                                   string opdateringsnoegle, CancellationToken ct)
     {

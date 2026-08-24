@@ -76,6 +76,18 @@ public static class Integrationer
             Klar: true),
 
         new Integration(
+            Id: "google-opgaver",
+            Navn: "Google Tasks",
+            Leverandoer: "Google",
+            Hjemland: "USA",
+            Kilde: Kalenderkilde.Google,
+            Hvad: "Opgaver, du skriver i Google — på telefonen eller i browseren — dukker op i Cockpittet. " +
+                  "Krydser du en af dem af her, bliver den også krydset af hos Google.",
+            Hvordan: "Egen godkendelse, adskilt fra kalenderen. Der bedes om ét område: dine opgaver. " +
+                     "Opgaver, appen selv har fundet i et møde, sendes ALDRIG op.",
+            Klar: true),
+
+        new Integration(
             Id: "microsoft",
             Navn: "Microsoft 365-kalender",
             Leverandoer: "Microsoft",
@@ -166,6 +178,12 @@ public static class Integrationsfiler
     {
         try { if (File.Exists(Fil(id))) File.Delete(Fil(id)); } catch (IOException) { }
 
-        Kalender.Fjern(kilde);
+        // OPGAVEINTEGRATIONEN RØRER IKKE KALENDEREN, OG OMVENDT.
+        //
+        // De to har hver sin nøgle og hvert sit område. Afbryder man den ene,
+        // skal den andens data blive stående — ellers forsvinder hele
+        // kalenderen, fordi man slog opgaver fra.
+        if (id == Googleopgaver.Id) Opgavelager.Fjern(Opgavekilde.Google);
+        else Kalender.Fjern(kilde);
     }
 }

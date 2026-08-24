@@ -101,6 +101,65 @@ public static class Opgavelager
         Gem(alle);
     }
 
+    /// <summary>
+    /// Erstatter alt fra én kilde med det, der lige er hentet.
+    ///
+    /// DET ER EN AFLØSNING, IKKE EN SAMMENFLETNING — samme mønster som
+    /// kalenderen. Alt fra kilden erstattes, så en opgave, der er slettet hos
+    /// Google, også forsvinder her. Alternativet — kun at lægge til — ville
+    /// betyde, at en slettet opgave blev stående for evigt, og så holder man
+    /// op med at stole på listen.
+    ///
+    /// DET, BRUGEREN HAR SAT PÅ HER, OVERLEVER. Prioritet findes ikke i Google
+    /// Tasks; den er appens eget felt og bæres over på den nye udgave af den
+    /// samme opgave, genkendt på fremmed-id'et.
+    ///
+    /// LOKALE OPGAVER RØRES ALDRIG. De hører til appen og har intet med
+    /// hentningen at gøre.
+    /// </summary>
+    public static int Afloes(Opgavekilde kilde, IEnumerable<Opgave> hentede)
+    {
+        if (kilde == Opgavekilde.Lokal)
+            throw new ArgumentException("Lokale opgaver afløses ikke.", nameof(kilde));
+
+        var alle = Alle();
+
+        var gamle = alle.Where(o => o.Herkomst == kilde && o.FremmedId.Length > 0)
+                        .GroupBy(o => o.FremmedId, StringComparer.Ordinal)
+                        .ToDictionary(g => g.Key, g => g.First(), StringComparer.Ordinal);
+
+        alle.RemoveAll(o => o.Herkomst == kilde);
+
+        var n = 0;
+
+        foreach (var ny in hentede)
+        {
+            if (gamle.TryGetValue(ny.FremmedId, out var gammel))
+            {
+                // Appens egne felter. De findes ikke hos Google og ville
+                // ellers blive nulstillet ved hver eneste hentning.
+                ny.Prioritet = gammel.Prioritet;
+                ny.Ejer = gammel.Ejer;
+            }
+
+            alle.Add(ny);
+            n++;
+        }
+
+        Gem(alle);
+        return n;
+    }
+
+    /// <summary>Fjerner alt fra én kilde. Kaldes, når en integration slås fra.</summary>
+    public static void Fjern(Opgavekilde kilde)
+    {
+        if (kilde == Opgavekilde.Lokal) return;
+
+        var alle = Alle();
+        alle.RemoveAll(o => o.Herkomst == kilde);
+        Gem(alle);
+    }
+
     // ------------------------------------------------------------ flytningen
 
     private static bool _flyttet;

@@ -3,6 +3,16 @@ using System.Text.Json;
 
 namespace NoteApp.Core;
 
+/// <summary>Hvor en opgave kommer fra.</summary>
+public enum Opgavekilde
+{
+    /// <summary>Lavet i appen — fra en transkription eller i hånden.</summary>
+    Lokal,
+
+    /// <summary>Hentet fra Google Tasks. Rettes dér, ikke her.</summary>
+    Google
+}
+
 /// <summary>
 /// En opgave, der kom ud af et møde.
 ///
@@ -153,6 +163,29 @@ public sealed record Opgave
 
     /// <summary>Tidsstemplet i optagelsen, opgaven kom fra. Tom ved en manuel opgave.</summary>
     public string Kilde { get; init; } = "";
+
+    /// <summary>
+    /// Hvor opgaven kommer fra: appen selv eller en integration.
+    ///
+    /// SAMME MØNSTER SOM KALENDEREN. En opgave fra Google er ikke en anden
+    /// slags opgave — den ligger i den samme liste og opfører sig ens. Det er
+    /// hvor den kan RETTES, der er forskellen.
+    /// </summary>
+    public Opgavekilde Herkomst { get; set; } = Opgavekilde.Lokal;
+
+    /// <summary>
+    /// Opgavens id HOS leverandøren. Tom for en opgave, appen selv har lavet.
+    ///
+    /// Uden den ville hver hentning lave dubletter af alt — samme grund som
+    /// på en aftale.
+    /// </summary>
+    public string FremmedId { get; set; } = "";
+
+    /// <summary>Listen hos leverandøren. Google har flere, og de skal holdes fra hinanden.</summary>
+    public string FremmedListe { get; set; } = "";
+
+    /// <summary>Kan opgaven rettes her i appen?</summary>
+    public bool KanRettes => Herkomst == Opgavekilde.Lokal;
 
     /// <summary>
     /// Optagelsen, opgaven kom fra. Tom, når den ikke kom fra et møde.

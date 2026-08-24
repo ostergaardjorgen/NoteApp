@@ -501,6 +501,80 @@
               </StackPanel>
             </Border>
 
+            <!-- ================== GOOGLE TASKS ======================
+                 EGET AFSNIT, FORDI DET ER EN ANDEN AFTALE END KALENDEREN.
+                 Kalenderen laeser noget, der allerede laa hos Google. Her gaar
+                 det begge veje, og det skal staa foerst - ikke i en fodnote. -->
+            <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20,16"
+                    BorderBrush="{StaticResource PanelKant}" BorderThickness="1" Margin="0,0,0,14">
+              <StackPanel>
+                <Grid Margin="0,0,0,12">
+                  <TextBlock Text="GOOGLE TASKS" FontSize="10.5" FontWeight="SemiBold"
+                             Foreground="{StaticResource TekstMeget}" />
+                  <TextBlock x:Name="Opgavetilstand" FontSize="11" HorizontalAlignment="Right"
+                             Foreground="{StaticResource TekstMeget}" />
+                </Grid>
+
+                <TextBlock FontSize="13" LineHeight="22" TextWrapping="Wrap"
+                           Foreground="{StaticResource Tekst}" FontWeight="SemiBold"
+                           Text="Den her går begge veje — i modsætning til kalenderen." />
+
+                <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,8,0,0"
+                           Foreground="{StaticResource TekstSvag}"
+                           Text="Opgaver, du skriver i Google, læses ind i Cockpittet. Krydser du en af dem af her, sendes det op til Google. Det er hele meningen: ét sted at holde øje med, ikke to." />
+
+                <Grid Margin="0,16,0,0">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="14" />
+                    <ColumnDefinition Width="*" />
+                  </Grid.ColumnDefinitions>
+
+                  <Border Grid.Column="0" Background="#FF16241C" BorderBrush="{StaticResource Godkendt}"
+                          BorderThickness="1" CornerRadius="8" Padding="16,13">
+                    <StackPanel>
+                      <TextBlock Text="DET, DER SENDES OP" FontSize="11" FontWeight="SemiBold"
+                                 Foreground="{StaticResource Godkendt}" Margin="0,0,0,10" />
+                      <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap"
+                                 Foreground="{StaticResource TekstSvag}"
+                                 Text="Kun at en opgave er krydset af — eller ikke længere er det. Intet andet." />
+                      <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
+                                 Foreground="{StaticResource TekstSvag}"
+                                 Text="Der bedes om ÉT område: dine opgaver. Ikke kalenderen, ikke mailen, ikke filerne." />
+                    </StackPanel>
+                  </Border>
+
+                  <Border Grid.Column="2" Background="#FF2A1A1A" BorderBrush="{StaticResource FejlTekst}"
+                          BorderThickness="1" CornerRadius="8" Padding="16,13">
+                    <StackPanel>
+                      <TextBlock Text="DET, DER ALDRIG SENDES" FontSize="11" FontWeight="SemiBold"
+                                 Foreground="{StaticResource FejlTekst}" Margin="0,0,0,10" />
+                      <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap"
+                                 Foreground="{StaticResource TekstSvag}"
+                                 Text="Opgaver, appen selv har fundet i et møde. De kommer fra en transkription, og et referats indhold skal ikke ende i skyen, fordi man slog opgaver til." />
+                      <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
+                                 Foreground="{StaticResource TekstSvag}"
+                                 Text="Lyd, transkriptioner, noter og dokumenter. Området rækker ikke dertil." />
+                    </StackPanel>
+                  </Border>
+                </Grid>
+
+                <Border Background="#FF181B22" CornerRadius="8" Padding="16,13" Margin="0,14,0,0"
+                        BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+                  <StackPanel>
+                    <TextBlock Text="Egen godkendelse, adskilt fra kalenderen" FontSize="12.5"
+                               FontWeight="SemiBold" Foreground="{StaticResource Tekst}" />
+                    <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
+                               Foreground="{StaticResource TekstSvag}"
+                               Text="Det koster et login mere, og det er prisen værd: den, der kun vil dele sin kalender, skal ikke se «og dine opgaver» på Googles skærm. Et samtykke, der dækker mere end det, man bad om, er ikke et samtykke." />
+                    <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
+                               Foreground="{StaticResource TekstSvag}"
+                               Text="Afbryder du opgaverne, forsvinder de hentede opgaver — og kalenderen bliver stående. De to har hver sin nøgle." />
+                  </StackPanel>
+                </Border>
+              </StackPanel>
+            </Border>
+
             <!-- ================== DET UAFKLAREDE ===================== -->
             <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20,16"
                     BorderBrush="{StaticResource Advarsel}" BorderThickness="1" Margin="0,0,0,14">

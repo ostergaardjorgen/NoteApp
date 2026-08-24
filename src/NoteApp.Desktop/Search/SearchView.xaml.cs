@@ -1138,6 +1138,31 @@ public sealed class Opgavevisning : System.ComponentModel.INotifyPropertyChanged
     /// </summary>
     public string Beskrivelse => _r.Opgave.Tekst;
 
+    /// <summary>
+    /// Sender en afkrydsning videre til Google. Sker i baggrunden.
+    ///
+    /// GÅR DET GALT, SIGES DER INGENTING. Fluebenet er sat lokalt og gemt;
+    /// en fejlbesked om noget, brugeren allerede har set virke, er støj. Næste
+    /// hentning retter forskellen — og der ER ingen forskel at rette, hvis
+    /// nettet bare var væk et øjeblik.
+    /// </summary>
+    private static async void Sendfaerdig(Opgave o)
+    {
+        if (o.Herkomst != Opgavekilde.Google) return;
+
+        try
+        {
+            var noegle = Integrationsfiler.Hent(Googleopgaver.Id).Opdateringsnoegle;
+            if (noegle.Length == 0) return;
+
+            await Googleopgaver.SaetFaerdigAsync(o, noegle);
+        }
+        catch (Exception)
+        {
+            // Se doc-kommentaren. I stilhed, med vilje.
+        }
+    }
+
     /// <summary>Opgaven bag visningen — til vinduet, der åbner den.</summary>
     public Registeropgave Opgave => _r;
 
@@ -1180,6 +1205,13 @@ public sealed class Opgavevisning : System.ComponentModel.INotifyPropertyChanged
             var dele = new List<string>();
 
             if (_r.Opgave.Ejer.Length > 0) dele.Add(_r.Opgave.Ejer);
+
+            // «Google Tasks» og ikke listens navn alene. «Mine opgaver» siger
+            // ikke, hvor den kom fra - og det er dét, man vil vide, naar man
+            // ser en opgave, man ikke husker at have skrevet i appen.
+            if (_r.Opgave.Herkomst == Opgavekilde.Google)
+                dele.Add("Google Tasks");
+
             dele.Add(_r.Moedetitel);
             if (_r.Opgave.Kilde.Length > 0) dele.Add(_r.Opgave.Kilde);
 
@@ -1236,6 +1268,17 @@ public sealed class Opgavevisning : System.ComponentModel.INotifyPropertyChanged
             // saa opgaven kan blive staaende daempet dagen ud.
             _r.Opgave.SaetFaerdig(value);
             Opgaveregister.Gem(_r);
+
+            // ER DEN FRA GOOGLE, SKAL DET OGSAA SIGES DÉR.
+            //
+            // Et flueben, der kun virker i NoteApp, er vaerre end ingen:
+            // opgaven staar stadig paa telefonen, og saa holder man op med at
+            // stole paa begge lister.
+            //
+            // Det sker i baggrunden. Fluebenet er sat lokalt, og det maa ikke
+            // vente paa nettet - gaar det galt, staar afkrydsningen her, og
+            // naeste hentning retter den.
+            Sendfaerdig(_r.Opgave);
             _aendret();
         }
     }
