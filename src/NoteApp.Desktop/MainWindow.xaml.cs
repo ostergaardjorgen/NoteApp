@@ -222,14 +222,32 @@ public partial class MainWindow : Window
 
             _aabnOptagelse = mappe;
 
-            // DER SPOERGES IKKE LAENGERE - der SKRIVES UD.
+            // DER SPOERGES IKKE LAENGERE - der TRANSSKRIBERES.
             //
             // Flaget hed foer _spoergOmUdskrift og udloeste en dialog. Nu
-            // saetter det udskriften i gang, hvis sproget er kendt; er det
-            // ikke, spoerges der EEN gang og svaret huskes. Se
+            // saetter det transskriptionen i gang, hvis sproget er kendt; er
+            // det ikke, spoerges der EEN gang og svaret huskes. Se
             // TranscribeView.StartAutomatisk og Core.Udskriftsvalg.
             _spoergOmUdskrift = AppSettings.Current.SkrivUdAutomatisk;
-            NavTransskriber.IsChecked = true;
+
+            // ============ SKAERMEN SKAL BYGGES OM, OGSAA NAAR MAN STAAR PAA DEN ============
+            //
+            // Her stod kun «NavTransskriber.IsChecked = true». Stod man
+            // ALLEREDE paa Optagelser - og det goer man tit, for det er den
+            // skaerm, man arbejder paa - saetter man en RadioButton, der
+            // allerede er sat. Saa rejses Checked ikke, skaermen bygges ikke
+            // om, optagelsen markeres ikke, og transskriptionen gaar aldrig i
+            // gang.
+            //
+            // Man stod tilbage paa den tomme hjaelpeskaerm med «Opret
+            // transskription» graa og ingen maade at se, hvad der skete.
+            // Set 25-08-2026 paa et moede paa 32 minutter, hvor historikken
+            // kun fik linjen «Moede optaget» og intet andet.
+            //
+            // Moenstret findes i forvejen i GaaTilOptagelse laengere nede;
+            // det var her, det manglede.
+            if (NavTransskriber.IsChecked == true) Indhold.Content = NyOptagelsesskaerm();
+            else NavTransskriber.IsChecked = true;
 
             // Er man allerede paa skaermen, fyrer Checked ikke. Saa bygges
             // den her - ellers ville dialogen udeblive netop naar man
@@ -599,7 +617,20 @@ public partial class MainWindow : Window
         // Sproget alene er ikke nok til at springe dialogen over: uden en
         // mappe lander optagelsen samme sted som alt andet, og det er dét,
         // hele opstartsdialogen er sat i verden for at undgaa.
-        if (spoerg && (a.Sprog.Length == 0 || a.Mappe.Length == 0))
+        // ============ DER SPOERGES KUN OM DET, DER MANGLER ============
+        //
+        // Her stod «a.Sprog.Length == 0 || a.Mappe.Length == 0». En TOM MAPPE
+        // er ikke et manglende svar - det er et svar: optagelsen hoerer ikke
+        // til i en folder. De fleste moeder goer ikke.
+        //
+        // Foelgen var, at dialogen kom hver gang paa en aftale, hvor sprog og
+        // moedetype var sat, men folderen med vilje var tom - og saa skulle
+        // man svare paa det samme igen, mens moedet gik i gang.
+        //
+        // SPROGET ER DET ENESTE, DER IKKE KAN GAETTES. Rammer det forkert,
+        // bliver hele transskriptionen vroevl, og det opdages foerst i
+        // referatet. Mappe og moedetype kan saettes bagefter paa et oejeblik.
+        if (spoerg && a.Sprog.Length == 0)
         {
             var slags = a.ErWebinar
                 ? OpstartWindow.Slags.Webinar

@@ -278,7 +278,7 @@
     "vilkaar_underdatabehandlerlister_certifice": "Vilkår, underdatabehandlerlister, certificeringer og licenser kan være ændret, efter teksten blev indsat, uden at det fremgår her. Brugeren er selv ansvarlig for at efterprøve rigtigheden hos de pågældende leverandører og for løbende at kontrollere, om der er sket ændringer."
   },
   "correctionwindow": {
-    "den_oprindelige_udskrift_gemmes_ved_siden": "Den oprindelige udskrift gemmes ved siden af som .raa.txt, så en rettelse altid kan fortrydes.",
+    "den_oprindelige_udskrift_gemmes_ved_siden": "Den oprindelige transkription gemmes ved siden af som .raa.txt, så en rettelse altid kan fortrydes.",
     "hoert_som": "Hørt som",
     "hvad_skulle_der_have_staaet": "Hvad skulle der have stået?",
     "laer_rettelsen": "Lær rettelsen",
@@ -487,7 +487,7 @@
     "aftaler_hentes_ned_den_anden_vej_sker_kun": "Aftaler HENTES ned. Den anden vej sker kun, når du selv sætter hak ved «Opret også hos leverandøren» på en aftale — og så er det aftalens titel, tidspunkt og sted, intet andet. Lyd, transkriptioner, noter og dokumenter går aldrig den vej.",
     "aktiver": "Aktiver",
     "alle_filer_i_mapperne_bliver_tilbudt_igen": "Alle filer i mapperne bliver tilbudt igen, også dem du har sagt nej til",
-    "alt_arbejdet_sker_paa_din_egen_maskine_uds": "Alt arbejdet sker på din egen maskine — udskrift, søgning, talergenkendelse og den korte opsummering. Derfor betyder maskinen noget, og derfor står der, hvad DEN HER maskine har.",
+    "alt_arbejdet_sker_paa_din_egen_maskine_uds": "Alt arbejdet sker på din egen maskine — transkription, søgning, talergenkendelse og den korte opsummering. Derfor betyder maskinen noget, og derfor står der, hvad DEN HER maskine har.",
     "alt_det_andet": "ALT DET ANDET",
     "altid_med_noter_transskriptioner_dokumente": "Altid med: noter, transskriptioner, dokumenter, mødedata og indstillinger.",
     "anbefalet_minimum": "Anbefalet minimum",
@@ -542,7 +542,7 @@
     "ledigt": "LEDIGT",
     "lyd": "Lyd",
     "lyden_er_det_eneste_i_appen_der_fylder_nog": "Lyden er det eneste i appen, der fylder noget. Teksten, dine noter, opgaverne og dokumenterne fylder tilsammen mindre end ét enkelt møde gør som lyd.",
-    "lyden_fylder_en_times_moede_med_to_spor_er": "Lyden fylder. En times møde med to spor er 220 MB, fordi lyden gemmes ukomprimeret — det giver den bedste udskrift. Teksten fylder 56 KB, og lyden kan slettes, når den er skrevet ud.",
+    "lyden_fylder_en_times_moede_med_to_spor_er": "Lyden fylder. En times møde med to spor er 220 MB, fordi lyden gemmes ukomprimeret — det giver den bedste transkription. Teksten fylder 56 KB, og lyden kan slettes, når den er skrevet ud.",
     "lyden_transkriptionerne_dine_noter_og_doku": "Lyden, transkriptionerne, dine noter og dokumenterne forlader aldrig maskinen ad denne vej. En kalenderintegration giver adgang til at læse en kalender.",
     "lydfiler": "LYDFILER",
     "lynstart_af_optagelse": "Lynstart af optagelse",
@@ -582,7 +582,7 @@
     "tre_ting_kan_kun_ske_mens_appen_er_aaben_g": "Tre ting kan kun ske, mens appen er åben: genvejstasten kan starte en optagelse, mødevagten kan spørge, når et program bruger mikrofonen, og en aftale, du har markeret til automatisk optagelse, kan gå i gang af sig selv.",
     "tryk_kombinationen_hvor_som_helst_i_window": "Tryk kombinationen hvor som helst i Windows, så begynder optagelsen med det samme. Listen viser, hvad der er ledigt på netop din maskine — det er forskelligt fra pc til pc.",
     "uden_hak_bliver_filen_tilbudt_paa_optagels": "Uden hak bliver filen tilbudt på Optagelser, og du bestemmer",
-    "uden_nvidia_kort_koerer_udskriften_paa_pro": "Uden NVIDIA-kort kører udskriften på processoren. Den virker, men en times møde tager længere end mødet selv varede. Optagelsen er upåvirket.",
+    "uden_nvidia_kort_koerer_udskriften_paa_pro": "Uden NVIDIA-kort kører transkriptionen på processoren. Den virker, men en times møde tager længere end mødet selv varede. Optagelsen er upåvirket.",
     "vaelg_et_arkiv_for_at_se_hvad_det_indehold": "Vælg et arkiv for at se, hvad det indeholder.",
     "vaelg_mikrofon_og_hoejttaler_appen_lytter": "Vælg mikrofon og højttaler. Appen lytter ikke, før du trykker prøv — eller trykker optag."
   },
@@ -773,7 +773,7 @@
     "gikgalt": "Opsummeringen kunne ikke laves"
   },
   "udskrift": {
-    "gaaridang": "«{0}» er gemt. Udskriften er gået i gang — typisk {1}–{2} minutter. Du får besked, når den er færdig."
+    "gaaridang": "«{0}» er gemt. Transkriptionen er gået i gang — typisk {1}–{2} minutter. Du får besked, når den er færdig."
   },
   "model": {
     "vaelg": "HVILKEN MODEL SKAL BRUGES?",
