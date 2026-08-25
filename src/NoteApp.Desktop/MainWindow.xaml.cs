@@ -313,6 +313,16 @@ public partial class MainWindow : Window
             // saa dagen er rigtig, naar man saetter sig. Koster ingenting,
             // naar ingen integration er forbundet.
             Jobs.Synkvagt.Start();
+
+            // STILHEDSMODELLEN HENTES, HVIS DEN MANGLER.
+            //
+            // 885 KB, og den er ikke et valg - den er en del af motoren. Uden
+            // den finder whisper underteksterkreditter i de tredive sekunder,
+            // hvor ingen siger noget, og de staar i transskriptionen som alt
+            // andet. Se WhisperInstall.VadModel for maalingen.
+            //
+            // Uden ventetid og uden besked. Gaar det galt, koeres der som foer.
+            _ = NoteApp.Core.WhisperInstall.HentVadAsync();
         };
     }
 

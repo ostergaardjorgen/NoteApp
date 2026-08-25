@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -135,6 +135,29 @@ public sealed class Transcriber
             // saetning, saa der bliver ikke klippet noget af.
             "-mc", "0"
         };
+
+        // STILHED SENDES IKKE TIL MODELLEN.
+        //
+        // Uden den her fandt whisper to underteksterkreditter og 66 tomme
+        // «Ja» i et moede paa 32 minutter - se WhisperInstall.VadModel for
+        // maalingen og for hvorfor det IKKE hjaelper at dele lyden op.
+        //
+        // 200 ms luft omkring hvert stykke tale. Standarden er 30 ms, og det
+        // klipper for taet: ved 30 ms forsvandt et «ikke» eet sted. 400 ms
+        // var til gengaeld naesten tre gange langsommere end 200 uden at
+        // vaere bedre. 200 ligger, hvor begge dele holder.
+        //
+        // ER MODELLEN IKKE HENTET, KOERES DER SOM FOER. Optagelsen og
+        // transskriptionen maa aldrig staa og vente paa en fil paa under
+        // 1 MB.
+        if (WhisperInstall.VadModel() is { } vad)
+        {
+            args.Add("--vad");
+            args.Add("--vad-model");
+            args.Add(vad);
+            args.Add("--vad-speech-pad-ms");
+            args.Add("200");
+        }
 
         // ORDLISTEN SENDES IKKE LÆNGERE TIL WHISPER.
         //

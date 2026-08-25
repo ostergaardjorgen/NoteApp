@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -318,4 +319,100 @@ public static class WhisperInstall
 
     public static string ModelDestination(WhisperModel model) =>
         Path.Combine(ModelDirectory, model.FileName);
+
+    /// <summary>Stilhedsmodellen — Silero, under 1 MB. Ligger sammen med de andre.</summary>
+    public const string VadFilnavn = "ggml-silero-v5.1.2.bin";
+
+    public const long VadStoerrelse = 885_098L;
+
+    public const string VadKilde =
+        "https://huggingface.co/ggml-org/whisper-vad/resolve/main/ggml-silero-v5.1.2.bin";
+
+    /// <summary>
+    /// Stien til stilhedsmodellen — null hvis den ikke er hentet.
+    ///
+    /// HVAD DEN LØSER
+    ///
+    /// Whisper er trænet på undertekster. Får den tredive sekunder uden tale,
+    /// finder den ikke ingenting — den finder det, der plejer at stå, hvor der
+    /// ikke bliver sagt noget: en underteksterkredit. Målt 25-08-2026 på et
+    /// møde på 32 minutter kom der to af slagsen, «Danske tekster af Jesper
+    /// Buhl Scandinavian Text Service 2018» og «Danske tekster af Nicolai
+    /// Winther», plus 66 segmenter, der kun var «Ja».
+    ///
+    /// Ingen af delene blev sagt. De står i transskriptionen som alt andet, og
+    /// derfra går de videre til opsummeringen som noget, der ligner indhold.
+    ///
+    /// AT DELE LYDEN OP HJÆLPER IKKE. Efterprøvet: den samme lyd i syv
+    /// uafhængige bidder af fem minutter gav NØJAGTIG lige så mange
+    /// opdigtninger — to — og den ene på samme absolutte sted. Det er ikke
+    /// længden, der gør det; whisper.cpp arbejder i forvejen i 30-sekunders
+    /// vinduer, og med -mc 0 bæres der intet med videre. Det er vinduer UDEN
+    /// TALE, og de ligger spredt: de tætteste i den her optagelse lå mellem
+    /// 2 og 8 minutter, altså i begyndelsen.
+    ///
+    /// HVAD DET KOSTER, OG HVAD DET GIVER
+    ///
+    /// Målt på samme lyd, samme model, samme øvrige argumenter:
+    ///
+    ///   uden stilhedsmodel   7 min 27 s   2 opdigtninger   66 tomme «Ja»
+    ///   med, 200 ms luft     1 min 57 s   0                0
+    ///
+    /// Næsten fire gange hurtigere, fordi stilhed slet ikke sendes til
+    /// modellen. Antallet af negationer var det samme (19 mod 20), så der
+    /// forsvinder ikke betydning — og det var dét, der skulle efterprøves,
+    /// før den kunne slås til.
+    /// </summary>
+    public static string? VadModel()
+    {
+        var sti = Path.Combine(ModelDirectory, VadFilnavn);
+        return File.Exists(sti) && new FileInfo(sti).Length > 100_000 ? sti : null;
+    }
+
+    /// <summary>
+    /// Henter stilhedsmodellen, hvis den mangler. Gør intet, hvis den er der.
+    /// </summary>
+    /// <remarks>
+    /// DEN SPØRGES DER IKKE OM, og det er med vilje.
+    ///
+    /// De store modeller er et valg: de fylder gigabyte, og forskellen mellem
+    /// dem er noget, man skal kunne tage stilling til. Den her fylder 885 KB
+    /// og har ikke noget alternativ — den er en del af motoren, ikke en smag.
+    /// Et spørgsmål om den ville være et spørgsmål, ingen har forudsætning for
+    /// at svare på.
+    ///
+    /// DEN MÅ ALDRIG STÅ I VEJEN. Går hentningen galt — der er ikke net, eller
+    /// filen er flyttet — sker der ingenting, og transskriptionen kører som
+    /// før. Se Transcriber: mangler modellen, udelades tilvalget.
+    ///
+    /// Halvt hentede filer skrives til .delvis og flyttes først på plads, når
+    /// størrelsen passer. Ellers ville et afbrudt net efterlade en fil, der
+    /// ligner en model og ikke er det — og så ville motoren fejle ved hver
+    /// transskription, indtil nogen slettede den i hånden.
+    /// </remarks>
+    public static async Task HentVadAsync(CancellationToken ct = default)
+    {
+        if (VadModel() is not null) return;
+
+        var maal = Path.Combine(ModelDirectory, VadFilnavn);
+        var delvis = maal + ".delvis";
+
+        try
+        {
+            Directory.CreateDirectory(ModelDirectory);
+
+            using var http = new HttpClient { Timeout = TimeSpan.FromMinutes(5) };
+            var data = await http.GetByteArrayAsync(VadKilde, ct);
+
+            if (data.Length != VadStoerrelse) return;
+
+            await File.WriteAllBytesAsync(delvis, data, ct);
+            File.Move(delvis, maal, overwrite: true);
+        }
+        catch (Exception)
+        {
+            // I stilhed. Uden modellen koeres der som foer.
+            try { if (File.Exists(delvis)) File.Delete(delvis); } catch (Exception) { }
+        }
+    }
 }
