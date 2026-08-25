@@ -6,6 +6,13 @@ namespace NoteApp.Tests;
 /// <summary>
 /// Mappenavne og tidsangivelser — de små funktioner, brugeren ser resultatet
 /// af hver eneste dag.
+///
+/// HVER PRØVE, DER KAN NÅ KERNEN, SKAL HAVE EN PRØVEMAPPE.
+///
+/// Seks af dem herunder stod uden. Det gik godt, indtil «sidst hentet» blev
+/// oversat: så gik de gennem Sprog, som lagde sprogfilerne ud — i den
+/// RIGTIGE datamappe. En prøve, der ikke rører data i dag, kan komme til det
+/// i morgen, fordi noget under den bliver lavet om.
 /// </summary>
 public class NavneOgTiderTest
 {
@@ -77,16 +84,24 @@ public class NavneOgTiderTest
     // ===================== «SIDST HENTET» =====================
 
     [Fact]
-    public void Aldrig_hentet_siges_ligeud() =>
+    public void Aldrig_hentet_siges_ligeud()
+    {
+        using var p = new Proevemappe();
         Assert.Equal("aldrig hentet", Synkronisering.Siden(null));
+    }
 
     [Fact]
-    public void Lige_hentet_siges_som_lige_nu() =>
+    public void Lige_hentet_siges_som_lige_nu()
+    {
+        using var p = new Proevemappe();
         Assert.Equal("hentet lige nu", Synkronisering.Siden(DateTimeOffset.Now.AddSeconds(-5)));
+    }
 
     [Fact]
     public void Inden_for_den_foerste_time_taelles_der_i_minutter()
     {
+        using var p = new Proevemappe();
+
         var svar = Synkronisering.Siden(DateTimeOffset.Now.AddMinutes(-12));
 
         Assert.Contains("12 min", svar);
@@ -95,6 +110,8 @@ public class NavneOgTiderTest
     [Fact]
     public void Senere_paa_dagen_staar_klokkeslaettet()
     {
+        using var p = new Proevemappe();
+
         var svar = Synkronisering.Siden(DateTimeOffset.Now.AddHours(-3));
 
         Assert.StartsWith("hentet kl.", svar);
@@ -103,6 +120,8 @@ public class NavneOgTiderTest
     [Fact]
     public void I_gaar_siges_som_i_gaar()
     {
+        using var p = new Proevemappe();
+
         var i_gaar = DateTime.Today.AddDays(-1).AddHours(14);
 
         Assert.Contains("i går", Synkronisering.Siden(new DateTimeOffset(i_gaar)));
@@ -111,6 +130,8 @@ public class NavneOgTiderTest
     [Fact]
     public void Laengere_tilbage_faar_en_dato()
     {
+        using var p = new Proevemappe();
+
         var svar = Synkronisering.Siden(DateTimeOffset.Now.AddDays(-9));
 
         Assert.DoesNotContain("i går", svar);
