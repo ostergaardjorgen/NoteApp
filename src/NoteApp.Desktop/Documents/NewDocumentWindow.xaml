@@ -2,22 +2,43 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:i18n="clr-namespace:NoteApp.Desktop"
-        Title="Opret dokument" Height="720" Width="680" MinHeight="520" MinWidth="560"
+        Title="Opret dokument" Height="780" Width="1060" MinHeight="560" MinWidth="820"
         WindowStartupLocation="CenterOwner" ResizeMode="CanResize"
         Background="{StaticResource Baggrund}">
   <!-- Vinduet kan ændres i størrelse. Med NoResize og en fast højde er der
        ingen vej ud, hvis indholdet ikke passer — og det gør det ikke ved en
-       anden skriftstørrelse eller skalering end den, det blev prøvet på. -->
+       anden skriftstørrelse eller skalering end den, det blev prøvet på.
+
+       ============ TO SPALTER, IKKE ÉN ============
+
+       Alt stod før i én søjle: overskrift, mødetyper, titel, beskrivelse,
+       sprog, knapper. Mødetyperne fik det, der var tilovers — og det var
+       plads til TO. Med fem mødetyper kunne man ikke se, hvad man valgte
+       imellem, uden at rulle i en kasse på tre centimeter.
+
+       Valget af mødetype er det, der afgør, hvad der kommer ud af det hele.
+       Det skal fylde mest og ses på én gang. Felterne til højre er dem, man
+       udfylder BAGEFTER, og de fylder kun det, de skal.
+
+       Vinduet er derfor bredt frem for højt: bredden er billig på en skærm,
+       højden er ikke. -->
 
   <Grid Margin="24">
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
       <RowDefinition Height="*" />
       <RowDefinition Height="Auto" />
-      <RowDefinition Height="Auto" />
     </Grid.RowDefinitions>
 
-    <StackPanel Grid.Row="0" Margin="0,0,0,16">
+    <Grid.ColumnDefinitions>
+      <!-- Moedetyperne faar det meste. Hoejre spalte er saa bred, som
+           felterne har brug for, og ikke bredere. -->
+      <ColumnDefinition Width="*" MinWidth="380" />
+      <ColumnDefinition Width="22" />
+      <ColumnDefinition Width="360" />
+    </Grid.ColumnDefinitions>
+
+    <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,0,0,16">
       <!-- SPØRGSMÅLET STILLES RENT, OG DET SIGER HVAD DET KOSTER.
            «Opret dokument» sagde hverken, hvad man fik, eller at det bliver
            lavet ude i verden. Begge dele hoerer i overskriften: det er dét,
@@ -42,7 +63,7 @@
             Man kunne ikke se, hvad der var valgt.
          3. Raekkerne stod klods op ad hinanden. Med tre skabeloner kan man
             taelle dem; med ti skal de ligne kort, man vaelger imellem. -->
-    <Border Grid.Row="1" Background="{StaticResource Panel}" CornerRadius="10"
+    <Border Grid.Row="1" Grid.Column="0" Background="{StaticResource Panel}" CornerRadius="10"
             BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
       <DockPanel>
         <TextBlock DockPanel.Dock="Top" Text="{i18n:Oversat newdocumentwindow.hvilken_moedetype}" Margin="18,15,18,4"
@@ -105,40 +126,46 @@
       </DockPanel>
     </Border>
 
-    <StackPanel Grid.Row="2" Margin="0,14,0,0">
-      <TextBlock Text="{i18n:Oversat newdocumentwindow.titel_paa_dokumentet}" Style="{StaticResource Underskrift}" />
-      <TextBox x:Name="FeltTitel" Margin="0,4,0,0" FontSize="14" Padding="9,7" />
+    <!-- Hoejre spalte: det, man udfylder, EFTER at typen er valgt. Den ruller
+         for sig selv, saa et lille vindue ikke klemmer moedetyperne. -->
+    <ScrollViewer Grid.Row="1" Grid.Column="2" VerticalScrollBarVisibility="Auto"
+                  HorizontalScrollBarVisibility="Disabled">
+      <StackPanel>
+        <TextBlock Text="{i18n:Oversat newdocumentwindow.titel_paa_dokumentet}" Style="{StaticResource Underskrift}" />
+        <TextBox x:Name="FeltTitel" Margin="0,4,0,0" FontSize="14" Padding="9,7"
+                 TextWrapping="Wrap" AcceptsReturn="False" />
 
-      <TextBlock Text="{i18n:Oversat newdocumentwindow.beskrivelse_valgfri_staar_oeverst_i_dokume}"
-                 Style="{StaticResource Underskrift}" Margin="0,12,0,0" />
-      <TextBox x:Name="FeltBeskrivelse" Margin="0,4,0,0" FontSize="13" Padding="9,7"
-               AcceptsReturn="True" TextWrapping="Wrap" Height="46"
-               VerticalScrollBarVisibility="Auto" />
+        <TextBlock Text="{i18n:Oversat newdocumentwindow.beskrivelse_valgfri_staar_oeverst_i_dokume}"
+                   Style="{StaticResource Underskrift}" Margin="0,14,0,0" TextWrapping="Wrap" />
+        <TextBox x:Name="FeltBeskrivelse" Margin="0,4,0,0" FontSize="13" Padding="9,7"
+                 AcceptsReturn="True" TextWrapping="Wrap" Height="88"
+                 VerticalScrollBarVisibility="Auto" />
 
-      <!-- ============ SPROGET VÆLGES PR. DOKUMENT ============
-           Det lå før fast i hver mødetype: alt blev dansk, uanset hvad mødet
-           var på. Behovet er ikke det samme hver gang — et referat til en
-           selv er dansk, et resumé af et engelsk webinar, der skal videre,
-           er det ikke nødvendigvis. -->
-      <TextBlock Text="{i18n:Oversat newdocumentwindow.dokumentets_sprog}" Style="{StaticResource Underskrift}" Margin="0,12,0,0" />
+        <!-- ============ SPROGET VÆLGES PR. DOKUMENT ============
+             Det lå før fast i hver mødetype: alt blev dansk, uanset hvad mødet
+             var på. Behovet er ikke det samme hver gang — et referat til en
+             selv er dansk, et resumé af et engelsk webinar, der skal videre,
+             er det ikke nødvendigvis. -->
+        <TextBlock Text="{i18n:Oversat newdocumentwindow.dokumentets_sprog}" Style="{StaticResource Underskrift}" Margin="0,16,0,0" />
 
-      <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
-        <RadioButton x:Name="SprogDansk" GroupName="doksprog" Content="{i18n:Oversat faelles.dansk}"
-                     IsChecked="True" FontSize="13" Margin="0,0,20,0"
-                     VerticalContentAlignment="Center" />
-        <RadioButton x:Name="SprogEngelsk" GroupName="doksprog" Content="{i18n:Oversat newdocumentwindow.engelsk}"
-                     FontSize="13" VerticalContentAlignment="Center" />
+        <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+          <RadioButton x:Name="SprogDansk" GroupName="doksprog" Content="{i18n:Oversat faelles.dansk}"
+                       IsChecked="True" FontSize="13" Margin="0,0,20,0"
+                       VerticalContentAlignment="Center" />
+          <RadioButton x:Name="SprogEngelsk" GroupName="doksprog" Content="{i18n:Oversat newdocumentwindow.engelsk}"
+                       FontSize="13" VerticalContentAlignment="Center" />
+        </StackPanel>
+
+        <TextBlock x:Name="Sproghjaelp" FontSize="11.5" Margin="2,6,0,0" TextWrapping="Wrap"
+                   LineHeight="17" Foreground="{StaticResource TekstMeget}" />
+
+        <TextBlock x:Name="ModelTekst" FontSize="12" Margin="2,16,0,0" TextWrapping="Wrap"
+                   LineHeight="19" Foreground="{StaticResource TekstMeget}" />
       </StackPanel>
+    </ScrollViewer>
 
-      <TextBlock x:Name="Sproghjaelp" FontSize="11.5" Margin="2,6,0,0" TextWrapping="Wrap"
-                 LineHeight="17" Foreground="{StaticResource TekstMeget}" />
-
-      <TextBlock x:Name="ModelTekst" FontSize="12" Margin="2,12,0,0" TextWrapping="Wrap"
-                 LineHeight="19" Foreground="{StaticResource TekstMeget}" />
-
-    </StackPanel>
-
-    <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,18,0,0">
+    <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3"
+                Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,18,0,0">
       <Button Content="{i18n:Oversat faelles.annuller}" Click="Annuller_Click" Padding="18,9" Margin="0,0,10,0" />
       <Button x:Name="OpretKnap" Content="{i18n:Oversat faelles.opret_dokument}" Click="Opret_Click" Padding="20,9"
               Background="{StaticResource Accent}" Foreground="#FF0B1220" BorderThickness="0"
