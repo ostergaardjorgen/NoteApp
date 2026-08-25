@@ -861,9 +861,22 @@ public partial class TranscribeView : UserControl
     /// optagelse, sker der ingenting, og musen viser det ved ikke at
     /// fremhæve noget.
     /// </summary>
+    /// <remarks>
+    /// DEN SPURGTE KUN EFTER OPTAGELSER. Første linje var
+    /// «if (!e.Data.GetDataPresent(typeof(OptagelseVisning))) return null;»,
+    /// og et mappetræk bærer en STRENG. Så var målet altid null, og en mappe
+    /// kunne ikke slippes nogen steder — uanset om der lå filer i den.
+    ///
+    /// Det så ud som om det handlede om indholdet, fordi en tom mappe er
+    /// nemmere at ramme forbi med. Det gjorde det ikke: det virkede aldrig for
+    /// nogen mappe. Set 25-08-2026.
+    /// </remarks>
     private Biblioteker.Biblioteksnode? MaalUnderMusen(DragEventArgs e)
     {
-        if (!e.Data.GetDataPresent(typeof(OptagelseVisning))) return null;
+        var erTraek = e.Data.GetDataPresent(typeof(OptagelseVisning))
+                   || e.Data.GetDataPresent(Mappetraek);
+
+        if (!erTraek) return null;
 
         var ramt = Trae.InputHitTest(e.GetPosition(Trae)) as DependencyObject;
         var knude = FindOpad<TreeViewItem>(ramt)?.DataContext as Biblioteker.Biblioteksnode;
