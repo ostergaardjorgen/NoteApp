@@ -176,6 +176,16 @@ public sealed class OptagelseVisning
 public partial class TranscribeView : UserControl
 {
     private CancellationTokenSource? _afbryd;
+
+    /// <summary>
+    /// Mappen for den optagelse, der bliver skrevet ud lige nu. Null når
+    /// intet kører.
+    ///
+    /// Den findes, fordi «der kører noget» og «der kører noget PÅ DEN HER» er
+    /// to forskellige spørgsmål. Uden den kunne skærmen kun svare på det
+    /// første — og så låste den sig selv fast på ét møde. Se OpdaterValg.
+    /// </summary>
+    private string? _koererPaa;
     private string? _sidsteMappe;
 
     public TranscribeView() : this(null) { }
@@ -1030,7 +1040,35 @@ public partial class TranscribeView : UserControl
         // fra. Arkiver_Click staar stadig; den kaldes bare ikke laengere fra
         // vaerktoejslinjen.
 
-        if (_afbryd is not null) return;   // der koeres — forklaringen staar om det
+        // ============ DER MAA GERNE KLIKKES RUNDT, MENS DER KOERES ============
+        //
+        // Her stod «if (_afbryd is not null) return;» - saa snart en
+        // transskription var i gang, holdt hele ruden op med at reagere.
+        // Valgte man et andet moede i traeet, blev «Skriver lyden ud …»
+        // staaende, og man kunne ikke se den tekst, man kom efter. Et moede,
+        // der er skrevet ud i sidste uge, har ingenting med det her job at
+        // goere.
+        //
+        // Nu spoerges der om det rigtige: koerer der noget PAA DEN HER
+        // optagelse? Kun da skal fremdriften staa. Alle andre moeder vises
+        // som altid, og deres tekst kan laeses, mens jobbet arbejder videre.
+        //
+        // Knapperne ovenfor er uaendret spaerret af «_afbryd is null»: der
+        // koeres eet job ad gangen, og man skal ikke kunne saette et nyt i
+        // gang eller slette noget under fode paa det, der arbejder.
+        // FREMDRIFTEN HOERER TIL DET MOEDE, DEN ARBEJDER PAA.
+        //
+        // Staar man paa et andet, ville en bjaelke i ruden se ud, som om DET
+        // moede blev skrevet ud. Bjaelken nederst i vinduet siger stadig, at
+        // der koeres, og hvilket moede det er - den er der netop til det her.
+        if (_afbryd is not null)
+        {
+            var paaDenne = valgt is not null && valgt.Mappe == _koererPaa;
+            Fremdriftsrude.Visibility = paaDenne ? Visibility.Visible : Visibility.Collapsed;
+            AfbrydKnap.Visibility = paaDenne ? Visibility.Visible : Visibility.Collapsed;
+
+            if (paaDenne) return;
+        }
 
         // Findes teksten allerede, vises den frem for forklaringen. Det er den,
         // man er kommet efter, naar optagelsen er skrevet ud een gang.
@@ -1532,6 +1570,7 @@ public partial class TranscribeView : UserControl
         var kunStemmer = genbrugMik && genbrugLoop;
 
         _afbryd = new CancellationTokenSource();
+        _koererPaa = valgt.Mappe;
         KoerKnap.IsEnabled = false;
         AfbrydKnap.Visibility = Visibility.Visible;
         // DER SKAL SIGES NOGET MED DET SAMME.
@@ -1880,8 +1919,21 @@ public partial class TranscribeView : UserControl
             Fremdrift.IsIndeterminate = false;
             AfbrydKnap.Visibility = Visibility.Collapsed;
             _afbryd?.Dispose();
+            _koererPaa = null;
             _afbryd = null;
-            KoerKnap.IsEnabled = Valgt is { HarLyd: true };
+
+            // HELE RUDEN OPDATERES, ikke kun koerselsknappen.
+            //
+            // Her stod «KoerKnap.IsEnabled = ...» alene. Alle de andre
+            // knapper - ryd lyden, slet, omdoeb, flyt, opret dokument - var
+            // spaerret, mens der koerte, og blev ved med at vaere det
+            // bagefter, indtil man tilfaeldigvis klikkede paa noget andet.
+            //
+            // Det betoed ikke saa meget, dengang man var laast til det moede,
+            // der blev skrevet ud. Nu kan man staa hvor som helst, naar
+            // jobbet bliver faerdigt, og saa skal skaermen vaere rigtig dér,
+            // hvor man staar.
+            OpdaterValg();
         }
     }
 
