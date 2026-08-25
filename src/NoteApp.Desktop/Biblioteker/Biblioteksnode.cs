@@ -42,9 +42,17 @@ public sealed class Biblioteksnode : INotifyPropertyChanged
     public static Biblioteksnode Bibliotek(string navn, string glyf, Transcribe.Gruppe gruppe) =>
         new(Slags.Bibliotek, navn, glyf, gruppe, null);
 
-    /// <summary>En af brugerens egne mapper under et bibliotek.</summary>
-    public static Biblioteksnode Mappenode(string navn, Transcribe.Gruppe gruppe) =>
-        new(Slags.Mappe, navn, "\uE8B7", gruppe, navn);
+    /// <summary>
+    /// En af brugerens egne mapper under et bibliotek.
+    /// </summary>
+    /// <param name="sti">
+    /// Hele stien, fx «Møder/Steen». Knuden VISER kun sidste led — ellers stod
+    /// der «Møder/Steen» inde i mappen «Møder», og det er den slags gentagelse,
+    /// man holder op med at læse. <see cref="Mappe"/> holder hele stien, for
+    /// det er den, indholdet peger på.
+    /// </param>
+    public static Biblioteksnode Mappenode(string sti, Transcribe.Gruppe gruppe) =>
+        new(Slags.Mappe, NoteApp.Core.Mapper.Bladnavn(sti), "\uE8B7", gruppe, sti);
 
     /// <summary>Et dokument. Kan trækkes, men ikke slippes noget i.</summary>
     public static Biblioteksnode Dokumentnode(NoteApp.Core.Documents.DocumentInfo d) =>
