@@ -68,18 +68,48 @@ Næsten fire gange hurtigere, fordi stilhed slet ikke sendes til modellen.
 **Luften er sat til 200 ms.** Standarden er 30 ms og klipper for tæt; 400 ms
 er næsten tre gange langsommere uden at være bedre.
 
-## Det, der ikke er afgjort
+## Det ene omstridte sted — afgjort ved gennemlytning
 
 Ét sted er de to læsninger uenige:
 
 - uden VAD: «Men jeg tror **ikke** du kan være helt sikker på»
 - med VAD (alle tre kørsler): «Men jeg tror du kan være helt sikker på»
 
-Antallet af negationer er det samme i alle kørsler, så der er ikke tale om et
-systematisk tab. Men hvilken af de to der er rigtig, kan ikke afgøres af
-teksten — kun ved at høre lyden. Klippet er sendt til gennemlytning
-25-08-2026; udfaldet skal skrives ind her.
+Klippet blev lyttet igennem 25-08-2026. Der bliver sagt:
 
-Grammatikken taler for VAD-udgaven: det følgende led er «at hvis du får de
-der succesoplevelser...», som hænger sammen med «du kan være helt sikker på»
-og ikke med negationen.
+> «**Tror du ikke** at du kan være helt sikker på at får du...»
+
+**Begge transskriptioner er forkerte, og den, der havde flest negationer, var
+den, der forstod dårligst.**
+
+- Uden VAD: «jeg tror **ikke** du kan være helt sikker på». Ordet er der, men
+  det er blevet til en førstepersons **påstand**. Meningen er vendt om.
+- Med VAD: «jeg tror du kan være helt sikker på». Ordet mangler, men meningen
+  rammer.
+
+Det siger noget vigtigt om, hvordan det her måles. **Et retorisk spørgsmål med
+«ikke» betyder det modsatte af en benægtelse.** «Tror du ikke, at du kan være
+sikker?» betyder, at man kan. At tælle forekomster af «ikke» er derfor ikke et
+mål for, om betydningen er bevaret — det kan pege stik modsat, og det gjorde
+det her.
+
+Den, der talte, kalder selv passagen «meget utydelig». Det er altså ikke
+bevis for, at VAD taber tale i almindelighed; det er ét sted, hvor lyden er
+dårlig, og hvor ingen af indstillingerne rammer.
+
+### Kan en lavere taletærskel redde den?
+
+VAD har sin egen grænse for, hvad der tæller som tale (`--vad-threshold`,
+standard 0,50). Utydelig tale er præcis det, den grænse afviser. Prøvet:
+
+| Tærskel | Tid | Opdigtninger | Det omstridte sted |
+|---|---|---|---|
+| 0,50 | 1:57 | 0 | uden «ikke» |
+| 0,30 | 2:02 | 0 | uden «ikke» |
+
+Tærsklen flytter den ikke. Ordet er for utydeligt til, at VAD hører det som
+tale, uanset hvor lavt der skrues — og det stemmer med, hvad taleren selv
+siger om optagelsen.
+
+**Indstillingen bliver på 0,50.** En lavere tærskel køber ingenting og lukker
+mere stilhed ind i modellen, hvilket er dét, hele rettelsen handler om.
