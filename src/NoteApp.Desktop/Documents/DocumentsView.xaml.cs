@@ -406,7 +406,10 @@ public partial class DocumentsView : UserControl
             if (d.Mappe is not { Length: > 0 } nu || !ramte.Contains(nu)) continue;
 
             d.Mappe = null;
-            DocumentStore.Save(d);
+
+            // KUN METADATA. Mappen staar ikke i Word-filen, og at skrive den
+            // om ville fejle paa et dokument, der er aabent i Word.
+            DocumentStore.GemMetadata(d);
             ryddede++;
         }
 
@@ -432,7 +435,7 @@ public partial class DocumentsView : UserControl
             if (!omdoebt.TryGetValue(nu, out var nyt)) continue;
 
             d.Mappe = nyt;
-            DocumentStore.Save(d);
+            DocumentStore.GemMetadata(d);
             rettede++;
         }
 
@@ -515,7 +518,7 @@ public partial class DocumentsView : UserControl
         if (e.Data.GetData(typeof(DocumentInfo)) is not DocumentInfo d) return;
 
         d.Mappe = maal.Mappe;
-        DocumentStore.Save(d);
+        DocumentStore.GemMetadata(d);
 
         maal.ErUdfoldet = true;
         Indlæs(d.Id);
@@ -751,7 +754,10 @@ public partial class DocumentsView : UserControl
         {
             var fraMappe = _valgt.Mappe;
             _valgt.Mappe = vindue.Valgt;
-            DocumentStore.Save(_valgt);
+
+            // KUN METADATA - mappen staar ikke i Word-filen. Save ville skrive
+            // hele .docx'en om og fejle, hvis den er aaben i Word.
+            DocumentStore.GemMetadata(_valgt);
 
             Historik.Skriv(HaendelseType.Flyttet, $"Dokument flyttet: {_valgt.Title}",
                 $"Fra «{fraMappe ?? "roden"}» til «{vindue.Valgt ?? "roden"}».",

@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 using System.Text.Json;
 
 namespace NoteApp.Core.Documents;
@@ -100,6 +100,29 @@ public static class DocumentStore
 
         File.WriteAllText(MetaSti(info), JsonSerializer.Serialize(info, Options), Encoding.UTF8);
         return fil;
+    }
+
+    /// <summary>
+    /// Gemmer KUN metadata — .json'en. Word-filen røres ikke.
+    /// </summary>
+    /// <remarks>
+    /// TIL DET, DER IKKE STÅR I DOKUMENTET. Hvilken mappe et dokument ligger
+    /// i, er appens egen ordning; det står ikke på forsiden og skal ikke stå
+    /// der. At skrive en 40-siders .docx om for at flytte den mellem to
+    /// mapper er ikke bare spild — det FEJLER, hvis dokumentet er åbent i
+    /// Word, og fejlen kommer som «Access to the path is denied».
+    ///
+    /// Set 25-08-2026, da en mappeflytning ramte alle dokumenter i mappen på
+    /// én gang. Med ét dokument ad gangen var det sjældent nok til at ligne
+    /// et uheld.
+    ///
+    /// Skal forsiden ændre sig — titel, beskrivelse, skabelon — er det
+    /// <see cref="Save"/>, der skal bruges. Den skriver begge dele.
+    /// </remarks>
+    public static void GemMetadata(DocumentInfo info)
+    {
+        System.IO.Directory.CreateDirectory(Directory);
+        File.WriteAllText(MetaSti(info), JsonSerializer.Serialize(info, Options), Encoding.UTF8);
     }
 
     /// <summary>

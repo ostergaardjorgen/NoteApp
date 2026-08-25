@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.IO;
+using System.Windows;
 using System.Windows.Threading;
 using NoteApp.Core;
 
@@ -124,8 +125,22 @@ public partial class App : Application
     {
         // Hovedvinduet som ejer, ikke «this» — App er ikke et vindue. Findes
         // det ikke endnu (fejl under opstart), staar dialogen for sig selv.
-        Dialogs.AppDialog.Vis(MainWindow, "Der gik noget galt",
-            $"{e.Exception.Message}\n\n{e.Exception.GetType().Name}", Dialogs.Slags.Fejl);
+        // EN LÅST FIL ER IKKE «NOGET GALT» — DET ER EN FIL, DER ER ÅBEN.
+        //
+        // «Access to the path is denied» siger ingenting om, hvad man skal
+        // gøre. Ni ud af ti gange er svaret, at dokumentet står åbent i Word,
+        // og så kan filen ikke skrives om. Det skal beskeden sige, for det er
+        // det eneste, brugeren kan handle på.
+        var laast = e.Exception is UnauthorizedAccessException or IOException;
+
+        Dialogs.AppDialog.Vis(MainWindow,
+            laast ? "Filen er i brug" : "Der gik noget galt",
+            laast
+                ? "Filen kunne ikke skrives, fordi et andet program har den åben — " +
+                  "som regel Word.\n\nLuk dokumentet, og prøv igen.\n\n" +
+                  $"{e.Exception.Message}"
+                : $"{e.Exception.Message}\n\n{e.Exception.GetType().Name}",
+            Dialogs.Slags.Fejl);
 
         e.Handled = true;
     }
