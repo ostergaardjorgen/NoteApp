@@ -1,4 +1,4 @@
-namespace NoteApp.Core;
+﻿namespace NoteApp.Core;
 
 /// <summary>
 /// Planlægger transskription, MENS mødet kører.
@@ -9,9 +9,10 @@ namespace NoteApp.Core;
 /// crash ikke må koste mere end et halvt minut. De segmenter er færdige filer
 /// længe før mødet er slut, og der er ingen grund til, at de skal vente.
 ///
-/// Efter stilhedsmodellen tager en times møde omkring fire minutter at skrive
-/// ud. Køres der med undervejs, er det kun HALEN, der er tilbage, når mødet
-/// stopper — og halen kan gøres så kort, man vil.
+/// Køres der med undervejs, er det kun HALEN, der er tilbage, når mødet
+/// stopper — og halen kan gøres så kort, man vil. Det er værdien: ikke at det
+/// samlede arbejde bliver mindre, men at det meste af det er gjort, inden
+/// nogen venter på det.
 ///
 /// HVOR STOR EN BID
 ///
@@ -22,9 +23,10 @@ namespace NoteApp.Core;
 ///                  betales forfra ved hver eneste bid.
 ///   Større bid  →  færre opstarter, men længere hale.
 ///
-/// Ved fem minutter er halen højst fem minutters lyd ≈ tyve sekunders arbejde,
-/// og en times møde koster tolv modelindlæsninger ≈ tre kvarters minut. Begge
-/// dele er små, og det er dét, der gør fem til svaret.
+/// Ved fem minutter er halen højst fem minutters lyd, og en times møde koster
+/// tolv modelindlæsninger à knap fire sekunder ≈ tre kvarters minut. Hvor lang
+/// halen bliver i tid, afhænger af en hastighed, der svinger for meget til at
+/// love noget — se doc/maaling-stilhed.md.
 ///
 /// SKÆREKANTERNE ER PROBLEMET
 ///
@@ -115,8 +117,10 @@ public static class Medskrift
     /// regnet ud af, hvad der faktisk mangler.
     /// </summary>
     /// <param name="hastighed">
-    /// Hvor mange sekunder lyd der skrives ud pr. sekund. Målt til omkring 17
-    /// med stilhedsmodel og large-v3 på et RTX 2060 (32,7 minutter på 1:57).
+    /// Hvor mange sekunder lyd der skrives ud pr. sekund. Svinger meget: målt
+    /// til 17 på det ene spor og 4 på det andet i samme møde, med samme
+    /// indstillinger. Se doc/maaling-stilhed.md — der loves ingen hastighed,
+    /// før det er undersøgt på en rolig maskine.
     /// </param>
     public static TimeSpan Restarbejde(int skrevneSegmenter, int faerdige, double hastighed)
     {
@@ -126,5 +130,115 @@ public static class Medskrift
         var sekunderLyd = mangler * AudioFormat.ChunkDuration.TotalSeconds;
 
         return TimeSpan.FromSeconds(sekunderLyd / hastighed);
+    }
+
+    /// <summary>Én færdigskrevet bid: hvor den hører til, og hvad den siger.</summary>
+    /// <param name="Json">whisper-json'en for biddens lyd.</param>
+    /// <param name="StartSekunder">Hvor i mødet biddens LYD begynder.</param>
+    /// <param name="KastVaekSekunder">Hvor meget af den der er tilløb og skal væk.</param>
+    public readonly record struct Faerdigbid(string Json, double StartSekunder, double KastVaekSekunder);
+
+    /// <summary>
+    /// Fletter bidderne til én transskription, som var den skrevet i ét stykke.
+    /// </summary>
+    /// <remarks>
+    /// RESTEN AF APPEN MÅ IKKE KUNNE SE FORSKEL. Søgningen, talergenkendelsen,
+    /// rettelserne og dokumenterne læser alle den samme json. Bliver den anderledes,
+    /// fordi teksten blev til i bidder, skal alt det andet laves om — og så er
+    /// prisen for løbende transskription pludselig hele appen.
+    ///
+    /// TIDERNE ER DET, DER KAN GÅ GALT. Hver bid er skrevet ud for sig og tæller
+    /// derfor fra nul. Lægges de sammen uden at rette tiderne, står hele mødet
+    /// oven i hinanden i de første fem minutter — og det opdages først, når nogen
+    /// klikker på en replik og hører noget helt andet.
+    ///
+    /// TILLØBET SMIDES VÆK HER. Hver bid har ét segments lyd med fra før sig, så
+    /// modellen ikke starter midt i en sætning. Den tekst er allerede skrevet af
+    /// den forrige bid, og alt, der begynder før grænsen, ryger ud.
+    /// </remarks>
+    public static string Flet(IReadOnlyList<Faerdigbid> bidder)
+    {
+        if (bidder.Count == 0) throw new ArgumentException("Ingen bidder at flette", nameof(bidder));
+
+        var samlet = new System.Text.Json.Nodes.JsonArray();
+        System.Text.Json.Nodes.JsonNode? skabelon = null;
+
+        foreach (var bid in bidder)
+        {
+            var rod = System.Text.Json.Nodes.JsonNode.Parse(bid.Json)
+                      as System.Text.Json.Nodes.JsonObject;
+            if (rod is null) continue;
+
+            // Den foerste bid leverer alt det, der ikke er selve teksten:
+            // model, parametre og det sprog, motoren koerte med. De felter er
+            // ens for alle bidder - det er den samme model paa den samme lyd.
+            skabelon ??= rod.DeepClone();
+
+            if (rod["transcription"] is not System.Text.Json.Nodes.JsonArray liste) continue;
+
+            var kastVaekMs = (long)Math.Round(bid.KastVaekSekunder * 1000);
+            var forskydMs = (long)Math.Round(bid.StartSekunder * 1000);
+
+            foreach (var post in liste)
+            {
+                if (post is not System.Text.Json.Nodes.JsonObject p) continue;
+                if (p["offsets"] is not System.Text.Json.Nodes.JsonObject o) continue;
+
+                var fra = o["from"]?.GetValue<long>() ?? 0;
+                var til = o["to"]?.GetValue<long>() ?? 0;
+
+                // TILLOEBET UD. Alt, der begynder foer graensen, er skrevet af
+                // den forrige bid. «Begynder foer» og ikke «slutter foer»: en
+                // replik, der starter i tillobet og fortsaetter ind i bidden,
+                // hoerer til den forrige - ellers staar den to gange.
+                if (fra < kastVaekMs) continue;
+
+                var nyFra = fra - kastVaekMs + forskydMs;
+                var nyTil = til - kastVaekMs + forskydMs;
+
+                var kopi = p.DeepClone() as System.Text.Json.Nodes.JsonObject;
+                if (kopi is null) continue;
+
+                kopi["offsets"] = new System.Text.Json.Nodes.JsonObject
+                {
+                    ["from"] = nyFra,
+                    ["to"] = nyTil
+                };
+                kopi["timestamps"] = new System.Text.Json.Nodes.JsonObject
+                {
+                    ["from"] = Stempel(nyFra),
+                    ["to"] = Stempel(nyTil)
+                };
+
+                samlet.Add(kopi);
+            }
+        }
+
+        if (skabelon is not System.Text.Json.Nodes.JsonObject ud)
+            throw new InvalidOperationException("Ingen af bidderne kunne læses");
+
+        ud["transcription"] = samlet;
+        return ud.ToJsonString(new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
+    }
+
+    /// <summary>Millisekunder som «HH:MM:SS,mmm» — samme form som whisper skriver.</summary>
+    public static string Stempel(long ms)
+    {
+        var t = TimeSpan.FromMilliseconds(Math.Max(0, ms));
+        return $"{(int)t.TotalHours:00}:{t.Minutes:00}:{t.Seconds:00},{t.Milliseconds:000}";
+    }
+
+    /// <summary>Den flettede json som ren tekst — samme form som whispers .txt.</summary>
+    public static string SomTekst(string flettetJson)
+    {
+        var rod = System.Text.Json.Nodes.JsonNode.Parse(flettetJson) as System.Text.Json.Nodes.JsonObject;
+        if (rod?["transcription"] is not System.Text.Json.Nodes.JsonArray liste) return "";
+
+        var linjer = liste
+            .OfType<System.Text.Json.Nodes.JsonObject>()
+            .Select(p => p["text"]?.GetValue<string>() ?? "")
+            .Where(t => t.Trim().Length > 0);
+
+        return string.Join("\n", linjer);
     }
 }
