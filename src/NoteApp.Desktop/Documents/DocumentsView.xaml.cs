@@ -119,17 +119,40 @@ public partial class DocumentsView : UserControl
         _rod = Biblioteker.Biblioteksnode.Bibliotek("Dokumenter", "\uE8F1", Transcribe.Gruppe.Moede);
         _rod.Antal = _alle.Count;
 
+        // MAPPER I MAPPER — samme model som under «Optagelser».
+        //
+        // Navnene baerer stien, og listen er sorteret, saa en foraelder altid
+        // kommer foer sine boern. Derfor kan traeet bygges i eet gennemloeb.
+        var noder = new Dictionary<string, Biblioteker.Biblioteksnode>(
+            StringComparer.CurrentCultureIgnoreCase);
+
         foreach (var m in NoteApp.Core.Mapper.Alle(NoteApp.Core.Mapper.Slags.Dokumenter))
         {
             var mappe = Biblioteker.Biblioteksnode.Mappenode(m, Transcribe.Gruppe.Moede);
-            foreach (var d in _alle.Where(d => m.Equals(d.Mappe, StringComparison.CurrentCultureIgnoreCase)))
-                mappe.Boern.Add(Biblioteker.Biblioteksnode.Dokumentnode(d));
+            noder[m] = mappe;
 
-            mappe.Antal = mappe.Boern.Count;
-            _rod.Boern.Add(mappe);
+            var foraelder = NoteApp.Core.Mapper.Foraelder(m);
+
+            if (foraelder.Length > 0 && noder.TryGetValue(foraelder, out var over))
+                over.Boern.Add(mappe);
+            else
+                _rod.Boern.Add(mappe);
         }
 
-        foreach (var d in _alle.Where(d => string.IsNullOrWhiteSpace(d.Mappe)))
+        foreach (var d in _alle.Where(d => !string.IsNullOrWhiteSpace(d.Mappe)))
+            if (noder.TryGetValue(d.Mappe!, out var i))
+                i.Boern.Add(Biblioteker.Biblioteksnode.Dokumentnode(d));
+
+        // Tallet taeller undermapperne med - det svarer paa «er der noget
+        // hernede», og det aendrer sig ikke af et lag mere.
+        foreach (var (sti, knude) in noder)
+            knude.Antal = _alle.Count(d => !string.IsNullOrWhiteSpace(d.Mappe)
+                                           && NoteApp.Core.Mapper.LiggerUnder(d.Mappe!, sti));
+
+        // Uden mappe - eller i en mappe, der ikke findes. Det sidste maa ikke
+        // faa et dokument til at forsvinde ud af traeet.
+        foreach (var d in _alle.Where(d => string.IsNullOrWhiteSpace(d.Mappe)
+                                           || !noder.ContainsKey(d.Mappe!)))
             _rod.Boern.Add(Biblioteker.Biblioteksnode.Dokumentnode(d));
 
         Trae.ItemsSource = new[] { _rod };
@@ -198,8 +221,18 @@ public partial class DocumentsView : UserControl
         Vis(knude.Dokument);
     }
 
+    /// <summary>
+    /// Ny mappe — dér hvor man står. Samme regel som under «Optagelser».
+    /// </summary>
     private void NyMappe_Click(object sender, RoutedEventArgs e)
     {
+        var under = _valgtKnude switch
+        {
+            { Art: Biblioteker.Biblioteksnode.Slags.Mappe, Mappe: { Length: > 0 } m } => m,
+            { Dokument: { } dok } when !string.IsNullOrWhiteSpace(dok.Mappe) => dok.Mappe!,
+            _ => ""
+        };
+
         var vindue = Transcribe.RenameWindow.TilNyMappe();
         vindue.Owner = Window.GetWindow(this);
 
@@ -207,10 +240,23 @@ public partial class DocumentsView : UserControl
 
         var navn = vindue.NytNavn;
 
-        if (!NoteApp.Core.Mapper.Opret(NoteApp.Core.Mapper.Slags.Dokumenter, navn))
+        if (!NoteApp.Core.Mapper.ErGyldigtLed(navn))
+        {
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Det navn kan ikke bruges",
+                $"En mappe kan ikke hedde «{navn}». Skråstreg er det tegn, der skiller " +
+                "mapper fra hinanden, så det kan ikke stå i et navn.", Dialogs.Slags.Valg);
+            return;
+        }
+
+        var sti = NoteApp.Core.Mapper.Sammensaet(under, navn.Trim());
+
+        if (!NoteApp.Core.Mapper.OpretUnder(NoteApp.Core.Mapper.Slags.Dokumenter, under, navn))
         {
             Dialogs.AppDialog.Vis(Window.GetWindow(this), "Den findes allerede",
-                $"Der er allerede en mappe, der hedder «{navn.Trim()}».", Dialogs.Slags.Valg);
+                under.Length == 0
+                    ? $"Der er allerede en mappe, der hedder «{navn.Trim()}»."
+                    : $"«{NoteApp.Core.Mapper.Bladnavn(under)}» har allerede en mappe, der hedder «{navn.Trim()}».",
+                Dialogs.Slags.Valg);
             return;
         }
 
@@ -219,7 +265,7 @@ public partial class DocumentsView : UserControl
 
         // Den nye mappe foldes ud og markeres. Den er tom, og det skal man
         // kunne se - ellers ligner det, at der ikke skete noget.
-        var ny = AlleKnuder().FirstOrDefault(k => k.ErBeholder && k.Mappe == navn.Trim());
+        var ny = AlleKnuder().FirstOrDefault(k => k.ErBeholder && k.Mappe == sti);
         if (ny is null) return;
 
         _rod.ErUdfoldet = true;
@@ -245,9 +291,152 @@ public partial class DocumentsView : UserControl
 
         if (e.OriginalSource is not DependencyObject kilde) return;
         if (FindOpad<TreeViewItem>(kilde) is not { } punkt) return;
-        if (punkt.DataContext is not Biblioteker.Biblioteksnode { Dokument: { } d }) return;
+        if (punkt.DataContext is not Biblioteker.Biblioteksnode knude) return;
 
-        DragDrop.DoDragDrop(punkt, new DataObject(typeof(DocumentInfo), d), DragDropEffects.Move);
+        if (knude.Dokument is { } d)
+        {
+            DragDrop.DoDragDrop(punkt, new DataObject(typeof(DocumentInfo), d), DragDropEffects.Move);
+            return;
+        }
+
+        // En mappe traekkes ved sin STI - det er den, dokumenterne peger paa.
+        if (knude.Art == Biblioteker.Biblioteksnode.Slags.Mappe && knude.Mappe is { Length: > 0 } sti)
+            DragDrop.DoDragDrop(punkt, new DataObject(Mappetraek, sti), DragDropEffects.Move);
+    }
+
+    /// <summary>Dataformatet for et mappetræk. Samme navn som under «Optagelser».</summary>
+    private const string Mappetraek = "NoteApp.Mappesti";
+
+    // ==================== MAPPER ====================
+    //
+    // Samme tre handlinger som under «Optagelser», og med samme regler.
+    // Mapper-klassen er faelles; det er kun det, der peger paa mapperne, der
+    // er forskelligt - dokumenter i stedet for optagelser.
+
+    /// <summary>Flytter en mappe hen under en anden — eller ud i roden.</summary>
+    private void FlytMappe(string mappe, string nyForaelder)
+    {
+        var skift = NoteApp.Core.Mapper.Flyt(
+            NoteApp.Core.Mapper.Slags.Dokumenter, mappe, nyForaelder);
+
+        if (skift.Count == 0)
+        {
+            Status.Text = NoteApp.Core.Mapper.Alle(NoteApp.Core.Mapper.Slags.Dokumenter)
+                .Any(m => m.Equals(
+                    NoteApp.Core.Mapper.Sammensaet(nyForaelder, NoteApp.Core.Mapper.Bladnavn(mappe)),
+                    StringComparison.CurrentCultureIgnoreCase))
+                ? $"Der er allerede en mappe, der hedder «{NoteApp.Core.Mapper.Bladnavn(mappe)}» dér."
+                : "";
+            return;
+        }
+
+        var rettede = RetDokumenterEfter(skift);
+        Indlæs();
+
+        var hvorhen = nyForaelder.Length == 0
+            ? "ud i roden"
+            : $"ind under «{NoteApp.Core.Mapper.Bladnavn(nyForaelder)}»";
+
+        Status.Text = rettede == 0
+            ? $"«{NoteApp.Core.Mapper.Bladnavn(mappe)}» er flyttet {hvorhen}."
+            : $"«{NoteApp.Core.Mapper.Bladnavn(mappe)}» er flyttet {hvorhen} — {rettede} dokument(er) fulgte med.";
+    }
+
+    /// <summary>Giver en mappe et nyt navn. Undermapper og indhold følger med.</summary>
+    private void OmdoebMappe(string sti)
+    {
+        var vindue = Transcribe.RenameWindow.TilNyMappe();
+        vindue.Owner = Window.GetWindow(this);
+        if (vindue.ShowDialog() != true) return;
+
+        var skift = NoteApp.Core.Mapper.Omdoeb(
+            NoteApp.Core.Mapper.Slags.Dokumenter, sti, vindue.NytNavn);
+
+        if (skift.Count == 0)
+        {
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Navnet kan ikke bruges",
+                $"Enten findes der allerede en mappe, der hedder «{vindue.NytNavn}» det " +
+                "sted, eller også står der en skråstreg i navnet. Skråstreg er det tegn, " +
+                "der skiller mapper fra hinanden.", Dialogs.Slags.Valg);
+            return;
+        }
+
+        var rettede = RetDokumenterEfter(skift);
+        Indlæs();
+
+        Status.Text = rettede == 0
+            ? $"Mappen hedder nu «{vindue.NytNavn}»."
+            : $"Mappen hedder nu «{vindue.NytNavn}» — {rettede} dokument(er) fulgte med.";
+    }
+
+    /// <summary>
+    /// Fjerner en mappe. Dokumenterne slettes ALDRIG — de står uden mappe bagefter.
+    /// </summary>
+    private void SletMappe(string sti)
+    {
+        var iAlt = _alle.Count(d => d.Mappe is { Length: > 0 } m
+                                    && NoteApp.Core.Mapper.LiggerUnder(m, sti));
+
+        var under = NoteApp.Core.Mapper.Alle(NoteApp.Core.Mapper.Slags.Dokumenter)
+            .Count(m => NoteApp.Core.Mapper.LiggerUnder(m, sti)) - 1;
+
+        var linjer = new List<string>();
+        if (under > 0) linjer.Add($"Mappen har {under} undermappe(r). De fjernes også.");
+        linjer.Add(iAlt == 0
+            ? "Der ligger ingen dokumenter i den."
+            : $"De {iAlt} dokument(er), der ligger i den, BLIVER — de står bare uden mappe bagefter. Intet slettes.");
+
+        var ja = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
+            $"Fjern mappen «{NoteApp.Core.Mapper.Bladnavn(sti)}»?",
+            string.Join("\n\n", linjer),
+            godkend: "Fjern mappen", annuller: "Behold den", slags: Dialogs.Slags.Valg);
+
+        if (!ja) return;
+
+        var fjernet = NoteApp.Core.Mapper.SletMedIndhold(
+            NoteApp.Core.Mapper.Slags.Dokumenter, sti);
+
+        if (fjernet.Count == 0) return;
+
+        var ramte = fjernet.ToHashSet(StringComparer.CurrentCultureIgnoreCase);
+        var ryddede = 0;
+
+        foreach (var d in _alle)
+        {
+            if (d.Mappe is not { Length: > 0 } nu || !ramte.Contains(nu)) continue;
+
+            d.Mappe = null;
+            DocumentStore.Save(d);
+            ryddede++;
+        }
+
+        _valgtKnude = null;
+        Indlæs();
+
+        Status.Text = ryddede == 0
+            ? "Mappen er fjernet."
+            : $"Mappen er fjernet — {ryddede} dokument(er) står nu uden mappe.";
+    }
+
+    /// <summary>Retter de dokumenter, der peger på mapper, som har skiftet navn.</summary>
+    private int RetDokumenterEfter(IReadOnlyList<NoteApp.Core.Mapper.Navneskifte> skift)
+    {
+        var omdoebt = skift.ToDictionary(
+            x => x.Fra, x => x.Til, StringComparer.CurrentCultureIgnoreCase);
+
+        var rettede = 0;
+
+        foreach (var d in _alle)
+        {
+            if (d.Mappe is not { Length: > 0 } nu) continue;
+            if (!omdoebt.TryGetValue(nu, out var nyt)) continue;
+
+            d.Mappe = nyt;
+            DocumentStore.Save(d);
+            rettede++;
+        }
+
+        return rettede;
     }
 
     private static T? FindOpad<T>(DependencyObject? d) where T : DependencyObject
@@ -259,6 +448,20 @@ public partial class DocumentsView : UserControl
     private void Trae_TraekOver(object sender, DragEventArgs e)
     {
         var maal = MaalUnderMusen(e);
+
+        // EN MAPPE MAA IKKE SLIPPES I SIG SELV. Musen siger nej, FOER man
+        // slipper; selve spaerren ligger i Mapper.Flyt.
+        if (e.Data.GetDataPresent(Mappetraek)
+            && e.Data.GetData(Mappetraek) is string traukket
+            && maal?.Mappe is { Length: > 0 } under
+            && NoteApp.Core.Mapper.LiggerUnder(under, traukket))
+        {
+            foreach (var k in AlleKnuder()) k.ErDropmaal = false;
+            e.Effects = DragDropEffects.None;
+            e.Handled = true;
+            return;
+        }
+
         foreach (var k in AlleKnuder()) k.ErDropmaal = ReferenceEquals(k, maal);
 
         e.Effects = maal is null ? DragDropEffects.None : DragDropEffects.Move;
@@ -272,9 +475,17 @@ public partial class DocumentsView : UserControl
         foreach (var k in AlleKnuder()) k.ErDropmaal = false;
     }
 
+    /// <remarks>
+    /// DEN SPURGTE KUN EFTER DOKUMENTER, og et mappetræk bærer en STRENG. Så
+    /// var målet altid null, og en mappe kunne ikke slippes nogen steder.
+    /// Samme fejl som under «Optagelser», rettet samme dag.
+    /// </remarks>
     private Biblioteker.Biblioteksnode? MaalUnderMusen(DragEventArgs e)
     {
-        if (!e.Data.GetDataPresent(typeof(DocumentInfo))) return null;
+        var erTraek = e.Data.GetDataPresent(typeof(DocumentInfo))
+                   || e.Data.GetDataPresent(Mappetraek);
+
+        if (!erTraek) return null;
 
         var ramt = Trae.InputHitTest(e.GetPosition(Trae)) as DependencyObject;
         var knude = FindOpad<TreeViewItem>(ramt)?.DataContext as Biblioteker.Biblioteksnode;
@@ -292,6 +503,15 @@ public partial class DocumentsView : UserControl
 
         var maal = MaalUnderMusen(e);
         if (maal is null) return;
+
+        // EN MAPPE, DER FLYTTES, TAGER ALT MED SIG - undermapper og de
+        // dokumenter, der peger paa dem.
+        if (e.Data.GetData(Mappetraek) is string mappesti)
+        {
+            FlytMappe(mappesti, maal.Mappe ?? "");
+            return;
+        }
+
         if (e.Data.GetData(typeof(DocumentInfo)) is not DocumentInfo d) return;
 
         d.Mappe = maal.Mappe;
@@ -384,6 +604,11 @@ public partial class DocumentsView : UserControl
         {
             _valgt = null;
             SletKnap.IsEnabled = AabnKnap.IsEnabled = GemKnap.IsEnabled = OmdoebKnap.IsEnabled = FlytKnap.IsEnabled = false;
+
+            // MEN EN MAPPE KAN SLETTES OG OMDOEBES. Uden det her stod en
+            // markeret mappe med graa knapper og ingen forklaring.
+            if (_valgtKnude is { Art: Biblioteker.Biblioteksnode.Slags.Mappe, Mappe.Length: > 0 })
+                SletKnap.IsEnabled = OmdoebKnap.IsEnabled = true;
 
             // RUDEN STOD TOM HER.
             // TomPanel gaelder kun, naar der slet ikke findes dokumenter.
@@ -478,6 +703,14 @@ public partial class DocumentsView : UserControl
     /// </summary>
     private void Omdoeb_Click(object sender, RoutedEventArgs e)
     {
+        // EN MAPPE KAN OGSAA OMDOEBES. Knapperne saa foer kun paa det valgte
+        // DOKUMENT, og derfor stod en markeret mappe med graa knapper.
+        if (_valgtKnude is { Art: Biblioteker.Biblioteksnode.Slags.Mappe, Mappe: { Length: > 0 } sti })
+        {
+            OmdoebMappe(sti);
+            return;
+        }
+
         if (_valgt is null) return;
 
         var vindue = Transcribe.RenameWindow.TilDokument(_valgt.Title);
@@ -580,6 +813,12 @@ public partial class DocumentsView : UserControl
 
     private void Slet_Click(object sender, RoutedEventArgs e)
     {
+        if (_valgtKnude is { Art: Biblioteker.Biblioteksnode.Slags.Mappe, Mappe: { Length: > 0 } sti })
+        {
+            SletMappe(sti);
+            return;
+        }
+
         if (_valgt is null) return;
 
         var ja = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
