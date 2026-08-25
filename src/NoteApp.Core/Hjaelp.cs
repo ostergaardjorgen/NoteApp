@@ -1,4 +1,4 @@
-using System.Reflection;
+﻿using System.Reflection;
 using System.Text;
 
 namespace NoteApp.Core;
@@ -282,15 +282,34 @@ public static class Hjaelp
     }
 
     /// <summary>
-    /// Lægger hjælpen i datamappen ved første brug. Findes filen, røres den
-    /// ikke — har nogen rettet i den, skal en opdatering ikke skrive rettelsen
-    /// væk.
+    /// Lægger hjælpen i datamappen — og opdaterer de filer, ingen har rettet.
+    ///
+    /// HVORFOR DET IKKE ER NOK AT SKRIVE FILEN ÉN GANG
+    ///
+    /// Første udgave sprang over, hvis filen fandtes. Så ville en rettet
+    /// hjælpetekst i en ny udgave af appen aldrig nå frem til nogen, der
+    /// havde appen i forvejen — hjælpen ville blive stående på den udgave,
+    /// den blev installeret med, og efterhånden beskrive noget andet end det,
+    /// skærmen gør.
+    ///
+    /// EN HJÆLPETEKST ER ÉT DOKUMENT, IKKE MANGE SMÅ TING
+    ///
+    /// Sprogfilerne kan flettes nøgle for nøgle. Det kan et afsnit ikke: to
+    /// udgaver af den samme tekst kan ikke lægges sammen til noget, der giver
+    /// mening.
+    ///
+    /// Derfor huskes det, appen SELV skrev — som en kontrolsum i
+    /// <c>.udgivet.txt</c>. Er filen på disken uændret siden da, har ingen
+    /// rørt den, og den kan trygt skiftes ud. Er den ændret, har nogen rettet
+    /// i den, og så bliver den stående.
     /// </summary>
     private static void Udpak()
     {
         try
         {
             var samling = Assembly.GetExecutingAssembly();
+            var bogen = Bog();
+            var aendret = false;
 
             foreach (var navn in samling.GetManifestResourceNames())
             {
@@ -311,19 +330,113 @@ public static class Hjaelp
                 Directory.CreateDirectory(maalmappe);
 
                 var maal = Path.Combine(maalmappe, filnavn);
-                if (File.Exists(maal)) continue;
 
                 using var stroem = samling.GetManifestResourceStream(navn);
                 if (stroem is null) continue;
 
                 using var laeser = new StreamReader(stroem, Encoding.UTF8);
-                File.WriteAllText(maal, laeser.ReadToEnd(), new UTF8Encoding(false));
+                var indhold = laeser.ReadToEnd();
+
+                var noegle = sprogmappe + "/" + filnavn;
+                var udgivetSum = Sum(indhold);
+
+                if (File.Exists(maal))
+                {
+                    var paaDisken = Sum(File.ReadAllText(maal, Encoding.UTF8));
+
+                    // Er den allerede den nyeste, er der ingenting at goere.
+                    if (paaDisken == udgivetSum)
+                    {
+                        if (!bogen.TryGetValue(noegle, out var kendt) || kendt != udgivetSum)
+                        {
+                            bogen[noegle] = udgivetSum;
+                            aendret = true;
+                        }
+                        continue;
+                    }
+
+                    // Staar der en anden sum i bogen end den, filen har nu, har
+                    // nogen rettet i teksten. Den bliver staaende.
+                    if (bogen.TryGetValue(noegle, out var skrevet) && skrevet != paaDisken) continue;
+
+                    // Ingen bog: appen er opdateret fra en udgave, der ikke
+                    // foerte den. Saa vides det ikke, om filen er rettet - og
+                    // saa roeres den ikke. Bedre at have en foraeldet hjaelp
+                    // end at slette en rettelse.
+                    if (!bogen.ContainsKey(noegle))
+                    {
+                        bogen[noegle] = paaDisken;
+                        aendret = true;
+                        continue;
+                    }
+                }
+
+                File.WriteAllText(maal, indhold, new UTF8Encoding(false));
+
+                bogen[noegle] = udgivetSum;
+                aendret = true;
             }
+
+            if (aendret) GemBog(bogen);
         }
         catch (Exception)
         {
             // Kan hjaelpen ikke skrives ud, staar vinduet tomt. Det maa ikke
             // vaelte appen - hjaelpen er en hjaelp, ikke en forudsaetning.
         }
+    }
+
+    private static string Bogsti => Path.Combine(Mappe, ".udgivet.txt");
+
+    /// <summary>Hvad appen selv skrev, sidst den lagde hjælpen ud. Én linje pr. fil.</summary>
+    private static Dictionary<string, string> Bog()
+    {
+        var ud = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+        try
+        {
+            if (!File.Exists(Bogsti)) return ud;
+
+            foreach (var linje in File.ReadAllLines(Bogsti, Encoding.UTF8))
+            {
+                var skil = linje.IndexOf('\t');
+                if (skil <= 0) continue;
+
+                ud[linje[..skil]] = linje[(skil + 1)..].Trim();
+            }
+        }
+        catch (IOException) { }
+
+        return ud;
+    }
+
+    private static void GemBog(Dictionary<string, string> bogen)
+    {
+        try
+        {
+            Directory.CreateDirectory(Mappe);
+
+            var linjer = bogen.OrderBy(p => p.Key, StringComparer.Ordinal)
+                              .Select(p => p.Key + "\t" + p.Value);
+
+            File.WriteAllLines(Bogsti, linjer, new UTF8Encoding(false));
+
+            // Filen er appens egen bogholderi og ikke noget, brugeren skal
+            // forholde sig til. Den skjules, saa mappen ser ud som det, den er:
+            // hjaelpetekster.
+            try { File.SetAttributes(Bogsti, FileAttributes.Hidden); }
+            catch (Exception) { }
+        }
+        catch (IOException) { }
+    }
+
+    private static string Sum(string tekst)
+    {
+        // Linjeskift taeller ikke med. En fil, der er gemt i Notesblok, faar
+        // CRLF, og saa ville den se rettet ud, selv om teksten er den samme.
+        var renset = tekst.Replace("\r\n", "\n").TrimEnd();
+
+        var bytes = System.Security.Cryptography.SHA256.HashData(Encoding.UTF8.GetBytes(renset));
+        return Convert.ToHexString(bytes);
     }
 }

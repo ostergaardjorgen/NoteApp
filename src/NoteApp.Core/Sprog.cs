@@ -253,10 +253,26 @@ public static class Sprog
     }
 
     /// <summary>
-    /// Lægger de sprog, der følger med appen, i mappen — én gang.
+    /// Lægger de sprog, der følger med appen, i mappen — og FLETTER nye
+    /// nøgler ind i en fil, der allerede er der.
     ///
-    /// Findes filen i forvejen, røres den ikke. Har nogen rettet i den danske
-    /// tekst, skal en opdatering af appen ikke skrive rettelsen væk.
+    /// HVORFOR DET IKKE ER NOK AT SKRIVE FILEN ÉN GANG
+    ///
+    /// Første udgave sprang over, hvis filen fandtes. Det beskyttede
+    /// brugerens rettelser — og frøs samtidig sproget fast ved den udgave,
+    /// appen blev installeret med. En opdatering med 612 nye tekster nåede
+    /// aldrig frem, og skærmen viste nøglerne: «faelles.mappe» i stedet for
+    /// «MAPPE». Opdaget 25-08-2026 på en rigtig installation.
+    ///
+    /// SÅDAN VIRKER FLETNINGEN
+    ///
+    /// Nøgler, der mangler i filen på disken, lægges ind. Nøgler, der er der
+    /// i forvejen, røres ALDRIG — så en rettet tekst bliver stående, også
+    /// efter en opdatering.
+    ///
+    /// Det følger af, at en sprogfil er mange små ting frem for ét dokument:
+    /// man retter én tekst, ikke filen. Hjælpen håndteres derfor anderledes
+    /// — se Hjaelp.Udpak.
     /// </summary>
     private static void Udpak()
     {
@@ -274,14 +290,21 @@ public static class Sprog
                 var filnavn = navn[(navn.LastIndexOf(".sprog.", StringComparison.OrdinalIgnoreCase)
                                     + ".sprog.".Length)..];
 
-                var maal = Path.Combine(Mappe, filnavn);
-                if (File.Exists(maal)) continue;
-
                 using var stroem = samling.GetManifestResourceStream(navn);
                 if (stroem is null) continue;
 
                 using var laeser = new StreamReader(stroem, Encoding.UTF8);
-                File.WriteAllText(maal, laeser.ReadToEnd(), new UTF8Encoding(false));
+                var indhold = laeser.ReadToEnd();
+
+                var maal = Path.Combine(Mappe, filnavn);
+
+                if (!File.Exists(maal))
+                {
+                    File.WriteAllText(maal, indhold, new UTF8Encoding(false));
+                    continue;
+                }
+
+                Flet(maal, indhold);
             }
         }
         catch (Exception)
@@ -290,6 +313,94 @@ public static class Sprog
             // grimt, men den starter - og en app, der ikke kan starte, fordi
             // en sprogfil ikke kunne skrives, er vaerre.
         }
+    }
+
+    /// <summary>
+    /// Lægger de nøgler, der mangler i filen på disken, ind i den.
+    ///
+    /// Filen skrives kun, hvis der faktisk kom noget til. Ellers ville hver
+    /// eneste opstart give filen en ny dato uden at have ændret noget.
+    /// </summary>
+    private static void Flet(string sti, string udgivet)
+    {
+        try
+        {
+            var paaDisken = System.Text.Json.Nodes.JsonNode.Parse(
+                File.ReadAllText(sti, Encoding.UTF8)) as System.Text.Json.Nodes.JsonObject;
+
+            if (paaDisken is null) return;
+
+            var nyeste = Laes2(udgivet);
+            var kendte = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            FladNode(paaDisken, "", kendte);
+
+            var tilfoejet = 0;
+
+            foreach (var (noegle, tekst) in nyeste)
+            {
+                if (kendte.ContainsKey(noegle)) continue;
+
+                Saet(paaDisken, noegle, tekst);
+                tilfoejet++;
+            }
+
+            if (tilfoejet == 0) return;
+
+            File.WriteAllText(sti,
+                paaDisken.ToJsonString(new System.Text.Json.JsonSerializerOptions { WriteIndented = true }),
+                new UTF8Encoding(false));
+        }
+        catch (Exception)
+        {
+            // En oedelagt fil paa disken kan ikke flettes. Den bliver liggende
+            // som den er - og Laes springer den over, saa der falders tilbage
+            // paa noeglerne. At skrive oven i den ville slette brugerens
+            // rettelser paa grund af en tastefejl et sted i filen.
+        }
+    }
+
+    private static void Saet(System.Text.Json.Nodes.JsonObject rod, string noegle, string vaerdi)
+    {
+        var dele = noegle.Split('.');
+        var p = rod;
+
+        for (var i = 0; i < dele.Length - 1; i++)
+        {
+            if (p[dele[i]] is System.Text.Json.Nodes.JsonObject naeste) { p = naeste; continue; }
+
+            var ny = new System.Text.Json.Nodes.JsonObject();
+            p[dele[i]] = ny;
+            p = ny;
+        }
+
+        p[dele[^1]] = vaerdi;
+    }
+
+    private static void FladNode(System.Text.Json.Nodes.JsonObject o, string praefiks,
+                                 Dictionary<string, string> ud)
+    {
+        foreach (var (navn, vaerdi) in o)
+        {
+            var noegle = praefiks.Length == 0 ? navn : praefiks + "." + navn;
+
+            if (vaerdi is System.Text.Json.Nodes.JsonObject under) FladNode(under, noegle, ud);
+            else if (vaerdi is not null) ud[noegle] = vaerdi.ToString();
+        }
+    }
+
+    /// <summary>Den udgivne fil som flade nøgler. Samme form som Laes, men fra en streng.</summary>
+    private static Dictionary<string, string> Laes2(string json)
+    {
+        var ud = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+        try
+        {
+            using var doku = JsonDocument.Parse(json);
+            Flad(doku.RootElement, "", ud);
+        }
+        catch (JsonException) { }
+
+        return ud;
     }
 
     /// <summary>
