@@ -103,7 +103,7 @@ public partial class MeetingView : UserControl
             // Ingen af mulighederne kunne registreres. At skjule maerkatet
             // ville vaere at lade som ingenting - saa staar der, at den ikke
             // virker, og hvor man goer noget ved det.
-            GenvejMaerkat.Text = "OPTAG MED";
+            GenvejMaerkat.Text = NoteApp.Core.Sprog.T("topbar.optagmed");
             GenvejTast.Text = "ingen genvej";
             GenvejTast.Foreground = (System.Windows.Media.Brush)FindResource("Advarsel");
             GenvejPanel.ToolTip =
@@ -114,7 +114,7 @@ public partial class MeetingView : UserControl
         }
         else
         {
-            GenvejMaerkat.Text = "OPTAG MED";
+            GenvejMaerkat.Text = NoteApp.Core.Sprog.T("topbar.optagmed");
             GenvejTast.Text = tast;
             GenvejTast.Foreground = (System.Windows.Media.Brush)FindResource("Tekst");
             GenvejPanel.ToolTip = bemærkning is null

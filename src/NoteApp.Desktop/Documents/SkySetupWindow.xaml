@@ -1,6 +1,7 @@
 ﻿<Window x:Class="NoteApp.Desktop.Documents.SkySetupWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:i18n="clr-namespace:NoteApp.Desktop"
         Title="Tilslut europæisk bearbejdning" Height="700" Width="660"
         MinHeight="560" MinWidth="560"
         WindowStartupLocation="CenterOwner"
@@ -14,10 +15,10 @@
     </Grid.RowDefinitions>
 
     <StackPanel Grid.Row="0" Margin="0,0,0,14">
-      <TextBlock Text="Tilslut europæisk bearbejdning" FontSize="20" FontWeight="SemiBold" />
+      <TextBlock Text="{i18n:Oversat skysetupwindow.tilslut_europaeisk_bearbejdning}" FontSize="20" FontWeight="SemiBold" />
       <TextBlock Margin="0,6,0,0" TextWrapping="Wrap" LineHeight="20"
                  Foreground="{StaticResource TekstSvag}"
-                 Text="Optagelse og transskription bliver på din pc uanset hvad. Det her handler kun om selve referatet — teksten kan sendes til en europæisk leverandør, som skriver det hurtigere og fyldigere end modellen på maskinen." />
+                 Text="{i18n:Oversat skysetupwindow.optagelse_og_transskription_bliver_paa_din}" />
     </StackPanel>
 
     <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
@@ -28,12 +29,12 @@
                 Background="{StaticResource Panel}"
                 BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
           <StackPanel>
-            <TextBlock Text="Det sørger appen for" FontWeight="SemiBold" FontSize="14" />
+            <TextBlock Text="{i18n:Oversat skysetupwindow.det_soerger_appen_for}" FontWeight="SemiBold" FontSize="14" />
             <TextBlock Margin="0,8,0,0" TextWrapping="Wrap" LineHeight="20"
                        x:Name="EndepunktTekst" />
             <TextBlock Margin="0,8,0,0" TextWrapping="Wrap" LineHeight="20"
                        Foreground="{StaticResource TekstMeget}" FontSize="12"
-                       Text="Mistral har også et globalt endepunkt, hvor de ikke lover nogen bestemt geografi. Det bruger appen ikke, og det kan ikke slås til. Det europæiske koster 10 % mere — omkring 2 øre pr. referat." />
+                       Text="{i18n:Oversat skysetupwindow.mistral_har_ogsaa_et_globalt_endepunkt_hvo}" />
           </StackPanel>
         </Border>
 
@@ -42,35 +43,35 @@
                 Background="{StaticResource Panel}"
                 BorderBrush="{StaticResource Advarsel}" BorderThickness="2">
           <StackPanel>
-            <TextBlock Text="Det skal du selv sørge for" FontWeight="SemiBold" FontSize="14"
+            <TextBlock Text="{i18n:Oversat skysetupwindow.det_skal_du_selv_soerge_for}" FontWeight="SemiBold" FontSize="14"
                        Foreground="{StaticResource Advarsel}" />
             <TextBlock Margin="0,8,0,0" TextWrapping="Wrap" LineHeight="20"
-                       Text="Mistrals aftale tillader, at dine data bruges til at træne deres modeller — MEDMINDRE du selv slår det fra. Det er en indstilling på din konto, ikke noget der følger med abonnementet, og appen kan ikke sætte den for dig." />
+                       Text="{i18n:Oversat skysetupwindow.mistrals_aftale_tillader_at_dine_data_brug}" />
             <TextBlock Margin="0,10,0,0" TextWrapping="Wrap" LineHeight="20" FontSize="13"
                        Foreground="{StaticResource TekstSvag}"
-                       Text="Sådan: log ind på console.mistral.ai → Workspace → Data → slå fra, at input og output må bruges til træning. Tag et skærmbillede — indstillingen kan skifte ved et nyt workspace eller en ny nøgle, uden at du får besked." />
-            <Button Content="Åbn console.mistral.ai" Click="AabnKonsol_Click"
+                       Text="{i18n:Oversat skysetupwindow.saadan_log_ind_paa_console_mistral_ai_work}" />
+            <Button Content="{i18n:Oversat faelles.aabn_console_mistral_ai}" Click="AabnKonsol_Click"
                     HorizontalAlignment="Left" Margin="0,10,0,0" Padding="14,7" />
           </StackPanel>
         </Border>
 
         <!-- 3: det appen ikke kan love -->
-        <Expander Header="Hvem rører data undervejs" Margin="0,0,0,12" Foreground="{StaticResource Tekst}">
+        <Expander Header="{i18n:Oversat skysetupwindow.hvem_roerer_data_undervejs}" Margin="0,0,0,12" Foreground="{StaticResource Tekst}">
           <TextBlock Margin="8,8,0,0" TextWrapping="Wrap" LineHeight="20" FontSize="12"
                      Foreground="{StaticResource TekstMeget}"
-                     Text="Mistral er fransk og hoster i Europa, men bruger underleverandører — blandt andet Microsoft (Sverige og Norge) og CoreWeave (EØS). De er amerikansk ejede, også når serverne står i Europa. Vil du kunne sige «ingen amerikansk virksomhed er involveret», holder det ikke. Vil du sige «bearbejdningen sker i Europa, hos en europæisk leverandør, under databehandleraftale», holder det. Den fulde liste står på trust.mistral.ai." />
+                     Text="{i18n:Oversat skysetupwindow.mistral_er_fransk_og_hoster_i_europa_men_b}" />
         </Expander>
 
         <!-- 4: noeglen -->
-        <TextBlock Text="Din API-nøgle fra Mistral" Style="{StaticResource Underskrift}" Margin="0,6,0,0" />
+        <TextBlock Text="{i18n:Oversat skysetupwindow.din_api_noegle_fra_mistral}" Style="{StaticResource Underskrift}" Margin="0,6,0,0" />
         <TextBlock Margin="0,2,0,0" TextWrapping="Wrap" FontSize="12"
                    Foreground="{StaticResource TekstMeget}"
-                   Text="Hentes på console.mistral.ai under API Keys. Den gemmes i din datamappe — aldrig i programmet, og aldrig et sted den kan følge med en opdatering." />
+                   Text="{i18n:Oversat skysetupwindow.hentes_paa_console_mistral_ai_under_api_ke}" />
         <PasswordBox x:Name="FeltNoegle" Margin="0,6,0,0" FontSize="14" Padding="9,7" />
 
         <CheckBox x:Name="HakTraening" Margin="0,16,0,0">
           <TextBlock TextWrapping="Wrap" LineHeight="19"
-                     Text="Jeg har slået fra på min Mistral-konto, at mine data må bruges til træning." />
+                     Text="{i18n:Oversat skysetupwindow.jeg_har_slaaet_fra_paa_min_mistral_konto_a}" />
         </CheckBox>
 
         <TextBlock x:Name="Fejl" Margin="0,12,0,0" TextWrapping="Wrap"
@@ -79,10 +80,10 @@
     </ScrollViewer>
 
     <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
-      <Button x:Name="FjernKnap" Content="Fjern nøglen" Click="Fjern_Click"
+      <Button x:Name="FjernKnap" Content="{i18n:Oversat skysetupwindow.fjern_noeglen}" Click="Fjern_Click"
               Padding="14,9" Margin="0,0,10,0" Visibility="Collapsed" />
-      <Button Content="Annullér" Click="Annuller_Click" Padding="18,9" Margin="0,0,10,0" />
-      <Button Content="Gem og afprøv" Click="Gem_Click" Padding="20,9"
+      <Button Content="{i18n:Oversat faelles.annuller}" Click="Annuller_Click" Padding="18,9" Margin="0,0,10,0" />
+      <Button Content="{i18n:Oversat skysetupwindow.gem_og_afproev}" Click="Gem_Click" Padding="20,9"
               Background="{StaticResource Accent}" Foreground="#FF0B1220" BorderThickness="0"
               FontWeight="SemiBold" IsDefault="True" />
     </StackPanel>

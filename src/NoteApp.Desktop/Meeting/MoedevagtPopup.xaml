@@ -1,6 +1,7 @@
-<Window x:Class="NoteApp.Desktop.Meeting.MoedevagtPopup"
+﻿<Window x:Class="NoteApp.Desktop.Meeting.MoedevagtPopup"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:i18n="clr-namespace:NoteApp.Desktop"
         Title="Er der startet et møde?"
         Width="360" SizeToContent="Height"
         WindowStyle="None" ResizeMode="NoResize" AllowsTransparency="True"
@@ -39,12 +40,12 @@
         <Button Content="✕" Click="Luk_Klik" HorizontalAlignment="Right" VerticalAlignment="Top"
                 Background="Transparent" BorderThickness="0" Padding="6,0" FontSize="12"
                 Foreground="{StaticResource TekstMeget}" Cursor="Hand"
-                ToolTip="Luk. Der spørges igen, næste gang et møde begynder." />
+                ToolTip="{i18n:Oversat moedevagtpopup.luk_der_spoerges_igen_naeste_gang_et_moede}" />
       </Grid>
 
       <TextBlock FontSize="12.5" LineHeight="19" TextWrapping="Wrap" Margin="0,6,0,0"
                  Foreground="{StaticResource TekstSvag}"
-                 Text="Skal mødet optages? Appen optager aldrig af sig selv — der sker kun det, du trykker på." />
+                 Text="{i18n:Oversat moedevagtpopup.skal_moedet_optages_appen_optager_aldrig_a}" />
 
       <!-- DEN HER LINJE SKAL STÅ.
            Optagelsen bliver på maskinen, og netop derfor kan man se de andre i
@@ -52,12 +53,12 @@
            besked — aldrig med at lade være. -->
       <TextBlock FontSize="11.5" LineHeight="17" TextWrapping="Wrap" Margin="0,8,0,0"
                  Foreground="{StaticResource TekstMeget}"
-                 Text="Sig til de andre, at du optager. Lyden bliver på din maskine, så det er til at forklare." />
+                 Text="{i18n:Oversat moedevagtpopup.sig_til_de_andre_at_du_optager_lyden_blive}" />
 
       <StackPanel Orientation="Horizontal" Margin="0,14,0,0">
-        <Button Content="Optag mødet" Click="Optag_Klik" Padding="16,7" FontSize="12.5"
+        <Button Content="{i18n:Oversat faelles.optag_moedet}" Click="Optag_Klik" Padding="16,7" FontSize="12.5"
                 Style="{StaticResource Primaer}" />
-        <Button Content="Ikke nu" Click="Luk_Klik" Padding="14,7" Margin="8,0,0,0" FontSize="12.5" />
+        <Button Content="{i18n:Oversat moedevagtpopup.ikke_nu}" Click="Luk_Klik" Padding="14,7" Margin="8,0,0,0" FontSize="12.5" />
       </StackPanel>
 
       <Button x:Name="AldrigKnap" Click="Aldrig_Klik" Margin="0,10,0,0" Padding="0"

@@ -1,6 +1,7 @@
 ﻿<UserControl x:Class="NoteApp.Desktop.Templates.TemplatesView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:i18n="clr-namespace:NoteApp.Desktop"
              Background="{StaticResource Baggrund}">
 
   <!-- Samme opbygning som «Optagelser» og «Dokumenter»: vaerktoejslinje med
@@ -25,9 +26,9 @@
            Se MainWindow.xaml for hvorfor. Kort: mødetypen kan man svare på,
            FØR mødet går i gang, og det er dér, den bliver valgt. «Skabelon»
            kan man foerst svare paa, naar man taenker i dokumenter. -->
-      <TextBlock Text="Mødetyper" Style="{StaticResource Overskrift}" />
+      <TextBlock Text="{i18n:Oversat templatesview.moedetyper}" Style="{StaticResource Overskrift}" />
       <TextBlock Style="{StaticResource Underskrift}"
-                 Text="Hvilken slags møde det er — og hvad der skal skrives ud af det" />
+                 Text="{i18n:Oversat templatesview.hvilken_slags_moede_det_er_og_hvad_der_ska}" />
     </StackPanel>
 
     <!-- HER LAA ET PANEL: "Dokumenter laves af Mistral Medium 3.5 i Europa".
@@ -40,16 +41,16 @@
     <Border Grid.Row="1" Background="{StaticResource Panel}" CornerRadius="8"
             BorderBrush="{StaticResource PanelKant}" BorderThickness="1" Padding="8,6">
       <DockPanel>
-        <Button DockPanel.Dock="Right" x:Name="GemKnap" Content="Gem ændringer" Click="Gem_Click"
+        <Button DockPanel.Dock="Right" x:Name="GemKnap" Content="{i18n:Oversat templatesview.gem_aendringer}" Click="Gem_Click"
                 Style="{StaticResource Primaer}" MinWidth="150" IsEnabled="False"
-                ToolTip="Gem det, du har rettet i mødetypen" />
+                ToolTip="{i18n:Oversat templatesview.gem_det_du_har_rettet_i_moedetypen}" />
 
         <Border DockPanel.Dock="Right" Width="1" Margin="10,4,14,4"
                 Background="{StaticResource PanelKant}" />
 
         <Button DockPanel.Dock="Left" x:Name="NyKnap" Style="{StaticResource IkonKnap}"
-                Click="Ny_Click" AutomationProperties.Name="Ny mødetype"
-                ToolTip="Ny mødetype — start fra en tom og skriv din egen">
+                Click="Ny_Click" AutomationProperties.Name="{i18n:Oversat faelles.ny_moedetype}"
+                ToolTip="{i18n:Oversat templatesview.ny_moedetype_start_fra_en_tom_og_skriv_din}">
           <TextBlock Text="&#xE710;" FontFamily="Segoe MDL2 Assets" />
         </Button>
 
@@ -57,8 +58,8 @@
                 Background="{StaticResource PanelKant}" />
 
         <Button DockPanel.Dock="Left" x:Name="MappeKnap" Style="{StaticResource IkonKnap}"
-                Click="Mappe_Click" AutomationProperties.Name="Åbn mappen med mødetyper"
-                ToolTip="Åbn mappen med mødetyper på disken">
+                Click="Mappe_Click" AutomationProperties.Name="{i18n:Oversat templatesview.aabn_mappen_med_moedetyper}"
+                ToolTip="{i18n:Oversat templatesview.aabn_mappen_med_moedetyper_paa_disken}">
           <TextBlock Text="&#xE838;" FontFamily="Segoe MDL2 Assets" />
         </Button>
 
@@ -66,8 +67,8 @@
                 Background="{StaticResource PanelKant}" />
 
         <Button DockPanel.Dock="Left" x:Name="SletKnap" Style="{StaticResource IkonKnapFare}"
-                Click="Slet_Click" IsEnabled="False" AutomationProperties.Name="Slet mødetype"
-                ToolTip="Slet den valgte mødetype. Kan ikke fortrydes">
+                Click="Slet_Click" IsEnabled="False" AutomationProperties.Name="{i18n:Oversat templatesview.slet_moedetype}"
+                ToolTip="{i18n:Oversat templatesview.slet_den_valgte_moedetype_kan_ikke_fortryd}">
           <TextBlock Text="&#xE74D;" FontFamily="Segoe MDL2 Assets" />
         </Button>
 
@@ -90,7 +91,7 @@
       <Border Grid.Column="0" Background="{StaticResource Panel}" CornerRadius="10"
               BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
         <DockPanel>
-          <TextBlock DockPanel.Dock="Top" Text="BIBLIOTEKER" FontSize="10.5" FontWeight="SemiBold"
+          <TextBlock DockPanel.Dock="Top" Text="{i18n:Oversat faelles.biblioteker}" FontSize="10.5" FontWeight="SemiBold"
                      Margin="16,14,16,8" Foreground="{StaticResource TekstMeget}" />
 
           <TreeView x:Name="Trae" Background="Transparent" BorderThickness="0"
@@ -170,7 +171,7 @@
              opslagslisten over felter. -->
         <TabControl x:Name="Detaljer" Style="{StaticResource Fanerude}" Margin="22,16,22,18">
 
-          <TabItem Header="Indstillinger" Style="{StaticResource Fane}">
+          <TabItem Header="{i18n:Oversat faelles.indstillinger}" Style="{StaticResource Fane}">
             <StackPanel>
 
               <!-- De tre korte felter paa een raekke. Beskrivelsen fik foer
@@ -186,17 +187,17 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Grid.Column="0" Margin="0,0,10,0">
-                  <TextBlock Text="Navn" Style="{StaticResource Underskrift}" />
+                  <TextBlock Text="{i18n:Oversat templatesview.navn}" Style="{StaticResource Underskrift}" />
                   <TextBox x:Name="FeltNavn" Margin="0,4,0,0" TextChanged="Aendret" />
                 </StackPanel>
 
                 <StackPanel Grid.Column="1" Margin="0,0,10,0">
-                  <TextBlock Text="Temperatur" Style="{StaticResource Underskrift}" />
+                  <TextBlock Text="{i18n:Oversat templatesview.temperatur}" Style="{StaticResource Underskrift}" />
                   <TextBox x:Name="FeltTemperatur" Margin="0,4,0,0" TextChanged="Aendret" />
                 </StackPanel>
 
                 <StackPanel Grid.Column="2">
-                  <TextBlock Text="Maks. længde (tokens)" Style="{StaticResource Underskrift}" />
+                  <TextBlock Text="{i18n:Oversat templatesview.maks_laengde_tokens}" Style="{StaticResource Underskrift}" />
                   <TextBox x:Name="FeltMaksTokens" Margin="0,4,0,0" TextChanged="Aendret" />
                 </StackPanel>
               </Grid>
@@ -209,30 +210,30 @@
                 </Grid.ColumnDefinitions>
                 <TextBlock Grid.Column="0" FontSize="11.5" TextWrapping="Wrap" Margin="2,0,10,0"
                            Foreground="{StaticResource TekstMeget}"
-                           Text="Står på knappen, når du vælger mødetype." />
+                           Text="{i18n:Oversat templatesview.staar_paa_knappen_naar_du_vaelger_moedetyp}" />
                 <TextBlock Grid.Column="1" FontSize="11.5" TextWrapping="Wrap" Margin="2,0,10,0"
                            Foreground="{StaticResource TekstMeget}"
-                           Text="0,0 holder sig tæt på transkriptionen. Over 0,4 formulerer den sig frit — og til et referat er det en fejl." />
+                           Text="{i18n:Oversat templatesview.0_0_holder_sig_taet_paa_transkriptionen_ov}" />
                 <TextBlock Grid.Column="2" FontSize="11.5" TextWrapping="Wrap" Margin="2,0,0,0"
                            Foreground="{StaticResource TekstMeget}"
-                           Text="Loftet over svaret. Cirka 3 tegn pr. token." />
+                           Text="{i18n:Oversat templatesview.loftet_over_svaret_cirka_3_tegn_pr_token}" />
               </Grid>
 
-              <TextBlock Text="Beskrivelse" Style="{StaticResource Underskrift}" Margin="0,20,0,0" />
+              <TextBlock Text="{i18n:Oversat templatesview.beskrivelse}" Style="{StaticResource Underskrift}" Margin="0,20,0,0" />
               <TextBox x:Name="FeltBeskrivelse" Margin="0,4,0,0" TextChanged="Aendret"
                        AcceptsReturn="True" TextWrapping="Wrap" MinHeight="58"
                        VerticalScrollBarVisibility="Auto" />
               <TextBlock FontSize="11.5" Margin="2,6,0,0" TextWrapping="Wrap"
                          Foreground="{StaticResource TekstMeget}"
-                         Text="Står under navnet, når du vælger mødetype — så valget ikke er et gæt. Skriv gerne to linjer om, hvad den er god til, og hvornår man vælger den frem for de andre." />
+                         Text="{i18n:Oversat templatesview.staar_under_navnet_naar_du_vaelger_moedety}" />
             </StackPanel>
           </TabItem>
 
-          <TabItem Header="Instruktion" Style="{StaticResource Fane}">
+          <TabItem Header="{i18n:Oversat templatesview.instruktion}" Style="{StaticResource Fane}">
             <DockPanel>
               <TextBlock DockPanel.Dock="Top" FontSize="11.5" Margin="2,0,0,8" TextWrapping="Wrap"
                          Foreground="{StaticResource TekstMeget}"
-                         Text="Reglerne, modellen arbejder efter. Det er her, du bestemmer, hvad et referat SKAL og ikke må — og det er her, en fejl i et referat oftest skal rettes." />
+                         Text="{i18n:Oversat templatesview.reglerne_modellen_arbejder_efter_det_er_he}" />
 
               <!-- DELTAGERREGLERNE HOERER TIL HER, IKKE PAA MATERIALEFANEN.
                    De er en REGEL, ikke en oplysning om moedet, og de bliver
@@ -244,15 +245,15 @@
                       BorderBrush="{StaticResource PanelKant}" BorderThickness="1"
                       Padding="14,11" Margin="0,10,0,0">
                 <StackPanel>
-                  <TextBlock Text="Fælles regler, du kan sætte ind" FontSize="12.5" FontWeight="SemiBold" />
+                  <TextBlock Text="{i18n:Oversat templatesview.faelles_regler_du_kan_saette_ind}" FontSize="12.5" FontWeight="SemiBold" />
                   <TextBlock FontSize="11.5" Margin="0,4,0,8" TextWrapping="Wrap" LineHeight="18"
                              Foreground="{StaticResource TekstMeget}"
-                             Text="Reglerne for, hvem der kommer på deltagerlisten, er de samme for alle mødetyper. Sæt feltet ind, så følger de med — rettes de ét sted, følger alle mødetyper med." />
+                             Text="{i18n:Oversat templatesview.reglerne_for_hvem_der_kommer_paa_deltagerl}" />
                   <!-- {} foerst: ellers laeser XAML den kroellede parentes som en
                        markup-extension og vil ikke bygge. -->
                   <Button Content="{}{{deltagerregler}}" Tag="{}{{deltagerregler}}" Click="Systemfelt_Klik"
                           HorizontalAlignment="Left" Padding="10,5" FontFamily="Consolas" FontSize="12"
-                          ToolTip="Sætter de fælles deltagerregler ind, hvor markøren står" />
+                          ToolTip="{i18n:Oversat templatesview.saetter_de_faelles_deltagerregler_ind_hvor}" />
                 </StackPanel>
               </Border>
 
@@ -267,15 +268,15 @@
                overhovedet naar frem til modellen: staar {{noter}} ikke her,
                bliver dine noter aldrig sendt. Det er et roer, ikke en
                indstilling - og navnet skal sige det. -->
-          <TabItem x:Name="MaterialeFane" Header="Hvad modellen får" Style="{StaticResource Fane}">
+          <TabItem x:Name="MaterialeFane" Header="{i18n:Oversat templatesview.hvad_modellen_faar}" Style="{StaticResource Fane}">
             <DockPanel>
               <StackPanel DockPanel.Dock="Top" Margin="2,0,0,8">
                 <TextBlock FontSize="11.5" TextWrapping="Wrap" LineHeight="18"
                            Foreground="{StaticResource TekstMeget}"
-                           Text="«Instruktion» er reglerne — hvad modellen skal gøre. Det her er materialet, den skal gøre det på. Alt herunder sendes, som det står, bortset fra felterne, der bliver skiftet ud med mødets egne oplysninger." />
+                           Text="{i18n:Oversat templatesview.instruktion_er_reglerne_hvad_modellen_skal}" />
                 <TextBlock FontSize="11.5" Margin="0,5,0,0" TextWrapping="Wrap" LineHeight="18"
                            Foreground="{StaticResource TekstMeget}"
-                           Text="Står et felt ikke her, når de oplysninger aldrig frem — uanset hvad instruktionen beder om." />
+                           Text="{i18n:Oversat templatesview.staar_et_felt_ikke_her_naar_de_oplysninger}" />
 
                 <!-- KONTROLLEN AF FELTERNE.
                      En skabelon uden {{transskription}} beder en model om at
@@ -299,11 +300,11 @@
                       BorderBrush="{StaticResource PanelKant}" BorderThickness="1"
                       Padding="14,11" Margin="0,10,0,0">
                 <StackPanel>
-                  <TextBlock Text="Sæt et felt ind, hvor markøren står" FontSize="12.5"
+                  <TextBlock Text="{i18n:Oversat templatesview.saet_et_felt_ind_hvor_markoeren_staar}" FontSize="12.5"
                              FontWeight="SemiBold" />
                   <TextBlock FontSize="11.5" Margin="0,4,0,8" TextWrapping="Wrap" LineHeight="18"
                              Foreground="{StaticResource TekstMeget}"
-                             Text="Klik på et felt for at sætte det ind i teksten ovenfor. Når dokumentet laves, bliver feltet skiftet ud med mødets egne oplysninger — {{transskription}} bliver til hele transkriptionen." />
+                             Text="{i18n:Oversat templatesview.klik_paa_et_felt_for_at_saette_det_ind_i_t}" />
                   <ItemsControl x:Name="Felter">
                     <ItemsControl.ItemsPanel>
                       <ItemsPanelTemplate>
@@ -327,20 +328,20 @@
             </DockPanel>
           </TabItem>
 
-          <TabItem x:Name="AgendaFane" Header="Agenda" Style="{StaticResource Fane}">
+          <TabItem x:Name="AgendaFane" Header="{i18n:Oversat templatesview.agenda}" Style="{StaticResource Fane}">
             <DockPanel>
               <StackPanel DockPanel.Dock="Top" Margin="0,0,0,10">
                 <TextBlock x:Name="AgendaOverskrift" FontSize="13.5" FontWeight="SemiBold"
-                           Text="Hvorfor en fast dagsorden" />
+                           Text="{i18n:Oversat templatesview.hvorfor_en_fast_dagsorden}" />
                 <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,6,0,0"
                            Foreground="{StaticResource TekstSvag}"
-                           Text="Et referat kan kun indeholde det, der blev sagt. Bliver et navn aldrig nævnt, en frist aldrig aftalt eller en beslutning aldrig sagt højt, står det heller ikke i dokumentet — uanset hvor god modellen er." />
+                           Text="{i18n:Oversat templatesview.et_referat_kan_kun_indeholde_det_der_blev}" />
                 <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,8,0,0"
                            Foreground="{StaticResource TekstSvag}"
-                           Text="Dagsordenen herunder er bygget, så mødet af sig selv kommer omkring det, mødetyperne leder efter: hvem der er med, hvem der siger hvad, hvad der besluttes, hvad ingen kan svare på, og hvem der følger op hvornår. Den er et forslag — tilpas den frit, men de fem punkter er dem, der afgør, om transkriptionen kan blive til noget brugbart." />
+                           Text="{i18n:Oversat templatesview.dagsordenen_herunder_er_bygget_saa_moedet}" />
                 <TextBlock FontSize="12" LineHeight="20" TextWrapping="Wrap" Margin="0,8,0,0"
                            Foreground="{StaticResource TekstMeget}"
-                           Text="Kopiér den ind i mødeindkaldelsen. Det vigtigste enkelte punkt er navnerunden: uden den har talegenkendelsen ingen navne at genkende, og så bliver «hvem sagde hvad» et gæt." />
+                           Text="{i18n:Oversat templatesview.kopier_den_ind_i_moedeindkaldelsen_det_vig}" />
 
                 <!-- DAGSORDENEN HOERER TIL SKABELONEN.
                      Foerst viste den det samme, uanset hvad man stod paa. Det
@@ -352,15 +353,15 @@
                      Har skabelonen ikke sin egen, staar standarden. Den kan
                      tilpasses med een knap, og den kan altid rulles tilbage. -->
                 <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
-                  <Button x:Name="AgendaKopierKnap" Content="Kopiér dagsordenen"
+                  <Button x:Name="AgendaKopierKnap" Content="{i18n:Oversat templatesview.kopier_dagsordenen}"
                           Click="KopierAgenda_Click" Padding="14,7" Margin="0,0,8,0"
-                          ToolTip="Læg hele dagsordenen i udklipsholderen" />
-                  <Button x:Name="AgendaTilpasKnap" Content="Tilpas til denne mødetype"
+                          ToolTip="{i18n:Oversat templatesview.laeg_hele_dagsordenen_i_udklipsholderen}" />
+                  <Button x:Name="AgendaTilpasKnap" Content="{i18n:Oversat templatesview.tilpas_til_denne_moedetype}"
                           Click="TilpasAgenda_Click" Padding="14,7" Margin="0,0,8,0"
-                          ToolTip="Lad Mistral skrive en dagsorden, der passer til netop denne mødetype" />
-                  <Button x:Name="AgendaNulstilKnap" Content="Tilbage til standarden"
+                          ToolTip="{i18n:Oversat templatesview.lad_mistral_skrive_en_dagsorden_der_passer}" />
+                  <Button x:Name="AgendaNulstilKnap" Content="{i18n:Oversat templatesview.tilbage_til_standarden}"
                           Click="NulstilAgenda_Click" Padding="14,7" Visibility="Collapsed"
-                          ToolTip="Slet mødetypens egen dagsorden og brug den fælles igen" />
+                          ToolTip="{i18n:Oversat templatesview.slet_moedetypens_egen_dagsorden_og_brug_de}" />
                 </StackPanel>
               </StackPanel>
 

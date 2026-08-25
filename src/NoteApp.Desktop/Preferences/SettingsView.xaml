@@ -1,6 +1,7 @@
 ﻿<UserControl x:Class="NoteApp.Desktop.Preferences.SettingsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:i18n="clr-namespace:NoteApp.Desktop"
              Background="{StaticResource Baggrund}">
 
   <!-- ALT DET, MAN STILLER IND, EET STED.
@@ -21,15 +22,15 @@
     </Grid.RowDefinitions>
 
     <StackPanel Grid.Row="0" Margin="0,0,0,12">
-      <TextBlock Text="Indstillinger" Style="{StaticResource Overskrift}" />
+      <TextBlock Text="{i18n:Oversat faelles.indstillinger}" Style="{StaticResource Overskrift}" />
       <TextBlock Style="{StaticResource Underskrift}" TextWrapping="Wrap" MaxWidth="820"
                  HorizontalAlignment="Left"
-                 Text="Opstart, lyd, hvor dine filer ligger — og sikkerhedskopien." />
+                 Text="{i18n:Oversat settingsview.opstart_lyd_hvor_dine_filer_ligger_og_sikk}" />
     </StackPanel>
 
     <TabControl Grid.Row="1" Style="{StaticResource Fanerude}">
 
-      <TabItem Header="Opstart" Style="{StaticResource Fane}">
+      <TabItem Header="{i18n:Oversat settingsview.opstart}" Style="{StaticResource Fane}">
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
           <StackPanel>
         <!-- ===================== Klar til næste møde ======================== -->
@@ -37,10 +38,10 @@
                 BorderBrush="{StaticResource PanelKant}" BorderThickness="1" Margin="0,0,0,14"
                 VerticalAlignment="Top">
           <StackPanel>
-            <TextBlock Text="Klar til næste møde" FontSize="15" FontWeight="SemiBold" />
+            <TextBlock Text="{i18n:Oversat settingsview.klar_til_naeste_moede}" FontSize="15" FontWeight="SemiBold" />
             <TextBlock FontSize="12.5" Margin="0,6,0,0" TextWrapping="Wrap" LineHeight="20"
                        Foreground="{StaticResource TekstMeget}"
-                       Text="Genvejstasten kan kun starte en optagelse, hvis appen kører. Derfor hænger de to ting sammen." />
+                       Text="{i18n:Oversat settingsview.genvejstasten_kan_kun_starte_en_optagelse}" />
 
             <!-- HVORFOR DET STAAR HER OG IKKE KUN VED HAKKET PAA AFTALEN.
                  Betingelsen gaelder tre funktioner, ikke én, og den er den
@@ -51,22 +52,22 @@
             <Border Background="#FF181B22" BorderBrush="{StaticResource Accent}"
                     BorderThickness="3,0,0,0" CornerRadius="4" Padding="14,11" Margin="0,12,0,0">
               <StackPanel>
-                <TextBlock Text="NoteApp virker bedst, når den altid kører"
+                <TextBlock Text="{i18n:Oversat settingsview.noteapp_virker_bedst_naar_den_altid_koerer}"
                            FontSize="12.5" FontWeight="SemiBold" />
                 <TextBlock FontSize="12" Margin="0,7,0,0" TextWrapping="Wrap" LineHeight="19"
                            Foreground="{StaticResource Tekst}"
-                           Text="Tre ting kan kun ske, mens appen er åben: genvejstasten kan starte en optagelse, mødevagten kan spørge, når et program bruger mikrofonen, og en aftale, du har markeret til automatisk optagelse, kan gå i gang af sig selv." />
+                           Text="{i18n:Oversat settingsview.tre_ting_kan_kun_ske_mens_appen_er_aaben_g}" />
                 <TextBlock FontSize="12" Margin="0,7,0,0" TextWrapping="Wrap" LineHeight="19"
                            Foreground="{StaticResource Tekst}"
-                           Text="Det er ikke en begrænsning, der kan laves om. En optagelse er noget, der skal være i gang, og et lukket program kan ikke starte den — heller ikke med en planlagt opgave i Windows, for de første sekunder ville gå med at hente programmet ind." />
+                           Text="{i18n:Oversat settingsview.det_er_ikke_en_begraensning_der_kan_laves}" />
                 <TextBlock FontSize="12" Margin="0,7,0,0" TextWrapping="Wrap" LineHeight="19"
                            Foreground="{StaticResource TekstMeget}"
-                           Text="Appen fylder ingenting, når der ikke optages. Derfor er «Start NoteApp, når jeg logger på Windows» slået til fra begyndelsen — og derfor kan du slå den fra." />
+                           Text="{i18n:Oversat settingsview.appen_fylder_ingenting_naar_der_ikke_optag}" />
               </StackPanel>
             </Border>
 
             <CheckBox x:Name="StartMedWindows" Margin="0,14,0,0" Click="Autostart_Klik"
-                      Content="Start NoteApp, når jeg logger på Windows" />
+                      Content="{i18n:Oversat settingsview.start_noteapp_naar_jeg_logger_paa_windows}" />
             <TextBlock x:Name="AutostartStatus" FontSize="12" Margin="24,6,0,0" TextWrapping="Wrap"
                        Foreground="{StaticResource TekstMeget}" />
 
@@ -74,10 +75,10 @@
                     CornerRadius="8" Padding="14,11" Margin="0,14,0,0">
               <StackPanel>
                 <TextBlock x:Name="GenvejOverskrift" FontSize="13" FontWeight="SemiBold"
-                           Text="Lynstart af optagelse" />
+                           Text="{i18n:Oversat settingsview.lynstart_af_optagelse}" />
                 <TextBlock FontSize="12.5" Margin="0,6,0,0" TextWrapping="Wrap" LineHeight="20"
                            Foreground="{StaticResource TekstSvag}"
-                           Text="Tryk kombinationen hvor som helst i Windows, så begynder optagelsen med det samme. Listen viser, hvad der er ledigt på netop din maskine — det er forskelligt fra pc til pc." />
+                           Text="{i18n:Oversat settingsview.tryk_kombinationen_hvor_som_helst_i_window}" />
 
                 <ComboBox x:Name="Genveje" Margin="0,12,0,0" SelectionChanged="Genvej_Valgt">
                   <ComboBox.ItemTemplate>
@@ -99,24 +100,24 @@
                 BorderBrush="{StaticResource PanelKant}" BorderThickness="1" Margin="0,0,0,14"
                 VerticalAlignment="Top">
           <StackPanel>
-            <TextBlock Text="Spørg, når der starter et møde" FontSize="15" FontWeight="SemiBold" />
+            <TextBlock Text="{i18n:Oversat settingsview.spoerg_naar_der_starter_et_moede}" FontSize="15" FontWeight="SemiBold" />
             <TextBlock FontSize="12.5" Margin="0,6,0,0" TextWrapping="Wrap" LineHeight="20"
                        Foreground="{StaticResource TekstMeget}"
-                       Text="Appen kan holde øje med, om et andet program åbner din mikrofon — det gør et møde, og det gør et webinar, en video eller en streamingtjeneste ikke. Sker det, kommer der en besked nede ved uret med spørgsmålet, om mødet skal optages." />
+                       Text="{i18n:Oversat settingsview.appen_kan_holde_oeje_med_om_et_andet_progr}" />
 
             <CheckBox x:Name="MoedevagtTil" Margin="0,14,0,0" Click="Moedevagt_Klik"
-                      Content="Spørg mig, når et program bruger mikrofonen" />
+                      Content="{i18n:Oversat settingsview.spoerg_mig_naar_et_program_bruger_mikrofon}" />
 
             <Border Background="#FF181B22" BorderBrush="{StaticResource PanelKant}" BorderThickness="1"
                     CornerRadius="8" Padding="14,11" Margin="24,10,0,0">
               <StackPanel>
-                <TextBlock Text="Hvad appen kigger på" FontSize="12.5" FontWeight="SemiBold" />
+                <TextBlock Text="{i18n:Oversat settingsview.hvad_appen_kigger_paa}" FontSize="12.5" FontWeight="SemiBold" />
                 <TextBlock FontSize="12" Margin="0,6,0,0" TextWrapping="Wrap" LineHeight="19"
                            Foreground="{StaticResource TekstSvag}"
-                           Text="Kun Windows' egen liste over, hvilke programmer der bruger mikrofonen — den samme, du selv kan se under Indstillinger i Windows. Der lyttes ikke med, der optages ingenting, og oplysningen bliver på maskinen." />
+                           Text="{i18n:Oversat settingsview.kun_windows_egen_liste_over_hvilke_program}" />
                 <TextBlock FontSize="12" Margin="0,8,0,0" TextWrapping="Wrap" LineHeight="19"
                            Foreground="{StaticResource TekstSvag}"
-                           Text="Der spørges først, når mikrofonen har været i brug i et halvt minut, så en diktering eller en mikrofonprøve ikke udløser noget. Og der optages aldrig af sig selv — der sker kun det, du trykker på." />
+                           Text="{i18n:Oversat settingsview.der_spoerges_foerst_naar_mikrofonen_har_va}" />
               </StackPanel>
             </Border>
 
@@ -128,11 +129,11 @@
                  program, man rent faktisk holder sine møder i, uden at man
                  kunne finde ud af hvorfor. -->
             <StackPanel x:Name="FravalgtPanel" Margin="24,14,0,0" Visibility="Collapsed">
-              <TextBlock Text="Der spørges ikke om disse programmer" FontSize="12.5"
+              <TextBlock Text="{i18n:Oversat settingsview.der_spoerges_ikke_om_disse_programmer}" FontSize="12.5"
                          FontWeight="SemiBold" />
               <TextBlock FontSize="12" Margin="0,5,0,0" TextWrapping="Wrap" LineHeight="19"
                          Foreground="{StaticResource TekstMeget}"
-                         Text="Fjern et program fra listen, hvis du kom til at frabede dig det — så spørges der igen næste gang." />
+                         Text="{i18n:Oversat settingsview.fjern_et_program_fra_listen_hvis_du_kom_ti}" />
 
               <ItemsControl x:Name="Fravalgte" Margin="0,10,0,0">
                 <ItemsControl.ItemTemplate>
@@ -146,7 +147,7 @@
                                      TextTrimming="CharacterEllipsis"
                                      Foreground="{StaticResource TekstMeget}" />
                         </StackPanel>
-                        <Button Content="Spørg igen" Tag="{Binding Noegle}" Click="Fravalg_Fjern"
+                        <Button Content="{i18n:Oversat settingsview.spoerg_igen}" Tag="{Binding Noegle}" Click="Fravalg_Fjern"
                                 HorizontalAlignment="Right" VerticalAlignment="Center"
                                 Padding="12,5" FontSize="11.5" />
                       </Grid>
@@ -171,17 +172,17 @@
            paa naesten hvad som helst; forskellen er, hvor laenge man venter.
            Et roedt kryds ville sige, at noget ikke virker, og det ville vaere
            forkert. -->
-      <TabItem Header="Krav til maskinen" Style="{StaticResource Fane}">
+      <TabItem Header="{i18n:Oversat settingsview.krav_til_maskinen}" Style="{StaticResource Fane}">
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
           <StackPanel>
 
             <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20"
                     BorderBrush="{StaticResource PanelKant}" BorderThickness="1" Margin="0,0,0,14">
               <StackPanel>
-                <TextBlock Text="Anbefalet minimum" FontSize="15" FontWeight="SemiBold" />
+                <TextBlock Text="{i18n:Oversat settingsview.anbefalet_minimum}" FontSize="15" FontWeight="SemiBold" />
                 <TextBlock FontSize="12.5" Margin="0,6,0,0" TextWrapping="Wrap" LineHeight="20"
                            Foreground="{StaticResource TekstMeget}"
-                           Text="Alt arbejdet sker på din egen maskine — udskrift, søgning, talergenkendelse og den korte opsummering. Derfor betyder maskinen noget, og derfor står der, hvad DEN HER maskine har." />
+                           Text="{i18n:Oversat settingsview.alt_arbejdet_sker_paa_din_egen_maskine_uds}" />
 
                 <ItemsControl x:Name="Kravliste" Margin="0,14,0,0">
                   <ItemsControl.ItemTemplate>
@@ -213,36 +214,36 @@
             <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20"
                     BorderBrush="{StaticResource Advarsel}" BorderThickness="1" Margin="0,0,0,14">
               <StackPanel>
-                <TextBlock Text="FORBEHOLD" FontSize="10.5" FontWeight="SemiBold"
+                <TextBlock Text="{i18n:Oversat settingsview.forbehold}" FontSize="10.5" FontWeight="SemiBold"
                            Foreground="{StaticResource Advarsel}" Margin="0,0,0,10" />
 
                 <TextBlock FontSize="12.5" Margin="0,0,0,0" TextWrapping="Wrap" LineHeight="21"
                            Foreground="{StaticResource TekstSvag}"
-                           Text="Kun Windows. Appen bygger på Windows' egen lydmotor og på Windows' liste over programmer, der bruger mikrofonen. Der findes ingen udgave til Mac eller Linux, og det er ikke en oversættelse væk." />
+                           Text="{i18n:Oversat settingsview.kun_windows_appen_bygger_paa_windows_egen}" />
 
                 <TextBlock FontSize="12.5" Margin="0,10,0,0" TextWrapping="Wrap" LineHeight="21"
                            Foreground="{StaticResource TekstSvag}"
-                           Text="Appen skal køre, for at tre ting virker: genvejstasten, mødevagten og automatisk optagelse af en aftale. Et lukket program kan ikke starte en optagelse." />
+                           Text="{i18n:Oversat settingsview.appen_skal_koere_for_at_tre_ting_virker_ge}" />
 
                 <TextBlock FontSize="12.5" Margin="0,10,0,0" TextWrapping="Wrap" LineHeight="21"
                            Foreground="{StaticResource TekstSvag}"
-                           Text="Uden NVIDIA-kort kører udskriften på processoren. Den virker, men en times møde tager længere end mødet selv varede. Optagelsen er upåvirket." />
+                           Text="{i18n:Oversat settingsview.uden_nvidia_kort_koerer_udskriften_paa_pro}" />
 
                 <TextBlock FontSize="12.5" Margin="0,10,0,0" TextWrapping="Wrap" LineHeight="21"
                            Foreground="{StaticResource TekstSvag}"
-                           Text="Lyden fylder. En times møde med to spor er 220 MB, fordi lyden gemmes ukomprimeret — det giver den bedste udskrift. Teksten fylder 56 KB, og lyden kan slettes, når den er skrevet ud." />
+                           Text="{i18n:Oversat settingsview.lyden_fylder_en_times_moede_med_to_spor_er}" />
 
                 <TextBlock FontSize="12.5" Margin="0,10,0,0" TextWrapping="Wrap" LineHeight="21"
                            Foreground="{StaticResource TekstSvag}"
-                           Text="Nøjagtigheden er ikke 100 %. Målt: 92,3 % på dansk, 90,5 % på engelsk, 83,1 % når der skiftes mellem sprogene midt i en sætning. Navne og fagord er det, der oftest rammes forkert." />
+                           Text="{i18n:Oversat settingsview.noejagtigheden_er_ikke_100_maalt_92_3_paa}" />
 
                 <TextBlock FontSize="12.5" Margin="0,10,0,0" TextWrapping="Wrap" LineHeight="21"
                            Foreground="{StaticResource TekstSvag}"
-                           Text="Appen kan skille de to SIDER af et onlinemøde — din mikrofon og det, computeren afspiller. Den kan ikke kende de enkelte personer i den anden ende fra hinanden." />
+                           Text="{i18n:Oversat settingsview.appen_kan_skille_de_to_sider_af_et_onlinem}" />
 
                 <TextBlock FontSize="12.5" Margin="0,10,0,0" TextWrapping="Wrap" LineHeight="21"
                            Foreground="{StaticResource TekstSvag}"
-                           Text="Et fysisk møde i et lokale optages gennem din mikrofon alene. Det virker, men afstanden til den, der taler, afgør, hvor godt det bliver." />
+                           Text="{i18n:Oversat settingsview.et_fysisk_moede_i_et_lokale_optages_gennem}" />
               </StackPanel>
             </Border>
 
@@ -250,17 +251,17 @@
         </ScrollViewer>
       </TabItem>
 
-      <TabItem Header="Lyd" Style="{StaticResource Fane}">
+      <TabItem Header="{i18n:Oversat settingsview.lyd}" Style="{StaticResource Fane}">
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
           <StackPanel>
             <Grid Margin="0,0,0,14">
               <TextBlock Style="{StaticResource Underskrift}" TextWrapping="Wrap" MaxWidth="700"
                          HorizontalAlignment="Left" VerticalAlignment="Center"
-                         Text="Vælg mikrofon og højttaler. Appen lytter ikke, før du trykker prøv — eller trykker optag." />
+                         Text="{i18n:Oversat settingsview.vaelg_mikrofon_og_hoejttaler_appen_lytter}" />
                     <!-- Måleren kræver, at mikrofonen åbnes. Det skal være et valg: en app,
                          der lytter, fordi man kigger på en indstillingsskærm, holder ikke
                          det løfte, resten af appen giver. -->
-                    <Button x:Name="ProeveKnap" Content="▶ Prøv mikrofon og højttaler" Click="Proeve_Click"
+                    <Button x:Name="ProeveKnap" Content="{i18n:Oversat settingsview.proev_mikrofon_og_hoejttaler}" Click="Proeve_Click"
                             HorizontalAlignment="Right" VerticalAlignment="Center" Padding="16,9"
                             Background="{StaticResource Accent}" Foreground="#FF0B1220" BorderThickness="0"
                             FontWeight="SemiBold" />
@@ -269,9 +270,9 @@
         <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20" Margin="0,0,0,14"
                 BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
           <StackPanel>
-            <TextBlock Text="Mikrofon" FontSize="15" FontWeight="SemiBold" />
+            <TextBlock Text="{i18n:Oversat settingsview.mikrofon}" FontSize="15" FontWeight="SemiBold" />
             <TextBlock Style="{StaticResource Underskrift}" Margin="0,3,0,10"
-                       Text="Dig. Optages på alle møder, både fysiske og online." />
+                       Text="{i18n:Oversat settingsview.dig_optages_paa_alle_moeder_baade_fysiske}" />
 
             <!-- ItemTemplate frem for DisplayMemberPath: med en egen ComboBox-
                  skabelon slaar DisplayMemberPath ikke igennem paa den lukkede
@@ -290,7 +291,7 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
               </Grid.ColumnDefinitions>
-              <TextBlock Grid.Column="0" Text="Niveau" Style="{StaticResource Underskrift}"
+              <TextBlock Grid.Column="0" Text="{i18n:Oversat faelles.niveau}" Style="{StaticResource Underskrift}"
                          VerticalAlignment="Center" Width="52" />
               <Border Grid.Column="1" Height="10" Background="#FF2C323D" CornerRadius="5"
                       VerticalAlignment="Center">
@@ -321,9 +322,9 @@
         <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20"
                 BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
           <StackPanel>
-            <TextBlock Text="Højttaler" FontSize="15" FontWeight="SemiBold" />
+            <TextBlock Text="{i18n:Oversat settingsview.hoejttaler}" FontSize="15" FontWeight="SemiBold" />
             <TextBlock Style="{StaticResource Underskrift}" Margin="0,3,0,10"
-                       Text="De andre deltagere. Vælges den forkerte, bliver deres spor tomt." />
+                       Text="{i18n:Oversat settingsview.de_andre_deltagere_vaelges_den_forkerte_bl}" />
 
             <ComboBox x:Name="Hoejttalere" SelectionChanged="Hoejttaler_Valgt">
               <ComboBox.ItemTemplate>
@@ -339,7 +340,7 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
               </Grid.ColumnDefinitions>
-              <TextBlock Grid.Column="0" Text="Niveau" Style="{StaticResource Underskrift}"
+              <TextBlock Grid.Column="0" Text="{i18n:Oversat faelles.niveau}" Style="{StaticResource Underskrift}"
                          VerticalAlignment="Center" Width="52" />
               <Border Grid.Column="1" Height="10" Background="#FF2C323D" CornerRadius="5"
                       VerticalAlignment="Center">
@@ -369,12 +370,12 @@
           <StackPanel>
             <Grid>
               <StackPanel>
-                <TextBlock Text="Er mikrofonen god nok?" FontSize="15" FontWeight="SemiBold" />
+                <TextBlock Text="{i18n:Oversat settingsview.er_mikrofonen_god_nok}" FontSize="15" FontWeight="SemiBold" />
                 <TextBlock Style="{StaticResource Underskrift}" Margin="0,3,0,0" TextWrapping="Wrap" MaxWidth="620"
                            HorizontalAlignment="Left"
-                           Text="Læs en fast tekst op i cirka tredive sekunder. Appen kender teksten i forvejen og tæller, hvor mange ord den hørte rigtigt." />
+                           Text="{i18n:Oversat settingsview.laes_en_fast_tekst_op_i_cirka_tredive_seku}" />
               </StackPanel>
-              <Button x:Name="TestKnap" Content="▶ Start test" Click="Test_Click"
+              <Button x:Name="TestKnap" Content="{i18n:Oversat settingsview.start_test}" Click="Test_Click"
                       HorizontalAlignment="Right" VerticalAlignment="Top" Padding="16,9" MinWidth="150"
                       Background="{StaticResource Accent}" Foreground="#FF0B1220" BorderThickness="0"
                       FontWeight="SemiBold" />
@@ -388,7 +389,7 @@
               <StackPanel>
                 <Grid Margin="0,0,0,12">
                   <TextBlock x:Name="TestTrin" FontSize="13" FontWeight="SemiBold"
-                             Foreground="{StaticResource Accent}" Text="Læs højt — i almindeligt tempo" />
+                             Foreground="{StaticResource Accent}" Text="{i18n:Oversat settingsview.laes_hoejt_i_almindeligt_tempo}" />
                   <TextBlock x:Name="TestUr" FontSize="13" HorizontalAlignment="Right"
                              Foreground="{StaticResource TekstSvag}" FontFamily="Consolas" />
                 </Grid>
@@ -401,7 +402,7 @@
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
                   </Grid.ColumnDefinitions>
-                  <TextBlock Grid.Column="0" Text="Niveau" Style="{StaticResource Underskrift}"
+                  <TextBlock Grid.Column="0" Text="{i18n:Oversat faelles.niveau}" Style="{StaticResource Underskrift}"
                              VerticalAlignment="Center" Width="52" />
                   <Border Grid.Column="1" Height="10" Background="#FF2C323D" CornerRadius="5"
                           VerticalAlignment="Center">
@@ -431,7 +432,7 @@
                            Margin="0,10,0,0" Foreground="{StaticResource TekstSvag}" MaxWidth="640"
                            HorizontalAlignment="Left" />
 
-                <Expander x:Name="TestDetalje" Header="Sådan hørte appen det" Margin="0,12,0,0"
+                <Expander x:Name="TestDetalje" Header="{i18n:Oversat settingsview.saadan_hoerte_appen_det}" Margin="0,12,0,0"
                           Foreground="{StaticResource TekstMeget}" FontSize="12">
                   <StackPanel Margin="0,10,0,0">
                     <TextBlock x:Name="TestFejl" FontSize="12.5" TextWrapping="Wrap" LineHeight="21"
@@ -462,32 +463,32 @@
            STÅ ØVERST. Alt andet bliver på maskinen; her taler appen med en
            amerikansk leverandør. Det er i orden — men det skal siges, og det
            skal siges før knapperne, ikke under dem. -->
-      <TabItem Header="Integrationer" Style="{StaticResource Fane}">
+      <TabItem Header="{i18n:Oversat settingsview.integrationer}" Style="{StaticResource Fane}">
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
           <StackPanel>
 
             <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20"
                     BorderBrush="{StaticResource PanelKant}" BorderThickness="1" Margin="0,0,0,14">
               <StackPanel>
-                <TextBlock Text="Kalendere fra andre tjenester" FontSize="15" FontWeight="SemiBold" />
+                <TextBlock Text="{i18n:Oversat settingsview.kalendere_fra_andre_tjenester}" FontSize="15" FontWeight="SemiBold" />
                 <TextBlock FontSize="12.5" Margin="0,6,0,0" TextWrapping="Wrap" LineHeight="20"
                            Foreground="{StaticResource TekstMeget}"
-                           Text="Appen kan læse dine aftaler ind i kalenderen, så du kan trykke optag direkte på et møde. Kalenderen virker også uden — du kan altid oprette aftaler her i appen." />
+                           Text="{i18n:Oversat settingsview.appen_kan_laese_dine_aftaler_ind_i_kalende}" />
 
                 <Border Background="#FF181B22" BorderBrush="{StaticResource Accent}"
                         BorderThickness="3,0,0,0" CornerRadius="4" Padding="14,11" Margin="0,14,0,0">
                   <StackPanel>
-                    <TextBlock Text="Hvad der bliver sendt — og hvad der ikke gør"
+                    <TextBlock Text="{i18n:Oversat settingsview.hvad_der_bliver_sendt_og_hvad_der_ikke_goe}"
                                FontSize="12.5" FontWeight="SemiBold" />
                     <TextBlock FontSize="12" Margin="0,7,0,0" TextWrapping="Wrap" LineHeight="19"
                                Foreground="{StaticResource Tekst}"
-                               Text="Aftaler HENTES ned. Den anden vej sker kun, når du selv sætter hak ved «Opret også hos leverandøren» på en aftale — og så er det aftalens titel, tidspunkt og sted, intet andet. Lyd, transkriptioner, noter og dokumenter går aldrig den vej." />
+                               Text="{i18n:Oversat settingsview.aftaler_hentes_ned_den_anden_vej_sker_kun}" />
                     <TextBlock FontSize="12" Margin="0,7,0,0" TextWrapping="Wrap" LineHeight="19"
                                Foreground="{StaticResource Tekst}"
-                               Text="Lyden, transkriptionerne, dine noter og dokumenterne forlader aldrig maskinen ad denne vej. En kalenderintegration giver adgang til at læse en kalender." />
+                               Text="{i18n:Oversat settingsview.lyden_transkriptionerne_dine_noter_og_doku}" />
                     <TextBlock FontSize="12" Margin="0,7,0,0" TextWrapping="Wrap" LineHeight="19"
                                Foreground="{StaticResource TekstMeget}"
-                               Text="Google og Microsoft er amerikanske. Bruger du deres kalender i forvejen, ligger dine mødetitler og deltagere der allerede — appen læser det, der er der." />
+                               Text="{i18n:Oversat settingsview.google_og_microsoft_er_amerikanske_bruger}" />
                   </StackPanel>
                 </Border>
 
@@ -498,12 +499,12 @@
                      anden gang. -->
                 <CheckBox x:Name="IntegrationerLaest" Margin="0,14,0,0"
                           Click="IntegrationerLaest_Klik"
-                          Content="Dette er læst og forstået" />
+                          Content="{i18n:Oversat settingsview.dette_er_laest_og_forstaaet}" />
 
                 <TextBlock x:Name="LaestNote" FontSize="11.5" Margin="24,5,0,0"
                            TextWrapping="Wrap" LineHeight="18"
                            Foreground="{StaticResource TekstMeget}"
-                           Text="Sæt hakket for at kunne aktivere en integration. Du kan altid afbryde forbindelsen igen." />
+                           Text="{i18n:Oversat settingsview.saet_hakket_for_at_kunne_aktivere_en_integ}" />
               </StackPanel>
             </Border>
 
@@ -521,10 +522,10 @@
             <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20"
                     BorderBrush="{StaticResource PanelKant}" BorderThickness="1" Margin="0,0,0,14">
               <StackPanel>
-                <TextBlock Text="Teksten i mødeindkaldelsen" FontSize="15" FontWeight="SemiBold" />
+                <TextBlock Text="{i18n:Oversat settingsview.teksten_i_moedeindkaldelsen}" FontSize="15" FontWeight="SemiBold" />
                 <TextBlock FontSize="12.5" Margin="0,6,0,0" TextWrapping="Wrap" LineHeight="20"
                            Foreground="{StaticResource TekstMeget}"
-                           Text="Er en aftale markeret til at blive optaget, skrives den her tekst i indkaldelsen sammen med mødelinket. Deltagerne får det at vide før mødet, hvor de kan nå at sige fra — ikke i det øjeblik optagelsen begynder. Et mødelink alene udløser den ikke: man holder også online-møder, der ikke skal optages. Læg mærke til de to ting i første linje: der står mødetransskription frem for optagelse, fordi det er formålet — og der står LYD og ikke video, fordi «mødet optages» i dag læses som «mødet filmes», og det er en langt større ting at sige ja til." />
+                           Text="{i18n:Oversat settingsview.er_en_aftale_markeret_til_at_blive_optaget}" />
 
                 <!-- TO SPROG, FORDI EN INDKALDELSE PAA DANSK TIL EN, DER IKKE
                      LAESER DANSK, IKKE ER EN OPLYSNING. Retten til at sige fra
@@ -536,7 +537,7 @@
                      sat til engelsk, er indkaldelsen det ogsaa. -->
                 <TabControl Margin="0,14,0,0" Style="{StaticResource Fanerude}">
 
-                  <TabItem Header="Dansk" Style="{StaticResource Fane}">
+                  <TabItem Header="{i18n:Oversat faelles.dansk}" Style="{StaticResource Fane}">
                     <TextBox x:Name="Optagenote" FontSize="12"
                              MinHeight="220" MaxHeight="320" Padding="12,10"
                              TextWrapping="Wrap" AcceptsReturn="True"
@@ -545,7 +546,7 @@
                              TextChanged="Optagenote_Aendret" />
                   </TabItem>
 
-                  <TabItem Header="English" Style="{StaticResource Fane}">
+                  <TabItem Header="{i18n:Oversat settingsview.english}" Style="{StaticResource Fane}">
                     <TextBox x:Name="OptagenoteEn" FontSize="12"
                              MinHeight="220" MaxHeight="320" Padding="12,10"
                              TextWrapping="Wrap" AcceptsReturn="True"
@@ -557,12 +558,12 @@
 
                 <TextBlock FontSize="11.5" Margin="2,7,0,0" TextWrapping="Wrap" LineHeight="18"
                            Foreground="{StaticResource TekstMeget}"
-                           Text="Sproget vælges ikke her — det tages fra aftalen. Er mødet sat til engelsk, bruges den engelske tekst. Ryd et felt for at komme tilbage til standardteksten; den kan ikke slås helt fra, for en optagelse, ingen har fået at vide, er ikke noget appen hjælper med." />
+                           Text="{i18n:Oversat settingsview.sproget_vaelges_ikke_her_det_tages_fra_aft}" />
 
                 <StackPanel Orientation="Horizontal" Margin="0,14,0,0">
-                  <Button Content="Gem teksten" Click="GemNote_Klik" Padding="18,8"
+                  <Button Content="{i18n:Oversat settingsview.gem_teksten}" Click="GemNote_Klik" Padding="18,8"
                           Style="{StaticResource Primaer}" />
-                  <Button Content="Nulstil til standard" Click="NulstilNote_Klik"
+                  <Button Content="{i18n:Oversat settingsview.nulstil_til_standard}" Click="NulstilNote_Klik"
                           Padding="14,8" Margin="10,0,0,0" />
                   <TextBlock x:Name="Notestatus" FontSize="11.5" Margin="14,0,0,0"
                              VerticalAlignment="Center"
@@ -610,14 +611,14 @@
                            cloud-projekt først. Appen har sit eget id nu. -->
                       <StackPanel Visibility="{Binding Opsaetningsvis}" Margin="0,14,0,0">
                         <StackPanel Orientation="Horizontal">
-                          <Button Content="Aktiver" Tag="{Binding Id}" Click="Forbind_Klik"
+                          <Button Content="{i18n:Oversat settingsview.aktiver}" Tag="{Binding Id}" Click="Forbind_Klik"
                                   Style="{StaticResource Primaer}" Padding="20,8"
                                   Visibility="{Binding Forbindvis}"
                                   IsEnabled="{Binding MaaAktivere}"
                                   ToolTip="{Binding Aktivertip}" />
-                          <Button Content="Hent aftaler nu" Tag="{Binding Id}" Click="Hent_Klik"
+                          <Button Content="{i18n:Oversat settingsview.hent_aftaler_nu}" Tag="{Binding Id}" Click="Hent_Klik"
                                   Padding="14,8" Visibility="{Binding Forbundetvis}" />
-                          <Button Content="Afbryd forbindelsen" Tag="{Binding Id}" Click="Afbryd_Klik"
+                          <Button Content="{i18n:Oversat settingsview.afbryd_forbindelsen}" Tag="{Binding Id}" Click="Afbryd_Klik"
                                   Padding="14,8" Margin="8,0,0,0"
                                   Visibility="{Binding Forbundetvis}" />
                         </StackPanel>
@@ -635,7 +636,7 @@
         </ScrollViewer>
       </TabItem>
 
-      <TabItem Header="Filer" Style="{StaticResource Fane}">
+      <TabItem Header="{i18n:Oversat settingsview.filer}" Style="{StaticResource Fane}">
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
           <StackPanel>
         <!-- ===================== Plads og lydfiler =========================
@@ -654,10 +655,10 @@
         <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20" Margin="0,0,0,14"
                 BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
           <StackPanel>
-            <TextBlock Text="Plads og lydfiler" FontSize="15" FontWeight="SemiBold" />
+            <TextBlock Text="{i18n:Oversat settingsview.plads_og_lydfiler}" FontSize="15" FontWeight="SemiBold" />
             <TextBlock FontSize="12.5" Margin="0,6,0,0" TextWrapping="Wrap" LineHeight="20"
                        Foreground="{StaticResource TekstMeget}"
-                       Text="Lyden er det eneste i appen, der fylder noget. Teksten, dine noter, opgaverne og dokumenterne fylder tilsammen mindre end ét enkelt møde gør som lyd." />
+                       Text="{i18n:Oversat settingsview.lyden_er_det_eneste_i_appen_der_fylder_nog}" />
 
             <!-- BJAELKEN. Den siger paa ét blik, hvad disken gaar til:
                  blaat er appens lyd, graat er alt det andet, moerkt er
@@ -687,7 +688,7 @@
                 <StackPanel Orientation="Horizontal">
                   <Border Width="10" Height="10" CornerRadius="2" Background="#FF5B9DF0"
                           VerticalAlignment="Center" Margin="0,0,7,0" />
-                  <TextBlock Text="LYDFILER" FontSize="9.5" FontWeight="SemiBold"
+                  <TextBlock Text="{i18n:Oversat settingsview.lydfiler}" FontSize="9.5" FontWeight="SemiBold"
                              VerticalAlignment="Center"
                              Foreground="{StaticResource TekstMeget}" />
                 </StackPanel>
@@ -700,7 +701,7 @@
                 <StackPanel Orientation="Horizontal">
                   <Border Width="10" Height="10" CornerRadius="2" Background="#FF3A4150"
                           VerticalAlignment="Center" Margin="0,0,7,0" />
-                  <TextBlock Text="ALT DET ANDET" FontSize="9.5" FontWeight="SemiBold"
+                  <TextBlock Text="{i18n:Oversat settingsview.alt_det_andet}" FontSize="9.5" FontWeight="SemiBold"
                              VerticalAlignment="Center"
                              Foreground="{StaticResource TekstMeget}" />
                 </StackPanel>
@@ -710,7 +711,7 @@
               </StackPanel>
 
               <StackPanel Grid.Column="2">
-                <TextBlock Text="LEDIGT" FontSize="9.5" FontWeight="SemiBold"
+                <TextBlock Text="{i18n:Oversat settingsview.ledigt}" FontSize="9.5" FontWeight="SemiBold"
                            Foreground="{StaticResource TekstMeget}" />
                 <TextBlock x:Name="PladsFri" FontSize="17" FontWeight="SemiBold" Margin="0,4,0,0" />
                 <TextBlock x:Name="PladsFriUnder" FontSize="11" Margin="0,2,0,0"
@@ -722,10 +723,10 @@
             <Border Background="#FF181B22" BorderBrush="{StaticResource PanelKant}" BorderThickness="1"
                     CornerRadius="8" Padding="14,12" Margin="0,18,0,0">
               <StackPanel>
-                <TextBlock Text="Hvor længe lyden bliver liggende" FontSize="13" FontWeight="SemiBold" />
+                <TextBlock Text="{i18n:Oversat settingsview.hvor_laenge_lyden_bliver_liggende}" FontSize="13" FontWeight="SemiBold" />
                 <TextBlock FontSize="12" Margin="0,6,0,0" TextWrapping="Wrap" LineHeight="19"
                            Foreground="{StaticResource TekstSvag}"
-                           Text="Når en optagelse er skrevet ud, er det teksten, du bruger. Lyden kan ryddes efter et stykke tid — så beholder du mødet uden at beholde de 220 MB." />
+                           Text="{i18n:Oversat settingsview.naar_en_optagelse_er_skrevet_ud_er_det_tek}" />
 
                 <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
                   <ComboBox x:Name="Lydfrist" Width="230" FontSize="12.5" Padding="8,5"
@@ -735,9 +736,9 @@
                     </ComboBox.ItemTemplate>
                   </ComboBox>
 
-                  <Button x:Name="RydNuKnap" Content="Ryd nu" Click="RydLyd_Klik"
+                  <Button x:Name="RydNuKnap" Content="{i18n:Oversat settingsview.ryd_nu}" Click="RydLyd_Klik"
                           Margin="10,0,0,0" Padding="14,6" FontSize="12"
-                          ToolTip="Rydder lyden på de optagelser, der allerede er ældre end fristen" />
+                          ToolTip="{i18n:Oversat settingsview.rydder_lyden_paa_de_optagelser_der_allered}" />
                 </StackPanel>
 
                 <TextBlock x:Name="Lydfriststatus" FontSize="11.5" Margin="2,9,0,0"
@@ -751,7 +752,7 @@
                      fuld. Der spoerges KUN én gang, lige efter udskriften -
                      dér, hvor man netop har set teksten. -->
                 <StackPanel Orientation="Horizontal" Margin="0,14,0,0">
-                  <TextBlock Text="Spørg efter møder over" FontSize="12.5"
+                  <TextBlock Text="{i18n:Oversat settingsview.spoerg_efter_moeder_over}" FontSize="12.5"
                              VerticalAlignment="Center" Margin="0,0,10,0"
                              Foreground="{StaticResource TekstSvag}" />
 
@@ -765,7 +766,7 @@
 
                 <TextBlock FontSize="11.5" Margin="2,7,0,0" TextWrapping="Wrap" LineHeight="18"
                            Foreground="{StaticResource TekstMeget}"
-                           Text="Så snart et langt møde er skrevet ud, spørger appen, om lyden skal ryddes med det samme — og skriver, hvor meget den fylder. Du kan altid rydde en enkelt optagelse fra Optagelser-skærmen." />
+                           Text="{i18n:Oversat settingsview.saa_snart_et_langt_moede_er_skrevet_ud_spo}" />
               </StackPanel>
             </Border>
 
@@ -775,20 +776,20 @@
             <Border Background="#FF181B22" BorderBrush="{StaticResource Advarsel}"
                     BorderThickness="3,0,0,0" CornerRadius="4" Padding="14,11" Margin="0,12,0,0">
               <StackPanel>
-                <TextBlock Text="Det, du ikke kan bagefter" FontSize="12.5" FontWeight="SemiBold"
+                <TextBlock Text="{i18n:Oversat settingsview.det_du_ikke_kan_bagefter}" FontSize="12.5" FontWeight="SemiBold"
                            Foreground="{StaticResource Advarsel}" />
 
                 <TextBlock FontSize="12" Margin="0,7,0,0" TextWrapping="Wrap" LineHeight="19"
                            Foreground="{StaticResource Tekst}"
-                           Text="Skrive optagelsen ud igen med en bedre model. Køre talergenkendelsen om. Og høre efter, om maskinen hørte rigtigt — det er dét, der oftest er brug for, når et navn eller et fagord ser forkert ud." />
+                           Text="{i18n:Oversat settingsview.skrive_optagelsen_ud_igen_med_en_bedre_mod}" />
 
                 <TextBlock FontSize="12" Margin="0,8,0,0" TextWrapping="Wrap" LineHeight="19"
                            Foreground="{StaticResource TekstMeget}"
-                           Text="At klikke på en sætning og høre den er ikke bygget endnu, men står på listen. Den kan kun bruges på optagelser, hvor lyden stadig er der — og det er grunden til, at standarden er et helt år og ikke en måned." />
+                           Text="{i18n:Oversat settingsview.at_klikke_paa_en_saetning_og_hoere_den_er}" />
 
                 <TextBlock FontSize="12" Margin="0,8,0,0" TextWrapping="Wrap" LineHeight="19"
                            Foreground="{StaticResource TekstMeget}"
-                           Text="Teksten, dine noter, opgaverne og dokumenterne røres aldrig. Og en optagelse, der ikke er skrevet ud, ryddes aldrig — så ville der ikke være noget tilbage." />
+                           Text="{i18n:Oversat settingsview.teksten_dine_noter_opgaverne_og_dokumenter}" />
               </StackPanel>
             </Border>
           </StackPanel>
@@ -805,11 +806,11 @@
         <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20" Margin="0,0,0,14"
                 BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
           <StackPanel>
-            <TextBlock Text="Overvågede mapper" FontSize="15" FontWeight="SemiBold" />
+            <TextBlock Text="{i18n:Oversat settingsview.overvaagede_mapper}" FontSize="15" FontWeight="SemiBold" />
 
             <TextBlock Style="{StaticResource Underskrift}" Margin="0,6,0,0" TextWrapping="Wrap"
                        Foreground="{StaticResource TekstMeget}"
-                       Text="Peg appen på en mappe. Dukker der en lydfil op, bliver den tilbudt på Optagelser. Kildefilen røres aldrig — der kopieres, og originalen bliver liggende." />
+                       Text="{i18n:Oversat settingsview.peg_appen_paa_en_mappe_dukker_der_en_lydfi}" />
 
             <!-- METODEN, KORT. Den lange udgave staar i
                  doc/overvaagede-mapper.md, men det, der har betydning for, om
@@ -817,21 +818,21 @@
             <Border Background="{StaticResource Baggrund}" CornerRadius="8" Padding="14,12"
                     Margin="0,14,0,0" BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
               <StackPanel>
-                <TextBlock Text="SÅDAN KIGGER DEN" FontSize="9.5" FontWeight="SemiBold"
+                <TextBlock Text="{i18n:Oversat settingsview.saadan_kigger_den}" FontSize="9.5" FontWeight="SemiBold"
                            Foreground="{StaticResource TekstMeget}" Margin="0,0,0,8" />
 
                 <TextBlock FontSize="12" LineHeight="19" TextWrapping="Wrap"
                            Foreground="{StaticResource TekstSvag}"
-                           Text="&#x2022;  Hvert minut, så længe appen er åben. Der kigges også, når du selv beder om det." />
+                           Text="{i18n:Oversat settingsview.hvert_minut_saa_laenge_appen_er_aaben_der}" />
                 <TextBlock FontSize="12" LineHeight="19" TextWrapping="Wrap" Margin="0,4,0,0"
                            Foreground="{StaticResource TekstSvag}"
-                           Text="&#x2022;  Der læses aldrig i en fil, kun navn, størrelse og dato. Filer i iCloud og OneDrive ligger tit kun i skyen, og at læse dem ville hente hele mappen ned." />
+                           Text="{i18n:Oversat settingsview.der_laeses_aldrig_i_en_fil_kun_navn_stoerr}" />
                 <TextBlock FontSize="12" LineHeight="19" TextWrapping="Wrap" Margin="0,4,0,0"
                            Foreground="{StaticResource TekstSvag}"
-                           Text="&#x2022;  En fil skal have ligget stille i tyve sekunder. Ellers kan den nå at blive lagt ind, mens den stadig kopieres." />
+                           Text="{i18n:Oversat settingsview.en_fil_skal_have_ligget_stille_i_tyve_seku}" />
                 <TextBlock FontSize="12" LineHeight="19" TextWrapping="Wrap" Margin="0,4,0,0"
                            Foreground="{StaticResource TekstSvag}"
-                           Text="&#x2022;  Hver fil tilbydes én gang. Siger du nej, kommer den ikke igen." />
+                           Text="{i18n:Oversat settingsview.hver_fil_tilbydes_en_gang_siger_du_nej_kom}" />
               </StackPanel>
             </Border>
 
@@ -856,10 +857,10 @@
 
                       <CheckBox Grid.Column="1" IsChecked="{Binding Automatisk, Mode=TwoWay}"
                                 VerticalAlignment="Center" FontSize="12" Margin="0,0,14,0"
-                                Content="Læg ind automatisk"
-                                ToolTip="Uden hak bliver filen tilbudt på Optagelser, og du bestemmer" />
+                                Content="{i18n:Oversat settingsview.laeg_ind_automatisk}"
+                                ToolTip="{i18n:Oversat settingsview.uden_hak_bliver_filen_tilbudt_paa_optagels}" />
 
-                      <Button Grid.Column="2" Content="Fjern" Click="FjernMappe_Click"
+                      <Button Grid.Column="2" Content="{i18n:Oversat settingsview.fjern}" Click="FjernMappe_Click"
                               Tag="{Binding Sti}" Padding="14,6" VerticalAlignment="Center" />
                     </Grid>
                   </Border>
@@ -870,7 +871,7 @@
             <TextBlock x:Name="IngenOvervaagede" FontSize="12.5" TextWrapping="Wrap"
                        Margin="0,16,0,0" Visibility="Collapsed"
                        Foreground="{StaticResource TekstMeget}"
-                       Text="Ingen mapper overvåges. Tilføj en, eller opret NoteApp-mappen i en af de skytjenester, der findes på maskinen." />
+                       Text="{i18n:Oversat settingsview.ingen_mapper_overvaages_tilfoej_en_eller_o}" />
 
             <!-- SKYTJENESTERNE, DER ER FUNDET.
                  De findes ved at spoerge Windows selv om, hvor de
@@ -908,10 +909,10 @@
                          Foreground="{StaticResource TekstMeget}" />
 
               <StackPanel Grid.Column="1" Orientation="Horizontal">
-                <Button Content="Glem hvad der er set" Click="GlemSete_Click" Padding="14,7"
+                <Button Content="{i18n:Oversat settingsview.glem_hvad_der_er_set}" Click="GlemSete_Click" Padding="14,7"
                         Margin="0,0,10,0"
-                        ToolTip="Alle filer i mapperne bliver tilbudt igen, også dem du har sagt nej til" />
-                <Button Content="Tilføj mappe…" Click="TilfoejMappe_Click" Padding="16,7"
+                        ToolTip="{i18n:Oversat settingsview.alle_filer_i_mapperne_bliver_tilbudt_igen}" />
+                <Button Content="{i18n:Oversat settingsview.tilfoej_mappe}" Click="TilfoejMappe_Click" Padding="16,7"
                         Style="{StaticResource Primaer}" />
               </StackPanel>
             </Grid>
@@ -927,15 +928,15 @@
               <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0" Margin="0,0,16,0">
-              <TextBlock Text="Dine filer" FontSize="15" FontWeight="SemiBold" />
+              <TextBlock Text="{i18n:Oversat settingsview.dine_filer}" FontSize="15" FontWeight="SemiBold" />
               <TextBlock x:Name="DataSti" FontSize="13" FontFamily="Consolas" Margin="0,6,0,0" TextWrapping="Wrap" />
               <TextBlock x:Name="DataIndhold" Style="{StaticResource Underskrift}" Margin="0,6,0,0" />
               <TextBlock Style="{StaticResource Underskrift}" Margin="0,8,0,0" Foreground="{StaticResource TekstMeget}"
-                         Text="Optagelser, transkriptioner, noter og dokumenter. Skifter du mappe, flyttes alt med." />
+                         Text="{i18n:Oversat settingsview.optagelser_transkriptioner_noter_og_dokume}" />
             </StackPanel>
             <StackPanel Grid.Column="1" VerticalAlignment="Center">
-              <Button Content="Skift mappe…" Click="SkiftData_Click" MinWidth="130" />
-              <Button Content="Åbn mappen" Click="AabnData_Click" Margin="0,8,0,0" MinWidth="130" />
+              <Button Content="{i18n:Oversat faelles.skift_mappe}" Click="SkiftData_Click" MinWidth="130" />
+              <Button Content="{i18n:Oversat faelles.aabn_mappen}" Click="AabnData_Click" Margin="0,8,0,0" MinWidth="130" />
             </StackPanel>
           </Grid>
         </Border>
@@ -943,7 +944,7 @@
         </ScrollViewer>
       </TabItem>
 
-      <TabItem Header="Sikkerhedskopi" Style="{StaticResource Fane}">
+      <TabItem Header="{i18n:Oversat faelles.sikkerhedskopi}" Style="{StaticResource Fane}">
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
           <StackPanel>
         <!-- ======================== Sikkerhedskopi ========================= -->
@@ -955,7 +956,7 @@
               <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0" Margin="0,0,16,0">
-              <TextBlock Text="Sikkerhedskopi" FontSize="15" FontWeight="SemiBold" />
+              <TextBlock Text="{i18n:Oversat faelles.sikkerhedskopi}" FontSize="15" FontWeight="SemiBold" />
               <TextBlock x:Name="BackupSti" FontSize="13" FontFamily="Consolas" Margin="0,6,0,0" TextWrapping="Wrap" />
               <TextBlock x:Name="BackupSenest" Style="{StaticResource Underskrift}" Margin="0,6,0,0" />
               <TextBlock x:Name="BackupAdvarsel" FontSize="12" Margin="0,8,0,0"
@@ -967,20 +968,20 @@
               <Border Background="#FF181B22" CornerRadius="6" Padding="12,10" Margin="0,12,0,0"
                       BorderThickness="1" BorderBrush="{StaticResource PanelKant}">
                 <StackPanel>
-                  <TextBlock Text="Hvad kommer med" Style="{StaticResource Underskrift}" Margin="0,0,0,8" />
+                  <TextBlock Text="{i18n:Oversat settingsview.hvad_kommer_med}" Style="{StaticResource Underskrift}" Margin="0,0,0,8" />
 
                   <TextBlock FontSize="12" Foreground="{StaticResource TekstSvag}" Margin="0,0,0,8"
-                             Text="Altid med: noter, transskriptioner, dokumenter, mødedata og indstillinger." />
+                             Text="{i18n:Oversat settingsview.altid_med_noter_transskriptioner_dokumente}" />
 
-                  <CheckBox x:Name="TagLydMed" Content="Tag også lydfilerne med" Click="Lyd_Klik" />
+                  <CheckBox x:Name="TagLydMed" Content="{i18n:Oversat settingsview.tag_ogsaa_lydfilerne_med}" Click="Lyd_Klik" />
                   <TextBlock x:Name="LydStoerrelse" Style="{StaticResource Underskrift}" Margin="24,4,0,0"
                              Foreground="{StaticResource TekstMeget}" />
                 </StackPanel>
               </Border>
             </StackPanel>
             <StackPanel Grid.Column="1" VerticalAlignment="Center">
-              <Button Content="Skift mappe…" Click="SkiftBackup_Click" MinWidth="130" />
-              <Button x:Name="KoerKnap" Content="Tag backup nu" Click="Koer_Click"
+              <Button Content="{i18n:Oversat faelles.skift_mappe}" Click="SkiftBackup_Click" MinWidth="130" />
+              <Button x:Name="KoerKnap" Content="{i18n:Oversat settingsview.tag_backup_nu}" Click="Koer_Click"
                       Style="{StaticResource Primaer}" Margin="0,8,0,0" MinWidth="130" />
             </StackPanel>
           </Grid>
@@ -1000,14 +1001,14 @@
                 <ColumnDefinition Width="Auto" />
               </Grid.ColumnDefinitions>
               <StackPanel Grid.Column="0">
-                <TextBlock Text="Gemte sikkerhedskopier" FontSize="14" FontWeight="SemiBold" />
+                <TextBlock Text="{i18n:Oversat settingsview.gemte_sikkerhedskopier}" FontSize="14" FontWeight="SemiBold" />
                 <TextBlock x:Name="ValgtArkiv" Style="{StaticResource Underskrift}" Margin="0,3,0,0"
-                           Text="Vælg et arkiv for at se, hvad det indeholder." />
+                           Text="{i18n:Oversat settingsview.vaelg_et_arkiv_for_at_se_hvad_det_indehold}" />
               </StackPanel>
               <StackPanel Grid.Column="1" Orientation="Horizontal">
-                <Button x:Name="ProeveArkivKnap" Content="Prøvekørsel" Click="ProeveArkiv_Click"
+                <Button x:Name="ProeveArkivKnap" Content="{i18n:Oversat settingsview.proevekoersel}" Click="ProeveArkiv_Click"
                         IsEnabled="False" Margin="0,0,8,0" />
-                <Button x:Name="GendanKnap" Content="Gendan…" Click="Gendan_Click" IsEnabled="False" />
+                <Button x:Name="GendanKnap" Content="{i18n:Oversat settingsview.gendan}" Click="Gendan_Click" IsEnabled="False" />
               </StackPanel>
             </Grid>
 
@@ -1057,7 +1058,7 @@
                      Background="#FF232A35" BorderThickness="0"
                      Foreground="{StaticResource Accent}" />
       </StackPanel>
-      <Button Grid.Column="1" Content="Opdatér enhedslisten" Click="Genindlaes_Click" />
+      <Button Grid.Column="1" Content="{i18n:Oversat settingsview.opdater_enhedslisten}" Click="Genindlaes_Click" />
     </Grid>
   </Grid>
 </UserControl>

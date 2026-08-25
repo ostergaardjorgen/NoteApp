@@ -1,6 +1,8 @@
 ﻿<UserControl x:Class="NoteApp.Desktop.Transcribe.UdskriftView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:i18n="clr-namespace:NoteApp.Desktop"
+             xmlns:local="clr-namespace:NoteApp.Desktop">
 
   <!-- ================== UDSKRIFTEN, SOM MAN KAN RETTE I ==================
 
@@ -47,7 +49,7 @@
             <TextBlock x:Name="SoegPladsholder" Grid.Column="0" IsHitTestVisible="False"
                        FontSize="12.5" Margin="10,0,0,0" VerticalAlignment="Center"
                        Foreground="{StaticResource TekstMeget}"
-                       Text="Søg i transkriptionen" />
+                       Text="{i18n:Oversat udskriftview.soeg_i_transkriptionen}" />
 
             <!-- Krydset rydder feltet i eet klik. Et soegeord paa tyve tegn
                  skal ellers slettes tegn for tegn, eller markeres foerst - og
@@ -57,7 +59,7 @@
                     Visibility="Collapsed" Cursor="Hand" FontSize="11"
                     Padding="0" BorderThickness="0" Background="Transparent"
                     Width="24" Height="24" Margin="0,0,3,0"
-                    ToolTip="Ryd søgningen (Escape)">
+                    ToolTip="{i18n:Oversat faelles.ryd_soegningen_escape}">
               <Button.Template>
                 <ControlTemplate TargetType="Button">
                   <Border x:Name="flade" CornerRadius="12" Background="Transparent">
@@ -85,7 +87,7 @@
         <ComboBox x:Name="Talervalg" Grid.Column="1" Width="160" Margin="10,0,0,0"
                   FontSize="12.5" VerticalAlignment="Center" Visibility="Collapsed"
                   SelectionChanged="Taler_Valgt"
-                  ToolTip="Vis kun det, én taler sagde" />
+                  ToolTip="{i18n:Oversat udskriftview.vis_kun_det_en_taler_sagde}" />
 
         <TextBlock x:Name="SoegStatus" Grid.Column="2" FontSize="11.5" VerticalAlignment="Center"
                    Margin="12,0,0,0" Foreground="{StaticResource TekstMeget}" />
@@ -97,14 +99,14 @@
              skriver navnet dér. Rettelsen slaar igennem alle steder, den stemme
              taler. -->
 
-        <Button Grid.Column="3" Content="Kopiér ▾" Click="Kopier_Klik"
+        <Button Grid.Column="3" Content="{i18n:Oversat udskriftview.kopier}" Click="Kopier_Klik"
                 Padding="12,6" FontSize="12.5"
-                ToolTip="Kopiér transkriptionen — med eller uden tidsstempler og talere">
+                ToolTip="{i18n:Oversat udskriftview.kopier_transkriptionen_med_eller_uden_tids}">
           <Button.ContextMenu>
             <ContextMenu x:Name="Kopimenu">
-              <MenuItem Header="Kopiér med tidsstempel og taler" Click="KopierAlt_Klik" />
-              <MenuItem Header="Kopiér med tidsstempel" Click="KopierTid_Klik" />
-              <MenuItem Header="Kopiér kun teksten" Click="KopierRen_Klik" />
+              <MenuItem Header="{i18n:Oversat udskriftview.kopier_med_tidsstempel_og_taler}" Click="KopierAlt_Klik" />
+              <MenuItem Header="{i18n:Oversat udskriftview.kopier_med_tidsstempel}" Click="KopierTid_Klik" />
+              <MenuItem Header="{i18n:Oversat udskriftview.kopier_kun_teksten}" Click="KopierRen_Klik" />
             </ContextMenu>
           </Button.ContextMenu>
         </Button>
@@ -136,7 +138,7 @@
 
                Her flyttes kun den ene replik. -->
           <StackPanel x:Name="HenfoerRude" Visibility="Collapsed" Margin="0,12,0,0">
-            <TextBlock Text="LÆG REPLIKKEN HOS" FontSize="9.5" FontWeight="SemiBold"
+            <TextBlock Text="{i18n:Oversat udskriftview.laeg_replikken_hos}" FontSize="9.5" FontWeight="SemiBold"
                        Foreground="{StaticResource Accent}" />
 
             <ItemsControl x:Name="Henfoer" Margin="0,7,0,0">
@@ -155,7 +157,7 @@
 
             <TextBlock FontSize="11" TextWrapping="Wrap" LineHeight="17"
                        Foreground="{StaticResource TekstMeget}"
-                       Text="Kun denne ene replik flyttes. De øvrige rører du ikke." />
+                       Text="{i18n:Oversat udskriftview.kun_denne_ene_replik_flyttes_de_oevrige_ro}" />
 
             <!-- ============ ELLER DEM ALLE SAMMEN ============
                  De replikker, maskinen ikke kunne placere, er typisk korte
@@ -196,9 +198,9 @@
                    KeyDown="Navn_Tast" />
 
           <StackPanel Orientation="Horizontal" Margin="0,11,0,0" HorizontalAlignment="Right">
-            <Button Content="Fjern navnet" Click="NavnRyd_Klik" Padding="11,5"
+            <Button Content="{i18n:Oversat udskriftview.fjern_navnet}" Click="NavnRyd_Klik" Padding="11,5"
                     FontSize="12" Margin="0,0,8,0" />
-            <Button Content="Gem" Click="NavnGem_Klik" Padding="16,5"
+            <Button Content="{i18n:Oversat udskriftview.gem}" Click="NavnGem_Klik" Padding="16,5"
                     FontSize="12" FontWeight="SemiBold" />
           </StackPanel>
         </StackPanel>
@@ -209,7 +211,7 @@
     <TabControl x:Name="Faner" Grid.Row="2" Style="{StaticResource Fanerude}"
                 Background="Transparent" BorderThickness="0">
 
-      <TabItem Header="Redigeret tekst" Style="{StaticResource Fane}">
+      <TabItem Header="{i18n:Oversat udskriftview.redigeret_tekst}" Style="{StaticResource Fane}">
         <ScrollViewer x:Name="Rude" Padding="8,10,8,20"
                       VerticalScrollBarVisibility="Auto"
                       HorizontalScrollBarVisibility="Disabled">
@@ -378,7 +380,7 @@
 
            DEN LAVES IKKE AF SIG SELV. At lave den sender udskriften til
            Mistral, og det maa aldrig ske, fordi man klikkede paa en fane. -->
-      <TabItem Header="Opsummering" Style="{StaticResource Fane}">
+      <TabItem Header="{i18n:Oversat faelles.opsummering}" Style="{StaticResource Fane}">
         <Grid>
           <ScrollViewer x:Name="OpsumRude" Padding="18,14,18,18" Visibility="Collapsed"
                         VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
@@ -387,9 +389,9 @@
                 <TextBlock x:Name="OpsumHoved" FontSize="11.5" VerticalAlignment="Center"
                            TextWrapping="Wrap" Foreground="{StaticResource TekstMeget}" />
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                  <Button Content="Kopiér" Click="OpsumKopier_Klik" Padding="12,6"
+                  <Button Content="{i18n:Oversat udskriftview.kopier_2}" Click="OpsumKopier_Klik" Padding="12,6"
                           FontSize="12" Margin="0,0,8,0" />
-                  <Button Content="Lav den om" Click="OpsumLokal_Klik" Padding="12,6"
+                  <Button Content="{i18n:Oversat udskriftview.lav_den_om}" Click="OpsumLokal_Klik" Padding="12,6"
                           FontSize="12" />
                 </StackPanel>
               </Grid>
@@ -423,7 +425,7 @@
                              Foreground="{StaticResource Tekst}" />
                   <TextBlock FontSize="11" TextWrapping="Wrap" LineHeight="17" Margin="0,6,0,0"
                              Foreground="{StaticResource TekstMeget}"
-                             Text="Det kan godt være rigtigt alligevel — ordene kan stå anderledes i transkriptionen end i opsummeringen. Men det er ikke efterprøvet, og der er ikke slettet noget." />
+                             Text="{i18n:Oversat udskriftview.det_kan_godt_vaere_rigtigt_alligevel_orden}" />
                 </StackPanel>
               </Border>
 
@@ -440,11 +442,11 @@
             <!-- Overskrift og forklaring sættes i koden: et webinar spørges om
                  noget andet end et møde. «Hvad blev der besluttet» er et
                  spørgsmål uden svar, når nogen har undervist i en time. -->
-            <TextBlock x:Name="OpsumOverskrift" Text="Hvad handlede mødet om?" FontSize="17"
+            <TextBlock x:Name="OpsumOverskrift" Text="{i18n:Oversat udskriftview.hvad_handlede_moedet_om}" FontSize="17"
                        FontWeight="SemiBold" HorizontalAlignment="Center" />
             <TextBlock x:Name="OpsumForklaring" FontSize="13" Margin="0,10,0,0" TextWrapping="Wrap"
                        LineHeight="21" TextAlignment="Center" Foreground="{StaticResource TekstSvag}"
-                       Text="En kort opsummering på ti linjer: hvad der blev besluttet, hvad der blev aftalt, og hvad der stod åbent. Til at huske mødet med — ikke et dokument, du skal navngive og gemme." />
+                       Text="{i18n:Oversat udskriftview.en_kort_opsummering_paa_ti_linjer_hvad_der}" />
 
             <!-- ============ TO VEJE, OG FORSKELLEN STÅR DER ============
 
@@ -469,12 +471,12 @@
               <Border Grid.Column="0" Background="#FF181B22" CornerRadius="9" Padding="14,12"
                       Margin="0,0,7,0" BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
                 <StackPanel>
-                  <TextBlock Text="PÅ MASKINEN" FontSize="9.5" FontWeight="SemiBold"
+                  <TextBlock Text="{i18n:Oversat udskriftview.paa_maskinen}" FontSize="9.5" FontWeight="SemiBold"
                              Foreground="{StaticResource Accent}" />
                   <TextBlock x:Name="OpsumLokalTekst" FontSize="12" LineHeight="18" TextWrapping="Wrap"
                              Margin="0,6,0,0" Foreground="{StaticResource TekstSvag}"
-                             Text="Cirka et halvt minut. Intet forlader maskinen. Kort — nogle få linjer og højst fire punkter. Den skriver ikke tal, og det, den skriver, bliver efterprøvet mod transkriptionen." />
-                  <Button x:Name="OpsumLokalKnap" Content="Kort lokal opsummering"
+                             Text="{i18n:Oversat udskriftview.cirka_et_halvt_minut_intet_forlader_maskin}" />
+                  <Button x:Name="OpsumLokalKnap" Content="{i18n:Oversat udskriftview.kort_lokal_opsummering}"
                           Click="OpsumLokal_Klik" Margin="0,12,0,0" Padding="14,8"
                           Style="{StaticResource Primaer}" />
                 </StackPanel>
@@ -488,14 +490,14 @@
               <Border Grid.Column="1" Background="#FF181B22" CornerRadius="9" Padding="14,12"
                       Margin="7,0,0,0" BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
                 <StackPanel>
-                  <TextBlock Text="SKAL DET VÆRE ET REFERAT?" FontSize="9.5" FontWeight="SemiBold"
+                  <TextBlock Text="{i18n:Oversat udskriftview.skal_det_vaere_et_referat}" FontSize="9.5" FontWeight="SemiBold"
                              Foreground="{StaticResource TekstMeget}" />
                   <TextBlock FontSize="12" LineHeight="18" TextWrapping="Wrap" Margin="0,6,0,0"
                              Foreground="{StaticResource TekstSvag}"
-                             Text="Et rigtigt mødereferat, en opgaveliste eller et tilbud laves som et komplet Word-dokument af din online AI-model — og den kører i Europa hos Mistral." />
+                             Text="{i18n:Oversat udskriftview.et_rigtigt_moedereferat_en_opgaveliste_ell}" />
                   <TextBlock FontSize="12" LineHeight="18" TextWrapping="Wrap" Margin="0,8,0,0"
                              Foreground="{StaticResource TekstMeget}"
-                             Text="Tryk «Opret dokument» øverst til højre. Mødetypen fra optagelsen er valgt på forhånd — dine mødetyper ligger under «Mødetyper» i menuen." />
+                             Text="{i18n:Oversat udskriftview.tryk_opret_dokument_oeverst_til_hoejre_moe}" />
                 </StackPanel>
               </Border>
             </Grid>
@@ -523,7 +525,7 @@
 
            Den tager for meget med. Det er den rigtige vej at fejle, når et
            menneske alligevel skal sige ja eller nej til hvert forslag. -->
-      <TabItem Header="Opgaver" Style="{StaticResource Fane}">
+      <TabItem Header="{i18n:Oversat udskriftview.opgaver_2}" Style="{StaticResource Fane}">
         <DockPanel>
 
           <Border DockPanel.Dock="Top" Background="#FF1B2029" Padding="16,10"
@@ -535,16 +537,16 @@
                 <ColumnDefinition Width="Auto" />
               </Grid.ColumnDefinitions>
 
-              <Button Grid.Column="0" x:Name="FindOpgaverKnap" Content="Find opgaver"
+              <Button Grid.Column="0" x:Name="FindOpgaverKnap" Content="{i18n:Oversat udskriftview.find_opgaver}"
                       Click="FindOpgaver_Klik" Padding="14,7" FontSize="12.5"
                       Style="{StaticResource Primaer}"
-                      ToolTip="Gennemgå transkriptionen igen for steder, der kan være en opgave" />
+                      ToolTip="{i18n:Oversat udskriftview.gennemgaa_transkriptionen_igen_for_steder}" />
 
               <TextBlock Grid.Column="1" x:Name="OpgaveStatus" FontSize="11.5"
                          VerticalAlignment="Center" Margin="14,0,0,0"
                          TextWrapping="Wrap" Foreground="{StaticResource TekstMeget}" />
 
-              <CheckBox Grid.Column="2" x:Name="VisSvage" Content="Vis også svage forslag"
+              <CheckBox Grid.Column="2" x:Name="VisSvage" Content="{i18n:Oversat udskriftview.vis_ogsaa_svage_forslag}"
                         Click="VisSvage_Klik" VerticalAlignment="Center" FontSize="12" />
             </Grid>
           </Border>
@@ -554,7 +556,7 @@
             <StackPanel>
 
               <!-- De oprettede opgaver. -->
-              <TextBlock x:Name="OpgaveOverskrift" Text="OPGAVER" FontSize="10.5"
+              <TextBlock x:Name="OpgaveOverskrift" Text="{i18n:Oversat udskriftview.opgaver}" FontSize="10.5"
                          FontWeight="SemiBold" Margin="2,0,0,8" Visibility="Collapsed"
                          Foreground="{StaticResource Accent}" />
 
@@ -580,14 +582,14 @@
                                    FontSize="13" FontWeight="SemiBold"
                                    BorderThickness="0" Padding="0" Background="Transparent"
                                    Foreground="{StaticResource Tekst}"
-                                   ToolTip="Det korte navn — det, der står på listen i Cockpittet" />
+                                   ToolTip="{i18n:Oversat udskriftview.det_korte_navn_det_der_staar_paa_listen_i}" />
 
                           <TextBox Text="{Binding Tekst, UpdateSourceTrigger=PropertyChanged}"
                                    FontSize="12.5" TextWrapping="Wrap" AcceptsReturn="True"
                                    Margin="0,4,0,0"
                                    BorderThickness="0" Padding="0" Background="Transparent"
                                    Foreground="{StaticResource TekstSvag}"
-                                   ToolTip="Hele opgaven — det, der blev sagt" />
+                                   ToolTip="{i18n:Oversat udskriftview.hele_opgaven_det_der_blev_sagt}" />
                           <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
                             <TextBlock Text="{Binding Ejer}" FontSize="11.5" FontWeight="SemiBold"
                                        Foreground="{StaticResource Accent}"
@@ -601,25 +603,25 @@
                              der kraever syv felter, bliver ikke udfyldt. -->
                         <DatePicker Grid.Column="1" SelectedDate="{Binding Deadline}"
                                     VerticalAlignment="Top" Width="132" FontSize="12"
-                                    ToolTip="Senest-dato. Kan stå tom." />
+                                    ToolTip="{i18n:Oversat udskriftview.senest_dato_kan_staa_tom}" />
 
                         <Button Grid.Column="2" Content="✕" Click="SletOpgave_Klik"
                                 Tag="{Binding Id}" Margin="8,0,0,0" Padding="8,4"
                                 VerticalAlignment="Top" FontSize="11" Cursor="Hand"
-                                ToolTip="Slet opgaven" />
+                                ToolTip="{i18n:Oversat udskriftview.slet_opgaven}" />
                       </Grid>
                     </Border>
                   </DataTemplate>
                 </ItemsControl.ItemTemplate>
               </ItemsControl>
 
-              <Button x:Name="NyOpgaveKnap" Content="+ Tilføj en opgave i hånden"
+              <Button x:Name="NyOpgaveKnap" Content="{i18n:Oversat udskriftview.tilfoej_en_opgave_i_haanden}"
                       Click="NyOpgave_Klik" HorizontalAlignment="Left" Margin="0,4,0,0"
                       Padding="12,6" FontSize="12"
-                      ToolTip="Til en, der ikke var med på mødet — det kan appen ikke vide" />
+                      ToolTip="{i18n:Oversat udskriftview.til_en_der_ikke_var_med_paa_moedet_det_kan}" />
 
               <!-- Forslagene, der ikke er taget stilling til endnu. -->
-              <TextBlock x:Name="ForslagOverskrift" Text="FORSLAG" FontSize="10.5"
+              <TextBlock x:Name="ForslagOverskrift" Text="{i18n:Oversat udskriftview.forslag}" FontSize="10.5"
                          FontWeight="SemiBold" Margin="2,26,0,8" Visibility="Collapsed"
                          Foreground="{StaticResource Accent}" />
 
@@ -642,10 +644,10 @@
                                    LineHeight="20" Foreground="{StaticResource Tekst}" />
 
                         <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
-                          <Button Content="Opret opgave" Click="OpretOpgave_Klik"
+                          <Button Content="{i18n:Oversat udskriftview.opret_opgave}" Click="OpretOpgave_Klik"
                                   Tag="{Binding Noegle}" Padding="13,6" FontSize="12"
                                   Style="{StaticResource Primaer}" Cursor="Hand" />
-                          <Button Content="Ikke en opgave" Click="AfvisOpgave_Klik"
+                          <Button Content="{i18n:Oversat udskriftview.ikke_en_opgave}" Click="AfvisOpgave_Klik"
                                   Tag="{Binding Noegle}" Padding="13,6" FontSize="12"
                                   Margin="8,0,0,0" Cursor="Hand" />
                         </StackPanel>
@@ -667,7 +669,7 @@
            Kort med vilje. Der er tre ting, man vil vide efter et møde: hvornår
            det var, hvor længe det varede, og hvem der fyldte. Alt andet er
            noget, man kan læse sig til i selve udskriften. -->
-      <TabItem Header="Tal" Style="{StaticResource Fane}">
+      <TabItem Header="{i18n:Oversat udskriftview.tal}" Style="{StaticResource Fane}">
         <ScrollViewer Padding="18,16,18,18" VerticalScrollBarVisibility="Auto"
                       HorizontalScrollBarVisibility="Disabled">
           <StackPanel>
@@ -676,26 +678,26 @@
             <Border Background="#FF181B22" CornerRadius="10" Padding="20,16"
                     BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
               <StackPanel>
-                <TextBlock Text="MØDET" FontSize="10.5" FontWeight="SemiBold"
+                <TextBlock Text="{i18n:Oversat udskriftview.moedet}" FontSize="10.5" FontWeight="SemiBold"
                            Foreground="{StaticResource Accent}" Margin="0,0,0,10" />
 
                 <TextBlock x:Name="StatDato" FontSize="16" FontWeight="SemiBold" />
 
                 <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
                   <StackPanel Margin="0,0,34,0">
-                    <TextBlock Text="BEGYNDTE" FontSize="9.5" FontWeight="SemiBold"
+                    <TextBlock Text="{i18n:Oversat udskriftview.begyndte}" FontSize="9.5" FontWeight="SemiBold"
                                Foreground="{StaticResource TekstMeget}" />
                     <TextBlock x:Name="StatStart" FontSize="19" FontFamily="Consolas"
                                Margin="0,3,0,0" />
                   </StackPanel>
                   <StackPanel Margin="0,0,34,0">
-                    <TextBlock Text="SLUTTEDE" FontSize="9.5" FontWeight="SemiBold"
+                    <TextBlock Text="{i18n:Oversat udskriftview.sluttede}" FontSize="9.5" FontWeight="SemiBold"
                                Foreground="{StaticResource TekstMeget}" />
                     <TextBlock x:Name="StatSlut" FontSize="19" FontFamily="Consolas"
                                Margin="0,3,0,0" />
                   </StackPanel>
                   <StackPanel>
-                    <TextBlock Text="VARIGHED" FontSize="9.5" FontWeight="SemiBold"
+                    <TextBlock Text="{i18n:Oversat udskriftview.varighed}" FontSize="9.5" FontWeight="SemiBold"
                                Foreground="{StaticResource TekstMeget}" />
                     <TextBlock x:Name="StatVarighed" FontSize="19" FontFamily="Consolas"
                                Margin="0,3,0,0" Foreground="{StaticResource Accent}" />
@@ -708,7 +710,7 @@
             <Border Background="#FF181B22" CornerRadius="10" Padding="20,16" Margin="0,14,0,0"
                     BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
               <StackPanel>
-                <TextBlock Text="TALETID" FontSize="10.5" FontWeight="SemiBold"
+                <TextBlock Text="{i18n:Oversat udskriftview.taletid}" FontSize="10.5" FontWeight="SemiBold"
                            Foreground="{StaticResource Accent}" Margin="0,0,0,14" />
 
                 <ItemsControl x:Name="StatTalere">
@@ -761,11 +763,11 @@
         </ScrollViewer>
       </TabItem>
 
-      <TabItem Header="Rå tekst" Style="{StaticResource Fane}">
+      <TabItem Header="{i18n:Oversat udskriftview.raa_tekst}" Style="{StaticResource Fane}">
         <DockPanel>
           <TextBlock DockPanel.Dock="Top" FontSize="11.5" Margin="10,8,10,10"
                      TextWrapping="Wrap" Foreground="{StaticResource TekstMeget}"
-                     Text="Maskinens egne ord, som de kom ud — uden dine rettelser. Den kan ikke redigeres; den er der for at kunne holdes op mod den rettede." />
+                     Text="{i18n:Oversat udskriftview.maskinens_egne_ord_som_de_kom_ud_uden_dine}" />
           <TextBox x:Name="RaaTekst" IsReadOnly="True" FontSize="12.5" TextWrapping="Wrap"
                    BorderThickness="0" Background="Transparent" Padding="10,0,10,10"
                    Foreground="{StaticResource TekstSvag}"

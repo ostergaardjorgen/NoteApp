@@ -1,5 +1,4 @@
-using System.IO;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using NoteApp.Core;
@@ -68,28 +67,17 @@ public static class Sprogmenu
             menu.Items.Add(punkt);
         }
 
-        // ET SPROG MERE ER EEN FIL. Linjen staar der, saa den, der undrer sig
-        // over kun at se to sprog, faar svaret paa stedet i stedet for at
-        // lede i en vejledning.
-        menu.Items.Add(new Separator());
+        // HER LAA «TILFOEJ ET SPROG …».
+        //
+        // Den aabnede sprogmappen i Stifinderen. Fjernet 25-08-2026: en
+        // brugerflade, der inviterer til at redigere JSON, lover mere end den
+        // holder - en halv oversaettelse ser ud som en fejl i appen, ikke som
+        // en fil, nogen ikke blev faerdig med.
+        //
+        // Mekanikken er der stadig, og den er dokumenteret i doc/sprog.md.
+        // Et sprog kan altsaa tilfoejes; det er bare ikke noget, appen
+        // opfordrer til.
 
-        var aabn = new MenuItem { Header = Sprog.T("sprog.aabnmappe") };
-        aabn.Click += (_, _) =>
-        {
-            try
-            {
-                Directory.CreateDirectory(Sprog.Mappe);
-                System.Diagnostics.Process.Start(
-                    new System.Diagnostics.ProcessStartInfo(Sprog.Mappe) { UseShellExecute = true });
-            }
-            catch (Exception ex)
-            {
-                Dialogs.AppDialog.Vis(Window.GetWindow(ved), Sprog.T("sprog.kunneikkeaabne"),
-                    ex.Message, Dialogs.Slags.Pas_paa);
-            }
-        };
-
-        menu.Items.Add(aabn);
         menu.IsOpen = true;
     }
 }

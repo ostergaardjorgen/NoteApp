@@ -1,6 +1,7 @@
-<Window x:Class="NoteApp.Desktop.Meeting.OptageBaand"
+﻿<Window x:Class="NoteApp.Desktop.Meeting.OptageBaand"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:i18n="clr-namespace:NoteApp.Desktop"
         Title="NoteApp optager"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         ResizeMode="NoResize" SizeToContent="WidthAndHeight"
@@ -74,8 +75,8 @@
            og et traek maa ikke ogsaa taelle som et klik. En Button tager selv
            imod museklikket, saa traek-handleren paa Border aldrig ser det. -->
       <Button x:Name="VisAppKnap" Click="VisApp_Klik" Cursor="Hand"
-              Content="▼ Vis appen" Padding="14,7" FontSize="12.5"
-              ToolTip="Vis hele appen frem. Optagelsen fortsætter, og båndet bliver liggende." />
+              Content="{i18n:Oversat optagebaand.vis_appen}" Padding="14,7" FontSize="12.5"
+              ToolTip="{i18n:Oversat optagebaand.vis_hele_appen_frem_optagelsen_fortsaetter}" />
 
       <Rectangle Width="1" Height="26" Fill="#FF39404D" Margin="14,0,14,0" />
 
@@ -88,10 +89,10 @@
                  Background="#FF1E2330" BorderBrush="#FF39404D" BorderThickness="1"
                  Foreground="#FFF2F4F8" CaretBrush="#FFF2F4F8"
                  KeyDown="Note_Tast"
-                 ToolTip="Skriv en note og tryk Enter. Den bliver tidsstemplet." />
+                 ToolTip="{i18n:Oversat optagebaand.skriv_en_note_og_tryk_enter_den_bliver_tid}" />
         <TextBlock x:Name="NotePladsholder" IsHitTestVisible="False" FontSize="12.5"
                    Margin="12,0,0,0" VerticalAlignment="Center" Foreground="#FF6B7484"
-                   Text="Note — tryk Enter" />
+                   Text="{i18n:Oversat optagebaand.note_tryk_enter}" />
       </Grid>
 
       <TextBlock x:Name="NoteTaeller" FontSize="11.5" FontWeight="SemiBold"
@@ -101,16 +102,16 @@
 
       <Button x:Name="PauseKnap" Click="Pause_Klik" Content="❚❚" Cursor="Hand"
               Padding="11,7" FontSize="12" Margin="0,0,7,0"
-              ToolTip="Hold pause. Der optages intet, før du fortsætter." />
+              ToolTip="{i18n:Oversat optagebaand.hold_pause_der_optages_intet_foer_du_forts}" />
 
-      <Button x:Name="StopKnap" Click="Stop_Klik" Content="■ Stop og gem" Cursor="Hand"
+      <Button x:Name="StopKnap" Click="Stop_Klik" Content="{i18n:Oversat faelles.stop_og_gem}" Cursor="Hand"
               Padding="14,7" FontSize="12.5" FontWeight="SemiBold"
               Background="#FFE5484D" Foreground="#FFFFFFFF" BorderThickness="0"
-              ToolTip="Afslut optagelsen og gem den. Du navngiver mødet bagefter." />
+              ToolTip="{i18n:Oversat optagebaand.afslut_optagelsen_og_gem_den_du_navngiver}" />
 
       <Button x:Name="AnnullerKnap" Click="Annuller_Klik" Content="✕" Cursor="Hand"
               Padding="11,7" FontSize="12" Margin="7,0,0,0"
-              ToolTip="Kassér optagelsen uden at gemme. Lyden bliver slettet." />
+              ToolTip="{i18n:Oversat optagebaand.kasser_optagelsen_uden_at_gemme_lyden_bliv}" />
     </StackPanel>
   </Border>
 </Window>

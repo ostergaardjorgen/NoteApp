@@ -1,6 +1,7 @@
 ﻿<UserControl x:Class="NoteApp.Desktop.History.HistoryView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:i18n="clr-namespace:NoteApp.Desktop"
              Background="{StaticResource Baggrund}">
 
   <Grid Margin="24,20,24,20">
@@ -11,9 +12,9 @@
     </Grid.RowDefinitions>
 
     <StackPanel Grid.Row="0" Margin="0,0,0,14">
-      <TextBlock Text="Historik" Style="{StaticResource Overskrift}" />
+      <TextBlock Text="{i18n:Oversat historyview.historik}" Style="{StaticResource Overskrift}" />
       <TextBlock Style="{StaticResource Underskrift}"
-                 Text="Alt appen har gjort, hvornår, med hvilken model — og hvordan det gik." />
+                 Text="{i18n:Oversat historyview.alt_appen_har_gjort_hvornaar_med_hvilken_m}" />
     </StackPanel>
 
     <!-- HER STOD «Intet har forladt denne pc» med et stort nul ved siden af.
@@ -40,7 +41,7 @@
         <TextBlock x:Name="TomTekst" DockPanel.Dock="Top" Margin="20,10,20,0" FontSize="13"
                    TextWrapping="Wrap" LineHeight="21" Visibility="Collapsed"
                    Foreground="{StaticResource TekstMeget}"
-                   Text="Der er ikke sket noget endnu. Historikken fyldes, efterhånden som du optager møder, skriver dem ud og laver dokumenter." />
+                   Text="{i18n:Oversat historyview.der_er_ikke_sket_noget_endnu_historikken_f}" />
 
         <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="8,0,8,10">
           <ItemsControl x:Name="Liste">
@@ -82,7 +83,7 @@
                               FontSize="11.5" Cursor="Hand" BorderThickness="0"
                               Background="Transparent" Foreground="{Binding LinkFarve}"
                               IsEnabled="{Binding Findes}"
-                              ToolTip="Gå til den, linjen handler om">
+                              ToolTip="{i18n:Oversat historyview.gaa_til_den_linjen_handler_om}">
                         <Button.Style>
                           <Style TargetType="Button">
                             <Setter Property="Template">
@@ -128,8 +129,8 @@
                  Foreground="{StaticResource TekstMeget}" TextWrapping="Wrap" />
 
       <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-        <Button Content="Åbn logfilen" Click="Aabn_Click" Padding="14,8" Margin="0,0,8,0" />
-        <Button Content="Opdatér" Click="Genindlaes_Click" Padding="14,8" />
+        <Button Content="{i18n:Oversat historyview.aabn_logfilen}" Click="Aabn_Click" Padding="14,8" Margin="0,0,8,0" />
+        <Button Content="{i18n:Oversat historyview.opdater}" Click="Genindlaes_Click" Padding="14,8" />
       </StackPanel>
     </Grid>
   </Grid>

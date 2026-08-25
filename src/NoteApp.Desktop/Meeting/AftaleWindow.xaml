@@ -1,6 +1,7 @@
-<Window x:Class="NoteApp.Desktop.Meeting.AftaleWindow"
+﻿<Window x:Class="NoteApp.Desktop.Meeting.AftaleWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:i18n="clr-namespace:NoteApp.Desktop"
         Title="Aftale"
         Width="620" SizeToContent="Height"
         WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
@@ -27,7 +28,7 @@
     <TextBlock x:Name="Underskrift" Style="{StaticResource Underskrift}"
                Margin="0,4,0,0" TextWrapping="Wrap" />
 
-    <TextBlock Text="HVAD ER DET?" FontSize="9.5" FontWeight="SemiBold"
+    <TextBlock Text="{i18n:Oversat aftalewindow.hvad_er_det}" FontSize="9.5" FontWeight="SemiBold"
                Margin="2,18,0,6" Foreground="{StaticResource TekstMeget}" />
     <TextBox x:Name="Titel" FontSize="13.5" Padding="10,7" />
 
@@ -35,14 +36,14 @@
          ikke nogen. «Catch-up - Relation» siger ingenting om, hvem man skal
          tale med; det goer navnet. -->
     <StackPanel x:Name="Arrangoerrude" Margin="0,14,0,0" Visibility="Collapsed">
-      <TextBlock Text="INDKALDT AF" FontSize="9.5" FontWeight="SemiBold" Margin="2,0,0,6"
+      <TextBlock Text="{i18n:Oversat aftalewindow.indkaldt_af}" FontSize="9.5" FontWeight="SemiBold" Margin="2,0,0,6"
                  Foreground="{StaticResource TekstMeget}" />
       <TextBlock x:Name="Arrangoer" FontSize="14" TextWrapping="Wrap"
                  Foreground="{StaticResource Tekst}" />
       <TextBlock x:Name="Arrangoernote" FontSize="11" Margin="0,3,0,0" TextWrapping="Wrap"
                  Visibility="Collapsed"
                  Foreground="{StaticResource Advarsel}"
-                 Text="Du er selv arrangør. Så er det dig, der skal sige det til deltagerne, hvis mødet optages." />
+                 Text="{i18n:Oversat aftalewindow.du_er_selv_arrangoer_saa_er_det_dig_der_sk}" />
     </StackPanel>
 
     <!-- EN HENTET AFTALE VISER TIDEN SOM TEKST.
@@ -50,7 +51,7 @@
          kontroller, der ser ud som noget, der er gaaet i stykker. Her staar
          der bare, hvornaar moedet er. -->
     <StackPanel x:Name="Laasttid" Margin="0,14,0,0" Visibility="Collapsed">
-      <TextBlock Text="HVORNÅR" FontSize="9.5" FontWeight="SemiBold" Margin="2,0,0,6"
+      <TextBlock Text="{i18n:Oversat aftalewindow.hvornaar}" FontSize="9.5" FontWeight="SemiBold" Margin="2,0,0,6"
                  Foreground="{StaticResource TekstMeget}" />
       <TextBlock x:Name="Tidslinje" FontSize="14" TextWrapping="Wrap"
                  Foreground="{StaticResource Tekst}" />
@@ -66,25 +67,25 @@
       </Grid.ColumnDefinitions>
 
       <StackPanel Grid.Column="0">
-        <TextBlock Text="DATO" FontSize="9.5" FontWeight="SemiBold" Margin="2,0,0,6"
+        <TextBlock Text="{i18n:Oversat aftalewindow.dato}" FontSize="9.5" FontWeight="SemiBold" Margin="2,0,0,6"
                    Foreground="{StaticResource TekstMeget}" />
         <DatePicker x:Name="Dato" FontSize="13" />
       </StackPanel>
 
       <StackPanel Grid.Column="2">
-        <TextBlock Text="FRA" FontSize="9.5" FontWeight="SemiBold" Margin="2,0,0,6"
+        <TextBlock Text="{i18n:Oversat aftalewindow.fra}" FontSize="9.5" FontWeight="SemiBold" Margin="2,0,0,6"
                    Foreground="{StaticResource TekstMeget}" />
         <ComboBox x:Name="Fra" Width="92" FontSize="13" Padding="8,6" IsEditable="True" />
       </StackPanel>
 
       <StackPanel Grid.Column="4">
-        <TextBlock Text="TIL" FontSize="9.5" FontWeight="SemiBold" Margin="2,0,0,6"
+        <TextBlock Text="{i18n:Oversat aftalewindow.til}" FontSize="9.5" FontWeight="SemiBold" Margin="2,0,0,6"
                    Foreground="{StaticResource TekstMeget}" />
         <ComboBox x:Name="Til" Width="92" FontSize="13" Padding="8,6" IsEditable="True" />
       </StackPanel>
     </Grid>
 
-    <TextBlock Text="LINK ELLER STED (kan stå tomt)" FontSize="9.5" FontWeight="SemiBold"
+    <TextBlock Text="{i18n:Oversat aftalewindow.link_eller_sted_kan_staa_tomt}" FontSize="9.5" FontWeight="SemiBold"
                Margin="2,14,0,6" Foreground="{StaticResource TekstMeget}" />
     <Grid>
       <Grid.ColumnDefinitions>
@@ -98,20 +99,20 @@
            Uden knappen skulle man over i Google Kalender for at trykke paa
            det samme link - og saa er kalenderen her en visning, man alligevel
            forlader. Knappen staar kun, naar der ER et link. -->
-      <Button x:Name="AabnLinkKnap" Grid.Column="1" Content="Åbn mødet"
+      <Button x:Name="AabnLinkKnap" Grid.Column="1" Content="{i18n:Oversat aftalewindow.aabn_moedet}"
               Click="AabnLink_Klik" Margin="8,0,0,0" Padding="14,7" FontSize="12"
               Visibility="Collapsed"
-              ToolTip="Åbner mødelinket i din browser" />
+              ToolTip="{i18n:Oversat aftalewindow.aabner_moedelinket_i_din_browser}" />
     </Grid>
 
     <!-- ============ DE TRE, DER FØLGER MED TIL OPTAGELSEN ============ -->
     <Border Background="#FF181B22" BorderBrush="{StaticResource PanelKant}" BorderThickness="1"
             CornerRadius="8" Padding="14,12" Margin="0,18,0,0">
       <StackPanel>
-        <TextBlock Text="Når du trykker optag på aftalen" FontSize="12.5" FontWeight="SemiBold" />
+        <TextBlock Text="{i18n:Oversat aftalewindow.naar_du_trykker_optag_paa_aftalen}" FontSize="12.5" FontWeight="SemiBold" />
         <TextBlock FontSize="12" Margin="0,5,0,0" TextWrapping="Wrap" LineHeight="19"
                    Foreground="{StaticResource TekstSvag}"
-                   Text="De her tre følger med, så der ikke skal svares på noget, mens mødet går i gang. Står de tomme, bliver du spurgt som sædvanlig." />
+                   Text="{i18n:Oversat aftalewindow.de_her_tre_foelger_med_saa_der_ikke_skal_s}" />
 
         <Grid Margin="0,12,0,0">
           <Grid.ColumnDefinitions>
@@ -123,7 +124,7 @@
           </Grid.ColumnDefinitions>
 
           <StackPanel Grid.Column="0">
-            <TextBlock Text="MAPPE" FontSize="9" FontWeight="SemiBold" Margin="2,0,0,5"
+            <TextBlock Text="{i18n:Oversat faelles.mappe}" FontSize="9" FontWeight="SemiBold" Margin="2,0,0,5"
                        Foreground="{StaticResource TekstMeget}" />
             <ComboBox x:Name="Mappevalg" FontSize="12" Padding="8,5">
               <ComboBox.ItemTemplate>
@@ -133,7 +134,7 @@
           </StackPanel>
 
           <StackPanel Grid.Column="2">
-            <TextBlock Text="MØDETYPE" FontSize="9" FontWeight="SemiBold" Margin="2,0,0,5"
+            <TextBlock Text="{i18n:Oversat faelles.moedetype}" FontSize="9" FontWeight="SemiBold" Margin="2,0,0,5"
                        Foreground="{StaticResource TekstMeget}" />
             <ComboBox x:Name="Typevalg" FontSize="12" Padding="8,5">
               <ComboBox.ItemTemplate>
@@ -143,7 +144,7 @@
           </StackPanel>
 
           <StackPanel Grid.Column="4">
-            <TextBlock Text="SPROG" FontSize="9" FontWeight="SemiBold" Margin="2,0,0,5"
+            <TextBlock Text="{i18n:Oversat aftalewindow.sprog}" FontSize="9" FontWeight="SemiBold" Margin="2,0,0,5"
                        Foreground="{StaticResource TekstMeget}" />
             <ComboBox x:Name="Sprogvalg" FontSize="12" Padding="8,5">
               <ComboBox.ItemTemplate>
@@ -154,40 +155,40 @@
         </Grid>
 
         <CheckBox x:Name="ErWebinar" Margin="0,12,0,0" FontSize="12"
-                  Content="Optag som webinar — kun det, computeren afspiller" />
+                  Content="{i18n:Oversat aftalewindow.optag_som_webinar_kun_det_computeren_afspi}" />
 
         <!-- OGSAA PAA EN HENTET AFTALE. Feltet er appens eget og findes ikke
              hos Google, saa det kan saettes paa hvad som helst i kalenderen. -->
         <CheckBox x:Name="OptagAutomatisk" Margin="0,10,0,0" FontSize="12"
                   Checked="Automatisk_Skiftet" Unchecked="Automatisk_Skiftet"
-                  Content="Start optagelsen automatisk, når mødet begynder" />
+                  Content="{i18n:Oversat aftalewindow.start_optagelsen_automatisk_naar_moedet_be}" />
 
         <TextBlock x:Name="AutomatiskNote" Margin="24,3,0,0" FontSize="11"
                    TextWrapping="Wrap" Visibility="Collapsed"
                    Foreground="{StaticResource Advarsel}"
-                   Text="Optagelsen begynder to minutter før. Det kræver, at NoteApp kører — et program, der er lukket, kan ikke starte en optagelse. Flyttes mødet, flytter optagelsen med." />
+                   Text="{i18n:Oversat aftalewindow.optagelsen_begynder_to_minutter_foer_det_k}" />
 
         <!-- MEET PAA EN HENTET AFTALE.
              Den staar kun paa en Google-aftale uden link. Er der allerede et
              moedelink, er der ikke noget at tilfoeje - og en knap, der laver
              et moederum nummer to, er en fejl, ikke en mulighed. -->
-        <Button x:Name="TilfoejMeetKnap" Content="Tilføj et Google Meet-link"
+        <Button x:Name="TilfoejMeetKnap" Content="{i18n:Oversat faelles.tilfoej_et_google_meet_link}"
                 Click="TilfoejMeet_Klik" HorizontalAlignment="Left"
                 Margin="0,12,0,0" Padding="12,6" FontSize="12"
                 Visibility="Collapsed"
-                ToolTip="Opretter et mødelokale hos Google og lægger linket på aftalen. Er mødet markeret til automatisk optagelse, skrives oplysningen om optagelse også i indkaldelsen" />
+                ToolTip="{i18n:Oversat aftalewindow.opretter_et_moedelokale_hos_google_og_laeg}" />
 
         <!-- Hakket vises kun, naar der ER en forbindelse. Et afkrydsningsfelt,
              der ikke kan bruges, er et spoergsmaal om hvorfor. -->
         <CheckBox x:Name="OpretHosGoogle" Margin="0,10,0,0" FontSize="12"
                   Visibility="Collapsed"
                   Checked="Google_Skiftet" Unchecked="Google_Skiftet"
-                  Content="Opret også i Google Kalender" />
+                  Content="{i18n:Oversat aftalewindow.opret_ogsaa_i_google_kalender}" />
 
         <TextBlock x:Name="GoogleForklaring" Margin="24,3,0,0" FontSize="11"
                    TextWrapping="Wrap" Visibility="Collapsed"
                    Foreground="{StaticResource TekstMeget}"
-                   Text="Titel, tidspunkt og sted sendes op. Mødetype, mappe og sprog bliver her — og lyd, transkriptioner og noter sendes aldrig." />
+                   Text="{i18n:Oversat aftalewindow.titel_tidspunkt_og_sted_sendes_op_moedetyp}" />
 
         <!-- DE TO UNDERVALG VISES FOERST, NAAR DER ER SAT HAK OVENFOR.
              De giver ingen mening uden, og to doede felter er to
@@ -195,16 +196,16 @@
         <StackPanel x:Name="Googlevalg" Margin="24,8,0,0" Visibility="Collapsed">
 
           <CheckBox x:Name="MedMeet" FontSize="12" IsChecked="True"
-                    Content="Tilføj et Google Meet-link" />
+                    Content="{i18n:Oversat faelles.tilfoej_et_google_meet_link}" />
           <TextBlock Margin="24,2,0,0" FontSize="11" TextWrapping="Wrap"
                      Foreground="{StaticResource TekstMeget}"
-                     Text="Linket kommer med tilbage, så mødet kan startes herfra. Sætter du også hak i «Start optagelsen automatisk», følger der en oplysning med i indkaldelsen: at der anvendes mødetransskription, at det kræver at LYDEN optages, at der ikke optages video, at lyden bliver på din computer — og at man kan sige fra. Teksten kan rettes under Indstillinger → Integrationer, på dansk og engelsk." />
+                     Text="{i18n:Oversat aftalewindow.linket_kommer_med_tilbage_saa_moedet_kan_s}" />
 
           <CheckBox x:Name="InviterGaester" FontSize="12" Margin="0,9,0,0"
-                    Content="Jeg vil invitere gæster" />
+                    Content="{i18n:Oversat aftalewindow.jeg_vil_invitere_gaester}" />
           <TextBlock Margin="24,2,0,0" FontSize="11" TextWrapping="Wrap"
                      Foreground="{StaticResource TekstMeget}"
-                     Text="Aftalen åbnes i Google Kalender, når den er oprettet. Dine kontakter og invitationerne hører hjemme dér — ikke her." />
+                     Text="{i18n:Oversat aftalewindow.aftalen_aabnes_i_google_kalender_naar_den}" />
         </StackPanel>
       </StackPanel>
     </Border>
@@ -213,7 +214,7 @@
                Foreground="{StaticResource Advarsel}" />
 
     <Grid Margin="0,18,0,0">
-      <Button x:Name="SletKnap" Content="Slet aftalen" Click="Slet_Klik"
+      <Button x:Name="SletKnap" Content="{i18n:Oversat aftalewindow.slet_aftalen}" Click="Slet_Klik"
               HorizontalAlignment="Left" Padding="14,8" Visibility="Collapsed" />
 
       <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
@@ -226,10 +227,10 @@
 
              Den gemmer aftalen foerst. Har man rettet mappen og saa trykket
              optag, skal optagelsen bruge den nye mappe. -->
-        <Button x:Name="OptagKnap" Content="Optag mødet" Click="Optag_Klik"
+        <Button x:Name="OptagKnap" Content="{i18n:Oversat faelles.optag_moedet}" Click="Optag_Klik"
                 Padding="16,8" Margin="0,0,10,0" Visibility="Collapsed" />
-        <Button Content="Fortryd" Click="Fortryd_Klik" Padding="16,8" Margin="0,0,10,0" />
-        <Button x:Name="GemKnap" Content="Gem aftalen" Click="Gem_Klik"
+        <Button Content="{i18n:Oversat faelles.fortryd}" Click="Fortryd_Klik" Padding="16,8" Margin="0,0,10,0" />
+        <Button x:Name="GemKnap" Content="{i18n:Oversat aftalewindow.gem_aftalen}" Click="Gem_Klik"
                 Padding="20,8" Style="{StaticResource Primaer}" IsDefault="True" />
       </StackPanel>
     </Grid>

@@ -1,6 +1,8 @@
-<UserControl x:Class="NoteApp.Desktop.Notifications.NotificationPopup"
+﻿<UserControl x:Class="NoteApp.Desktop.Notifications.NotificationPopup"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:i18n="clr-namespace:NoteApp.Desktop"
+             xmlns:local="clr-namespace:NoteApp.Desktop">
 
   <Border Background="{StaticResource Panel}" CornerRadius="12" Width="440"
           BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
@@ -19,7 +21,7 @@
               BorderBrush="{StaticResource PanelKant}" BorderThickness="0,0,0,1">
         <Grid>
           <StackPanel VerticalAlignment="Center">
-            <TextBlock Text="Beskeder" FontSize="15" FontWeight="SemiBold" />
+            <TextBlock Text="{i18n:Oversat notificationpopup.beskeder}" FontSize="15" FontWeight="SemiBold" />
             <TextBlock x:Name="Under" FontSize="11.5" Margin="0,2,0,0"
                        Foreground="{StaticResource TekstMeget}" />
           </StackPanel>
@@ -41,7 +43,7 @@
         <Grid>
           <TextBlock x:Name="Tom" FontSize="12" VerticalAlignment="Center" TextWrapping="Wrap"
                      Foreground="{StaticResource TekstMeget}" Margin="0,0,110,0" />
-          <Button Content="Se hele historikken" Click="Historik_Click" HorizontalAlignment="Right"
+          <Button Content="{i18n:Oversat notificationpopup.se_hele_historikken}" Click="Historik_Click" HorizontalAlignment="Right"
                   Padding="12,6" FontSize="12" />
         </Grid>
       </Border>

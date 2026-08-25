@@ -1,6 +1,7 @@
-<Window x:Class="NoteApp.Desktop.Dialogs.AppDialog"
+﻿<Window x:Class="NoteApp.Desktop.Dialogs.AppDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:i18n="clr-namespace:NoteApp.Desktop"
         Width="620" SizeToContent="Height" ResizeMode="NoResize"
         WindowStartupLocation="CenterOwner" ShowInTaskbar="False"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent">
@@ -72,7 +73,7 @@
 
         <StackPanel Grid.Column="2" Orientation="Horizontal">
           <Button x:Name="AnnullerKnap" Click="Annuller_Click" Padding="20,10" Margin="0,0,10,0"
-                  IsCancel="True" MinWidth="104" Content="Annullér" />
+                  IsCancel="True" MinWidth="104" Content="{i18n:Oversat faelles.annuller}" />
           <Button x:Name="GodkendKnap" Click="Godkend_Click" Padding="22,10" MinWidth="124"
                   IsDefault="True" BorderThickness="0" FontWeight="SemiBold"
                   Foreground="#FF0B1220" Background="{StaticResource Accent}" />

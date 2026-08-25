@@ -1,6 +1,7 @@
-<Window x:Class="NoteApp.Desktop.Dialogs.MappeVaelger"
+﻿<Window x:Class="NoteApp.Desktop.Dialogs.MappeVaelger"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:i18n="clr-namespace:NoteApp.Desktop"
         Title="Flyt til mappe" Width="460" SizeToContent="Height" MinHeight="300"
         WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
         Background="{StaticResource Baggrund}" Foreground="{StaticResource Tekst}">
@@ -20,12 +21,12 @@
       </ListBox.ItemTemplate>
     </ListBox>
 
-    <Button x:Name="NyKnap" Content="Ny mappe …" Click="Ny_Click"
+    <Button x:Name="NyKnap" Content="{i18n:Oversat mappevaelger.ny_mappe}" Click="Ny_Click"
             HorizontalAlignment="Left" Margin="0,10,0,0" Padding="12,6" FontSize="12" />
 
     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
-      <Button Content="Annullér" Click="Annuller_Click" Padding="18,9" Margin="0,0,10,0" />
-      <Button Content="Flyt" Click="Flyt_Click" Padding="22,9" IsDefault="True"
+      <Button Content="{i18n:Oversat faelles.annuller}" Click="Annuller_Click" Padding="18,9" Margin="0,0,10,0" />
+      <Button Content="{i18n:Oversat mappevaelger.flyt}" Click="Flyt_Click" Padding="22,9" IsDefault="True"
               Background="{StaticResource Accent}" Foreground="#FF0B1220"
               BorderThickness="0" FontWeight="SemiBold" />
     </StackPanel>

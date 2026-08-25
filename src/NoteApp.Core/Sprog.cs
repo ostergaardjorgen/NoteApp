@@ -48,12 +48,51 @@ public static class Sprog
     private static Dictionary<string, string>? _valgt;
     private static Dictionary<string, string>? _kilde;
     private static string _kode = Kilde;
+    private static System.Globalization.CultureInfo? _kultur;
 
     /// <summary>Meldes, når sproget skiftes. Skærmene lytter med og skriver sig om.</summary>
     public static event Action? Aendret;
 
     /// <summary>Sprogmappen. Én fil pr. sprog.</summary>
     public static string Mappe => Path.Combine(UserDataPaths.Root, "sprog");
+
+    /// <summary>
+    /// Kulturen, datoer og tal skal skrives i.
+    ///
+    /// HVORFOR DEN HØRER SAMMEN MED SPROGET
+    ///
+    /// «Torsdag 27. august» er lige så meget dansk som «Optagelser». Skiftede
+    /// kun teksterne, ville en engelsk brugerflade vise engelske knapper og
+    /// danske ugedage — og det ser ud som en fejl, fordi det ER en.
+    ///
+    /// Kulturen kommer fra sprogfilens <c>_sprog.kultur</c>, så et nyt sprog
+    /// selv siger, hvordan dets datoer ser ud. Mangler feltet, bruges koden —
+    /// «de» giver tysk. Kender Windows ikke koden, bruges maskinens egen.
+    /// </summary>
+    public static System.Globalization.CultureInfo Kultur
+    {
+        get
+        {
+            lock (_laas)
+            {
+                Sikr();
+
+                if (_kultur is not null) return _kultur;
+
+                var navn = _valgt!.TryGetValue("_sprog.kultur", out var k) && k.Length > 0
+                    ? k
+                    : _kode;
+
+                try { _kultur = System.Globalization.CultureInfo.GetCultureInfo(navn); }
+                catch (System.Globalization.CultureNotFoundException)
+                {
+                    _kultur = System.Globalization.CultureInfo.CurrentCulture;
+                }
+
+                return _kultur;
+            }
+        }
+    }
 
     /// <summary>Koden på det sprog, der vises nu.</summary>
     public static string Kode
@@ -122,6 +161,7 @@ public static class Sprog
 
             _valgt = Laes(fil);
             _kode = kode.ToLowerInvariant();
+            _kultur = null;
         }
 
         var s = AppSettings.Current;
@@ -177,7 +217,7 @@ public static class Sprog
         // KODEN SLIPPES OGSAA. Stod den tilbage, ville Sprog paastaa et andet
         // sprog end det, filerne og indstillingen siger - og Skift ville
         // springe over netop det sprog, der skulle vaelges.
-        lock (_laas) { _valgt = null; _kilde = null; _kode = Kilde; }
+        lock (_laas) { _valgt = null; _kilde = null; _kode = Kilde; _kultur = null; }
         Aendret?.Invoke();
     }
 
@@ -195,6 +235,7 @@ public static class Sprog
         var fil = Filen(oensket) ?? Filen(Kilde);
 
         _kode = fil is null ? Kilde : Path.GetFileNameWithoutExtension(fil).ToLowerInvariant();
+        _kultur = null;
         _valgt = fil is null ? new() : Laes(fil);
 
         var kildefil = Filen(Kilde);

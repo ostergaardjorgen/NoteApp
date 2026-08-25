@@ -1,19 +1,20 @@
-<Window x:Class="NoteApp.Desktop.Transcribe.CorrectionWindow"
+﻿<Window x:Class="NoteApp.Desktop.Transcribe.CorrectionWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:i18n="clr-namespace:NoteApp.Desktop"
         Title="Ret et ord" Width="540" SizeToContent="Height" MinHeight="300"
         WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
         Background="{StaticResource Baggrund}">
 
   <StackPanel Margin="26">
-    <TextBlock Text="Hvad skulle der have stået?" FontSize="18" FontWeight="SemiBold" />
+    <TextBlock Text="{i18n:Oversat correctionwindow.hvad_skulle_der_have_staaet}" FontSize="18" FontWeight="SemiBold" />
     <TextBlock Style="{StaticResource Underskrift}" Margin="0,8,0,0" TextWrapping="Wrap" LineHeight="20"
-               Text="Rettelsen bliver en regel. Næste gang det samme bliver hørt forkert, retter appen det selv — i denne transkription og i alle fremtidige." />
+               Text="{i18n:Oversat correctionwindow.rettelsen_bliver_en_regel_naeste_gang_det}" />
 
-    <TextBlock Text="Hørt som" Style="{StaticResource Underskrift}" Margin="0,20,0,0" />
+    <TextBlock Text="{i18n:Oversat correctionwindow.hoert_som}" Style="{StaticResource Underskrift}" Margin="0,20,0,0" />
     <TextBox x:Name="FeltHoert" Margin="0,4,0,0" FontSize="15" Padding="12,10" />
 
-    <TextBlock Text="Skulle have været" Style="{StaticResource Underskrift}" Margin="0,14,0,0" />
+    <TextBlock Text="{i18n:Oversat correctionwindow.skulle_have_vaeret}" Style="{StaticResource Underskrift}" Margin="0,14,0,0" />
     <TextBox x:Name="FeltRigtigt" Margin="0,4,0,0" FontSize="15" Padding="12,10" />
 
     <Border Background="#FF181B22" BorderBrush="{StaticResource PanelKant}" BorderThickness="1"
@@ -23,13 +24,13 @@
                    Foreground="{StaticResource TekstSvag}" />
         <TextBlock FontSize="12" LineHeight="19" Margin="0,7,0,0" TextWrapping="Wrap"
                    Foreground="{StaticResource TekstMeget}"
-                   Text="Den oprindelige udskrift gemmes ved siden af som .raa.txt, så en rettelse altid kan fortrydes." />
+                   Text="{i18n:Oversat correctionwindow.den_oprindelige_udskrift_gemmes_ved_siden}" />
       </StackPanel>
     </Border>
 
     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,22,0,0">
-      <Button Content="Annullér" Click="Annuller_Click" Padding="18,9" Margin="0,0,10,0" IsCancel="True" />
-      <Button Content="Lær rettelsen" Click="Gem_Click" Padding="22,9" IsDefault="True"
+      <Button Content="{i18n:Oversat faelles.annuller}" Click="Annuller_Click" Padding="18,9" Margin="0,0,10,0" IsCancel="True" />
+      <Button Content="{i18n:Oversat correctionwindow.laer_rettelsen}" Click="Gem_Click" Padding="22,9" IsDefault="True"
               Background="{StaticResource Accent}" Foreground="#FF0B1220" BorderThickness="0"
               FontWeight="SemiBold" />
     </StackPanel>

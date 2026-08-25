@@ -1,6 +1,7 @@
 ﻿<UserControl x:Class="NoteApp.Desktop.Engine.EngineView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:i18n="clr-namespace:NoteApp.Desktop"
              Background="{StaticResource Baggrund}">
 
   <!-- ======================== HVORFOR SKÆRMEN ER TOM FOR VALG ============
@@ -30,10 +31,10 @@
     </Grid.RowDefinitions>
 
     <StackPanel Grid.Row="0" Margin="0,0,0,14">
-      <TextBlock Text="AI-modeller" Style="{StaticResource Overskrift}" />
+      <TextBlock Text="{i18n:Oversat faelles.ai_modeller}" Style="{StaticResource Overskrift}" />
       <TextBlock Style="{StaticResource Underskrift}" TextWrapping="Wrap" MaxWidth="900"
                  HorizontalAlignment="Left"
-                 Text="Fire modeller gør hver sit. Tre af dem kører her på maskinen; kun dokumenter laves i Europa. Alt er valgt på forhånd — der er ikke noget at stille ind. Under «Compliance» står hver komponent for sig med sin egen licens." />
+                 Text="{i18n:Oversat engineview.fire_modeller_goer_hver_sit_tre_af_dem_koe}" />
     </StackPanel>
 
     <!-- ===================== ÉN FANE PR. MODEL =====================
@@ -50,7 +51,7 @@
     <TabControl Grid.Row="1" Style="{StaticResource Fanerude}"
                 Background="Transparent" BorderThickness="0">
 
-      <TabItem Header="Lyd til tekst" Style="{StaticResource Fane}">
+      <TabItem Header="{i18n:Oversat engineview.lyd_til_tekst}" Style="{StaticResource Fane}">
         <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,12,0,0"
                       HorizontalScrollBarVisibility="Disabled">
         <StackPanel>
@@ -59,7 +60,7 @@
         <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20" Margin="0,0,0,14"
                 BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
           <StackPanel>
-            <TextBlock Text="1 · LYD TIL TEKST — HER PÅ MASKINEN" FontSize="11" FontWeight="SemiBold"
+            <TextBlock Text="{i18n:Oversat engineview.1_lyd_til_tekst_her_paa_maskinen}" FontSize="11" FontWeight="SemiBold"
                        Foreground="{StaticResource Accent}" />
             <Grid Margin="0,8,0,0">
               <Grid.ColumnDefinitions>
@@ -82,7 +83,7 @@
                       <ColumnDefinition Width="72" />
                       <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="MOTOR" FontSize="10" FontWeight="SemiBold"
+                    <TextBlock Grid.Column="0" Text="{i18n:Oversat engineview.motor}" FontSize="10" FontWeight="SemiBold"
                                Foreground="{StaticResource TekstMeget}" Margin="0,3,0,0" />
                     <StackPanel Grid.Column="1">
                       <TextBlock x:Name="LydMotor" FontSize="14.5" FontWeight="SemiBold" />
@@ -99,7 +100,7 @@
                       <ColumnDefinition Width="72" />
                       <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="MODEL" FontSize="10" FontWeight="SemiBold"
+                    <TextBlock Grid.Column="0" Text="{i18n:Oversat engineview.model}" FontSize="10" FontWeight="SemiBold"
                                Foreground="{StaticResource TekstMeget}" Margin="0,3,0,0" />
                     <StackPanel Grid.Column="1">
                       <TextBlock x:Name="LydModel" FontSize="14.5" FontWeight="SemiBold" />
@@ -134,7 +135,7 @@
 
             <!-- Det tekniske står i en foldbar. Man slår det op den ene gang,
                  noget driller — det skal ikke fylde skærmen hver dag. -->
-            <Expander Header="Det tekniske" Margin="0,14,0,0" FontSize="12"
+            <Expander Header="{i18n:Oversat engineview.det_tekniske}" Margin="0,14,0,0" FontSize="12"
                       Foreground="{StaticResource TekstMeget}">
               <Grid Margin="0,10,0,0" MaxWidth="520" HorizontalAlignment="Left">
                 <Grid.ColumnDefinitions>
@@ -149,21 +150,21 @@
                   <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
-                <TextBlock Grid.Row="0" Grid.Column="0" Text="Motor" Margin="0,0,24,0"
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="{i18n:Oversat faelles.motor}" Margin="0,0,24,0"
                            Foreground="{StaticResource TekstMeget}" FontSize="12.5" />
                 <TextBlock Grid.Row="0" Grid.Column="1" x:Name="MotorNavn" HorizontalAlignment="Right" FontSize="12.5" />
 
-                <TextBlock Grid.Row="1" Grid.Column="0" x:Name="AlderLabel" Text="Sidst opdateret"
+                <TextBlock Grid.Row="1" Grid.Column="0" x:Name="AlderLabel" Text="{i18n:Oversat engineview.sidst_opdateret}"
                            Margin="0,6,24,0" Foreground="{StaticResource TekstMeget}" FontSize="12.5" />
                 <TextBlock Grid.Row="1" Grid.Column="1" x:Name="MotorVersion" HorizontalAlignment="Right"
                            FontSize="12.5" Margin="0,6,0,0" />
 
-                <TextBlock Grid.Row="2" Grid.Column="0" Text="Beregning" Margin="0,6,24,0"
+                <TextBlock Grid.Row="2" Grid.Column="0" Text="{i18n:Oversat engineview.beregning}" Margin="0,6,24,0"
                            Foreground="{StaticResource TekstMeget}" FontSize="12.5" />
                 <TextBlock Grid.Row="2" Grid.Column="1" x:Name="MotorBeregning" HorizontalAlignment="Right"
                            FontSize="12.5" Margin="0,6,0,0" />
 
-                <TextBlock Grid.Row="3" Grid.Column="0" Text="Modelfil" Margin="0,6,24,0"
+                <TextBlock Grid.Row="3" Grid.Column="0" Text="{i18n:Oversat engineview.modelfil}" Margin="0,6,24,0"
                            Foreground="{StaticResource TekstMeget}" FontSize="12.5" />
                 <TextBlock Grid.Row="3" Grid.Column="1" x:Name="ModelNavn" HorizontalAlignment="Right"
                            FontSize="12.5" FontWeight="SemiBold" Margin="0,6,0,0" />
@@ -179,19 +180,19 @@
       </TabItem>
 
       <!-- ===================== Talergenkendelsen ===================== -->
-      <TabItem Header="Talergenkendelse" Style="{StaticResource Fane}">
+      <TabItem Header="{i18n:Oversat engineview.talergenkendelse}" Style="{StaticResource Fane}">
         <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,12,0,0"
                       HorizontalScrollBarVisibility="Disabled">
           <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20"
                   BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
             <StackPanel>
-              <TextBlock Text="HVEM SAGDE HVAD — HER PÅ MASKINEN" FontSize="11"
+              <TextBlock Text="{i18n:Oversat engineview.hvem_sagde_hvad_her_paa_maskinen}" FontSize="11"
                          FontWeight="SemiBold" Foreground="{StaticResource Accent}" />
 
               <TextBlock FontSize="12.5" LineHeight="20" Margin="0,8,0,0" TextWrapping="Wrap"
                          MaxWidth="720" HorizontalAlignment="Left"
                          Foreground="{StaticResource TekstSvag}"
-                         Text="Et onlinemøde optages på to spor, og det siger hvilken SIDE der talte — ikke hvem. Sad der tre i den anden ende, ville de alle stå som «Gæster». De her to modeller skiller stemmerne ad, så hver enkelt kan navngives." />
+                         Text="{i18n:Oversat engineview.et_onlinemoede_optages_paa_to_spor_og_det}" />
 
               <TextBlock x:Name="TalerStatus" FontSize="12" Margin="0,12,0,0" TextWrapping="Wrap"
                          Foreground="{StaticResource Accent}" />
@@ -227,7 +228,7 @@
               <TextBlock FontSize="11.5" LineHeight="19" Margin="0,4,0,0" TextWrapping="Wrap"
                          MaxWidth="720" HorizontalAlignment="Left"
                          Foreground="{StaticResource TekstMeget}"
-                         Text="Målt på et møde på 35 minutter med to talere: begge stemmer fundet, og den ene blev genkendt igen efter ti minutters tavshed. Den kører samtidig med udskrivningen og lægger derfor kun omkring halvandet minut til et møde på en time." />
+                         Text="{i18n:Oversat engineview.maalt_paa_et_moede_paa_35_minutter_med_to}" />
 
               <TextBlock x:Name="TalerSti" FontSize="11" Margin="0,12,0,0" TextWrapping="Wrap"
                          Foreground="{StaticResource TekstMeget}" />
@@ -237,13 +238,13 @@
       </TabItem>
 
       <!-- ===================== Den lokale opsummering ================= -->
-      <TabItem Header="Opsummering" Style="{StaticResource Fane}">
+      <TabItem Header="{i18n:Oversat faelles.opsummering}" Style="{StaticResource Fane}">
         <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,12,0,0"
                       HorizontalScrollBarVisibility="Disabled">
           <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20"
                   BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
             <StackPanel>
-              <TextBlock Text="KORT OPSUMMERING — HER PÅ MASKINEN" FontSize="11"
+              <TextBlock Text="{i18n:Oversat engineview.kort_opsummering_her_paa_maskinen}" FontSize="11"
                          FontWeight="SemiBold" Foreground="{StaticResource Accent}" />
 
               <Grid Margin="0,8,0,0">
@@ -270,7 +271,7 @@
               <TextBlock FontSize="12.5" LineHeight="20" Margin="0,8,0,0" TextWrapping="Wrap"
                          MaxWidth="720" HorizontalAlignment="Left"
                          Foreground="{StaticResource TekstSvag}"
-                         Text="Ti linjer om, hvad mødet handlede om — til at huske det med. Den kører på grafikkortet her, og intet forlader maskinen. Skal teksten være et rigtigt referat, laves det som et komplet Word-dokument af din online AI-model." />
+                         Text="{i18n:Oversat engineview.ti_linjer_om_hvad_moedet_handlede_om_til_a}" />
 
               <TextBlock x:Name="LokalStatus" FontSize="12" Margin="0,12,0,0" TextWrapping="Wrap"
                          Foreground="{StaticResource Accent}" />
@@ -278,11 +279,11 @@
               <Border Background="#FF181B22" BorderBrush="{StaticResource PanelKant}"
                       BorderThickness="1" CornerRadius="8" Padding="14,12" Margin="0,14,0,0">
                 <StackPanel>
-                  <TextBlock Text="Hvad den kan og ikke kan" FontSize="13" FontWeight="SemiBold" />
+                  <TextBlock Text="{i18n:Oversat engineview.hvad_den_kan_og_ikke_kan}" FontSize="13" FontWeight="SemiBold" />
                   <TextBlock FontSize="12" LineHeight="19" Margin="0,6,0,0" TextWrapping="Wrap"
                              MaxWidth="680" HorizontalAlignment="Left"
                              Foreground="{StaticResource TekstMeget}"
-                             Text="Målt på et møde på en time: 34 sekunder. Den fandt deltagerne, emnet og mødets aftale. Den er bedt om ikke at skrive tal — en tidligere kørsel skrev «allerede seks kunder i Danmark», og de ord faldt ikke ét sted i mødet. Alt, hvad den skriver, bliver holdt op mod transkriptionen bagefter, og det, der ikke kan findes, bliver markeret." />
+                             Text="{i18n:Oversat engineview.maalt_paa_et_moede_paa_en_time_34_sekunder}" />
                 </StackPanel>
               </Border>
 
@@ -294,13 +295,13 @@
       </TabItem>
 
       <!-- ===================== Dokumenter i Europa =================== -->
-      <TabItem Header="Dokumenter (i skyen)" Style="{StaticResource Fane}">
+      <TabItem Header="{i18n:Oversat engineview.dokumenter_i_skyen}" Style="{StaticResource Fane}">
         <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,12,0,0"
                       HorizontalScrollBarVisibility="Disabled">
         <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20"
                 BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
           <StackPanel>
-            <TextBlock Text="TEKST TIL DOKUMENT — I EUROPA" FontSize="11" FontWeight="SemiBold"
+            <TextBlock Text="{i18n:Oversat engineview.tekst_til_dokument_i_europa}" FontSize="11" FontWeight="SemiBold"
                        Foreground="{StaticResource Accent}" />
             <Grid Margin="0,8,0,0">
               <Grid.ColumnDefinitions>
@@ -313,14 +314,14 @@
                   <TextBlock x:Name="SkyModel" FontSize="16" FontWeight="SemiBold" />
                   <Border Background="{StaticResource Accent}" CornerRadius="3"
                           Padding="6,1" Margin="10,2,0,0" VerticalAlignment="Center">
-                    <TextBlock Text="EU" FontSize="10" FontWeight="SemiBold" Foreground="#FF0B1220" />
+                    <TextBlock Text="{i18n:Oversat engineview.eu}" FontSize="10" FontWeight="SemiBold" Foreground="#FF0B1220" />
                   </Border>
                 </StackPanel>
 
                 <TextBlock FontSize="12.5" LineHeight="20" Margin="0,8,0,0" TextWrapping="Wrap"
                            MaxWidth="620" HorizontalAlignment="Left"
                            Foreground="{StaticResource TekstSvag}"
-                           Text="Den færdige tekst bliver til et referat, en opgaveliste eller hvad du har lavet af mødetyper. Optagelsen og transkriptionen bliver på maskinen — kun teksten sendes, og kun til det europæiske endepunkt." />
+                           Text="{i18n:Oversat engineview.den_faerdige_tekst_bliver_til_et_referat_e}" />
 
                 <TextBlock x:Name="SkyStatus" FontSize="11.5" Margin="0,10,0,0" TextWrapping="Wrap"
                            Foreground="{StaticResource Accent}" />
@@ -343,11 +344,11 @@
                     Background="#FF181B22" BorderBrush="{StaticResource PanelKant}"
                     BorderThickness="1" CornerRadius="8" Padding="16,14">
               <StackPanel>
-                <TextBlock Text="Sådan kommer du i gang — fem minutter" FontSize="13.5"
+                <TextBlock Text="{i18n:Oversat engineview.saadan_kommer_du_i_gang_fem_minutter}" FontSize="13.5"
                            FontWeight="SemiBold" Margin="0,0,0,4" />
                 <TextBlock FontSize="12" TextWrapping="Wrap" Margin="0,0,0,12"
                            Foreground="{StaticResource TekstMeget}"
-                           Text="Mistral er en fransk leverandør. Du opretter dig hos dem selv, og nøglen er din — den følger aldrig med appen." />
+                           Text="{i18n:Oversat engineview.mistral_er_en_fransk_leverandoer_du_oprett}" />
 
                 <!-- Trin 1 -->
                 <Grid Margin="0,0,0,14">
@@ -361,11 +362,11 @@
                                HorizontalAlignment="Center" VerticalAlignment="Center" />
                   </Border>
                   <StackPanel Grid.Column="1">
-                    <TextBlock Text="Opret en konto" FontSize="13" FontWeight="SemiBold" />
+                    <TextBlock Text="{i18n:Oversat engineview.opret_en_konto}" FontSize="13" FontWeight="SemiBold" />
                     <TextBlock FontSize="12.5" LineHeight="20" TextWrapping="Wrap" Margin="0,3,0,0"
                                MaxWidth="560" HorizontalAlignment="Left"
                                Foreground="{StaticResource TekstSvag}"
-                               Text="Gå til console.mistral.ai og opret dig. Der skal ikke vælges abonnement undervejs." />
+                               Text="{i18n:Oversat engineview.gaa_til_console_mistral_ai_og_opret_dig_de}" />
                   </StackPanel>
                 </Grid>
 
@@ -381,15 +382,15 @@
                                HorizontalAlignment="Center" VerticalAlignment="Center" />
                   </Border>
                   <StackPanel Grid.Column="1">
-                    <TextBlock Text="Sæt betaling op — vælg «Pay as you go»" FontSize="13" FontWeight="SemiBold" />
+                    <TextBlock Text="{i18n:Oversat engineview.saet_betaling_op_vaelg_pay_as_you_go}" FontSize="13" FontWeight="SemiBold" />
                     <TextBlock FontSize="12.5" LineHeight="20" TextWrapping="Wrap" Margin="0,3,0,0"
                                MaxWidth="560" HorizontalAlignment="Left"
                                Foreground="{StaticResource TekstSvag}"
-                               Text="Under Billing. Uden den afviser nøglen alle kald, og fejlen ligner et forkert indtastet tegn. Du betaler pr. referat, ikke pr. måned — et mødereferat koster omkring 21 øre, så et normalt forbrug lander på nogle få kroner om måneden." />
+                               Text="{i18n:Oversat engineview.under_billing_uden_den_afviser_noeglen_all}" />
                     <TextBlock FontSize="12" LineHeight="19" TextWrapping="Wrap" Margin="0,6,0,0"
                                MaxWidth="560" HorizontalAlignment="Left"
                                Foreground="{StaticResource TekstMeget}"
-                               Text="Pay as you go er også det niveau, den databehandleraftale gælder for, som appen bygger på. Gratisniveauet har andre vilkår for, hvad dine data må bruges til." />
+                               Text="{i18n:Oversat engineview.pay_as_you_go_er_ogsaa_det_niveau_den_data}" />
                   </StackPanel>
                 </Grid>
 
@@ -405,12 +406,12 @@
                                HorizontalAlignment="Center" VerticalAlignment="Center" />
                   </Border>
                   <StackPanel Grid.Column="1">
-                    <TextBlock Text="Slå fra, at dine data må bruges til træning" FontSize="13"
+                    <TextBlock Text="{i18n:Oversat engineview.slaa_fra_at_dine_data_maa_bruges_til_traen}" FontSize="13"
                                FontWeight="SemiBold" Foreground="{StaticResource Advarsel}" />
                     <TextBlock FontSize="12.5" LineHeight="20" TextWrapping="Wrap" Margin="0,3,0,0"
                                MaxWidth="560" HorizontalAlignment="Left"
                                Foreground="{StaticResource TekstSvag}"
-                               Text="Workspace → Data. Det er slået TIL som udgangspunkt, og appen kan ikke ændre det for dig. Det er det eneste trin, hvor det gør en forskel for dine mødedata, om du husker det." />
+                               Text="{i18n:Oversat engineview.workspace_data_det_er_slaaet_til_som_udgan}" />
                   </StackPanel>
                 </Grid>
 
@@ -426,17 +427,17 @@
                                HorizontalAlignment="Center" VerticalAlignment="Center" />
                   </Border>
                   <StackPanel Grid.Column="1">
-                    <TextBlock Text="Lav en API-nøgle og sæt den ind her" FontSize="13" FontWeight="SemiBold" />
+                    <TextBlock Text="{i18n:Oversat engineview.lav_en_api_noegle_og_saet_den_ind_her}" FontSize="13" FontWeight="SemiBold" />
                     <TextBlock FontSize="12.5" LineHeight="20" TextWrapping="Wrap" Margin="0,3,0,0"
                                MaxWidth="560" HorizontalAlignment="Left"
                                Foreground="{StaticResource TekstSvag}"
-                               Text="Under API Keys. Kopiér den med det samme — den vises kun én gang. Tryk så «Sæt op …» heroppe og indsæt den." />
+                               Text="{i18n:Oversat engineview.under_api_keys_kopier_den_med_det_samme_de}" />
                   </StackPanel>
                 </Grid>
 
                 <StackPanel Orientation="Horizontal" Margin="34,12,0,0">
-                  <Button Content="Åbn console.mistral.ai" Click="AabnKonsol_Klik" Padding="14,7" />
-                  <Button Content="Priser hos Mistral" Click="AabnPriser_Klik" Padding="14,7" Margin="8,0,0,0" />
+                  <Button Content="{i18n:Oversat faelles.aabn_console_mistral_ai}" Click="AabnKonsol_Klik" Padding="14,7" />
+                  <Button Content="{i18n:Oversat engineview.priser_hos_mistral}" Click="AabnPriser_Klik" Padding="14,7" Margin="8,0,0,0" />
                 </StackPanel>
               </StackPanel>
             </Border>
@@ -461,7 +462,7 @@
       </StackPanel>
 
       <StackPanel Grid.Column="1" Orientation="Horizontal">
-        <Button x:Name="AfbrydKnap" Content="Afbryd" Click="Afbryd_Click" Visibility="Collapsed" />
+        <Button x:Name="AfbrydKnap" Content="{i18n:Oversat faelles.afbryd}" Click="Afbryd_Click" Visibility="Collapsed" />
       </StackPanel>
     </Grid>
   </Grid>

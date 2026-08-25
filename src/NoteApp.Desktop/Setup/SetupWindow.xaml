@@ -1,6 +1,7 @@
 ﻿<Window x:Class="NoteApp.Desktop.Setup.SetupWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:i18n="clr-namespace:NoteApp.Desktop"
         Title="Velkommen til NoteApp" Height="680" Width="780" MinHeight="520" MinWidth="640"
         Background="{StaticResource Baggrund}" WindowStartupLocation="CenterScreen"
         ResizeMode="CanResize" Icon="../app.ico">
@@ -19,7 +20,7 @@
       <Image Source="../app.png" Width="52" Height="52" VerticalAlignment="Top" Margin="0,2,16,0"
              RenderOptions.BitmapScalingMode="HighQuality" />
       <StackPanel VerticalAlignment="Center">
-        <TextBlock x:Name="TrinTitel" Text="Velkommen" FontSize="24" FontWeight="SemiBold" />
+        <TextBlock x:Name="TrinTitel" Text="{i18n:Oversat setupwindow.velkommen}" FontSize="24" FontWeight="SemiBold" />
         <TextBlock x:Name="TrinUnder" Style="{StaticResource Underskrift}" Margin="0,4,0,0" FontSize="13" />
       </StackPanel>
     </StackPanel>
@@ -29,16 +30,16 @@
       <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20"
               BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
         <StackPanel>
-          <TextBlock Text="Lyden bliver her. Teksten bliver i Europa." FontSize="16" FontWeight="SemiBold" Margin="0,0,0,10" />
+          <TextBlock Text="{i18n:Oversat setupwindow.lyden_bliver_her_teksten_bliver_i_europa}" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,10" />
           <TextBlock FontSize="13" LineHeight="22" Foreground="{StaticResource TekstSvag}"
-                     Text="NoteApp optager dine møder og skriver dem ud her på maskinen. Skal der laves et referat eller et andet dokument ud af teksten, sker det hos Mistral AI i Frankrig — og det er kun teksten, der sendes." />
+                     Text="{i18n:Oversat setupwindow.noteapp_optager_dine_moeder_og_skriver_dem}" />
           <TextBlock FontSize="13" LineHeight="22" Margin="0,12,0,0" Foreground="{StaticResource TekstSvag}"
-                     Text="Selve transskriptionen laves af Whisper, som kører lokalt. Lydfilerne forlader aldrig maskinen — heller ikke når der laves et dokument. Motoren og modellen skal hentes én gang, og du bliver spurgt først." />
+                     Text="{i18n:Oversat setupwindow.selve_transskriptionen_laves_af_whisper_so}" />
 
           <Border Background="#334CBE72" BorderBrush="{StaticResource Godkendt}" BorderThickness="1"
                   CornerRadius="6" Padding="14,10" Margin="0,16,0,0">
             <TextBlock FontSize="12" Foreground="{StaticResource Tekst}" LineHeight="19"
-                       Text="Optagelsen kan ikke sendes nogen steder hen. Appen har ingen kode, der kan det — kun den færdige tekst kan sendes, og kun til det europæiske endepunkt. Du sætter det selv op om lidt, og du kan lade være." />
+                       Text="{i18n:Oversat setupwindow.optagelsen_kan_ikke_sendes_nogen_steder_he}" />
           </Border>
         </StackPanel>
       </Border>
@@ -51,13 +52,13 @@
             <ColumnDefinition Width="Auto" />
           </Grid.ColumnDefinitions>
           <StackPanel Grid.Column="0">
-            <TextBlock Text="Dine filer ligger her" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8" />
+            <TextBlock Text="{i18n:Oversat setupwindow.dine_filer_ligger_her}" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8" />
             <TextBlock x:Name="DataSti" FontSize="12" FontFamily="Consolas"
                        Foreground="{StaticResource TekstSvag}" TextWrapping="Wrap" />
             <TextBlock Style="{StaticResource Underskrift}" Margin="0,6,0,0"
-                       Text="Optagelser, transkriptioner, noter og dokumenter. Vælg en anden mappe, hvis du fx vil have dem på en krypteret disk." />
+                       Text="{i18n:Oversat setupwindow.optagelser_transkriptioner_noter_og_dokume}" />
           </StackPanel>
-          <Button Grid.Column="1" Content="Skift…" Click="SkiftMappe_Click" VerticalAlignment="Top"
+          <Button Grid.Column="1" Content="{i18n:Oversat setupwindow.skift}" Click="SkiftMappe_Click" VerticalAlignment="Top"
                   Margin="12,0,0,0" />
         </Grid>
       </Border>
@@ -80,12 +81,12 @@
            skrives dokumenter hos Mistral, og saa er saetningen forkert - to
            skaerme foer staar det rigtige, og de maa ikke modsige hinanden. -->
       <TextBlock Grid.Row="0" FontSize="13" Foreground="{StaticResource TekstSvag}" Margin="0,0,0,16" LineHeight="20"
-                 Text="Transskriptionen laves af Whisper, som kører på din egen maskine. Motoren og en sprogmodel skal hentes én gang. Selve hentningen henter kun ned — der sendes intet fra din pc undervejs." />
+                 Text="{i18n:Oversat setupwindow.transskriptionen_laves_af_whisper_som_koer}" />
 
       <Border Grid.Row="1" Background="{StaticResource Panel}" CornerRadius="10" Padding="18,15"
               BorderBrush="{StaticResource PanelKant}" BorderThickness="1" Margin="0,0,0,12">
         <StackPanel>
-          <TextBlock x:Name="MotorOverskrift" Text="Motor" FontSize="15" FontWeight="SemiBold" />
+          <TextBlock x:Name="MotorOverskrift" Text="{i18n:Oversat faelles.motor}" FontSize="15" FontWeight="SemiBold" />
           <TextBlock x:Name="MotorValg" FontSize="13" Margin="0,6,0,0"
                      Foreground="{StaticResource TekstSvag}" />
           <TextBlock x:Name="MotorBegrundelse" Style="{StaticResource Underskrift}" Margin="0,6,0,0" />
@@ -95,13 +96,13 @@
       <Border Grid.Row="2" Background="{StaticResource Panel}" CornerRadius="10" Padding="18,15"
               BorderBrush="{StaticResource PanelKant}" BorderThickness="1" VerticalAlignment="Top">
         <StackPanel>
-          <TextBlock Text="Sprogmodel" FontSize="15" FontWeight="SemiBold" />
+          <TextBlock Text="{i18n:Oversat faelles.sprogmodel}" FontSize="15" FontWeight="SemiBold" />
           <TextBlock x:Name="ModelValg" FontSize="13" Margin="0,6,0,0"
                      Foreground="{StaticResource TekstSvag}" />
           <TextBlock x:Name="ModelBegrundelse" Style="{StaticResource Underskrift}" Margin="0,6,0,0" />
 
           <StackPanel Orientation="Horizontal" Margin="0,14,0,0">
-            <TextBlock Text="I alt at hente:" Style="{StaticResource Underskrift}" VerticalAlignment="Center" />
+            <TextBlock Text="{i18n:Oversat setupwindow.i_alt_at_hente}" Style="{StaticResource Underskrift}" VerticalAlignment="Center" />
             <TextBlock x:Name="SamletStoerrelse" FontSize="14" FontWeight="SemiBold" Margin="8,0,0,0"
                        VerticalAlignment="Center" />
           </StackPanel>
@@ -127,9 +128,9 @@
                  VerticalAlignment="Center" />
 
       <StackPanel Grid.Column="2" Orientation="Horizontal">
-        <Button x:Name="TilbageKnap" Content="Tilbage" Click="Tilbage_Click" Margin="0,0,8,0"
+        <Button x:Name="TilbageKnap" Content="{i18n:Oversat setupwindow.tilbage}" Click="Tilbage_Click" Margin="0,0,8,0"
                 Visibility="Collapsed" />
-        <Button x:Name="NaesteKnap" Content="Kom i gang" Click="Naeste_Click"
+        <Button x:Name="NaesteKnap" Content="{i18n:Oversat setupwindow.kom_i_gang}" Click="Naeste_Click"
                 Style="{StaticResource Primaer}" MinWidth="140" />
       </StackPanel>
     </Grid>

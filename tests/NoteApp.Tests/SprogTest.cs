@@ -1,4 +1,4 @@
-using NoteApp.Core;
+﻿using NoteApp.Core;
 using Xunit;
 
 namespace NoteApp.Tests;
@@ -227,37 +227,51 @@ public class SprogTest
 
         Sprog.Tilgaengelige();
 
-        // Den her fanger den fejl, ingen opdager: en ny dansk tekst kommer
-        // ind, og engelsk staar tilbage med dansk paa den ene linje. Falder
-        // proeven, skal en.json have noeglen med - ikke omvendt.
-        var manglende = new List<string>();
+        // DER SAMMENLIGNES NOEGLER, IKKE TEKSTER.
+        //
+        // Foerste udgave saa efter, om den engelske tekst var FORSKELLIG fra
+        // den danske - og faldt paa «Trust Center», «EU», «Agenda» og fem
+        // andre ord, der er ens paa begge sprog. Den slags kraevede en liste
+        // over undtagelser, og en liste over undtagelser bliver aldrig
+        // faerdig.
+        //
+        // Det rigtige spoergsmaal er, om noeglen STAAR i en.json. Staar den
+        // der med den samme tekst, er det et valg. Mangler den, er det en
+        // forglemmelse - og saa viser appen dansk midt i en engelsk skaerm.
+        var danske = Noegler("da.json")
+            .Where(n => !n.StartsWith("_sprog", StringComparison.Ordinal))
+            .ToList();
 
-        Sprog.Skift("da");
+        var engelske = Noegler("en.json").ToHashSet(StringComparer.Ordinal);
 
-        foreach (var noegle in Noegler("da.json"))
-        {
-            if (noegle.StartsWith("_sprog", StringComparison.Ordinal)) continue;
-
-            Sprog.Skift("en");
-            var engelsk = Sprog.T(noegle);
-
-            Sprog.Skift("da");
-            var dansk = Sprog.T(noegle);
-
-            // Falder engelsk tilbage paa dansk, er teksten den SAMME. Nogle
-            // ord er ens paa begge sprog - «Cockpit», «Compliance», «Webinar»
-            // - saa dem kan der ikke skelnes paa, og de springes over.
-            if (engelsk == dansk && !ErEnsPaaBeggeSprog(dansk))
-                manglende.Add(noegle);
-        }
+        var manglende = danske.Where(n => !engelske.Contains(n)).ToList();
 
         Assert.True(manglende.Count == 0,
-            "en.json mangler: " + string.Join(", ", manglende));
+            $"en.json mangler {manglende.Count} nøgler:\n  "
+            + string.Join("\n  ", manglende.Take(40))
+            + (manglende.Count > 40 ? $"\n  … og {manglende.Count - 40} mere" : ""));
     }
 
-    private static bool ErEnsPaaBeggeSprog(string tekst) =>
-        tekst is "Cockpit" or "Compliance" or "Webinar" or "Pause"
-              or "❚❚ Pause" or "Ja" or "Nej";
+    [Fact]
+    public void Dansk_har_ikke_noegler_der_er_glemt_paa_engelsk_omvendt()
+    {
+        using var p = new Proevemappe();
+
+        Sprog.Tilgaengelige();
+
+        // Den anden vej: en noegle i en.json, der IKKE findes i da.json, er
+        // enten en stavefejl eller en rest fra noget, der er fjernet. Den
+        // vises aldrig, og den staar og roder.
+        var danske = Noegler("da.json").ToHashSet(StringComparer.Ordinal);
+
+        var overskydende = Noegler("en.json")
+            .Where(n => !n.StartsWith("_sprog", StringComparison.Ordinal))
+            .Where(n => !danske.Contains(n))
+            .ToList();
+
+        Assert.True(overskydende.Count == 0,
+            "en.json har nøgler, dansk ikke har: " + string.Join(", ", overskydende.Take(20)));
+    }
 
     private static List<string> Noegler(string filnavn)
     {

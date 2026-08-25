@@ -385,7 +385,7 @@ public partial class SearchView : UserControl
     /// i en dansk skærm.
     /// </summary>
     private static readonly System.Globalization.CultureInfo Dansk =
-        System.Globalization.CultureInfo.GetCultureInfo("da-DK");
+        System.Globalization.CultureInfo.GetCultureInfo("da-DK");   // se Sprogkultur nedenfor
 
     private void VisKalender()
     {
@@ -421,13 +421,16 @@ public partial class SearchView : UserControl
             // Ugedagen med stort forbogstav. Dansk skriver dem med lille, men
             // som overskrift laeses «Torsdag» hurtigere end «torsdag» - og
             // ToUpper paa hele ordet ville raabe.
-            var ugedag = dag.ToString("dddd", Dansk);
+            var ugedag = dag.ToString("dddd", Sprog.Kultur);
 
-            v.Dagsnavn = iDag ? "I DAG"
-                       : iMorgen ? "I MORGEN"
+            v.Dagsnavn = iDag ? Sprog.T("kalender.idag")
+                       : iMorgen ? Sprog.T("kalender.imorgen")
                        : char.ToUpper(ugedag[0]) + ugedag[1..];
 
-            v.Dagsdato = dag.ToString("d. MMMM", Dansk);
+            // DATOFORMATET STAAR I SPROGFILEN. Dansk skriver «27. august»,
+            // engelsk «27 August». Punktummet er ikke en detalje, man kan
+            // regne sig frem til - det hoerer til sproget.
+            v.Dagsdato = dag.ToString(Sprog.T("kalender.datoformat"), Sprog.Kultur);
         }
 
         Kalenderrude.ItemsSource = visninger;
@@ -1025,7 +1028,7 @@ public partial class SearchView : UserControl
         // ligger i arkivet.
         Periodefilter.ItemsSource = new List<Filterpunkt>
         {
-            new("Hele tiden", null),
+            new(Sprog.T("cockpit.heletiden"), null),
             new("I dag", "idag"),
             new("Denne uge", "uge"),
             new("Denne måned", "maaned"),
@@ -1034,9 +1037,9 @@ public partial class SearchView : UserControl
         };
         Periodefilter.SelectedIndex = 0;
 
-        var mapper = new List<Filterpunkt> { new("Alle mapper", null) };
+        var mapper = new List<Filterpunkt> { new(Sprog.T("cockpit.allemapper"), null) };
         var typer = new List<Filterpunkt> { new("Alle mødetyper", null) };
-        var sprog = new List<Filterpunkt> { new("Alle sprog", null) };
+        var sprog = new List<Filterpunkt> { new(Sprog.T("cockpit.allesprog"), null) };
 
         var seteMapper = new HashSet<string>(StringComparer.CurrentCultureIgnoreCase);
         var seteTyper = new HashSet<string>(StringComparer.CurrentCultureIgnoreCase);

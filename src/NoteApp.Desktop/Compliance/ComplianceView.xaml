@@ -1,6 +1,7 @@
 ﻿<UserControl x:Class="NoteApp.Desktop.Compliance.ComplianceView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:i18n="clr-namespace:NoteApp.Desktop"
              Background="{StaticResource Baggrund}">
 
   <!-- ======================= HVORFOR SKÆRMEN FINDES =====================
@@ -27,9 +28,9 @@
     </Grid.RowDefinitions>
 
     <StackPanel Grid.Row="0" Margin="0,0,0,14">
-      <TextBlock Text="Compliance" Style="{StaticResource Overskrift}" />
+      <TextBlock Text="{i18n:Oversat complianceview.compliance}" Style="{StaticResource Overskrift}" />
       <TextBlock Style="{StaticResource Underskrift}"
-                 Text="Hvor dine data går hen, hvem der kan røre dem, og hvilke licenser der følger med." />
+                 Text="{i18n:Oversat complianceview.hvor_dine_data_gaar_hen_hvem_der_kan_roere}" />
     </StackPanel>
 
     <!-- FANER FREM FOR EN LANG RULLE.
@@ -44,7 +45,7 @@
          Fanerude i App.xaml. -->
     <TabControl Grid.Row="1" Style="{StaticResource Fanerude}">
 
-      <TabItem Header="Overblik" Style="{StaticResource Fane}">
+      <TabItem Header="{i18n:Oversat complianceview.overblik}" Style="{StaticResource Fane}">
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
           <StackPanel>
     <!-- ============ Det, vi ved, og det, vi ikke ved =============
@@ -59,15 +60,15 @@
             <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20,16"
                     BorderBrush="{StaticResource Advarsel}" BorderThickness="2" Margin="0,0,0,14">
               <StackPanel>
-                <TextBlock Text="LÆS DETTE FØRST" FontSize="10.5" FontWeight="SemiBold"
+                <TextBlock Text="{i18n:Oversat complianceview.laes_dette_foerst}" FontSize="10.5" FontWeight="SemiBold"
                            Foreground="{StaticResource Advarsel}" Margin="0,0,0,8" />
 
                 <TextBlock FontSize="13.5" LineHeight="22" TextWrapping="Wrap" FontWeight="SemiBold"
-                           Text="Leverandøren er europæisk. Det er ikke det samme som, at databehandlingen er efterprøvet europæisk." />
+                           Text="{i18n:Oversat complianceview.leverandoeren_er_europaeisk_det_er_ikke_de}" />
 
                 <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,8,0,0"
                            Foreground="{StaticResource TekstSvag}"
-                           Text="Mistral AI er fransk og underlagt GDPR direkte. Men de to dokumenter, der juridisk binder — databehandleraftalen og de kommercielle vilkår — forpligter ikke behandlingen til et bestemt område, og de skelner ikke mellem de tre endepunkter. Derfor står der herunder både, hvad der er efterprøvet, og hvad der ikke er." />
+                           Text="{i18n:Oversat complianceview.mistral_ai_er_fransk_og_underlagt_gdpr_dir}" />
 
                 <!-- DET, DER ER EFTERPROEVET OG SIKKERT, SKAL OGSAA STAA
                      OEVERST. Rammen her er en advarsel, og en advarsel uden
@@ -75,7 +76,7 @@
                      gaelder ét skridt i kaeden - teksten - og ikke lyden. -->
                 <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,10,0,0"
                            Foreground="{StaticResource Godkendt}" FontWeight="SemiBold"
-                           Text="Tvivlen gælder teksten. Den gælder ikke lyden: optagelsen forlader aldrig maskinen, og det er den, der vejer tungest — se «Hvor data går hen»." />
+                           Text="{i18n:Oversat complianceview.tvivlen_gaelder_teksten_den_gaelder_ikke_l}" />
 
                 <Grid Margin="0,16,0,0">
                   <Grid.ColumnDefinitions>
@@ -87,49 +88,49 @@
                   <Border Grid.Column="0" Background="#FF16241C" BorderBrush="{StaticResource Godkendt}"
                           BorderThickness="1" CornerRadius="8" Padding="16,13">
                     <StackPanel>
-                      <TextBlock Text="DET, DER ER EFTERPRØVET" FontSize="11" FontWeight="SemiBold"
+                      <TextBlock Text="{i18n:Oversat complianceview.det_der_er_efterproevet}" FontSize="11" FontWeight="SemiBold"
                                  Foreground="{StaticResource Godkendt}" Margin="0,0,0,10" />
                       <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap"
                                  Foreground="{StaticResource TekstSvag}"
-                                 Text="Lyd og transkription forlader aldrig maskinen. Det sker i appens egen kode, og den kan efterprøves." />
+                                 Text="{i18n:Oversat complianceview.lyd_og_transkription_forlader_aldrig_maski}" />
                       <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
                                  Foreground="{StaticResource TekstSvag}"
-                                 Text="Appen kan kun kalde det europæiske endepunkt. Det er spærret i koden, ikke en indstilling." />
+                                 Text="{i18n:Oversat complianceview.appen_kan_kun_kalde_det_europaeiske_endepu}" />
                       <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
                                  Foreground="{StaticResource TekstSvag}"
-                                 Text="Mistral AI er et fransk selskab, underlagt GDPR direkte og ikke via en aftalekonstruktion." />
+                                 Text="{i18n:Oversat complianceview.mistral_ai_er_et_fransk_selskab_underlagt}" />
                       <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
                                  Foreground="{StaticResource TekstSvag}"
-                                 Text="Databehandleraftalen gælder automatisk. Den skal hverken bestilles eller underskrives." />
+                                 Text="{i18n:Oversat complianceview.databehandleraftalen_gaelder_automatisk_de}" />
                       <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
                                  Foreground="{StaticResource TekstSvag}"
-                                 Text="Træning på dine data kan fravælges, og fravalget er dit eget. Aftalen siger det udtrykkeligt." />
+                                 Text="{i18n:Oversat complianceview.traening_paa_dine_data_kan_fravaelges_og_f}" />
                       <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
                                  Foreground="{StaticResource TekstSvag}"
-                                 Text="ISO/IEC 27001, ISO/IEC 27701 og SOC 2 Type II. Attesterne ligger i Trust Center." />
+                                 Text="{i18n:Oversat complianceview.iso_iec_27001_iso_iec_27701_og_soc_2_type}" />
                     </StackPanel>
                   </Border>
 
                   <Border Grid.Column="2" Background="#FF2A1A1A" BorderBrush="{StaticResource FejlTekst}"
                           BorderThickness="1" CornerRadius="8" Padding="16,13">
                     <StackPanel>
-                      <TextBlock Text="DET, DER ER UAFKLARET" FontSize="11" FontWeight="SemiBold"
+                      <TextBlock Text="{i18n:Oversat complianceview.det_der_er_uafklaret}" FontSize="11" FontWeight="SemiBold"
                                  Foreground="{StaticResource FejlTekst}" Margin="0,0,0,10" />
                       <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap"
                                  Foreground="{StaticResource TekstSvag}"
-                                 Text="Om behandlingen KONTRAKTLIGT er bundet til Europa. Det står ikke i de to bindende dokumenter — kun i produktdokumentationen, som er en beskrivelse, ikke et løfte." />
+                                 Text="{i18n:Oversat complianceview.om_behandlingen_kontraktligt_er_bundet_til}" />
                       <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
                                  Foreground="{StaticResource TekstSvag}"
-                                 Text="Om Cloudflares «Worldwide» og CrowdStrikes «United States» i praksis betyder, at data kan ligge uden for EØS. Begge gælder alle produkter." />
+                                 Text="{i18n:Oversat complianceview.om_cloudflares_worldwide_og_crowdstrikes_u}" />
                       <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
                                  Foreground="{StaticResource TekstSvag}"
-                                 Text="Om listen har ændret sig siden 17-08-2026. Mistral varsler ændringer med ti dages frist, men der er ikke abonneret på varsler." />
+                                 Text="{i18n:Oversat complianceview.om_listen_har_aendret_sig_siden_17_08_2026}" />
                       <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
                                  Foreground="{StaticResource TekstSvag}"
-                                 Text="Hvor længe den enkelte API-anmodning opbevares. Der står kun noget om, hvad der sker, når aftalen ophører." />
+                                 Text="{i18n:Oversat complianceview.hvor_laenge_den_enkelte_api_anmodning_opbe}" />
                       <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
                                  Foreground="{StaticResource TekstSvag}"
-                                 Text="Hvad der faktisk sker hos de amerikansk ejede underleverandører i kæden. Det kan ikke efterprøves udefra." />
+                                 Text="{i18n:Oversat complianceview.hvad_der_faktisk_sker_hos_de_amerikansk_ej}" />
                     </StackPanel>
                   </Border>
                 </Grid>
@@ -138,7 +139,7 @@
                         BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
                   <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap"
                              Foreground="{StaticResource Tekst}"
-                             Text="Hvad det betyder i praksis: løsningen er et velbegrundet valg, og den er bedre stillet end en amerikansk tjeneste. Men den er ikke en efterprøvet garanti for, at data bliver i Europa — og den forskel skal frem, INDEN nogen skriver det i et tilbud. Vil du kunne stå på mål for det, skal leverandøren bekræfte det skriftligt." />
+                             Text="{i18n:Oversat complianceview.hvad_det_betyder_i_praksis_loesningen_er_e}" />
                 </Border>
               </StackPanel>
             </Border>
@@ -146,14 +147,14 @@
         </ScrollViewer>
       </TabItem>
 
-      <TabItem Header="Hvor data går hen" Style="{StaticResource Fane}">
+      <TabItem Header="{i18n:Oversat complianceview.hvor_data_gaar_hen_2}" Style="{StaticResource Fane}">
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
           <StackPanel>
     <!-- ==================== Datastrømmen ========================= -->
             <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20,16"
                     BorderBrush="{StaticResource PanelKant}" BorderThickness="1" Margin="0,0,0,14">
               <StackPanel>
-                <TextBlock Text="HVOR DATA GÅR HEN" FontSize="10.5" FontWeight="SemiBold"
+                <TextBlock Text="{i18n:Oversat complianceview.hvor_data_gaar_hen}" FontSize="10.5" FontWeight="SemiBold"
                            Foreground="{StaticResource TekstMeget}" Margin="0,0,0,12" />
 
                 <Grid>
@@ -166,12 +167,12 @@
                   <Border Grid.Column="0" Background="#FF16241C" BorderBrush="{StaticResource Godkendt}"
                           BorderThickness="1" CornerRadius="8" Padding="16,13">
                     <StackPanel>
-                      <TextBlock Text="Lyd og transkription" FontSize="14" FontWeight="SemiBold" />
-                      <TextBlock Text="Bliver på denne pc" FontSize="12.5" Margin="0,4,0,0"
+                      <TextBlock Text="{i18n:Oversat complianceview.lyd_og_transkription}" FontSize="14" FontWeight="SemiBold" />
+                      <TextBlock Text="{i18n:Oversat complianceview.bliver_paa_denne_pc}" FontSize="12.5" Margin="0,4,0,0"
                                  Foreground="{StaticResource Godkendt}" FontWeight="SemiBold" />
                       <TextBlock FontSize="12.5" LineHeight="20" Margin="0,8,0,0" TextWrapping="Wrap"
                                  Foreground="{StaticResource TekstSvag}"
-                                 Text="Optagelsen laves lokalt, og Whisper skriver den ud lokalt. Appen har ingen kode, der kan sende en lydfil nogen steder hen." />
+                                 Text="{i18n:Oversat complianceview.optagelsen_laves_lokalt_og_whisper_skriver}" />
                     </StackPanel>
                   </Border>
 
@@ -182,12 +183,12 @@
                   <Border Grid.Column="2" Background="#FF1D2530" BorderBrush="{StaticResource Accent}"
                           BorderThickness="1" CornerRadius="8" Padding="16,13">
                     <StackPanel>
-                      <TextBlock Text="Den færdige tekst" FontSize="14" FontWeight="SemiBold" />
+                      <TextBlock Text="{i18n:Oversat complianceview.den_faerdige_tekst}" FontSize="14" FontWeight="SemiBold" />
                       <TextBlock x:Name="SkyLinje" FontSize="12.5" Margin="0,4,0,0"
                                  Foreground="{StaticResource Accent}" FontWeight="SemiBold" />
                       <TextBlock FontSize="12.5" LineHeight="20" Margin="0,8,0,0" TextWrapping="Wrap"
                                  Foreground="{StaticResource TekstSvag}"
-                                 Text="Skal der laves et referat eller et andet dokument, sendes transkriptionens tekst til Mistral AI. Kun teksten — aldrig lyden, og aldrig dine noter, medmindre mødetypen beder om dem." />
+                                 Text="{i18n:Oversat complianceview.skal_der_laves_et_referat_eller_et_andet_d}" />
                     </StackPanel>
                   </Border>
                 </Grid>
@@ -207,38 +208,38 @@
             <Border Background="#FF16241C" BorderBrush="{StaticResource Godkendt}" BorderThickness="1"
                     CornerRadius="10" Padding="20,16" Margin="0,0,0,14">
               <StackPanel>
-                <TextBlock Text="Derfor betyder det noget, at det er LYDEN, der bliver hos dig"
+                <TextBlock Text="{i18n:Oversat complianceview.derfor_betyder_det_noget_at_det_er_lyden_d}"
                            FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap" />
                 <TextBlock FontSize="12.5" LineHeight="21" Margin="0,8,0,14" TextWrapping="Wrap"
                            Foreground="{StaticResource TekstSvag}"
-                           Text="Forskellen på en lydfil og en transkription er ikke en gradsforskel. Det er to forskellige slags oplysninger, og den ene af dem forlader aldrig din maskine." />
+                           Text="{i18n:Oversat complianceview.forskellen_paa_en_lydfil_og_en_transkripti}" />
 
-                <TextBlock Text="Lyden kan blive til biometri. Teksten kan ikke." FontSize="13.5"
+                <TextBlock Text="{i18n:Oversat complianceview.lyden_kan_blive_til_biometri_teksten_kan_i}" FontSize="13.5"
                            FontWeight="SemiBold" Margin="0,0,0,4" />
                 <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,0,0,12"
                            Foreground="{StaticResource TekstSvag}"
-                           Text="En stemmeoptagelse er personoplysninger. Bliver den behandlet med det formål at genkende, HVEM der taler, er den samtidig biometriske data efter databeskyttelsesforordningens artikel 4, nr. 14 — og dermed en særlig kategori efter artikel 9, hvor kravene er skærpede. En optagelse er råstoffet til den behandling. En transkription er det ikke: tekst kan ikke laves om til et stemmeaftryk." />
+                           Text="{i18n:Oversat complianceview.en_stemmeoptagelse_er_personoplysninger_bl}" />
 
-                <TextBlock Text="Lyden indeholder mere end ordene." FontSize="13.5"
+                <TextBlock Text="{i18n:Oversat complianceview.lyden_indeholder_mere_end_ordene}" FontSize="13.5"
                            FontWeight="SemiBold" Margin="0,0,0,4" />
                 <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,0,0,12"
                            Foreground="{StaticResource TekstSvag}"
-                           Text="Hvem der talte, kan høres, også når navnet aldrig bliver sagt. Dertil kommer tonefald, tøven, accent og ting om helbred og sindstilstand, som ingen har sagt højt. Intet af det følger med en transkription." />
+                           Text="{i18n:Oversat complianceview.hvem_der_talte_kan_hoeres_ogsaa_naar_navne}" />
 
-                <TextBlock Text="Fortæl altid deltagerne, at du optager." FontSize="13.5"
+                <TextBlock Text="{i18n:Oversat complianceview.fortael_altid_deltagerne_at_du_optager}" FontSize="13.5"
                            FontWeight="SemiBold" Margin="0,0,0,4" />
                 <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,0,0,10"
                            Foreground="{StaticResource TekstSvag}"
-                           Text="Sig det, inden mødet går i gang. Det er god skik, og ved onlinemøder er det nødvendigt: mødeprogrammet giver ikke besked, når lyden optages på denne måde." />
+                           Text="{i18n:Oversat complianceview.sig_det_inden_moedet_gaar_i_gang_det_er_go}" />
                 <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap"
                            Foreground="{StaticResource TekstSvag}"
-                           Text="Og du kan sige mere end at du optager. Du kan fortælle, hvor optagelsen ender: den bliver på din maskine. Den lægges ikke i en skytjeneste — hverken en amerikansk eller en anden — og den sendes ikke videre. Det er en besked, de færreste mødeværktøjer kan give, og den gør samtykket nemt at give." />
+                           Text="{i18n:Oversat complianceview.og_du_kan_sige_mere_end_at_du_optager_du_k}" />
 
                 <Border Background="#FF16241C" BorderBrush="{StaticResource Godkendt}" BorderThickness="0,1,0,0"
                         Padding="0,12,0,0" Margin="0,14,0,0">
                   <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap"
                              Foreground="{StaticResource Tekst}"
-                             Text="Det er et designvalg, ikke en begrænsning, der venter på at blive ophævet. Talegenkendelse i skyen ville være hurtigere, og det er fravalgt. Bliver transkriptionen for langsom, løses det med bedre lokale modeller — ikke ved at sende lyden væk." />
+                             Text="{i18n:Oversat complianceview.det_er_et_designvalg_ikke_en_begraensning}" />
                 </Border>
               </StackPanel>
             </Border>
@@ -246,7 +247,7 @@
         </ScrollViewer>
       </TabItem>
 
-      <TabItem Header="Leverandøren" Style="{StaticResource Fane}">
+      <TabItem Header="{i18n:Oversat complianceview.leverandoeren}" Style="{StaticResource Fane}">
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
           <StackPanel>
     <!-- ==================== Leverandøren ========================= -->
@@ -254,9 +255,9 @@
                     BorderBrush="{StaticResource PanelKant}" BorderThickness="1" Margin="0,0,0,14">
               <StackPanel>
                 <Grid Margin="0,0,0,12">
-                  <TextBlock Text="LEVERANDØREN — MISTRAL AI" FontSize="10.5" FontWeight="SemiBold"
+                  <TextBlock Text="{i18n:Oversat complianceview.leverandoeren_mistral_ai}" FontSize="10.5" FontWeight="SemiBold"
                              Foreground="{StaticResource TekstMeget}" VerticalAlignment="Center" />
-                  <TextBlock Text="Vilkår gennemgået 17-08-2026" FontSize="11"
+                  <TextBlock Text="{i18n:Oversat complianceview.vilkaar_gennemgaaet_17_08_2026}" FontSize="11"
                              HorizontalAlignment="Right" VerticalAlignment="Center"
                              Foreground="{StaticResource TekstMeget}" />
                 </Grid>
@@ -275,45 +276,45 @@
                     <RowDefinition Height="Auto" />
                   </Grid.RowDefinitions>
 
-                  <TextBlock Grid.Row="0" Grid.Column="0" Text="Selskab" Margin="0,0,28,0"
+                  <TextBlock Grid.Row="0" Grid.Column="0" Text="{i18n:Oversat complianceview.selskab}" Margin="0,0,28,0"
                              FontSize="12.5" Foreground="{StaticResource TekstMeget}" />
                   <TextBlock Grid.Row="0" Grid.Column="1" FontSize="12.5" TextWrapping="Wrap"
-                             Text="Mistral AI, fransk selskab med adresse i Paris. Underlagt GDPR direkte — ikke via en aftalekonstruktion." />
+                             Text="{i18n:Oversat complianceview.mistral_ai_fransk_selskab_med_adresse_i_pa}" />
 
-                  <TextBlock Grid.Row="1" Grid.Column="0" Text="Databehandleraftale" Margin="0,9,28,0"
+                  <TextBlock Grid.Row="1" Grid.Column="0" Text="{i18n:Oversat complianceview.databehandleraftale}" Margin="0,9,28,0"
                              FontSize="12.5" Foreground="{StaticResource TekstMeget}" />
                   <TextBlock Grid.Row="1" Grid.Column="1" FontSize="12.5" Margin="0,9,0,0" TextWrapping="Wrap"
-                             Text="Gælder automatisk — «incorporated to the Agreement by reference». Den skal hverken bestilles hos salg eller underskrives særskilt." />
+                             Text="{i18n:Oversat complianceview.gaelder_automatisk_incorporated_to_the_agr}" />
 
-                  <TextBlock Grid.Row="2" Grid.Column="0" Text="Endepunkt" Margin="0,9,28,0"
+                  <TextBlock Grid.Row="2" Grid.Column="0" Text="{i18n:Oversat complianceview.endepunkt}" Margin="0,9,28,0"
                              FontSize="12.5" Foreground="{StaticResource TekstMeget}" />
                   <TextBlock Grid.Row="2" Grid.Column="1" x:Name="Endepunkt" FontSize="12.5"
                              Margin="0,9,0,0" TextWrapping="Wrap" FontFamily="Consolas" />
 
-                  <TextBlock Grid.Row="3" Grid.Column="0" Text="Certificeringer" Margin="0,9,28,0"
+                  <TextBlock Grid.Row="3" Grid.Column="0" Text="{i18n:Oversat complianceview.certificeringer}" Margin="0,9,28,0"
                              FontSize="12.5" Foreground="{StaticResource TekstMeget}" />
                   <TextBlock Grid.Row="3" Grid.Column="1" FontSize="12.5" Margin="0,9,0,0" TextWrapping="Wrap"
-                             Text="ISO/IEC 27001, ISO/IEC 27701 og SOC 2 Type II. Attesterne ligger i deres Trust Center." />
+                             Text="{i18n:Oversat complianceview.iso_iec_27001_iso_iec_27701_og_soc_2_type_2}" />
 
-                  <TextBlock Grid.Row="4" Grid.Column="0" Text="Opbevaring" Margin="0,9,28,0"
+                  <TextBlock Grid.Row="4" Grid.Column="0" Text="{i18n:Oversat complianceview.opbevaring}" Margin="0,9,28,0"
                              FontSize="12.5" Foreground="{StaticResource TekstMeget}" />
                   <TextBlock Grid.Row="4" Grid.Column="1" FontSize="12.5" Margin="0,9,0,0" TextWrapping="Wrap"
-                             Text="Aftalens punkt 10.1: personoplysninger er utilgængelige senest tredive dage efter, aftalen ophører. Der står ingen opbevaringstid for den enkelte API-anmodning." />
+                             Text="{i18n:Oversat complianceview.aftalens_punkt_10_1_personoplysninger_er_u}" />
 
-                  <TextBlock Grid.Row="5" Grid.Column="0" Text="Træning på dine data" Margin="0,9,28,0"
+                  <TextBlock Grid.Row="5" Grid.Column="0" Text="{i18n:Oversat complianceview.traening_paa_dine_data}" Margin="0,9,28,0"
                              FontSize="12.5" Foreground="{StaticResource TekstMeget}" />
                   <TextBlock Grid.Row="5" Grid.Column="1" FontSize="12.5" Margin="0,9,0,0" TextWrapping="Wrap"
                              Foreground="{StaticResource Advarsel}"
-                             Text="Aftalen: Mistral må behandle oplysningerne som DATAANSVARLIG med henblik på at træne deres modeller, «unless Customer is or has opted-out of training». Slås fra på din konto. Det er en indstilling under Workspace → Data, og appen kan ikke sætte den for dig." />
+                             Text="{i18n:Oversat complianceview.aftalen_mistral_maa_behandle_oplysningerne}" />
                 </Grid>
 
                 <StackPanel Orientation="Horizontal" Margin="0,16,0,0">
-                  <Button Content="Databehandleraftalen" Click="Dpa_Klik" Padding="14,7" Margin="0,0,8,0"
-                          ToolTip="Åbner legal.mistral.ai, hvor databehandleraftalen står" />
-                  <Button Content="Trust Center" Click="Trust_Klik" Padding="14,7" Margin="0,0,8,0"
-                          ToolTip="Åbner trust.mistral.ai med certificeringer og listen over underdatabehandlere" />
-                  <Button Content="Din konto" Click="Konsol_Klik" Padding="14,7"
-                          ToolTip="Åbner console.mistral.ai, hvor du slår træning fra" />
+                  <Button Content="{i18n:Oversat complianceview.databehandleraftalen}" Click="Dpa_Klik" Padding="14,7" Margin="0,0,8,0"
+                          ToolTip="{i18n:Oversat complianceview.aabner_legal_mistral_ai_hvor_databehandler}" />
+                  <Button Content="{i18n:Oversat complianceview.trust_center}" Click="Trust_Klik" Padding="14,7" Margin="0,0,8,0"
+                          ToolTip="{i18n:Oversat complianceview.aabner_trust_mistral_ai_med_certificeringe}" />
+                  <Button Content="{i18n:Oversat complianceview.din_konto}" Click="Konsol_Klik" Padding="14,7"
+                          ToolTip="{i18n:Oversat complianceview.aabner_console_mistral_ai_hvor_du_slaar_tr}" />
                 </StackPanel>
               </StackPanel>
             </Border>
@@ -321,47 +322,47 @@
         </ScrollViewer>
       </TabItem>
 
-      <TabItem Header="Underdatabehandlere" Style="{StaticResource Fane}">
+      <TabItem Header="{i18n:Oversat complianceview.underdatabehandlere}" Style="{StaticResource Fane}">
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
           <StackPanel>
     <!-- ============== Det, der kræver præcision ================== -->
             <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20,16"
                     BorderBrush="{StaticResource Advarsel}" BorderThickness="1" Margin="0,0,0,14">
               <StackPanel>
-                <TextBlock Text="DET, DER KRÆVER PRÆCISION I FORMULERINGEN" FontSize="10.5"
+                <TextBlock Text="{i18n:Oversat complianceview.det_der_kraever_praecision_i_formuleringen}" FontSize="10.5"
                            FontWeight="SemiBold" Foreground="{StaticResource Advarsel}" Margin="0,0,0,10" />
 
                 <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap"
                            Foreground="{StaticResource TekstSvag}"
-                           Text="Listen i Trust Center er gennemgået navn for navn 18-08-2026. Den opdeler efter PRODUKT — Vibe, Studio/API, Vibe Code Web — og det kan bruges: ni af de femogtyve hører til Vibe eller Vibe Code Web og er ude af billedet, fordi appen kun kalder API'et. Fem mere rører kun konto og betaling, ikke mødeindhold." />
+                           Text="{i18n:Oversat complianceview.listen_i_trust_center_er_gennemgaaet_navn}" />
 
                 <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,10,0,0"
                            Foreground="{StaticResource TekstSvag}"
-                           Text="Tilbage i selve behandlingskæden: Mistral Compute (Frankrig) og Mistral AI Affiliates; Microsoft som infrastruktur i Sverige og Norge; CoreWeave, som leverer selve inferensen, i EØS; Ory til brugergodkendelse i Belgien og Tyskland; samt Kong, Sentry og Wiz i EØS. Google står med Holland og Belgien — deres amerikanske placering er udtrykkeligt knyttet til «US API endpoint», som appen hverken bruger eller kan bruge." />
+                           Text="{i18n:Oversat complianceview.tilbage_i_selve_behandlingskaeden_mistral}" />
 
                 <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,10,0,0"
                            Foreground="{StaticResource FejlTekst}" FontWeight="SemiBold"
-                           Text="TO UNDTAGELSER ER VÆRD AT KENDE. CrowdStrike står med «EØS, United States» og gælder alle produkter — altså en amerikansk placering i leverandørkæden, ikke kun amerikansk ejerskab. Cloudflare står med «Worldwide», dog med bemærkningen «Local to Customer», hvilket peger på, at trafikken føres til nærmeste knudepunkt." />
+                           Text="{i18n:Oversat complianceview.to_undtagelser_er_vaerd_at_kende_crowdstri}" />
 
                 <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,10,0,0"
                            Foreground="{StaticResource TekstSvag}"
-                           Text="Bortset fra Google skelner listen ikke mellem endepunkter, kun mellem produkter. At bruge det europæiske endepunkt fjerner altså ikke i sig selv et navn fra listen — og databehandleraftalen opdeler dem heller ikke." />
+                           Text="{i18n:Oversat complianceview.bortset_fra_google_skelner_listen_ikke_mel}" />
 
                 <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,10,0,0"
                            Foreground="{StaticResource TekstSvag}"
-                           Text="Ejerskabet er den anden halvdel: Microsoft, CoreWeave, Cloudflare, Kong, Sentry, Wiz og CrowdStrike er amerikansk ejede, også når serverne står i EØS. Derfor kan «ingen amerikansk virksomhed er involveret» ikke siges — uanset endepunkt." />
+                           Text="{i18n:Oversat complianceview.ejerskabet_er_den_anden_halvdel_microsoft}" />
 
                 <Border Background="#FF181B22" CornerRadius="8" Padding="16,13" Margin="0,14,0,0"
                         BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
                   <StackPanel>
-                    <TextBlock Text="Det, der kan siges — og som holder hele vejen" FontSize="12.5"
+                    <TextBlock Text="{i18n:Oversat complianceview.det_der_kan_siges_og_som_holder_hele_vejen}" FontSize="12.5"
                                FontWeight="SemiBold" Margin="0,0,0,8" />
                     <TextBlock FontSize="13" LineHeight="22" TextWrapping="Wrap"
                                Foreground="{StaticResource Tekst}"
-                               Text="«Optagelse og transskription forlader aldrig din pc. Bearbejdningen sker hos Mistral AI, et fransk selskab underlagt GDPR og omfattet af databehandleraftale, og appen kalder alene deres europæiske endepunkt.»" />
+                               Text="{i18n:Oversat complianceview.optagelse_og_transskription_forlader_aldri}" />
                     <TextBlock FontSize="12" LineHeight="20" TextWrapping="Wrap" Margin="0,10,0,0"
                                Foreground="{StaticResource TekstMeget}"
-                               Text="«Ingen amerikansk virksomhed er involveret» holder IKKE, og «databehandleraftalen garanterer, at data bliver i Europa» holder heller ikke — den forpligtelse står ikke i aftalen. «100 % europæisk» er et absolut ord om noget, hvor leverandørens egne dokumenter tager forbehold — og en påstand, der ikke kan holdes hele vejen, er dyrere end en, der siger lidt mindre." />
+                               Text="{i18n:Oversat complianceview.ingen_amerikansk_virksomhed_er_involveret}" />
                   </StackPanel>
                 </Border>
               </StackPanel>
@@ -378,32 +379,32 @@
            i forvejen, og appen henter dem ned. Blandes de to sammen paa den
            samme side, laeser man den ene som den anden, og saa er begge
            forklaret forkert. -->
-      <TabItem Header="Andre integrationer" Style="{StaticResource Fane}">
+      <TabItem Header="{i18n:Oversat complianceview.andre_integrationer}" Style="{StaticResource Fane}">
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
           <StackPanel>
 
             <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20,16"
                     BorderBrush="{StaticResource PanelKant}" BorderThickness="1" Margin="0,0,0,14">
               <StackPanel>
-                <TextBlock Text="DEN ANDEN VEJ RUNDT" FontSize="10.5" FontWeight="SemiBold"
+                <TextBlock Text="{i18n:Oversat complianceview.den_anden_vej_rundt}" FontSize="10.5" FontWeight="SemiBold"
                            Foreground="{StaticResource TekstMeget}" Margin="0,0,0,10" />
 
                 <TextBlock FontSize="13" LineHeight="22" TextWrapping="Wrap"
                            Foreground="{StaticResource TekstSvag}"
-                           Text="Resten af denne side handler om det, appen SENDER: en transkription til en sprogmodel i Europa. En kalenderintegration er det modsatte. Dine aftaler ligger allerede hos Google eller Microsoft, og appen henter dem ned, så du kan trykke optag direkte på et møde." />
+                           Text="{i18n:Oversat complianceview.resten_af_denne_side_handler_om_det_appen}" />
 
                 <TextBlock FontSize="13" LineHeight="22" TextWrapping="Wrap" Margin="0,10,0,0"
                            Foreground="{StaticResource TekstSvag}"
-                           Text="Har du valgt Google Workspace eller Microsoft 365, har du allerede taget stilling til, at mødetitler og deltagere ligger hos en amerikansk leverandør. Appen ændrer ikke på det. Den læser det, der er der i forvejen." />
+                           Text="{i18n:Oversat complianceview.har_du_valgt_google_workspace_eller_micros}" />
 
                 <Border Background="#FF16241C" BorderBrush="{StaticResource Godkendt}"
                         BorderThickness="1" CornerRadius="8" Padding="16,13" Margin="0,14,0,0">
                   <StackPanel>
-                    <TextBlock Text="KALENDEREN VIRKER UDEN" FontSize="11" FontWeight="SemiBold"
+                    <TextBlock Text="{i18n:Oversat complianceview.kalenderen_virker_uden}" FontSize="11" FontWeight="SemiBold"
                                Foreground="{StaticResource Godkendt}" Margin="0,0,0,8" />
                     <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap"
                                Foreground="{StaticResource TekstSvag}"
-                               Text="Det er ikke en overgangsløsning. Appens egen kalender er den rigtige kalender, og den kræver ingen konto nogen steder. En integration lægger aftaler oveni; slår du den fra, forsvinder de hentede igen, og dine egne bliver stående." />
+                               Text="{i18n:Oversat complianceview.det_er_ikke_en_overgangsloesning_appens_eg}" />
                   </StackPanel>
                 </Border>
               </StackPanel>
@@ -414,7 +415,7 @@
                     BorderBrush="{StaticResource PanelKant}" BorderThickness="1" Margin="0,0,0,14">
               <StackPanel>
                 <Grid Margin="0,0,0,12">
-                  <TextBlock Text="GOOGLE KALENDER" FontSize="10.5" FontWeight="SemiBold"
+                  <TextBlock Text="{i18n:Oversat complianceview.google_kalender}" FontSize="10.5" FontWeight="SemiBold"
                              Foreground="{StaticResource TekstMeget}" />
                   <TextBlock x:Name="GoogleTilstand" FontSize="11" HorizontalAlignment="Right"
                              Foreground="{StaticResource TekstMeget}" />
@@ -430,34 +431,34 @@
                   <Border Grid.Column="0" Background="#FF16241C" BorderBrush="{StaticResource Godkendt}"
                           BorderThickness="1" CornerRadius="8" Padding="16,13">
                     <StackPanel>
-                      <TextBlock Text="DET, APPEN MÅ" FontSize="11" FontWeight="SemiBold"
+                      <TextBlock Text="{i18n:Oversat complianceview.det_appen_maa}" FontSize="11" FontWeight="SemiBold"
                                  Foreground="{StaticResource Godkendt}" Margin="0,0,0,10" />
                       <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap"
                                  Foreground="{StaticResource TekstSvag}"
-                                 Text="Læse dine aftaler: titel, tidspunkt, sted og mødelink." />
+                                 Text="{i18n:Oversat complianceview.laese_dine_aftaler_titel_tidspunkt_sted_og}" />
                       <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
                                  Foreground="{StaticResource TekstSvag}"
-                                 Text="Oprette en aftale — men kun den, du selv sætter hak ved. Der oprettes intet af sig selv." />
+                                 Text="{i18n:Oversat complianceview.oprette_en_aftale_men_kun_den_du_selv_saet}" />
                       <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
                                  Foreground="{StaticResource TekstSvag}"
-                                 Text="Der bedes om ÉT område: calendar.events. Det står i koden og kan efterprøves — og du ser det på Googles egen side, inden du godkender." />
+                                 Text="{i18n:Oversat complianceview.der_bedes_om_et_omraade_calendar_events_de}" />
                     </StackPanel>
                   </Border>
 
                   <Border Grid.Column="2" Background="#FF2A1A1A" BorderBrush="{StaticResource FejlTekst}"
                           BorderThickness="1" CornerRadius="8" Padding="16,13">
                     <StackPanel>
-                      <TextBlock Text="DET, APPEN IKKE KAN" FontSize="11" FontWeight="SemiBold"
+                      <TextBlock Text="{i18n:Oversat complianceview.det_appen_ikke_kan}" FontSize="11" FontWeight="SemiBold"
                                  Foreground="{StaticResource FejlTekst}" Margin="0,0,0,10" />
                       <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap"
                                  Foreground="{StaticResource TekstSvag}"
-                                 Text="Se din mail, dine filer eller dine kontakter. Området rækker ikke dertil, og grænsen håndhæves af Google — ikke af appen." />
+                                 Text="{i18n:Oversat complianceview.se_din_mail_dine_filer_eller_dine_kontakte}" />
                       <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
                                  Foreground="{StaticResource TekstSvag}"
-                                 Text="Sende lyd, transkriptioner, noter eller dokumenter. Der findes ingen vej i appen, der lægger dem i en kalender." />
+                                 Text="{i18n:Oversat complianceview.sende_lyd_transkriptioner_noter_eller_doku}" />
                       <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
                                  Foreground="{StaticResource TekstSvag}"
-                                 Text="Se din adgangskode. Godkendelsen sker i din egen browser hos Google." />
+                                 Text="{i18n:Oversat complianceview.se_din_adgangskode_godkendelsen_sker_i_din}" />
                     </StackPanel>
                   </Border>
                 </Grid>
@@ -465,37 +466,37 @@
                 <Border Background="#FF181B22" CornerRadius="8" Padding="16,13" Margin="0,14,0,0"
                         BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
                   <StackPanel>
-                    <TextBlock Text="Det, der bliver sendt op — og hvornår" FontSize="12.5"
+                    <TextBlock Text="{i18n:Oversat complianceview.det_der_bliver_sendt_op_og_hvornaar}" FontSize="12.5"
                                FontWeight="SemiBold" Foreground="{StaticResource Tekst}" />
                     <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
                                Foreground="{StaticResource TekstSvag}"
-                               Text="Kun når du sætter hak ved «Opret også i Google Kalender» på en aftale. Så sendes aftalens titel, tidspunkt og sted. Mødetype, mappe og sprog bliver her — de er appens egne og vedkommer ikke Google." />
+                               Text="{i18n:Oversat complianceview.kun_naar_du_saetter_hak_ved_opret_ogsaa_i}" />
                     <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
                                Foreground="{StaticResource TekstSvag}"
-                               Text="Vælger du et Google Meet-link, beder appen Google om at oprette mødelokalet. Linket kommer med tilbage, så mødet kan startes fra kalenderen her." />
+                               Text="{i18n:Oversat complianceview.vaelger_du_et_google_meet_link_beder_appen}" />
                     <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
                                Foreground="{StaticResource TekstSvag}"
-                               Text="Er aftalen markeret til at blive optaget, skrives der samtidig i indkaldelsen, at der anvendes mødetransskription, at det kræver at LYDEN optages, at der ikke optages video, at lyden bliver på din computer — og at man kan gøre indsigelse. Deltagerne skal kunne nå at sige fra; det er hele grundlaget for at optage et møde med andre til stede. Oplysningen findes på dansk og engelsk og følger mødets sprog. Ordlyden kan rettes under Indstillinger, men ikke fjernes. Har aftalen allerede en beskrivelse, bliver den stående — oplysningen lægges under." />
+                               Text="{i18n:Oversat complianceview.er_aftalen_markeret_til_at_blive_optaget_s}" />
                     <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
                                Foreground="{StaticResource TekstSvag}"
-                               Text="Gæster inviteres ALDRIG herfra. Vælger du at invitere, åbnes aftalen i Google Kalender i din browser, og du inviterer dér. Appen ser hverken dine kontakter eller hvem du sender til — der bedes ikke om adgang til kontakter." />
+                               Text="{i18n:Oversat complianceview.gaester_inviteres_aldrig_herfra_vaelger_du}" />
                     <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
                                Foreground="{StaticResource TekstSvag}"
-                               Text="Uden hakket sker der ingen afsendelse overhovedet. Hentningen går kun den ene vej." />
+                               Text="{i18n:Oversat complianceview.uden_hakket_sker_der_ingen_afsendelse_over}" />
                   </StackPanel>
                 </Border>
 
                 <Border Background="#FF181B22" CornerRadius="8" Padding="16,13" Margin="0,10,0,0"
                         BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
                   <StackPanel>
-                    <TextBlock Text="Når du afbryder forbindelsen" FontSize="12.5"
+                    <TextBlock Text="{i18n:Oversat complianceview.naar_du_afbryder_forbindelsen}" FontSize="12.5"
                                FontWeight="SemiBold" Foreground="{StaticResource Tekst}" />
                     <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
                                Foreground="{StaticResource TekstSvag}"
-                               Text="Nøgler og hentede aftaler slettes fra maskinen. Dine egne aftaler bliver stående. En aftale, du har fået oprettet hos Google, bliver liggende dér — den skal slettes i Google, hvis den skal væk." />
+                               Text="{i18n:Oversat complianceview.noegler_og_hentede_aftaler_slettes_fra_mas}" />
                     <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
                                Foreground="{StaticResource TekstSvag}"
-                               Text="Adgangen kan også trækkes tilbage hos Google selv, under din kontos sikkerhedsindstillinger. Det virker, uanset hvad appen gør." />
+                               Text="{i18n:Oversat complianceview.adgangen_kan_ogsaa_traekkes_tilbage_hos_go}" />
                   </StackPanel>
                 </Border>
               </StackPanel>
@@ -509,7 +510,7 @@
                     BorderBrush="{StaticResource PanelKant}" BorderThickness="1" Margin="0,0,0,14">
               <StackPanel>
                 <Grid Margin="0,0,0,12">
-                  <TextBlock Text="GOOGLE TASKS" FontSize="10.5" FontWeight="SemiBold"
+                  <TextBlock Text="{i18n:Oversat complianceview.google_tasks}" FontSize="10.5" FontWeight="SemiBold"
                              Foreground="{StaticResource TekstMeget}" />
                   <TextBlock x:Name="Opgavetilstand" FontSize="11" HorizontalAlignment="Right"
                              Foreground="{StaticResource TekstMeget}" />
@@ -517,11 +518,11 @@
 
                 <TextBlock FontSize="13" LineHeight="22" TextWrapping="Wrap"
                            Foreground="{StaticResource Tekst}" FontWeight="SemiBold"
-                           Text="Den her går begge veje — i modsætning til kalenderen." />
+                           Text="{i18n:Oversat complianceview.den_her_gaar_begge_veje_i_modsaetning_til}" />
 
                 <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,8,0,0"
                            Foreground="{StaticResource TekstSvag}"
-                           Text="Opgaver, du skriver i Google, læses ind i Cockpittet. Krydser du en af dem af her, sendes det op til Google. Det er hele meningen: ét sted at holde øje med, ikke to." />
+                           Text="{i18n:Oversat complianceview.opgaver_du_skriver_i_google_laeses_ind_i_c}" />
 
                 <Grid Margin="0,16,0,0">
                   <Grid.ColumnDefinitions>
@@ -533,28 +534,28 @@
                   <Border Grid.Column="0" Background="#FF16241C" BorderBrush="{StaticResource Godkendt}"
                           BorderThickness="1" CornerRadius="8" Padding="16,13">
                     <StackPanel>
-                      <TextBlock Text="DET, DER SENDES OP" FontSize="11" FontWeight="SemiBold"
+                      <TextBlock Text="{i18n:Oversat complianceview.det_der_sendes_op}" FontSize="11" FontWeight="SemiBold"
                                  Foreground="{StaticResource Godkendt}" Margin="0,0,0,10" />
                       <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap"
                                  Foreground="{StaticResource TekstSvag}"
-                                 Text="Kun at en opgave er krydset af — eller ikke længere er det. Intet andet." />
+                                 Text="{i18n:Oversat complianceview.kun_at_en_opgave_er_krydset_af_eller_ikke}" />
                       <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
                                  Foreground="{StaticResource TekstSvag}"
-                                 Text="Der bedes om ÉT område: dine opgaver. Ikke kalenderen, ikke mailen, ikke filerne." />
+                                 Text="{i18n:Oversat complianceview.der_bedes_om_et_omraade_dine_opgaver_ikke}" />
                     </StackPanel>
                   </Border>
 
                   <Border Grid.Column="2" Background="#FF2A1A1A" BorderBrush="{StaticResource FejlTekst}"
                           BorderThickness="1" CornerRadius="8" Padding="16,13">
                     <StackPanel>
-                      <TextBlock Text="DET, DER ALDRIG SENDES" FontSize="11" FontWeight="SemiBold"
+                      <TextBlock Text="{i18n:Oversat complianceview.det_der_aldrig_sendes}" FontSize="11" FontWeight="SemiBold"
                                  Foreground="{StaticResource FejlTekst}" Margin="0,0,0,10" />
                       <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap"
                                  Foreground="{StaticResource TekstSvag}"
-                                 Text="Opgaver, appen selv har fundet i et møde. De kommer fra en transkription, og et referats indhold skal ikke ende i skyen, fordi man slog opgaver til." />
+                                 Text="{i18n:Oversat complianceview.opgaver_appen_selv_har_fundet_i_et_moede_d}" />
                       <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
                                  Foreground="{StaticResource TekstSvag}"
-                                 Text="Lyd, transkriptioner, noter og dokumenter. Området rækker ikke dertil." />
+                                 Text="{i18n:Oversat complianceview.lyd_transkriptioner_noter_og_dokumenter_om}" />
                     </StackPanel>
                   </Border>
                 </Grid>
@@ -562,14 +563,14 @@
                 <Border Background="#FF181B22" CornerRadius="8" Padding="16,13" Margin="0,14,0,0"
                         BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
                   <StackPanel>
-                    <TextBlock Text="Egen godkendelse, adskilt fra kalenderen" FontSize="12.5"
+                    <TextBlock Text="{i18n:Oversat complianceview.egen_godkendelse_adskilt_fra_kalenderen}" FontSize="12.5"
                                FontWeight="SemiBold" Foreground="{StaticResource Tekst}" />
                     <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
                                Foreground="{StaticResource TekstSvag}"
-                               Text="Det koster et login mere, og det er prisen værd: den, der kun vil dele sin kalender, skal ikke se «og dine opgaver» på Googles skærm. Et samtykke, der dækker mere end det, man bad om, er ikke et samtykke." />
+                               Text="{i18n:Oversat complianceview.det_koster_et_login_mere_og_det_er_prisen}" />
                     <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
                                Foreground="{StaticResource TekstSvag}"
-                               Text="Afbryder du opgaverne, forsvinder de hentede opgaver — og kalenderen bliver stående. De to har hver sin nøgle." />
+                               Text="{i18n:Oversat complianceview.afbryder_du_opgaverne_forsvinder_de_hented}" />
                   </StackPanel>
                 </Border>
               </StackPanel>
@@ -579,20 +580,20 @@
             <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20,16"
                     BorderBrush="{StaticResource Advarsel}" BorderThickness="1" Margin="0,0,0,14">
               <StackPanel>
-                <TextBlock Text="DET, DER SKAL VÆRE KLART" FontSize="10.5" FontWeight="SemiBold"
+                <TextBlock Text="{i18n:Oversat complianceview.det_der_skal_vaere_klart}" FontSize="10.5" FontWeight="SemiBold"
                            Foreground="{StaticResource Advarsel}" Margin="0,0,0,10" />
 
                 <TextBlock FontSize="12.5" LineHeight="22" TextWrapping="Wrap"
                            Foreground="{StaticResource TekstSvag}"
-                           Text="Mødetitler og deltagere er personoplysninger. De ligger hos Google, både før og efter appen henter dem — men når de er hentet, ligger de også på denne maskine." />
+                           Text="{i18n:Oversat complianceview.moedetitler_og_deltagere_er_personoplysnin}" />
 
                 <TextBlock FontSize="12.5" LineHeight="22" TextWrapping="Wrap" Margin="0,10,0,0"
                            Foreground="{StaticResource TekstSvag}"
-                           Text="Google er en amerikansk leverandør. Det er en anden vurdering end den, resten af denne side handler om, hvor sprogmodellen er valgt europæisk med vilje. Her er valget dit: integrationen er slået fra, indtil du selv slår den til." />
+                           Text="{i18n:Oversat complianceview.google_er_en_amerikansk_leverandoer_det_er}" />
 
                 <TextBlock FontSize="12.5" LineHeight="22" TextWrapping="Wrap" Margin="0,10,0,0"
                            Foreground="{StaticResource TekstSvag}"
-                           Text="Optager du et møde med andre til stede, gælder det samme som altid: sig det højt, at der optages. En aftale i kalenderen er ikke et samtykke." />
+                           Text="{i18n:Oversat complianceview.optager_du_et_moede_med_andre_til_stede_ga}" />
               </StackPanel>
             </Border>
 
@@ -600,11 +601,11 @@
             <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20,16"
                     BorderBrush="{StaticResource PanelKant}" BorderThickness="1" Margin="0,0,0,14">
               <StackPanel>
-                <TextBlock Text="MICROSOFT 365-KALENDER" FontSize="10.5" FontWeight="SemiBold"
+                <TextBlock Text="{i18n:Oversat complianceview.microsoft_365_kalender}" FontSize="10.5" FontWeight="SemiBold"
                            Foreground="{StaticResource TekstMeget}" Margin="0,0,0,8" />
                 <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap"
                            Foreground="{StaticResource TekstSvag}"
-                           Text="Bygges, når Google-vejen står og virker. Formen bliver den samme: et område, der kun rækker til aftaler, godkendelse i din egen browser, og intet der sendes op uden dit hak. Den står her nu, så det er til at se, hvad der er på vej — ikke for at lede efter en indstilling, der ikke findes endnu." />
+                           Text="{i18n:Oversat complianceview.bygges_naar_google_vejen_staar_og_virker_f}" />
               </StackPanel>
             </Border>
 
@@ -612,14 +613,14 @@
         </ScrollViewer>
       </TabItem>
 
-      <TabItem Header="Modeller og licenser" Style="{StaticResource Fane}">
+      <TabItem Header="{i18n:Oversat complianceview.modeller_og_licenser_2}" Style="{StaticResource Fane}">
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
           <StackPanel>
     <!-- ==================== Modeller og licenser ================= -->
             <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20,16"
                     BorderBrush="{StaticResource PanelKant}" BorderThickness="1" Margin="0,0,0,14">
               <StackPanel>
-                <TextBlock Text="MODELLER OG LICENSER" FontSize="10.5" FontWeight="SemiBold"
+                <TextBlock Text="{i18n:Oversat complianceview.modeller_og_licenser}" FontSize="10.5" FontWeight="SemiBold"
                            Foreground="{StaticResource TekstMeget}" Margin="0,0,0,6" />
 
                 <!-- HVORFOR DER STAAR TRE HER OG TO PAA AI-MODELLER.
@@ -630,7 +631,7 @@
                      rettighedshaver, og saa skal de staa hver for sig. -->
                 <TextBlock FontSize="12" LineHeight="20" TextWrapping="Wrap" Margin="0,0,0,12"
                            Foreground="{StaticResource TekstMeget}"
-                           Text="Syv komponenter. De tæller ikke som fanerne under «AI-modeller»: her står hver komponent med sin egen rettighedshaver og sin egen licens. Lyd til tekst er to — motoren og modelfilen. Talergenkendelsen er tre — programmet og to modeller, én der finder talen og én der kender stemmerne fra hinanden. Den korte opsummering er den sjette og kører på maskinen. Dokumenter er den syvende, og den er en tjeneste frem for en licens — den eneste, der sender noget ud af huset." />
+                           Text="{i18n:Oversat complianceview.syv_komponenter_de_taeller_ikke_som_fanern}" />
 
                 <ItemsControl x:Name="Modeller">
                   <ItemsControl.ItemTemplate>
@@ -671,17 +672,17 @@
 
            En revision spoerger ikke "hvordan virker det", men "hvad skete der
            den 14. august". Det kan en beskrivelse af koden ikke svare paa. -->
-      <TabItem Header="Kvitteringer" Style="{StaticResource Fane}">
+      <TabItem Header="{i18n:Oversat complianceview.kvitteringer}" Style="{StaticResource Fane}">
         <DockPanel>
 
           <StackPanel DockPanel.Dock="Top" Margin="0,0,0,12">
-            <TextBlock Text="Hvad der faktisk er sendt" FontSize="15" FontWeight="SemiBold" />
+            <TextBlock Text="{i18n:Oversat complianceview.hvad_der_faktisk_er_sendt}" FontSize="15" FontWeight="SemiBold" />
             <TextBlock FontSize="12.5" LineHeight="21" Margin="0,6,0,0" TextWrapping="Wrap"
                        Foreground="{StaticResource TekstSvag}"
-                       Text="Hver gang noget forlader maskinen, bogføres det her: tidspunkt, adresse, model, hvor mange tegn der gik, hvad det kostede — og en kontrolsum af de nøjagtige bytes. Også når kaldet fejler; en fejlet afsendelse har stadig sendt." />
+                       Text="{i18n:Oversat complianceview.hver_gang_noget_forlader_maskinen_bogfoere}" />
             <TextBlock FontSize="12" LineHeight="20" Margin="0,8,0,0" TextWrapping="Wrap"
                        Foreground="{StaticResource TekstMeget}"
-                       Text="Selve teksten gemmes IKKE. Den ligger allerede ved mødet, og en kopi mere ville være endnu et sted, den kunne slippe ud fra. Kontrolsummen kan holdes op mod originalen — passer den ikke, er transkriptionen ændret siden." />
+                       Text="{i18n:Oversat complianceview.selve_teksten_gemmes_ikke_den_ligger_aller}" />
           </StackPanel>
 
           <Border DockPanel.Dock="Top" Background="{StaticResource Panel}" CornerRadius="10"
@@ -696,28 +697,28 @@
               </Grid.ColumnDefinitions>
 
               <StackPanel Grid.Column="0">
-                <TextBlock Text="AFSENDELSER" FontSize="10.5" FontWeight="SemiBold"
+                <TextBlock Text="{i18n:Oversat complianceview.afsendelser}" FontSize="10.5" FontWeight="SemiBold"
                            Foreground="{StaticResource TekstMeget}" />
                 <TextBlock x:Name="KvitAntal" FontSize="20" FontWeight="SemiBold" Margin="0,3,0,0" />
               </StackPanel>
 
               <StackPanel Grid.Column="1">
-                <TextBlock Text="TEGN SENDT I ALT" FontSize="10.5" FontWeight="SemiBold"
+                <TextBlock Text="{i18n:Oversat complianceview.tegn_sendt_i_alt}" FontSize="10.5" FontWeight="SemiBold"
                            Foreground="{StaticResource TekstMeget}" />
                 <TextBlock x:Name="KvitTegn" FontSize="20" FontWeight="SemiBold" Margin="0,3,0,0" />
               </StackPanel>
 
               <StackPanel Grid.Column="2">
-                <TextBlock Text="SAMLET PRIS (SKØN)" FontSize="10.5" FontWeight="SemiBold"
+                <TextBlock Text="{i18n:Oversat complianceview.samlet_pris_skoen}" FontSize="10.5" FontWeight="SemiBold"
                            Foreground="{StaticResource TekstMeget}" />
                 <TextBlock x:Name="KvitPris" FontSize="20" FontWeight="SemiBold" Margin="0,3,0,0" />
                 <TextBlock x:Name="KvitPrisKr" FontSize="11.5" Margin="0,2,0,0"
                            Foreground="{StaticResource TekstMeget}" />
               </StackPanel>
 
-              <Button Grid.Column="3" Content="Åbn mappen" Click="Kvitteringer_Klik"
+              <Button Grid.Column="3" Content="{i18n:Oversat faelles.aabn_mappen}" Click="Kvitteringer_Klik"
                       VerticalAlignment="Center" Padding="14,8"
-                      ToolTip="Filerne er almindelig JSONL — én linje pr. afsendelse. De kan læses af et regneark eller et script uden appen" />
+                      ToolTip="{i18n:Oversat complianceview.filerne_er_almindelig_jsonl_en_linje_pr_af}" />
             </Grid>
           </Border>
 
@@ -732,20 +733,20 @@
               <Border Background="#FF181B22" BorderBrush="{StaticResource PanelKant}" BorderThickness="1"
                       CornerRadius="8" Padding="14,11" Margin="0,0,0,12">
                 <StackPanel>
-                  <TextBlock Text="Om prisen" FontSize="12.5" FontWeight="SemiBold" />
+                  <TextBlock Text="{i18n:Oversat complianceview.om_prisen}" FontSize="12.5" FontWeight="SemiBold" />
                   <TextBlock FontSize="12" LineHeight="19" Margin="0,4,0,0" TextWrapping="Wrap"
                              Foreground="{StaticResource TekstMeget}"
-                             Text="Antallet af tokens kommer fra leverandøren og er det, der faktureres. Prisen herover er derimod et skøn: den er regnet ud fra listeprisen på Mistrals prisside, som er noteret i dollar. Kronebeløbet bruger en fast kurs på 6,50 kr./USD — ikke en dagskurs." />
+                             Text="{i18n:Oversat complianceview.antallet_af_tokens_kommer_fra_leverandoere}" />
                   <TextBlock FontSize="12" LineHeight="19" Margin="0,6,0,0" TextWrapping="Wrap"
                              Foreground="{StaticResource TekstMeget}"
-                             Text="Hvilken valuta Mistral rent faktisk fakturerer i, og om der lægges moms oveni, er ikke efterprøvet. Skal tallet bruges til bogføring, så tag det fra fakturaen — ikke herfra." />
+                             Text="{i18n:Oversat complianceview.hvilken_valuta_mistral_rent_faktisk_faktur}" />
                 </StackPanel>
               </Border>
 
               <TextBlock x:Name="KvitTom" FontSize="13" LineHeight="21" TextWrapping="Wrap"
                          Margin="4,10,4,0" Visibility="Collapsed"
                          Foreground="{StaticResource TekstSvag}"
-                         Text="Der er ikke sendt noget endnu. Første gang du laver et dokument, står afsendelsen her." />
+                         Text="{i18n:Oversat complianceview.der_er_ikke_sendt_noget_endnu_foerste_gang}" />
 
               <ItemsControl x:Name="KvitListe">
                 <ItemsControl.ItemTemplate>
@@ -787,31 +788,31 @@
         </DockPanel>
       </TabItem>
 
-      <TabItem Header="Forbehold" Style="{StaticResource Fane}">
+      <TabItem Header="{i18n:Oversat complianceview.forbehold}" Style="{StaticResource Fane}">
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
           <StackPanel>
     <!-- ==================== Det uafklarede ======================= -->
             <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20,16"
                     BorderBrush="{StaticResource PanelKant}" BorderThickness="1" Margin="0,0,0,4">
               <StackPanel>
-                <TextBlock Text="DET, DER IKKE ER EFTERPRØVET" FontSize="10.5" FontWeight="SemiBold"
+                <TextBlock Text="{i18n:Oversat complianceview.det_der_ikke_er_efterproevet}" FontSize="10.5" FontWeight="SemiBold"
                            Foreground="{StaticResource TekstMeget}" Margin="0,0,0,10" />
 
                 <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap"
                            Foreground="{StaticResource TekstSvag}"
-                           Text="Listen over underdatabehandlere kan ændre sig. Mistral varsler ændringer med ti dages indsigelsesfrist, og der kan abonneres på varsler i Trust Center — det bør nogen gøre." />
+                           Text="{i18n:Oversat complianceview.listen_over_underdatabehandlere_kan_aendre}" />
 
                 <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,8,0,0"
                            Foreground="{StaticResource TekstSvag}"
-                           Text="Opbevaringstiden for API-anmodninger er ikke slået op." />
+                           Text="{i18n:Oversat complianceview.opbevaringstiden_for_api_anmodninger_er_ik}" />
 
                 <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,8,0,0"
                            Foreground="{StaticResource TekstSvag}"
-                           Text="Trust Center oplyste 14-05-2026 om en sikkerhedshændelse i forsyningskæden. Mistral skriver, at hverken hostede tjenester eller kundedata blev berørt. Nævnt for fuldstændighedens skyld, ikke som en indvending." />
+                           Text="{i18n:Oversat complianceview.trust_center_oplyste_14_05_2026_om_en_sikk}" />
 
                 <TextBlock FontSize="11.5" LineHeight="19" TextWrapping="Wrap" Margin="0,14,0,0"
                            Foreground="{StaticResource TekstMeget}"
-                           Text="Hele gennemgangen med kildehenvisninger står i doc/mistral-dpa.md i projektmappen. Målingerne, der ligger bag valget af model, står i doc/maaling-sky.md og doc/maaling-whisper.md." />
+                           Text="{i18n:Oversat complianceview.hele_gennemgangen_med_kildehenvisninger_st}" />
               </StackPanel>
             </Border>
     <!-- ==================== Ansvarsfraskrivelse ==================
@@ -825,20 +826,20 @@
             <Border Background="#FF181B22" CornerRadius="10" Padding="20,16" Margin="0,14,0,0"
                     BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
               <StackPanel>
-                <TextBlock Text="ANSVARSFRASKRIVELSE" FontSize="10.5" FontWeight="SemiBold"
+                <TextBlock Text="{i18n:Oversat complianceview.ansvarsfraskrivelse}" FontSize="10.5" FontWeight="SemiBold"
                            Foreground="{StaticResource TekstMeget}" Margin="0,0,0,10" />
 
                 <TextBlock FontSize="12" LineHeight="20" TextWrapping="Wrap"
                            Foreground="{StaticResource TekstMeget}"
-                           Text="Oplysningerne under «Compliance» er en gengivelse af tredjepartsvilkår, licensbetingelser og offentligt tilgængelig dokumentation, som forelå på de anførte gennemgangsdatoer. De udgør ikke juridisk rådgivning og kan ikke træde i stedet for en selvstændig vurdering." />
+                           Text="{i18n:Oversat complianceview.oplysningerne_under_compliance_er_en_gengi}" />
 
                 <TextBlock FontSize="12" LineHeight="20" TextWrapping="Wrap" Margin="0,9,0,0"
                            Foreground="{StaticResource TekstMeget}"
-                           Text="Vilkår, underdatabehandlerlister, certificeringer og licenser kan være ændret, efter teksten blev indsat, uden at det fremgår her. Brugeren er selv ansvarlig for at efterprøve rigtigheden hos de pågældende leverandører og for løbende at kontrollere, om der er sket ændringer." />
+                           Text="{i18n:Oversat complianceview.vilkaar_underdatabehandlerlister_certifice}" />
 
                 <TextBlock FontSize="12" LineHeight="20" TextWrapping="Wrap" Margin="0,9,0,0"
                            Foreground="{StaticResource TekstMeget}"
-                           Text="Ansvaret for, at anvendelsen af programmet er i overensstemmelse med databeskyttelsesforordningen og øvrig gældende ret — herunder rollefordelingen som dataansvarlig, behandlingsgrundlag, oplysningspligt og fortegnelse over behandlingsaktiviteter — påhviler alene brugeren som dataansvarlig. Der påtages intet ansvar for direkte eller indirekte tab som følge af, at oplysningerne under «Compliance» lægges til grund." />
+                           Text="{i18n:Oversat complianceview.ansvaret_for_at_anvendelsen_af_programmet}" />
               </StackPanel>
             </Border>
           </StackPanel>

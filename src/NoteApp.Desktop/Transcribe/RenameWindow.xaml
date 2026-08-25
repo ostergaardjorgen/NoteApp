@@ -1,6 +1,7 @@
-<Window x:Class="NoteApp.Desktop.Transcribe.RenameWindow"
+﻿<Window x:Class="NoteApp.Desktop.Transcribe.RenameWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:i18n="clr-namespace:NoteApp.Desktop"
         x:Name="Vindue" Width="520" SizeToContent="Height" MinHeight="220"
         WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
         Background="{StaticResource Baggrund}">
@@ -22,14 +23,14 @@
       <!-- Kassér står til VENSTRE og alene. Den er den eneste handling her,
            der ikke kan fortrydes, og den skal ikke ligge ved siden af den, man
            trykker på hver gang. -->
-      <Button x:Name="KasserKnap" Content="Kassér optagelsen" Click="Kasser_Click"
+      <Button x:Name="KasserKnap" Content="{i18n:Oversat renamewindow.kasser_optagelsen}" Click="Kasser_Click"
               HorizontalAlignment="Left" Padding="16,9" Visibility="Collapsed"
               Foreground="{StaticResource Optager}" />
 
     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-      <Button x:Name="AnnullerKnap" Content="Annullér" Click="Annuller_Click" Padding="18,9"
+      <Button x:Name="AnnullerKnap" Content="{i18n:Oversat faelles.annuller}" Click="Annuller_Click" Padding="18,9"
               Margin="0,0,10,0" IsCancel="True" />
-      <Button x:Name="GemKnap" Content="Gem navnet" Click="Gem_Click" Padding="22,9" IsDefault="True"
+      <Button x:Name="GemKnap" Content="{i18n:Oversat renamewindow.gem_navnet}" Click="Gem_Click" Padding="22,9" IsDefault="True"
               Background="{StaticResource Accent}" Foreground="#FF0B1220" BorderThickness="0"
               FontWeight="SemiBold" />
     </StackPanel>

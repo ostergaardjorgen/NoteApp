@@ -1,6 +1,7 @@
 ﻿<Window x:Class="NoteApp.Desktop.Documents.NewDocumentWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:i18n="clr-namespace:NoteApp.Desktop"
         Title="Opret dokument" Height="720" Width="680" MinHeight="520" MinWidth="560"
         WindowStartupLocation="CenterOwner" ResizeMode="CanResize"
         Background="{StaticResource Baggrund}">
@@ -22,7 +23,7 @@
            lavet ude i verden. Begge dele hoerer i overskriften: det er dét,
            der skiller den her knap fra den korte lokale opsummering, og det
            er dét, brugeren skal kunne traeffe sit valg paa. -->
-      <TextBlock Text="Vil du have et komplet Word-dokument?" FontSize="20" FontWeight="SemiBold"
+      <TextBlock Text="{i18n:Oversat newdocumentwindow.vil_du_have_et_komplet_word_dokument}" FontSize="20" FontWeight="SemiBold"
                  TextWrapping="Wrap" />
       <TextBlock x:Name="Kilde" Style="{StaticResource Underskrift}" Margin="0,4,0,0" TextWrapping="Wrap" />
     </StackPanel>
@@ -44,11 +45,11 @@
     <Border Grid.Row="1" Background="{StaticResource Panel}" CornerRadius="10"
             BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
       <DockPanel>
-        <TextBlock DockPanel.Dock="Top" Text="Hvilken mødetype?" Margin="18,15,18,4"
+        <TextBlock DockPanel.Dock="Top" Text="{i18n:Oversat newdocumentwindow.hvilken_moedetype}" Margin="18,15,18,4"
                    FontSize="13" FontWeight="SemiBold" />
         <TextBlock x:Name="Typehjaelp" DockPanel.Dock="Top" Margin="18,0,18,10" FontSize="11.5"
                    TextWrapping="Wrap" Foreground="{StaticResource TekstMeget}"
-                   Text="Mødetypen bestemmer, hvilke afsnit dokumentet får, og hvor langt det bliver." />
+                   Text="{i18n:Oversat newdocumentwindow.moedetypen_bestemmer_hvilke_afsnit_dokumen}" />
 
         <ListBox x:Name="Skabeloner" Margin="10,0,10,10" BorderThickness="0"
                  Background="Transparent" SelectionChanged="Skabelon_Valgt"
@@ -105,10 +106,10 @@
     </Border>
 
     <StackPanel Grid.Row="2" Margin="0,14,0,0">
-      <TextBlock Text="Titel på dokumentet" Style="{StaticResource Underskrift}" />
+      <TextBlock Text="{i18n:Oversat newdocumentwindow.titel_paa_dokumentet}" Style="{StaticResource Underskrift}" />
       <TextBox x:Name="FeltTitel" Margin="0,4,0,0" FontSize="14" Padding="9,7" />
 
-      <TextBlock Text="Beskrivelse (valgfri — står øverst i dokumentet)"
+      <TextBlock Text="{i18n:Oversat newdocumentwindow.beskrivelse_valgfri_staar_oeverst_i_dokume}"
                  Style="{StaticResource Underskrift}" Margin="0,12,0,0" />
       <TextBox x:Name="FeltBeskrivelse" Margin="0,4,0,0" FontSize="13" Padding="9,7"
                AcceptsReturn="True" TextWrapping="Wrap" Height="46"
@@ -119,13 +120,13 @@
            var på. Behovet er ikke det samme hver gang — et referat til en
            selv er dansk, et resumé af et engelsk webinar, der skal videre,
            er det ikke nødvendigvis. -->
-      <TextBlock Text="Dokumentets sprog" Style="{StaticResource Underskrift}" Margin="0,12,0,0" />
+      <TextBlock Text="{i18n:Oversat newdocumentwindow.dokumentets_sprog}" Style="{StaticResource Underskrift}" Margin="0,12,0,0" />
 
       <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
-        <RadioButton x:Name="SprogDansk" GroupName="doksprog" Content="Dansk"
+        <RadioButton x:Name="SprogDansk" GroupName="doksprog" Content="{i18n:Oversat faelles.dansk}"
                      IsChecked="True" FontSize="13" Margin="0,0,20,0"
                      VerticalContentAlignment="Center" />
-        <RadioButton x:Name="SprogEngelsk" GroupName="doksprog" Content="Engelsk"
+        <RadioButton x:Name="SprogEngelsk" GroupName="doksprog" Content="{i18n:Oversat newdocumentwindow.engelsk}"
                      FontSize="13" VerticalContentAlignment="Center" />
       </StackPanel>
 
@@ -138,8 +139,8 @@
     </StackPanel>
 
     <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,18,0,0">
-      <Button Content="Annullér" Click="Annuller_Click" Padding="18,9" Margin="0,0,10,0" />
-      <Button x:Name="OpretKnap" Content="Opret dokument" Click="Opret_Click" Padding="20,9"
+      <Button Content="{i18n:Oversat faelles.annuller}" Click="Annuller_Click" Padding="18,9" Margin="0,0,10,0" />
+      <Button x:Name="OpretKnap" Content="{i18n:Oversat faelles.opret_dokument}" Click="Opret_Click" Padding="20,9"
               Background="{StaticResource Accent}" Foreground="#FF0B1220" BorderThickness="0"
               FontWeight="SemiBold" IsDefault="True" />
     </StackPanel>
