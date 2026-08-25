@@ -702,7 +702,11 @@ public partial class MainWindow : Window
                 ? OpstartWindow.Slags.Webinar
                 : OpstartWindow.Slags.Moede;
 
-            var vindue = new OpstartWindow(slags) { Owner = this };
+            // AFTALENS EGNE VAERDIER GIVES MED. Er de sat, skjules felterne,
+            // og der staar eet spoergsmaal tilbage - sproget. Uden det her
+            // skulle man vaelge mappe og moedetype for ANDEN gang, mens
+            // moedet gik i gang.
+            var vindue = new OpstartWindow(slags, a.Mappe, a.Moedetype) { Owner = this };
             if (vindue.ShowDialog() != true) return;
 
             a.Mappe = vindue.Mappe ?? a.Mappe;

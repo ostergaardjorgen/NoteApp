@@ -130,17 +130,17 @@ public static class WhisperInstall
             "large-v3", "ggml-large-v3.bin", 3_095_033_483L,
             "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v3.bin",
             ModelLanguages.Multilingual,
-            "Standardvalget. Den eneste, der er målt på dansk her i projektet.",
-            "Målt til 10,0 % ordfejlrate på en oplæsning på 2.365 ord, 12 af 19 fagtermer og 11 af 17 negationer bevaret. Femten minutters lyd tager fire en halv minut på et RTX 2060.",
+            "Standardvalget. Målt på dansk to gange — på oplæsning og på et rigtigt møde.",
+            "Målt 25-08-2026 på et rigtigt møde: 32,7 minutter dansk tale skrevet ud på 1 minut 57 sekunder med stilhedsmodel — omkring sytten gange hurtigere end lyden er lang. En times møde tager altså cirka fire minutter. På oplæsning tidligere: 10,0 % ordfejlrate på 2.365 ord, 12 af 19 fagtermer og 11 af 17 negationer bevaret.",
             "Fylder 2,9 GB og kræver godt 3 GB på grafikkortet. På ren CPU er den for langsom til daglig brug."),
 
         new WhisperModel(
             "large-v3-turbo", "ggml-large-v3-turbo.bin", 1_624_555_275L,
             "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v3-turbo.bin",
             ModelLanguages.Multilingual,
-            "Halv størrelse, omtrent dobbelt hastighed. Til en maskine, der ikke kan holde large-v3.",
-            "Bruger det halve af grafikkortet og er mærkbart hurtigere. Bedste kompromis, hvis du venter på transkriptionen frem for at lade den køre om natten.",
-            "IKKE MÅLT i dette projekt — tallene ovenfor gælder large-v3, ikke den her. Rygtet siger «næsten lige så god»; det er ikke det samme som målt."),
+            "Halv størrelse. Til en maskine, der ikke kan holde large-v3 — men den taber tale.",
+            "Målt 25-08-2026 på det samme møde som large-v3: 1,76 gange hurtigere, ikke dobbelt. Lige så god på negationer (17 mod 18 steder, enige om 16). Ét sted skrev den rigtigere dansk end large-v3.",
+            "MEN DEN TABER TALE, HVOR LYDEN BLIVER SVÆR. På det samme møde droppede den en hel sætning, og de sidste tredive sekunder skiftede den til islandsk. Slutningen af et møde er dér, aftaler og næste skridt bliver sagt — og en sætning, der ikke blev skrevet, kan ingen sprogmodel genskabe bagefter. Vælg den, hvis grafikkortet ikke kan holde large-v3; ikke for hastigheden alene."),
     };
 
     /// <summary>

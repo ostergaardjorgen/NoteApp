@@ -1,4 +1,4 @@
-using NoteApp.Core;
+﻿using NoteApp.Core;
 using Xunit;
 
 namespace NoteApp.Tests;
@@ -47,14 +47,37 @@ public class OpdateringTest
         Assert.Equal("MAPPE", Sprog.T("faelles.mappe"));
     }
 
+    /// <summary>
+    /// EN AENDRET TEKST SKAL FREM - OGSAA I EN FIL, DER ALLEREDE FANDTES.
+    ///
+    /// Den her proeve sagde det MODSATTE indtil 25-08-2026: at en tekst paa
+    /// disken skulle blive staaende, saa en haandrettelse overlevede en
+    /// opdatering. Det lyder rigtigt og var forkert, og det kostede en hel
+    /// arbejdsdags tekstrettelser, foer det blev opdaget.
+    ///
+    /// Foelgen var, at en RETTET formulering aldrig naaede frem. Nye noegler
+    /// landede - derfor saa fletningen ud til at virke - men en tekst, der var
+    /// lavet om, blev staaende i al fremtid. Appen skrev «kun dokumenter laves
+    /// i Europa» paa skaermen, mens den udgivne fil havde sagt noget andet
+    /// gennem flere udgivelser. Filen paa disken var vokset til 84 KB mod den
+    /// udgivnes 77: den samlede noegler op og slap aldrig af med noget.
+    ///
+    /// DER ER INTET AT BESKYTTE. Sprog kan ikke redigeres i brugerfladen; det
+    /// er en truffet beslutning. da.json og en.json er appens filer, ikke
+    /// brugerens, og saa skal de ligne det, der blev udgivet.
+    ///
+    /// ET SPROG, MAN SELV HAR LAGT IND, ROERES IKKE. Fletningen loeber kun
+    /// over de sprog, appen selv udgiver - se Udpak. En haandlavet de.json
+    /// bliver liggende noejagtig som den er.
+    /// </summary>
     [Fact]
-    public void En_rettet_tekst_bliver_staaende_efter_en_opdatering()
+    public void En_aendret_tekst_kommer_frem_ved_en_opdatering()
     {
         using var p = new Proevemappe();
 
         Directory.CreateDirectory(Sprog.Mappe);
 
-        // Brugeren har rettet EEN tekst og mangler resten.
+        // En fil paa disken med en FORAELDET tekst og resten manglende.
         File.WriteAllText(Path.Combine(Sprog.Mappe, "da.json"), """
             {
               "_sprog": { "kode": "da", "navn": "Dansk", "flag": "DK" },
@@ -64,12 +87,37 @@ public class OpdateringTest
 
         Sprog.Genindlaes();
 
-        // DEN RETTEDE ROERES IKKE. Det er hele grunden til, at der flettes
-        // frem for at skrives over.
-        Assert.Equal("Mine møder", Sprog.T("nav.optagelser"));
+        // Den forældede tekst er rettet til det, der udgives nu.
+        Assert.Equal("Optagelser", Sprog.T("nav.optagelser"));
 
         // Og resten er kommet med.
         Assert.Equal("Dokumenter", Sprog.T("nav.dokumenter"));
+    }
+
+    [Fact]
+    public void En_noegle_der_ikke_udgives_laengere_ryddes_vaek()
+    {
+        using var p = new Proevemappe();
+
+        Directory.CreateDirectory(Sprog.Mappe);
+
+        File.WriteAllText(Path.Combine(Sprog.Mappe, "da.json"), """
+            {
+              "_sprog": { "kode": "da", "navn": "Dansk", "flag": "DK" },
+              "nav": { "optagelser": "Optagelser" },
+              "doed": { "noegle": "noget der blev omdoebt for laenge siden" }
+            }
+            """);
+
+        Sprog.Genindlaes();
+
+        // DER SKAL SLAAS EN TEKST OP FOERST. Udpakningen og fletningen sker
+        // foerst ved foerste opslag - laeses filen uden, har fletningen aldrig
+        // koert, og proeven maaler ingenting.
+        Assert.Equal("Optagelser", Sprog.T("nav.optagelser"));
+
+        var paaDisken = File.ReadAllText(Path.Combine(Sprog.Mappe, "da.json"));
+        Assert.DoesNotContain("noget der blev omdoebt", paaDisken, StringComparison.Ordinal);
     }
 
     [Fact]

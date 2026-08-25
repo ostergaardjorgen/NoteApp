@@ -1,4 +1,4 @@
-using System.Windows;
+﻿using System.Windows;
 using NoteApp.Core;
 using NoteApp.Core.Llm;
 using NoteApp.Desktop.Transcribe;
@@ -47,6 +47,9 @@ public partial class OpstartWindow : Window
     }
 
     /// <summary>Brugerens mappe. Null betyder «uden mappe».</summary>
+    private string? _forvalgtMappe;
+    private string? _forvalgtType;
+
     public string? Mappe { get; private set; }
 
     /// <summary>Navnet på den valgte mødetype. Null betyder «ikke valgt».</summary>
@@ -68,11 +71,33 @@ public partial class OpstartWindow : Window
     /// </summary>
     public sealed record Punkt(string Navn, string Under, string? Vaerdi);
 
-    public OpstartWindow(Slags slags)
+    /// <param name="forvalgtMappe">Mappen fra aftalen, hvis den allerede er valgt dér.</param>
+    /// <param name="forvalgtType">Mødetypen fra aftalen, hvis den allerede er valgt dér.</param>
+    /// <remarks>
+    /// DER SPØRGES KUN OM DET, DER MANGLER.
+    ///
+    /// En aftale fra kalenderen har allerede mappe og mødetype på sig — man har
+    /// skrevet dem i aftalevinduet. Sproget står derimod på «Spørg mig», og det
+    /// er med vilje: rammer sproget forkert, bliver hele transskriptionen
+    /// vrøvl, og det opdages først i referatet.
+    ///
+    /// Men dialogen viste ALLE TRE felter igen, tomme. Så sad man og valgte
+    /// mappe og mødetype for anden gang, mens webinaret gik i gang — og det
+    /// ligner en fejl, ikke et spørgsmål. Er de to allerede besvaret, skjules
+    /// de nu, og der står ét spørgsmål tilbage.
+    ///
+    /// Værdierne SKJULES OG BEVARES — de gives videre uændret, så den, der
+    /// kalder, ikke skal huske at flette dem ind igen.
+    /// </remarks>
+    public OpstartWindow(Slags slags, string? forvalgtMappe = null, string? forvalgtType = null)
     {
         InitializeComponent();
 
         var erWebinar = slags == Slags.Webinar;
+
+        _forvalgtMappe = string.IsNullOrWhiteSpace(forvalgtMappe) ? null : forvalgtMappe;
+        _forvalgtType = string.IsNullOrWhiteSpace(forvalgtType) ? null : forvalgtType;
+        var kunSprog = _forvalgtMappe is not null && _forvalgtType is not null;
 
         Title = erWebinar ? "Optag et webinar" : "Optag";
 
@@ -112,6 +137,16 @@ public partial class OpstartWindow : Window
         FortrydKnap.Content = slags == Slags.Igang ? "Ikke nu" : "Fortryd";
 
         Fyld(erWebinar);
+
+        if (kunSprog)
+        {
+            Mappefelt.Visibility = Visibility.Collapsed;
+            Typefelt.Visibility = Visibility.Collapsed;
+
+            Underskrift.Text = erWebinar
+                ? $"Mappe og mødetype står allerede på aftalen ({_forvalgtMappe}, {_forvalgtType}). Der mangler kun sproget — og det kan ikke gættes uden at koste hele transskriptionen."
+                : $"Mappe og mødetype står allerede på aftalen ({_forvalgtMappe}, {_forvalgtType}). Der mangler kun sproget.";
+        }
 
         // Startknappen faar fokus, ikke det foerste felt. Trykker man bare
         // retur, koerer den — og det skal den kunne, for det er hele forskellen
@@ -233,8 +268,12 @@ public partial class OpstartWindow : Window
 
     private void Start_Klik(object sender, RoutedEventArgs e)
     {
-        if (Mappevalg.SelectedItem is Punkt m) Mappe = m.Vaerdi;
-        if (Typevalg.SelectedItem is Punkt t) Moedetype = t.Vaerdi;
+        // ER FELTET SKJULT, GAELDER AFTALENS VAERDI. Laeses rullelisten
+        // alligevel, ville et skjult felt paa «Ikke valgt» slette det, der
+        // stod paa aftalen - og saa havde man mistet noget ved at faa faerre
+        // spoergsmaal.
+        Mappe = _forvalgtMappe ?? (Mappevalg.SelectedItem as Punkt)?.Vaerdi;
+        Moedetype = _forvalgtType ?? (Typevalg.SelectedItem as Punkt)?.Vaerdi;
         if (Sprogvalg.SelectedItem is Punkt s && s.Vaerdi is { } kode) Sprog = kode;
 
         var link = Link.Text.Trim();

@@ -316,11 +316,29 @@ public static class Sprog
     }
 
     /// <summary>
-    /// Lægger de nøgler, der mangler i filen på disken, ind i den.
-    ///
-    /// Filen skrives kun, hvis der faktisk kom noget til. Ellers ville hver
-    /// eneste opstart give filen en ny dato uden at have ændret noget.
+    /// Bringer filen på disken i overensstemmelse med den udgivne.
     /// </summary>
+    /// <remarks>
+    /// DEN TILFØJEDE FØR KUN DET, DER MANGLEDE — og sprang over alt, den
+    /// kendte i forvejen. Det betød, at en RETTET tekst aldrig kom frem: nye
+    /// nøgler landede, men en formulering, der var lavet om, blev stående som
+    /// den var, i al fremtid.
+    ///
+    /// Set 25-08-2026: appen skrev «kun dokumenter laves i Europa» på skærmen,
+    /// mens den udgivne fil havde sagt «i skyen» i flere udgivelser. Filen på
+    /// disken var vokset til 84 KB mod den udgivnes 77 — den samlede nøgler op
+    /// og slap aldrig af med noget.
+    ///
+    /// DER ER INTET AT BESKYTTE. Sprogfilerne kan ikke redigeres i
+    /// brugerfladen; det er en truffet beslutning, ikke en mangel. Filen på
+    /// disken er en KOPI af den udgivne, ikke brugerens ejendom, og så skal
+    /// den ligne den.
+    ///
+    /// Derfor: manglende nøgler lægges ind, ændrede rettes, og nøgler, der
+    /// ikke længere udgives, ryddes væk. Filen skrives kun, hvis noget faktisk
+    /// blev anderledes — ellers ville hver opstart give den en ny dato uden
+    /// grund.
+    /// </remarks>
     private static void Flet(string sti, string udgivet)
     {
         try
@@ -334,17 +352,29 @@ public static class Sprog
             var kendte = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             FladNode(paaDisken, "", kendte);
 
-            var tilfoejet = 0;
+            var aendret = 0;
 
             foreach (var (noegle, tekst) in nyeste)
             {
-                if (kendte.ContainsKey(noegle)) continue;
+                // Uaendret? Lad den vaere. Ellers skrives filen ved hver
+                // opstart, uden at noget er anderledes.
+                if (kendte.TryGetValue(noegle, out var paaDisk) && paaDisk == tekst) continue;
 
                 Saet(paaDisken, noegle, tekst);
-                tilfoejet++;
+                aendret++;
             }
 
-            if (tilfoejet == 0) return;
+            // NOEGLER, DER IKKE UDGIVES LAENGERE, RYDDES VAEK.
+            //
+            // Uden det bliver filen ved med at vokse med hver omdoebning, der
+            // nogensinde er lavet - og saa kan man ikke se paa den, hvad appen
+            // faktisk bruger. Brugerens fil var 84 KB mod den udgivnes 77.
+            foreach (var doed in kendte.Keys.Where(k => !nyeste.ContainsKey(k)).ToList())
+            {
+                if (Fjern(paaDisken, doed)) aendret++;
+            }
+
+            if (aendret == 0) return;
 
             File.WriteAllText(sti,
                 paaDisken.ToJsonString(new System.Text.Json.JsonSerializerOptions { WriteIndented = true }),
@@ -353,10 +383,25 @@ public static class Sprog
         catch (Exception)
         {
             // En oedelagt fil paa disken kan ikke flettes. Den bliver liggende
-            // som den er - og Laes springer den over, saa der falders tilbage
-            // paa noeglerne. At skrive oven i den ville slette brugerens
-            // rettelser paa grund af en tastefejl et sted i filen.
+            // som den er - og Laes springer den over, saa der faldes tilbage
+            // paa noeglerne. At skrive oven i en fil, man ikke kunne laese,
+            // ville vaere at gaette paa, hvad der stod i den.
         }
+    }
+
+    /// <summary>Fjerner en nøgle. Sandt, hvis der faktisk blev fjernet noget.</summary>
+    private static bool Fjern(System.Text.Json.Nodes.JsonObject rod, string noegle)
+    {
+        var dele = noegle.Split('.');
+        var p = rod;
+
+        for (var i = 0; i < dele.Length - 1; i++)
+        {
+            if (p[dele[i]] is not System.Text.Json.Nodes.JsonObject naeste) return false;
+            p = naeste;
+        }
+
+        return p.Remove(dele[^1]);
     }
 
     private static void Saet(System.Text.Json.Nodes.JsonObject rod, string noegle, string vaerdi)
