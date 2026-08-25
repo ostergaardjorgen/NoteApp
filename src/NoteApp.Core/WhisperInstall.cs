@@ -131,7 +131,7 @@ public static class WhisperInstall
             "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v3.bin",
             ModelLanguages.Multilingual,
             "Standardvalget. Målt på dansk to gange — på oplæsning og på et rigtigt møde.",
-            "Målt 25-08-2026 på et rigtigt møde: 32,7 minutter dansk tale skrevet ud på 1 minut 57 sekunder med stilhedsmodel — omkring sytten gange hurtigere end lyden er lang. En times møde tager altså cirka fire minutter. På oplæsning tidligere: 10,0 % ordfejlrate på 2.365 ord, 12 af 19 fagtermer og 11 af 17 negationer bevaret.",
+            "Målt 25-08-2026 på et rigtigt møde: to spor à 32,7 minutter dansk tale. Tiden svinger meget — samme indstillinger og samme længde gav 2 minutter på det ene spor og 8 på det andet. Regn med, at et møde tager mellem en fjerdedel og halvdelen af sin egen længde pr. spor. På oplæsning tidligere: 10,0 % ordfejlrate på 2.365 ord, 12 af 19 fagtermer og 11 af 17 negationer bevaret.",
             "Fylder 2,9 GB og kræver godt 3 GB på grafikkortet. På ren CPU er den for langsom til daglig brug."),
 
         new WhisperModel(

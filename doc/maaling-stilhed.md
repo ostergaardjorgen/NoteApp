@@ -63,7 +63,20 @@ aldrig frem til modellen.
 | **Med, 200 ms luft** | **1:57** | **0** | **0** | **20** |
 | Med, 400 ms luft | 5:28 | 0 | 7 | 19 |
 
-Næsten fire gange hurtigere, fordi stilhed slet ikke sendes til modellen.
+**Om hastigheden: tallet holder ikke som en generel påstand.** Det er målt på
+mikrofonsporet. Det ANDET spor i samme møde — samme længde, samme indstillinger,
+samme sprog, sammenligneligt antal talestykker (258 mod 294) og ord (2.508 mod
+2.964) — tog **8 minutter 9 sekunder** målt 25-08-2026 kl. 17:56.
+
+Forskellen ligger ikke i arbejdsmængden, men i hastigheden pr. kørsel:
+indkodning 282 ms mod 1.563 ms, batch 3,75 ms mod 14,79 ms. Begge kørsler
+brugte CUDA på samme kort med samme opsætning. **Hvorfor er ikke afklaret**, og
+der er gættet forkert to gange allerede (først "den hænger", derefter "det ene
+spor har mindre tale" — begge afvist af måling).
+
+Indtil det er undersøgt på en rolig maskine: **lov ikke en hastighed.**
+Stilhedsmodellen beholdes for det, der ER efterprøvet — nul opdigtninger mod
+to, og nul tomme «Ja» mod 66.
 
 **Luften er sat til 200 ms.** Standarden er 30 ms og klipper for tæt; 400 ms
 er næsten tre gange langsommere uden at være bedre.
