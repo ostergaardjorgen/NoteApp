@@ -86,18 +86,23 @@
               <Grid>
                 <TextBlock x:Name="Kalenderoverskrift" FontSize="13" FontWeight="SemiBold"
                            VerticalAlignment="Center" />
+                <!-- SYNKRONISERINGEN STAAR YDERST TIL HOEJRE.
+                     Samme plads som paa opgaverne. To paneler ved siden af
+                     hinanden, hvor den samme knap sidder to forskellige
+                     steder, laeses som to forskellige knapper. -->
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"
                             VerticalAlignment="Center">
+                  <Button Content="{i18n:Oversat kalender.nyaftale}" Click="NyAftale_Klik"
+                          VerticalAlignment="Center" Padding="10,3" FontSize="11"
+                          Margin="0,0,6,0" />
                   <Button x:Name="Kalendersynk" Click="Kalendersynk_Klik"
-                          Style="{StaticResource IkonKnap}" Margin="0,0,6,0"
+                          Style="{StaticResource IkonKnap}"
                           Visibility="Collapsed"
                           AutomationProperties.Name="{i18n:Oversat kalender.hentaftaler}"
                           ToolTip="{i18n:Oversat kalender.hentaftalerhjaelp}">
                     <TextBlock x:Name="Kalendersynkglyf" Text="&#xE895;"
                                FontFamily="Segoe MDL2 Assets" FontSize="13" />
                   </Button>
-                  <Button Content="{i18n:Oversat kalender.nyaftale}" Click="NyAftale_Klik"
-                          VerticalAlignment="Center" Padding="10,3" FontSize="11" />
                 </StackPanel>
               </Grid>
 
