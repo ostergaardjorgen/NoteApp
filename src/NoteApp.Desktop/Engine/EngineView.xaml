@@ -293,62 +293,16 @@
         </ScrollViewer>
       </TabItem>
 
-      <!-- ===================== Den lokale opsummering ================= -->
-      <TabItem Header="{i18n:Oversat faelles.opsummering}" Style="{StaticResource Fane}">
-        <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,12,0,0"
-                      HorizontalScrollBarVisibility="Disabled">
-          <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20"
-                  BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
-            <StackPanel>
-              <TextBlock Text="{i18n:Oversat engineview.kort_opsummering_her_paa_maskinen}" FontSize="11"
-                         FontWeight="SemiBold" Foreground="{StaticResource Accent}" />
+      <!-- HER LAA FANEN «OPSUMMERING» - den lokale vej.
 
-              <Grid Margin="0,8,0,0">
-                <Grid.ColumnDefinitions>
-                  <ColumnDefinition Width="*" />
-                  <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
+           Den viste llama-motoren og sprogmodellen paa 2,33 GB, som
+           opsummeringen koerte paa her paa maskinen. Fjernet 25-08-2026
+           sammen med motoren og modellen: 4 GB af det, en ny bruger
+           skulle hente, for den halvdel der gav mindst.
 
-                <StackPanel Grid.Column="0" Orientation="Horizontal">
-                  <TextBlock x:Name="LokalModel" FontSize="16" FontWeight="SemiBold" />
-                  <TextBlock x:Name="LokalStoerrelse" FontSize="12.5" FontFamily="Consolas"
-                             VerticalAlignment="Center" Margin="12,3,0,0"
-                             Foreground="{StaticResource TekstMeget}" />
-                </StackPanel>
-
-                <!-- Samme knap uanset om modellen mangler eller ligger der:
-                     hent, eller hent igen som reparation. En 2,3 GB-fil kan
-                     blive beskadiget, og det er en fejl, man skal kunne komme
-                     ud af — praecis som med whisper-modellen. -->
-                <Button Grid.Column="1" x:Name="LokalKnap" Click="LokalModel_Klik"
-                        VerticalAlignment="Top" Padding="16,8" MinWidth="150" />
-              </Grid>
-
-              <TextBlock FontSize="12.5" LineHeight="20" Margin="0,8,0,0" TextWrapping="Wrap"
-                         MaxWidth="720" HorizontalAlignment="Left"
-                         Foreground="{StaticResource TekstSvag}"
-                         Text="{i18n:Oversat engineview.ti_linjer_om_hvad_moedet_handlede_om_til_a}" />
-
-              <TextBlock x:Name="LokalStatus" FontSize="12" Margin="0,12,0,0" TextWrapping="Wrap"
-                         Foreground="{StaticResource Accent}" />
-
-              <Border Background="#FF181B22" BorderBrush="{StaticResource PanelKant}"
-                      BorderThickness="1" CornerRadius="8" Padding="14,12" Margin="0,14,0,0">
-                <StackPanel>
-                  <TextBlock Text="{i18n:Oversat engineview.hvad_den_kan_og_ikke_kan}" FontSize="13" FontWeight="SemiBold" />
-                  <TextBlock FontSize="12" LineHeight="19" Margin="0,6,0,0" TextWrapping="Wrap"
-                             MaxWidth="680" HorizontalAlignment="Left"
-                             Foreground="{StaticResource TekstMeget}"
-                             Text="{i18n:Oversat engineview.maalt_paa_et_moede_paa_en_time_34_sekunder}" />
-                </StackPanel>
-              </Border>
-
-              <TextBlock x:Name="LokalSti" FontSize="11" Margin="0,12,0,0" TextWrapping="Wrap"
-                         Foreground="{StaticResource TekstMeget}" />
-            </StackPanel>
-          </Border>
-        </ScrollViewer>
-      </TabItem>
+           Graensen gaar nu ved transkriptionen. Alt derefter sker hos
+           leverandoeren, og det staar i teksten paa de tre faner, der er
+           tilbage. Se Core/Llm/Opsummeringsvej. -->
 
       <!-- ===================== Dokumenter i Europa =================== -->
       <TabItem Header="{i18n:Oversat engineview.dokumenter_i_skyen}" Style="{StaticResource Fane}">

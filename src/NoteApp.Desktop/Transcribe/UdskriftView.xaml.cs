@@ -1562,24 +1562,17 @@ public partial class UdskriftView : UserControl
     /// </summary>
     private void VisOpsummeringsvej()
     {
-        switch (Opsummeringsvej.Valgt)
+        // DER ER KUN EEN VEJ NU. Den lokale opsummering er fjernet
+        // 25-08-2026; graensen gaar ved transkriptionen, og det staar her.
+        if (Opsummeringsvej.Valgt == Opsummeringssted.Sky)
         {
-            case Opsummeringssted.Sky:
-                OpsumHvor.Text = Sprog.T("opsum.ieuropa");
-                OpsumLokalTekst.Text = Opsummeringsvej.ValgtErIkkeDetOenskede
-                    ? Sprog.T("opsum.ieuropamodel")
-                    : Sprog.T("opsum.ieuropatekst");
-                break;
-
-            case Opsummeringssted.Lokal:
-                OpsumHvor.Text = Sprog.T("opsum.paamaskinen");
-                OpsumLokalTekst.Text = Sprog.T("opsum.paamaskinentekst");
-                break;
-
-            default:
-                OpsumHvor.Text = Sprog.T("opsum.ingenvej");
-                OpsumLokalTekst.Text = Sprog.T("opsum.ingenvejtekst");
-                break;
+            OpsumHvor.Text = Sprog.T("opsum.ieuropa");
+            OpsumLokalTekst.Text = Sprog.T("opsum.ieuropatekst");
+        }
+        else
+        {
+            OpsumHvor.Text = Sprog.T("opsum.ingenvej");
+            OpsumLokalTekst.Text = Sprog.T("opsum.ingenvejtekst");
         }
     }
 
@@ -1604,21 +1597,14 @@ public partial class UdskriftView : UserControl
             return;
         }
 
-        switch (Opsummeringsvej.Valgt)
+        if (Opsummeringsvej.Valgt == Opsummeringssted.Sky)
         {
-            case Opsummeringssted.Sky:
-                await OpsummerISkyen(tekst);
-                return;
-
-            case Opsummeringssted.Lokal:
-                OpsummerLokalt(tekst);
-                return;
-
-            default:
-                Dialogs.AppDialog.Vis(Window.GetWindow(this), Sprog.T("opsum.ingenvej"),
-                    Sprog.T("opsum.ingenvejtekst"), Dialogs.Slags.Valg);
-                return;
+            await OpsummerISkyen(tekst);
+            return;
         }
+
+        Dialogs.AppDialog.Vis(Window.GetWindow(this), Sprog.T("opsum.ingenvej"),
+            Sprog.T("opsum.ingenvejtekst"), Dialogs.Slags.Valg);
     }
 
     /// <summary>
@@ -1684,120 +1670,14 @@ public partial class UdskriftView : UserControl
         }
     }
 
-    private void OpsummerLokalt(string tekst) => _ = OpsumLokal_Klik(tekst);
-
-    private async Task OpsumLokal_Klik(string tekstUdefra)
-    {
-        if (_mappe is null || _udskrift is null) return;
-
-        var cli = LlmRunner.FindCli();
-        if (cli is null)
-        {
-            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Den lokale motor mangler",
-                "Programmet, der kører en sprogmodel på maskinen, er ikke installeret.\n\n" +
-                "Du kan stadig lave opsummeringen i Europa.", Dialogs.Slags.Valg);
-            return;
-        }
-
-        // MODELVALGET LIGGER ET STED — I Sprogmodeller.Valgt().
-        //
-        // Det laa foer baade her og paa AI-modeller-skaermen, med hver sin
-        // kopi af reglen. To kopier af et valg driver fra hinanden, og saa
-        // viser skaermen een model, mens der koeres med en anden.
-        if (Sprogmodeller.Valgt() is not { } model)
-        {
-            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Sprogmodellen er ikke hentet",
-                "En opsummering på maskinen kræver en sprogmodel på " +
-                $"{Sprogmodeller.Standard.SizeText}, og den er ikke hentet endnu.\n\n" +
-                "Gå til «AI-modeller» og vælg fanen «Opsummering» — der står knappen.\n\n" +
-                "Skal teksten være et rigtigt referat, kan du i mellemtiden lave et " +
-                "dokument efter en skabelon.",
-                Dialogs.Slags.Valg);
-            return;
-        }
-
-        var tekst = tekstUdefra;
-
-        OpsumKnap.IsEnabled = false;
-
-        var navn = Path.GetFileNameWithoutExtension(model);
-        var ur = System.Diagnostics.Stopwatch.StartNew();
-
-        // FREMDRIFTEN SKAL KUNNE SES BEGGE STEDER.
-        //
-        // OpsumStatus ligger i den TOMME rudes panel, og det er skjult, saa
-        // snart der ER en opsummering. Ved en ny koersel stod der derfor
-        // ingenting i halvandet minut, og man kunne ikke vide, om appen
-        // arbejdede eller var gaaet i staa. Meld() skriver i linjen oeverst,
-        // som staar fremme uanset hvad.
-        void Sig(string s) { OpsumStatus.Text = s; Meld(s); }
-
-        var tikker = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
-        var laeser = _meta?.Type == MeetingType.Webinar ? "webinaret" : "mødet";
-
-        tikker.Tick += (_, _) =>
-            Sig($"{navn} læser {laeser} igennem … {ur.Elapsed.TotalSeconds:0} sek.");
-        tikker.Start();
-
-        Sig($"{navn} indlæses …");
-
-        try
-        {
-            // ET WEBINAR SPØRGES OM NOGET ANDET END ET MØDE.
-            //
-            // Både opskriften og den linje, der følger med udskriften. Stod der
-            // «Mødet hedder …» over et webinar, begyndte svaret med «Mødet
-            // handlede om …» — og så ledte den efter beslutninger, der ikke
-            // fandtes. Set på skærmen 21-08-2026.
-            var erWebinar = _meta?.Type == MeetingType.Webinar;
-            var slags = erWebinar ? "Webinaret" : "Mødet";
-            var titel = _meta?.Title ?? (erWebinar ? "webinaret" : "mødet");
-
-            var svar = await new LlmRunner(cli).RunAsync(
-                model,
-                Opsummering.LokalOpskrift(_meta?.Type ?? MeetingType.Online),
-                $"{slags} hedder «{titel}».\n\nTranskription:\n{tekst}");
-
-            var ren = svar.Text.Trim();
-
-            // ET AFKORTET SVAR MAA IKKE SE FAERDIGT UD.
-            //
-            // Modellen stopper midt i et ord, naar pladsen slipper op, og saa
-            // stod der «- Cloudworks har planer paa at st» i ruden - uden at
-            // noget sagde, at der manglede noget. Ender teksten ikke paa et
-            // skilletegn, siges det.
-            var afkortet = ren.Length > 0 && !".!?»\")".Contains(ren[^1]);
-
-            Opsummering.Gem(_mappe, new Opsummeringsdata
-            {
-                Tekst = afkortet
-                    ? ren + "\n\n[Svaret stoppede her — modellen løb tør for plads. " +
-                            "Prøv igen, eller lav den i Europa.]"
-                    : ren,
-                Model = navn + " (på maskinen)",
-                UdskriftSum = Kvitteringer.Kontrolsum(tekst)
-            });
-
-            VisOpsummering();
-            OpsumStatus.Text = "";
-
-            Meld(afkortet
-                ? $"Opsummeringen blev afkortet — {ur.Elapsed.TotalSeconds:0} sek."
-                : $"Opsummeringen er lavet på maskinen — {ur.Elapsed.TotalSeconds:0} sek.");
-        }
-        catch (Exception ex)
-        {
-            OpsumStatus.Text = "";
-
-            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Opsummeringen blev ikke lavet",
-                ex.Message, Dialogs.Slags.Pas_paa);
-        }
-        finally
-        {
-            tikker.Stop();
-            OpsumKnap.IsEnabled = true;
-        }
-    }
+    // HER LAA OpsummerLokalt - den korte opsummering paa maskinen.
+    //
+    // Den koerte llama.cpp gennem LlmRunner med en sprogmodel paa 2,33 GB.
+    // Fjernet 25-08-2026 sammen med motoren og modellen: 4 GB af det, en ny
+    // bruger skulle hente, for den halvdel der gav mindst. Den lokale
+    // DOKUMENT-vej var i forvejen fjernet 18-08 af en maalt grund.
+    //
+    // Graensen gaar nu ved transkriptionen. Se Llm.Opsummeringsvej.
 
     // HER LAA OpsumLav_Klik — opsummeringen lavet hos Mistral.
     //

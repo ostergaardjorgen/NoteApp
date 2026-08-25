@@ -3,44 +3,60 @@ namespace NoteApp.Core.Llm;
 /// <summary>Hvor den korte opsummering laves.</summary>
 public enum Opsummeringssted
 {
-    /// <summary>Hos leverandøren i Europa. Standard.</summary>
+    /// <summary>Hos leverandøren. Den eneste vej.</summary>
     Sky,
 
-    /// <summary>På maskinen, med en sprogmodel der er hentet ned.</summary>
-    Lokal,
-
-    /// <summary>Hverken det ene eller det andet er sat op.</summary>
+    /// <summary>Der er ingen nøgle sat op, og så kan den ikke laves.</summary>
     Ingen
 }
 
 /// <summary>
-/// Hvor den korte opsummering laves — og hvorfor det som standard er i skyen.
+/// Opsummeringen laves hos leverandøren. Der er ikke længere en lokal vej.
 ///
-/// HVAD DET HANDLER OM
+/// GRÆNSEN GÅR VED TRANSKRIPTIONEN
 ///
-/// Opsummeringen er ti linjer om, hvad mødet handlede om. Den kostede indtil
-/// 25-08-2026 **4 GB** at have med: llama-motoren på 1,68 GB og en sprogmodel
-/// på 2,33 GB, hentet ned ved opsætningen.
+/// Det er den linje, appen står på, og den skal siges lige ud: lyden optages
+/// og skrives ud her på maskinen, og den forlader aldrig maskinen. Alt
+/// DEREFTER — opsummering, opgaver, referater — sker hos leverandøren.
 ///
-/// Det er halvdelen af alt, en ny bruger skal hente, for at kunne bruge
-/// appen — og det er den halvdel, der giver mindst. Dokumenterne, som er det
-/// egentlige arbejde, laves i forvejen i skyen.
+/// Det er en indsnævring i forhold til før, og den er bevidst. Den skal stå
+/// samme sted i alle tekster, så ingen først opdager den, når de har taget
+/// appen i brug.
 ///
-/// HVORFOR DET IKKE ÆNDRER NOGET PÅ COMPLIANCE-SIDEN
+/// HVORFOR DEN LOKALE VEJ ER VÆK
 ///
-/// Det, der sendes, er transkriptionens tekst — præcis som når der laves et
-/// dokument. Lyden bliver, hvor den er. Afsendelsen bogføres af
-/// <see cref="SkyRunner"/> som alle andre, med tidspunkt, model, tegn, pris
-/// og kontrolsum.
+/// Den kostede **4 GB** at have med: llama-motoren på 1,68 GB og en
+/// sprogmodel på 2,33 GB, hentet ned ved opsætningen. Det er halvdelen af
+/// alt, en ny bruger skulle hente — og det var den halvdel, der gav mindst.
 ///
-/// Grænsen flytter sig ikke. Det er den samme slags tekst, der går samme vej,
-/// til den samme leverandør.
+/// Den lokale DOKUMENT-vej var i forvejen fjernet 18-08-2026 af en målt
+/// grund: på det samme møde tabte den 72 % af navnene og brugte 59 minutter,
+/// hvor skyen bruger 25 sekunder og taber 23 %. Se doc/maaling-sky.md.
+/// Tilbage stod en lokal opsummering, der var kort, fordi vægtene og
+/// udskriften ikke kunne være på grafikkortet samtidig — mens den i skyen kan
+/// bære de opgaver, den finder.
 ///
-/// DEN LOKALE FORSVINDER IKKE
+/// Fjernet 25-08-2026. Motoren og modellen slettes fra maskinen.
 ///
-/// Den, der vil have opsummeringen på maskinen, kan hente modellen og slå det
-/// til. Det er et **tilvalg** i stedet for en forudsætning — og for den, der
-/// arbejder med noget, der ikke må sendes, er det stadig svaret.
+/// HVAD DET KOSTER
+///
+/// To ting, og de skal stå i teksterne, ikke kun her:
+///
+///   1. Uden en nøgle kan appen kun transskribere. Før fik man en
+///      opsummering alligevel; det gør man ikke længere.
+///   2. Der er ingen opsummering uden net. I et tog eller et mødelokale uden
+///      forbindelse får man teksten og intet andet.
+///
+/// HVAD DER SENDES, ER UÆNDRET
+///
+/// Transkriptionens tekst — præcis som når der laves et dokument. Lyden
+/// bliver, hvor den er. Afsendelsen bogføres af <see cref="SkyRunner"/> som
+/// alle andre, med tidspunkt, model, tegn, pris og kontrolsum.
+///
+/// LlmRunner og Referatbygger ligger stadig i Core, men bruges kun fra
+/// kommandolinjen (noteapp referat). Det er dér, sammenligningen mellem
+/// lokalt og skyen skal kunne køres igen — en måling, man ikke kan gentage,
+/// er en påstand.
 /// </summary>
 public static class Opsummeringsvej
 {
@@ -54,42 +70,7 @@ public static class Opsummeringsvej
         }
     }
 
-    /// <summary>Er både motoren og en sprogmodel på plads?</summary>
-    public static bool LokalKlar
-    {
-        get
-        {
-            try { return LlmRunner.FindCli() is not null && Sprogmodeller.Valgt() is not null; }
-            catch (Exception) { return false; }
-        }
-    }
-
-    /// <summary>
-    /// Vejen, der bruges nu.
-    ///
-    /// ØNSKET GÅR FORUD, MEN KUN NÅR DET KAN LADE SIG GØRE. Har man valgt
-    /// den lokale og ikke hentet modellen, er svaret ikke «lokal» — det er
-    /// «sky», hvis der er en nøgle. Ellers «ingen», og så skal skærmen sige,
-    /// hvad der mangler.
-    /// </summary>
-    public static Opsummeringssted Valgt
-    {
-        get
-        {
-            var vilLokalt = AppSettings.Current.OpsummerLokalt;
-
-            if (vilLokalt && LokalKlar) return Opsummeringssted.Lokal;
-            if (SkyKlar) return Opsummeringssted.Sky;
-            if (LokalKlar) return Opsummeringssted.Lokal;
-
-            return Opsummeringssted.Ingen;
-        }
-    }
-
-    /// <summary>
-    /// Er den valgte vej en anden end den ønskede? Så skal skærmen sige det —
-    /// ellers ser det ud, som om indstillingen ikke virker.
-    /// </summary>
-    public static bool ValgtErIkkeDetOenskede =>
-        AppSettings.Current.OpsummerLokalt && !LokalKlar && SkyKlar;
+    /// <summary>Vejen, der bruges nu. Der er kun én — eller ingen.</summary>
+    public static Opsummeringssted Valgt =>
+        SkyKlar ? Opsummeringssted.Sky : Opsummeringssted.Ingen;
 }

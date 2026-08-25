@@ -39,21 +39,18 @@ public sealed class AppSettings
 
     public string? BackupDestination { get; set; }
 
-    /// <summary>
-    /// Lav den korte opsummering på maskinen frem for i skyen.
-    ///
-    /// Falsk som standard, og det er en beslutning om, hvad en ny bruger skal
-    /// hente ned. Den lokale vej koster 4 GB — llama-motoren og en
-    /// sprogmodel — og den er halvdelen af alt, der hentes ved opsætningen.
-    ///
-    /// Det, der sendes i skyen, er transkriptionens tekst; præcis den samme
-    /// slags, der i forvejen sendes, når der laves et dokument. Lyden bliver,
-    /// hvor den er.
-    ///
-    /// Slås den til uden at modellen er hentet, køres der i skyen alligevel —
-    /// og skærmen siger det. Se <see cref="Llm.Opsummeringsvej"/>.
-    /// </summary>
-    public bool OpsummerLokalt { get; set; }
+// HER LAA OpsummerLokalt.
+    //
+    // Den afgjorde, om den korte opsummering blev lavet paa maskinen eller
+    // hos leverandoeren. Der er kun een vej nu: den lokale er fjernet
+    // 25-08-2026 sammen med motoren og sprogmodellen - 4 GB af det, en ny
+    // bruger skulle hente.
+    //
+    // Feltet fjernes helt frem for at blive staaende ubrugt. En indstilling,
+    // der ikke goer noget, er en, nogen finder og tror paa. Gamle
+    // indstillingsfiler med noeglen i laeses uden problemer; ukendte felter
+    // springes over.
+
 
     /// <summary>
     /// Skriv mødet ud af sig selv, så snart optagelsen er gemt.

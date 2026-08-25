@@ -135,7 +135,6 @@ public partial class EngineView : System.Windows.Controls.UserControl
         Status.Text = "";
         VisSkyStatus();
         VisTalergenkendelse();
-        VisLokalModel();
     }
 
     // ------------------------------------------------- talergenkendelsen
@@ -187,161 +186,13 @@ public partial class EngineView : System.Windows.Controls.UserControl
 
     // ------------------------------------------------ den lokale opsummering
 
-    /// <summary>
-    /// Sprogmodellen, der laver den korte opsummering på maskinen.
-    ///
-    /// Der vises den, appen VILLE vælge — ikke en liste at vælge imellem.
-    /// Valget følger målingen: Qwen3-4B foran, ellers den mindste. Se
-    /// UdskriftView.OpsumLokal_Klik for hvorfor størrelse ikke er kriteriet.
-    /// </summary>
-    private void VisLokalModel()
-    {
-        var cli = NoteApp.Core.Llm.LlmRunner.FindCli();
-        var standard = Sprogmodeller.Standard;
-        var valgt = Sprogmodeller.Valgt();
+    // HER LAA VisLokalModel og LokalModel_Klik - fanen for den lokale
+    // opsummering.
+    //
+    // Fjernet 25-08-2026 sammen med motoren og modellen. Se
+    // Core/Llm/Opsummeringsvej: graensen gaar nu ved transkriptionen, og alt
+    // derefter sker hos leverandoeren.
 
-        LokalKnap.Content = Sprogmodeller.ErHentet(standard)
-            ? "Hent modellen igen"
-            : $"Hent {standard.SizeText}";
-
-        if (valgt is null)
-        {
-            LokalModel.Text = $"{standard.Navn} — ikke hentet";
-            LokalStoerrelse.Text = standard.SizeText;
-
-            LokalStatus.Text = cli is null
-                ? "Programmet, der kører en sprogmodel på maskinen, er ikke installeret. Modellen kan hentes alligevel."
-                : "Modellen er ikke hentet endnu. Uden den kan opsummeringen ikke laves på maskinen.";
-
-            LokalSti.Text = $"Hentes til {NoteApp.Core.Llm.LlmRunner.ModelDirectory}";
-            return;
-        }
-
-        LokalModel.Text = Path.GetFileNameWithoutExtension(valgt);
-        LokalStoerrelse.Text = $"{new FileInfo(valgt).Length / 1024.0 / 1024.0:0} MB";
-
-        LokalStatus.Text = cli is null
-            ? "Modellen ligger der, men motoren mangler — opsummeringen kan ikke køre endnu."
-            : "Klar. Knappen står under «Opsummering» ved en optagelse.";
-
-        LokalSti.Text = cli is null ? valgt : $"{valgt}\nMotor: {cli}";
-    }
-
-    /// <summary>
-    /// Henter sprogmodellen til den lokale opsummering.
-    ///
-    /// DEN FØLGER IKKE MED APPEN, OG DET ER MED VILJE.
-    ///
-    /// Talergenkendelsens filer fylder 61 MB og ligger i installationspakken.
-    /// Den her fylder 2,3 GB. Pakket med ville installationsfilen gå fra 104 MB
-    /// til 2,5 GB, og så bliver den ikke sendt til nogen.
-    ///
-    /// Der spørges først, og der står hvad, hvorfra og hvor meget — samme krav
-    /// som ved whisper-modellen. Det er den eneste anden gang, appen rører
-    /// netværket uden at brugeren har bedt om et dokument.
-    /// </summary>
-    private async void LokalModel_Klik(object sender, RoutedEventArgs e)
-    {
-        var m = Sprogmodeller.Standard;
-        var har = Sprogmodeller.ErHentet(m);
-
-        var ja = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
-            har ? $"Hent {m.Navn} igen?" : $"Hent {m.Navn}?",
-            $"Fil: {m.Filnavn}\n" +
-            $"Størrelse: {m.SizeText}\n" +
-            $"Licens: {m.Licens}\n" +
-            "Hentes fra: huggingface.co\n" +
-            $"Gemmes i: {NoteApp.Core.Llm.LlmRunner.ModelDirectory}\n\n" +
-            (har
-                ? "Du har den allerede. Det giver præcis den samme fil og gør ikke " +
-                  "opsummeringen bedre — det er kun værd at gøre, hvis filen er blevet beskadiget."
-                : $"{m.Opgave}\n\n{m.Hvorfor}") +
-            "\n\nDer sendes intet fra din maskine. Appen beder om en navngiven fil og " +
-            "modtager den; ingen optagelser, transkriptioner eller noter forlader pc'en.",
-            godkend: har ? $"Hent {m.SizeText} igen" : $"Hent {m.SizeText}",
-            annuller: "Ikke nu",
-            slags: Dialogs.Slags.Valg,
-            godkendErStandard: !har);
-
-        if (!ja) return;
-
-        _afbryd = new CancellationTokenSource();
-        Fremdrift.Visibility = Visibility.Visible;
-        AfbrydKnap.Visibility = Visibility.Visible;
-        LokalKnap.IsEnabled = false;
-
-        var fremdrift = new Progress<DownloadProgress>(p =>
-        {
-            Fremdrift.Value = p.Percent;
-
-            var mb = p.BytesDone / 1024.0 / 1024.0;
-            var ialt = p.BytesTotal / 1024.0 / 1024.0;
-            var fart = p.BytesPerSecond / 1024.0 / 1024.0;
-            var tilbage = p.Remaining is null ? "" : $" · {p.Remaining.Value:mm\\:ss} tilbage";
-
-            Status.Text = $"Henter {m.Navn}: {mb:0} af {ialt:0} MB · {fart:0.0} MB/s{tilbage}";
-        });
-
-        var sti = Sprogmodeller.Sti(m);
-
-        // ============ EN REPARATION SKAL FAKTISK HENTE IGEN ============
-        //
-        // Downloader springer over, naar filen findes og har den forventede
-        // stoerrelse — hvilket er rigtigt ved en almindelig hentning og forkert
-        // her: en beskadiget fil kan sagtens fylde det rigtige. Uden det her
-        // ville "Hent igen" melde faerdig uden at have gjort noget.
-        //
-        // DEN GAMLE FIL SLETTES IKKE, DEN LAEGGES TIL SIDE.
-        //
-        // Slettede vi den og hentningen faldt paa halvvejen, ville en fungerende
-        // model paa 2,3 GB vaere vaek — og saa har reparationen oedelagt det, den
-        // skulle redde. Den bliver liggende, indtil den nye er hentet faerdig.
-        var reserve = sti + ".gammel";
-
-        try
-        {
-            Directory.CreateDirectory(NoteApp.Core.Llm.LlmRunner.ModelDirectory);
-
-            if (har && File.Exists(sti))
-            {
-                if (File.Exists(reserve)) File.Delete(reserve);
-                File.Move(sti, reserve);
-            }
-
-            await _downloader.DownloadAsync(m.Url, sti, m.Bytes, fremdrift, _afbryd.Token);
-
-            if (File.Exists(reserve)) File.Delete(reserve);
-
-            Status.Text = $"{m.Navn} er hentet. Opsummeringen kan nu laves på maskinen.";
-        }
-        catch (OperationCanceledException)
-        {
-            GendanReserve(sti, reserve);
-            Status.Text = "Afbrudt. Den model, du havde, er urørt.";
-        }
-        catch (Exception ex)
-        {
-            GendanReserve(sti, reserve);
-            Status.Text = $"Kunne ikke hente: {ex.Message}";
-
-            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Kunne ikke hente",
-                $"Hentningen fejlede.\n\n{ex.Message}\n\n" +
-                (File.Exists(sti)
-                    ? "Den model, du havde i forvejen, er lagt tilbage og virker som før.\n\n"
-                    : "") +
-                "Er der ingen internetforbindelse, kan du lægge filen manuelt i:\n" +
-                NoteApp.Core.Llm.LlmRunner.ModelDirectory, Dialogs.Slags.Pas_paa);
-        }
-        finally
-        {
-            Fremdrift.Visibility = Visibility.Collapsed;
-            AfbrydKnap.Visibility = Visibility.Collapsed;
-            LokalKnap.IsEnabled = true;
-            _afbryd?.Dispose();
-            _afbryd = null;
-            Opdater();
-        }
-    }
 
     // ---------------------------------------------------------------- Europa
 
