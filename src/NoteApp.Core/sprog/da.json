@@ -757,5 +757,19 @@
     "ettraef": "1 træf",
     "traef": "{0} træf",
     "intet": "Der er ikke noget om «{0}» i hjælpen. Prøv et enkelt ord — eller ryd søgningen og se afsnittene igennem."
+  },
+  "opsum": {
+    "knap": "Lav en kort opsummering",
+    "ieuropa": "I EUROPA",
+    "ieuropatekst": "Nogle få sekunder. Transkriptionens tekst sendes til sprogmodellen i Europa — den samme vej som et dokument. Lyden bliver her. Kort, og den finder ikke på noget.",
+    "ieuropamodel": "Du har valgt at lave den på maskinen, men sprogmodellen er ikke hentet. Den laves derfor i Europa. Hent modellen under «AI-modeller», hvis den skal blive her.",
+    "paamaskinen": "PÅ MASKINEN",
+    "paamaskinentekst": "Cirka et halvt minut. Intet forlader maskinen. Kort — nogle få linjer og højst fire punkter.",
+    "ingenvej": "Ikke sat op endnu",
+    "ingenvejtekst": "En kort opsummering kræver enten en nøgle til sprogmodellen i Europa eller en model hentet ned. Gå til «AI-modeller» — det tager få minutter.",
+    "forkort": "Der er ikke nok tekst",
+    "forkorttekst": "Transkriptionen er for kort til, at en opsummering siger mere end teksten selv.",
+    "faerdigsky": "Opsummeringen er lavet af {0} — {1} sek.",
+    "gikgalt": "Opsummeringen kunne ikke laves"
   }
 }

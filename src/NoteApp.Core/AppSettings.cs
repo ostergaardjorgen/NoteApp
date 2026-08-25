@@ -40,6 +40,22 @@ public sealed class AppSettings
     public string? BackupDestination { get; set; }
 
     /// <summary>
+    /// Lav den korte opsummering på maskinen frem for i skyen.
+    ///
+    /// Falsk som standard, og det er en beslutning om, hvad en ny bruger skal
+    /// hente ned. Den lokale vej koster 4 GB — llama-motoren og en
+    /// sprogmodel — og den er halvdelen af alt, der hentes ved opsætningen.
+    ///
+    /// Det, der sendes i skyen, er transkriptionens tekst; præcis den samme
+    /// slags, der i forvejen sendes, når der laves et dokument. Lyden bliver,
+    /// hvor den er.
+    ///
+    /// Slås den til uden at modellen er hentet, køres der i skyen alligevel —
+    /// og skærmen siger det. Se <see cref="Llm.Opsummeringsvej"/>.
+    /// </summary>
+    public bool OpsummerLokalt { get; set; }
+
+    /// <summary>
     /// Lyd med i sikkerhedskopien. Falsk som standard: lyden er tusind gange
     /// større end alt det andet tilsammen, og den er også det, der er lettest
     /// at undvære — transskriptionen og de indlærte rettelser er arbejdet.

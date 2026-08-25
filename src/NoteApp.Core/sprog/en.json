@@ -757,5 +757,19 @@
     "ettraef": "1 match",
     "traef": "{0} matches",
     "intet": "There is nothing about «{0}» in the help. Try a single word — or clear the search and look through the sections."
+  },
+  "opsum": {
+    "knap": "Make a short summary",
+    "ieuropa": "IN EUROPE",
+    "ieuropatekst": "A few seconds. The transcript's text is sent to the language model in Europe — the same route as a document. The audio stays here. Short, and it does not make things up.",
+    "ieuropamodel": "You have chosen to make it on the machine, but the language model has not been downloaded. It is therefore made in Europe. Download the model under «AI models» if it is to stay here.",
+    "paamaskinen": "ON THIS MACHINE",
+    "paamaskinentekst": "About half a minute. Nothing leaves the machine. Short — a few lines and at most four points.",
+    "ingenvej": "Not set up yet",
+    "ingenvejtekst": "A short summary needs either a key for the language model in Europe or a model downloaded. Go to «AI models» — it takes a few minutes.",
+    "forkort": "There is not enough text",
+    "forkorttekst": "The transcript is too short for a summary to say more than the text itself.",
+    "faerdigsky": "The summary was made by {0} — {1} sec.",
+    "gikgalt": "The summary could not be made"
   }
 }

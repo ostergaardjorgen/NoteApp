@@ -362,6 +362,8 @@ public partial class UdskriftView : UserControl
 
         IngenUdskrift.Visibility = Visibility.Collapsed;
         Faner.Visibility = Visibility.Visible;
+
+        VisOpsummeringsvej();
         _kigEfter.Stop();
 
         Hoved.Visibility = Visibility.Visible;
@@ -1552,7 +1554,139 @@ public partial class UdskriftView : UserControl
     /// Den blev afbrudt efter elleve minutter. Den mindre model er ikke et
     /// kompromis — den er den, der virker.
     /// </summary>
-    private async void OpsumLokal_Klik(object sender, RoutedEventArgs e)
+    /// <summary>
+    /// Skriver, hvor opsummeringen bliver lavet.
+    ///
+    /// Den skal stå, FØR man trykker. En skærm, der handler om, hvor data
+    /// går hen, må ikke sige «på maskinen», når svaret laves i Europa.
+    /// </summary>
+    private void VisOpsummeringsvej()
+    {
+        switch (Opsummeringsvej.Valgt)
+        {
+            case Opsummeringssted.Sky:
+                OpsumHvor.Text = Sprog.T("opsum.ieuropa");
+                OpsumLokalTekst.Text = Opsummeringsvej.ValgtErIkkeDetOenskede
+                    ? Sprog.T("opsum.ieuropamodel")
+                    : Sprog.T("opsum.ieuropatekst");
+                break;
+
+            case Opsummeringssted.Lokal:
+                OpsumHvor.Text = Sprog.T("opsum.paamaskinen");
+                OpsumLokalTekst.Text = Sprog.T("opsum.paamaskinentekst");
+                break;
+
+            default:
+                OpsumHvor.Text = Sprog.T("opsum.ingenvej");
+                OpsumLokalTekst.Text = Sprog.T("opsum.ingenvejtekst");
+                break;
+        }
+    }
+
+    /// <summary>
+    /// Laver den korte opsummering — i skyen eller på maskinen.
+    ///
+    /// VEJEN VÆLGES ÉT STED, i Opsummeringsvej. Knappen spørger ikke; den
+    /// gør det, indstillingen siger, og skærmen har allerede skrevet hvilket.
+    /// To knapper til det samme svar ville være et valg, brugeren skulle
+    /// træffe hver gang — og det er ikke et valg, man kan træffe på et møde.
+    /// </summary>
+    private async void Opsum_Klik(object sender, RoutedEventArgs e)
+    {
+        if (_mappe is null || _udskrift is null) return;
+
+        var tekst = _udskrift.SomTekst(_meta?.Talere);
+
+        if (tekst.Trim().Length < 200)
+        {
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), Sprog.T("opsum.forkort"),
+                Sprog.T("opsum.forkorttekst"), Dialogs.Slags.Valg);
+            return;
+        }
+
+        switch (Opsummeringsvej.Valgt)
+        {
+            case Opsummeringssted.Sky:
+                await OpsummerISkyen(tekst);
+                return;
+
+            case Opsummeringssted.Lokal:
+                OpsummerLokalt(tekst);
+                return;
+
+            default:
+                Dialogs.AppDialog.Vis(Window.GetWindow(this), Sprog.T("opsum.ingenvej"),
+                    Sprog.T("opsum.ingenvejtekst"), Dialogs.Slags.Valg);
+                return;
+        }
+    }
+
+    /// <summary>
+    /// Opsummeringen hos leverandøren i Europa.
+    ///
+    /// DET ER DEN SAMME SLAGS TEKST, DER I FORVEJEN SENDES. Et dokument
+    /// sender hele transkriptionen til den samme model på det samme
+    /// endepunkt. Afsendelsen bogføres af SkyRunner som alle andre — med
+    /// tidspunkt, model, tegn, pris og kontrolsum.
+    /// </summary>
+    private async Task OpsummerISkyen(string tekst)
+    {
+        if (_mappe is null) return;
+        if (SkyNoegle.Hent() is not { } noegle) return;
+
+        OpsumKnap.IsEnabled = false;
+
+        var ur = System.Diagnostics.Stopwatch.StartNew();
+        var model = SkyKatalog.Standard;
+
+        void Sig(string s) { OpsumStatus.Text = s; Meld(s); }
+
+        try
+        {
+            var erWebinar = _meta?.Type == MeetingType.Webinar;
+            var slags = erWebinar ? "Webinaret" : "Mødet";
+            var titel = _meta?.Title ?? (erWebinar ? "webinaret" : "mødet");
+
+            var fremdrift = new Progress<LlmProgress>(
+                p => Sig($"{p.Message} · {ur.Elapsed.TotalSeconds:0} sek."));
+
+            var svar = await new SkyRunner(noegle).KoerAsync(
+                model,
+                Opsummering.Opskrift(),
+                $"{slags} hedder «{titel}».\n\nTranskription:\n{tekst}",
+                fremdrift,
+                kilde: _meta?.Id.ToString() ?? "",
+                kildeTitel: titel);
+
+            Opsummering.Gem(_mappe, new Opsummeringsdata
+            {
+                Tekst = svar.Tekst.Trim(),
+                Model = $"{model.Navn} ({model.Hjemland})",
+                UdskriftSum = Kvitteringer.Kontrolsum(tekst)
+            });
+
+            VisOpsummering();
+            OpsumStatus.Text = "";
+
+            Meld(Sprog.T("opsum.faerdigsky", model.Navn, ur.Elapsed.TotalSeconds.ToString("0")));
+        }
+        catch (Exception ex)
+        {
+            OpsumStatus.Text = "";
+            Meld("");
+
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), Sprog.T("opsum.gikgalt"),
+                ex.Message, Dialogs.Slags.Pas_paa);
+        }
+        finally
+        {
+            OpsumKnap.IsEnabled = true;
+        }
+    }
+
+    private void OpsummerLokalt(string tekst) => _ = OpsumLokal_Klik(tekst);
+
+    private async Task OpsumLokal_Klik(string tekstUdefra)
     {
         if (_mappe is null || _udskrift is null) return;
 
@@ -1582,17 +1716,9 @@ public partial class UdskriftView : UserControl
             return;
         }
 
-        var tekst = _udskrift.SomTekst(_meta?.Talere);
+        var tekst = tekstUdefra;
 
-        if (tekst.Trim().Length < 200)
-        {
-            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Der er ikke nok tekst",
-                "Transkriptionen er for kort til, at en opsummering siger mere end teksten selv.",
-                Dialogs.Slags.Valg);
-            return;
-        }
-
-        OpsumLokalKnap.IsEnabled = false;
+        OpsumKnap.IsEnabled = false;
 
         var navn = Path.GetFileNameWithoutExtension(model);
         var ur = System.Diagnostics.Stopwatch.StartNew();
@@ -1669,7 +1795,7 @@ public partial class UdskriftView : UserControl
         finally
         {
             tikker.Stop();
-            OpsumLokalKnap.IsEnabled = true;
+            OpsumKnap.IsEnabled = true;
         }
     }
 

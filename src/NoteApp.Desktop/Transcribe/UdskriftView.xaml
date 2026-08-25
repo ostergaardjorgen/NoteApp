@@ -391,7 +391,7 @@
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                   <Button Content="{i18n:Oversat udskriftview.kopier_2}" Click="OpsumKopier_Klik" Padding="12,6"
                           FontSize="12" Margin="0,0,8,0" />
-                  <Button Content="{i18n:Oversat udskriftview.lav_den_om}" Click="OpsumLokal_Klik" Padding="12,6"
+                  <Button Content="{i18n:Oversat udskriftview.lav_den_om}" Click="Opsum_Klik" Padding="12,6"
                           FontSize="12" />
                 </StackPanel>
               </Grid>
@@ -471,13 +471,17 @@
               <Border Grid.Column="0" Background="#FF181B22" CornerRadius="9" Padding="14,12"
                       Margin="0,0,7,0" BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
                 <StackPanel>
-                  <TextBlock Text="{i18n:Oversat udskriftview.paa_maskinen}" FontSize="9.5" FontWeight="SemiBold"
+                  <!-- MAERKATET SIGER, HVOR DEN LAVES.
+                       Det stod fast paa «PAA MASKINEN». Nu laves den i
+                       Europa som standard, og saa skal maerkatet foelge med -
+                       ellers staar der noget forkert paa en skaerm, der
+                       handler om, hvor data gaar hen. -->
+                  <TextBlock x:Name="OpsumHvor" FontSize="9.5" FontWeight="SemiBold"
                              Foreground="{StaticResource Accent}" />
                   <TextBlock x:Name="OpsumLokalTekst" FontSize="12" LineHeight="18" TextWrapping="Wrap"
-                             Margin="0,6,0,0" Foreground="{StaticResource TekstSvag}"
-                             Text="{i18n:Oversat udskriftview.cirka_et_halvt_minut_intet_forlader_maskin}" />
-                  <Button x:Name="OpsumLokalKnap" Content="{i18n:Oversat udskriftview.kort_lokal_opsummering}"
-                          Click="OpsumLokal_Klik" Margin="0,12,0,0" Padding="14,8"
+                             Margin="0,6,0,0" Foreground="{StaticResource TekstSvag}" />
+                  <Button x:Name="OpsumKnap" Content="{i18n:Oversat opsum.knap}"
+                          Click="Opsum_Klik" Margin="0,12,0,0" Padding="14,8"
                           Style="{StaticResource Primaer}" />
                 </StackPanel>
               </Border>
