@@ -72,6 +72,21 @@ public static class WhisperInstall
     /// <summary>Motor og model lander i datamappen — de er brugerens, ikke kodens.</summary>
     public static string Root => Path.Combine(UserDataPaths.Root, "motor");
 
+    /// <summary>
+    /// DET ENESTE STED, MODELLER LIGGER: {datamappe}\motor\modeller.
+    ///
+    /// Der var to steder. Ud over det her ledte koden ogsaa i
+    /// C:\NoteApp\models — en haardkodet sti ind i KODELAGERET. Den var
+    /// bekvem paa udviklingsmaskinen og forkert alle andre steder: paa en
+    /// kundes maskine findes mappen ikke, saa den lagde et opslag ind, der
+    /// aldrig kunne give noget.
+    ///
+    /// Vaerre var, at den virkede. Modellerne endte spredt — large-v3 og
+    /// medium i kodelageret, small i datamappen — og saa kan man ikke svare
+    /// paa, hvad maskinen har, uden at lede to steder og huske begge.
+    /// Filerne er op til 2,9 GB stykket; de hoerer i datamappen, som ligger
+    /// uden for git, og ingen andre steder. Samlet 25-08-2026.
+    /// </summary>
     public static string ModelDirectory => Path.Combine(Root, "modeller");
 
     public static string EngineDirectory => Path.Combine(Root, "whisper");
@@ -271,12 +286,9 @@ public static class WhisperInstall
 
     private static string? FindModel(string? preferredId)
     {
-        var mapper = new[]
-        {
-            ModelDirectory,
-            Path.Combine("C:", "NoteApp", "models"),
-            Path.Combine(AppContext.BaseDirectory, "models")
-        };
+        // ÉT STED. Se ModelDirectory for, hvorfor der ikke længere ledes
+        // ved siden af exe'en eller i kodelageret.
+        var mapper = new[] { ModelDirectory };
 
         // Er der ønsket en bestemt model, gælder kun den. Ellers tages den
         // bedste, der findes — rækkefølgen i Models er kvalitetsrækkefølgen.
@@ -300,8 +312,7 @@ public static class WhisperInstall
         foreach (var m in Models)
         {
             var sti = Path.Combine(ModelDirectory, m.FileName);
-            var iRepo = Path.Combine("C:", "NoteApp", "models", m.FileName);
-            if (File.Exists(sti) || File.Exists(iRepo)) yield return m;
+            if (File.Exists(sti)) yield return m;
         }
     }
 

@@ -314,7 +314,10 @@ $snavset = $false
 try { $snavset = [bool](git -C $Rod status --porcelain 2>$null) } catch { }
 
 Write-Host ""
-Write-Host ("PRODUKTION: v{0} · bygget {1:dd-MM HH:mm}" -f $fuld, $fil.LastWriteTime) -ForegroundColor Cyan
+# Meldes som appen SKRIVER det - med to cifre i tredje led. Rapporteres
+# der v1.1.7 her og v1.1.07 paa skaermen, ser det ud som to udgivelser.
+$vist = if ($fuld -match '^(\d+)\.(\d+)\.(\d+)$') { "{0}.{1}.{2:00}" -f $Matches[1], $Matches[2], [int]$Matches[3] } else { $fuld }
+Write-Host ("PRODUKTION: v{0} · bygget {1:dd-MM HH:mm}" -f $vist, $fil.LastWriteTime) -ForegroundColor Cyan
 
 if ($snavset) {
     Write-Host ("  Bemaerk: der er uommitede aendringer. Versionsnummeret staar stille," +
