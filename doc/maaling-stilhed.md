@@ -104,12 +104,19 @@ standard 0,50). Utydelig tale er præcis det, den grænse afviser. Prøvet:
 
 | Tærskel | Tid | Opdigtninger | Det omstridte sted |
 |---|---|---|---|
-| 0,50 | 1:57 | 0 | uden «ikke» |
+| **0,50** | **1:57** | **0** | uden «ikke» |
 | 0,30 | 2:02 | 0 | uden «ikke» |
+| 0,15 | **12:09** | 0 | uden «ikke» |
+| *ingen VAD* | *7:27* | *2* | *«ikke», men forkert mening* |
 
-Tærsklen flytter den ikke. Ordet er for utydeligt til, at VAD hører det som
-tale, uanset hvor lavt der skrues — og det stemmer med, hvad taleren selv
-siger om optagelsen.
+Tærsklen flytter det ikke. Over et spænd på mere end tre gange giver alle tre
+den samme læsning: ordet er for utydeligt til, at VAD hører det som tale. Det
+stemmer med, hvad taleren selv siger om optagelsen.
 
-**Indstillingen bliver på 0,50.** En lavere tærskel køber ingenting og lukker
-mere stilhed ind i modellen, hvilket er dét, hele rettelsen handler om.
+Og 0,15 viser, hvorfor man ikke bare skruer ned: **12:09 er langsommere end
+slet ikke at bruge stilhedsdetektion** (7:27). En lav tærskel lukker ikke bare
+stilheden ind igen — den lader VAD hakke den op i mange små stykker først, og
+så betaler man for begge dele.
+
+**Indstillingen bliver på 0,50.** En lavere tærskel køber ingenting og koster
+alt.
