@@ -113,26 +113,80 @@ public static class Samtale
         a.FraMs < b.TilMs + 1000 && b.FraMs < a.TilMs + 1000;
 
     /// <summary>
-    /// Deler de to sætninger hovedparten af deres ord?
-    ///
-    /// Der måles på, hvor stor en del af den KORTESTE der går igen i den
-    /// anden. Det svage spor taber typisk ord i begge ender, så en ren
-    /// sammenligning af mængderne ville lade for mange slippe igennem.
+    /// Er de to sætninger den SAMME ytring, hørt på begge spor?
     /// </summary>
+    /// <remarks>
+    /// DEN SLETTEDE BRUGERENS EGNE UDTALELSER. Målt 25-08-2026 på et rigtigt
+    /// møde:
+    ///
+    ///   mikrofonen: «Men jeg tror, at du kan være helt sikker på, at hvis du
+    ///                får de der succesoplevelser i det marked …»  (20 ord)
+    ///   højttaleren: «Det håber jeg selvfølgelig på, at der så»     (8 ord)
+    ///
+    /// Den lange blev slettet som et ekko af den korte. Bagefter fandtes
+    /// tanken kun i modpartens spor — og referatet lagde den i hans mund.
+    ///
+    /// HVORFOR: der blev målt på andelen af den KORTESTE. En kort replik af
+    /// almindelige danske funktionsord — «altså det var jo» — deler næsten
+    /// altid 60 % af sine ord med en hvilken som helst længere sætning. «det»,
+    /// «var» og «jo» findes overalt. Så kunne fire ord slette tyve.
+    ///
+    /// TO KRAV MERE, OG DE FØLGER BEGGE AF, HVAD ET EKKO ER
+    ///
+    /// Et ekko er den samme ytring hørt to gange. Derfor:
+    ///
+    ///   1. De skal være nogenlunde lige lange. Er den ene mere end dobbelt
+    ///      så lang som den anden, er det ikke det samme, der blev sagt —
+    ///      uanset hvor mange ord de deler.
+    ///   2. De skal dele mindst to INDHOLDSORD. Funktionsord alene beviser
+    ///      ingenting; det er navneordene og udsagnsordene, der siger, at det
+    ///      var den samme sætning.
+    ///
+    /// Grænsen på 60 % står. Det svage spor taber typisk ord i begge ender,
+    /// og en ren sammenligning af mængderne ville lade for mange slippe
+    /// igennem.
+    /// </remarks>
     private static bool Ligner(string a, string b)
     {
         var oa = Ord(a);
         var ob = Ord(b);
         if (oa.Count == 0 || ob.Count == 0) return false;
 
+        var kort = Math.Min(oa.Count, ob.Count);
+        var lang = Math.Max(oa.Count, ob.Count);
+
         // Meget korte udbrud — «ja», «mmh» — kan ikke afgøres på ordene. De
         // faar lov at blive: en dublet af et «ja» koster ingenting, mens et
         // tabt «ja» fra den forkerte side kan vende meningen af et referat.
-        if (Math.Min(oa.Count, ob.Count) < 4) return false;
+        if (kort < 4) return false;
+
+        // ET EKKO ER LIGE SAA LANGT SOM DET, DET ER ET EKKO AF.
+        if (lang > kort * 2) return false;
 
         var faelles = oa.Count(o => ob.Contains(o));
-        return faelles / (double)Math.Min(oa.Count, ob.Count) >= 0.6;
+        if (faelles / (double)kort < 0.6) return false;
+
+        // FUNKTIONSORD ALENE BEVISER INGENTING.
+        var indhold = oa.Count(o => ob.Contains(o) && !Fyldord.Contains(o));
+        return indhold >= 2;
     }
+
+    /// <summary>
+    /// De ord, der findes i enhver dansk sætning, og derfor intet siger om,
+    /// hvorvidt to sætninger er den samme.
+    ///
+    /// Listen er kort med vilje. Den skal fange dét, der matcher ved et
+    /// tilfælde — ikke bygge en ordklasseanalyse.
+    /// </summary>
+    private static readonly HashSet<string> Fyldord = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "og", "i", "at", "det", "en", "den", "til", "er", "som", "på", "de",
+        "med", "af", "for", "der", "til", "har", "vi", "du", "jeg", "man",
+        "ikke", "men", "så", "et", "om", "var", "jo", "ja", "nej", "kan",
+        "vil", "skal", "han", "hun", "de", "her", "nu", "også", "eller",
+        "hvad", "hvor", "når", "fra", "være", "have", "blive", "altså",
+        "lige", "godt", "meget", "helt", "bare", "noget", "nogen", "sådan"
+    };
 
     private static HashSet<string> Ord(string s) =>
         new(s.ToLowerInvariant()
