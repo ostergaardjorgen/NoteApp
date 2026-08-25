@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- ============================ PRØVERNE ============================
+
+       De findes, fordi der er regler i appen, som INGEN opdager er brudt,
+       før skaden er sket. Oprydningen af lydfiler er den tydeligste: sletter
+       den én gang for meget, er en optagelse væk for altid, og det opdages
+       måneder senere.
+
+       Der prøves KUN på NoteApp.Core. Skærmene er WPF og kræver en
+       vinduestråd; det, der er værd at spænde fast, er i forvejen flyttet
+       ned i kernen, netop fordi det skulle kunne prøves.
+
+       DER RØRES ALDRIG RIGTIGE DATA. Hver prøve peger NOTEAPP_DATA på sin
+       egen mappe under Temp og rydder op efter sig. Se Prøvemappe. -->
+
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+    <RootNamespace>NoteApp.Tests</RootNamespace>
+
+    <!-- Prøverne skriver i miljøvariabler, og de må derfor ikke køre
+         samtidig. xUnit kører klasser parallelt som standard; det slås fra
+         i AssemblyInfo.cs. -->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\NoteApp.Core\NoteApp.Core.csproj" />
+  </ItemGroup>
+
+</Project>
