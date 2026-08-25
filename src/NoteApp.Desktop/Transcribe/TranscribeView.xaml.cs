@@ -234,7 +234,7 @@ public partial class TranscribeView : UserControl
         // Spoerg foerst, naar vinduet er tegnet. En dialog fra en konstruktoer
         // aabner over en halvfaerdig skaerm, og saa kan man ikke se, hvad man
         // siger ja til.
-        if (spoerg) Loaded += (_, _) => SpoergOmStart(match);
+        if (spoerg) Loaded += (_, _) => StartAutomatisk(match);
 
         // SPRINGET SKER FOERST, NAAR TEKSTEN ER TEGNET.
         //
@@ -259,6 +259,42 @@ public partial class TranscribeView : UserControl
     }
 
     private bool _harSpurgt;
+
+    /// <summary>
+    /// Sætter udskriften i gang af sig selv, når mødet er gemt.
+    ///
+    /// DER SPØRGES IKKE OM, OM DEN SKAL LAVES. En optagelse uden tekst kan
+    /// hverken søges, laves til et dokument eller bruges til noget —
+    /// skridtet fra lyd til tekst er dét, man kom for. Før stod der et
+    /// spørgsmål her, og et spørgsmål lige efter et møde bliver besvaret med
+    /// nej, fordi nej lyder uforpligtende.
+    ///
+    /// DER SPØRGES OM SPROGET, HVIS DET IKKE ER KENDT — og kun første gang.
+    /// Et gæt er dyrere end et spørgsmål: en udskrift på det forkerte sprog
+    /// ligner en færdig tekst, og fejlen opdages først i referatet. Svaret
+    /// huskes i indstillingerne, så det er sidste gang.
+    /// </summary>
+    private void StartAutomatisk(OptagelseVisning optagelse)
+    {
+        if (_harSpurgt) return;
+        _harSpurgt = true;
+
+        if (!optagelse.HarLyd) return;
+
+        // Optagelsen skal vaere markeret, saa man kan se HVILKET moede der er
+        // i gang - ogsaa naar udskriften koerer i baggrunden.
+        VaelgOptagelse(optagelse.Mappe);
+
+        var minutter = optagelse.Sekunder / 60.0;
+        var fra = Math.Max(1, Math.Round(minutter * 0.3));
+        var til = Math.Max(2, Math.Round(minutter * 0.5));
+
+        Status.Text = Sprog.T("udskrift.gaaridang", optagelse.Titel, fra.ToString("0"), til.ToString("0"));
+
+        // Selve koerslen er den samme som knappens. Den spoerger om sproget,
+        // hvis det ikke er kendt - se Udskriftsvalg.
+        _ = Koer(optagelse);
+    }
 
     private void SpoergOmStart(OptagelseVisning optagelse)
     {
@@ -1292,6 +1328,23 @@ public partial class TranscribeView : UserControl
     {
         if (Valgt is not { } valgt) return;
 
+        // KNAPPEN SPOERGER ALTID OM SPROGET.
+        //
+        // Trykker man selv paa den, er det tit netop fordi sproget var
+        // forkert - og saa ville et huskeet svar give den samme fejl igen.
+        // Den automatiske start spoerger derimod kun, naar svaret er ukendt.
+        await Koer(valgt, spoergOmSprog: true);
+    }
+
+    /// <summary>
+    /// Skriver optagelsen ud. Kaldes af knappen og af den automatiske start.
+    ///
+    /// Den var før en klik-handler alene, og så kunne den kun sættes i gang
+    /// af et menneske. Nu er handleren en linje, og selve arbejdet står her.
+    /// </summary>
+    private async Task Koer(OptagelseVisning valgt, bool spoergOmSprog = false)
+    {
+
         var install = WhisperInstall.Locate(AppSettings.Current.PreferredModel);
         if (!install.IsComplete)
         {
@@ -1375,14 +1428,40 @@ public partial class TranscribeView : UserControl
         // mikrofonens, som aldrig blev optaget.
         var sidsteHovedsprog = kunLoop ? gemtMeta?.ValgtSprogLoop : gemtMeta?.ValgtSprogMik;
 
-        var sprogvalg = new SprogvalgWindow(toSpor,
-            sidsteHovedsprog, gemtMeta?.ValgtSprogLoop, valgt.Titel, kunLoop)
-        { Owner = Window.GetWindow(this) };
+        // ============ DER SPOERGES KUN, NAAR SVARET IKKE ER KENDT ============
+        //
+        // Rekkefoelgen staar i Core.Udskriftsvalg: optagelsen, aftalen,
+        // indstillingen - og foerst derefter et spoergsmaal. Svaret gemmes,
+        // saa det er sidste gang.
+        //
+        // Et gaet ville vaere billigere at bygge og dyrere at leve med: en
+        // udskrift paa det forkerte sprog ligner en faerdig tekst, og fejlen
+        // opdages foerst i referatet.
+        var kendt = Udskriftsvalg.Sprog(valgt.Mappe, kunLoop);
 
-        if (sprogvalg.ShowDialog() != true) return;
+        string? mitSprog;
+        string? deresSprog;
 
-        var mitSprog = sprogvalg.MitSprog;
-        var deresSprog = sprogvalg.DeresSprog ?? mitSprog;
+        if (kendt.Kendt && !spoergOmSprog)
+        {
+            mitSprog = kendt.Mit;
+            deresSprog = kendt.Deres ?? kendt.Mit;
+        }
+        else
+        {
+            var sprogvalg = new SprogvalgWindow(toSpor,
+                sidsteHovedsprog, gemtMeta?.ValgtSprogLoop, valgt.Titel, kunLoop)
+            { Owner = Window.GetWindow(this) };
+
+            if (sprogvalg.ShowDialog() != true) return;
+
+            mitSprog = sprogvalg.MitSprog;
+            deresSprog = sprogvalg.DeresSprog ?? mitSprog;
+
+            // HUSKET, SAA DER IKKE SPOERGES IGEN. Man holder ikke sine moeder
+            // paa et nyt sprog hver gang.
+            Udskriftsvalg.Husk(mitSprog, deresSprog);
+        }
 
         var modelNavn = Path.GetFileNameWithoutExtension(install.ModelPath!).Replace("ggml-", "");
 
@@ -1417,7 +1496,7 @@ public partial class TranscribeView : UserControl
 
         var genbrugMik = KanGenbruges(udBase, wav, sidsteHovedsprog, mitSprog);
         var genbrugLoop = toSpor
-                          && KanGenbruges(loopUdBase, loopWav, gemtMeta?.ValgtSprogLoop, sprogvalg.DeresSprog ?? "");
+                          && KanGenbruges(loopUdBase, loopWav, gemtMeta?.ValgtSprogLoop, deresSprog ?? "");
 
         // ============ ER DER NOGET AT LAVE? ============
         //
@@ -1624,7 +1703,7 @@ public partial class TranscribeView : UserControl
                 else
                 {
                     gemtMeta.ValgtSprogMik = mitSprog;
-                    gemtMeta.ValgtSprogLoop = sprogvalg.DeresSprog;
+                    gemtMeta.ValgtSprogLoop = deresSprog;
                 }
 
                 try { MeetingStore.Save(valgt.Mappe, gemtMeta); } catch (IOException) { }

@@ -114,6 +114,62 @@
                            den. -->
                       <TextBlock x:Name="ModelNote" FontSize="11.5" LineHeight="18" Margin="0,7,0,0"
                                  TextWrapping="Wrap" Foreground="{StaticResource TekstMeget}" />
+
+                      <!-- ============ VALGET MELLEM DE TO ============
+
+                           Der var ikke noget valg foer. Det var rigtigt, saa
+                           laenge alternativerne var daarligere paa dansk -
+                           men de to her loeser to FORSKELLIGE problemer:
+                           noejagtighed og hastighed. Hvilket af dem der er
+                           det vigtigste, afhaenger af maskinen, og det ved
+                           appen ikke.
+
+                           Forskellen staar VED valget. Et valg mellem to
+                           navne, man ikke kender, er ikke et valg. -->
+                      <TextBlock Text="{i18n:Oversat model.vaelg}" FontSize="10" FontWeight="SemiBold"
+                                 Margin="0,16,0,8" Foreground="{StaticResource TekstMeget}" />
+
+                      <ItemsControl x:Name="Modelvalg">
+                        <ItemsControl.ItemTemplate>
+                          <DataTemplate>
+                            <Border CornerRadius="8" Padding="12,10" Margin="0,0,0,8"
+                                    Background="{Binding Flade}"
+                                    BorderBrush="{Binding Kant}" BorderThickness="1">
+                              <Grid>
+                                <Grid.ColumnDefinitions>
+                                  <ColumnDefinition Width="*" />
+                                  <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0" Margin="0,0,12,0">
+                                  <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{Binding Navn}" FontSize="13" FontWeight="SemiBold" />
+                                    <Border Background="{StaticResource Accent}" CornerRadius="4"
+                                            Padding="6,1" Margin="8,0,0,0"
+                                            Visibility="{Binding BrugesSynlig}">
+                                      <TextBlock Text="{Binding Bruges}" FontSize="9" FontWeight="SemiBold"
+                                                 Foreground="#FF0B1220" />
+                                    </Border>
+                                  </StackPanel>
+
+                                  <TextBlock Text="{Binding Linje}" FontSize="11.5" Margin="0,4,0,0"
+                                             Foreground="{StaticResource TekstMeget}" />
+                                  <TextBlock Text="{Binding Godt}" FontSize="11.5" LineHeight="17"
+                                             Margin="0,6,0,0" TextWrapping="Wrap"
+                                             Foreground="{StaticResource TekstSvag}" />
+                                  <TextBlock Text="{Binding Skidt}" FontSize="11.5" LineHeight="17"
+                                             Margin="0,3,0,0" TextWrapping="Wrap"
+                                             Foreground="{StaticResource TekstMeget}" />
+                                </StackPanel>
+
+                                <Button Grid.Column="1" Content="{Binding Knap}" Click="Modelvalg_Klik"
+                                        Tag="{Binding Id}" Padding="14,7" VerticalAlignment="Center"
+                                        IsEnabled="{Binding KanVaelges}" />
+                              </Grid>
+                            </Border>
+                          </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                      </ItemsControl>
                     </StackPanel>
                   </Grid>
                 </Border>

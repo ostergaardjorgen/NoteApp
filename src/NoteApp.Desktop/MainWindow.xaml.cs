@@ -221,7 +221,14 @@ public partial class MainWindow : Window
             }
 
             _aabnOptagelse = mappe;
-            _spoergOmUdskrift = true;
+
+            // DER SPOERGES IKKE LAENGERE - der SKRIVES UD.
+            //
+            // Flaget hed foer _spoergOmUdskrift og udloeste en dialog. Nu
+            // saetter det udskriften i gang, hvis sproget er kendt; er det
+            // ikke, spoerges der EEN gang og svaret huskes. Se
+            // TranscribeView.StartAutomatisk og Core.Udskriftsvalg.
+            _spoergOmUdskrift = AppSettings.Current.SkrivUdAutomatisk;
             NavTransskriber.IsChecked = true;
 
             // Er man allerede paa skaermen, fyrer Checked ikke. Saa bygges

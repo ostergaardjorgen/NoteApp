@@ -1,4 +1,5 @@
-using System.IO;
+﻿using System.IO;
+using System.Windows.Controls;
 using System.Windows;
 using System.Windows.Media;
 using NoteApp.Core;
@@ -39,6 +40,8 @@ public partial class EngineView : System.Windows.Controls.UserControl
 
     private void Opdater()
     {
+        VisModelvalg();
+
         var s = WhisperInstall.Locate(AppSettings.Current.PreferredModel);
         var model = WhisperInstall.Model(AppSettings.Current.PreferredModel ?? "")
                     ?? WhisperInstall.Standard;
@@ -395,6 +398,92 @@ public partial class EngineView : System.Windows.Controls.UserControl
 
         // Loeftet i sidebjaelken opdaterer vinduet selv - se SkySetupWindow.Luk.
         VisSkyStatus();
+    }
+
+    // ==================== VALGET MELLEM DE TO MODELLER ====================
+    //
+    // De loeser to forskellige problemer. large-v3 er den, der er MAALT paa
+    // dansk her i projektet; turbo er den, der kan koere paa en maskine, hvor
+    // den store ikke kan. Hvilket af dem der er det vigtigste, ved appen
+    // ikke - det afhaenger af maskinen, og af om man venter paa svaret.
+    //
+    // Der var ikke noget valg foer. Det var rigtigt, saa laenge alternativerne
+    // bare var daarligere; her er de ikke daarligere, de er ANDERLEDES.
+
+    /// <summary>Én model, som den skal stå på skærmen.</summary>
+    public sealed record Modelraekke(
+        string Id, string Navn, string Linje, string Godt, string Skidt,
+        string Knap, bool KanVaelges, string Bruges,
+        Visibility BrugesSynlig, Brush Flade, Brush Kant);
+
+    private void VisModelvalg()
+    {
+        var valgt = AppSettings.Current.PreferredModel ?? WhisperInstall.Standard.Id;
+        var harGpu = EngineInstaller.HasNvidiaGpu();
+
+        Modelvalg.ItemsSource = WhisperInstall.Models.Select(m =>
+        {
+            var erValgt = string.Equals(m.Id, valgt, StringComparison.OrdinalIgnoreCase);
+            var erHentet = File.Exists(WhisperInstall.ModelDestination(m));
+            var erStor = m.Id == "large-v3";
+
+            var linje = Sprog.T("model.linje", m.SizeText,
+                Sprog.T(erStor ? "model.kraever3gb" : "model.kraever15gb"));
+
+            var godt = Sprog.T(erStor ? "model.storgodt" : "model.turbogodt");
+
+            // ANBEFALINGEN AFHAENGER AF MASKINEN, og det staar der. Den store
+            // paa en maskine uden grafikkort er ikke "lidt langsommere" -
+            // den er ubrugelig til daglig brug.
+            var skidt = erStor
+                ? Sprog.T(harGpu ? "model.storskidt" : "model.storskidtudengpu")
+                : Sprog.T("model.turboskidt");
+
+            var knap = erValgt
+                ? Sprog.T("model.ibrug")
+                : erHentet ? Sprog.T("model.skifttil") : Sprog.T("model.hentogskift");
+
+            return new Modelraekke(
+                m.Id, m.Id, linje, godt, skidt, knap,
+                KanVaelges: !erValgt,
+                Bruges: Sprog.T("model.bruges"),
+                BrugesSynlig: erValgt ? Visibility.Visible : Visibility.Collapsed,
+                Flade: (Brush)(erValgt ? FindResource("Panel") : FindResource("Baggrund")),
+                Kant: (Brush)(erValgt ? FindResource("Accent") : FindResource("PanelKant")));
+        }).ToList();
+    }
+
+    private async void Modelvalg_Klik(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button { Tag: string id }) return;
+        if (WhisperInstall.Model(id) is not { } model) return;
+
+        var sti = WhisperInstall.ModelDestination(model);
+
+        if (!File.Exists(sti))
+        {
+            // ER DEN IKKE HENTET, ER SKIFTET EN HENTNING. Det siges FOER,
+            // ikke opdages undervejs - der er halvanden til tre gigabyte
+            // paa spil.
+            var ja = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
+                Sprog.T("model.hentfoerst", model.Id),
+                Sprog.T("model.hentfoersttekst", model.SizeText),
+                Sprog.T("model.hentnu"), slags: Dialogs.Slags.Valg);
+
+            if (!ja) return;
+
+            await HentAsync(model, sti);
+
+            if (!File.Exists(sti)) return;
+        }
+
+        AppSettings.Current.PreferredModel = model.Id;
+        AppSettings.Current.Save();
+
+        Status.Text = Sprog.T("model.skiftet", model.Id);
+
+        Opdater();
+        VisModelvalg();
     }
 
     // -------------------------------------------------------------- hentning

@@ -56,6 +56,22 @@ public sealed class AppSettings
     public bool OpsummerLokalt { get; set; }
 
     /// <summary>
+    /// Skriv mødet ud af sig selv, så snart optagelsen er gemt.
+    ///
+    /// SAND SOM STANDARD, og det er en beslutning om, hvad appen ER. En
+    /// optagelse uden tekst kan hverken søges, laves til et dokument eller
+    /// bruges til noget. Skridtet fra lyd til tekst er ikke et valg, man
+    /// træffer — det er det, man kom for.
+    ///
+    /// Før stod der et spørgsmål efter hvert møde. Et spørgsmål lige efter et
+    /// møde bliver besvaret med nej, fordi nej lyder uforpligtende — og så
+    /// ligger optagelsen og bliver aldrig til noget.
+    ///
+    /// Den kan slås fra af den, der vil bestemme selv.
+    /// </summary>
+    public bool SkrivUdAutomatisk { get; set; } = true;
+
+    /// <summary>
     /// Lyd med i sikkerhedskopien. Falsk som standard: lyden er tusind gange
     /// større end alt det andet tilsammen, og den er også det, der er lettest
     /// at undvære — transskriptionen og de indlærte rettelser er arbejdet.

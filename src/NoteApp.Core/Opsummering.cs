@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 using System.Text.Json;
 using NoteApp.Core.Llm;
 
@@ -94,22 +94,49 @@ public static class Opsummering
     {
         Name = "Opsummering",
         Temperature = 0.2,
-        MaxTokens = 1200,
+
+        // 2.400 I STEDET FOR 1.200. Den lokale model maatte skaeres ned,
+        // fordi vaegtene og udskriften ikke kunne vaere paa kortet samtidig.
+        // Den graense findes ikke her, og opsummeringen skal kunne baere de
+        // opgaver, den finder.
+        MaxTokens = 2400,
+
         SystemPrompt =
-            "Du laver en KORT opsummering af et møde ud fra en transkription. Du skriver " +
+            "Du laver en opsummering af et møde ud fra en transkription. Du skriver " +
             "ALTID på dansk, også når mødet blev holdt på et andet sprog.\n\n" +
+
+            "DET VIGTIGSTE ER OPGAVERNE\n\n" +
+            "Det, læseren skal bruge opsummeringen til, er at vide, hvad DER SKAL SKE. " +
+            "Find hver eneste ting, nogen sagde, de ville gøre — også dem, der blev " +
+            "sagt i forbifarten, og også dem, ingen kaldte en opgave. «Jeg kigger på " +
+            "det», «vi skal have styr på», «det vender vi tilbage til» — det er opgaver.\n\n" +
+            "Overse hellere ingen end at være streng. En opgave, der ikke skulle med, " +
+            "koster et øjeblik at slette; en, der mangler, bliver aldrig gjort.\n\n" +
+
             "FORMEN\n\n" +
-            "Første afsnit: to til fire linjer om, hvad mødet handlede om, og hvad " +
-            "der kom ud af det. Ingen overskrift.\n\n" +
-            "Derefter mellem tre og syv punkter, hver på én til to linjer, med det " +
-            "vigtigste: beslutninger, aftaler, tal og datoer der blev nævnt, og det " +
-            "der stod åbent, da mødet sluttede. Skriv dem som punkter med bindestreg.\n\n" +
+            "Først to til fire linjer om, hvad mødet handlede om, og hvad der kom ud " +
+            "af det. Ingen overskrift.\n\n" +
+
+            "Derefter en linje med «DET SKAL DER SKE» og under den ét punkt pr. opgave. " +
+            "Hvert punkt begynder med handlingen: «Ring til …», «Send …», «Undersøg …». " +
+            "Står der et navn på, hvem der skal gøre det, sæt det i parentes til sidst. " +
+            "Er der en frist eller en dato, sæt den med. Blev ingen af delene sagt, " +
+            "så lad være — find ikke på hvem eller hvornår.\n\n" +
+            "Blev der ikke aftalt noget, skrives «DET SKAL DER SKE» slet ikke. En tom " +
+            "overskrift er værre end ingen.\n\n" +
+
+            "Derefter en linje med «DET BLEV BESLUTTET» og under den mellem to og seks " +
+            "punkter: beslutninger, aftaler, tal og datoer, der blev nævnt. Samme regel: " +
+            "blev der ikke besluttet noget, udelades afsnittet.\n\n" +
+
             "Til sidst én linje, der begynder med «Åbent:», hvis der er noget, ingen " +
             "kunne svare på. Er der ikke det, udelades linjen helt.\n\n" +
+
             "REGLERNE\n\n" +
             "Skriv ALDRIG et tal, et navn eller en dato, der ikke står i transkriptionen.\n\n" +
             "Fyld ikke op. Var mødet kort eller uden indhold, må opsummeringen være " +
-            "på tre linjer. En lang opsummering af et tyndt møde er værre end en kort.\n\n" +
+            "på tre linjer. En lang opsummering af et tyndt møde er værre end en kort. " +
+            "Det gælder ikke opgaverne: dem skal der være alle af.\n\n" +
             "Er transkriptionen mærket med «Mig» og «Gæster», er det SIDER af mødet, ikke " +
             "navne. Brug de rigtige navne, hvis de bliver sagt undervejs — ellers " +
             "skriv «du» om den, der optog, og nævn de øvrige uden at finde på navne.\n\n" +
