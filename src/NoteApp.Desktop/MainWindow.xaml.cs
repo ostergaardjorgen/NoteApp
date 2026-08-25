@@ -163,8 +163,20 @@ public partial class MainWindow : Window
         // alle sammen som "v1.0". Saa kunne man ikke se paa skaermen, hvilken
         // udgave man koerte - og det er hele grunden til, at nummeret staar
         // der. Fjerde led er altid 0 og siger ingenting.
-        Version.Text = "v" + (Assembly.GetExecutingAssembly()
-            .GetName().Version?.ToString(3) ?? "0.0.0");
+        // TREDJE LED SKRIVES MED TO CIFRE: v1.1.07, ikke v1.1.7.
+        //
+        // 99 er hoejeste tal i hvert led. Tredje led naaede 108, foer det
+        // blev opdaget - og 1.0.108 sorterer FOER 1.0.99 i alt, der
+        // sammenligner tekst, saa udgivelserne kom i forkert raekkefoelge
+        // overalt, hvor de blev stillet op.
+        //
+        // .NET kender ikke foranstillede nuller i en Version: skriver man
+        // 1.1.07 i csproj, bliver det til 1.1.7 uden at sige det. Derfor
+        // gemmes det rigtige tal, og nullet saettes paa her. Forskellen
+        // mellem, hvad der gemmes, og hvad der laeses, hoerer hjemme i
+        // visningen.
+        var v = Assembly.GetExecutingAssembly().GetName().Version;
+        Version.Text = v is null ? "v0.0.00" : $"v{v.Major}.{v.Minor}.{v.Build:00}";
         DataSti.Text = UserDataPaths.Root;
         OpdaterOpsaetningsmaerkat();
 

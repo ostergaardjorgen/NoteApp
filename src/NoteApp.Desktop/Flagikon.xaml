@@ -1,4 +1,4 @@
-<UserControl x:Class="NoteApp.Desktop.Flagikon"
+﻿<UserControl x:Class="NoteApp.Desktop.Flagikon"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              Width="22" Height="16">
@@ -68,7 +68,7 @@
          betyder, at en ny sprogfil virker uden at nogen skal tegne noget. -->
     <Border x:Name="Kodekasse" CornerRadius="3" Visibility="Collapsed"
             Background="#FF39414F" BorderBrush="#FF5A6472" BorderThickness="1">
-      <TextBlock x:Name="Kodetekst" FontSize="8.5" FontWeight="SemiBold"
+      <TextBlock x:Name="Kodetekst" FontSize="10.5" FontWeight="SemiBold"
                  HorizontalAlignment="Center" VerticalAlignment="Center"
                  Foreground="#FFEDF0F5" />
     </Border>

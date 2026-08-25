@@ -62,6 +62,7 @@
                       <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
                     <TextBlock Grid.Column="0" Text="{Binding Tid}" FontFamily="Consolas" FontSize="12.5"
+                               FontWeight="SemiBold"
                                Margin="0,1,18,0" Foreground="{StaticResource Accent}" />
                     <TextBlock Grid.Column="1" Text="{Binding Tekst}" FontSize="14" LineHeight="22"
                                TextWrapping="Wrap" Foreground="{StaticResource Tekst}" />

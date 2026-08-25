@@ -57,7 +57,7 @@
 
       <!-- Mappen -->
       <StackPanel Grid.Row="0" Grid.Column="0">
-        <TextBlock Text="{i18n:Oversat faelles.mappe}" FontSize="9.5" FontWeight="SemiBold" Margin="2,0,0,6"
+        <TextBlock Text="{i18n:Oversat faelles.mappe}" FontSize="10.5" FontWeight="SemiBold" Margin="2,0,0,6"
                    Foreground="{StaticResource TekstMeget}" />
         <Grid>
           <Grid.ColumnDefinitions>
@@ -84,7 +84,7 @@
 
       <!-- Mødetypen -->
       <StackPanel Grid.Row="0" Grid.Column="2">
-        <TextBlock Text="{i18n:Oversat faelles.moedetype}" FontSize="9.5" FontWeight="SemiBold" Margin="2,0,0,6"
+        <TextBlock Text="{i18n:Oversat faelles.moedetype}" FontSize="10.5" FontWeight="SemiBold" Margin="2,0,0,6"
                    Foreground="{StaticResource TekstMeget}" />
         <ComboBox x:Name="Typevalg" FontSize="13" Padding="10,7">
           <ComboBox.ItemTemplate>
@@ -97,7 +97,7 @@
 
       <!-- Sproget -->
       <StackPanel Grid.Row="2" Grid.Column="0">
-        <TextBlock x:Name="SprogMaerkat" FontSize="9.5" FontWeight="SemiBold" Margin="2,0,0,6"
+        <TextBlock x:Name="SprogMaerkat" FontSize="10.5" FontWeight="SemiBold" Margin="2,0,0,6"
                    Foreground="{StaticResource TekstMeget}" />
         <ComboBox x:Name="Sprogvalg" FontSize="13" Padding="10,7">
           <ComboBox.ItemTemplate>
@@ -110,7 +110,7 @@
 
       <!-- Linket — kun ved webinar -->
       <StackPanel x:Name="Linkfelt" Grid.Row="2" Grid.Column="2" Visibility="Collapsed">
-        <TextBlock Text="{i18n:Oversat opstartwindow.link_til_webinaret_kan_staa_tomt}" FontSize="9.5" FontWeight="SemiBold"
+        <TextBlock Text="{i18n:Oversat opstartwindow.link_til_webinaret_kan_staa_tomt}" FontSize="10.5" FontWeight="SemiBold"
                    Margin="2,0,0,6" Foreground="{StaticResource TekstMeget}" />
         <TextBox x:Name="Link" FontSize="12.5" Padding="10,7" />
       </StackPanel>

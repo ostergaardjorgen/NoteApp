@@ -688,7 +688,7 @@
                 <StackPanel Orientation="Horizontal">
                   <Border Width="10" Height="10" CornerRadius="2" Background="#FF5B9DF0"
                           VerticalAlignment="Center" Margin="0,0,7,0" />
-                  <TextBlock Text="{i18n:Oversat settingsview.lydfiler}" FontSize="9.5" FontWeight="SemiBold"
+                  <TextBlock Text="{i18n:Oversat settingsview.lydfiler}" FontSize="10.5" FontWeight="SemiBold"
                              VerticalAlignment="Center"
                              Foreground="{StaticResource TekstMeget}" />
                 </StackPanel>
@@ -701,7 +701,7 @@
                 <StackPanel Orientation="Horizontal">
                   <Border Width="10" Height="10" CornerRadius="2" Background="#FF3A4150"
                           VerticalAlignment="Center" Margin="0,0,7,0" />
-                  <TextBlock Text="{i18n:Oversat settingsview.alt_det_andet}" FontSize="9.5" FontWeight="SemiBold"
+                  <TextBlock Text="{i18n:Oversat settingsview.alt_det_andet}" FontSize="10.5" FontWeight="SemiBold"
                              VerticalAlignment="Center"
                              Foreground="{StaticResource TekstMeget}" />
                 </StackPanel>
@@ -711,7 +711,7 @@
               </StackPanel>
 
               <StackPanel Grid.Column="2">
-                <TextBlock Text="{i18n:Oversat settingsview.ledigt}" FontSize="9.5" FontWeight="SemiBold"
+                <TextBlock Text="{i18n:Oversat settingsview.ledigt}" FontSize="10.5" FontWeight="SemiBold"
                            Foreground="{StaticResource TekstMeget}" />
                 <TextBlock x:Name="PladsFri" FontSize="17" FontWeight="SemiBold" Margin="0,4,0,0" />
                 <TextBlock x:Name="PladsFriUnder" FontSize="11" Margin="0,2,0,0"
@@ -818,7 +818,7 @@
             <Border Background="{StaticResource Baggrund}" CornerRadius="8" Padding="14,12"
                     Margin="0,14,0,0" BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
               <StackPanel>
-                <TextBlock Text="{i18n:Oversat settingsview.saadan_kigger_den}" FontSize="9.5" FontWeight="SemiBold"
+                <TextBlock Text="{i18n:Oversat settingsview.saadan_kigger_den}" FontSize="10.5" FontWeight="SemiBold"
                            Foreground="{StaticResource TekstMeget}" Margin="0,0,0,8" />
 
                 <TextBlock FontSize="12" LineHeight="19" TextWrapping="Wrap"

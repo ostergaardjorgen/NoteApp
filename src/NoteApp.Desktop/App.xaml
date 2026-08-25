@@ -15,7 +15,7 @@
     <SolidColorBrush x:Key="PanelKant"     Color="#FF39404E" />
     <SolidColorBrush x:Key="Tekst"         Color="#FFF4F6FA" />
     <SolidColorBrush x:Key="TekstSvag"     Color="#FFC2CAD8" />
-    <SolidColorBrush x:Key="TekstMeget"    Color="#FF959EAE" />
+    <SolidColorBrush x:Key="TekstMeget"    Color="#FFAEB6C4" />
     <SolidColorBrush x:Key="Accent"        Color="#FF5B99FF" />
     <SolidColorBrush x:Key="Optager"       Color="#FFF05055" />
     <SolidColorBrush x:Key="Godkendt"      Color="#FF4CBE72" />

@@ -83,7 +83,7 @@
                       <ColumnDefinition Width="72" />
                       <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="{i18n:Oversat engineview.motor}" FontSize="10" FontWeight="SemiBold"
+                    <TextBlock Grid.Column="0" Text="{i18n:Oversat engineview.motor}" FontSize="11" FontWeight="SemiBold"
                                Foreground="{StaticResource TekstMeget}" Margin="0,3,0,0" />
                     <StackPanel Grid.Column="1">
                       <TextBlock x:Name="LydMotor" FontSize="14.5" FontWeight="SemiBold" />
@@ -100,7 +100,7 @@
                       <ColumnDefinition Width="72" />
                       <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="{i18n:Oversat engineview.model}" FontSize="10" FontWeight="SemiBold"
+                    <TextBlock Grid.Column="0" Text="{i18n:Oversat engineview.model}" FontSize="11" FontWeight="SemiBold"
                                Foreground="{StaticResource TekstMeget}" Margin="0,3,0,0" />
                     <StackPanel Grid.Column="1">
                       <TextBlock x:Name="LydModel" FontSize="14.5" FontWeight="SemiBold" />
@@ -126,7 +126,7 @@
 
                            Forskellen staar VED valget. Et valg mellem to
                            navne, man ikke kender, er ikke et valg. -->
-                      <TextBlock Text="{i18n:Oversat model.vaelg}" FontSize="10" FontWeight="SemiBold"
+                      <TextBlock Text="{i18n:Oversat model.vaelg}" FontSize="11" FontWeight="SemiBold"
                                  Margin="0,16,0,8" Foreground="{StaticResource TekstMeget}" />
 
                       <ItemsControl x:Name="Modelvalg">
@@ -147,7 +147,7 @@
                                     <Border Background="{StaticResource Accent}" CornerRadius="4"
                                             Padding="6,1" Margin="8,0,0,0"
                                             Visibility="{Binding BrugesSynlig}">
-                                      <TextBlock Text="{Binding Bruges}" FontSize="9" FontWeight="SemiBold"
+                                      <TextBlock Text="{Binding Bruges}" FontSize="10.5" FontWeight="SemiBold"
                                                  Foreground="#FF0B1220" />
                                     </Border>
                                   </StackPanel>
@@ -264,7 +264,7 @@
                           <ColumnDefinition Width="*" />
                           <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0" Text="{Binding Slags}" FontSize="10"
+                        <TextBlock Grid.Column="0" Text="{Binding Slags}" FontSize="11"
                                    FontWeight="SemiBold" Margin="0,3,10,0"
                                    Foreground="{StaticResource TekstMeget}" />
                         <StackPanel Grid.Column="1">
@@ -370,7 +370,7 @@
                   <TextBlock x:Name="SkyModel" FontSize="16" FontWeight="SemiBold" />
                   <Border Background="{StaticResource Accent}" CornerRadius="3"
                           Padding="6,1" Margin="10,2,0,0" VerticalAlignment="Center">
-                    <TextBlock Text="{i18n:Oversat engineview.eu}" FontSize="10" FontWeight="SemiBold" Foreground="#FF0B1220" />
+                    <TextBlock Text="{i18n:Oversat engineview.eu}" FontSize="11" FontWeight="SemiBold" Foreground="#FF0B1220" />
                   </Border>
                 </StackPanel>
 

@@ -66,12 +66,26 @@ if (-not $Version) {
 
 $fuld = if ($Version -match '^\d+\.\d+$') { "$Version.0" } else { $Version }
 
-# Advar, hvis .NET normaliserer nummeret vaek fra det, der blev bedt om.
-# Foranstillede nuller forsvinder - 1.01 bliver til 1.1 - og saa passer
-# skaermen ikke med commiten.
+# 99 ER HOEJESTE TAL I HVERT LED.
+#
+# Tredje led loeb til 108, foer det blev opdaget. Det er ikke bare grimt:
+# 1.0.108 sorterer FOER 1.0.99 i alt, der sammenligner tekst - og det er det
+# meste. Udgivelserne kom i forkert raekkefoelge overalt, hvor de blev stillet
+# op. Naar tredje led naar 99, ruller andet led.
+if ($fuld -match '^\d+\.\d+\.(\d+)$' -and [int]$Matches[1] -gt 99) {
+    throw ("Tredje led er $($Matches[1]) - 99 er hoejeste tal. Rul andet led: " +
+           "naeste efter 1.0.99 er 1.1.00. Ret commit-beskeden og koer igen.")
+}
+
+# Foranstillede nuller findes ikke i en .NET-version: 1.1.07 BLIVER til 1.1.7,
+# uanset hvad der staar i csproj. Derfor skrives det normaliserede tal ned, og
+# sidebjaelken saetter nullet paa igen, naar den viser det. Ellers ville
+# efterproevningen nedenfor sammenligne 1.1.7.0 med 1.1.07 og melde fejl paa
+# et byg, der er helt i orden.
 $normaliseret = ([version]$fuld).ToString(3)
 if ($normaliseret -ne $fuld) {
-    Write-Warning "Versionen $fuld normaliseres til $normaliseret. Undgaa foranstillede nuller - skriv fx 1.0.1, ikke 1.01."
+    Write-Host "Version $fuld gemmes som $normaliseret og vises som v$fuld."
+    $fuld = $normaliseret
 }
 
 $tekst = [IO.File]::ReadAllText($csproj, [Text.Encoding]::UTF8)
@@ -88,7 +102,20 @@ $nu = if ($tekst -match '<Version>([^<]+)</Version>') { $Matches[1] } else { '(i
 if ($nu -match '^(\d+)\.(\d+)' -and $fuld -match '^(\d+)\.(\d+)') {
     $nuMM   = ($nu   -split '\.')[0..1] -join '.'
     $nyMM   = ($fuld -split '\.')[0..1] -join '.'
-    if ($nuMM -ne $nyMM) {
+    # ET OVERLOEB ER IKKE ET SPRING. Gaar man fra 1.0.99 til 1.1.0, er det
+    # ikke en fejl - det er aftalen om, at 99 er hoejeste tal. Der spoerges
+    # kun, naar andet led rykker UDEN at tredje led var loebet fuldt.
+    $nuLed = $nu -split '\.'
+    $nyLed = $fuld -split '\.'
+    $erOverloeb = $nuLed.Count -ge 3 -and $nyLed.Count -ge 3 -and
+                  $nuLed[0] -eq $nyLed[0] -and
+                  [int]$nyLed[1] -eq [int]$nuLed[1] + 1 -and
+                  [int]$nuLed[2] -ge 90 -and [int]$nyLed[2] -lt 10
+
+    if ($erOverloeb) {
+        Write-Host "Tredje led var loebet fuldt - andet led ruller: $nu -> $fuld."
+    }
+    elseif ($nuMM -ne $nyMM) {
         Write-Warning "Versionen springer fra $nuMM.x til $nyMM.x (fra $nu til $fuld)."
         Write-Warning "Aftalen er tredje led - fx $nuMM.2. Er springet med vilje?"
         $svar = Read-Host "Skriv JA for at fortsaette, eller Enter for at afbryde"

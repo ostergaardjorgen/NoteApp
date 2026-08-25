@@ -28,7 +28,7 @@
     <TextBlock x:Name="Underskrift" Style="{StaticResource Underskrift}"
                Margin="0,4,0,0" TextWrapping="Wrap" />
 
-    <TextBlock Text="{i18n:Oversat aftalewindow.hvad_er_det}" FontSize="9.5" FontWeight="SemiBold"
+    <TextBlock Text="{i18n:Oversat aftalewindow.hvad_er_det}" FontSize="10.5" FontWeight="SemiBold"
                Margin="2,18,0,6" Foreground="{StaticResource TekstMeget}" />
     <TextBox x:Name="Titel" FontSize="13.5" Padding="10,7" />
 
@@ -36,7 +36,7 @@
          ikke nogen. «Catch-up - Relation» siger ingenting om, hvem man skal
          tale med; det goer navnet. -->
     <StackPanel x:Name="Arrangoerrude" Margin="0,14,0,0" Visibility="Collapsed">
-      <TextBlock Text="{i18n:Oversat aftalewindow.indkaldt_af}" FontSize="9.5" FontWeight="SemiBold" Margin="2,0,0,6"
+      <TextBlock Text="{i18n:Oversat aftalewindow.indkaldt_af}" FontSize="10.5" FontWeight="SemiBold" Margin="2,0,0,6"
                  Foreground="{StaticResource TekstMeget}" />
       <TextBlock x:Name="Arrangoer" FontSize="14" TextWrapping="Wrap"
                  Foreground="{StaticResource Tekst}" />
@@ -51,7 +51,7 @@
          kontroller, der ser ud som noget, der er gaaet i stykker. Her staar
          der bare, hvornaar moedet er. -->
     <StackPanel x:Name="Laasttid" Margin="0,14,0,0" Visibility="Collapsed">
-      <TextBlock Text="{i18n:Oversat aftalewindow.hvornaar}" FontSize="9.5" FontWeight="SemiBold" Margin="2,0,0,6"
+      <TextBlock Text="{i18n:Oversat aftalewindow.hvornaar}" FontSize="10.5" FontWeight="SemiBold" Margin="2,0,0,6"
                  Foreground="{StaticResource TekstMeget}" />
       <TextBlock x:Name="Tidslinje" FontSize="14" TextWrapping="Wrap"
                  Foreground="{StaticResource Tekst}" />
@@ -67,25 +67,25 @@
       </Grid.ColumnDefinitions>
 
       <StackPanel Grid.Column="0">
-        <TextBlock Text="{i18n:Oversat aftalewindow.dato}" FontSize="9.5" FontWeight="SemiBold" Margin="2,0,0,6"
+        <TextBlock Text="{i18n:Oversat aftalewindow.dato}" FontSize="10.5" FontWeight="SemiBold" Margin="2,0,0,6"
                    Foreground="{StaticResource TekstMeget}" />
         <DatePicker x:Name="Dato" FontSize="13" />
       </StackPanel>
 
       <StackPanel Grid.Column="2">
-        <TextBlock Text="{i18n:Oversat aftalewindow.fra}" FontSize="9.5" FontWeight="SemiBold" Margin="2,0,0,6"
+        <TextBlock Text="{i18n:Oversat aftalewindow.fra}" FontSize="10.5" FontWeight="SemiBold" Margin="2,0,0,6"
                    Foreground="{StaticResource TekstMeget}" />
         <ComboBox x:Name="Fra" Width="92" FontSize="13" Padding="8,6" IsEditable="True" />
       </StackPanel>
 
       <StackPanel Grid.Column="4">
-        <TextBlock Text="{i18n:Oversat aftalewindow.til}" FontSize="9.5" FontWeight="SemiBold" Margin="2,0,0,6"
+        <TextBlock Text="{i18n:Oversat aftalewindow.til}" FontSize="10.5" FontWeight="SemiBold" Margin="2,0,0,6"
                    Foreground="{StaticResource TekstMeget}" />
         <ComboBox x:Name="Til" Width="92" FontSize="13" Padding="8,6" IsEditable="True" />
       </StackPanel>
     </Grid>
 
-    <TextBlock Text="{i18n:Oversat aftalewindow.link_eller_sted_kan_staa_tomt}" FontSize="9.5" FontWeight="SemiBold"
+    <TextBlock Text="{i18n:Oversat aftalewindow.link_eller_sted_kan_staa_tomt}" FontSize="10.5" FontWeight="SemiBold"
                Margin="2,14,0,6" Foreground="{StaticResource TekstMeget}" />
     <Grid>
       <Grid.ColumnDefinitions>
@@ -124,7 +124,7 @@
           </Grid.ColumnDefinitions>
 
           <StackPanel Grid.Column="0">
-            <TextBlock Text="{i18n:Oversat faelles.mappe}" FontSize="9" FontWeight="SemiBold" Margin="2,0,0,5"
+            <TextBlock Text="{i18n:Oversat faelles.mappe}" FontSize="10.5" FontWeight="SemiBold" Margin="2,0,0,5"
                        Foreground="{StaticResource TekstMeget}" />
             <ComboBox x:Name="Mappevalg" FontSize="12" Padding="8,5">
               <ComboBox.ItemTemplate>
@@ -134,7 +134,7 @@
           </StackPanel>
 
           <StackPanel Grid.Column="2">
-            <TextBlock Text="{i18n:Oversat faelles.moedetype}" FontSize="9" FontWeight="SemiBold" Margin="2,0,0,5"
+            <TextBlock Text="{i18n:Oversat faelles.moedetype}" FontSize="10.5" FontWeight="SemiBold" Margin="2,0,0,5"
                        Foreground="{StaticResource TekstMeget}" />
             <ComboBox x:Name="Typevalg" FontSize="12" Padding="8,5">
               <ComboBox.ItemTemplate>
@@ -144,7 +144,7 @@
           </StackPanel>
 
           <StackPanel Grid.Column="4">
-            <TextBlock Text="{i18n:Oversat aftalewindow.sprog}" FontSize="9" FontWeight="SemiBold" Margin="2,0,0,5"
+            <TextBlock Text="{i18n:Oversat aftalewindow.sprog}" FontSize="10.5" FontWeight="SemiBold" Margin="2,0,0,5"
                        Foreground="{StaticResource TekstMeget}" />
             <ComboBox x:Name="Sprogvalg" FontSize="12" Padding="8,5">
               <ComboBox.ItemTemplate>

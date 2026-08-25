@@ -41,7 +41,7 @@
     <!-- NAVNET OEVERST. Det er dét, listen viser, og dét, man genkender
          opgaven paa. Staar det nederst, bliver det aldrig rettet. -->
     <StackPanel Grid.Row="1" Margin="0,18,0,0">
-      <TextBlock Text="{i18n:Oversat opgavewindow.kort_navn}" FontSize="9.5" FontWeight="SemiBold"
+      <TextBlock Text="{i18n:Oversat opgavewindow.kort_navn}" FontSize="10.5" FontWeight="SemiBold"
                  Margin="2,0,0,6" Foreground="{StaticResource TekstMeget}" />
       <TextBox x:Name="Navn" FontSize="14" Padding="10,8" />
       <TextBlock FontSize="11" Margin="2,5,0,0" TextWrapping="Wrap"
@@ -49,7 +49,7 @@
                  Text="{i18n:Oversat opgavewindow.det_der_staar_paa_listen_i_cockpittet_hold}" />
     </StackPanel>
 
-    <TextBlock Grid.Row="2" Text="{i18n:Oversat opgavewindow.beskrivelse}" FontSize="9.5" FontWeight="SemiBold"
+    <TextBlock Grid.Row="2" Text="{i18n:Oversat opgavewindow.beskrivelse}" FontSize="10.5" FontWeight="SemiBold"
                Margin="2,18,0,6" Foreground="{StaticResource TekstMeget}" />
 
     <!-- HELE HOEJDEN. Det er den, vinduet er aabnet for. -->
@@ -73,7 +73,7 @@
       </Grid.ColumnDefinitions>
 
       <StackPanel Grid.Column="0">
-        <TextBlock Text="{i18n:Oversat opgavewindow.frist}" FontSize="9.5" FontWeight="SemiBold"
+        <TextBlock Text="{i18n:Oversat opgavewindow.frist}" FontSize="10.5" FontWeight="SemiBold"
                    Margin="2,0,0,6" Foreground="{StaticResource TekstMeget}" />
         <DatePicker x:Name="Frist" Width="150" FontSize="12.5" />
 
@@ -87,7 +87,7 @@
       </StackPanel>
 
       <StackPanel Grid.Column="2">
-        <TextBlock Text="{i18n:Oversat opgavewindow.prioritet}" FontSize="9.5" FontWeight="SemiBold"
+        <TextBlock Text="{i18n:Oversat opgavewindow.prioritet}" FontSize="10.5" FontWeight="SemiBold"
                    Margin="2,0,0,6" Foreground="{StaticResource TekstMeget}" />
         <ComboBox x:Name="Prioritet" Width="130" FontSize="12.5" Padding="8,5"
                   ToolTip="{i18n:Oversat opgavewindow.1_er_vigtigst}">

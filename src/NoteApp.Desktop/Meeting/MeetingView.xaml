@@ -203,7 +203,7 @@
                Det stod i den daempede tekstfarve og forsvandt naesten i
                baggrunden - og et maerkat, man skal lede efter, forklarer
                ingenting. Nu er det den samme hvide som paa knapperne. -->
-          <TextBlock x:Name="GenvejMaerkat" Text="{i18n:Oversat topbar.optagmed}" FontSize="10" FontWeight="SemiBold"
+          <TextBlock x:Name="GenvejMaerkat" Text="{i18n:Oversat topbar.optagmed}" FontSize="11" FontWeight="SemiBold"
                      VerticalAlignment="Center" Margin="0,1,9,0"
                      Foreground="#FFFFFFFF" />
 
@@ -318,7 +318,7 @@
             <Border x:Name="KlokkeBadge" Background="{StaticResource Optager}" CornerRadius="8"
                     MinWidth="16" Height="16" Padding="4,0" Visibility="Collapsed"
                     HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-5,-7,0">
-              <TextBlock x:Name="KlokkeTal" FontSize="10" FontWeight="SemiBold"
+              <TextBlock x:Name="KlokkeTal" FontSize="11" FontWeight="SemiBold"
                          Foreground="#FFFFFFFF" HorizontalAlignment="Center"
                          VerticalAlignment="Center" />
             </Border>

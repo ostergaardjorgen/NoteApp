@@ -396,7 +396,7 @@
       <Border Grid.Column="4" Background="{StaticResource Panel}" CornerRadius="10"
               BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
         <DockPanel>
-          <TextBlock DockPanel.Dock="Top" Text="{i18n:Oversat documentsview.seneste_dokumenter}" FontSize="10"
+          <TextBlock DockPanel.Dock="Top" Text="{i18n:Oversat documentsview.seneste_dokumenter}" FontSize="11"
                      FontWeight="SemiBold" Margin="14,13,14,8"
                      Foreground="{StaticResource TekstMeget}" />
 

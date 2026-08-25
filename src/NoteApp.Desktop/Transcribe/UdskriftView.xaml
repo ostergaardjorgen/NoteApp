@@ -138,7 +138,7 @@
 
                Her flyttes kun den ene replik. -->
           <StackPanel x:Name="HenfoerRude" Visibility="Collapsed" Margin="0,12,0,0">
-            <TextBlock Text="{i18n:Oversat udskriftview.laeg_replikken_hos}" FontSize="9.5" FontWeight="SemiBold"
+            <TextBlock Text="{i18n:Oversat udskriftview.laeg_replikken_hos}" FontSize="10.5" FontWeight="SemiBold"
                        Foreground="{StaticResource Accent}" />
 
             <ItemsControl x:Name="Henfoer" Margin="0,7,0,0">
@@ -168,7 +168,7 @@
 
                  Raekken staar kun, naar der ER mere end een tilbage. -->
             <StackPanel x:Name="HenfoerAlleRude" Visibility="Collapsed" Margin="0,12,0,0">
-              <TextBlock x:Name="HenfoerAlleMaerkat" FontSize="9.5" FontWeight="SemiBold"
+              <TextBlock x:Name="HenfoerAlleMaerkat" FontSize="10.5" FontWeight="SemiBold"
                          Foreground="{StaticResource TekstMeget}" />
 
               <ItemsControl x:Name="HenfoerAlle" Margin="0,7,0,0">
@@ -190,7 +190,7 @@
             <Rectangle Height="1" Fill="{StaticResource PanelKant}" Margin="0,12,0,0" />
           </StackPanel>
 
-          <TextBlock x:Name="NavnFeltMaerkat" FontSize="9.5" FontWeight="SemiBold"
+          <TextBlock x:Name="NavnFeltMaerkat" FontSize="10.5" FontWeight="SemiBold"
                      Margin="0,12,0,0" Visibility="Collapsed"
                      Foreground="{StaticResource TekstMeget}" />
 
@@ -282,9 +282,10 @@
                       <!-- Tidsstemplet staar i margen og ikke inde i teksten.
                            Saa kan man loebe listen igennem paa tid uden at
                            laese. -->
-                      <TextBlock Grid.Column="0" Text="{Binding Tid}" FontSize="11"
-                                 FontFamily="Consolas" VerticalAlignment="Top"
-                                 Margin="0,4,12,0" Foreground="{StaticResource TekstMeget}" />
+                      <TextBlock Grid.Column="0" Text="{Binding Tid}" FontSize="12.5"
+                                 FontFamily="Consolas" FontWeight="SemiBold"
+                                 VerticalAlignment="Top"
+                                 Margin="0,3,12,0" Foreground="{StaticResource TekstSvag}" />
 
                       <!-- TALEREN ER EN KNAP.
                            Navngivningen laa foer bag en knap i vaerktoejslinjen,
@@ -476,7 +477,7 @@
                        Europa som standard, og saa skal maerkatet foelge med -
                        ellers staar der noget forkert paa en skaerm, der
                        handler om, hvor data gaar hen. -->
-                  <TextBlock x:Name="OpsumHvor" FontSize="9.5" FontWeight="SemiBold"
+                  <TextBlock x:Name="OpsumHvor" FontSize="10.5" FontWeight="SemiBold"
                              Foreground="{StaticResource Accent}" />
                   <TextBlock x:Name="OpsumLokalTekst" FontSize="12" LineHeight="18" TextWrapping="Wrap"
                              Margin="0,6,0,0" Foreground="{StaticResource TekstSvag}" />
@@ -494,7 +495,7 @@
               <Border Grid.Column="1" Background="#FF181B22" CornerRadius="9" Padding="14,12"
                       Margin="7,0,0,0" BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
                 <StackPanel>
-                  <TextBlock Text="{i18n:Oversat udskriftview.skal_det_vaere_et_referat}" FontSize="9.5" FontWeight="SemiBold"
+                  <TextBlock Text="{i18n:Oversat udskriftview.skal_det_vaere_et_referat}" FontSize="10.5" FontWeight="SemiBold"
                              Foreground="{StaticResource TekstMeget}" />
                   <TextBlock FontSize="12" LineHeight="18" TextWrapping="Wrap" Margin="0,6,0,0"
                              Foreground="{StaticResource TekstSvag}"
@@ -638,8 +639,9 @@
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,7">
                           <TextBlock Text="{Binding Taler}" FontSize="11.5" FontWeight="SemiBold"
                                      Foreground="{StaticResource Accent}" />
-                          <TextBlock Text="{Binding Tid}" FontSize="11" FontFamily="Consolas"
-                                     Margin="10,0,0,0" Foreground="{StaticResource TekstMeget}" />
+                          <TextBlock Text="{Binding Tid}" FontSize="12" FontFamily="Consolas"
+                                     FontWeight="SemiBold"
+                                     Margin="10,0,0,0" Foreground="{StaticResource TekstSvag}" />
                           <TextBlock Text="{Binding Grund}" FontSize="11" Margin="14,0,0,0"
                                      Foreground="{StaticResource TekstMeget}" />
                         </StackPanel>
@@ -689,19 +691,19 @@
 
                 <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
                   <StackPanel Margin="0,0,34,0">
-                    <TextBlock Text="{i18n:Oversat udskriftview.begyndte}" FontSize="9.5" FontWeight="SemiBold"
+                    <TextBlock Text="{i18n:Oversat udskriftview.begyndte}" FontSize="10.5" FontWeight="SemiBold"
                                Foreground="{StaticResource TekstMeget}" />
                     <TextBlock x:Name="StatStart" FontSize="19" FontFamily="Consolas"
                                Margin="0,3,0,0" />
                   </StackPanel>
                   <StackPanel Margin="0,0,34,0">
-                    <TextBlock Text="{i18n:Oversat udskriftview.sluttede}" FontSize="9.5" FontWeight="SemiBold"
+                    <TextBlock Text="{i18n:Oversat udskriftview.sluttede}" FontSize="10.5" FontWeight="SemiBold"
                                Foreground="{StaticResource TekstMeget}" />
                     <TextBlock x:Name="StatSlut" FontSize="19" FontFamily="Consolas"
                                Margin="0,3,0,0" />
                   </StackPanel>
                   <StackPanel>
-                    <TextBlock Text="{i18n:Oversat udskriftview.varighed}" FontSize="9.5" FontWeight="SemiBold"
+                    <TextBlock Text="{i18n:Oversat udskriftview.varighed}" FontSize="10.5" FontWeight="SemiBold"
                                Foreground="{StaticResource TekstMeget}" />
                     <TextBlock x:Name="StatVarighed" FontSize="19" FontFamily="Consolas"
                                Margin="0,3,0,0" Foreground="{StaticResource Accent}" />

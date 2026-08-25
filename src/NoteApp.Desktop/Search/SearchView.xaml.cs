@@ -354,6 +354,33 @@ public partial class SearchView : UserControl
         }
 
         /// <summary>
+        /// Klokkeslættet siger det samme som striben — men det skal kunne læses.
+        ///
+        /// Tallene stod før i «Kant», og Kant er en STRIBEFARVE. Den er dæmpet
+        /// med vilje, og det er rigtigt om tre pixels kant. Om tal er det
+        /// forkert: en aftale senere på ugen fik #3A4150 mod panelet, altså
+        /// 1,52:1, og en overstået fik 1,23:1 — og blev derefter ganget med
+        /// Dæmpning. Klokkeslættet var reelt ikke tegnet.
+        ///
+        /// Samme betydning, samme rækkefølge, læsbare lysstyrker: rødt er i
+        /// gang, gult er inden for en time, grønt optager selv, gråt er
+        /// senere. Ingen af dem går under 4,5:1.
+        /// </summary>
+        public Brush Klokkefarve
+        {
+            get
+            {
+                if (_a.MoedeId.Length > 0) return Pensel("#FF5FD183");
+                if (_a.ErIGang(_nu)) return Pensel("#FFFF6B70");
+                if (_a.ErOverstaaet(_nu)) return Pensel("#FF828B9C");
+
+                return _a.Start <= _nu.AddHours(1)
+                    ? Pensel("#FFF5BE62")
+                    : Pensel("#FFAEB6C4");
+            }
+        }
+
+        /// <summary>
         /// Overståede møder står dæmpet.
         ///
         /// DE BLIVER STÅENDE DAGEN UD, fordi spørgsmålet klokken to ikke kun
@@ -364,7 +391,9 @@ public partial class SearchView : UserControl
         /// dæmper hele kortet på én gang, også kanten og knappen, og kan ikke
         /// komme ud af trit med resten, den dag farverne ændres.
         /// </summary>
-        public double Daempning => _a.ErOverstaaet(_nu) ? 0.45 : 1.0;
+        // 0,45 var for haardt. En overstaaet aftale skal traede i baggrunden,
+        // ikke forsvinde - man spoerger ogsaa «hvad naaede jeg».
+        public double Daempning => _a.ErOverstaaet(_nu) ? 0.72 : 1.0;
 
         private static Brush Pensel(string hex) => (Brush)new BrushConverter().ConvertFrom(hex)!;
 
@@ -1317,7 +1346,7 @@ public sealed class Opgavevisning : System.ComponentModel.INotifyPropertyChanged
     /// Fluebenet kan stadig trykkes — Opacity slår ikke klik fra. Det er
     /// netop dét, der gør fortrydelsen mulig.
     /// </summary>
-    public double Daempning => _r.Opgave.Faerdig ? 0.45 : 1.0;
+    public double Daempning => _r.Opgave.Faerdig ? 0.72 : 1.0;
 
     /// <summary>
     /// Er herkomsten et LINK — eller bare en oplysning?
@@ -1384,7 +1413,12 @@ public sealed class Opgavevisning : System.ComponentModel.INotifyPropertyChanged
 
     public Visibility Fristvis => _r.Opgave.Deadline is null ? Visibility.Collapsed : Visibility.Visible;
 
-    /// <summary>Rød, gul eller grøn — efter hvor meget der er til fristen.</summary>
+    /// <summary>
+    /// Rød, gul eller grøn — efter hvor meget der er til fristen.
+    ///
+    /// DEN HER ER STRIBEN i venstre kant. Den fylder mange pixler og må gerne
+    /// være mættet. Til skrift er den for mørk — se Fristfarve nedenfor.
+    /// </summary>
     public Brush Farve => _r.Hastighed(_idag) switch
     {
         Hastighed.Overskredet => Pensel("#FFE5484D"),
@@ -1392,6 +1426,26 @@ public sealed class Opgavevisning : System.ComponentModel.INotifyPropertyChanged
         Hastighed.Denne_uge => Pensel("#FFE8A33D"),
         Hastighed.Senere => Pensel("#FF3DA55A"),
         _ => Pensel("#FF3A4150")
+    };
+
+    /// <summary>
+    /// Samme besked som striben — men skrevet, så det kan læses.
+    ///
+    /// Fristmærkaten stod før i stribens farve: elleve pixels tekst på den
+    /// mørke pille #2C323D. Tre af de fire faldt igennem — «senere» ramte
+    /// 4,13:1 og «ingen frist» 1,26:1. En dato, man ikke kan læse, er værre
+    /// end ingen dato: mærkaten ser ud, som om den siger noget.
+    ///
+    /// Rækkefølgen er den samme, så striben og teksten aldrig kan komme til
+    /// at sige hver sit. Ingen af dem går under 5:1.
+    /// </summary>
+    public Brush Fristfarve => _r.Hastighed(_idag) switch
+    {
+        Hastighed.Overskredet => Pensel("#FFFF8085"),
+        Hastighed.I_dag => Pensel("#FFF7CB7A"),
+        Hastighed.Denne_uge => Pensel("#FFF7CB7A"),
+        Hastighed.Senere => Pensel("#FF7EDCA0"),
+        _ => Pensel("#FFAEB6C4")
     };
 
     private static Brush Pensel(string hex) =>

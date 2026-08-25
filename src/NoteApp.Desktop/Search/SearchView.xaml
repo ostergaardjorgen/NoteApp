@@ -106,7 +106,7 @@
                 </StackPanel>
               </Grid>
 
-              <TextBlock x:Name="Kalendersynklinje" FontSize="10" Margin="0,4,0,0"
+              <TextBlock x:Name="Kalendersynklinje" FontSize="11" Margin="0,4,0,0"
                          Visibility="Collapsed" TextWrapping="Wrap"
                          Foreground="{StaticResource TekstMeget}" />
             </StackPanel>
@@ -164,7 +164,7 @@
                       <TextBlock Grid.Column="0" Text="{Binding Klokken}" FontSize="13"
                                  FontFamily="Consolas" FontWeight="SemiBold"
                                  VerticalAlignment="Top"
-                                 Margin="0,0,10,0" Foreground="{Binding Kant}" />
+                                 Margin="0,0,10,0" Foreground="{Binding Klokkefarve}" />
 
                       <StackPanel Grid.Column="1">
                         <TextBlock Text="{Binding Titel}" FontSize="12" TextWrapping="Wrap"
@@ -596,7 +596,7 @@
                 </StackPanel>
               </Grid>
 
-              <TextBlock x:Name="Opgavesynklinje" FontSize="10" Margin="0,4,0,0"
+              <TextBlock x:Name="Opgavesynklinje" FontSize="11" Margin="0,4,0,0"
                          Visibility="Collapsed" TextWrapping="Wrap"
                          Foreground="{StaticResource TekstMeget}" />
             </StackPanel>
@@ -693,8 +693,8 @@
                 <Border Grid.Column="2" CornerRadius="4" Padding="7,2" Margin="10,0,0,0"
                 VerticalAlignment="Top" Background="#FF2C323D"
                 Visibility="{Binding Fristvis}">
-                <TextBlock Text="{Binding Frist}" FontSize="11"
-                Foreground="{Binding Farve}" />
+                <TextBlock Text="{Binding Frist}" FontSize="11.5" FontWeight="SemiBold"
+                Foreground="{Binding Fristfarve}" />
                 </Border>
 
                 <ComboBox Grid.Column="3" x:Name="Pri" Width="62" Margin="8,0,0,0"
