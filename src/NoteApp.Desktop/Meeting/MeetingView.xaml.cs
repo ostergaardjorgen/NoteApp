@@ -316,6 +316,37 @@ public partial class MeetingView : UserControl
         }
     }
 
+    /// <summary>
+    /// Boksen står klar til et booket møde — eller står ned igen.
+    /// </summary>
+    /// <param name="besked">
+    /// Hvad der skal stå. Null sætter hjælpeteksten tilbage, som den var.
+    /// </param>
+    /// <remarks>
+    /// KLAR SKAL SES, ELLERS ER DEN INGENTING. Hele grunden til at stille
+    /// boksen klar to minutter før er, at man kan kigge på skærmen og vide, at
+    /// den er der. Står der den samme grå hjælpetekst som altid, har
+    /// klargøringen ingen værdi — så kunne den lige så godt køre usynligt.
+    ///
+    /// Derfor skifter både farve og vægt. Grøn og halvfed er «det her er i
+    /// orden, og det er nyt» — ikke rød, for der optages ikke endnu, og rødt
+    /// betyder optagelse alle andre steder i appen.
+    /// </remarks>
+    public void StaaKlar(string? besked)
+    {
+        if (besked is null)
+        {
+            KlarTekst.SetResourceReference(TextBlock.ForegroundProperty, "TekstMeget");
+            KlarTekst.FontWeight = FontWeights.Normal;
+            KlarTekst.Text = NoteApp.Core.Sprog.T("topbar.hjaelp");
+            return;
+        }
+
+        KlarTekst.SetResourceReference(TextBlock.ForegroundProperty, "Godkendt");
+        KlarTekst.FontWeight = FontWeights.SemiBold;
+        KlarTekst.Text = besked;
+    }
+
     /// <summary>Starter uden svar på noget. Genvejstasten spørger bagefter.</summary>
     public void Start() => Start(null);
 

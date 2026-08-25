@@ -793,5 +793,11 @@
     "hentfoersttekst": "Switching requires the model to be downloaded first — {0}. It comes from huggingface.co, and nothing is sent from your machine.",
     "hentnu": "Download it now",
     "skiftet": "{0} is now used for transcription."
+  },
+  "klar": {
+    "staarklar": "READY for «{0}» {1} — recording starts by itself once you begin talking. Nothing is being recorded yet.",
+    "venterpaasvar": "READY for «{0}» {1} — there is sound from the meeting. Say something and recording starts. Nothing is being recorded yet.",
+    "om": "in {0} min.",
+    "nu": "now"
   }
 }

@@ -793,5 +793,11 @@
     "hentfoersttekst": "Et skift kræver, at modellen hentes først — {0}. Den hentes fra huggingface.co, og der sendes intet fra din maskine.",
     "hentnu": "Hent den nu",
     "skiftet": "{0} bruges nu til transskription."
+  },
+  "klar": {
+    "staarklar": "KLAR til «{0}» {1} — optagelsen starter af sig selv, når I begynder at tale. Der optages ikke endnu.",
+    "venterpaasvar": "KLAR til «{0}» {1} — der er lyd fra mødet. Sig noget, så starter optagelsen. Der optages ikke endnu.",
+    "om": "om {0} min.",
+    "nu": "nu"
   }
 }

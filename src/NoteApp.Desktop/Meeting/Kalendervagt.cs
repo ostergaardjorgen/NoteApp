@@ -1,11 +1,11 @@
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Threading;
 using NoteApp.Core;
 
 namespace NoteApp.Desktop.Meeting;
 
 /// <summary>
-/// Starter optagelsen af sig selv, når et møde begynder.
+/// Stiller optageboksen klar, før et møde begynder.
 ///
 /// KUN DE AFTALER, DER ER MARKERET. Vagten går ikke i gang, fordi der står et
 /// møde i kalenderen — den gør det, fordi nogen har sat hak ved «Optag
@@ -53,16 +53,16 @@ public sealed class Kalendervagt
     private static readonly TimeSpan Efter = TimeSpan.FromMinutes(10);
 
     private readonly Func<bool> _optagerAllerede;
-    private readonly Action<Aftale> _start;
+    private readonly Action<Aftale> _klargoer;
 
     // Et halvt minut. Fint nok, naar der startes to minutter foer - og
     // billigt: der laeses én fil.
     private readonly DispatcherTimer _ur = new() { Interval = TimeSpan.FromSeconds(30) };
 
-    public Kalendervagt(Func<bool> optagerAllerede, Action<Aftale> start)
+    public Kalendervagt(Func<bool> optagerAllerede, Action<Aftale> klargoer)
     {
         _optagerAllerede = optagerAllerede;
-        _start = start;
+        _klargoer = klargoer;
 
         _ur.Tick += (_, _) => Kig();
         _ur.Start();
@@ -96,17 +96,22 @@ public sealed class Kalendervagt
 
             if (klar is null) return;
 
-            // MAERKET FOERST, START BAGEFTER.
+            // DER MAERKES IKKE HER LAENGERE.
             //
-            // Skrives det bagefter, og gaar noget galt undervejs, staar
-            // aftalen umaerket - og saa proever vagten igen om et halvt
-            // minut. Og igen. En moedetype, der starter en optagelse hvert
-            // halve minut, er en vaerre fejl end en optagelse, der ikke kom i
-            // gang.
-            klar.Startet = nu;
-            Kalender.Gem(klar);
-
-            _start(klar);
+            // Foer stod der «klar.Startet = nu» paa dette sted, fordi vagten
+            // startede optagelsen med det samme. Nu STILLER den kun boksen
+            // klar, og en boks, der staar klar, er ikke en optagelse, der er
+            // gaaet i gang. Maerkede den aftalen her, ville et moede, der blev
+            // aflyst, staa som optaget - og vagten ville aldrig stille klar
+            // til det igen, hvis det blev flyttet en time frem.
+            //
+            // Maerkningen sker, hvor optagelsen faktisk begynder. Startklar
+            // kalder samme vej som knappen.
+            //
+            // Stil() kan derfor kaldes hvert halve minut med den samme aftale
+            // uden at nulstille noget; den ser selv, at den allerede staar
+            // klar til netop den.
+            _klargoer(klar);
         }
         catch (Exception)
         {

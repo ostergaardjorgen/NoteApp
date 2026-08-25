@@ -384,11 +384,55 @@ public partial class MainWindow : Window
     /// </summary>
     public Kalendervagt Kalendervagten => _kalendervagt ??= new Kalendervagt(
         optagerAllerede: () => _moede.IsRecording,
-        start: a =>
+        klargoer: a =>
         {
+            // VINDUET HENTES FREM. Hele pointen er, at man kan SE, at boksen
+            // staar klar; ligger den bag et andet program, staar den klar for
+            // ingen.
             App.HentFrem(this);
-            OptagAftale(a, spoerg: false);
+            Startklaren.Stil(a);
         });
+
+    private Startklar? _startklar;
+
+    /// <summary>
+    /// Boksen, der staar klar foer et booket moede og selv trykker paa knappen.
+    ///
+    /// Den ligger HER og ikke i MeetingView, fordi den skal virke, uanset
+    /// hvilken skaerm man staar paa - praecis som Kalendervagten.
+    /// </summary>
+    private Startklar Startklaren
+    {
+        get
+        {
+            if (_startklar is not null) return _startklar;
+
+            _startklar = new Startklar(() => _moede.IsRecording);
+
+            _startklar.Aendret += () =>
+            {
+                if (_startklar!.Aftalen is not { } a) { _moede.StaaKlar(null); return; }
+
+                var om = a.Start - DateTimeOffset.Now;
+                var naar = om > TimeSpan.Zero
+                    ? string.Format(NoteApp.Core.Sprog.T("klar.om"), (int)Math.Ceiling(om.TotalMinutes))
+                    : NoteApp.Core.Sprog.T("klar.nu");
+
+                _moede.StaaKlar(string.Format(
+                    NoteApp.Core.Sprog.T(_startklar.VenterPaaSvar ? "klar.venterpaasvar" : "klar.staarklar"),
+                    a.Titel, naar));
+            };
+
+            _startklar.Gaaigang += a =>
+            {
+                _moede.StaaKlar(null);
+                App.HentFrem(this);
+                OptagAftale(a, spoerg: false);
+            };
+
+            return _startklar;
+        }
+    }
 
     private Moedevagt? _moedevagt;
 
@@ -657,6 +701,22 @@ public partial class MainWindow : Window
         }
 
         _venterAftale = a;
+
+        // MAERKET HER, hvor optagelsen faktisk begynder.
+        //
+        // Foer stod det i Kalendervagten, som dengang startede optagelsen selv.
+        // Nu STILLER vagten kun boksen klar, og en boks, der staar klar, er
+        // ikke en optagelse. Blev aftalen maerket dengang, ville et aflyst
+        // moede staa som optaget - og var det blevet flyttet en time frem,
+        // ville boksen aldrig stille sig klar til det igen.
+        //
+        // Uden maerkning ville vagten til gengaeld stille klar igen, saa snart
+        // optagelsen stoppede. Derfor skal den staa - bare her.
+        if (a.Startet is null)
+        {
+            a.Startet = DateTimeOffset.Now;
+            Kalender.Gem(a);
+        }
 
         _moede.Start(new MeetingView.Opstart(
             a.Sprog, a.Link.Length > 0 ? a.Link : null,
