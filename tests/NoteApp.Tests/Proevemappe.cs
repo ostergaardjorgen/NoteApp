@@ -1,4 +1,4 @@
-using NoteApp.Core;
+﻿using NoteApp.Core;
 
 namespace NoteApp.Tests;
 
@@ -30,6 +30,13 @@ public sealed class Proevemappe : IDisposable
         Environment.SetEnvironmentVariable(UserDataPaths.OverrideVariable, Sti);
 
         UserDataPaths.EnsureCreated();
+
+        // SPROGET LAESES FORFRA. Sprog holder teksterne i en statisk cache, og
+        // den ville ellers pege paa den FOERSTE proeves datamappe resten af
+        // koerslen - en faelde, der foerst viser sig, naar nogen laver en
+        // proeve, der skifter sprog.
+        AppSettings.Reload();
+        Sprog.Genindlaes();
     }
 
     public string Sti { get; }

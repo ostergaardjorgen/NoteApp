@@ -439,8 +439,8 @@ public partial class SearchView : UserControl
         // svarer paa «hvor meget ligger der forude», som listen ikke selv
         // svarer paa, foer man har rullet den igennem.
         Kalenderoverskrift.Text = kommende.Count == 0
-            ? "Kalender"
-            : $"Kalender · {kommende.Count}";
+            ? Sprog.T("kalender.titel")
+            : Sprog.T("kalender.titelmed", kommende.Count);
 
         VisSynktilstand();
     }
@@ -674,12 +674,13 @@ public partial class SearchView : UserControl
             is Hastighed.Overskredet or Hastighed.I_dag);
 
         OpgaveOverskrift.Text = aabne.Count == 0
-            ? "Ingen åbne opgaver"
-            : haster > 0 ? $"{haster} skal gøres nu" : "Åbne opgaver";
+            ? Sprog.T("opgaver.ingen")
+            : haster > 0 ? Sprog.T("opgaver.haster", haster) : Sprog.T("opgaver.aabne");
 
         OpgaveTal.Text = aabne.Count == 0
             ? ""
-            : $"{aabne.Count} i alt fra {aabne.Select(r => r.MoedeId).Distinct().Count()} optagelser";
+            : Sprog.T("opgaver.ialt", aabne.Count,
+                      aabne.Select(r => r.MoedeId).Distinct().Count());
 
         VisSynktilstand();
     }
@@ -705,7 +706,24 @@ public partial class SearchView : UserControl
     private void LytEfterSynk()
     {
         Jobs.Synkvagt.Hentet += Synkkom;
-        Unloaded += (_, _) => Jobs.Synkvagt.Hentet -= Synkkom;
+        Sprog.Aendret += Sprogskiftet;
+
+        Unloaded += (_, _) =>
+        {
+            Jobs.Synkvagt.Hentet -= Synkkom;
+            Sprog.Aendret -= Sprogskiftet;
+        };
+    }
+
+    /// <summary>
+    /// Sproget er skiftet. De tekster, der er BUNDET i XAML, skifter af sig
+    /// selv; dem, der bygges her i koden — overskrifter med tal i — skal
+    /// skrives om.
+    /// </summary>
+    private void Sprogskiftet()
+    {
+        VisKalender();
+        VisOpgaver();
     }
 
     private void Synkkom()
@@ -739,7 +757,7 @@ public partial class SearchView : UserControl
 
         _synker = true;
         Kalendersynk.IsEnabled = false;
-        Kalendersynklinje.Text = "Henter fra Google …";
+        Kalendersynklinje.Text = Sprog.T("kalender.henter");
 
         try
         {
@@ -772,7 +790,7 @@ public partial class SearchView : UserControl
 
         _synker = true;
         Opgavesynk.IsEnabled = false;
-        Opgavesynklinje.Text = "Henter fra Google …";
+        Opgavesynklinje.Text = Sprog.T("kalender.henter");
 
         try
         {

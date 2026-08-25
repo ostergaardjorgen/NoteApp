@@ -1,0 +1,92 @@
+{
+  "_sprog": {
+    "kode": "da",
+    "navn": "Dansk",
+    "flag": "DK",
+    "_note": "Dansk er kildesproget. Alt andet falder tilbage hertil, så denne fil skal være komplet."
+  },
+  "nav": {
+    "cockpit": "Cockpit",
+    "optagelser": "Optagelser",
+    "dokumenter": "Dokumenter",
+    "moedetyper": "Mødetyper",
+    "modeller": "AI-modeller",
+    "compliance": "Compliance",
+    "historik": "Historik",
+    "indstillinger": "Indstillinger",
+    "dinedata": "Dine data"
+  },
+  "topbar": {
+    "optag": "Optag møde",
+    "webinar": "Webinar",
+    "hjaelp": "Tryk optag, når mødet begynder. Du navngiver det bagefter — og du kan skrive noter undervejs.",
+    "optagmed": "OPTAG MED",
+    "pause": "❚❚ Pause",
+    "fortsaet": "▶ Fortsæt",
+    "stop": "■ Stop og gem",
+    "beskeder": "Beskeder om det, appen har lavet færdigt",
+    "sprog": "Sprog",
+    "vaelgsprog": "Skift sproget i appen"
+  },
+  "cockpit": {
+    "titel": "Cockpit",
+    "under": "Alt, der er sagt og skrevet — transkriptioner, dine noter og de færdige dokumenter. Søgningen læser filerne på din maskine, og der sendes intet.",
+    "soeg": "Hvad leder du efter?",
+    "soegkun": "Søg kun i",
+    "heletiden": "Hele tiden",
+    "allemapper": "Alle mapper",
+    "allemoedetyper": "Alle mødetyper",
+    "allesprog": "Alle sprog",
+    "tomtitel": "Hvad leder du efter?",
+    "tomtekst": "Der søges i alle transkriptioner, i de noter du skrev undervejs, og i dokumenter appen har lavet. Flere ord betyder, at de alle skal stå tæt på hinanden.",
+    "tomfod": "Filerne læses på din maskine. Der sendes intet."
+  },
+  "kalender": {
+    "titel": "Kalender",
+    "titelmed": "Kalender · {0}",
+    "nyaftale": "Ny aftale",
+    "hentaftaler": "Hent aftaler fra Google",
+    "hentaftalerhjaelp": "Hent aftalerne fra Google nu. Der hentes også af sig selv hvert kvarter",
+    "henter": "Henter fra Google …",
+    "idag": "I DAG",
+    "imorgen": "I MORGEN"
+  },
+  "opgaver": {
+    "ingen": "Ingen åbne opgaver",
+    "aabne": "Åbne opgaver",
+    "haster": "{0} skal gøres nu",
+    "ialt": "{0} i alt fra {1} optagelser",
+    "hentopgaver": "Hent opgaver fra Google",
+    "hentopgaverhjaelp": "Hent opgaverne fra Google Tasks nu. Der hentes også af sig selv hvert kvarter"
+  },
+  "synk": {
+    "aldrig": "aldrig hentet",
+    "ligenu": "hentet lige nu",
+    "minutter": "hentet for {0} min. siden",
+    "idag": "hentet kl. {0}",
+    "igaar": "hentet i går kl. {0}",
+    "dato": "hentet {0} kl. {1}",
+    "ingenkalender": "Ingen kalender er forbundet.",
+    "ingenopgaver": "Opgaverne er ikke forbundet.",
+    "aftalerhentet": "{0} aftaler hentet",
+    "enaftalehentet": "1 aftale hentet",
+    "opgaverhentet": "{0} opgaver hentet",
+    "enopgavehentet": "1 opgave hentet"
+  },
+  "faelles": {
+    "gem": "Gem",
+    "gemogluk": "Gem og luk",
+    "luk": "Luk",
+    "annuller": "Annullér",
+    "slet": "Slet",
+    "fjern": "Fjern",
+    "aabn": "Åbn",
+    "tilbage": "Tilbage",
+    "ja": "Ja",
+    "nej": "Nej"
+  },
+  "sprog": {
+    "aabnmappe": "Tilføj et sprog …",
+    "kunneikkeaabne": "Mappen kunne ikke åbnes"
+  }
+}

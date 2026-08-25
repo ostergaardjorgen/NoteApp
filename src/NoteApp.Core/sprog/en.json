@@ -1,0 +1,92 @@
+{
+  "_sprog": {
+    "kode": "en",
+    "navn": "English",
+    "flag": "GB",
+    "_note": "Keys missing here fall back to Danish, which is the source language."
+  },
+  "nav": {
+    "cockpit": "Cockpit",
+    "optagelser": "Recordings",
+    "dokumenter": "Documents",
+    "moedetyper": "Meeting types",
+    "modeller": "AI models",
+    "compliance": "Compliance",
+    "historik": "History",
+    "indstillinger": "Settings",
+    "dinedata": "Your data"
+  },
+  "topbar": {
+    "optag": "Record meeting",
+    "webinar": "Webinar",
+    "hjaelp": "Press record when the meeting starts. You name it afterwards — and you can write notes as you go.",
+    "optagmed": "RECORD WITH",
+    "pause": "❚❚ Pause",
+    "fortsaet": "▶ Resume",
+    "stop": "■ Stop and save",
+    "beskeder": "Notifications about what the app has finished",
+    "sprog": "Language",
+    "vaelgsprog": "Change the language of the app"
+  },
+  "cockpit": {
+    "titel": "Cockpit",
+    "under": "Everything said and written — transcripts, your notes and the finished documents. Search reads the files on your machine, and nothing is sent.",
+    "soeg": "What are you looking for?",
+    "soegkun": "Search only in",
+    "heletiden": "All time",
+    "allemapper": "All folders",
+    "allemoedetyper": "All meeting types",
+    "allesprog": "All languages",
+    "tomtitel": "What are you looking for?",
+    "tomtekst": "Searches all transcripts, the notes you wrote during the meeting, and documents the app has made. More words means they must all appear close together.",
+    "tomfod": "The files are read on your machine. Nothing is sent."
+  },
+  "kalender": {
+    "titel": "Calendar",
+    "titelmed": "Calendar · {0}",
+    "nyaftale": "New event",
+    "hentaftaler": "Fetch events from Google",
+    "hentaftalerhjaelp": "Fetch the events from Google now. They are also fetched automatically every fifteen minutes",
+    "henter": "Fetching from Google …",
+    "idag": "TODAY",
+    "imorgen": "TOMORROW"
+  },
+  "opgaver": {
+    "ingen": "No open tasks",
+    "aabne": "Open tasks",
+    "haster": "{0} due now",
+    "ialt": "{0} in total from {1} recordings",
+    "hentopgaver": "Fetch tasks from Google",
+    "hentopgaverhjaelp": "Fetch the tasks from Google Tasks now. They are also fetched automatically every fifteen minutes"
+  },
+  "synk": {
+    "aldrig": "never fetched",
+    "ligenu": "fetched just now",
+    "minutter": "fetched {0} min. ago",
+    "idag": "fetched at {0}",
+    "igaar": "fetched yesterday at {0}",
+    "dato": "fetched {0} at {1}",
+    "ingenkalender": "No calendar is connected.",
+    "ingenopgaver": "Tasks are not connected.",
+    "aftalerhentet": "{0} events fetched",
+    "enaftalehentet": "1 event fetched",
+    "opgaverhentet": "{0} tasks fetched",
+    "enopgavehentet": "1 task fetched"
+  },
+  "faelles": {
+    "gem": "Save",
+    "gemogluk": "Save and close",
+    "luk": "Close",
+    "annuller": "Cancel",
+    "slet": "Delete",
+    "fjern": "Remove",
+    "aabn": "Open",
+    "tilbage": "Back",
+    "ja": "Yes",
+    "nej": "No"
+  },
+  "sprog": {
+    "aabnmappe": "Add a language …",
+    "kunneikkeaabne": "The folder could not be opened"
+  }
+}

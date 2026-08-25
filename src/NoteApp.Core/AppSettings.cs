@@ -24,6 +24,17 @@ public sealed class AppSettings
 
     public bool SetupCompleted { get; set; }
 
+    /// <summary>
+    /// Sproget, BRUGERFLADEN vises på — «da», «en» og hvad der ellers ligger
+    /// i sprogmappen. Null betyder dansk.
+    ///
+    /// FORVEKSLES IKKE MED <see cref="MitSprog"/>. Det er sproget, du TALER,
+    /// og det bruges til at skrive lyden ud. De to har intet med hinanden at
+    /// gøre: man kan udmærket køre appen på engelsk og holde sine møder på
+    /// dansk — og det gør man, hvis man har en udenlandsk kollega kigge med.
+    /// </summary>
+    public string? Sprog { get; set; }
+
     public string? Industry { get; set; }
 
     public string? BackupDestination { get; set; }

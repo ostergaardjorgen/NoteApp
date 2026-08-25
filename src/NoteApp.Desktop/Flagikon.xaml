@@ -1,0 +1,76 @@
+<UserControl x:Class="NoteApp.Desktop.Flagikon"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Width="22" Height="16">
+
+  <!-- ========================== FLAGENE ==========================
+
+       DE ER TEGNET, IKKE SKREVET SOM EMOJI.
+
+       Windows viser med vilje ikke nationale flag: 🇩🇰 bliver til bogstaverne
+       «DK» i en kasse. Skal der være et flag på knappen, skal det tegnes.
+
+       Hvert flag er en Viewbox over en tegning i faste mål, så formen bliver
+       den samme, uanset hvor stor knappen er.
+
+       ET NYT SPROG BEHØVER IKKE ET FLAG. Er koden ukendt, vises landekoden i
+       en afrundet kasse — det samme, Windows selv gør. Så virker en ny
+       sprogfil med det samme, og et flag kan tegnes bagefter, hvis nogen får
+       lyst. Se Sprog.cs om hvordan et sprog tilføjes. -->
+
+  <Grid>
+
+    <!-- ===================== DANNEBROG =====================
+         Officielt forhold 37:28. Korset sidder ikke i midten: den lodrette
+         hvide stribe ligger mod stangen. -->
+    <Viewbox x:Name="Dansk" Stretch="Fill" Visibility="Collapsed">
+      <Canvas Width="37" Height="28">
+        <Rectangle Width="37" Height="28" Fill="#FFC8102E" />
+        <Rectangle Canvas.Left="12" Width="4" Height="28" Fill="#FFFFFFFF" />
+        <Rectangle Canvas.Top="12" Width="37" Height="4" Fill="#FFFFFFFF" />
+      </Canvas>
+    </Viewbox>
+
+    <!-- ===================== UNION JACK =====================
+         Lagene i den rækkefølge, de faktisk ligger: blå bund, hvide
+         diagonaler, røde diagonaler forskudt, hvidt kors, rødt kors.
+
+         De røde diagonaler er MODSAT forskudt i de to halvdele — det er
+         detaljen, der gør, at flaget kan vendes forkert. Her er den rigtig:
+         rødt over hvidt mod stangen foroven. -->
+    <Viewbox x:Name="Britisk" Stretch="Fill" Visibility="Collapsed">
+      <Canvas Width="60" Height="30" ClipToBounds="True">
+        <Rectangle Width="60" Height="30" Fill="#FF012169" />
+
+        <!-- Hvide diagonaler -->
+        <Path Fill="#FFFFFFFF"
+              Data="M 0,0 L 8,0 L 60,26 L 60,30 L 52,30 L 0,4 Z
+                    M 60,0 L 60,4 L 8,30 L 0,30 L 0,26 L 52,0 Z" />
+
+        <!-- Roede diagonaler, forskudt -->
+        <Path Fill="#FFC8102E"
+              Data="M 0,0 L 5,0 L 60,27.5 L 60,30 L 55,30 L 0,2.5 Z" />
+        <Path Fill="#FFC8102E"
+              Data="M 60,0 L 60,2.5 L 5,30 L 0,30 L 0,27.5 L 55,0 Z" />
+
+        <!-- Hvidt kors -->
+        <Rectangle Canvas.Left="25" Width="10" Height="30" Fill="#FFFFFFFF" />
+        <Rectangle Canvas.Top="10" Width="60" Height="10" Fill="#FFFFFFFF" />
+
+        <!-- Roedt kors -->
+        <Rectangle Canvas.Left="27" Width="6" Height="30" Fill="#FFC8102E" />
+        <Rectangle Canvas.Top="12" Width="60" Height="6" Fill="#FFC8102E" />
+      </Canvas>
+    </Viewbox>
+
+    <!-- ===================== ET SPROG UDEN FLAG =====================
+         Landekoden i en kasse. Det er det samme, Windows selv gør, og det
+         betyder, at en ny sprogfil virker uden at nogen skal tegne noget. -->
+    <Border x:Name="Kodekasse" CornerRadius="3" Visibility="Collapsed"
+            Background="#FF39414F" BorderBrush="#FF5A6472" BorderThickness="1">
+      <TextBlock x:Name="Kodetekst" FontSize="8.5" FontWeight="SemiBold"
+                 HorizontalAlignment="Center" VerticalAlignment="Center"
+                 Foreground="#FFEDF0F5" />
+    </Border>
+  </Grid>
+</UserControl>

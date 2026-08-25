@@ -1,6 +1,7 @@
 ﻿<UserControl x:Class="NoteApp.Desktop.Search.SearchView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:NoteApp.Desktop">
 
   <!-- ================== SØGNING PÅ TVÆRS ==================
 
@@ -89,12 +90,12 @@
                   <Button x:Name="Kalendersynk" Click="Kalendersynk_Klik"
                           Style="{StaticResource IkonKnap}" Margin="0,0,6,0"
                           Visibility="Collapsed"
-                          AutomationProperties.Name="Hent aftaler fra Google"
-                          ToolTip="Hent aftalerne fra Google nu. Der hentes også af sig selv hvert kvarter">
+                          AutomationProperties.Name="{local:Oversat kalender.hentaftaler}"
+                          ToolTip="{local:Oversat kalender.hentaftalerhjaelp}">
                     <TextBlock x:Name="Kalendersynkglyf" Text="&#xE895;"
                                FontFamily="Segoe MDL2 Assets" FontSize="13" />
                   </Button>
-                  <Button Content="Ny aftale" Click="NyAftale_Klik"
+                  <Button Content="{local:Oversat kalender.nyaftale}" Click="NyAftale_Klik"
                           VerticalAlignment="Center" Padding="10,3" FontSize="11" />
                 </StackPanel>
               </Grid>
@@ -212,7 +213,7 @@
                  HorizontalAlignment="Center" />
       <TextBlock Style="{StaticResource Underskrift}" Margin="0,5,0,0"
                  TextAlignment="Center" MaxWidth="620" TextWrapping="Wrap"
-                 Text="Alt, der er sagt og skrevet — transkriptioner, dine noter og de færdige dokumenter. Søgningen læser filerne på din maskine, og der sendes intet." />
+                 Text="{local:Oversat cockpit.under}" />
     </StackPanel>
 
     <Border Background="{StaticResource Panel}" CornerRadius="12"
@@ -238,7 +239,7 @@
         <TextBlock x:Name="Pladsholder" Grid.Column="1" IsHitTestVisible="False" FontSize="18"
                    Margin="13,0,0,0" VerticalAlignment="Center"
                    Foreground="{StaticResource TekstMeget}"
-                   Text="Hvad leder du efter?" />
+                   Text="{local:Oversat cockpit.soeg}" />
 
         <!-- Krydset rydder feltet i ét klik — samme som i udskriftens
              søgefelt, og af samme grund: et søgeord på tyve tegn skal ellers
@@ -354,14 +355,14 @@
                bliver soegt i. Kort - det er en oplysning, ikke en skaerm. -->
           <StackPanel x:Name="TomPanel" VerticalAlignment="Center" HorizontalAlignment="Center"
                       MaxWidth="440" Margin="24">
-            <TextBlock Text="Hvad leder du efter?" FontSize="16" FontWeight="SemiBold"
+            <TextBlock Text="{local:Oversat cockpit.tomtitel}" FontSize="16" FontWeight="SemiBold"
                        HorizontalAlignment="Center" />
             <TextBlock FontSize="12.5" Margin="0,10,0,0" TextWrapping="Wrap" LineHeight="20"
                        TextAlignment="Center" Foreground="{StaticResource TekstSvag}"
-                       Text="Der søges i alle transkriptioner, i de noter du skrev undervejs, og i de dokumenter appen har lavet. Flere ord betyder, at de alle skal stå tæt på hinanden." />
+                       Text="{local:Oversat cockpit.tomtekst}" />
             <TextBlock FontSize="12" Margin="0,12,0,0" TextWrapping="Wrap" LineHeight="19"
                        TextAlignment="Center" Foreground="{StaticResource TekstMeget}"
-                       Text="Filerne læses på din maskine. Der sendes intet." />
+                       Text="{local:Oversat cockpit.tomfod}" />
           </StackPanel>
 
           <!-- ============ FANER OG SORTERING ============
@@ -581,8 +582,8 @@
                   <Button x:Name="Opgavesynk" Click="Opgavesynk_Klik"
                           Style="{StaticResource IkonKnap}" Margin="6,0,0,0"
                           Visibility="Collapsed"
-                          AutomationProperties.Name="Hent opgaver fra Google"
-                          ToolTip="Hent opgaverne fra Google Tasks nu. Der hentes også af sig selv hvert kvarter">
+                          AutomationProperties.Name="{local:Oversat opgaver.hentopgaver}"
+                          ToolTip="{local:Oversat opgaver.hentopgaverhjaelp}">
                     <TextBlock x:Name="Opgavesynkglyf" Text="&#xE895;"
                                FontFamily="Segoe MDL2 Assets" FontSize="13" />
                   </Button>

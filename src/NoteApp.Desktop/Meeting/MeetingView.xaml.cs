@@ -1,4 +1,4 @@
-using System.IO;
+﻿using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -34,6 +34,13 @@ public partial class MeetingView : UserControl
     public MeetingView()
     {
         InitializeComponent();
+
+        // Flaget paa sprogknappen. Det skal ogsaa foelge med, naar sproget
+        // skiftes fra et andet vindue - derfor lyttes der, og der kobles af
+        // igen, naar bjaelken forsvinder.
+        VisSprogflag();
+        NoteApp.Core.Sprog.Aendret += VisSprogflag;
+        Unloaded += (_, _) => NoteApp.Core.Sprog.Aendret -= VisSprogflag;
 
         _ur = new DispatcherTimer(DispatcherPriority.Render) { Interval = TimeSpan.FromMilliseconds(250) };
         _ur.Tick += (_, _) => Opdater();
@@ -936,6 +943,30 @@ public partial class MeetingView : UserControl
 
         KlokkeBadge.Visibility = nye == 0 ? Visibility.Collapsed : Visibility.Visible;
         KlokkeTal.Text = nye > 9 ? "9+" : nye.ToString();
+    }
+
+    // ========================= SPROGET =========================
+    //
+    // Selve mekanikken ligger i NoteApp.Core.Sprog og i Sprogbinding.cs.
+    // Her er kun knappen og flaget paa den.
+
+    private void Sprog_Click(object sender, RoutedEventArgs e) => Sprogmenu.Vis(SprogKnap);
+
+    /// <summary>
+    /// Sætter flaget på knappen efter det sprog, der vises nu.
+    ///
+    /// Kaldes ved opstart og hver gang sproget skifter. Flaget er ikke bundet
+    /// som teksterne er, fordi det ikke er en streng — det er en tegning, der
+    /// skal vælges.
+    /// </summary>
+    private void VisSprogflag()
+    {
+        var nu = NoteApp.Core.Sprog.Kode;
+
+        var valgt = NoteApp.Core.Sprog.Tilgaengelige()
+            .FirstOrDefault(s => string.Equals(s.Kode, nu, StringComparison.OrdinalIgnoreCase));
+
+        SprogFlag.Kode = valgt?.Flag ?? nu.ToUpperInvariant();
     }
 
     private void Klokke_Click(object sender, RoutedEventArgs e)

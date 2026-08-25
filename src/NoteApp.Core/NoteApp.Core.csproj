@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0-windows</TargetFramework>
@@ -24,6 +24,11 @@
     <!-- Skabelonerne indlejres, saa de kan laegges i datamappen ved foerste
          brug. De skal LIGGE som filer, brugeren kan rette. -->
     <EmbeddedResource Include="Llm\skabeloner\*.md" />
+
+    <!-- Sprogfilerne. Samme princip: de foelger med appen og laegges i
+         datamappen ved foerste brug, saa et nyt sprog er EEN FIL, der
+         laegges i mappen - uden at der skal bygges noget. Se Sprog.cs. -->
+    <EmbeddedResource Include="sprog\*.json" />
   </ItemGroup>
 
 </Project>

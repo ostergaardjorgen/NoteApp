@@ -1,4 +1,4 @@
-namespace NoteApp.Core;
+﻿namespace NoteApp.Core;
 
 /// <summary>Hvad en hentning endte med. <c>Antal</c> er, hvor mange der kom ind.</summary>
 public sealed record Synksvar(bool Lykkedes, int Antal, string Besked);
@@ -61,7 +61,7 @@ public static class Synkronisering
         var klar = Kalenderintegrationer();
 
         if (klar.Count == 0)
-            return new Synksvar(false, 0, "Ingen kalender er forbundet.");
+            return new Synksvar(false, 0, Sprog.T("synk.ingenkalender"));
 
         var i_alt = 0;
         var fejl = new List<string>();
@@ -93,7 +93,7 @@ public static class Synkronisering
         if (fejl.Count == klar.Count)
             return new Synksvar(false, 0, string.Join("  ·  ", fejl));
 
-        var besked = i_alt == 1 ? "1 aftale hentet" : $"{i_alt} aftaler hentet";
+        var besked = i_alt == 1 ? Sprog.T("synk.enaftalehentet") : Sprog.T("synk.aftalerhentet", i_alt);
         if (fejl.Count > 0) besked += "  ·  " + string.Join("  ·  ", fejl);
 
         return new Synksvar(true, i_alt, besked);
@@ -105,7 +105,7 @@ public static class Synkronisering
         var o = Integrationsfiler.Hent(Googleopgaver.Id);
 
         if (!o.ErForbundet)
-            return new Synksvar(false, 0, "Opgaverne er ikke forbundet.");
+            return new Synksvar(false, 0, Sprog.T("synk.ingenopgaver"));
 
         try
         {
@@ -117,7 +117,7 @@ public static class Synkronisering
             o.SidsteFejl = "";
             Integrationsfiler.Gem(Googleopgaver.Id, o);
 
-            return new Synksvar(true, n, n == 1 ? "1 opgave hentet" : $"{n} opgaver hentet");
+            return new Synksvar(true, n, n == 1 ? Sprog.T("synk.enopgavehentet") : Sprog.T("synk.opgaverhentet", n));
         }
         catch (Exception ex)
         {
@@ -151,20 +151,20 @@ public static class Synkronisering
     /// <summary>«for et øjeblik siden», «for 12 min. siden», «i går kl. 14:30».</summary>
     public static string Siden(DateTimeOffset? hvornaar)
     {
-        if (hvornaar is not { } d) return "aldrig hentet";
+        if (hvornaar is not { } d) return Sprog.T("synk.aldrig");
 
         var gaaet = DateTimeOffset.Now - d;
 
-        if (gaaet < TimeSpan.FromMinutes(1)) return "hentet lige nu";
-        if (gaaet < TimeSpan.FromMinutes(60)) return $"hentet for {(int)gaaet.TotalMinutes} min. siden";
+        if (gaaet < TimeSpan.FromMinutes(1)) return Sprog.T("synk.ligenu");
+        if (gaaet < TimeSpan.FromMinutes(60)) return Sprog.T("synk.minutter", (int)gaaet.TotalMinutes);
 
         if (d.LocalDateTime.Date == DateTime.Today)
-            return $"hentet kl. {d.LocalDateTime:HH:mm}";
+            return Sprog.T("synk.idag", d.LocalDateTime.ToString("HH:mm"));
 
         if (d.LocalDateTime.Date == DateTime.Today.AddDays(-1))
-            return $"hentet i går kl. {d.LocalDateTime:HH:mm}";
+            return Sprog.T("synk.igaar", d.LocalDateTime.ToString("HH:mm"));
 
-        return $"hentet {d.LocalDateTime:dd-MM} kl. {d.LocalDateTime:HH:mm}";
+        return Sprog.T("synk.dato", d.LocalDateTime.ToString("dd-MM"), d.LocalDateTime.ToString("HH:mm"));
     }
 
     private static string Kort(string besked) =>
