@@ -186,6 +186,9 @@ public partial class TranscribeView : UserControl
     /// første — og så låste den sig selv fast på ét møde. Se OpdaterValg.
     /// </summary>
     private string? _koererPaa;
+
+    /// <summary>Koeres der kun talergenkendelse? Afgoer teksten i arbejdsvisningen.</summary>
+    private bool _koererKunStemmer;
     private string? _sidsteMappe;
 
     public TranscribeView() : this(null) { }
@@ -1020,6 +1023,33 @@ public partial class TranscribeView : UserControl
     /// den også, når der markeres en mappe — så skal knapperne blive grå, og
     /// forklaringen skal frem igen.
     /// </summary>
+    /// <summary>
+    /// Ruden, som den ser ud, mens der arbejdes på den valgte optagelse.
+    /// </summary>
+    /// <remarks>
+    /// DEN LIGGER ET STED, fordi den skal bruges to steder: når jobbet
+    /// startes, og når man vender TILBAGE til det møde, der køres på.
+    ///
+    /// Det andet var glemt. Man kunne gå væk fra det møde, der blev skrevet
+    /// ud — det er hele pointen — men kom man tilbage, blev det forrige
+    /// mødes tekst stående, mens bjælken nederst talte om det her. To møder
+    /// på én skærm og ingen måde at se hvilket. Set 25-08-2026.
+    ///
+    /// To kopier af den samme opsætning ville drive fra hinanden. Derfor én.
+    /// </remarks>
+    private void VisArbejdsvisning()
+    {
+        Forklaring.Visibility = Visibility.Visible;
+        Resultat.Visibility = Visibility.Collapsed;
+
+        ForklaringOverskrift.Text = _koererKunStemmer ? "Finder stemmerne …" : "Skriver lyden ud …";
+        ForklaringUnder.Text = _koererKunStemmer
+            ? "Teksten er skrevet ud i forvejen og bliver ikke lavet om. Der bliver kun " +
+              "skilt stemmer ad, så de kan navngives hver for sig. Det tager omkring et " +
+              "minut for hvert kvarters optagelse."
+            : "Fremdriften står nederst i ruden. Teksten dukker op her, når den er færdig, og bliver gemt automatisk.";
+    }
+
     private void OpdaterValg()
     {
         var valgt = Valgt;
@@ -1056,6 +1086,11 @@ public partial class TranscribeView : UserControl
         // Knapperne ovenfor er uaendret spaerret af «_afbryd is null»: der
         // koeres eet job ad gangen, og man skal ikke kunne saette et nyt i
         // gang eller slette noget under fode paa det, der arbejder.
+        // Stien til den valgte optagelse. Samme linje samme sted som paa
+        // Dokumenter og Skabeloner - det er den, man skal bruge, naar en fil
+        // skal findes frem uden om appen. Den saettes FOER spaerren nedenfor.
+        Stilinje.Text = valgt?.Mappe ?? "";
+
         // FREMDRIFTEN HOERER TIL DET MOEDE, DEN ARBEJDER PAA.
         //
         // Staar man paa et andet, ville en bjaelke i ruden se ud, som om DET
@@ -1067,7 +1102,11 @@ public partial class TranscribeView : UserControl
             Fremdriftsrude.Visibility = paaDenne ? Visibility.Visible : Visibility.Collapsed;
             AfbrydKnap.Visibility = paaDenne ? Visibility.Visible : Visibility.Collapsed;
 
-            if (paaDenne) return;
+            if (paaDenne)
+            {
+                VisArbejdsvisning();
+                return;
+            }
         }
 
         // Findes teksten allerede, vises den frem for forklaringen. Det er den,
@@ -1085,10 +1124,9 @@ public partial class TranscribeView : UserControl
             ? "Skriv lyden ud til tekst her på maskinen"
             : "Skriv lyden ud igen. Den nuværende transkription bliver overskrevet";
 
-        // Stien til den valgte optagelse. Samme linje samme sted som paa
-        // Dokumenter og Skabeloner - det er den, man skal bruge, naar en fil
-        // skal findes frem uden om appen.
-        Stilinje.Text = valgt?.Mappe ?? "";
+        // Stien er sat ovenfor - FOER spaerren, saa den ogsaa passer, naar man
+        // vender tilbage til det moede, der bliver skrevet ud. Stod den her,
+        // blev den haengende paa det forrige moedes mappe.
 
         ReferatKnap.IsEnabled = færdig is not null && _afbryd is null;
         KopierKnap.IsEnabled = færdig is not null;
@@ -1527,10 +1565,31 @@ public partial class TranscribeView : UserControl
         // Er én af dem ikke opfyldt, koeres sporet. Det er billigere at bruge
         // fem minutter for meget end at flette en udskrift, der ikke passer
         // til det, der blev bedt om.
-        bool KanGenbruges(string udbase, string lyd, string? sidst, string nu) =>
-            sidst is not null && sidst == nu
-            && File.Exists(udbase + ".json") && File.Exists(udbase + ".txt")
-            && File.GetLastWriteTimeUtc(udbase + ".json") > File.GetLastWriteTimeUtc(lyd);
+        // SPROGET LAESES I UDSKRIFTEN SELV, ikke kun i moedets metadata.
+        //
+        // Reglen sammenlignede foer det oenskede sprog med
+        // meeting.json -> ValgtSprogLoop. Var feltet tomt - og det var det paa
+        // hvert eneste moede, der blev optaget, foer opstartsdialogens fejl
+        // blev rettet 25-08-2026 - kunne det ikke matche noget, og et helt
+        // faerdigt spor blev skrevet ud igen. Maalt: 8 minutter 9 sekunder for
+        // arbejde, der allerede laa paa disken.
+        //
+        // whisper.cpp skriver selv sproget i sin json. Den fil siger, hvad
+        // udskriften ER; metadataen siger, hvad nogen valgte. Naar de to er
+        // uenige, er det filen, der har ret.
+        //
+        // Reglen selv er uaendret: et spor paa det forkerte sprog maa aldrig
+        // genbruges. Den spoerger bare det rigtige sted nu.
+        bool KanGenbruges(string udbase, string lyd, string? sidst, string nu)
+        {
+            if (!File.Exists(udbase + ".json") || !File.Exists(udbase + ".txt")) return false;
+            if (File.GetLastWriteTimeUtc(udbase + ".json") <= File.GetLastWriteTimeUtc(lyd)) return false;
+
+            var iUdskriften = Udskriftssprog.Hent(udbase + ".json");
+            var sprog = iUdskriften ?? sidst;
+
+            return sprog is not null && sprog == nu;
+        }
 
         var genbrugMik = KanGenbruges(udBase, wav, sidsteHovedsprog, mitSprog);
         var genbrugLoop = toSpor
@@ -1599,14 +1658,8 @@ public partial class TranscribeView : UserControl
         // Forklaringen bliver staaende, mens der koeres. Det er praecis dér,
         // den er noget vaerd: den svarer paa "hvor lang tid tager det" og
         // "maa jeg lave noget andet imens".
-        Forklaring.Visibility = Visibility.Visible;
-        Resultat.Visibility = Visibility.Collapsed;
-        ForklaringOverskrift.Text = kunStemmer ? "Finder stemmerne …" : "Skriver lyden ud …";
-        ForklaringUnder.Text = kunStemmer
-            ? "Teksten er skrevet ud i forvejen og bliver ikke lavet om. Der bliver kun " +
-              "skilt stemmer ad, så de kan navngives hver for sig. Det tager omkring et " +
-              "minut for hvert kvarters optagelse."
-            : "Fremdriften står nederst i ruden. Teksten dukker op her, når den er færdig, og bliver gemt automatisk.";
+        _koererKunStemmer = kunStemmer;
+        VisArbejdsvisning();
 
         // FREMDRIFTEN DAEKKER BEGGE SPOR.
         //
