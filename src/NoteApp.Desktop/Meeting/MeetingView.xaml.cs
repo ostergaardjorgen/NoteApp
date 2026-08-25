@@ -953,6 +953,14 @@ public partial class MeetingView : UserControl
     private void Sprog_Click(object sender, RoutedEventArgs e) => Sprogmenu.Vis(SprogKnap);
 
     /// <summary>
+    /// Åbner hjælpen. Den er ikke modal — man slår noget op MENS man
+    /// arbejder, og et vindue, der spærrer for appen, tvinger en til at lukke
+    /// hjælpen for at prøve det, man lige har læst.
+    /// </summary>
+    private void Hjaelp_Click(object sender, RoutedEventArgs e) =>
+        Help.HjaelpWindow.Aabn(Window.GetWindow(this));
+
+    /// <summary>
     /// Sætter flaget på knappen efter det sprog, der vises nu.
     ///
     /// Kaldes ved opstart og hver gang sproget skifter. Flaget er ikke bundet

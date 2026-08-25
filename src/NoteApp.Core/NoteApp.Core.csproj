@@ -29,6 +29,11 @@
          datamappen ved foerste brug, saa et nyt sprog er EEN FIL, der
          laegges i mappen - uden at der skal bygges noget. Se Sprog.cs. -->
     <EmbeddedResource Include="sprog\*.json" />
+
+    <!-- Hjaelpen. Samme princip som sprogfilerne: den foelger med appen
+         og laegges i datamappen ved foerste brug, saa teksterne kan
+         rettes uden at bygge noget. Se Hjaelp.cs. -->
+    <EmbeddedResource Include="hjaelp\**\*.md" />
   </ItemGroup>
 
 </Project>

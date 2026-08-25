@@ -37,6 +37,12 @@ public sealed class Proevemappe : IDisposable
         // proeve, der skifter sprog.
         AppSettings.Reload();
         Sprog.Genindlaes();
+
+        // OG HJAELPEN. Den holder afsnittene i den samme slags cache og ville
+        // ellers vise den FOERSTE proeves filer resten af koerslen. Proeverne
+        // bestod hver for sig og faldt samlet - den slags er den vaerste, for
+        // den ser ud som en fejl i koden.
+        Hjaelp.Genindlaes();
     }
 
     public string Sti { get; }

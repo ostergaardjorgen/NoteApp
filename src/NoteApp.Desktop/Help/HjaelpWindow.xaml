@@ -1,0 +1,152 @@
+<Window x:Class="NoteApp.Desktop.Help.HjaelpWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:i18n="clr-namespace:NoteApp.Desktop"
+        Title="{i18n:Oversat hjaelp.titel}"
+        Width="1000" Height="720" MinWidth="720" MinHeight="480"
+        WindowStartupLocation="CenterOwner"
+        Background="{StaticResource Baggrund}">
+
+  <!-- ============================ HJÆLPEN ============================
+
+       DEN LIGGER I APPEN OG IKKE PÅ EN HJEMMESIDE. Den virker uden net, den
+       kan ikke komme ud af trit med den udgave, man har installeret, og den
+       sender ingenting — heller ikke hvad man søgte efter.
+
+       TO SPALTER. Til venstre afsnittene, til højre teksten. Søgefeltet står
+       øverst i venstre spalte, fordi det er DEN, søgningen ændrer: listen
+       bliver til en liste over træf, og man vælger stadig i den. Et søgefelt
+       over hele vinduet ville se ud, som om det søgte i teksten til højre. -->
+
+  <Grid Margin="0">
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="300" MinWidth="220" />
+      <ColumnDefinition Width="Auto" />
+      <ColumnDefinition Width="*" MinWidth="320" />
+    </Grid.ColumnDefinitions>
+
+    <!-- ======================= VENSTRE: LISTEN ======================= -->
+    <Border Grid.Column="0" Background="{StaticResource Panel}"
+            BorderBrush="{StaticResource PanelKant}" BorderThickness="0,0,1,0">
+      <DockPanel Margin="14,16,14,12">
+
+        <StackPanel DockPanel.Dock="Top">
+          <TextBlock Text="{i18n:Oversat hjaelp.titel}" FontSize="17" FontWeight="SemiBold"
+                     Margin="4,0,0,10" />
+
+          <Border CornerRadius="8" Background="{StaticResource Baggrund}"
+                  BorderBrush="{StaticResource PanelKant}" BorderThickness="1"
+                  Padding="10,0" Margin="0,0,0,12">
+            <Grid>
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+              </Grid.ColumnDefinitions>
+
+              <TextBlock Grid.Column="0" Text="&#xE721;" FontFamily="Segoe MDL2 Assets"
+                         FontSize="13" VerticalAlignment="Center" Margin="0,0,8,0"
+                         Foreground="{StaticResource TekstMeget}" />
+
+              <TextBox x:Name="Felt" Grid.Column="1" FontSize="13.5" Padding="0,9"
+                       BorderThickness="0" Background="Transparent"
+                       TextChanged="Felt_Aendret" KeyDown="Felt_Tast" />
+
+              <TextBlock x:Name="Pladsholder" Grid.Column="1" IsHitTestVisible="False"
+                         FontSize="13.5" VerticalAlignment="Center"
+                         Foreground="{StaticResource TekstMeget}"
+                         Text="{i18n:Oversat hjaelp.soeg}" />
+
+              <Button x:Name="RydKnap" Grid.Column="2" Click="Ryd_Klik" Visibility="Collapsed"
+                      Padding="6,0" BorderThickness="0" Background="Transparent" Cursor="Hand"
+                      ToolTip="{i18n:Oversat hjaelp.ryd}">
+                <TextBlock Text="&#xE711;" FontFamily="Segoe MDL2 Assets" FontSize="12"
+                           Foreground="{StaticResource TekstMeget}" />
+              </Button>
+            </Grid>
+          </Border>
+
+          <TextBlock x:Name="Traeftal" FontSize="11" Margin="4,0,0,8"
+                     Visibility="Collapsed" Foreground="{StaticResource TekstMeget}" />
+        </StackPanel>
+
+        <ListBox x:Name="Liste" Background="Transparent" BorderThickness="0"
+                 SelectionChanged="Liste_Valgt"
+                 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+          <ListBox.ItemContainerStyle>
+            <Style TargetType="ListBoxItem">
+              <Setter Property="Padding" Value="0" />
+              <Setter Property="Margin" Value="0,0,0,3" />
+              <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+              <Setter Property="Template">
+                <Setter.Value>
+                  <ControlTemplate TargetType="ListBoxItem">
+                    <Border x:Name="flade" CornerRadius="7" Padding="10,8" Background="Transparent">
+                      <ContentPresenter />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                      <Trigger Property="IsMouseOver" Value="True">
+                        <Setter TargetName="flade" Property="Background" Value="#FF262D3A" />
+                      </Trigger>
+                      <Trigger Property="IsSelected" Value="True">
+                        <Setter TargetName="flade" Property="Background" Value="#FF2F3644" />
+                      </Trigger>
+                    </ControlTemplate.Triggers>
+                  </ControlTemplate>
+                </Setter.Value>
+              </Setter>
+            </Style>
+          </ListBox.ItemContainerStyle>
+
+          <ListBox.ItemTemplate>
+            <DataTemplate>
+              <StackPanel>
+                <TextBlock Text="{Binding Titel}" FontSize="13" FontWeight="SemiBold"
+                           TextWrapping="Wrap" Foreground="{StaticResource Tekst}" />
+
+                <!-- Ved en soegning staar uddraget her i stedet for
+                     undertitlen: det er dét, der viser, om traeffet er det,
+                     man leder efter, uden at aabne afsnittet. -->
+                <TextBlock Text="{Binding Under}" FontSize="11.5" Margin="0,3,0,0"
+                           TextWrapping="Wrap" LineHeight="17"
+                           Foreground="{StaticResource TekstMeget}">
+                  <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                      <Style.Triggers>
+                        <DataTrigger Binding="{Binding Under}" Value="">
+                          <Setter Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
+                      </Style.Triggers>
+                    </Style>
+                  </TextBlock.Style>
+                </TextBlock>
+              </StackPanel>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+      </DockPanel>
+    </Border>
+
+    <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch"
+                  Background="Transparent" Cursor="SizeWE"
+                  ToolTip="{i18n:Oversat faelles.traek_for_at_aendre_bredden}" />
+
+    <!-- ======================= HØJRE: TEKSTEN ======================= -->
+    <Grid Grid.Column="2">
+      <ScrollViewer x:Name="Rude" Padding="30,24,24,24"
+                    VerticalScrollBarVisibility="Auto"
+                    HorizontalScrollBarVisibility="Disabled">
+        <FlowDocumentScrollViewer x:Name="Visning" IsToolBarVisible="False"
+                                  VerticalScrollBarVisibility="Disabled"
+                                  HorizontalScrollBarVisibility="Disabled"
+                                  Background="Transparent"
+                                  Padding="0" Margin="0" />
+      </ScrollViewer>
+
+      <TextBlock x:Name="IntetFundet" FontSize="13.5" TextWrapping="Wrap"
+                 Visibility="Collapsed" MaxWidth="380" TextAlignment="Center"
+                 HorizontalAlignment="Center" VerticalAlignment="Center"
+                 LineHeight="21" Foreground="{StaticResource TekstSvag}" />
+    </Grid>
+  </Grid>
+</Window>

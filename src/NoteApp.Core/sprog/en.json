@@ -747,5 +747,15 @@
     "vaelger_du_et_google_meet_link_beder_appen": "If you choose a Google Meet link, the app asks Google to create the meeting room. The link comes back with it, so the meeting can be started from the calendar here.",
     "vilkaar_gennemgaaet_17_08_2026": "Terms reviewed 17-08-2026",
     "vilkaar_underdatabehandlerlister_certifice": "Terms, sub-processor lists, certifications and licences may have changed since the text was inserted, without that being apparent here. The user is responsible for verifying the accuracy with the suppliers concerned and for checking regularly whether anything has changed."
+  },
+  "hjaelp": {
+    "titel": "Help",
+    "hjaelpetekst": "Help — it lives in the app and works without a network",
+    "soeg": "Search the help",
+    "ryd": "Clear the search (Escape)",
+    "ingentraef": "No matches",
+    "ettraef": "1 match",
+    "traef": "{0} matches",
+    "intet": "There is nothing about «{0}» in the help. Try a single word — or clear the search and look through the sections."
   }
 }

@@ -747,5 +747,15 @@
     "varighed": "VARIGHED",
     "vis_kun_det_en_taler_sagde": "Vis kun det, én taler sagde",
     "vis_ogsaa_svage_forslag": "Vis også svage forslag"
+  },
+  "hjaelp": {
+    "titel": "Hjælp",
+    "hjaelpetekst": "Hjælp — den ligger i appen og virker uden net",
+    "soeg": "Søg i hjælpen",
+    "ryd": "Ryd søgningen (Escape)",
+    "ingentraef": "Ingen træf",
+    "ettraef": "1 træf",
+    "traef": "{0} træf",
+    "intet": "Der er ikke noget om «{0}» i hjælpen. Prøv et enkelt ord — eller ryd søgningen og se afsnittene igennem."
   }
 }

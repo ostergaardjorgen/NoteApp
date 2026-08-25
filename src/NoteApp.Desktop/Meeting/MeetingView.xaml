@@ -257,6 +257,37 @@
           <local:Flagikon x:Name="SprogFlag" />
         </Button>
 
+        <!-- ======================== Hjaelpen ========================
+
+             SPOERGSMAALSTEGNET STAAR TIL HOEJRE FOR FLAGET, fordi de tre
+             knapper herude er af samme slags: de gaelder hele appen og skal
+             kunne naas fra enhver skaerm.
+
+             Hjaelpen ligger I APPEN og ikke paa en hjemmeside. Den virker
+             uden net, den kan ikke komme ud af trit med den udgave, man har
+             installeret, og den sender ingenting - heller ikke hvad man
+             soegte efter. -->
+        <Button x:Name="HjaelpKnap" Click="Hjaelp_Click" Margin="4,0,0,0"
+                Padding="0" BorderThickness="0" Background="Transparent" Cursor="Hand"
+                AutomationProperties.Name="{i18n:Oversat hjaelp.titel}"
+                ToolTip="{i18n:Oversat hjaelp.hjaelpetekst}">
+          <Button.Template>
+            <ControlTemplate TargetType="Button">
+              <Border x:Name="flade" CornerRadius="8" Background="Transparent" Padding="9,7">
+                <ContentPresenter />
+              </Border>
+              <ControlTemplate.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                  <Setter TargetName="flade" Property="Background" Value="#FF2C323D" />
+                </Trigger>
+              </ControlTemplate.Triggers>
+            </ControlTemplate>
+          </Button.Template>
+
+          <TextBlock Text="&#xE897;" FontFamily="Segoe MDL2 Assets" FontSize="16"
+                     VerticalAlignment="Center" Foreground="{StaticResource TekstSvag}" />
+        </Button>
+
         <!-- ========================= Klokken =========================
              Den ligger i topbjælken, fordi den er det ENESTE sted i appen, der
              altid er fremme. Et referat af et langt møde tager fyrre minutter,
