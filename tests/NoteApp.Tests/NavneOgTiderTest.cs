@@ -107,12 +107,35 @@ public class NavneOgTiderTest
         Assert.Contains("12 min", svar);
     }
 
+    /// <summary>
+    /// Prøven må ikke afhænge af, hvad klokken er, når den køres.
+    /// </summary>
+    /// <remarks>
+    /// DEN GJORDE DET FØR: den spurgte om «tre timer siden» og forventede et
+    /// klokkeslæt. Det holder om dagen. Køres prøverne klokken to om natten,
+    /// er tre timer siden i GÅR, og svaret er «i går» — så fejlede den uden
+    /// at noget var galt med koden.
+    ///
+    /// Set natten til 26-08-2026. En prøve, der fejler af sig selv på visse
+    /// tidspunkter, er værre end ingen prøve: den lærer én at se bort fra en
+    /// rød prøve, og så bliver den ægte fejl også overset.
+    ///
+    /// Nu regnes tiden fra et punkt, der med sikkerhed ligger i dag — midt
+    /// mellem midnat og nu — og der spørges kun, når der er plads til det.
+    /// </remarks>
     [Fact]
     public void Senere_paa_dagen_staar_klokkeslaettet()
     {
         using var p = new Proevemappe();
 
-        var svar = Synkronisering.Siden(DateTimeOffset.Now.AddHours(-3));
+        // Et tidspunkt i dag, mindst en time siden. Er klokken under to om
+        // natten, findes det tidspunkt ikke, og der er intet at prøve.
+        var nu = DateTimeOffset.Now;
+        if (nu.TimeOfDay < TimeSpan.FromHours(2)) return;
+
+        var iDagTidligere = nu - TimeSpan.FromMinutes(nu.TimeOfDay.TotalMinutes / 2);
+
+        var svar = Synkronisering.Siden(iDagTidligere);
 
         Assert.StartsWith("hentet kl.", svar);
     }
