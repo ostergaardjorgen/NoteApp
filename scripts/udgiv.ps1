@@ -41,26 +41,37 @@ if (-not (Test-Path $csproj)) { throw "Finder ikke projektet: $csproj" }
 
 # --- Versionen -------------------------------------------------------------
 if (-not $Version) {
-    Push-Location $Rod
-    try { $besked = git log -1 --pretty=%s 2>$null } finally { Pop-Location }
+    # DER KIGGES TILBAGE, IKKE KUN PAA DEN SIDSTE.
+    #
+    # Ikke alle commits er udgivelser. En rettet proeve, en note i doc eller
+    # en oprydning har ingen "vX.Y.ZZ:" i sig - og saa stod scriptet af med
+    # "kunne ikke laese versionen", selv om der laa en udgivelse to commits
+    # laengere tilbage. Set 26-08-2026, hvor en rettelse ikke kunne udgives,
+    # fordi den var fulgt af en proeverettelse.
+    #
+    # Der ses paa de tyve seneste. Findes der ingen version i dem, er det en
+    # rigtig fejl - saa er der ikke udgivet laenge, og nummeret skal saettes i
+    # haanden.
+    $beskeder = git log -20 --format=%s 2>$null
 
-    # TRE LED: vX.Y.Z. Konventionen var to cifre - v0.99, v1.00, v1.01 - og
-    # den holdt indtil 1.0. Derefter dropper .NET det foranstillede nul, saa
-    # v1.01 blev til filversion 1.1.0.0, og skaermen sagde noget andet end
-    # commiten. Et versionsnummer, der ikke passer med historikken, kan man
-    # ikke bruge til at afgoere, hvad der koerer.
-    if ($besked -match '^v(\d+\.\d+\.\d+)') {
-        $Version = $Matches[1]
-        Write-Host "Version fra seneste commit: v$Version"
+    foreach ($besked in $beskeder) {
+        # Tre led: v1.1.25. Det er formen, og den staar ogsaa i csproj.
+        if ($besked -match '^v(\d+\.\d+\.\d+)\s*:') {
+            $Version = $Matches[1]
+            Write-Host "Version fra commit: v$Version"
+            break
+        }
+
+        # To led: v0.39. Gammelt format, laeses stadig.
+        if ($besked -match '^v(\d+\.\d+)\s*:') {
+            $Version = $Matches[1]
+            Write-Host "Version fra commit: v$Version (gammelt format med to led)"
+            break
+        }
     }
-    elseif ($besked -match '^v(\d+\.\d+)') {
-        # De gamle to-leddede numre skal stadig kunne laeses, saa en aeldre
-        # commit ikke stopper en udgivelse.
-        $Version = $Matches[1]
-        Write-Host "Version fra seneste commit: v$Version (gammelt format med to led)"
-    }
-    else {
-        throw "Kunne ikke læse versionen af seneste commit ('$besked'). Angiv -Version, fx 1.0.2."
+
+    if (-not $Version) {
+        throw "Ingen af de 20 seneste commits har en 'vX.Y.ZZ:'-besked. Angiv -Version, fx 1.1.26."
     }
 }
 
