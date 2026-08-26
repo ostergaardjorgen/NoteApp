@@ -258,14 +258,33 @@ public partial class MainWindow : Window
             //
             // Moenstret findes i forvejen i GaaTilOptagelse laengere nede;
             // det var her, det manglede.
+            // ============ SKAERMEN BYGGES EEN GANG - IKKE TO ============
+            //
+            // HER STOD DER TO BLOKKE, OG DEN ANDEN OEDELAGDE DEN FOERSTE.
+            //
+            // Den anden lyder: «er man allerede paa skaermen, fyrer Checked
+            // ikke - saa bygges den her». Det var rigtigt, indtil blokken
+            // ovenfor blev tilfoejet 25-08-2026; nu goer de det samme.
+            //
+            // Og de goer det ikke uskadeligt. NyOptagelsesskaerm TOEMMER
+            // _aabnOptagelse og _spoergOmUdskrift, naar den laeser dem - de
+            // gaelder kun det ene skift. Anden gang er de altsaa tomme, og
+            // skaermen bliver bygget UDEN besked om, hvilken optagelse der
+            // skal markeres, og uden at transskriptionen skal starte. Den
+            // rigtige skaerm blev smidt vaek og erstattet af en tom.
+            //
+            // Foelgen: efter et stop skete der ingenting. Set paa et webinar
+            // paa 42 minutter natten til 26-08-2026 - det stoppede selv kl.
+            // 21:48, historikken fik linjen «Moede optaget», og saa stod
+            // maskinen stille i fire en halv time. Ingen transskription,
+            // ingen fejl, ingen besked.
+            //
+            // EEN BLOK KLARER BEGGE TILFAELDE:
+            //   staar man paa skaermen  -> byg den om her
+            //   staar man et andet sted -> Checked fyrer, og Nav_Changed
+            //                              bygger den med de samme flag
             if (NavTransskriber.IsChecked == true) Indhold.Content = NyOptagelsesskaerm();
             else NavTransskriber.IsChecked = true;
-
-            // Er man allerede paa skaermen, fyrer Checked ikke. Saa bygges
-            // den her - ellers ville dialogen udeblive netop naar man
-            // optager to moeder i traek.
-            if (Indhold.Content is Transcribe.TranscribeView)
-                Indhold.Content = NyOptagelsesskaerm();
         };
 
         // Startskærmen sættes HER, ikke af Nav_Changed. Menupunktet er markeret
