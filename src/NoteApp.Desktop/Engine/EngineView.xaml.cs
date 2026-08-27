@@ -251,15 +251,21 @@ public partial class EngineView : System.Windows.Controls.UserControl
         VisSkyStatus();
     }
 
-    // ==================== VALGET MELLEM DE TO MODELLER ====================
+    // ==================== MODELLEN ====================
     //
-    // De loeser to forskellige problemer. large-v3 er den, der er MAALT paa
-    // dansk her i projektet; turbo er den, der kan koere paa en maskine, hvor
-    // den store ikke kan. Hvilket af dem der er det vigtigste, ved appen
-    // ikke - det afhaenger af maskinen, og af om man venter paa svaret.
+    // DER ER EEN. Her stod et valg mellem large-v3 og turbo, og begrundelsen
+    // var, at de loeste to forskellige problemer: den ene er maalt paa dansk,
+    // den anden kan koere paa en svagere maskine.
     //
-    // Der var ikke noget valg foer. Det var rigtigt, saa laenge alternativerne
-    // bare var daarligere; her er de ikke daarligere, de er ANDERLEDES.
+    // Turbo udgik 27-08-2026. Den droppede en hel saetning og skiftede til
+    // islandsk i slutningen af et rigtigt moede - se WhisperInstall.Models.
+    // Og argumentet for den holdt ikke: paa en maskine uden kraftigt
+    // grafikkort er BEGGE for langsomme, saa den loeste ikke problemet, den
+    // gjorde det mindre. Svaret paa den lette baerbare er skyen.
+    //
+    // Listen bliver: den er bygget over Models og viser bare eet kort nu. Kan
+    // der en dag maales en model, der er et rigtigt alternativ, staar valget
+    // klar igen.
 
     /// <summary>Én model, som den skal stå på skærmen.</summary>
     public sealed record Modelraekke(
@@ -276,27 +282,22 @@ public partial class EngineView : System.Windows.Controls.UserControl
         {
             var erValgt = string.Equals(m.Id, valgt, StringComparison.OrdinalIgnoreCase);
             var erHentet = File.Exists(WhisperInstall.ModelDestination(m));
-            var erStor = m.Id == "large-v3";
+            var linje = Sprog.T("model.linje", m.SizeText, Sprog.T("model.kraever3gb"));
 
-            var linje = Sprog.T("model.linje", m.SizeText,
-                Sprog.T(erStor ? "model.kraever3gb" : "model.kraever15gb"));
-
-            var godt = Sprog.T(erStor ? "model.storgodt" : "model.turbogodt");
+            var godt = Sprog.T("model.storgodt");
 
             // ANBEFALINGEN AFHAENGER AF MASKINEN, og det staar der. Den store
             // paa en maskine uden grafikkort er ikke "lidt langsommere" -
             // den er ubrugelig til daglig brug.
-            var skidt = erStor
-                ? Sprog.T(harGpu ? "model.storskidt" : "model.storskidtudengpu")
-                : Sprog.T("model.turboskidt");
+            var skidt = Sprog.T(harGpu ? "model.storskidt" : "model.storskidtudengpu");
 
-            var knap = erValgt
-                ? Sprog.T("model.ibrug")
-                : erHentet ? Sprog.T("model.skifttil") : Sprog.T("model.hentogskift");
+            // MED EEN MODEL ER DER INGEN KNAP AT TRYKKE PAA. Den er i brug
+            // eller mangler at blive hentet; der er ikke noget at skifte til.
+            var knap = Sprog.T("model.ibrug");
 
             return new Modelraekke(
                 m.Id, m.Id, linje, godt, skidt, knap,
-                KanVaelges: !erValgt,
+                KanVaelges: false,
                 Bruges: Sprog.T("model.bruges"),
                 BrugesSynlig: erValgt ? Visibility.Visible : Visibility.Collapsed,
                 Flade: (Brush)(erValgt ? FindResource("Panel") : FindResource("Baggrund")),

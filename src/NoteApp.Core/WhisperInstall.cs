@@ -134,13 +134,26 @@ public static class WhisperInstall
             "Målt 25-08-2026 på et rigtigt møde: to spor à 32,7 minutter dansk tale. Tiden svinger meget — samme indstillinger og samme længde gav 2 minutter på det ene spor og 8 på det andet. Regn med, at et møde tager mellem en fjerdedel og halvdelen af sin egen længde pr. spor. På oplæsning tidligere: 10,0 % ordfejlrate på 2.365 ord, 12 af 19 fagtermer og 11 af 17 negationer bevaret.",
             "Fylder 2,9 GB og kræver godt 3 GB på grafikkortet. På ren CPU er den for langsom til daglig brug."),
 
-        new WhisperModel(
-            "large-v3-turbo", "ggml-large-v3-turbo.bin", 1_624_555_275L,
-            "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v3-turbo.bin",
-            ModelLanguages.Multilingual,
-            "Halv størrelse. Til en maskine, der ikke kan holde large-v3 — men den taber tale.",
-            "Målt 25-08-2026 på det samme møde som large-v3: 1,76 gange hurtigere, ikke dobbelt. Lige så god på negationer (17 mod 18 steder, enige om 16). Ét sted skrev den rigtigere dansk end large-v3.",
-            "MEN DEN TABER TALE, HVOR LYDEN BLIVER SVÆR. På det samme møde droppede den en hel sætning, og de sidste tredive sekunder skiftede den til islandsk. Slutningen af et møde er dér, aftaler og næste skridt bliver sagt — og en sætning, der ikke blev skrevet, kan ingen sprogmodel genskabe bagefter. Vælg den, hvis grafikkortet ikke kan holde large-v3; ikke for hastigheden alene."),
+        // HER LAA large-v3-turbo. FJERNET 27-08-2026.
+        //
+        // Den var hurtigere - 1,76 gange, ikke dobbelt som rygtet siger - og
+        // lige saa god paa negationer. Det var ikke nok.
+        //
+        // Maalt paa det samme moede som large-v3: den droppede en HEL SAETNING
+        // («Men jeg tror, at du kan vaere helt sikker paa, at hvis du faar de
+        // der succesoplevelser…»), og de sidste tredive sekunder skiftede den
+        // til islandsk - «Þaþ er ekki spilt noget som helst det».
+        //
+        // Slutningen af et moede er der, aftaler og naeste skridt bliver sagt.
+        // En saetning, der ikke blev skrevet, kan ingen sprogmodel genskabe
+        // bagefter - og teksten ser hel ud alligevel. Det er den slags fejl,
+        // ingen opdager.
+        //
+        // ARGUMENTET FOR DEN VAR DEN LETTE BAERBARE: halv stoerrelse, halvt
+        // grafikkort. Men paa en maskine uden kraftigt kort er BEGGE modeller
+        // for langsomme, saa turbo loeste ikke det problem - den gjorde det
+        // bare mindre. Svaret paa den lette baerbare er skyen, ikke en
+        // ringere model. Se doc/skyvejen.md.
     };
 
     /// <summary>

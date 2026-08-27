@@ -66,9 +66,6 @@ public sealed class Startklar : IDisposable
 
     private Aftale? _aftale;
 
-    /// <summary>Der er en aftale, boksen står klar til.</summary>
-    public bool StaarKlar => _aftale is not null;
-
     /// <summary>Aftalen, der ventes på. Null når der ikke ventes.</summary>
     public Aftale? Aftalen => _aftale;
 

@@ -781,16 +781,11 @@
     "vaelg": "HVILKEN MODEL SKAL BRUGES?",
     "linje": "{0} · {1}",
     "kraever3gb": "kræver godt 3 GB på grafikkortet",
-    "kraever15gb": "kræver godt 1,5 GB på grafikkortet",
     "storgodt": "Den mest nøjagtige, og den eneste, der er målt på dansk her: 10,0 % ordfejl, 11 af 17 negationer bevaret. Negationerne er det, der afgør, om et referat siger det modsatte af, hvad der blev sagt.",
-    "storskidt": "Cirka dobbelt så lang tid som turbo. Et møde på en time tager omkring et kvarter på dit grafikkort.",
-    "storskidtudengpu": "Uden NVIDIA-kort er den for langsom til daglig brug — en times møde tager længere end mødet selv varede. Vælg turbo på den her maskine.",
-    "turbogodt": "Halv størrelse, omtrent dobbelt hastighed. Den, der gør appen brugbar på en bærbar uden kraftigt grafikkort — og den, der giver dig teksten, mens du stadig husker mødet.",
-    "turboskidt": "IKKE målt på dansk i dette projekt. Tallene ovenfor gælder large-v3. Rygtet siger «næsten lige så god» — det er ikke det samme som målt.",
+    "storskidt": "Fylder 2,9 GB og kræver godt 3 GB på grafikkortet. Et møde tager mellem en fjerdedel og halvdelen af sin egen længde pr. spor.",
+    "storskidtudengpu": "Uden NVIDIA-kort kører den på processoren, og en times møde tager længere end mødet selv varede. Optagelsen er upåvirket — det er kun teksten, der lader vente på sig.",
     "bruges": "I BRUG",
     "ibrug": "I brug",
-    "skifttil": "Skift til den",
-    "hentogskift": "Hent og skift",
     "hentfoerst": "{0} er ikke hentet endnu",
     "hentfoersttekst": "Et skift kræver, at modellen hentes først — {0}. Den hentes fra huggingface.co, og der sendes intet fra din maskine.",
     "hentnu": "Hent den nu",
@@ -800,6 +795,10 @@
     "staarklar": "KLAR til «{0}» {1} — optagelsen starter af sig selv, når I begynder at tale. Der optages ikke endnu.",
     "venterpaasvar": "KLAR til «{0}» {1} — der er lyd fra mødet. Sig noget, så starter optagelsen. Der optages ikke endnu.",
     "om": "om {0} min.",
-    "nu": "nu"
+    "nu": "nu",
+    "stille": "der er stille",
+    "hoerermoedet": "hører mødet",
+    "hoererdig": "hører dig",
+    "hoererbegge": "hører jer begge"
   }
 }

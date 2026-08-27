@@ -497,9 +497,29 @@ public partial class MainWindow : Window
                     ? string.Format(NoteApp.Core.Sprog.T("klar.om"), (int)Math.Ceiling(om.TotalMinutes))
                     : NoteApp.Core.Sprog.T("klar.nu");
 
+                // ============ BOKSEN SKAL KUNNE SES AT LYTTE ============
+                //
+                // Den sagde «KLAR» og roerte sig ikke. En boks, der staar
+                // stille, kan ikke skelnes fra en, der er gaaet i staa - og
+                // saa tror man ikke paa den. Samme fejl som medskrivningens
+                // usynlighed, bare et andet sted.
+                //
+                // Der staar HVAD den hoerer, ikke et tal. «Hoerer moedet»
+                // siger, at lyden naar frem; «58 %» siger ingenting. Og det
+                // aendrer sig af sig selv fire gange i sekundet, saa man kan
+                // se, at den lever.
+                var hoerer = NoteApp.Core.Sprog.T(
+                    (_startklar.UdslagMikrofon > 0.15, _startklar.UdslagOnline > 0.15) switch
+                    {
+                        (true, true)  => "klar.hoererbegge",
+                        (true, false) => "klar.hoererdig",
+                        (false, true) => "klar.hoerermoedet",
+                        _             => "klar.stille"
+                    });
+
                 _moede.StaaKlar(string.Format(
                     NoteApp.Core.Sprog.T(_startklar.VenterPaaSvar ? "klar.venterpaasvar" : "klar.staarklar"),
-                    a.Titel, naar));
+                    a.Titel, naar) + $"   ·   {hoerer}");
             };
 
             _startklar.Gaaigang += a =>

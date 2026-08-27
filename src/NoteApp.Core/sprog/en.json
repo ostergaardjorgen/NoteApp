@@ -781,16 +781,11 @@
     "vaelg": "WHICH MODEL SHOULD BE USED?",
     "linje": "{0} · {1}",
     "kraever3gb": "needs a good 3 GB on the graphics card",
-    "kraever15gb": "needs a good 1.5 GB on the graphics card",
     "storgodt": "The most accurate, and the only one measured on Danish here: 10.0 % word errors, 11 of 17 negations preserved. The negations are what decide whether a set of minutes says the opposite of what was said.",
-    "storskidt": "About twice as long as turbo. An hour-long meeting takes around fifteen minutes on your graphics card.",
-    "storskidtudengpu": "Without an NVIDIA card it is too slow for daily use — an hour-long meeting takes longer than the meeting itself lasted. Choose turbo on this machine.",
-    "turbogodt": "Half the size, about twice the speed. The one that makes the app usable on a laptop without a powerful graphics card — and the one that gives you the text while you still remember the meeting.",
-    "turboskidt": "NOT measured on Danish in this project. The figures above are for large-v3. Word has it that it is «almost as good» — that is not the same as measured.",
+    "storskidt": "Takes 2.9 GB and needs a good 3 GB on the graphics card. A meeting takes between a quarter and half of its own length per track.",
+    "storskidtudengpu": "Without an NVIDIA card it runs on the processor, and an hour-long meeting takes longer than the meeting itself lasted. Recording is unaffected — it is only the text that keeps you waiting.",
     "bruges": "IN USE",
     "ibrug": "In use",
-    "skifttil": "Switch to it",
-    "hentogskift": "Download and switch",
     "hentfoerst": "{0} has not been downloaded yet",
     "hentfoersttekst": "Switching requires the model to be downloaded first — {0}. It comes from huggingface.co, and nothing is sent from your machine.",
     "hentnu": "Download it now",
@@ -800,6 +795,10 @@
     "staarklar": "READY for «{0}» {1} — recording starts by itself once you begin talking. Nothing is being recorded yet.",
     "venterpaasvar": "READY for «{0}» {1} — there is sound from the meeting. Say something and recording starts. Nothing is being recorded yet.",
     "om": "in {0} min.",
-    "nu": "now"
+    "nu": "now",
+    "stille": "all quiet",
+    "hoerermoedet": "hears the meeting",
+    "hoererdig": "hears you",
+    "hoererbegge": "hears you both"
   }
 }

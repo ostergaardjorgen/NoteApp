@@ -71,12 +71,6 @@ public sealed class Medskriver : IDisposable
         ? _segmentmappe
         : Path.Combine(_sessionDir, "segmenter", _spor);
 
-    /// <summary>Er der noget brugbart? Falsk, hvis den har givet op.</summary>
-    public bool Duer => !_opgivet && _bidder.Count > 0;
-
-    /// <summary>Hvor mange segmenter der er skrevet ud indtil nu.</summary>
-    public int Faerdige => _faerdige;
-
     /// <summary>
     /// Hvor langt inde i optagelsen teksten rækker. Tom, hvis intet er skrevet.
     /// </summary>

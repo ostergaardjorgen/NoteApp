@@ -109,29 +109,6 @@ public static class Medskrift
         return new Bid(lydFra, faerdige, til);
     }
 
-    /// <summary>
-    /// Hvor lang tid er der tilbage at skrive ud, når mødet stopper netop nu?
-    ///
-    /// Til den besked, man får at se: «transskriptionen er i gang, typisk
-    /// x minutter». Et tal, der er gættet, er værre end intet tal — det her er
-    /// regnet ud af, hvad der faktisk mangler.
-    /// </summary>
-    /// <param name="hastighed">
-    /// Hvor mange sekunder lyd der skrives ud pr. sekund. Svinger meget: målt
-    /// til 17 på det ene spor og 4 på det andet i samme møde, med samme
-    /// indstillinger. Se doc/maaling-stilhed.md — der loves ingen hastighed,
-    /// før det er undersøgt på en rolig maskine.
-    /// </param>
-    public static TimeSpan Restarbejde(int skrevneSegmenter, int faerdige, double hastighed)
-    {
-        if (hastighed <= 0) return TimeSpan.Zero;
-
-        var mangler = Math.Max(0, skrevneSegmenter - faerdige);
-        var sekunderLyd = mangler * AudioFormat.ChunkDuration.TotalSeconds;
-
-        return TimeSpan.FromSeconds(sekunderLyd / hastighed);
-    }
-
     /// <summary>Én færdigskrevet bid: hvor den hører til, og hvad den siger.</summary>
     /// <param name="Json">whisper-json'en for biddens lyd.</param>
     /// <param name="StartSekunder">Hvor i mødet biddens LYD begynder.</param>
