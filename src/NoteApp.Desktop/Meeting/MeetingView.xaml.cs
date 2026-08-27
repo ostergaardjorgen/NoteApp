@@ -468,6 +468,8 @@ public partial class MeetingView : UserControl
 
             _erWebinar = webinar is not null;
             _stilhedFra = null;
+
+            StartMedskrivning();
         }
         catch (Exception ex)
         {
@@ -707,9 +709,27 @@ public partial class MeetingView : UserControl
         // der ingen at spørge, og optagelsen skal gemmes, ikke kasseres.
         var titel = navn ?? (spørgOmNavn ? SpørgOmNavn() : null);
 
+        // ============ SEGMENTERNE REDDES, HALEN KOERER BAGEFTER ============
+        //
+        // _session.Stop() SAMLER segmenterne og SLETTER dem bagefter. Resten
+        // af mødet ligger i dem, så de skal reddes FØR stoppet — det er en
+        // filkopiering på nogle få megabyte og tager et øjeblik.
+        //
+        // SELVE UDSKRIVNINGEN MAA IKKE SKE HER. Halen er op til fem minutters
+        // lyd, og det er op mod et minuts arbejde. Gjordes det her, ville
+        // skærmen stå stille imens — og et program, der fryser, når man
+        // trykker stop, ser ud som et, der har mistet mødet.
+        //
+        // Derfor: red segmenterne nu, luk optagelsen, og skriv resten ud
+        // bagefter med en status, man kan følge.
+        var reddet = RedResten();
+
         _session.Stop();
         _session.Dispose();
         _session = null;
+
+        // Kører videre af sig selv. Lægger filerne ned, når den er færdig.
+        _ = FaerdiggoerMedskrivning(mappe, reddet);
 
         // null betyder «kassér». Det er brugerens svar paa navnedialogen, og
         // der er ikke noget at gemme — de trykkede optag for at proeve noget.
@@ -764,6 +784,183 @@ public partial class MeetingView : UserControl
 
         FærdigMedMøde?.Invoke(mappe);
         return mappe;
+    }
+
+    // ==================== MEDSKRIVNING ====================
+
+    /// <summary>
+    /// Sætter medskrivningen i gang — ét job pr. spor.
+    /// </summary>
+    /// <remarks>
+    /// KUN NÅR SPROGET ER KENDT. Undervejs er der ingen at spørge, og en
+    /// transskription på det forkerte sprog er vrøvl, der først opdages i
+    /// referatet. Er sproget tomt, springes sporet over, og mødet skrives ud
+    /// bagefter som altid.
+    ///
+    /// GÅR NOGET GALT, SKER DER INGENTING. Medskriveren giver op af sig selv
+    /// og rører aldrig noget igen — optagelse må aldrig kunne blokeres.
+    /// </remarks>
+    private void StartMedskrivning()
+    {
+        _medskrivere.Clear();
+
+        if (_session is null) return;
+
+        try
+        {
+            var install = WhisperInstall.Locate(AppSettings.Current.PreferredModel);
+            if (!install.IsComplete) return;
+
+            var meta = MeetingStore.Load(_session.SessionDir);
+            if (meta is null) return;
+
+            var sprog = new Dictionary<string, string?>
+            {
+                ["mikrofon"] = _erWebinar ? null : meta.ValgtSprogMik,
+                ["loopback"] = meta.ValgtSprogLoop
+            };
+
+            foreach (var (spor, kode) in sprog)
+            {
+                if (string.IsNullOrWhiteSpace(kode)) continue;
+
+                var m = new Jobs.Medskriver(_session.SessionDir, spor, kode!, install);
+                m.Start();
+                _medskrivere[spor] = m;
+            }
+        }
+        catch (Exception)
+        {
+            _medskrivere.Clear();
+        }
+    }
+
+    /// <summary>
+    /// Redder de segmenter, medskrivningen ikke nåede — før de bliver slettet.
+    /// </summary>
+    /// <returns>Spor → medskriveren, der nu peger på en kopi. Tom = ingenting.</returns>
+    private Dictionary<string, Jobs.Medskriver> RedResten()
+    {
+        var ud = new Dictionary<string, Jobs.Medskriver>();
+
+        foreach (var (spor, m) in _medskrivere)
+        {
+            try
+            {
+                if (m.RedResten()) ud[spor] = m;
+                else m.Dispose();
+            }
+            catch (Exception)
+            {
+                m.Dispose();
+            }
+        }
+
+        _medskrivere.Clear();
+        return ud;
+    }
+
+    /// <summary>
+    /// Skriver halen ud og lægger den færdige udskrift ned.
+    /// </summary>
+    /// <remarks>
+    /// KØRER EFTER, AT MØDET ER LUKKET. Skærmen er fri imens, og bjælken
+    /// nederst siger, hvad der sker og hvor langt der er igen.
+    ///
+    /// Går noget galt, sker der ingenting: filerne findes ikke, og mødet
+    /// skrives ud bagefter på den almindelige måde. Det er hele sikkerheden i
+    /// medskrivningen — den kan altid fravælges, og resultatet er det samme.
+    /// </remarks>
+    private static async Task FaerdiggoerMedskrivning(
+        string mappe, Dictionary<string, Jobs.Medskriver> reddet)
+    {
+        if (reddet.Count == 0) return;
+
+        var faerdige = new Dictionary<string, string>();
+
+        // ============ MAN SKAL KUNNE SE, AT DEN ER I GANG ============
+        //
+        // Hele pointen med medskrivning er, at det meste er gjort, naar mødet
+        // slutter. Det er ingenting værd, hvis skærmen ikke siger det — så
+        // sidder man og venter på noget, der allerede er ved at være færdigt.
+        //
+        // Tallet er REGNET, ikke gættet: det er den lyd, der er tilbage, delt
+        // med den hastighed, de foregående bidder faktisk kørte med. Et gæt
+        // ville være værre end intet tal.
+        var tilbage = reddet.Values.Sum(m => m.SekunderTilbage());
+
+        Jobs.Udskriftsvagt.Start(mappe, "Transskription",
+            tilbage > 90
+                ? $"Skrevet med undervejs — der mangler cirka {Math.Ceiling(tilbage / 60.0):0} min"
+                : "Skrevet med undervejs — gør resten færdig nu");
+
+        try
+        {
+            foreach (var (spor, m) in reddet)
+            {
+                try
+                {
+                    if (await m.AfslutAsync() is { } json) faerdige[spor] = json;
+                }
+                catch (Exception)
+                {
+                    // Glem det spor. Det skrives ud bagefter.
+                }
+                finally
+                {
+                    m.Dispose();
+                }
+            }
+
+            LaegMedskrevetNed(mappe, faerdige);
+        }
+        catch (Exception)
+        {
+            // Intet tabt: uden filerne koerer den almindelige vej.
+        }
+        finally
+        {
+            Jobs.Udskriftsvagt.Slut();
+        }
+    }
+
+    /// <summary>
+    /// Lægger den medskrevne udskrift ved siden af lyden.
+    /// </summary>
+    /// <remarks>
+    /// FILERNE HEDDER DET SAMME, SOM DEN ALMINDELIGE VEJ VILLE KALDE DEM.
+    /// Derfor opdager genbrugsreglen dem af sig selv, og der er ikke rørt ved
+    /// transskriptionsskærmen overhovedet — se TranscribeView.KanGenbruges.
+    ///
+    /// Går skrivningen galt, sker der ingenting: filerne findes ikke, og
+    /// mødet skrives ud bagefter som altid.
+    /// </remarks>
+    private static void LaegMedskrevetNed(string mappe, Dictionary<string, string> medskrevet)
+    {
+        if (medskrevet.Count == 0) return;
+
+        try
+        {
+            var install = WhisperInstall.Locate(AppSettings.Current.PreferredModel);
+            var model = install.ModelFileName is { } f
+                ? System.IO.Path.GetFileNameWithoutExtension(f).Replace("ggml-", "")
+                : null;
+
+            if (model is null) return;
+
+            foreach (var (spor, json) in medskrevet)
+            {
+                var udbase = System.IO.Path.Combine(mappe, $"{spor}_{model}");
+
+                System.IO.File.WriteAllText(udbase + ".json", json, System.Text.Encoding.UTF8);
+                System.IO.File.WriteAllText(udbase + ".txt",
+                    NoteApp.Core.Medskrift.SomTekst(json), System.Text.Encoding.UTF8);
+            }
+        }
+        catch (Exception)
+        {
+            // Kan den ikke laegges ned, skrives moedet ud bagefter. Intet tabt.
+        }
     }
 
     /// <summary>Rejses når et møde er gemt — så resten af appen kan pege videre.</summary>
@@ -908,6 +1105,16 @@ public partial class MeetingView : UserControl
 
     private DateTime? _stilhedFra;
     private bool _erWebinar;
+
+    /// <summary>
+    /// De medskrivere, der kører nu — ét pr. spor. Tom, når der ikke optages.
+    /// </summary>
+    /// <remarks>
+    /// Se <see cref="Jobs.Medskriver"/>. De starter først, når sproget er
+    /// KENDT: en transskription på det forkerte sprog er vrøvl, og undervejs
+    /// er der ingen at spørge.
+    /// </remarks>
+    private readonly Dictionary<string, Jobs.Medskriver> _medskrivere = new();
 
     /// <summary>
     /// Stopper et webinar, når der ikke har været lyd i fem minutter.
