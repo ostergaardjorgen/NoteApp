@@ -199,6 +199,56 @@ public partial class MainWindow : Window
         // lige er lavet, og spørge, om den skal skrives ud.
         OptagBjaelke.Content = _moede;
 
+        // ============ OPTAGEKNAPPEN SPOERGER KALENDEREN FOERST ============
+        //
+        // Trykker man optag, mens en aftale koerer, skal den aftales mappe,
+        // moedetype og sprog bruges - ikke spoerges om igen. Se
+        // Kalender.IGangNu for, hvad der taeller som "nu", og hvorfor et
+        // moede, der allerede er optaget, ikke taeller.
+        //
+        // OptagAftale spoerger kun om det, der MANGLER. Staar sproget paa
+        // aftalen, kommer der ingen dialog overhovedet.
+        // Genvejstasten optager FOERST og spoerger bagefter. Staar svarene paa
+        // en aftale, skal der ikke spoerges - se MeetingView.Lynstart.
+        _moede.AftalensSvar = () =>
+        {
+            try
+            {
+                if (Kalender.IGangNu(DateTimeOffset.Now) is not { } a) return null;
+
+                _venterAftale = a;
+
+                return new Meeting.MeetingView.Opstart(
+                    a.Sprog,
+                    a.Link.Length > 0 ? a.Link : null,
+                    a.Mappe.Length > 0 ? a.Mappe : null,
+                    a.Moedetype.Length > 0 ? a.Moedetype : null,
+                    a.ErWebinar);
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        };
+
+        _moede.OptagAftalenNu = () =>
+        {
+            try
+            {
+                if (Kalender.IGangNu(DateTimeOffset.Now) is not { } a) return false;
+
+                OptagAftale(a, spoerg: true);
+                return true;
+            }
+            catch (Exception)
+            {
+                // Kan kalenderen ikke laeses, skal knappen stadig virke.
+                // Optagelse maa aldrig kunne blokeres - saa aabner dialogen
+                // som foer.
+                return false;
+            }
+        };
+
         // NAAR EN OPTAGELSE ER SLUT, SKAL DER SPOERGES MED DET SAMME.
         //
         // FaerdigMedMoede blev rejst, men INGEN lyttede. Efter et stop skete

@@ -163,9 +163,34 @@ public partial class MeetingView : UserControl
     /// knappen og genvejstasten: knappen trykker man på, fordi man er klar til
     /// at tage stilling, og genvejstasten fordi mødet allerede er begyndt.
     /// </summary>
+    /// <summary>
+    /// Rejses, når der trykkes optag. Sandt betyder: en anden har taget over.
+    /// </summary>
+    /// <remarks>
+    /// KNAPPEN SPØRGER KALENDEREN FØRST.
+    ///
+    /// Den åbnede før opstartsdialogen med TOMME felter og spurgte om mappe,
+    /// mødetype og sprog — også når man stod midt i en aftale, hvor alle tre
+    /// stod skrevet. Man havde udfyldt dem i går og blev spurgt igen, mens
+    /// mødet gik i gang.
+    ///
+    /// Det var ikke dialogens skyld. Den fik bare aldrig at vide, hvilket
+    /// møde det var. MainWindow ejer kalenderen og OptagAftale, så det er
+    /// den, der svarer — og OptagAftale spørger kun om det, der MANGLER.
+    ///
+    /// Er der ingen aftale netop nu, sker der som før: dialogen åbner, og der
+    /// spørges om det hele. Det er stadig det rigtige, når man optager noget,
+    /// der ikke står i kalenderen.
+    /// </remarks>
+    public Func<bool>? OptagAftalenNu;
+
     private void Start_Click(object sender, RoutedEventArgs e)
     {
         if (IsRecording) return;
+
+        // Er der en aftale i gang, tager den over - med alt, hvad der staar
+        // paa den.
+        if (OptagAftalenNu?.Invoke() == true) return;
 
         var vindue = new OpstartWindow(OpstartWindow.Slags.Moede)
         { Owner = Window.GetWindow(this) };
@@ -225,8 +250,30 @@ public partial class MeetingView : UserControl
 
         if (!IsRecording) return;
 
+        // STAAR SVARENE PAA EN AFTALE, SKAL DER IKKE SPOERGES.
+        //
+        // Genvejen bruges midt i et moede. Er moedet i kalenderen med mappe,
+        // moedetype og sprog paa, er der ikke noget at svare paa - og en
+        // dialog oven paa en koerende optagelse er saa bare noget, der staar
+        // i vejen.
+        //
+        // Mangler sproget, spoerges der alligevel. Det er det ene, der ikke
+        // kan gaettes: rammer det forkert, bliver hele transskriptionen
+        // vroevl, og det opdages foerst i referatet.
+        if (AftalensSvar?.Invoke() is { } fraAftalen)
+        {
+            Skriv_Opstart(fraAftalen);
+
+            if (fraAftalen.Sprog.Length > 0) return;
+        }
+
         Spoerg_MensDerOptages();
     }
+
+    /// <summary>
+    /// Svarene fra den aftale, der kører nu — hvis der er en. Sat af MainWindow.
+    /// </summary>
+    public Func<Opstart?>? AftalensSvar;
 
     /// <summary>
     /// Stiller de tre spørgsmål oven på en optagelse, der allerede kører.

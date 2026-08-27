@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 using System.Text.Json;
 
 namespace NoteApp.Core;
@@ -345,4 +345,43 @@ public static class Kalender
         alle.RemoveAll(a => a.Kilde == kilde);
         Gem(alle);
     }
+
+    /// <summary>
+    /// Hvilket møde er det, man er ved at optage NU?
+    /// </summary>
+    /// <remarks>
+    /// DEN FINDES, FORDI OPTAGEKNAPPEN IKKE KENDTE KALENDEREN.
+    ///
+    /// Trykkede man på «Optag møde», åbnede opstartsdialogen med TOMME felter
+    /// og spurgte om mappe, mødetype og sprog — også når man stod midt i en
+    /// aftale, hvor alle tre stod skrevet. Man havde udfyldt dem i går og
+    /// blev spurgt igen, mens mødet gik i gang.
+    ///
+    /// Det var ikke en fejl i dialogen. Den fik bare aldrig at vide, hvilket
+    /// møde det var.
+    ///
+    /// HVAD DER TÆLLER SOM «NU»
+    ///
+    /// Fra fem minutter før start til et kvarter efter slut. Fem minutter før,
+    /// fordi man trykker optag, mens folk kommer ind; et kvarter efter, fordi
+    /// et møde tit trækker ud, og fordi man kan komme til at trykke sent.
+    ///
+    /// ET MØDE, DER ALLEREDE ER OPTAGET, TÆLLER IKKE. Har aftalen et MoedeId,
+    /// er der en optagelse af den — og trykker man optag igen, er det en NY
+    /// optagelse, ikke en fortsættelse. Så skal den ikke arve noget.
+    ///
+    /// LIGGER TO MØDER OVEN I HINANDEN, vinder det, der begyndte SENEST. Det
+    /// er som regel det, man er på vej ind i; det forrige er ved at være
+    /// forbi. Er ingen af dem begyndt endnu, vinder det, der begynder først.
+    /// </remarks>
+    public static Aftale? IGangNu(DateTimeOffset nu) => IGangNu(Alle(), nu);
+
+    /// <summary>Samme opslag på en given liste. Til prøver.</summary>
+    public static Aftale? IGangNu(IEnumerable<Aftale> aftaler, DateTimeOffset nu) =>
+        aftaler
+            .Where(a => a.MoedeId.Length == 0)
+            .Where(a => nu >= a.Start.AddMinutes(-5) && nu <= a.Slutter.AddMinutes(15))
+            .OrderByDescending(a => a.Start <= nu)      // begyndt slaar ikke-begyndt
+            .ThenByDescending(a => a.Start)             // af de begyndte: den seneste
+            .FirstOrDefault();
 }
