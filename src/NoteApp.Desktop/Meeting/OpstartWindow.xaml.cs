@@ -188,6 +188,27 @@ public partial class OpstartWindow : Window
         Typevalg.ItemsSource = typer;
         Typevalg.SelectedIndex = 0;
 
+        // ============ ET WEBINAR ER ET WEBINAR ============
+        //
+        // Man har trykket paa knappen «Webinar». Saa skal moedetypen ikke staa
+        // paa «Ikke valgt» og vente paa, at man siger det en gang til.
+        //
+        // Og det haenger sammen med resten: moedetypen kan pege paa en mappe,
+        // saa naar typen saettes her, foelger mappen med af sig selv - se
+        // Type_Valgt. Uden det her stod baade type og mappe tomme paa noget,
+        // appen godt vidste.
+        //
+        // Findes der ingen moedetype, der hedder «Webinar», sker der
+        // ingenting. Skabelonerne er brugerens egne, og de kan hedde hvad som
+        // helst.
+        if (erWebinar)
+        {
+            var webinartype = typer.FirstOrDefault(
+                t => t.Vaerdi is { } v && v.Contains("webinar", StringComparison.CurrentCultureIgnoreCase));
+
+            if (webinartype is not null) Typevalg.SelectedItem = webinartype;
+        }
+
         // ---- sproget
         SprogMaerkat.Text = erWebinar ? "SPROG PÅ WEBINARET" : "SPROG DER TALES";
 

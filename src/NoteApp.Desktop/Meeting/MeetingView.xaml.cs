@@ -728,8 +728,17 @@ public partial class MeetingView : UserControl
         _session.Dispose();
         _session = null;
 
-        // Kører videre af sig selv. Lægger filerne ned, når den er færdig.
-        _ = FaerdiggoerMedskrivning(mappe, reddet);
+        // KOERER VIDERE AF SIG SELV - MEN DET SIGES HOEJT.
+        //
+        // Den automatiske udskrivning gaar i gang i samme oejeblik og kigger
+        // efter, om der allerede ligger en udskrift. Er halen ikke skrevet ned
+        // endnu, finder den ingenting og laver hele moedet om.
+        //
+        // Maalt 27-08-2026: otte bidders arbejde blev gentaget, fordi de to
+        // ting skete med et sekunds mellemrum. Se Jobs.Medskrivning.
+        var hale = FaerdiggoerMedskrivning(mappe, reddet);
+
+        if (reddet.Count > 0) Jobs.Medskrivning.Meld(mappe, hale);
 
         // null betyder «kassér». Det er brugerens svar paa navnedialogen, og
         // der er ikke noget at gemme — de trykkede optag for at proeve noget.
@@ -931,6 +940,7 @@ public partial class MeetingView : UserControl
         finally
         {
             Jobs.Udskriftsvagt.Slut();
+            Jobs.Medskrivning.Faerdig(mappe);
         }
     }
 

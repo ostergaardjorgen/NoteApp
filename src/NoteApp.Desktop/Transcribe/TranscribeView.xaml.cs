@@ -1889,6 +1889,20 @@ public partial class TranscribeView : UserControl
         //
         // Reglen selv er uaendret: et spor paa det forkerte sprog maa aldrig
         // genbruges. Den spoerger bare det rigtige sted nu.
+        // ============ HALEN SKAL VAERE SKREVET NED FOERST ============
+        //
+        // Skrives der med undervejs, ligger de fleste bidder klar, naar moedet
+        // stopper - men HALEN skrives ned i samme oejeblik, som den her
+        // metode gaar i gang. Kigger vi efter filerne foer, findes de ikke,
+        // og saa laves hele moedet om.
+        //
+        // Maalt 27-08-2026 paa et webinar paa 36 minutter: syv bidder og en
+        // hale var kørt, filen laa klar tretten sekunder efter stoppet - og
+        // udskrivningen var allerede gaaet i gang paa hele filen.
+        //
+        // Er der ingen medskrivning i gang, kommer den tilbage med det samme.
+        await Jobs.Medskrivning.Vent(valgt.Mappe, _afbryd?.Token ?? default);
+
         bool KanGenbruges(string udbase, string lyd, string? sidst, string nu)
         {
             if (!File.Exists(udbase + ".json") || !File.Exists(udbase + ".txt")) return false;

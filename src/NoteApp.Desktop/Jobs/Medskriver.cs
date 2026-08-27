@@ -214,13 +214,39 @@ public sealed class Medskriver : IDisposable
         return _bidder.Count > 0 ? Medskrift.Flet(_bidder) : null;
     }
 
+    /// <summary>Har uret meldt sig? Skrives een gang, saa historikken ikke fyldes.</summary>
+    private bool _harMeldtTik;
+
     private async Task Kig()
     {
         if (_opgivet || _koerer) return;
 
         try
         {
-            if (Medskrift.Naeste(TaelSegmenter(), _faerdige, optagerStadig: true) is not { } bid) return;
+            var antal = TaelSegmenter();
+
+            // ============ EEN LINJE, FOERSTE GANG URET TIKKER ============
+            //
+            // Uden den kan tre ting ikke skelnes: at uret ikke tikker, at der
+            // taelles i den forkerte mappe, og at beslutningen om at tage en
+            // bid er gal. De ser alle tre ud som INGENTING.
+            //
+            // Den skrives kun een gang. En linje hvert halve minut ville
+            // gemme alt det andet i historikken vaek.
+            if (!_harMeldtTik)
+            {
+                _harMeldtTik = true;
+
+                try
+                {
+                    Historik.Skriv(HaendelseType.Transskription,
+                        $"Medskrivning ser efter ({_spor})",
+                        $"{antal} segmenter i {Segmentmappe}", Udfald.Fuldført);
+                }
+                catch (Exception) { }
+            }
+
+            if (Medskrift.Naeste(antal, _faerdige, optagerStadig: true) is not { } bid) return;
 
             await SkrivBidAsync(bid, CancellationToken.None);
         }
