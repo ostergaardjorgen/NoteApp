@@ -1638,7 +1638,7 @@ public partial class UdskriftView : UserControl
 
             var svar = await new SkyRunner(noegle).KoerAsync(
                 model,
-                Opsummering.Opskrift(),
+                Opsummering.Opskrift(erWebinar),
                 $"{slags} hedder «{titel}».\n\nTranskription:\n{tekst}",
                 fremdrift,
                 kilde: _meta?.Id.ToString() ?? "",

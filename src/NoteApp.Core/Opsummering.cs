@@ -90,7 +90,102 @@ public static class Opsummering
     /// Kravene er de samme som alle andre steder: skriv på dansk, find ikke
     /// på noget, og lad være med at fylde op, når der ikke er mere at sige.
     /// </summary>
-    public static PromptTemplate Opskrift() => new()
+    /// <summary>
+    /// Opskriften, opsummeringen laves efter.
+    /// </summary>
+    /// <param name="erWebinar">
+    /// Sandt for et webinar. Så er der en HELT anden opskrift — se
+    /// <see cref="Webinaropskrift"/>.
+    /// </param>
+    public static PromptTemplate Opskrift(bool erWebinar) =>
+        erWebinar ? Webinaropskrift() : Moedeopskrift();
+
+    /// <summary>
+    /// Opsummeringen af et WEBINAR.
+    /// </summary>
+    /// <remarks>
+    /// PÅ ET WEBINAR ER DU MODTAGER, IKKE DELTAGER.
+    ///
+    /// Mødeopskriften leder efter opgaver og skriver dem under «DET SKAL DER
+    /// SKE». Det er rigtigt om et møde og forkert om et webinar: der bliver
+    /// ikke fordelt noget, og du har ikke sagt ja til noget.
+    ///
+    /// Målt 27-08-2026 på et rigtigt webinar. Mødeopskriften skrev seksten
+    /// punkter under «DET SKAL DER SKE» — «Udfør en vurdering af
+    /// EIM-indstillinger (Christian)», «Deaktiver agenter, der ikke længere er
+    /// nødvendige (Christian)». Christian holdt webinaret. Det var hverken
+    /// læserens opgaver eller aftaler; det var undervisning skrevet om til en
+    /// huskeliste, læseren aldrig har sagt ja til.
+    ///
+    /// Værre: «DET BLEV BESLUTTET» stod over ting, ingen besluttede — det var
+    /// oplægsholderens påstande om markedet.
+    ///
+    /// TRE TING HOLDES DERFOR ADSKILT
+    ///
+    ///   1. Hvad du kan tage med dig. Det er hele grunden til, at du så det.
+    ///   2. Hvad OPLÆGSHOLDEREN lovede — slides, optagelse, svar på spørgsmål.
+    ///      Det er deres opgaver, ikke dine, og det skal stå med hvem.
+    ///   3. Hvad du selv kunne overveje. Kun hvis webinaret lagde op til det,
+    ///      og aldrig som en ordre.
+    ///
+    /// Et afsnit uden indhold udelades. En tom overskrift lover noget, der
+    /// ikke er der.
+    /// </remarks>
+    public static PromptTemplate Webinaropskrift() => new()
+    {
+        Name = "Opsummering af webinar",
+        Temperature = 0.2,
+        MaxTokens = 2400,
+
+        SystemPrompt =
+            "Du laver en opsummering af et WEBINAR ud fra en transkription. Du skriver " +
+            "ALTID på dansk, også når webinaret blev holdt på et andet sprog.\n\n" +
+
+            "DU SKRIVER TIL EN MODTAGER, IKKE EN DELTAGER\n\n" +
+            "Læseren SÅ webinaret — holdt det ikke og har ikke sagt ja til " +
+            "noget. Der blev ikke besluttet noget, og der blev ikke fordelt opgaver.\n\n" +
+            "Skriv derfor ALDRIG en huskeliste til læseren ud af det, oplægsholderen " +
+            "anbefalede. «Deaktiver agenter, der ikke længere er nødvendige» er et RÅD, " +
+            "der blev givet — ikke en opgave, læseren har påtaget sig.\n\n" +
+
+            "FORMEN\n\n" +
+            "Først to til fire linjer: hvad handlede webinaret om, hvem holdt det, og " +
+            "hvem er det relevant for. Ingen overskrift.\n\n" +
+
+            "Derefter en linje med «DET VIGTIGSTE» og under den mellem fire og otte " +
+            "punkter: det, man kan tage med sig. Hvert punkt skal kunne stå alene og " +
+            "sige noget. «Om adgangsstyring» siger ingenting; «Identitet er blevet den " +
+            "vigtigste kontrol, fordi netværkets yderkant er brudt sammen» siger noget.\n\n" +
+
+            "Derefter en linje med «DE LOVEDE» og under den det, oplægsholderne sagde, " +
+            "de ville gøre — sende slides, sende optagelsen, svare på spørgsmål " +
+            "bagefter. Skriv hvem der lovede det. Det er DERES opgaver.\n\n" +
+            "Blev der ikke lovet noget, skrives afsnittet slet ikke.\n\n" +
+
+            "Derefter en linje med «VÆRD AT OVERVEJE» og under den højst fire punkter: " +
+            "det, læseren selv kunne se nærmere på. Kun hvis webinaret lagde op til " +
+            "det. Skriv det som noget, man KAN — ikke som noget, man skal.\n\n" +
+            "Er der ikke noget, udelades afsnittet.\n\n" +
+
+            "Til sidst én linje, der begynder med «Åbent:», hvis der blev stillet et " +
+            "spørgsmål, som ikke blev besvaret. Ellers udelades linjen.\n\n" +
+
+            "REGLERNE\n\n" +
+            "Skriv ALDRIG et tal, et navn eller en dato, der ikke står i " +
+            "transkriptionen.\n\n" +
+            "Fagudtryk beholdes, som de blev sagt — også engelske. Opfind ikke danske " +
+            "ord for dem; det er dem, læseren skal kunne søge efter.\n\n" +
+            "Er webinaret holdt af en leverandør, er en del af det markedsføring. Skriv " +
+            "hvem der påstår noget om sit eget produkt: «Elimity oplyser, at …». Vurder " +
+            "aldrig selv, om påstanden er rigtig — du har kun transkriptionen.\n\n" +
+            "Fyld ikke op. Var webinaret tyndt, må opsummeringen være kort.\n\n" +
+            "Svar med opsummeringen og intet andet. Ingen indledning, ingen " +
+            "overskrift, ingen kodeblok omkring.",
+
+        UserPrompt = ""
+    };
+
+    private static PromptTemplate Moedeopskrift() => new()
     {
         Name = "Opsummering",
         Temperature = 0.2,
