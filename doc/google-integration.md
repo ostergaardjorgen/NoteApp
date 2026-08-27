@@ -80,16 +80,89 @@ noget. `udgiv.ps1` skriver det også i sin egen udskrift.
 
 Det er en gyldig udgave. Kalenderen virker uden integration.
 
-## To ting, der skal huskes, inden appen deles ud
+## De tre tilstande hos Google
 
-**Google-verifikation.** Så længe samtykkeskærmen står som «Testing», er der
-et loft på 100 brugere, og de skal tilføjes i hånden. Skal appen ud til
-kunder, skal den igennem Googles verifikation. Det tager tid — det er ikke
-noget, man gør dagen før.
+*Efterprøvet mod Googles egen dokumentation 27-08-2026. Kilderne står nederst.*
 
-**Én spærring rammer alle.** Bliver id'et suspenderet, holder integrationen op
-med at virke for alle på én gang. Det er prisen for, at kunden ikke skal
-oprette noget selv, og den er værd at betale — men den skal være kendt.
+Appen kan stå i tre tilstande, og forskellen mellem dem er ikke en detalje —
+den afgør, om integrationen kan sælges.
+
+| | Testing | In production, uverificeret | Verificeret |
+|---|---|---|---|
+| Hvem kan forbinde | kun adresser, du selv skriver ind | enhver med en Google-konto | enhver |
+| Loft | 100 testbrugere | 100 nye brugere i alt | intet |
+| Advarselsskærm | ja | ja — «Avanceret → Fortsæt» | nej |
+| **Adgangen udløber efter syv dage** | **ja** | nej | nej |
+
+### Testing er den, der gør ondt nu
+
+Det er den, appen står i. Googles ordlyd er, at *«authorizations by a test
+user will expire seven days from the time of consent»* — og at det gælder
+opdateringsnøglen med. Derfor skal der trykkes **Forbind** igen hver uge.
+
+Det er ikke en fejl i appen. `Googlekalender.FriskNoegle` kender den, skelner
+`invalid_grant` fra en netværksfejl og siger det rent til brugeren. Men en
+integration, der falder ud hver uge, er ikke en integration, man kan sælge.
+
+### Mellemtrinnet: udgiv uden at være verificeret
+
+**Publish app** under **Audience** flytter projektet til *In production*. Det
+kan gøres uden verifikation, og det fjerner de to værste ting: syv-dages-udløbet
+og den manuelle liste over testbrugere. Prisen er en advarselsskærm, hver ny
+bruger skal klikke sig forbi.
+
+**Loftet er det, man skal passe på.** Google skriver «100 new users in total,
+after the app presents the unverified app screen» — det tælles over projektets
+levetid og kan ikke nulstilles. Verifikationen fjerner skærmen og dermed
+loftet, men de brugere, der allerede er brugt, kommer ikke tilbage. Brug dem
+derfor ikke på prøvekørsler.
+
+### Verifikationen: papirarbejde, ikke penge
+
+Appen beder om `calendar.events` og `tasks`. Begge er **følsomme**
+(*sensitive*) og ingen af dem **begrænsede** (*restricted*). Forskellen er
+afgørende:
+
+| | Følsom — det er os | Begrænset — Gmail, Drive |
+|---|---|---|
+| Gennemgang af app og varemærke | ja | ja |
+| Ejet domæne, hjemmeside og privatlivspolitik | ja | ja |
+| Demovideo af hele samtykkeforløbet | ja | ja |
+| Tredjeparts sikkerhedsvurdering (CASA) | **nej** | ja, og den koster årligt |
+
+Vi slipper for sikkerhedsvurderingen. Det er den post, der plejer at lukke
+ned for små udgivere. Vores verifikation koster **tid og papirarbejde**.
+
+### Én spærring rammer alle
+
+Bliver klient-id'et suspenderet, holder integrationen op med at virke for alle
+på én gang. Det er prisen for, at kunden ikke skal oprette noget selv, og den
+er værd at betale — men den skal være kendt.
+
+### Resten af appen er upåvirket
+
+Optagelse, transskription, opsummering og dokumenter rører aldrig Google.
+Mangler `google-klient.json`, siger fanen «IKKE SLÅET TIL», og alt andet
+kører. Verifikationen spærrer for **én fane** — ikke for produktet.
+
+## Hvor det gøres
+
+| Hvad | Hvor |
+|---|---|
+| Udgiv til produktion, testbrugere | [console.cloud.google.com/auth/audience](https://console.cloud.google.com/auth/audience) |
+| Navn, support-mail, logo | [console.cloud.google.com/auth/branding](https://console.cloud.google.com/auth/branding) |
+| Områder | [console.cloud.google.com/auth/scopes](https://console.cloud.google.com/auth/scopes) |
+| Send til verifikation, følg status | [console.cloud.google.com/auth/verification](https://console.cloud.google.com/auth/verification) |
+| Klient-id'et selv | [console.cloud.google.com/apis/credentials](https://console.cloud.google.com/apis/credentials) |
+
+Googles egne sider:
+
+- [Tilstandene og hvad de betyder](https://developers.google.com/identity/protocols/oauth2/production-readiness/overview)
+- [Testing, produktion og syv-dages-udløbet](https://support.google.com/cloud/answer/15549945)
+- [Advarselsskærmen og loftet på 100](https://support.google.com/cloud/answer/7454865)
+- [Verifikation af følsomme områder — trin for trin](https://developers.google.com/identity/protocols/oauth2/production-readiness/sensitive-scope-verification)
+- [Verifikation af varemærke](https://developers.google.com/identity/protocols/oauth2/production-readiness/brand-verification)
+- [Når verifikation ikke er nødvendig](https://support.google.com/cloud/answer/13464323)
 
 ## Microsoft 365
 

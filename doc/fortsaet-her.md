@@ -104,9 +104,12 @@ opfundet. Men det, der overlever, blander rigtige navne med almindelige ord
 («dag», «uge», «kunder»). Der mangler ét led: at afgøre, om noget ER et navn.
 Tre billige veje står i `findings.md`.
 
-**Google-verifikation.** Så længe samtykkeskærmen er i testtilstand, er der et
-loft på 100 brugere. Skal appen ud til kunder, skal den igennem Googles
-verifikation, og det tager tid. Se `google-integration.md`.
+**Google-verifikation.** I testtilstand udløber adgangen efter **syv dage** —
+det er den, der gør ondt, ikke loftet på 100. Der findes et mellemtrin:
+udgiv til produktion uden at være verificeret, så forsvinder udløbet, og
+prisen er en advarselsskærm. Verifikationen kræver ingen sikkerhedsvurdering,
+fordi områderne er følsomme og ikke begrænsede. Alt sammen efterprøvet og
+skrevet ud i [`google-integration.md`](google-integration.md).
 
 ## Roadmap uden for etaperne
 

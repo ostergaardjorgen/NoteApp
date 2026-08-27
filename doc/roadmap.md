@@ -211,7 +211,7 @@ kalender.
 
 **Compliance-konsekvensen er håndteret:** Google står på Compliance-siden under «Andre integrationer» med tilstand, områder og hvad der læses og skrives, og der er en popup, man skal kvittere for, før forbindelsen oprettes.
 
-**Det, der mangler, er hos Google, ikke i koden:** verifikationen af appen. Indtil den er igennem, udløber adgangen efter syv dage. Der ligger opgaver i Cockpittet om hjemmeside, privatlivspolitik og demovideo.
+**Det, der mangler, er hos Google, ikke i koden:** verifikationen af appen. I testtilstand udløber adgangen efter syv dage. **Det kan lukkes uden verifikation** ved at udgive projektet til produktion — så bliver prisen en advarselsskærm og et loft på 100 brugere i alt. Verifikationen selv kræver ingen sikkerhedsvurdering, fordi `calendar.events` og `tasks` er følsomme og ikke begrænsede områder; der ligger opgaver i Cockpittet om hjemmeside, privatlivspolitik og demovideo. De tre tilstande og alle links står i [`google-integration.md`](google-integration.md).
 
 **Der hentes kun, når nogen beder om det.** Der er et synkroniseringsikon på kalenderen og på opgaverne i Cockpittet, med en linje under, der siger, hvornår der sidst blev hentet. Det kom 24-08, fordi en aftale oprettet direkte i Google ikke dukkede op — og den eneste vej frem var at gå to skærme væk til Indstillinger og trykke på en knap, man skulle vide fandtes.
 
