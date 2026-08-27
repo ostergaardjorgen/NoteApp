@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Net;
 using System.Text;
 using System.Text.Json;
@@ -537,6 +537,70 @@ public static class Googlekalender
     /// have referat af. En indkaldelse, der varsler en optagelse, der aldrig
     /// kommer, er en, folk holder op med at læse.
     /// </param>
+    /// <summary>
+    /// Skriver en ændret aftale tilbage til Google.
+    /// </summary>
+    /// <remarks>
+    /// KUN TITEL OG TIDSPUNKT. Det er dem, der betyder noget for de andre
+    /// deltagere, og det er dem, der står i indkaldelsen. Mappe, mødetype og
+    /// sprog er NoteApps egne felter — de findes ikke i en Google-aftale, og
+    /// de skal ikke findes på, for så ville en indkaldelse pludselig bære
+    /// noget, ingen andre kan læse.
+    ///
+    /// LINKET RØRES IKKE. Et Meet-link hører til mødet hos Google, og en
+    /// PATCH, der sender et tomt felt, ville slette det. Skal der laves et
+    /// link, er der <see cref="TilfoejMeetAsync"/>.
+    ///
+    /// DELTAGERNE FÅR BESKED. Google sender selv en opdatering ud, når tiden
+    /// på en aftale med gæster flyttes — og det SKAL den. En aftale, der
+    /// rykker sig i ens egen kalender uden at nogen får det at vide, er den
+    /// slags, der får folk til at møde forkert.
+    /// </remarks>
+    public static async Task OpdaterAsync(Aftale aftale, string opdateringsnoegle,
+                                          CancellationToken ct = default)
+    {
+        if (aftale.FremmedId.Length == 0) return;
+
+        if (Googleklient.Hent() is not var (klientId, hemmelighed) || klientId.Length == 0)
+            throw new InvalidOperationException(Googleklient.Mangler);
+
+        var noegle = await FriskNoegle(klientId, hemmelighed, opdateringsnoegle, ct);
+
+        var zone = TimeZoneInfo.Local.Id;
+
+        var krop = new Dictionary<string, object?>
+        {
+            ["summary"] = aftale.Titel,
+            ["start"] = new Dictionary<string, string>
+            {
+                ["dateTime"] = aftale.Start.ToString("yyyy-MM-ddTHH:mm:sszzz"),
+                ["timeZone"] = zone
+            },
+            ["end"] = new Dictionary<string, string>
+            {
+                ["dateTime"] = aftale.Slutter.ToString("yyyy-MM-ddTHH:mm:sszzz"),
+                ["timeZone"] = zone
+            }
+        };
+
+        var adresse = $"{Aftaler}/{Uri.EscapeDataString(aftale.FremmedId)}" +
+                      "?sendUpdates=all";
+
+        using var anmodning = new HttpRequestMessage(HttpMethod.Patch, adresse)
+        {
+            Content = new StringContent(JsonSerializer.Serialize(krop), Encoding.UTF8, "application/json")
+        };
+
+        anmodning.Headers.Authorization = new("Bearer", noegle);
+
+        using var svar = await Http.SendAsync(anmodning, ct);
+
+        if (!svar.IsSuccessStatusCode)
+            throw new InvalidOperationException(
+                $"Google svarede {(int)svar.StatusCode}. " +
+                Kort(await svar.Content.ReadAsStringAsync(ct)));
+    }
+
     public static async Task<Googlesvar> OpretAsync(Aftale aftale, string opdateringsnoegle,
                                                     bool medMeet = true,
                                                     bool medNote = false,

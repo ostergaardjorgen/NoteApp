@@ -241,7 +241,11 @@
     "lukker_uden_at_gemme": "Closes without saving",
     "opgave": "Task",
     "opgaven_er_gjort": "The task is done",
-    "prioritet": "PRIORITY"
+    "prioritet": "PRIORITY",
+    "laeg_op_i_google_tasks": "Put in Google Tasks",
+    "ligger_i_google_tasks": "Is in Google Tasks",
+    "rettelser_sendes_op": "Changes made here are sent up to Google, and what is changed in Google comes down at the next fetch. Priority is NoteApp's own field and stays here.",
+    "saet_hakket_hvis_ogsaa_i_google": "Tick the box if the task should also be in Google Tasks — then it is on your phone too. Without the tick it stays here."
   },
   "newdocumentwindow": {
     "beskrivelse_valgfri_staar_oeverst_i_dokume": "Description (optional — appears at the top of the document)",

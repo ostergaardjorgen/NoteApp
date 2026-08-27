@@ -109,6 +109,14 @@
            Det laa i SAMME celle som knapperne, venstrestillet, og loeb ind
            under dem: «her kan du saette prioritet o…» og saa var resten vaek.
            En forklaring, man ikke kan laese til ende, er ikke en forklaring. -->
+      <!-- ============ SKAL DEN OP I GOOGLE? ============
+           Alt, appen finder i et møde, skal ikke ende i nogens telefon — de
+           fleste opgaver fra et møde er noter til en selv. Derfor et hak på
+           den enkelte opgave frem for en indstilling, der gælder alle. -->
+      <CheckBox x:Name="TilGoogle" Margin="2,0,2,10" FontSize="13"
+                VerticalContentAlignment="Center"
+                Content="{i18n:Oversat opgavewindow.laeg_op_i_google_tasks}" />
+
       <TextBlock x:Name="Googlenote" FontSize="11.5" TextWrapping="Wrap"
                  LineHeight="18" Visibility="Collapsed" Margin="2,0,2,12"
                  Foreground="{StaticResource TekstMeget}" />

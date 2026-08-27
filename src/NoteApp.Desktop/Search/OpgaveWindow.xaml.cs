@@ -1,4 +1,4 @@
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using NoteApp.Core;
 
@@ -44,35 +44,40 @@ public partial class OpgaveWindow : Window
         dele.Add(r.Moedetitel);
         if (r.Opgave.Kilde.Length > 0) dele.Add("fra " + r.Opgave.Kilde);
 
-        // EN OPGAVE FRA GOOGLE RETTES DÉR, IKKE HER.
+        // HER LAA LAASNINGEN AF EN GOOGLE-OPGAVE.
         //
-        // Teksten kommer fra Google og bliver overskrevet ved næste hentning.
-        // Felter, man kan skrive i, og som bliver rullet tilbage en time
-        // senere, er værre end felter, der er låst.
+        // Navn, beskrivelse og frist var skrivebeskyttede, og fristen blev vist
+        // som graa tekst i stedet for en datovaelger. Begrundelsen var rigtig,
+        // saa laenge appen kun kunne LAESE opgaver: felter, man kan skrive i,
+        // og som bliver rullet tilbage en time senere, er vaerre end felter,
+        // der er laast.
         //
-        // Fluebenet er undtagelsen: DET går begge veje.
-        if (r.Opgave.Herkomst == Opgavekilde.Google)
+        // Nu skrives rettelsen tilbage - se Googleopgaver.OpdaterAsync - saa
+        // den bliver ikke rullet tilbage, og saa er der ingen grund til at
+        // laase. AEndringer gaar begge veje for baade kalender og opgaver.
+
+        // ============ HERKOMSTEN AFGOER, HVAD HAKKET SIGER ============
+        //
+        // Ligger opgaven allerede i Google, er hakket en OPLYSNING og ikke et
+        // valg - man kan ikke traekke den hjem igen herfra. Er den lokal, er
+        // det et valg.
+        var iGoogle = r.Opgave.Herkomst == Opgavekilde.Google;
+
+        if (iGoogle)
         {
             dele.Insert(0, "Google Tasks");
 
-            Navn.IsReadOnly = true;
-            Beskrivelse.IsReadOnly = true;
+            TilGoogle.IsChecked = true;
+            TilGoogle.IsEnabled = false;
+            TilGoogle.Content = NoteApp.Core.Sprog.T("opgavewindow.ligger_i_google_tasks");
 
-            // FRISTEN SOM TEKST. En laast datovaelger staar som en graa kasse
-            // midt i en moerk skaerm og ser ud som noget, der er gaaet i
-            // stykker.
-            Frist.Visibility = System.Windows.Visibility.Collapsed;
-            Fristtekst.Visibility = System.Windows.Visibility.Visible;
+            Googlenote.Text = NoteApp.Core.Sprog.T("opgavewindow.rettelser_sendes_op");
 
-            Fristtekst.Text = r.Opgave.Deadline is { } f
-                ? f.LocalDateTime.ToString("d. MMMM yyyy")
-                : "ingen frist";
-
-            // NOTET STAAR FOR SIG, ikke i Fejl-feltet. Det laa i samme celle
-            // som knapperne og loeb ind under dem.
-            Googlenote.Text = "Opgaven kommer fra Google Tasks. Tekst og frist rettes dér — "
-                            + "her kan du sætte prioritet og krydse den af, og "
-                            + "afkrydsningen sendes op igen.";
+            Googlenote.Visibility = System.Windows.Visibility.Visible;
+        }
+        else
+        {
+            Googlenote.Text = NoteApp.Core.Sprog.T("opgavewindow.saet_hakket_hvis_ogsaa_i_google");
 
             Googlenote.Visibility = System.Windows.Visibility.Visible;
         }
@@ -159,8 +164,85 @@ public partial class OpgaveWindow : Window
             return;
         }
 
+        // ============ OG SAA OP TIL GOOGLE ============
+        //
+        // LOKALT FOERST, ALTID. Opgaven er gemt her, foer nettet roeres. Gaar
+        // afsendelsen galt - der er ikke net, noeglen er udloebet - er
+        // rettelsen der stadig, og den kan sendes op naeste gang.
+        //
+        // Den anden vej rundt ville betyde, at en fejl i Google kunne koste
+        // det, man lige har skrevet.
+        _ = TilGoogleAsync();
+
         Gemt = true;
         DialogResult = true;
+    }
+
+    /// <summary>
+    /// Lægger opgaven op i Google — eller skriver ændringen tilbage.
+    /// </summary>
+    /// <remarks>
+    /// DEN VENTER IKKE PAA SVAR. Dialogen lukker med det samme; et net, der er
+    /// langsomt, maa ikke holde en fast i et vindue, man er faerdig med.
+    ///
+    /// GAAR DET GALT, SIGES DET - men i en notifikation og ikke som en fejl,
+    /// der stopper noget. Opgaven ER gemt; det, der mangler, er kopien hos
+    /// Google, og den kan hentes ind igen.
+    /// </remarks>
+    /// <summary>
+    /// Siger til uden at stoppe noget.
+    /// </summary>
+    /// <remarks>
+    /// Det gaar i historikken og i klokken, ikke i en dialog. Opgaven ER
+    /// gemt; det, der mangler, er kopien hos Google. En dialog ville kraeve et
+    /// klik for noget, man ikke kan goere ved lige nu.
+    /// </remarks>
+    private static void Meld(string hvad, string detaljer)
+    {
+        NoteApp.Core.Historik.Skriv(NoteApp.Core.HaendelseType.Hentning,
+            hvad, detaljer, NoteApp.Core.Udfald.SeEfter);
+
+        NoteApp.Core.Notifikationer.Meld();
+    }
+
+    private async Task TilGoogleAsync()
+    {
+        var vil = TilGoogle.IsChecked == true;
+        var iGoogle = _r.Opgave.Herkomst == Opgavekilde.Google;
+
+        if (!vil && !iGoogle) return;
+
+        try
+        {
+            var noegle = Integrationsfiler.Hent(Googleopgaver.Id).Opdateringsnoegle;
+
+            if (noegle.Length == 0)
+            {
+                Meld("Opgaven blev ikke lagt op",
+                     "Google Tasks er ikke forbundet. Opgaven er gemt her. " +
+                     "Forbind under «Indstillinger» og sæt hakket igen.");
+                return;
+            }
+
+            if (iGoogle)
+            {
+                await Googleopgaver.OpdaterAsync(_r.Opgave, noegle);
+                return;
+            }
+
+            var (id, liste) = await Googleopgaver.OpretAsync(_r.Opgave, noegle);
+
+            _r.Opgave.Herkomst = Opgavekilde.Google;
+            _r.Opgave.FremmedId = id;
+            _r.Opgave.FremmedListe = liste;
+
+            Opgaveregister.Gem(_r);
+        }
+        catch (Exception ex)
+        {
+            Meld("Opgaven kunne ikke sendes til Google",
+                 $"Den er gemt her og går ikke tabt. {ex.Message}");
+        }
     }
 
     private void Luk_Klik(object sender, RoutedEventArgs e)

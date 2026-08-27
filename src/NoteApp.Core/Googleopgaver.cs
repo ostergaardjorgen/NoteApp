@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 using System.Text.Json;
 
 namespace NoteApp.Core;
@@ -176,6 +176,116 @@ public static class Googleopgaver
         // Google afviser ellers med 400: en opgave kan ikke baade vaere aaben
         // og have et faerdigtidspunkt.
         if (!o.Faerdig) krop["completed"] = null;
+
+        var adresse = $"{Opgaver}/{Uri.EscapeDataString(o.FremmedListe)}" +
+                      $"/tasks/{Uri.EscapeDataString(o.FremmedId)}";
+
+        using var anmodning = new HttpRequestMessage(HttpMethod.Patch, adresse)
+        {
+            Content = new StringContent(JsonSerializer.Serialize(krop), Encoding.UTF8, "application/json")
+        };
+
+        anmodning.Headers.Authorization = new("Bearer", noegle);
+
+        using var svar = await Http.SendAsync(anmodning, ct);
+
+        if (!svar.IsSuccessStatusCode)
+            throw new InvalidOperationException(
+                $"Google svarede {(int)svar.StatusCode}. " +
+                Kort(await svar.Content.ReadAsStringAsync(ct)));
+    }
+
+    /// <summary>
+    /// Lægger en lokal opgave op i Google. Returnerer id og liste, den fik.
+    /// </summary>
+    /// <remarks>
+    /// DEN SKAL VÆLGES, IKKE SKE AF SIG SELV. Alt, hvad appen finder i et
+    /// møde, skal ikke ende i nogens telefon — de fleste opgaver fra et møde
+    /// er noter til en selv. Derfor et hak på den enkelte opgave.
+    ///
+    /// LISTEN ER DEN FØRSTE, Google melder. Den er brugerens standardliste
+    /// («Mine opgaver» hos de fleste), og det er dér, en opgave hører hjemme,
+    /// når ingen har sagt andet. At spørge om listen ville være et spørgsmål
+    /// mere i en dialog, der i forvejen har fem felter.
+    ///
+    /// FRISTEN SENDES SOM EN DATO UDEN KLOKKESLÆT. Google Tasks gemmer kun
+    /// datoen og kaster tiden væk — sender man et klokkeslæt, ser det ud, som
+    /// om det blev gemt, og det gjorde det ikke.
+    /// </remarks>
+    public static async Task<(string Id, string Liste)> OpretAsync(
+        Opgave o, string opdateringsnoegle, CancellationToken ct = default)
+    {
+        var noegle = await Noegle(opdateringsnoegle, ct);
+
+        var lister = await Listerne(noegle, ct);
+        if (lister.Count == 0)
+            throw new InvalidOperationException("Der er ingen opgavelister i kontoen.");
+
+        var liste = o.FremmedListe.Length > 0
+            ? o.FremmedListe
+            : lister[0].Id;
+
+        var krop = new Dictionary<string, object?>
+        {
+            ["title"] = o.Visningsnavn,
+            ["status"] = o.Faerdig ? "completed" : "needsAction"
+        };
+
+        if (o.Tekst.Length > 0 && o.Tekst != o.Navn) krop["notes"] = o.Tekst;
+
+        // Kun datoen. Google kaster klokkeslaettet vaek.
+        if (o.Deadline is { } d)
+            krop["due"] = d.UtcDateTime.Date.ToString("yyyy-MM-dd'T'00:00:00'Z'");
+
+        var adresse = $"{Opgaver}/{Uri.EscapeDataString(liste)}/tasks";
+
+        using var anmodning = new HttpRequestMessage(HttpMethod.Post, adresse)
+        {
+            Content = new StringContent(JsonSerializer.Serialize(krop), Encoding.UTF8, "application/json")
+        };
+
+        anmodning.Headers.Authorization = new("Bearer", noegle);
+
+        using var svar = await Http.SendAsync(anmodning, ct);
+        var tekst = await svar.Content.ReadAsStringAsync(ct);
+
+        if (!svar.IsSuccessStatusCode)
+            throw new InvalidOperationException(
+                $"Google svarede {(int)svar.StatusCode}. " + Kort(tekst));
+
+        using var doku = JsonDocument.Parse(tekst);
+
+        return (Tekst(doku.RootElement, "id"), liste);
+    }
+
+    /// <summary>
+    /// Skriver en ændret opgave tilbage til Google.
+    /// </summary>
+    /// <remarks>
+    /// TITEL, NOTE OG FRIST — ikke afkrydsningen. Den har sin egen vej i
+    /// <see cref="SaetFaerdigAsync"/>, fordi den skal kunne sendes alene og
+    /// med det samme: et flueben, der venter på, at man lukker en dialog, er
+    /// et flueben, man ikke stoler på.
+    ///
+    /// EN FRIST, DER FJERNES, SKAL SENDES SOM NULL. Udelades feltet, lader
+    /// Google den gamle stå — og så ser det ud, som om sletningen ikke virkede.
+    /// </remarks>
+    public static async Task OpdaterAsync(Opgave o, string opdateringsnoegle,
+                                          CancellationToken ct = default)
+    {
+        if (o.FremmedId.Length == 0 || o.FremmedListe.Length == 0) return;
+
+        var noegle = await Noegle(opdateringsnoegle, ct);
+
+        var krop = new Dictionary<string, object?>
+        {
+            ["id"] = o.FremmedId,
+            ["title"] = o.Visningsnavn,
+            ["notes"] = o.Tekst.Length > 0 && o.Tekst != o.Navn ? o.Tekst : null,
+            ["due"] = o.Deadline is { } d
+                ? d.UtcDateTime.Date.ToString("yyyy-MM-dd'T'00:00:00'Z'")
+                : null
+        };
 
         var adresse = $"{Opgaver}/{Uri.EscapeDataString(o.FremmedListe)}" +
                       $"/tasks/{Uri.EscapeDataString(o.FremmedId)}";
