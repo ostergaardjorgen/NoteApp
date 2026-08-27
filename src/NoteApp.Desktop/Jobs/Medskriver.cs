@@ -89,8 +89,21 @@ public sealed class Medskriver : IDisposable
 
     public void Start()
     {
-        if (!_install.IsComplete) { _opgivet = true; return; }
+        if (!_install.IsComplete) { Opgiv("motoren eller modellen mangler"); return; }
+
         _ur.Start();
+
+        // SIG AT DEN ER I GANG. Uden det kan man ikke se forskel paa "den
+        // koerer og har bare ikke naaet en hel bid endnu" og "den startede
+        // aldrig". Det kostede en time 27-08-2026.
+        try
+        {
+            Historik.Skriv(HaendelseType.Transskription,
+                $"Medskrivning i gang ({_spor})",
+                $"Sprog {_sprog}. Foerste bid efter {Medskrift.BidSegmenter / 2} minutter.",
+                Udfald.Fuldført);
+        }
+        catch (Exception) { }
     }
 
     /// <summary>
@@ -130,9 +143,9 @@ public sealed class Medskriver : IDisposable
             _ly = ly;
             return true;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            Opgiv();
+            Opgiv(ex.Message);
             return false;
         }
     }
@@ -211,9 +224,9 @@ public sealed class Medskriver : IDisposable
 
             await SkrivBidAsync(bid, CancellationToken.None);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            Opgiv();
+            Opgiv(ex.Message);
         }
     }
 
@@ -231,7 +244,7 @@ public sealed class Medskriver : IDisposable
 
             var wav = Path.Combine(arbejde, "bid.wav");
 
-            if (!SamlSegmenter(bid, wav)) { Opgiv(); return false; }
+            if (!SamlSegmenter(bid, wav)) { Opgiv("et segment manglede"); return false; }
 
             var udbase = Path.Combine(arbejde, "bid");
 
@@ -242,7 +255,7 @@ public sealed class Medskriver : IDisposable
                 progress: null, ct);
 
             var json = udbase + ".json";
-            if (!File.Exists(json)) { Opgiv(); return false; }
+            if (!File.Exists(json)) { Opgiv("motoren skrev ingen json"); return false; }
 
             _bidder.Add(new Medskrift.Faerdigbid(
                 await File.ReadAllTextAsync(json, ct),
@@ -256,9 +269,9 @@ public sealed class Medskriver : IDisposable
 
             return true;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            Opgiv();
+            Opgiv(ex.Message);
             return false;
         }
         finally
@@ -284,8 +297,12 @@ public sealed class Medskriver : IDisposable
 
         for (var i = bid.LydFra; i < bid.Til; i++)
         {
-            // Segmenterne taeller fra 1, bidderne fra 0.
-            var sti = Path.Combine(Segmentmappe, $"seg_{i + 1:D5}.wav");
+            // SEGMENTERNE TAELLER FRA NUL. Her stod "i + 1", fordi jeg
+            // antog, at de begyndte ved seg_00001. De begynder ved
+            // seg_00000, og saa laeste bidden lyd, der laa et halvt minut
+            // for sent - og den sidste bid ledte efter en fil, der ikke
+            // fandtes. Set 27-08-2026.
+            var sti = Path.Combine(Segmentmappe, $"seg_{i:D5}.wav");
             if (!File.Exists(sti)) return false;
             filer.Add(sti);
         }
@@ -315,11 +332,25 @@ public sealed class Medskriver : IDisposable
     /// Det, der er skrevet indtil nu, smides væk. En halv transskription, der
     /// bliver flettet med en hel, er værre end ingen — den ville se komplet ud.
     /// </remarks>
-    private void Opgiv()
+    private void Opgiv(string hvorfor)
     {
         _opgivet = true;
         _ur.Stop();
         _bidder.Clear();
+
+        // DET SKAL STAA ET STED. En tavs opgivelse kan ikke skelnes fra
+        // "koerte aldrig", og forskellen er alt, naar man skal finde fejlen.
+        // Det gaar i historikken, ikke i en dialog: medskrivningen er en
+        // hjaelp, og at den udeblev, er ikke noget, brugeren skal svare paa.
+        try
+        {
+            Historik.Skriv(HaendelseType.Transskription,
+                $"Medskrivning opgivet ({_spor})", hvorfor, Udfald.SeEfter);
+        }
+        catch (Exception)
+        {
+            // Kan historikken ikke skrives, er der ikke mere at goere.
+        }
     }
 
     public void Dispose()

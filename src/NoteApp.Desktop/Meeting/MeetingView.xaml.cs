@@ -829,9 +829,19 @@ public partial class MeetingView : UserControl
                 _medskrivere[spor] = m;
             }
         }
-        catch (Exception)
+        catch (Exception ex)
         {
             _medskrivere.Clear();
+
+            // TAVSHEDEN VAR FEJLEN. Uden det her kan "medskrivningen koerte
+            // ikke" ikke skelnes fra "den gik i stykker ved opstart", og det
+            // kostede en time at finde ud af 27-08-2026.
+            try
+            {
+                Historik.Skriv(HaendelseType.Transskription,
+                    "Medskrivning kunne ikke startes", ex.Message, Udfald.SeEfter);
+            }
+            catch (Exception) { }
         }
     }
 
