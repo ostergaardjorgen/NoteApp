@@ -1949,7 +1949,19 @@ public partial class TranscribeView : UserControl
             return;
         }
 
-        var kunStemmer = genbrugMik && genbrugLoop;
+        // ET WEBINAR HAR KUN ET SPOR.
+        //
+        // Her stod "genbrugMik && genbrugLoop". genbrugLoop er falsk paa en
+        // optagelse med eet spor - der ER ikke noget andet spor at genbruge -
+        // og saa blev kunStemmer falsk, selv om sporet var genbrugt.
+        //
+        // Foelgen: skaermen sagde "Indlaeser modellen ... det tager typisk et
+        // halvt minut" om en model, der aldrig blev laest ind. Imens koerte
+        // talergenkendelsen, som er det, der faktisk tager tiden, og den stod
+        // der intet om. Set 27-08-2026 paa et webinar, hvor teksten laa klar
+        // seksten sekunder efter stoppet, mens bjaelken stadig sagde
+        // "indlaeser".
+        var kunStemmer = genbrugMik && (!toSpor || genbrugLoop);
 
         _afbryd = new CancellationTokenSource();
         _koererPaa = valgt.Mappe;
@@ -2071,7 +2083,7 @@ public partial class TranscribeView : UserControl
 
             if (toSpor)
             {
-                if (genbrugLoop) Status.Text = "Gæsternes spor er skrevet ud i forvejen — genbruges.";
+                if (genbrugLoop) Fase("Gæsternes spor er skrevet ud i forvejen — genbruges.");
                 else
                     loopR = await motor.RunAsync(
                         new TranscriptionRequest(loopWav, install.ModelPath!, loopUdBase, deresSprog),
@@ -2082,7 +2094,7 @@ public partial class TranscribeView : UserControl
 
             TranscriptionResult? r = null;
 
-            if (genbrugMik) Status.Text = "Dit spor er skrevet ud i forvejen — genbruges.";
+            if (genbrugMik) Fase("Dit spor er skrevet ud i forvejen — genbruges.");
             else
                 r = await motor.RunAsync(
                     new TranscriptionRequest(wav, install.ModelPath!, udBase, mitSprog),
@@ -2140,6 +2152,16 @@ public partial class TranscribeView : UserControl
             // forvejen. Fejler den, staar udskriften uden navne — den bliver
             // ikke daarligere af det, den bliver bare ikke bedre.
             Talere? talere = null;
+
+            // ============ SIG HVAD DEN LAVER NU ============
+            //
+            // Er sporene genbrugt, er talergenkendelsen det ENESTE, der
+            // koerer - og den tager minutter. Stod der stadig "Indlaeser
+            // modellen ... det tager typisk et halvt minut", ville skaermen
+            // tale om en model, der aldrig blev laest ind, mens det rigtige
+            // arbejde skete i tavshed. Set 27-08-2026.
+            if (!talerJob.IsCompleted) Fase("Finder ud af, hvem der taler …");
+
             try { talere = await talerJob; }
             catch (OperationCanceledException) { throw; }
             catch (Exception) { /* uden navne, som foer */ }
@@ -2502,6 +2524,24 @@ public partial class TranscribeView : UserControl
     /// Slås op frem for at blive husket: skærmen kan være bygget, før motoren
     /// er fundet, og et gemt navn ville så være tomt netop den første gang.
     /// </summary>
+    /// <summary>
+    /// Siger, hvad der sker nu — både i ruden og i bjælken øverst.
+    /// </summary>
+    /// <remarks>
+    /// DE TO SKAL SIGE DET SAMME. Status stod i ruden, og bjælken havde sin
+    /// egen tekst, sat én gang ved start. Skiftede arbejdet fase — fra
+    /// udskrivning til talergenkendelse, eller til genbrug — fulgte bjælken
+    /// ikke med, og så stod der «Indlæser modellen» om noget, der for længst
+    /// var forbi.
+    ///
+    /// Fremdriften røres ikke: den har sin egen vej og sit eget tal.
+    /// </remarks>
+    private void Fase(string besked)
+    {
+        Status.Text = besked;
+        Jobs.Udskriftsvagt.Fremdrift(Fremdrift.Value, besked);
+    }
+
     private static string Modelnavn()
     {
         var install = WhisperInstall.Locate(AppSettings.Current.PreferredModel);

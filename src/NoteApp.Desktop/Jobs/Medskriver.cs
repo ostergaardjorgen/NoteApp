@@ -77,6 +77,30 @@ public sealed class Medskriver : IDisposable
     /// <summary>Hvor mange segmenter der er skrevet ud indtil nu.</summary>
     public int Faerdige => _faerdige;
 
+    /// <summary>
+    /// Hvor langt inde i optagelsen teksten rækker. Tom, hvis intet er skrevet.
+    /// </summary>
+    /// <remarks>
+    /// TIL AT VISE, MENS DER OPTAGES. Medskrivningen er usynlig, og det er
+    /// dens eneste egentlige fejl: man kan ikke se, om den arbejder, og saa
+    /// tvivler man paa, at der sker noget. Set 27-08-2026, hvor brugeren
+    /// spurgte, om den overhovedet havde forberedt noget - og den havde
+    /// skrevet syv bidder.
+    ///
+    /// Der vises et TIDSPUNKT og ikke en procent. «Skrevet ud til 16:40» kan
+    /// man holde op mod uret; «58 %» siger ingenting om, hvad der mangler.
+    /// </remarks>
+    public string Naaet
+    {
+        get
+        {
+            if (_opgivet || _faerdige == 0) return "";
+
+            var sek = _faerdige * AudioFormat.ChunkDuration.TotalSeconds;
+            return TimeSpan.FromSeconds(sek).ToString(sek >= 3600 ? @"h\:mm\:ss" : @"mm\:ss");
+        }
+    }
+
     public Medskriver(string sessionDir, string spor, string sprog, InstallState install)
     {
         _sessionDir = sessionDir;

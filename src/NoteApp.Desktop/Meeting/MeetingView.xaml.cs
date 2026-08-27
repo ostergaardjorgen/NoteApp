@@ -795,6 +795,33 @@ public partial class MeetingView : UserControl
         return mappe;
     }
 
+    /// <summary>
+    /// «Skrevet ud til 16:40» — eller tom tekst, hvis der ikke skrives med.
+    /// </summary>
+    /// <remarks>
+    /// DET SKAL KUNNE SES, MENS DET SKER. Medskrivningen var usynlig, og saa
+    /// tvivler man paa, at den virker - med god grund: der er ingen maade at
+    /// vide det paa. Set 27-08-2026, hvor brugeren spurgte, om den havde
+    /// forberedt noget, og den havde skrevet syv bidder.
+    ///
+    /// Der staar et tidspunkt og ikke en procent. Et tidspunkt kan holdes op
+    /// mod uret oeverst i baandet.
+    /// </remarks>
+    private string Medskrivningsstatus()
+    {
+        if (_medskrivere.Count == 0) return "";
+
+        // Er der to spor, er det det mindst faerdige, der siger noget om,
+        // hvor langt man reelt er.
+        var naaet = _medskrivere.Values
+            .Select(m => m.Naaet)
+            .Where(t => t.Length > 0)
+            .OrderBy(t => t, StringComparer.Ordinal)
+            .FirstOrDefault();
+
+        return naaet is null ? "" : $"Skrevet ud til {naaet}";
+    }
+
     // ==================== MEDSKRIVNING ====================
 
     /// <summary>
@@ -1155,7 +1182,12 @@ public partial class MeetingView : UserControl
         if (niveau > AudioDevices.SilenceThreshold)
         {
             _stilhedFra = null;
-            _baand?.Meld("");
+
+            // ER DER LYD, ER DER INTET AT ADVARE OM - saa er pladsen ledig til
+            // at vise, hvor langt medskrivningen er naaet. Stilhedsadvarslen
+            // vinder, naar den er der: den handler om, at optagelsen kan vaere
+            // tom, og det er vaerre end alt andet.
+            _baand?.Meld(Medskrivningsstatus());
             return;
         }
 
