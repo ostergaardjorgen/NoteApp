@@ -1,4 +1,4 @@
-using System.Windows;
+﻿using System.Windows;
 using NoteApp.Core;
 using NoteApp.Core.Llm;
 using NoteApp.Desktop.Transcribe;
@@ -58,6 +58,44 @@ public partial class AftaleWindow : Window
     public bool SkalInvitere { get; private set; }
 
     private sealed record Punkt(string Navn, string? Vaerdi);
+
+    /// <summary>
+    /// Vælger man mødetype, følger mappen med — hvis man ikke selv har valgt en.
+    /// </summary>
+    /// <remarks>
+    /// Samme regel som i opstartsdialogen: et webinar hører i «Webinarer»,
+    /// hver gang, så det skal ikke vælges hver gang. Men den FORESLÅR — har
+    /// man selv sat en mappe, bliver den stående.
+    ///
+    /// Her betyder det mere end i opstartsdialogen: en aftale udfyldes tit
+    /// dagen før, og det, der står på den, er dét, optagelsen arver. Rammer
+    /// mappen rigtigt allerede her, er der ingenting at rette bagefter.
+    /// </remarks>
+    private void Type_Valgt(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+    {
+        if (Mappevalg.SelectedItem is Punkt { Vaerdi.Length: > 0 }) return;   // selv valgt
+
+        if ((Typevalg.SelectedItem as Punkt)?.Vaerdi is not { Length: > 0 } type) return;
+
+        var mappe = NoteApp.Core.Llm.PromptTemplate.LoadAll()
+            .FirstOrDefault(t => t.Name.Equals(type, StringComparison.CurrentCultureIgnoreCase))
+            ?.Mappe;
+
+        if (string.IsNullOrWhiteSpace(mappe)) return;
+
+        if (Mappevalg.ItemsSource is List<Punkt> punkter)
+        {
+            if (punkter.All(x => x.Vaerdi != mappe))
+            {
+                punkter.Add(new Punkt(mappe, mappe));
+                Mappevalg.ItemsSource = null;
+                Mappevalg.ItemsSource = punkter;
+            }
+
+            Mappevalg.SelectedItem = (Mappevalg.ItemsSource as List<Punkt>)
+                ?.FirstOrDefault(x => x.Vaerdi == mappe);
+        }
+    }
 
     public AftaleWindow(Aftale? aftale)
     {

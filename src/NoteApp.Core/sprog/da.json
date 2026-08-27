@@ -666,7 +666,9 @@
     "staar_under_navnet_naar_du_vaelger_moedety": "Står under navnet, når du vælger mødetype — så valget ikke er et gæt. Skriv gerne to linjer om, hvad den er god til, og hvornår man vælger den frem for de andre.",
     "temperatur": "Temperatur",
     "tilbage_til_standarden": "Tilbage til standarden",
-    "tilpas_til_denne_moedetype": "Tilpas til denne mødetype"
+    "tilpas_til_denne_moedetype": "Tilpas til denne mødetype",
+    "mappe": "MAPPE",
+    "optagelser_med_den_her_moedetype_laegges": "Optagelser med den her mødetype foreslås lagt i mappen. Har du selv valgt en anden, bliver den stående. Tomt felt = ingen mappe."
   },
   "transcribeview": {
     "aabn_mappen_paa_disken": "Åbn mappen på disken",

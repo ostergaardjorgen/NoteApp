@@ -219,6 +219,17 @@
                            Text="{i18n:Oversat templatesview.loftet_over_svaret_cirka_3_tegn_pr_token}" />
               </Grid>
 
+              <!-- ============ MAPPEN ============
+                   Et webinar hoerer i «Webinarer». Hver gang. Saa skal man
+                   ikke vaelge det hver gang - man har allerede sagt det ved
+                   at vaelge moedetypen. -->
+              <TextBlock Text="{i18n:Oversat templatesview.mappe}" Style="{StaticResource Underskrift}" Margin="0,20,0,0" />
+              <ComboBox x:Name="FeltMappe" Margin="0,4,0,0" IsEditable="False"
+                        SelectionChanged="Mappe_Valgt" />
+              <TextBlock FontSize="11.5" Margin="2,6,0,0" TextWrapping="Wrap"
+                         Foreground="{StaticResource TekstMeget}"
+                         Text="{i18n:Oversat templatesview.optagelser_med_den_her_moedetype_laegges}" />
+
               <TextBlock Text="{i18n:Oversat templatesview.beskrivelse}" Style="{StaticResource Underskrift}" Margin="0,20,0,0" />
               <TextBox x:Name="FeltBeskrivelse" Margin="0,4,0,0" TextChanged="Aendret"
                        AcceptsReturn="True" TextWrapping="Wrap" MinHeight="58"

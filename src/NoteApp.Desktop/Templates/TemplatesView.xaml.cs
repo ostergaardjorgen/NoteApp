@@ -289,6 +289,11 @@ public partial class TemplatesView : UserControl
         _valgt = t;
 
         FeltNavn.Text = t.Name;
+
+        // MAPPERNE HENTES HVER GANG. De aendrer sig, mens appen koerer - en
+        // liste, der blev fyldt ved opstart, ville mangle den mappe, man lige
+        // har lavet.
+        FyldMapper(t.Mappe);
         FeltBeskrivelse.Text = t.Description ?? "";
         FeltTemperatur.Text = t.Temperature.ToString("0.##", CultureInfo.CurrentCulture);
         FeltMaksTokens.Text = t.MaxTokens.ToString();
@@ -321,6 +326,41 @@ public partial class TemplatesView : UserControl
     /// at goere, og saa skal der ikke mindes om noget.
     /// </summary>
     private string? _systemVedIndlaesning;
+
+    /// <summary>Én mappe i rullelisten. Null betyder «ingen».</summary>
+    private sealed record Mappepunkt(string Navn, string? Sti)
+    {
+        public override string ToString() => Navn;
+    }
+
+    /// <summary>
+    /// Fylder mapperullelisten og markerer den, mødetypen peger på.
+    /// </summary>
+    /// <remarks>
+    /// EN MAPPE, DER ER SLETTET, SKAL STADIG KUNNE SES. Peger mødetypen på
+    /// noget, der ikke findes længere, lægges den ind alligevel og med
+    /// «(findes ikke)» efter sig. Fjernes den bare, ville feltet stå tomt, og
+    /// så ser det ud, som om der aldrig var valgt noget — og næste gang nogen
+    /// gemmer, ville det være sandt.
+    /// </remarks>
+    private void FyldMapper(string? valgt)
+    {
+        var punkter = new List<Mappepunkt> { new(NoteApp.Core.Mapper.Ingen, null) };
+
+        foreach (var m in NoteApp.Core.Mapper.Alle(NoteApp.Core.Mapper.Slags.Optagelser))
+            punkter.Add(new Mappepunkt(m, m));
+
+        if (!string.IsNullOrWhiteSpace(valgt) && punkter.All(x => x.Sti != valgt))
+            punkter.Add(new Mappepunkt($"{valgt}  (findes ikke)", valgt));
+
+        FeltMappe.ItemsSource = punkter;
+        FeltMappe.SelectedItem = punkter.FirstOrDefault(x => x.Sti == valgt) ?? punkter[0];
+    }
+
+    private void Mappe_Valgt(object sender, SelectionChangedEventArgs e)
+    {
+        if (!_indlæser) GemKnap.IsEnabled = true;
+    }
 
     // -------------------------------------------------------------- ændring
 
@@ -468,6 +508,7 @@ public partial class TemplatesView : UserControl
 
         _valgt.Name = FeltNavn.Text.Trim();
         _valgt.Description = string.IsNullOrWhiteSpace(FeltBeskrivelse.Text) ? null : FeltBeskrivelse.Text.Trim();
+        _valgt.Mappe = (FeltMappe.SelectedItem as Mappepunkt)?.Sti;
         _valgt.Temperature = temp;
         _valgt.MaxTokens = maks;
         _valgt.SystemPrompt = FeltSystem.Text.Trim();

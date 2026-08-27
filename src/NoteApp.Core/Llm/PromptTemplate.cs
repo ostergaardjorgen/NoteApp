@@ -16,6 +16,7 @@ namespace NoteApp.Core.Llm;
 ///   ---
 ///   navn: Mødereferat
 ///   model: qwen3-8b
+///   mappe: Webinarer
 ///   temperatur: 0.2
 ///   ---
 ///   [systemprompt]
@@ -27,6 +28,24 @@ public sealed class PromptTemplate
     public required string Name { get; set; }
     public string? Description { get; set; }
     public string? PreferredModel { get; set; }
+
+    /// <summary>
+    /// Mappen, optagelser af den her type hører til i. Tom = ingen.
+    /// </summary>
+    /// <remarks>
+    /// ET WEBINAR HØRER I «WEBINARER». Hver gang. Så skal man ikke vælge det
+    /// hver gang — man har allerede sagt det ved at vælge mødetypen.
+    ///
+    /// DEN FORESLÅR, DEN BESTEMMER IKKE. Vælger man mødetype i en dialog,
+    /// hvor mappen ikke er valgt endnu, sættes mappen. Har man selv valgt en
+    /// anden, bliver den stående — et valg, man har truffet med hånden, må en
+    /// automatik ikke lave om.
+    ///
+    /// Den ligger på mødetypen og ikke i en tabel for sig, fordi det er ÉN
+    /// oplysning om mødetypen, og fordi den så følger med, når en mødetype
+    /// deles eller kopieres.
+    /// </remarks>
+    public string? Mappe { get; set; }
     public double Temperature { get; set; } = 0.2;
 
     /// <summary>Loft over svarets længde. Et referat af et langt møde skal have plads.</summary>
@@ -98,6 +117,7 @@ public sealed class PromptTemplate
             Name = Hent(felter, "navn") ?? System.IO.Path.GetFileNameWithoutExtension(path) ?? "Uden navn",
             Description = Hent(felter, "beskrivelse"),
             PreferredModel = Hent(felter, "model"),
+            Mappe = Hent(felter, "mappe"),
             Temperature = temp > 0 ? temp : 0.2,
             MaxTokens = maks > 0 ? maks : 2048,
             SystemPrompt = dele[1].Trim(),
@@ -173,6 +193,7 @@ public sealed class PromptTemplate
         sb.Append("navn: ").AppendLine(Name);
         if (!string.IsNullOrWhiteSpace(Description)) sb.Append("beskrivelse: ").AppendLine(Description);
         if (!string.IsNullOrWhiteSpace(PreferredModel)) sb.Append("model: ").AppendLine(PreferredModel);
+        if (!string.IsNullOrWhiteSpace(Mappe)) sb.Append("mappe: ").AppendLine(Mappe);
         sb.Append("temperatur: ").AppendLine(
             Temperature.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture));
         sb.Append("maks_tokens: ").AppendLine(MaxTokens.ToString());

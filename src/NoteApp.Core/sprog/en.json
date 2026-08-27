@@ -474,7 +474,9 @@
     "staar_under_navnet_naar_du_vaelger_moedety": "Appears under the name when you choose a meeting type — so the choice is not a guess. Do write a couple of lines about what it is good for, and when you would pick it over the others.",
     "temperatur": "Temperature",
     "tilbage_til_standarden": "Back to the default",
-    "tilpas_til_denne_moedetype": "Adapt to this meeting type"
+    "tilpas_til_denne_moedetype": "Adapt to this meeting type",
+    "mappe": "FOLDER",
+    "optagelser_med_den_her_moedetype_laegges": "Recordings with this meeting type are suggested for this folder. If you have chosen another yourself, it stays. Empty = no folder."
   },
   "engineview": {
     "1_lyd_til_tekst_her_paa_maskinen": "1 · AUDIO TO TEXT — ON THIS MACHINE",
