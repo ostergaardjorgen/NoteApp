@@ -994,9 +994,14 @@ public static class Googlekalender
             // afgoer, om man skal forbinde igen eller bare vente, og en
             // besked, der ikke skelner, sender folk det forkerte sted hen.
             //
-            // DET SKER HVER UGE, SAA LAENGE APPEN STAAR SOM «TESTING» HOS
+            // DET SKETE HVER UGE, DENGANG APPEN STOD SOM «TESTING» HOS
             // GOOGLE: opdateringsnoegler til en app i test udloeber efter syv
-            // dage. Det er ikke en fejl i appen, og det skal beskeden sige.
+            // dage. Projektet blev udgivet til produktion, og den regel gaelder
+            // ikke laengere - efterprovet i konsollen 27-08-2026.
+            //
+            // BESKEDEN ER DEN SAMME, MEN FORVENTNINGEN ER EN ANDEN: sker det
+            // nu, er det ikke noget, der bare sker. Saa er noeglen trukket
+            // tilbage, og det skal undersoeges. Se doc/google-integration.md.
             var udloebet = tekst.Contains("invalid_grant", StringComparison.OrdinalIgnoreCase);
 
             throw new InvalidOperationException(udloebet

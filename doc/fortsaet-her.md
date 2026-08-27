@@ -104,12 +104,14 @@ opfundet. Men det, der overlever, blander rigtige navne med almindelige ord
 («dag», «uge», «kunder»). Der mangler ét led: at afgøre, om noget ER et navn.
 Tre billige veje står i `findings.md`.
 
-**Google-verifikation.** I testtilstand udløber adgangen efter **syv dage** —
-det er den, der gør ondt, ikke loftet på 100. Der findes et mellemtrin:
-udgiv til produktion uden at være verificeret, så forsvinder udløbet, og
-prisen er en advarselsskærm. Verifikationen kræver ingen sikkerhedsvurdering,
-fordi områderne er følsomme og ikke begrænsede. Alt sammen efterprøvet og
-skrevet ud i [`google-integration.md`](google-integration.md).
+**Google-verifikation.** Projektet er **udgivet til produktion, uverificeret**
+— efterprøvet i konsollen 27-08-2026, hvor tælleren stod på 1 af 100. Dermed
+er syv-dages-udløbet væk, og det haster ikke. Det, der er tilbage, er
+advarselsskærmen «Google har ikke verificeret denne app», som hver ny kunde
+skal klikke sig forbi — en salgsspærring, ikke en teknisk. Verifikationen
+kræver ingen sikkerhedsvurdering, fordi områderne er følsomme og ikke
+begrænsede. Alt sammen skrevet ud i
+[`google-integration.md`](google-integration.md).
 
 ## Roadmap uden for etaperne
 

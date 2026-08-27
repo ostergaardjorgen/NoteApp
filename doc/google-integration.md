@@ -94,28 +94,56 @@ den afgør, om integrationen kan sælges.
 | Advarselsskærm | ja | ja — «Avanceret → Fortsæt» | nej |
 | **Adgangen udløber efter syv dage** | **ja** | nej | nej |
 
-### Testing er den, der gør ondt nu
+### Hvor vi står: In production, uverificeret
 
-Det er den, appen står i. Googles ordlyd er, at *«authorizations by a test
-user will expire seven days from the time of consent»* — og at det gælder
-opdateringsnøglen med. Derfor skal der trykkes **Forbind** igen hver uge.
+**Efterprøvet i konsollen 27-08-2026.** Publishing status er *In production*,
+brugertypen er *External*, og tælleren står på **1 af 100**. Der er trykket
+Publish, og det trin er altså gjort.
 
-Det er ikke en fejl i appen. `Googlekalender.FriskNoegle` kender den, skelner
-`invalid_grant` fra en netværksfejl og siger det rent til brugeren. Men en
-integration, der falder ud hver uge, er ikke en integration, man kan sælge.
+Det betyder, at **syv-dages-udløbet ikke længere gælder**. Kommer beskeden
+«Forbindelsen til Google er udløbet» alligevel, er det ikke den regel — så er
+nøglen trukket tilbage af en anden grund, og det skal undersøges som en fejl
+og ikke affejes som noget forventet.
 
-### Mellemtrinnet: udgiv uden at være verificeret
+Til gengæld står der en gul advarsel i konsollen: *«Your app requires
+verification.»* Den forsvinder først, når appen er sendt til gennemgang og
+godkendt.
 
-**Publish app** under **Audience** flytter projektet til *In production*. Det
-kan gøres uden verifikation, og det fjerner de to værste ting: syv-dages-udløbet
-og den manuelle liste over testbrugere. Prisen er en advarselsskærm, hver ny
-bruger skal klikke sig forbi.
+### Testing — den, vi kom fra
 
-**Loftet er det, man skal passe på.** Google skriver «100 new users in total,
-after the app presents the unverified app screen» — det tælles over projektets
-levetid og kan ikke nulstilles. Verifikationen fjerner skærmen og dermed
-loftet, men de brugere, der allerede er brugt, kommer ikke tilbage. Brug dem
-derfor ikke på prøvekørsler.
+Googles ordlyd er, at *«authorizations by a test user will expire seven days
+from the time of consent»*, og det gælder opdateringsnøglen med. Derfor skulle
+der trykkes **Forbind** igen hver uge, så længe projektet stod som *Testing*.
+
+`Googlekalender.FriskNoegle` kender fejlen, skelner `invalid_grant` fra en
+netværksfejl og siger det rent til brugeren. Den besked er stadig den rigtige —
+kun forklaringen bag den er skiftet.
+
+### Loftet: 100 KONTI, ikke 100 forbindelser
+
+Det tæller **forskellige Google-konti**, der har givet samtykke. Konsollens
+egen tekst: *«the user cap limits the number of users that can grant
+permission to your app»*. Forbinder den samme konto igen — efter en genlogin,
+en ny maskine, en geninstallation — bruges der ikke en plads til.
+
+Det tælles over **projektets levetid og kan ikke nulstilles**. Verifikationen
+løfter loftet, men de forbrugte pladser kommer ikke tilbage. Brug dem derfor
+ikke på prøvekonti.
+
+### Advarselsskærmen er den egentlige pris
+
+Loftet er ikke det, der gør ondt ved 100 kunder — det er, at hver eneste af
+dem møder «Google har ikke verificeret denne app» og skal klikke sig forbi et
+punkt, der hedder noget i retning af *«Gå til appen (usikkert)»*. Det er en
+salgsspærring længe før det er en teknisk spærring.
+
+### Et nyt område sender alle tilbage til start
+
+Konsollen skriver det selv: ser brugerne den uverificerede skærm, er det,
+fordi forespørgslen indeholder områder, der ikke er godkendt. Tilføjes der et
+område senere, skal **hver eneste**, der har forbundet, igennem godkendelsen
+igen. Det er derfor, `calendar.readonly` blev byttet til `calendar.events`,
+mens der var nul brugere.
 
 ### Verifikationen: papirarbejde, ikke penge
 
