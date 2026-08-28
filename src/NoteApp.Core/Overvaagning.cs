@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 using System.Text.Json;
 using Microsoft.Win32;
 
@@ -22,7 +22,7 @@ public sealed class Overvaagetmappe
     /// </summary>
     public bool Automatisk { get; set; }
 
-    /// <summary>NoteApp-folderen, filerne skal lande i. Null betyder «uden folder».</summary>
+    /// <summary>HeyPia-folderen, filerne skal lande i. Null betyder «uden folder».</summary>
     public string? Folder { get; set; }
 
     public bool Undermapper { get; set; } = true;
@@ -79,7 +79,22 @@ public static class Overvaagning
     /// der skulle tages stilling til. En navngiven mappe er en aftale med
     /// brugeren om, hvor tingene skal ligge.
     /// </summary>
-    public const string Standardmappe = "NoteApp";
+    public const string Standardmappe = "HeyPia";
+
+    /// <summary>
+    /// Navne, mappen kan have haft før. Der ledes efter dem alle.
+    /// </summary>
+    /// <remarks>
+    /// APPEN SKIFTEDE NAVN 28-08-2026. Den, der allerede havde oprettet en
+    /// «NoteApp»-mappe i sin OneDrive og lagt optagelser i den, ville med et
+    /// rent navneskift opleve, at appen holdt op med at finde dem — uden en
+    /// fejl og uden en besked. Filerne ville ligge der, og appen ville sige,
+    /// at der ingen var.
+    ///
+    /// Mappen tilhører brugeren. Det er ikke appens ret at gøre den usynlig,
+    /// fordi den selv har skiftet navn.
+    /// </remarks>
+    public static readonly string[] Mappenavne = { Standardmappe, "NoteApp" };
 
     private static string Sti => Path.Combine(UserDataPaths.Root, "overvaagning.json");
 
@@ -121,7 +136,7 @@ public static class Overvaagning
     }
 
     /// <summary>
-    /// Skytjenesterne på maskinen — og NoteApp-mappen i hver af dem.
+    /// Skytjenesterne på maskinen — og HeyPia-mappen i hver af dem.
     ///
     /// HVORDAN DE FINDES. Windows fører selv en liste over
     /// synkroniseringsrødder i registreringsdatabasen, og det er den, der
@@ -135,22 +150,27 @@ public static class Overvaagning
 
         foreach (var (navn, rod) in Synkroniseringsroedder())
         {
-            var mappe = Path.Combine(rod, Standardmappe);
-            if (!Directory.Exists(mappe)) continue;
-
-            forslag.Add(new Overvaagetmappe
+            // BEGGE NAVNE. Se Mappenavne: en mappe, brugeren har oprettet
+            // foer navneskiftet, skal blive ved at vaere synlig.
+            foreach (var mappenavn in Mappenavne)
             {
-                Sti = mappe,
-                Herkomst = navn,
-                Aktiv = true
-            });
+                var mappe = Path.Combine(rod, mappenavn);
+                if (!Directory.Exists(mappe)) continue;
+
+                forslag.Add(new Overvaagetmappe
+                {
+                    Sti = mappe,
+                    Herkomst = navn,
+                    Aktiv = true
+                });
+            }
         }
 
         return forslag;
     }
 
     /// <summary>
-    /// Skytjenesterne og deres mapper, uanset om der ligger en NoteApp-mappe.
+    /// Skytjenesterne og deres mapper, uanset om der ligger en HeyPia-mappe.
     /// Til skærmen, der skal kunne tilbyde at oprette den.
     /// </summary>
     public static List<(string Navn, string Rod)> Synkroniseringsroedder()

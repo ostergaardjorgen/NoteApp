@@ -669,7 +669,7 @@ public partial class SearchView : UserControl
             // arbejdet gik tabt - kun som at den ene halvdel manglede.
             Dialogs.AppDialog.Vis(Window.GetWindow(this),
                 "Aftalen kom ikke i Google Kalender",
-                "Den er gemt i NoteApp. Det var oplægningen hos Google, der ikke "
+                "Den er gemt i HeyPia. Det var oplægningen hos Google, der ikke "
                 + "lykkedes." + Environment.NewLine + Environment.NewLine + ex.Message);
         }
     }
@@ -720,7 +720,7 @@ public partial class SearchView : UserControl
     // ==================== HENT FRA GOOGLE, MANUELT ====================
     //
     // Der hentes IKKE af sig selv. En aftale, der oprettes direkte i Google,
-    // er ikke i NoteApp, foer nogen henter den - og det laa foer kun under
+    // er ikke i HeyPia, foer nogen henter den - og det laa foer kun under
     // Indstillinger, hvor ingen leder efter det.
     //
     // Ikonet staar kun, naar der ER noget at hente fra. En knap, der ikke kan
@@ -1465,7 +1465,7 @@ public sealed class Opgavevisning : System.ComponentModel.INotifyPropertyChanged
 
             // ER DEN FRA GOOGLE, SKAL DET OGSAA SIGES DÉR.
             //
-            // Et flueben, der kun virker i NoteApp, er vaerre end ingen:
+            // Et flueben, der kun virker i HeyPia, er vaerre end ingen:
             // opgaven staar stadig paa telefonen, og saa holder man op med at
             // stole paa begge lister.
             //

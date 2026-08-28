@@ -1,4 +1,4 @@
-# Installation af NoteApp
+﻿# Installation af HeyPia
 
 ## Hvad appen gør
 
@@ -20,9 +20,9 @@ powershell -File C:\NoteApp\scripts\byg-installer.ps1
 
 Der kommer to filer i `C:\NoteApp\installer\`:
 
-- **NoteApp-setup.exe** (ca. 53 MB) — den, der skal sendes eller
+- **HeyPia-setup.exe** (ca. 53 MB) — den, der skal sendes eller
   dobbeltklikkes. Beder selv om administratorrettigheder undervejs.
-- **NoteApp.msi** (ca. 52 MB) — nyttelasten, til automatisk udrulning.
+- **HeyPia.msi** (ca. 52 MB) — nyttelasten, til automatisk udrulning.
 
 Efter installation ligger programmet i `C:\Program Files\NoteApp` (ca. 160 MB),
 med genveje i Startmenuen og på skrivebordet, og en post under **Tilføj/fjern

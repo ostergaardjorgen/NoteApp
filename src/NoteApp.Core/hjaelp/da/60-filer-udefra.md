@@ -36,7 +36,11 @@ op, bliver den tilbudt øverst på Optagelser.
 
 Som standard overvåges **ingenting**. Til gengæld finder appen selv de
 skytjenester, der er på maskinen, og tilbyder én mappe i hver:
-`<skytjeneste>\NoteApp`. Findes den ikke, står der en knap, der opretter den.
+`<skytjeneste>\HeyPia`. Findes den ikke, står der en knap, der opretter den.
+
+Appen hed NoteApp indtil 28. august 2026. Har du allerede en
+`<skytjeneste>\NoteApp`-mappe, bliver den fundet som hidtil. Den er din, og
+appen omdøber den ikke, fordi den selv har skiftet navn.
 
 Ikke hele skytjenesten — så skulle hver eneste lydfil nogen steder i skyen
 tages stilling til, også podcasts og ringetoner.

@@ -1,4 +1,4 @@
-using NoteApp.Core;
+﻿using NoteApp.Core;
 
 // Kommandolinjeværktøj til de ting, der ikke hører hjemme i en optageknap:
 // initialisering af ordbogen, genopretning efter crash, og et hurtigt kig på
@@ -45,26 +45,26 @@ catch (Exception ex)
 static int Hjælp()
 {
     Console.WriteLine("""
-        noteapp <kommando>
+        heypia <kommando>
 
           status    Viser hvor dine data ligger og hvad de indeholder
           init      Opretter databasen til dine rettelser
           motor     Viser hvilken Whisper-motor og model der er i brug
           transskriber  Transskriberer en optagelse:
-                      noteapp transskriber <mappe-eller-wav> [--cpu]
+                      heypia transskriber <mappe-eller-wav> [--cpu]
           recover   Samler møder der aldrig blev lukket ordentligt
           maalsoegning  Kører de tyve søgeprøver med kendt facit
           maaldato  Måler datoforståelsen mod kendte svar
           google    Efterprøver Google Kalender-forbindelsen hele vejen:
-                      noteapp google [dage]
+                      heypia google [dage]
           opgaver   Viser alle opgaver og hvor de kom fra
           lydproeve Komprimerer en optagelse og pakker den ud igen:
-                      noteapp lydproeve <wav> [kbit ...]
+                      heypia lydproeve <wav> [kbit ...]
           plads     Viser hvad lyden fylder, og hvad der kan ryddes:
-                      noteapp plads [--ryd] [--dage N]
+                      heypia plads [--ryd] [--dage N]
           udkast    Laver et referat med en lokal model — intet forlader maskinen
           sky       Laver et referat hos en europæisk leverandør:
-                      SENDER UDSKRIFTEN UD AF MASKINEN. Se «noteapp sky».
+                      SENDER UDSKRIFTEN UD AF MASKINEN. Se «heypia sky».
 
         Dine data ligger i C:\AppNoter — eller den mappe, du har valgt i
         appen under Filer og backup. Miljøvariablen NOTEAPP_DATA vinder over
@@ -105,7 +105,7 @@ static int Status()
     if (efterladte.Count > 0)
     {
         Console.WriteLine();
-        Console.WriteLine($"{efterladte.Count} møde(r) blev aldrig lukket ordentligt. Kør 'noteapp recover'.");
+        Console.WriteLine($"{efterladte.Count} møde(r) blev aldrig lukket ordentligt. Kør 'heypia recover'.");
     }
 
     var enheder = new[]
@@ -203,7 +203,7 @@ static async Task<int> Sprogmodel(string[] a)
         }
 
         Console.WriteLine();
-        Console.WriteLine("Hent med: noteapp sprogmodel <id>");
+        Console.WriteLine("Hent med: heypia sprogmodel <id>");
         return 0;
     }
 
@@ -255,7 +255,7 @@ static async Task<int> Sprogmodel(string[] a)
 
 /// <summary>
 /// Kører en skabelon på en tekst og gemmer udkastet med proveniens.
-///   noteapp udkast &lt;mappe-eller-tekstfil&gt; [skabelon] [model.gguf]
+///   heypia udkast &lt;mappe-eller-tekstfil&gt; [skabelon] [model.gguf]
 /// </summary>
 static async Task<int> Udkast(string[] a)
 {
@@ -265,7 +265,7 @@ static async Task<int> Udkast(string[] a)
     if (cli is null) { Console.Error.WriteLine("llama-cli.exe er ikke hentet endnu."); return 1; }
 
     var modeller = NoteApp.Core.Llm.LlmRunner.InstalledModels();
-    if (modeller.Count == 0) { Console.Error.WriteLine("Ingen sprogmodel hentet. Kør 'noteapp sprogmodel'."); return 1; }
+    if (modeller.Count == 0) { Console.Error.WriteLine("Ingen sprogmodel hentet. Kør 'heypia sprogmodel'."); return 1; }
 
     var skabeloner = NoteApp.Core.Llm.PromptTemplate.LoadAll();
     if (skabeloner.Count == 0) { Console.Error.WriteLine($"Ingen skabeloner i {NoteApp.Core.Llm.PromptTemplate.Directory}"); return 1; }
@@ -278,7 +278,7 @@ static async Task<int> Udkast(string[] a)
         Console.WriteLine("Modeller:");
         foreach (var m in modeller) Console.WriteLine($"  {Path.GetFileName(m)}");
         Console.WriteLine();
-        Console.WriteLine("Brug: noteapp udkast <mappe-eller-tekstfil> [skabelon] [model.gguf]");
+        Console.WriteLine("Brug: heypia udkast <mappe-eller-tekstfil> [skabelon] [model.gguf]");
         return 0;
     }
 
@@ -359,13 +359,13 @@ static async Task<int> Udkast(string[] a)
 /// <summary>
 /// Kører en skabelon hos en europæisk sky-model.
 ///
-///   noteapp sky                                    — hvad der er sat op
-///   noteapp sky modeller                           — de id'er, nøglen kan bruge
-///   noteapp sky referat &lt;mappe-eller-fil&gt; &lt;model&gt; [skabelon]
+///   heypia sky                                    — hvad der er sat op
+///   heypia sky modeller                           — de id'er, nøglen kan bruge
+///   heypia sky referat &lt;mappe-eller-fil&gt; &lt;model&gt; [skabelon]
 ///
 /// HVORFOR DEN LIGGER I EN EGEN KOMMANDO
 ///
-/// «noteapp udkast» lover, at intet forlader maskinen. Den kommando skal blive
+/// «heypia udkast» lover, at intet forlader maskinen. Den kommando skal blive
 /// ved med at betyde det. At sende udskriften afsted er et andet valg, og det
 /// skal man skrive et andet ord for — ikke sætte et flag på det, man plejer
 /// at køre.
@@ -414,7 +414,7 @@ static async Task<int> Sky(string[] a)
         Console.WriteLine();
 
         if (noegle is null) Console.WriteLine(NoteApp.Core.Llm.SkyNoegle.Vejledning);
-        else Console.WriteLine("Brug: noteapp sky referat <mappe-eller-tekstfil> <model> [skabelon]");
+        else Console.WriteLine("Brug: heypia sky referat <mappe-eller-tekstfil> <model> [skabelon]");
 
         return 0;
     }
@@ -435,7 +435,7 @@ static async Task<int> Sky(string[] a)
 
     if (underkommando is not "referat" || a.Length < 2)
     {
-        Console.Error.WriteLine("Brug: noteapp sky referat <mappe-eller-tekstfil> [model] [skabelon]");
+        Console.Error.WriteLine("Brug: heypia sky referat <mappe-eller-tekstfil> [model] [skabelon]");
         return 1;
     }
 
@@ -454,7 +454,7 @@ static async Task<int> Sky(string[] a)
     NoteApp.Core.Llm.DraftStore.SeedTemplates();
 
     // Kilden: enten en moedemappe eller en ren tekstfil. Samme regler som
-    // «noteapp udkast», saa de to kan sammenlignes paa det samme materiale.
+    // «heypia udkast», saa de to kan sammenlignes paa det samme materiale.
     string tekst, moedeMappe, titel;
     if (Directory.Exists(a[1]))
     {
@@ -550,7 +550,7 @@ static async Task<int> HentMotor(string[] a)
 
     if (a.Length == 0)
     {
-        Console.WriteLine("Hent med: noteapp hentmotor <filnavn>   (eller 'anbefalet')");
+        Console.WriteLine("Hent med: heypia hentmotor <filnavn>   (eller 'anbefalet')");
         return 0;
     }
 
@@ -589,7 +589,7 @@ static int Gendan(string[] a)
 {
     if (a.Length == 0)
     {
-        Console.Error.WriteLine("Brug: noteapp gendan <arkiv.zip> [--foralvor]");
+        Console.Error.WriteLine("Brug: heypia gendan <arkiv.zip> [--foralvor]");
         return 2;
     }
 
@@ -629,7 +629,7 @@ static async Task<int> Hent(string[] a)
 {
     if (a.Length == 0)
     {
-        Console.Error.WriteLine("Brug: noteapp hent <model>");
+        Console.Error.WriteLine("Brug: heypia hent <model>");
         Console.Error.WriteLine($"Modeller: {string.Join(", ", WhisperInstall.Models.Select(m => m.Id))}");
         return 2;
     }
@@ -673,14 +673,14 @@ static async Task<int> Transskriber(string[] a)
 {
     if (a.Length == 0)
     {
-        Console.Error.WriteLine("Brug: noteapp transskriber <mappe-eller-wav> [--cpu]");
+        Console.Error.WriteLine("Brug: heypia transskriber <mappe-eller-wav> [--cpu]");
         return 2;
     }
 
     var s = WhisperInstall.Locate();
     if (!s.IsComplete)
     {
-        Console.Error.WriteLine("Motor eller model mangler. Kør 'noteapp motor' for at se hvad.");
+        Console.Error.WriteLine("Motor eller model mangler. Kør 'heypia motor' for at se hvad.");
         return 1;
     }
 
@@ -1092,7 +1092,7 @@ static int Dokument(string[] a)
             Console.WriteLine($"  {d.Created:dd-MM HH:mm}  {d.Title,-40} {d.Template}");
 
         Console.WriteLine();
-        Console.WriteLine("Lav et: noteapp dokument <udkast.md> [titel]");
+        Console.WriteLine("Lav et: heypia dokument <udkast.md> [titel]");
         return 0;
     }
 
@@ -1142,7 +1142,7 @@ static int Forventning(string[] a)
 {
     if (a.Length == 0)
     {
-        Console.WriteLine("Brug: noteapp forventning <mappe-eller-tekstfil>");
+        Console.WriteLine("Brug: heypia forventning <mappe-eller-tekstfil>");
         return 0;
     }
 
@@ -1210,7 +1210,7 @@ static int Mikrofontest(string[] a)
     Console.WriteLine($"Mikrofon : {mik.FriendlyName}{(faldtTilbage ? "  (IKKE den valgte — faldt tilbage)" : "")}");
     Console.WriteLine($"Optager  : {sekunder:0.0} sekunder — sig noget nu …");
 
-    var fil = Path.Combine(Path.GetTempPath(), $"noteapp-miktest-{Guid.NewGuid():N}.wav");
+    var fil = Path.Combine(Path.GetTempPath(), $"heypia-miktest-{Guid.NewGuid():N}.wav");
     var optager = new ShortClipRecorder(fil);
 
     optager.Start(mik.Id);
@@ -1497,7 +1497,7 @@ static int Lydproeve(string[] a)
 {
     if (a.Length == 0)
     {
-        Console.WriteLine("Brug: noteapp lydproeve <wav> [kbit ...]");
+        Console.WriteLine("Brug: heypia lydproeve <wav> [kbit ...]");
         Console.WriteLine("      standard: 24 32 48 64");
         return 0;
     }

@@ -39,9 +39,9 @@ if (-not (Test-Path $Reference)) { throw "Referencetekst findes ikke: $Reference
 # --- Hurtig Levenshtein på ordniveau -------------------------------------
 # PowerShell er for langsom til en 2700 x 2700 matrix. C# klarer den på et
 # øjeblik.
-if (-not ('NoteApp.Wer' -as [type])) {
+if (-not ('HeyPia.Wer' -as [type])) {
     Add-Type -TypeDefinition @'
-namespace NoteApp {
+namespace HeyPia {
     public static class Wer {
         public static int[] Distance(string[] reference, string[] hypothesis) {
             int n = reference.Length, m = hypothesis.Length;
@@ -180,7 +180,7 @@ foreach ($fil in $filer) {
     $normTekst = ConvertTo-Normaliseret $raa
     $hypOrd = $normTekst -split ' '
 
-    $r = [NoteApp.Wer]::Distance($refOrd, $hypOrd)
+    $r = [HeyPia.Wer]::Distance($refOrd, $hypOrd)
     $wer = [math]::Round(100 * $r[0] / $refOrd.Count, 2)
 
     $fagRamt = @($fagNorm | Where-Object { $normTekst -like "*$_*" })

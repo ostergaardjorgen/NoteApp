@@ -1,4 +1,4 @@
-// NoteApp — Fase 0 to-spors optager.
+﻿// HeyPia — Fase 0 to-spors optager.
 //
 // Optager mikrofon og WASAPI-loopback som to separate WAV-filer med faelles
 // starttidsstempel. Begge spor skrives direkte som 16 kHz mono PCM16, som er
@@ -16,7 +16,7 @@ using NAudio.CoreAudioApi;
 using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 
-namespace NoteApp.Fase0;
+namespace HeyPia.Fase0;
 
 internal enum MeetingType { Physical, Online }
 
@@ -32,10 +32,11 @@ internal static class Program
     /// maskine hvor stien ikke findes, og så falder vi tilbage på appens
     /// datamappe frem for at crashe eller skrive et tilfældigt sted hen.
     ///
-    /// Rækkefølgen for den fallback er den samme som i appen: NOTEAPP_DATA,
-    /// så pegefilen i %APPDATA%\NoteApp\datasti.txt, så standarden
-    /// C:\AppNoter. Dette projekt henviser ikke til NoteApp.Core, så logikken
-    /// står her — den skal holdes i takt med UserDataPaths.
+    /// Rækkefølgen for den fallback er den samme som i appen: HEYPIA_DATA,
+    /// så NOTEAPP_DATA, så pegefilen i %APPDATA%\HeyPia\datasti.txt, så den
+    /// gamle i %APPDATA%\NoteApp\datasti.txt, så standarden C:\AppNoter.
+    /// Dette projekt henviser ikke til NoteApp.Core, så logikken står her —
+    /// den skal holdes i takt med UserDataPaths.
     /// </summary>
     private static string DefaultOutputRoot([CallerFilePath] string? thisFile = null)
     {
@@ -48,17 +49,22 @@ internal static class Program
 
     private static string DataRoot()
     {
-        var tilsidesat = Environment.GetEnvironmentVariable("NOTEAPP_DATA");
+        // Begge navne. Appen skiftede navn 28-08-2026, og en optager, der
+        // rammer en anden mappe end appen, laegger lyd et sted, ingen leder.
+        var tilsidesat = Environment.GetEnvironmentVariable("HEYPIA_DATA");
+        if (string.IsNullOrWhiteSpace(tilsidesat))
+            tilsidesat = Environment.GetEnvironmentVariable("NOTEAPP_DATA");
         if (!string.IsNullOrWhiteSpace(tilsidesat)) return Path.GetFullPath(tilsidesat);
 
         try
         {
-            var peger = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                "NoteApp", "datasti.txt");
+            var appdata = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
 
-            if (File.Exists(peger))
+            foreach (var mappe in new[] { "HeyPia", "NoteApp" })
             {
+                var peger = Path.Combine(appdata, mappe, "datasti.txt");
+                if (!File.Exists(peger)) continue;
+
                 var valgt = File.ReadAllText(peger).Trim();
                 if (!string.IsNullOrWhiteSpace(valgt)) return Path.GetFullPath(valgt);
             }

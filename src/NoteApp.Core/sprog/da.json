@@ -1,4 +1,4 @@
-{
+﻿{
   "_sprog": {
     "kode": "da",
     "navn": "Dansk",
@@ -33,7 +33,7 @@
   },
   "cockpit": {
     "titel": "Cockpit",
-    "under": "Alt, der er sagt og skrevet — transkriptioner, dine noter og de færdige dokumenter. Søgningen læser filerne på din maskine, og der sendes intet.",
+    "under": "HeyPia er din personlige informationsassistent. Alt, du arbejder med i appen — det, der blev sagt på dine møder, de noter du skrev undervejs, og de dokumenter, der kom ud af det — samles her og kan søges frem med det samme. Filerne læses på din maskine, og der sendes intet.",
     "soeg": "Hvad leder du efter?",
     "soegkun": "Søg kun i",
     "heletiden": "Hele tiden",
@@ -135,7 +135,7 @@
     "opret_ogsaa_i_google_kalender": "Opret også i Google Kalender",
     "opretter_et_moedelokale_hos_google_og_laeg": "Opretter et mødelokale hos Google og lægger linket på aftalen. Er mødet markeret til automatisk optagelse, skrives oplysningen om optagelse også i indkaldelsen",
     "optag_som_webinar_kun_det_computeren_afspi": "Optag som webinar — kun det, computeren afspiller",
-    "optagelsen_begynder_to_minutter_foer_det_k": "Optagelsen begynder to minutter før. Det kræver, at NoteApp kører — et program, der er lukket, kan ikke starte en optagelse. Flyttes mødet, flytter optagelsen med.",
+    "optagelsen_begynder_to_minutter_foer_det_k": "Optagelsen begynder to minutter før. Det kræver, at HeyPia kører — et program, der er lukket, kan ikke starte en optagelse.",
     "slet_aftalen": "Slet aftalen",
     "sprog": "SPROG",
     "start_optagelsen_automatisk_naar_moedet_be": "Start optagelsen automatisk, når mødet begynder",
@@ -441,7 +441,7 @@
     "prioritet": "PRIORITET",
     "laeg_op_i_google_tasks": "Læg op i Google Tasks",
     "ligger_i_google_tasks": "Ligger i Google Tasks",
-    "rettelser_sendes_op": "Rettelser her sendes op til Google, og det, der rettes i Google, kommer ned ved næste hentning. Prioritet er NoteApps eget felt og bliver her.",
+    "rettelser_sendes_op": "Rettelser her sendes op til Google, og det, der rettes i Google, kommer ned ved næste hentning. Prioritet er HeyPias eget felt og bliver her.",
     "saet_hakket_hvis_ogsaa_i_google": "Sæt hakket, hvis opgaven også skal stå i Google Tasks — så er den med på telefonen. Uden hak bliver den her."
   },
   "opstartwindow": {
@@ -496,7 +496,7 @@
     "alt_det_andet": "ALT DET ANDET",
     "altid_med_noter_transskriptioner_dokumente": "Altid med: noter, transskriptioner, dokumenter, mødedata og indstillinger.",
     "anbefalet_minimum": "Anbefalet minimum",
-    "appen_fylder_ingenting_naar_der_ikke_optag": "Appen fylder ingenting, når der ikke optages. Derfor er «Start NoteApp, når jeg logger på Windows» slået til fra begyndelsen — og derfor kan du slå den fra.",
+    "appen_fylder_ingenting_naar_der_ikke_optag": "Appen fylder ingenting, når der ikke optages. Derfor er «Start HeyPia, når jeg logger på Windows» slået til fra begyndelsen — og derfor kan du slå den fra.",
     "appen_kan_holde_oeje_med_om_et_andet_progr": "Appen kan holde øje med, om et andet program åbner din mikrofon — det gør et møde, og det gør et webinar, en video eller en streamingtjeneste ikke. Sker det, kommer der en besked nede ved uret med spørgsmålet, om mødet skal optages.",
     "appen_kan_laese_dine_aftaler_ind_i_kalende": "Appen kan læse dine aftaler ind i kalenderen, så du kan trykke optag direkte på et møde. Kalenderen virker også uden — du kan altid oprette aftaler her i appen.",
     "appen_kan_skille_de_to_sider_af_et_onlinem": "Appen kan skille de to SIDER af et onlinemøde — din mikrofon og det, computeren afspiller. Den kan ikke kende de enkelte personer i den anden ende fra hinanden.",
@@ -534,7 +534,7 @@
     "hver_fil_tilbydes_en_gang_siger_du_nej_kom": "&#x2022;  Hver fil tilbydes én gang. Siger du nej, kommer den ikke igen.",
     "hvert_minut_saa_laenge_appen_er_aaben_der": "&#x2022;  Hvert minut, så længe appen er åben. Der kigges også, når du selv beder om det.",
     "hvor_laenge_lyden_bliver_liggende": "Hvor længe lyden bliver liggende",
-    "ingen_mapper_overvaages_tilfoej_en_eller_o": "Ingen mapper overvåges. Tilføj en, eller opret NoteApp-mappen i en af de skytjenester, der findes på maskinen.",
+    "ingen_mapper_overvaages_tilfoej_en_eller_o": "Ingen mapper overvåges. Tilføj en, eller opret HeyPia-mappen i en af de skytjenester, der findes på maskinen.",
     "integrationer": "Integrationer",
     "kalendere_fra_andre_tjenester": "Kalendere fra andre tjenester",
     "klar_til_naeste_moede": "Klar til næste møde",
@@ -554,7 +554,7 @@
     "mikrofon": "Mikrofon",
     "naar_en_optagelse_er_skrevet_ud_er_det_tek": "Når en optagelse er skrevet ud, er det teksten, du bruger. Lyden kan ryddes efter et stykke tid — så beholder du mødet uden at beholde de 220 MB.",
     "noejagtigheden_er_ikke_100_maalt_92_3_paa": "Nøjagtigheden er ikke 100 %. Målt: 92,3 % på dansk, 90,5 % på engelsk, 83,1 % når der skiftes mellem sprogene midt i en sætning. Navne og fagord er det, der oftest rammes forkert.",
-    "noteapp_virker_bedst_naar_den_altid_koerer": "NoteApp virker bedst, når den altid kører",
+    "heypia_virker_bedst_naar_den_altid_koerer": "HeyPia virker bedst, når den altid kører",
     "nulstil_til_standard": "Nulstil til standard",
     "opdater_enhedslisten": "Opdatér enhedslisten",
     "opstart": "Opstart",
@@ -577,7 +577,7 @@
     "spoerg_mig_naar_et_program_bruger_mikrofon": "Spørg mig, når et program bruger mikrofonen",
     "spoerg_naar_der_starter_et_moede": "Spørg, når der starter et møde",
     "sproget_vaelges_ikke_her_det_tages_fra_aft": "Sproget vælges ikke her — det tages fra aftalen. Er mødet sat til engelsk, bruges den engelske tekst. Ryd et felt for at komme tilbage til standardteksten; den kan ikke slås helt fra, for en optagelse, ingen har fået at vide, er ikke noget appen hjælper med.",
-    "start_noteapp_naar_jeg_logger_paa_windows": "Start NoteApp, når jeg logger på Windows",
+    "start_heypia_naar_jeg_logger_paa_windows": "Start HeyPia, når jeg logger på Windows",
     "start_test": "▶ Start test",
     "tag_backup_nu": "Tag backup nu",
     "tag_ogsaa_lydfilerne_med": "Tag også lydfilerne med",
@@ -603,7 +603,7 @@
     "i_alt_at_hente": "I alt at hente:",
     "kom_i_gang": "Kom i gang",
     "lyden_bliver_her_teksten_bliver_i_europa": "Lyden bliver her. Teksten sendes kun, hvis du beder om det.",
-    "noteapp_optager_dine_moeder_og_skriver_dem": "NoteApp optager dine møder og skriver dem ud her på maskinen. Skal der laves et referat eller et andet dokument ud af teksten, sker det hos Mistral AI i Frankrig — og det er kun teksten, der sendes.",
+    "heypia_optager_dine_moeder_og_skriver_dem": "HeyPia optager dine møder og skriver dem ud her på maskinen. Skal der laves et referat eller et dokument, sker det hos en leverandør i EU — og kun når du beder om det.",
     "optagelsen_kan_ikke_sendes_nogen_steder_he": "Optagelsen kan ikke sendes nogen steder hen. Appen har ingen kode, der kan det — kun den færdige tekst kan sendes, og kun til det europæiske endepunkt. Du sætter det selv op om lidt, og du kan lade være.",
     "optagelser_transkriptioner_noter_og_dokume": "Optagelser, transkriptioner, noter og dokumenter. Vælg en anden mappe, hvis du fx vil have dem på en krypteret disk.",
     "selve_transskriptionen_laves_af_whisper_so": "Selve transskriptionen laves af Whisper, som kører lokalt. Lydfilerne forlader aldrig maskinen — heller ikke når der laves et dokument. Motoren og modellen skal hentes én gang, og du bliver spurgt først.",

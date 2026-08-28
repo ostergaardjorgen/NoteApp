@@ -252,8 +252,8 @@ public partial class SettingsView : UserControl
         }
 
         Status.Text = til
-            ? "NoteApp starter nu med Windows og ligger klar til genvejstasten."
-            : "NoteApp starter ikke længere med Windows.";
+            ? "HeyPia starter nu med Windows og ligger klar til genvejstasten."
+            : "HeyPia starter ikke længere med Windows.";
 
         VisAutostart();
     }
@@ -461,7 +461,7 @@ public partial class SettingsView : UserControl
             : $"{o.LydFiler} filer · {o.LydAndelAfDisk:0.0} % af disken";
 
         PladsBrugt.Text = $"{o.BrugtGb - o.LydGb:0.0} GB";
-        PladsBrugtUnder.Text = $"Windows, dine programmer og NoteApps tekst " +
+        PladsBrugtUnder.Text = $"Windows, dine programmer og HeyPias tekst " +
                                $"({Maal(o.RestBytes)})";
 
         PladsFri.Text = $"{o.FritGb:0.0} GB";
@@ -1035,7 +1035,7 @@ public partial class SettingsView : UserControl
         // niveaumaaleren holder enheden aaben.
         StopProber();
 
-        _testMappe = Path.Combine(Path.GetTempPath(), "noteapp-miktest-" + Guid.NewGuid().ToString("N")[..8]);
+        _testMappe = Path.Combine(Path.GetTempPath(), "heypia-miktest-" + Guid.NewGuid().ToString("N")[..8]);
         _testKlip = new ShortClipRecorder(Path.Combine(_testMappe, "proeve.wav"));
 
         try
@@ -1332,7 +1332,7 @@ public partial class SettingsView : UserControl
         }
     }
 
-    /// <summary>En skytjeneste på maskinen, og om NoteApp-mappen findes i den.</summary>
+    /// <summary>En skytjeneste på maskinen, og om HeyPia-mappen findes i den.</summary>
     private sealed record Skyvisning(string Navn, string Sti, string Knap, bool Kan);
 
     private void VisOvervaagede()
@@ -1357,7 +1357,7 @@ public partial class SettingsView : UserControl
 
                 return Directory.Exists(mappe)
                     ? new Skyvisning(r.Navn, mappe, "Overvåg den", true)
-                    : new Skyvisning(r.Navn, r.Rod, "Opret NoteApp-mappen", true);
+                    : new Skyvisning(r.Navn, r.Rod, "Opret HeyPia-mappen", true);
             })
             .ToList();
 
@@ -1388,7 +1388,7 @@ public partial class SettingsView : UserControl
         if (sender is not Button { Tag: string sti }) return;
 
         // Knappen staar med to betydninger, og Tag afgoer hvilken: findes
-        // NoteApp-mappen, er stien mappen selv; findes den ikke, er stien
+        // HeyPia-mappen, er stien mappen selv; findes den ikke, er stien
         // skytjenestens rod, og saa skal mappen oprettes foerst.
         var navn = Path.GetFileName(sti.TrimEnd('\\'));
 
@@ -1481,7 +1481,7 @@ public partial class SettingsView : UserControl
 
     private void SkiftData_Click(object sender, RoutedEventArgs e)
     {
-        var valgt = VaelgMappe("Vælg hvor NoteApps filer skal ligge", UserDataPaths.Root);
+        var valgt = VaelgMappe("Vælg hvor HeyPias filer skal ligge", UserDataPaths.Root);
         if (valgt is null) return;
 
         var ja = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),

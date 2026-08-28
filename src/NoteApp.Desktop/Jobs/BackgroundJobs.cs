@@ -169,7 +169,7 @@ public static class BackgroundJobs
     // ovenfor bruger 25 sekunder og taber 23 %. Se doc/maaling-sky.md.
     //
     // LlmRunner og Referatbygger ligger stadig i Core og bruges fra
-    // kommandolinjen (noteapp referat). Det er dér, sammenligningen mellem
+    // kommandolinjen (heypia referat). Det er dér, sammenligningen mellem
     // lokalt og Europa skal kunne koeres igen - en maaling, man ikke kan
     // gentage, er en paastand.
 

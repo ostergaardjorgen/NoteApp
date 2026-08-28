@@ -1,4 +1,4 @@
-# Priser på sky-API'er og EU-alternativer
+﻿# Priser på sky-API'er og EU-alternativer
 
 *Slået op 16-08-2026. Priserne ændrer sig — tallene skal kontrolleres, før de
 bruges til noget bindende.*
@@ -124,7 +124,7 @@ beregningen sker, flytter.
 
 ---
 
-## Hvad det betyder for NoteApp
+## Hvad det betyder for HeyPia
 
 Prisen betyder ingenting. Tre forhold betyder noget:
 

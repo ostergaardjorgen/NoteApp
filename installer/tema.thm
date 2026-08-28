@@ -1,6 +1,6 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <!--
-  NoteApps installationstema.
+  HeyPias installationstema.
 
   Kopi af WiX 5's RtfLargeTheme med ÉN ændring: vinduet er 760x560 i stedet
   for 500x390, så introteksten har plads at stå på. Alt andet er urørt.

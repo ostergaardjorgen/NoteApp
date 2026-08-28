@@ -1,4 +1,4 @@
-using System.IO.Compression;
+﻿using System.IO.Compression;
 using System.Text;
 
 namespace NoteApp.Core;
@@ -97,7 +97,7 @@ public static class RestoreService
     /// </summary>
     public static string TestRestore(string archivePath)
     {
-        var midlertidig = Path.Combine(Path.GetTempPath(), "NoteApp-proeve-" + Guid.NewGuid().ToString("N")[..8]);
+        var midlertidig = Path.Combine(Path.GetTempPath(), "HeyPia-proeve-" + Guid.NewGuid().ToString("N")[..8]);
         Directory.CreateDirectory(midlertidig);
 
         ZipFile.ExtractToDirectory(archivePath, midlertidig, overwriteFiles: true);

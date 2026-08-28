@@ -16,7 +16,7 @@ namespace NoteApp.Core;
 /// DET ER EN UDVIDELSE AF, HVAD DER DELES, OG DET SKAL SIGES
 ///
 /// Kalenderen læser noget, der allerede lå hos Google. Her går det begge veje:
-/// krydser man en Google-opgave af i NoteApp, sendes det op. Det er stadig kun
+/// krydser man en Google-opgave af i HeyPia, sendes det op. Det er stadig kun
 /// opgaver — men det er en beslutning, brugeren skal træffe bevidst, og derfor
 /// er det en integration for sig, man slår til hver for sig.
 ///
@@ -36,7 +36,7 @@ public static class Googleopgaver
     /// Opgaver, og intet andet i kontoen.
     ///
     /// Der bedes om skriveadgang og ikke kun læsning, fordi et flueben, der
-    /// kun virker den ene vej, er værre end ingen: man krydser af i NoteApp,
+    /// kun virker den ene vej, er værre end ingen: man krydser af i HeyPia,
     /// og opgaven står stadig på telefonen.
     /// </summary>
     public const string Omraade = "https://www.googleapis.com/auth/tasks";
@@ -154,7 +154,7 @@ public static class Googleopgaver
     /// <summary>
     /// Krydser en opgave af — eller tager afkrydsningen tilbage.
     ///
-    /// DEN ANDEN VEJ ER HELE POINTEN. Et flueben, der kun virker i NoteApp,
+    /// DEN ANDEN VEJ ER HELE POINTEN. Et flueben, der kun virker i HeyPia,
     /// er værre end ingen: opgaven står stadig på telefonen, og så holder man
     /// op med at stole på nogen af listerne.
     /// </summary>

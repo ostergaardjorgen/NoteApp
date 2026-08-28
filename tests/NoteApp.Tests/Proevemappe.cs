@@ -23,7 +23,7 @@ public sealed class Proevemappe : IDisposable
 
     public Proevemappe()
     {
-        Sti = Path.Combine(Path.GetTempPath(), "noteapp-proeve", Guid.NewGuid().ToString("N"));
+        Sti = Path.Combine(Path.GetTempPath(), "heypia-proeve", Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(Sti);
 
         _foer = Environment.GetEnvironmentVariable(UserDataPaths.OverrideVariable);

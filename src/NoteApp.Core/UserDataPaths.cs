@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 
 namespace NoteApp.Core;
 
@@ -13,9 +13,10 @@ namespace NoteApp.Core;
 /// at begynde med.
 ///
 /// Placeringen bestemmes i denne rækkefølge:
-///   1. Miljøvariablen NOTEAPP_DATA — vinder altid, til test og særtilfælde.
-///   2. Pegefilen i %APPDATA%\NoteApp\datasti.txt — sat af appen, når
-///      brugeren har valgt en anden mappe.
+///   1. Miljøvariablen HEYPIA_DATA — vinder altid, til test og særtilfælde.
+///      NOTEAPP_DATA virker fortsat; appen skiftede navn 28-08-2026.
+///   2. Pegefilen i %APPDATA%\HeyPia\datasti.txt — sat af appen, når
+///      brugeren har valgt en anden mappe. Den gamle i \NoteApp\ læses også.
 ///   3. Standarden C:\AppNoter.
 ///
 /// Pegefilen ligger med vilje UDEN FOR datamappen. Lå valget inde i den mappe,
@@ -23,16 +24,50 @@ namespace NoteApp.Core;
 /// </summary>
 public static class UserDataPaths
 {
-    public const string OverrideVariable = "NOTEAPP_DATA";
+    /// <summary>
+    /// Miljøvariablen, der tilsidesætter alt. Bruges af prøver og målinger.
+    /// </summary>
+    /// <remarks>
+    /// BEGGE NAVNE VIRKER. Appen skiftede navn 28-08-2026, og HEYPIA_DATA er
+    /// det rigtige nu — men NOTEAPP_DATA står i prøvescripts og i vaner, og en
+    /// variabel, der stille holdt op med at virke, ville få en prøvekørsel til
+    /// at ramme de RIGTIGE data i stedet for sandkassen. Det er ikke en fejl,
+    /// man opdager før bagefter.
+    /// </remarks>
+    public const string OverrideVariable = "HEYPIA_DATA";
+
+    /// <summary>Det gamle navn. Virker fortsat — se <see cref="OverrideVariable"/>.</summary>
+    public const string GammelOverrideVariable = "NOTEAPP_DATA";
 
     /// <summary>Standardplaceringen for en frisk installation.</summary>
     public static readonly string DefaultRoot = Path.Combine("C:", "AppNoter");
 
-    /// <summary>Hvor det tidligere lå. Bruges kun til at tilbyde en flytning.</summary>
+    /// <summary>
+    /// Hvor det tidligere lå. Bruges kun til at tilbyde en flytning.
+    /// </summary>
+    /// <remarks>
+    /// DEN SKAL BLIVE VED AT PEGE PÅ FORTIDEN. Et navneskift-søgeerstat døbte
+    /// den om til «HeyPia» 28-08-2026, og det er noget nær det modsatte af,
+    /// hvad den er til: den findes for at kunne finde data, der ligger, hvor
+    /// de lå FØR.
+    /// </remarks>
     public static string LegacyRoot => Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "NoteApp");
 
+    /// <summary>
+    /// Hvor valget af datamappe står. Der læses fra begge navne, og skrives
+    /// til det nye.
+    /// </summary>
+    /// <remarks>
+    /// FILEN FINDES PÅ MASKINER, DER ER I BRUG. Den blev skrevet, da appen hed
+    /// NoteApp, og den fortæller, hvor brugerens optagelser ligger. Ledte
+    /// appen kun det nye sted, ville den falde tilbage på standarden — og for
+    /// den, der HAR flyttet sin datamappe, ville appen se tom ud.
+    /// </remarks>
     private static string PointerFile => Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "HeyPia", "datasti.txt");
+
+    private static string GammelPointerFile => Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "NoteApp", "datasti.txt");
 
     private static string? _cached;
@@ -43,15 +78,20 @@ public static class UserDataPaths
         get
         {
             var tilsidesat = Environment.GetEnvironmentVariable(OverrideVariable);
+            if (string.IsNullOrWhiteSpace(tilsidesat))
+                tilsidesat = Environment.GetEnvironmentVariable(GammelOverrideVariable);
             if (!string.IsNullOrWhiteSpace(tilsidesat)) return Path.GetFullPath(tilsidesat);
 
             if (_cached is not null) return _cached;
 
             try
             {
-                if (File.Exists(PointerFile))
+                // Det nye sted foerst, det gamle bagefter. Se PointerFile.
+                foreach (var fil in new[] { PointerFile, GammelPointerFile })
                 {
-                    var valgt = File.ReadAllText(PointerFile, Encoding.UTF8).Trim();
+                    if (!File.Exists(fil)) continue;
+
+                    var valgt = File.ReadAllText(fil, Encoding.UTF8).Trim();
                     if (!string.IsNullOrWhiteSpace(valgt)) return _cached = Path.GetFullPath(valgt);
                 }
             }

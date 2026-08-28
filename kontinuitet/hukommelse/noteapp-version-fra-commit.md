@@ -1,6 +1,6 @@
----
-name: noteapp-version-fra-commit
-description: "NoteApps versionsnummer udledes af seneste commit-besked, så gentagne udgivelser uden commit får samme nummer"
+﻿---
+name: heypia-version-fra-commit
+description: "HeyPias versionsnummer udledes af seneste commit-besked, så gentagne udgivelser uden commit får samme nummer"
 metadata: 
   node_type: memory
   type: project

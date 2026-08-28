@@ -1,4 +1,4 @@
-# Måling: europæiske modeller mod Claude-facit
+﻿# Måling: europæiske modeller mod Claude-facit
 
 *Målt 17-08-2026 på Cloudworks-mødet (61 minutter, 9.493 tegn udskrift).*
 
@@ -224,7 +224,7 @@ Det er **tredje** håndtag i dette projekt, der måler nul:
 Kør selv:
 
 ```
-noteapp sky referat <mødemappe> mistral-medium --uden-ordbog
+heypia sky referat <mødemappe> mistral-medium --uden-ordbog
 ```
 
 ## Det, der stadig mangler, før budskabet må bruges

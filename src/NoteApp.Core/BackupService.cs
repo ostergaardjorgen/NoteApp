@@ -27,8 +27,31 @@ public sealed record BackupInfo(string Path, DateTimeOffset When, long Bytes)
 /// </summary>
 public static class BackupService
 {
-    public static string DefaultDestination => Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "NoteApp-backup");
+    /// <summary>
+    /// Hvor sikkerhedskopierne lander — og hvor de gamle stadig findes.
+    /// </summary>
+    /// <remarks>
+    /// APPEN HED NoteApp INDTIL 28-08-2026, og kopierne lå i «NoteApp-backup».
+    /// Skiftede standarden bare, ville de gamle blive liggende et sted, ingen
+    /// leder — og den, der en dag skulle gendanne, ville få at vide, at der
+    /// ingen kopier var.
+    ///
+    /// Findes den gamle mappe, og den nye ikke, bruges den gamle fortsat. Der
+    /// FLYTTES IKKE: en sikkerhedskopi er det sidste, man vil flytte
+    /// automatisk, og den, der har peget en backup et bestemt sted hen, har
+    /// gjort det med vilje.
+    /// </remarks>
+    public static string DefaultDestination
+    {
+        get
+        {
+            var hjem = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            var ny = Path.Combine(hjem, "HeyPia-backup");
+            var gammel = Path.Combine(hjem, "NoteApp-backup");
+
+            return !Directory.Exists(ny) && Directory.Exists(gammel) ? gammel : ny;
+        }
+    }
 
     /// <summary>
     /// Sand hvis stien ligger uden for den fysiske maskine. Et drevbogstav
@@ -138,16 +161,16 @@ public static class BackupService
                     ? $"Der er ingen filer at sikre i {kilde}"
                     : $"Der er kun lydfiler i {kilde}, og lyd er slået fra. Slå lyd til, eller kør appen først.");
 
-        var arkiv = Path.Combine(destination, $"noteapp-data_{DateTime.Now:yyyy-MM-dd_HHmm}.zip");
+        var arkiv = Path.Combine(destination, $"heypia-data_{DateTime.Now:yyyy-MM-dd_HHmm}.zip");
 
         // ARKIVET BYGGES UNDER ET ANDET NAVN OG DOEBES OM TIL SIDST.
         //
-        // Existing() finder arkiver paa moenstret noteapp-data_*.zip. Byggede
+        // Existing() finder arkiver paa moenstret heypia-data_*.zip. Byggede
         // vi direkte paa det navn, ville en afbrudt koersel - appen lukket,
         // strommen vaek, disken fuld - efterlade en halv zip, der staar i
         // listen som en rigtig sikkerhedskopi. Man opdager det den dag, man
         // skal bruge den. Maalt 18-08-2026: en afbrudt koersel efterlod
-        // noteapp-data_2026-08-18_1547.zip paa 870 MB, som saa gyldig ud.
+        // heypia-data_2026-08-18_1547.zip paa 870 MB, som saa gyldig ud.
         //
         // .part matcher ikke moenstret, saa en halv fil er usynlig for baade
         // listen og rotationen.
@@ -266,7 +289,7 @@ public static class BackupService
     {
         if (!Directory.Exists(destination)) yield break;
 
-        var filer = Directory.GetFiles(destination, "noteapp-data_*.zip")
+        var filer = Directory.GetFiles(destination, "heypia-data_*.zip")
             .Select(f => new FileInfo(f))
             .OrderByDescending(f => f.LastWriteTime);
 

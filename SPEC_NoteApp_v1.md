@@ -1,4 +1,4 @@
-# NoteApp (Windows) — samlet spec v1
+﻿# HeyPia (Windows) — samlet spec v1
 
 > ## ⚠️ Protokol, ikke aktuel tilstand
 >

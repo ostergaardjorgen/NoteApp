@@ -1,6 +1,6 @@
 ﻿<#
 .SYNOPSIS
-    Tager backup af dine NoteApp-data: ordbog, indlærte rettelser, optagelser,
+    Tager backup af dine HeyPia-data: ordbog, indlærte rettelser, optagelser,
     noter og transskriptioner.
 
 .DESCRIPTION
@@ -34,7 +34,7 @@
 #>
 [CmdletBinding()]
 param(
-    [string] $Destination = (Join-Path $env:USERPROFILE 'NoteApp-backup'),
+    [string] $Destination = (Join-Path $env:USERPROFILE 'HeyPia-backup'),
     [int]    $Behold = 8,
 
     # Eksplicit datamappe. Planlagte opgaver SKAL sætte denne: en opgave kan
@@ -64,7 +64,7 @@ if (-not (Test-Path $datagraense)) { throw "Fandt ikke $datagraense — uden den
 # ogsaa naar der ikke er et vindue at skrive til.
 $fejlLogRod = $DataMappe
 if ([string]::IsNullOrWhiteSpace($fejlLogRod)) { $fejlLogRod = $env:NOTEAPP_DATA }
-if ([string]::IsNullOrWhiteSpace($fejlLogRod)) { $fejlLogRod = Get-NoteAppDataRod }
+if ([string]::IsNullOrWhiteSpace($fejlLogRod)) { $fejlLogRod = Get-HeyPiaDataRod }
 $fejlLog = Join-Path $fejlLogRod 'log\backup.log'
 
 trap {
@@ -86,7 +86,7 @@ function Skriv {
 # --- Kilde ----------------------------------------------------------------
 $kilde = $DataMappe
 if ([string]::IsNullOrWhiteSpace($kilde)) { $kilde = $env:NOTEAPP_DATA }
-if ([string]::IsNullOrWhiteSpace($kilde)) { $kilde = Get-NoteAppDataRod }
+if ([string]::IsNullOrWhiteSpace($kilde)) { $kilde = Get-HeyPiaDataRod }
 $kilde = [IO.Path]::GetFullPath($kilde)
 
 if (-not (Test-Path $kilde)) {
@@ -134,16 +134,16 @@ New-Item -ItemType Directory -Force $destinationFuld | Out-Null
 
 # --- Kører appen? ---------------------------------------------------------
 # SQLite-filer kopieret midt i en skrivning kan blive inkonsistente.
-$kørende = Get-Process -Name 'NoteApp', 'Fase0Recorder' -ErrorAction SilentlyContinue
+$kørende = Get-Process -Name 'HeyPia', 'Fase0Recorder' -ErrorAction SilentlyContinue
 if ($kørende) {
-    Skriv "ADVARSEL: NoteApp kører ($($kørende.Name -join ', '))." 'Yellow'
+    Skriv "ADVARSEL: HeyPia kører ($($kørende.Name -join ', '))." 'Yellow'
     Skriv "  Backup tages alligevel, men luk appen for et helt rent øjebliksbillede." 'Yellow'
     Skriv ""
 }
 
 # --- Byg arkivet ----------------------------------------------------------
 $stempel = Get-Date -Format 'yyyy-MM-dd_HHmm'
-$arkiv = Join-Path $destinationFuld "noteapp-data_$stempel.zip"
+$arkiv = Join-Path $destinationFuld "heypia-data_$stempel.zip"
 
 $filer = Get-ChildItem $kilde -Recurse -File -ErrorAction SilentlyContinue
 if (-not $filer) { throw "Ingen filer at tage backup af i $kilde" }
@@ -178,7 +178,7 @@ if ($antalIArkiv -lt $filer.Count) {
 }
 
 # --- Rotation -------------------------------------------------------------
-$gamle = Get-ChildItem $destinationFuld -Filter 'noteapp-data_*.zip' |
+$gamle = Get-ChildItem $destinationFuld -Filter 'heypia-data_*.zip' |
     Sort-Object LastWriteTime -Descending | Select-Object -Skip $Behold
 foreach ($g in $gamle) {
     [IO.File]::Delete($g.FullName)
@@ -195,6 +195,6 @@ $linje = '{0}  {1} filer  {2} MB  fra {3}  -> {4}' -f (Get-Date -Format 's'),
          $filer.Count, $arkivMB, $kilde, (Split-Path $arkiv -Leaf)
 Add-Content -Path (Join-Path $logMappe 'backup.log') -Value $linje -Encoding UTF8
 
-$bevaret = (Get-ChildItem $destinationFuld -Filter 'noteapp-data_*.zip').Count
+$bevaret = (Get-ChildItem $destinationFuld -Filter 'heypia-data_*.zip').Count
 Skriv ""
 Skriv "Færdig. $bevaret arkiver i $destinationFuld" 'Green'

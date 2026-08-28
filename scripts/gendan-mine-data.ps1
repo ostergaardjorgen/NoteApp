@@ -1,6 +1,6 @@
 ﻿<#
 .SYNOPSIS
-    Gendanner NoteApp-data fra et backup-arkiv.
+    Gendanner HeyPia-data fra et backup-arkiv.
 
 .DESCRIPTION
     En backup, man aldrig har prøvet at gendanne fra, er et gæt — ikke en
@@ -15,14 +15,14 @@
     .\gendan-mine-data.ps1 -Proeve
 
 .EXAMPLE
-    .\gendan-mine-data.ps1 -Arkiv 'C:\Users\oster\NoteApp-backup\noteapp-data_2026-08-10_0900.zip'
+    .\gendan-mine-data.ps1 -Arkiv 'C:\Users\oster\NoteApp-backup\heypia-data_2026-08-10_0900.zip'
 #>
 [CmdletBinding()]
 param(
     # Udelades det, bruges det nyeste arkiv i standard-backupmappen.
     [string] $Arkiv,
 
-    [string] $BackupMappe = (Join-Path $env:USERPROFILE 'NoteApp-backup'),
+    [string] $BackupMappe = (Join-Path $env:USERPROFILE 'HeyPia-backup'),
 
     [switch] $Proeve
 )
@@ -31,7 +31,7 @@ $ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 
 if (-not $Arkiv) {
-    $nyeste = Get-ChildItem $BackupMappe -Filter 'noteapp-data_*.zip' -ErrorAction SilentlyContinue |
+    $nyeste = Get-ChildItem $BackupMappe -Filter 'heypia-data_*.zip' -ErrorAction SilentlyContinue |
         Sort-Object LastWriteTime -Descending | Select-Object -First 1
     if (-not $nyeste) { throw "Ingen arkiver fundet i $BackupMappe" }
     $Arkiv = $nyeste.FullName
@@ -42,7 +42,7 @@ if (-not (Test-Path $Arkiv)) { throw "Arkivet findes ikke: $Arkiv" }
 # En gendannelse til den forkerte mappe ser ud til at lykkes og efterlader
 # brugeren uden sine data dér, hvor appen leder.
 . (Join-Path $PSScriptRoot 'lib-datagraense.ps1')
-$mål = Get-NoteAppDataRod
+$mål = Get-HeyPiaDataRod
 
 Write-Host "Arkiv : $Arkiv"
 Write-Host "Mål   : $mål"
@@ -64,7 +64,7 @@ try {
 }
 
 if ($Proeve) {
-    $midlertidig = Join-Path ([IO.Path]::GetTempPath()) "noteapp-proeve-$(Get-Random)"
+    $midlertidig = Join-Path ([IO.Path]::GetTempPath()) "heypia-proeve-$(Get-Random)"
     Expand-Archive -Path $Arkiv -DestinationPath $midlertidig -Force
 
     $udpakket = Get-ChildItem $midlertidig -Recurse -File

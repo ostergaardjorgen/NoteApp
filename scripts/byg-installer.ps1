@@ -1,6 +1,6 @@
 ﻿<#
 .SYNOPSIS
-    Bygger NoteApp.msi ud fra den udgivne app-mappe.
+    Bygger HeyPia.msi ud fra den udgivne app-mappe.
 
 .DESCRIPTION
     Rækkefølgen betyder noget: appen udgives FØRST, og installationspakken
@@ -31,8 +31,8 @@ $ErrorActionPreference = 'Stop'
 $rod = Split-Path -Parent $PSScriptRoot
 $app = Join-Path $rod 'app'
 $installer = Join-Path $rod 'installer'
-$wxs = Join-Path $installer 'NoteApp.wxs'
-$msi = Join-Path $installer 'NoteApp.msi'
+$wxs = Join-Path $installer 'HeyPia.wxs'
+$msi = Join-Path $installer 'HeyPia.msi'
 
 # wix ligger som dotnet-vaerktoej i brugerens profil og er ikke altid i PATH,
 # naar scriptet koeres fra en ny session.
@@ -71,7 +71,7 @@ if (-not $SpringUdgivelseOver) {
     if ($LASTEXITCODE -ne 0) { throw "Udgivelsen fejlede." }
 }
 
-$exe = Join-Path $app 'NoteApp.exe'
+$exe = Join-Path $app 'HeyPia.exe'
 if (-not (Test-Path $exe)) { throw "Fandt ikke $exe. Udgiv appen først." }
 
 $version = (Get-Item $exe).VersionInfo.FileVersion
@@ -87,7 +87,7 @@ Write-Host "Version      : $version"
 
 # --- SPAERRE: TALERGENKENDELSEN SKAL VAERE I PAKKEN ----------------------
 #
-# Den ligger i app\talere\ og samles op af "..\app\**" i NoteApp.wxs. Mangler
+# Den ligger i app\talere\ og samles op af "..\app\**" i HeyPia.wxs. Mangler
 # den, bygger pakken uden fejl og installerer en app, der stiltiende holder op
 # med at kunne skille stemmer ad.
 $talerFiler = @(
@@ -144,7 +144,7 @@ try
     # tal, saa revisionen klippes af — 0.18.0.0 bliver til 0.18.0.
     $msiVersion = ($version -split '\.')[0..2] -join '.'
 
-    & $wix build 'NoteApp.wxs' -ext WixToolset.UI.wixext -d "Version=$msiVersion" -o 'NoteApp.msi'
+    & $wix build 'HeyPia.wxs' -ext WixToolset.UI.wixext -d "Version=$msiVersion" -o 'HeyPia.msi'
     if ($LASTEXITCODE -ne 0) { throw "wix build af MSI fejlede." }
 
     # Indpakningen: en setup.exe, der baerer MSI'en. Den beder selv om
@@ -153,7 +153,7 @@ try
     # bliver stoppet.
     Write-Host "Bygger setup.exe ..." -ForegroundColor Cyan
     & $wix extension add --global WixToolset.BootstrapperApplications.wixext/5.0.2
-    & $wix build 'Bundle.wxs' -ext WixToolset.BootstrapperApplications.wixext -d "Version=$msiVersion" -o 'NoteApp-setup.exe'
+    & $wix build 'Bundle.wxs' -ext WixToolset.BootstrapperApplications.wixext -d "Version=$msiVersion" -o 'HeyPia-setup.exe'
     if ($LASTEXITCODE -ne 0) { throw "wix build af setup.exe fejlede." }
 }
 finally
@@ -161,7 +161,7 @@ finally
     Pop-Location
 }
 
-$setup = Join-Path $installer 'NoteApp-setup.exe'
+$setup = Join-Path $installer 'HeyPia-setup.exe'
 
 # --- EFTERPROEV, FREM FOR AT ANTAGE -------------------------------------
 #
@@ -172,11 +172,11 @@ $setup = Join-Path $installer 'NoteApp-setup.exe'
 #
 # Det skete to gange den 19-08-2026, og begge gange blev en fil paa vej ud
 # ad doeren stoppet af en tilfaeldighed frem for af en kontrol.
-if (-not (Test-Path $setup)) { throw "NoteApp-setup.exe blev ikke bygget." }
+if (-not (Test-Path $setup)) { throw "HeyPia-setup.exe blev ikke bygget." }
 
 $setupVersion = [Diagnostics.FileVersionInfo]::GetVersionInfo($setup).FileVersion
 if (($setupVersion -split '\.')[0..2] -join '.' -ne $msiVersion) {
-    throw ("NoteApp-setup.exe er version $setupVersion, men der blev bygget $msiVersion. " +
+    throw ("HeyPia-setup.exe er version $setupVersion, men der blev bygget $msiVersion. " +
            "Bundle-trinnet er fejlet, og den gamle fil ligger der stadig. Koer scriptet igen.")
 }
 
@@ -188,6 +188,6 @@ foreach ($f in @($setup, $msi)) {
     }
 }
 Write-Host ""
-Write-Host "Send NoteApp-setup.exe til den, der skal installere. Den beder selv om" -ForegroundColor DarkGray
+Write-Host "Send HeyPia-setup.exe til den, der skal installere. Den beder selv om" -ForegroundColor DarkGray
 Write-Host "administratorrettigheder og installerer MSI'en." -ForegroundColor DarkGray
 Write-Host "Afinstallation fjerner kun programmet — datamappen bliver liggende." -ForegroundColor DarkGray

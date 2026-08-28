@@ -148,7 +148,7 @@ if ($SpringByggeOver) { return }
 # --- Byg og udgiv ----------------------------------------------------------
 # Appen skal ikke koere, mens der skrives til den. Kun DESKTOP-processen
 # stoppes; kommandolinjevaerktoejet kan koere et laengevarende job.
-Get-Process -Name NoteApp -ErrorAction SilentlyContinue |
+Get-Process -Name HeyPia -ErrorAction SilentlyContinue |
     Where-Object { $_.Path -like '*NoteApp\app\*' -or $_.Path -like '*NoteApp.Desktop*' } |
     ForEach-Object { Write-Host "Lukker koerende app (PID $($_.Id))"; $_ | Stop-Process }
 
@@ -297,8 +297,8 @@ else {
 # --- Efterproev ------------------------------------------------------------
 # Et byg, der siger "faerdig" uden at filen er skiftet, er vaerre end et, der
 # fejler. Derfor kontrolleres resultatet frem for at blive antaget.
-$exe = Join-Path $udgivTil 'NoteApp.exe'
-if (-not (Test-Path $exe)) { throw "NoteApp.exe blev ikke lagt i $udgivTil" }
+$exe = Join-Path $udgivTil 'HeyPia.exe'
+if (-not (Test-Path $exe)) { throw "HeyPia.exe blev ikke lagt i $udgivTil" }
 
 $fil = Get-Item $exe
 $ver = [Diagnostics.FileVersionInfo]::GetVersionInfo($exe).FileVersion
@@ -342,16 +342,16 @@ if ($snavset) {
 #
 # NAVNET ER IKKE GIVET, OG DER ER MERE END EEN GENVEJ.
 #
-# Der blev foer kun set efter 'NoteApp.lnk' paa brugerens eget skrivebord. Det
-# var forkert paa to maader. Udviklingsgenvejen hedder 'NoteApp_dev.lnk' — den
+# Der blev foer kun set efter 'HeyPia.lnk' paa brugerens eget skrivebord. Det
+# var forkert paa to maader. Udviklingsgenvejen hedder 'HeyPia_dev.lnk' — den
 # er doebt om med vilje, saa de to udgaver kan kendes fra hinanden — og saa
 # meldte scriptet "ingen skrivebordsgenvej fundet", mens den stod og pegede
-# rigtigt. Omvendt er 'NoteApp.lnk' den INSTALLEREDE udgave, der ligger paa
+# rigtigt. Omvendt er 'HeyPia.lnk' den INSTALLEREDE udgave, der ligger paa
 # faellesskrivebordet og med rette peger paa Program Files; havde scriptet
 # fundet den, ville det have advaret om det, der er helt som det skal vaere.
 #
 # Der ses derfor paa begge skriveborde og paa alle genveje, der peger paa en
-# NoteApp.exe. De sorteres efter HVAD de peger paa, ikke efter hvad de hedder.
+# HeyPia.exe. De sorteres efter HVAD de peger paa, ikke efter hvad de hedder.
 $skriveborde = @(
     [Environment]::GetFolderPath('Desktop'),
     (Join-Path $env:PUBLIC 'Desktop')
@@ -361,7 +361,7 @@ $sh = New-Object -ComObject WScript.Shell
 $genveje = foreach ($sted in $skriveborde) {
     foreach ($fil in Get-ChildItem $sted -Filter '*.lnk' -ErrorAction SilentlyContinue) {
         $maal = $sh.CreateShortcut($fil.FullName).TargetPath
-        if ($maal -like '*\NoteApp.exe') {
+        if ($maal -like '*\HeyPia.exe') {
             [pscustomobject]@{ Navn = $fil.BaseName; Maal = $maal; Her = ($maal -eq $exe) }
         }
     }

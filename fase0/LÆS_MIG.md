@@ -1,4 +1,4 @@
-# Fase 0 — feasibility gate
+﻿# Fase 0 — feasibility gate
 
 Formålet er at afgøre **to ting**, før der bygges noget som helst UI:
 
@@ -39,7 +39,7 @@ Alt ligger i `C:\NoteApp\` — kildekode, modeller, whisper-binærer og optagels
 
 ## Trin 1 — optag oplæsningen
 
-Start **NoteApp** fra skrivebordet og bliv på skærmen *Oplæsning*. Den viser teksten ét afsnit ad gangen, holder øje med tempoet og sætter blokmærker undervejs.
+Start **HeyPia** fra skrivebordet og bliv på skærmen *Oplæsning*. Den viser teksten ét afsnit ad gangen, holder øje med tempoet og sætter blokmærker undervejs.
 
 **Ret navnene i `oplaesning\testtekst.md` først.** De opdigtede navne kan ikke afsløre det, testen skal måle — det er dine rigtige kollegaers og kunders navne, Whisper staver forkert. Genstart appen efter rettelsen.
 

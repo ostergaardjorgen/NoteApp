@@ -1,4 +1,4 @@
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 
 namespace NoteApp.Core.Llm;
 
@@ -184,7 +184,7 @@ public static class LlmCatalog
         try
         {
             using var klient = new HttpClient();
-            klient.DefaultRequestHeaders.UserAgent.ParseAdd("NoteApp");
+            klient.DefaultRequestHeaders.UserAgent.ParseAdd("HeyPia");
             using var svar = await klient.SendAsync(
                 new HttpRequestMessage(HttpMethod.Head, model.Url), ct);
             bytes = svar.Content.Headers.ContentLength ?? 0;

@@ -1,4 +1,4 @@
-# When something goes wrong
+﻿# When something goes wrong
 
 *The questions that come up most often*
 
@@ -32,7 +32,7 @@ this transcript and in every future one.
 
 The app was not running. A closed program cannot start a recording.
 
-Turn on **Start NoteApp when I log in to Windows** under Settings. It takes up
+Turn on **Start HeyPia when I log in to Windows** under Settings. It takes up
 nothing when it is not recording.
 
 ## The event from Google does not appear

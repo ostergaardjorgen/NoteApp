@@ -1,4 +1,4 @@
-# Calendar and tasks
+﻿# Calendar and tasks
 
 *Today's meetings in the Cockpit — and what Google has to do with it*
 
@@ -14,7 +14,7 @@ here.
 Open an event and tick **Start the recording automatically**. Then it begins
 two minutes before.
 
-It requires **NoteApp to be running**. A closed program cannot start a
+It requires **HeyPia to be running**. A closed program cannot start a
 recording, and that is not something that can be changed — not even with a
 scheduled task in Windows, because the first seconds would go on loading the
 program.

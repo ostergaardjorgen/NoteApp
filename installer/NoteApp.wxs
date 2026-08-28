@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <!--
-  Installationspakke til NoteApp.
+  Installationspakke til HeyPia.
 
   Bygges med scripts\byg-installer.ps1. Resultatet er en .msi, en kollega kan
   dobbeltklikke: den lander under Tilføj/fjern programmer, får en genvej i
@@ -16,8 +16,8 @@
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
      xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
 
-  <Package Name="NoteApp"
-           Manufacturer="NoteApp"
+  <Package Name="HeyPia"
+           Manufacturer="HeyPia"
            Version="$(var.Version)"
            UpgradeCode="8f3a5c21-4d7e-4b19-9c6a-2e51f0d8a7b3"
            Scope="perMachine"
@@ -26,7 +26,7 @@
     <!-- Opgradering: en nyere udgave fjerner den gamle af sig selv, saa der
          ikke ligger to poster i Tilfoej/fjern. -->
     <MajorUpgrade AllowSameVersionUpgrades="yes"
-                  DowngradeErrorMessage="En nyere udgave af NoteApp er allerede installeret. Afinstallér den først, hvis du vil gå tilbage." />
+                  DowngradeErrorMessage="En nyere udgave af HeyPia er allerede installeret. Afinstallér den først, hvis du vil gå tilbage." />
 
     <MediaTemplate EmbedCab="yes" />
 
@@ -49,11 +49,11 @@
          brugere, og det er en fordel: koden ligger ét sted, data et andet, og
          graensen haandhaeves af Windows i stedet for kun af vores egen kode. -->
     <StandardDirectory Id="ProgramFiles6432Folder">
-      <Directory Id="INSTALLFOLDER" Name="NoteApp" />
+      <Directory Id="INSTALLFOLDER" Name="HeyPia" />
     </StandardDirectory>
 
     <StandardDirectory Id="ProgramMenuFolder">
-      <Directory Id="StartMenuMappe" Name="NoteApp" />
+      <Directory Id="StartMenuMappe" Name="HeyPia" />
     </StandardDirectory>
 
     <StandardDirectory Id="DesktopFolder" />
@@ -68,17 +68,17 @@
     <ComponentGroup Id="Genveje">
       <Component Directory="StartMenuMappe" Guid="c4e7b902-16fa-4d38-8a55-9b0e3c7d41f6">
         <Shortcut Id="StartMenuGenvej"
-                  Name="NoteApp"
+                  Name="HeyPia"
                   Description="Optager møder og skriver dem ud til tekst på din egen pc. Referater laves af en sprogmodel i EU."
-                  Target="[INSTALLFOLDER]NoteApp.exe"
+                  Target="[INSTALLFOLDER]HeyPia.exe"
                   WorkingDirectory="INSTALLFOLDER"
                   Icon="AppIkon" />
 
         <Shortcut Id="SkrivebordsGenvej"
                   Directory="DesktopFolder"
-                  Name="NoteApp"
+                  Name="HeyPia"
                   Description="Optager møder og skriver dem ud til tekst på din egen pc. Referater laves af en sprogmodel i EU."
-                  Target="[INSTALLFOLDER]NoteApp.exe"
+                  Target="[INSTALLFOLDER]HeyPia.exe"
                   WorkingDirectory="INSTALLFOLDER"
                   Icon="AppIkon" />
 
@@ -91,7 +91,7 @@
       </Component>
     </ComponentGroup>
 
-    <Feature Id="Hovedprogram" Title="NoteApp" Level="1">
+    <Feature Id="Hovedprogram" Title="HeyPia" Level="1">
       <ComponentGroupRef Id="Programfiler" />
       <ComponentGroupRef Id="Genveje" />
     </Feature>

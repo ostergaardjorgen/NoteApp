@@ -1,4 +1,4 @@
-# Overvågede mapper
+﻿# Overvågede mapper
 
 *Bygget 24-08-2026. Roadmap 2.2.*
 
@@ -7,7 +7,7 @@ ind af sig selv, hvis du beder om det.
 
 Det er den anden halvdel af punkt 2.1: filer udefra kunne læses ind i hånden,
 men skulle trækkes ind hver gang. Med en overvåget mappe ligger optagelsen fra
-telefonen i NoteApp, når du sætter dig ved computeren.
+telefonen i HeyPia, når du sætter dig ved computeren.
 
 ---
 

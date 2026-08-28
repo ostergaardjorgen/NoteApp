@@ -1,4 +1,4 @@
-# Når noget driller
+﻿# Når noget driller
 
 *De spørgsmål, der kommer oftest*
 
@@ -32,7 +32,7 @@ transkription og i alle fremtidige.
 
 Appen kørte ikke. Et lukket program kan ikke starte en optagelse.
 
-Slå **Start NoteApp, når jeg logger på Windows** til under Indstillinger. Den
+Slå **Start HeyPia, når jeg logger på Windows** til under Indstillinger. Den
 fylder ingenting, når der ikke optages.
 
 ## Aftalen fra Google dukker ikke op

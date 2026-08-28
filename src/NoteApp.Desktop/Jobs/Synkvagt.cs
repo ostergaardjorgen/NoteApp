@@ -1,4 +1,4 @@
-using System.Windows.Threading;
+﻿using System.Windows.Threading;
 using NoteApp.Core;
 
 namespace NoteApp.Desktop.Jobs;
@@ -9,7 +9,7 @@ namespace NoteApp.Desktop.Jobs;
 /// HVORFOR DEN FINDES
 ///
 /// Der blev aldrig hentet af sig selv. En aftale, der blev oprettet direkte i
-/// Google, var ikke i NoteApp, før nogen gik ind under Indstillinger og
+/// Google, var ikke i HeyPia, før nogen gik ind under Indstillinger og
 /// trykkede Hent — og så viste kalenderen i Cockpittet bare, hvad der sidst
 /// tilfældigvis blev hentet. Ikonet på panelerne (24-08) gjorde det muligt at
 /// hente ét sted fra; den her gør, at man ikke skal huske det.

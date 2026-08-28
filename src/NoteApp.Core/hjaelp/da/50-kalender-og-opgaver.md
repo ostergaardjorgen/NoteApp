@@ -1,4 +1,4 @@
-# Kalender og opgaver
+﻿# Kalender og opgaver
 
 *Dagens møder i Cockpittet — og hvad Google har med det at gøre*
 
@@ -14,7 +14,7 @@ altid oprette aftaler her.
 Åbn en aftale og sæt hak i **Start optagelsen automatisk**. Så går den i gang
 to minutter før.
 
-Det kræver, at **NoteApp kører**. Et lukket program kan ikke starte en
+Det kræver, at **HeyPia kører**. Et lukket program kan ikke starte en
 optagelse, og det er ikke noget, der kan laves om — heller ikke med en
 planlagt opgave i Windows, for de første sekunder ville gå med at hente
 programmet ind.

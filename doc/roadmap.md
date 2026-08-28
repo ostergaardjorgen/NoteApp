@@ -1,4 +1,4 @@
-# Roadmap
+﻿# Roadmap
 
 *Skrevet om 20-08-2026, efter at retningen blev lagt fast.*
 *Status efterprøvet mod koden 24-08-2026 — mærkaterne nedenfor er læst i kilden, ikke husket.*
@@ -315,11 +315,11 @@ være anderledes. Og whisper-modellen har ingen knap.
 
 ---
 
-### NoteApp på iPhone — **PARKERET 24-08-2026**
+### HeyPia på iPhone — **PARKERET 24-08-2026**
 *Foreslået og undersøgt 24-08-2026 · hele undersøgelsen står i `iphone-app.md`*
 
 En app, der optager møder og telefonsamtaler på telefonen og lægger lyden i en
-mappe ved navn NoteApp i iCloud. Undersøgt til bunds og lagt væk igen — ikke
+mappe ved navn HeyPia i iCloud. Undersøgt til bunds og lagt væk igen — ikke
 fordi den er dårlig, men fordi den koster en Mac, 99 USD om året og et
 selvstændigt produkt at vedligeholde, og fordi den halvdel, der var mest
 efterspurgt, ikke kan lade sig gøre.

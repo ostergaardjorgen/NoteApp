@@ -1,4 +1,4 @@
-# Fortsæt her
+﻿# Fortsæt her
 
 *Skrevet 23-08-2026 ved v1.0.65. Læs den her først — så kan arbejdet fortsætte
 uden samtalehistorikken.*
@@ -123,10 +123,10 @@ egne rettelser ER målingen.
 ## Hvis noget skal efterprøves
 
 ```bash
-noteapp maalsoegning   # tyve søgeprøver med kendt facit
-noteapp maaldato       # tyve datoer i talesprog
-noteapp motor          # hvilken whisper-motor og model der bruges
-noteapp status         # hvor data ligger, og hvad de indeholder
+heypia maalsoegning   # tyve søgeprøver med kendt facit
+heypia maaldato       # tyve datoer i talesprog
+heypia motor          # hvilken whisper-motor og model der bruges
+heypia status         # hvor data ligger, og hvad de indeholder
 ```
 
 Værktøjet bygges fra `src\NoteApp.Tools`.

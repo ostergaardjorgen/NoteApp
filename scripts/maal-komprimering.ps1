@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     Måler, hvad det koster i nøjagtighed at komprimere lyden.
 
@@ -51,7 +51,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $Rod = Split-Path $PSScriptRoot -Parent
-$Exe = Join-Path $Rod 'src\NoteApp.Tools\bin\Release\net8.0-windows\noteapp.exe'
+$Exe = Join-Path $Rod 'src\NoteApp.Tools\bin\Release\net8.0-windows\heypia.exe'
 
 if (-not (Test-Path $Exe)) {
     throw "Vaerktoejet er ikke bygget. Koer: dotnet build src\NoteApp.Tools\NoteApp.Tools.csproj -c Release"
@@ -75,7 +75,7 @@ $Proever = @(
        Navn  = 'Blandet dansk-engelsk' }
 )
 
-$Data = Join-Path $env:LOCALAPPDATA 'NoteApp'
+$Data = Join-Path $env:LOCALAPPDATA 'HeyPia'
 if ($env:NOTEAPP_DATA) { $Data = $env:NOTEAPP_DATA }
 if (Test-Path 'C:\AppNoter') { $Data = 'C:\AppNoter' }
 

@@ -1,4 +1,4 @@
-{
+﻿{
   "_sprog": {
     "kode": "en",
     "navn": "English",
@@ -33,7 +33,7 @@
   },
   "cockpit": {
     "titel": "Cockpit",
-    "under": "Everything said and written — transcripts, your notes and the finished documents. Search reads the files on your machine, and nothing is sent.",
+    "under": "HeyPia is your personal information assistant. Everything you work with in the app — what was said in your meetings, the notes you took along the way, and the documents that came out of it — is gathered here and can be found in an instant. The files are read on your machine, and nothing is sent.",
     "soeg": "What are you looking for?",
     "soegkun": "Search only in",
     "heletiden": "All time",
@@ -221,7 +221,7 @@
     "i_alt_at_hente": "To download in total:",
     "kom_i_gang": "Get started",
     "lyden_bliver_her_teksten_bliver_i_europa": "The audio stays here. The text is only sent if you ask for it.",
-    "noteapp_optager_dine_moeder_og_skriver_dem": "NoteApp records your meetings and transcribes them here on your machine. If minutes or another document are to be made from the text, that happens at Mistral AI in France — and only the text is sent.",
+    "heypia_optager_dine_moeder_og_skriver_dem": "HeyPia records your meetings and transcribes them here on your machine. If minutes or another document are to be made from the text, that happens at Mistral AI in France — and only the text is sent.",
     "optagelsen_kan_ikke_sendes_nogen_steder_he": "The recording cannot be sent anywhere. The app has no code that could — only the finished text can be sent, and only to the European endpoint. You set that up yourself in a moment, and you may leave it be.",
     "optagelser_transkriptioner_noter_og_dokume": "Recordings, transcripts, notes and documents. Choose another folder if you want them on an encrypted disk, for instance.",
     "selve_transskriptionen_laves_af_whisper_so": "The transcription itself is done by Whisper, which runs locally. The audio files never leave the machine — not even when a document is made. The engine and the model must be downloaded once, and you are asked first.",
@@ -246,7 +246,7 @@
     "prioritet": "PRIORITY",
     "laeg_op_i_google_tasks": "Put in Google Tasks",
     "ligger_i_google_tasks": "Is in Google Tasks",
-    "rettelser_sendes_op": "Changes made here are sent up to Google, and what is changed in Google comes down at the next fetch. Priority is NoteApp's own field and stays here.",
+    "rettelser_sendes_op": "Changes made here are sent up to Google, and what is changed in Google comes down at the next fetch. Priority is HeyPia's own field and stays here.",
     "saet_hakket_hvis_ogsaa_i_google": "Tick the box if the task should also be in Google Tasks — then it is on your phone too. Without the tick it stays here."
   },
   "newdocumentwindow": {
@@ -311,7 +311,7 @@
     "opret_ogsaa_i_google_kalender": "Create in Google Calendar as well",
     "opretter_et_moedelokale_hos_google_og_laeg": "Creates a meeting room at Google and puts the link on the event. If the meeting is marked for automatic recording, the note about recording is written into the invitation too",
     "optag_som_webinar_kun_det_computeren_afspi": "Record as a webinar — only what the computer plays",
-    "optagelsen_begynder_to_minutter_foer_det_k": "The recording begins two minutes before. It requires NoteApp to be running — a program that is closed cannot start a recording. If the meeting moves, the recording moves with it.",
+    "optagelsen_begynder_to_minutter_foer_det_k": "The recording begins two minutes before. It requires HeyPia to be running — a program that is closed cannot start a recording. If the meeting moves, the recording moves with it.",
     "slet_aftalen": "Delete the event",
     "sprog": "LANGUAGE",
     "start_optagelsen_automatisk_naar_moedet_be": "Start the recording automatically when the meeting begins",
@@ -523,7 +523,7 @@
     "alt_det_andet": "EVERYTHING ELSE",
     "altid_med_noter_transskriptioner_dokumente": "Always included: notes, transcripts, documents, meeting data and settings.",
     "anbefalet_minimum": "Recommended minimum",
-    "appen_fylder_ingenting_naar_der_ikke_optag": "The app takes up nothing when it is not recording. That is why «Start NoteApp when I log in to Windows» is on from the beginning — and why you can turn it off.",
+    "appen_fylder_ingenting_naar_der_ikke_optag": "The app takes up nothing when it is not recording. That is why «Start HeyPia when I log in to Windows» is on from the beginning — and why you can turn it off.",
     "appen_kan_holde_oeje_med_om_et_andet_progr": "The app can watch whether another program opens your microphone — a meeting does, and a webinar, a video or a streaming service does not. If it happens, a message appears by the clock asking whether the meeting should be recorded.",
     "appen_kan_laese_dine_aftaler_ind_i_kalende": "The app can read your events into the calendar, so you can press record directly on a meeting. The calendar works without it too — you can always create events here in the app.",
     "appen_kan_skille_de_to_sider_af_et_onlinem": "The app can separate the two SIDES of an online meeting — your microphone and what the computer plays. It cannot tell the individual people at the other end apart.",
@@ -561,7 +561,7 @@
     "hver_fil_tilbydes_en_gang_siger_du_nej_kom": "•  Each file is offered once. Say no, and it does not come back.",
     "hvert_minut_saa_laenge_appen_er_aaben_der": "•  Every minute, for as long as the app is open. It also looks when you ask it to.",
     "hvor_laenge_lyden_bliver_liggende": "How long the audio stays",
-    "ingen_mapper_overvaages_tilfoej_en_eller_o": "No folders are being watched. Add one, or create the NoteApp folder in one of the cloud services found on this machine.",
+    "ingen_mapper_overvaages_tilfoej_en_eller_o": "No folders are being watched. Add one, or create the HeyPia folder in one of the cloud services found on this machine.",
     "integrationer": "Integrations",
     "kalendere_fra_andre_tjenester": "Calendars from other services",
     "klar_til_naeste_moede": "Ready for the next meeting",
@@ -581,7 +581,7 @@
     "mikrofon": "Microphone",
     "naar_en_optagelse_er_skrevet_ud_er_det_tek": "Once a recording has been transcribed, it is the text you use. The audio can be cleared after a while — then you keep the meeting without keeping the 220 MB.",
     "noejagtigheden_er_ikke_100_maalt_92_3_paa": "The accuracy is not 100 %. Measured: 92.3 % in Danish, 90.5 % in English, 83.1 % when switching between languages mid-sentence. Names and technical terms are what most often come out wrong.",
-    "noteapp_virker_bedst_naar_den_altid_koerer": "NoteApp works best when it is always running",
+    "heypia_virker_bedst_naar_den_altid_koerer": "HeyPia works best when it is always running",
     "nulstil_til_standard": "Reset to default",
     "opdater_enhedslisten": "Refresh the device list",
     "opstart": "Startup",
@@ -604,7 +604,7 @@
     "spoerg_mig_naar_et_program_bruger_mikrofon": "Ask me when a program uses the microphone",
     "spoerg_naar_der_starter_et_moede": "Ask when a meeting starts",
     "sproget_vaelges_ikke_her_det_tages_fra_aft": "The language is not chosen here — it is taken from the event. If the meeting is set to English, the English text is used. Clear a field to return to the default text; it cannot be turned off entirely, because a recording nobody has been told about is not something the app helps with.",
-    "start_noteapp_naar_jeg_logger_paa_windows": "Start NoteApp when I log in to Windows",
+    "start_heypia_naar_jeg_logger_paa_windows": "Start HeyPia when I sign in to Windows",
     "start_test": "▶ Start test",
     "tag_backup_nu": "Back up now",
     "tag_ogsaa_lydfilerne_med": "Include the audio files as well",

@@ -1,4 +1,4 @@
-# NoteApp til iPhone — undersøgt og parkeret
+﻿# HeyPia til iPhone — undersøgt og parkeret
 
 > **PARKERET 24-08-2026, samme dag som den blev undersøgt.**
 >
@@ -27,10 +27,10 @@ iOS ændrer sig, og særligt EU-forholdene kan flytte sig.*
    Når Apples egen er lukket her, findes der ingen bagdør for andre.
 4. **En VoIP-app må optage sin egen lyd.** Ringer man op gennem appen, falder
    alle tre mure — og CallKit giver samtidig CarPlay og Siri, som en
-   noteapp ellers ikke kan få.
+   heypia ellers ikke kan få.
 5. **Den billigste vej kræver ingen app.** Et nummer hos en nordisk udbyder,
    der viderestiller til mobilen og optager undervejs. Filen lander på egen
-   maskine, og NoteApp læser den ind.
+   maskine, og HeyPia læser den ind.
 
 **Én ting følger ikke med i parkeringen**, fordi den gælder Windows-siden
 allerede i dag: iCloud lægger kun en **pladsholder** på disken. Filen fylder
@@ -44,10 +44,10 @@ filstørrelsen, ser derfor ingenting. Det står ved punkt 2.2 i roadmappen.
 Ønsket falder i to halvdele, og de er ikke lige lette.
 
 **Mødeoptageren kan bygges.** En app, der optager et møde og lægger filen i en
-mappe ved navn NoteApp i iCloud Drive, er almindeligt iOS-arbejde. Den kan
+mappe ved navn HeyPia i iCloud Drive, er almindeligt iOS-arbejde. Den kan
 startes håndfrit med Siri, den kan vise en stor stopknap på låseskærmen, og
 filen dukker op på pc'en af sig selv. Det hænger direkte sammen med det, der
-blev bygget i dag: NoteApp på Windows kan nu læse en `.m4a` eller `.wav` ind
+blev bygget i dag: HeyPia på Windows kan nu læse en `.m4a` eller `.wav` ind
 som en optagelse.
 
 **Telefonsamtalen kan ikke.** Ikke «det er svært» — det kan ikke lade sig
@@ -57,7 +57,7 @@ gøre. Der er tre mure, og de er alle tre Apples, ikke vores:
    den.
 2. Under et opkald har opkaldet mikrofonen alene. En optagelse, der kørte i
    forvejen, bliver afbrudt af iOS.
-3. En app kan ikke åbne sig selv. Der findes ingen måde at få NoteApp frem på
+3. En app kan ikke åbne sig selv. Der findes ingen måde at få HeyPia frem på
    skærmen, fordi et opkald begynder.
 
 Siri kan heller ikke diktere samtalen — og Apples egen optagefunktion fra
@@ -162,7 +162,7 @@ en tydelig visning af at der optages, og en stopknap.
 - Filen skrives løbende i stumper, så et sammenbrud højst koster det sidste
   stykke. Det er den samme regel som på Windows.
 
-**Formatet er en beslutning med en pris.** NoteApp på Windows skal bruge 16
+**Formatet er en beslutning med en pris.** HeyPia på Windows skal bruge 16
 kHz mono. Optager telefonen direkte i det format, er der ingen omsætning og
 intet tab — men det fylder ca. 115 MB i timen. AAC ved 64 kbit/s fylder ca.
 28 MB, og det er ikke målt, hvad det koster i nøjagtighed. Det, der **er**
@@ -173,7 +173,7 @@ ukomprimeret, og en indstilling til den, der har lidt plads i iCloud.
 ### Etape B — Mappen i iCloud
 *Lille · bygger på A*
 
-Filen lægges i en mappe, der hedder NoteApp og står i iCloud Drive ved siden
+Filen lægges i en mappe, der hedder HeyPia og står i iCloud Drive ved siden
 af alt andet.
 
 Det gøres med tre nøgler i appens `Info.plist`: `NSUbiquitousContainerName`
@@ -183,7 +183,7 @@ bestemmer, om der må være undermapper. Kun det, der ligger i `Documents`
 inde i beholderen, bliver vist.
 
 **Så er ringen sluttet.** Mappen synkroniserer til `C:\iCloudDrive\NoteApp`
-på pc'en, og NoteApp kan læse filen ind — det blev bygget i dag.
+på pc'en, og HeyPia kan læse filen ind — det blev bygget i dag.
 
 **Én ting skal huskes på Windows-siden:** iCloud lægger kun en pladsholder på
 disken. Filen fylder nul, indtil nogen læser den. Det er allerede håndteret i
@@ -193,7 +193,7 @@ overvåget mappe.
 ### Etape C — Håndfri med Siri
 *Middel · bygger på A*
 
-«Hey Siri, optag et møde i NoteApp» starter en optagelse, uden at telefonen
+«Hey Siri, optag et møde i HeyPia» starter en optagelse, uden at telefonen
 skal røres og uden at appen åbnes. Det bygges med App Intents og App
 Shortcuts, og Siri kan spørge og få svar undervejs.
 
@@ -207,9 +207,9 @@ Samtalen kan ikke optages. Men det, der skulle komme ud af den — de vigtige
 punkter og opgaverne — kan tages med det samme bagefter, og det kan gøres
 håndfrit:
 
-> «Hey Siri, diktér noter til NoteApp»
+> «Hey Siri, diktér noter til HeyPia»
 
-Appen optager, lægger lyden i den samme mappe i iCloud, og NoteApp på pc'en
+Appen optager, lægger lyden i den samme mappe i iCloud, og HeyPia på pc'en
 skriver den ud og finder opgaverne i den, ligesom den gør med et møde.
 
 **Og der findes en halv vej til at blive mindet om det.** Kører appen
@@ -242,7 +242,7 @@ fortælle deltagerne, at der optages.
 ## Vejen udenom: appen skal selv ringe op
 
 Alt ovenfor handler om **Telefon-appens** opkald. Reglen er, at ingen app må
-røre en anden apps lyd — og det gælder begge veje: heller ikke NoteApp må
+røre en anden apps lyd — og det gælder begge veje: heller ikke HeyPia må
 lytte med på Telefon-appen.
 
 Men **sin egen lyd må en app godt røre.** Går opkaldet gennem en VoIP-app,
@@ -272,7 +272,7 @@ Windows-siden, der henter optagelserne ned og lægger dem ind — og indlæsning
 findes allerede.
 
 **Men lyden ligger i deres sky**, for HubSpots vedkommende typisk i USA. Det
-er præcis dét, NoteApp sælges på ikke at gøre.
+er præcis dét, HeyPia sælges på ikke at gøre.
 
 **Og dét er grunden til at kigge dansk og nordisk.** Vejen holder, hvis
 udbyderen er i EU:
@@ -297,19 +297,19 @@ udbyderen er i EU:
   til din egen maskine eller server, i stedet for at blive liggende hos dem.
 - Ellers hentes den med `GET https://api.46elks.com/a1/recordings/{id}`, og
   **der er 72 timer til at gøre det.** Efter det er den væk.
-- Både SIP og WebRTC understøttes, så NoteApp kan enten være telefonen selv
+- Både SIP og WebRTC understøttes, så HeyPia kan enten være telefonen selv
   eller bare være det, opkaldet føres igennem.
 
 **Den billigste første prøve ligger her, og den kræver ingen app:** et nummer
 hos udbyderen, der viderestiller til din mobil og optager undervejs. Filen
-lander på din egen maskine, og NoteApp læser den ind. Så kan det måles, om
+lander på din egen maskine, og HeyPia læser den ind. Så kan det måles, om
 optagne opkald overhovedet er noget værd i praksis — før der bygges en
 iPhone-app for at få dem.
 
-**3. NoteApp ringer selv op**
+**3. HeyPia ringer selv op**
 *Stor · og den, der giver den fulde oplevelse*
 
-NoteApp bliver sin egen lille telefon: et nummer hos en udbyder, opkald ud og
+HeyPia bliver sin egen lille telefon: et nummer hos en udbyder, opkald ud og
 ind, CallKit så det ser ud som et rigtigt opkald.
 
 Det afgørende er, at optagelsen kan ske **på telefonen** — appen har jo lyden
@@ -318,7 +318,7 @@ gemmer den ikke.
 
 Det flytter grænsen ét sted, og det skal formuleres ærligt i
 salgsargumenterne: et telefonopkald bliver altid båret af et teleselskab. Det
-har det altid gjort, også uden NoteApp. Argumentet er og bliver, at
+har det altid gjort, også uden HeyPia. Argumentet er og bliver, at
 **optagelsen** ikke uploades — og det holder her.
 
 Arbejdet er til gengæld rigtigt: en VoIP-klient er WebRTC eller SIP,
@@ -369,14 +369,14 @@ GDPR oveni, fordi en optagelse med andres stemmer er personoplysninger.
 
 For telefonsamtaler er spørgsmålet i praksis afgjort af, at det ikke kan lade
 sig gøre. Skulle det nogensinde blive muligt, skal det bygges med den samme
-regel som resten af NoteApp: **der oplyses altid om, at der optages.**
+regel som resten af HeyPia: **der oplyses altid om, at der optages.**
 
 ---
 
 ## Rækkefølgen, hvis det skal bygges
 
 1. **A + B** giver hele værdien af «jeg vil ikke bruge iPhones egen optager».
-   Filen lander i NoteApp på pc'en, og det virker fra dag ét.
+   Filen lander i HeyPia på pc'en, og det virker fra dag ét.
 2. **C** gør den brugbar i bilen.
 3. **D** er det, der erstatter drømmen om at optage samtalen — og det er
    værd at bygge, netop fordi det andet ikke kan.
@@ -406,7 +406,7 @@ Tre ting kunne ændre det:
   Det er en helt anden og meget mindre opgave.
 
 Indtil videre er svaret på «jeg vil have mine møder fra telefonen ind i
-NoteApp» det, der blev bygget 24-08: læs lydfilen ind. Den virker for enhver
+HeyPia» det, der blev bygget 24-08: læs lydfilen ind. Den virker for enhver
 telefon, enhver diktafon og enhver kollega, der sender en fil — og den krævede
 hverken en Mac eller en årlig afgift.
 

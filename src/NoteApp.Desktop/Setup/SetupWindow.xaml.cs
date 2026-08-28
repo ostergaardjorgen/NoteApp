@@ -1,4 +1,4 @@
-using System.IO;
+﻿using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using NoteApp.Core;
@@ -25,7 +25,7 @@ public partial class SetupWindow : Window
 
     private static readonly (string Titel, string Under)[] Trin =
     {
-        ("Velkommen til NoteApp", "Lyden bliver på din maskine — teksten bearbejdes i Europa"),
+        ("Velkommen til HeyPia", "Lyden bliver på din maskine — teksten bearbejdes i Europa"),
         ("Sidste trin: hent Whisper", "Motoren og en sprogmodel, så appen kan skrive dine møder ud")
     };
 
@@ -153,7 +153,7 @@ public partial class SetupWindow : Window
     {
         var dialog = new Microsoft.Win32.OpenFolderDialog
         {
-            Title = "Vælg hvor NoteApps filer skal ligge",
+            Title = "Vælg hvor HeyPias filer skal ligge",
             InitialDirectory = Directory.Exists(UserDataPaths.Root)
                 ? UserDataPaths.Root
                 : Path.GetPathRoot(UserDataPaths.DefaultRoot)!

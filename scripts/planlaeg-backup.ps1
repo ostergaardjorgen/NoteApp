@@ -1,7 +1,7 @@
 ﻿<#
 .SYNOPSIS
     Opretter en planlagt opgave i Windows, der tager backup af dine
-    NoteApp-data automatisk.
+    HeyPia-data automatisk.
 
 .DESCRIPTION
     Opgaven kører backup-mine-data.ps1 lokalt på din maskine. Med en lokal
@@ -33,7 +33,7 @@ param(
 
     [string] $Klokken = '09:00',
 
-    [string] $Destination = (Join-Path $env:USERPROFILE 'NoteApp-backup'),
+    [string] $Destination = (Join-Path $env:USERPROFILE 'HeyPia-backup'),
 
     [int] $Behold = 8,
 
@@ -41,7 +41,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$opgaveNavn = 'NoteApp - ugentlig backup'
+$opgaveNavn = 'HeyPia - ugentlig backup'
 
 $datagraense = Join-Path $PSScriptRoot 'lib-datagraense.ps1'
 if (-not (Test-Path $datagraense)) { throw "Fandt ikke $datagraense — uden den kan datagrænsen ikke håndhæves." }
@@ -69,9 +69,9 @@ $engelskUgedag = @{
 # Datamappen loeses HER, i din egen session, og skrives ind i opgaven.
 # Opgaven maa ikke selv slaa LOCALAPPDATA op: den kan koere med et andet
 # miljoe, og saa tager den backup af en tom mappe uden at fejle.
-$dataMappe = [IO.Path]::GetFullPath((Get-NoteAppDataRod))
+$dataMappe = [IO.Path]::GetFullPath((Get-HeyPiaDataRod))
 if (-not (Test-Path $dataMappe)) {
-    throw "Datamappen findes ikke: $dataMappe`nKør 'noteapp init' først."
+    throw "Datamappen findes ikke: $dataMappe`nKør 'heypia init' først."
 }
 
 # En planlagt opgave koerer uden nogen til at godkende noget. Peger den ud af
@@ -119,9 +119,9 @@ $indstillinger = New-ScheduledTaskSettingsSet `
     -MultipleInstances IgnoreNew
 
 $beskrivelse = if ($arverGodkendelse) {
-    "Tager backup af NoteApp-data (ordbog, indlærte rettelser, optagelser, noter) til $destinationFuld — en destination UDEN FOR maskinen, godkendt ved oprettelsen."
+    "Tager backup af HeyPia-data (ordbog, indlærte rettelser, optagelser, noter) til $destinationFuld — en destination UDEN FOR maskinen, godkendt ved oprettelsen."
 } else {
-    "Tager lokal backup af NoteApp-data (ordbog, indlærte rettelser, optagelser, noter). Sender intet nogen steder hen."
+    "Tager lokal backup af HeyPia-data (ordbog, indlærte rettelser, optagelser, noter). Sender intet nogen steder hen."
 }
 
 Register-ScheduledTask -TaskName $opgaveNavn `

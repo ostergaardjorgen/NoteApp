@@ -1,6 +1,6 @@
 ﻿<#
 .SYNOPSIS
-    Fase 0 feasibility gate for NoteApp: kører en optagelse gennem whisper.cpp
+    Fase 0 feasibility gate for HeyPia: kører en optagelse gennem whisper.cpp
     i både medium og large-v3 på dansk, med og uden IAM-ordliste, og måler
     hvor lang tid transskriptionen tager i forhold til mødets længde.
 
@@ -58,14 +58,14 @@ Write-Host "Whisper : $($whisper.FullName)" -ForegroundColor DarkGray
 
 # --- Find optagelsen ------------------------------------------------------
 # Der er to kilder, fordi der er to optagere: konsol-optageren skriver i
-# repoets fase0\optagelser, mens NoteApp-appen skriver i din datamappe, hvor
+# repoets fase0\optagelser, mens HeyPia-appen skriver i din datamappe, hvor
 # data hoerer hjemme. Gaten skal kunne finde begge — ellers braekker
 # arbejdsgangen praecis mellem "optag" og "maal".
 # Datamappen slaas op praecis som appen goer det: NOTEAPP_DATA, saa
 # pegefilen, saa standarden. Skriver man stien selv, holder den op med at
 # passe i det oejeblik brugeren flytter mappen i appen.
 . (Join-Path $PSScriptRoot 'lib-datagraense.ps1')
-$dataRod = Get-NoteAppDataRod
+$dataRod = Get-HeyPiaDataRod
 
 $kilder = @(
     (Join-Path $root 'fase0\optagelser'),
@@ -83,7 +83,7 @@ if ($Sti) {
         ForEach-Object { Get-ChildItem $_ -Directory -ErrorAction SilentlyContinue } |
         Sort-Object LastWriteTime -Descending | Select-Object -First 1
     if (-not $nyeste) {
-        throw "Ingen optagelser fundet i:`n  $($kilder -join "`n  ")`nOptag noget i NoteApp foerst."
+        throw "Ingen optagelser fundet i:`n  $($kilder -join "`n  ")`nOptag noget i HeyPia foerst."
     }
     $sessionDir = $nyeste.FullName
 }

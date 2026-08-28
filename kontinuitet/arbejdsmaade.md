@@ -1,4 +1,4 @@
-# Arbejdsmåden i NoteApp
+﻿# Arbejdsmåden i HeyPia
 
 *Skrevet 23-08-2026. Den vigtigste fil i mappen: koden kan læses, men de her
 regler kan ikke udledes af den.*
@@ -48,8 +48,8 @@ de får lov: at tvinge dem på plads ville være at gøre målingen ubrugelig.
 De to målinger, der kan køres igen:
 
 ```bash
-noteapp maalsoegning
-noteapp maaldato
+heypia maalsoegning
+heypia maaldato
 ```
 
 ## 3. Tekst i appen skrives til en kunde
@@ -153,7 +153,7 @@ man husker, lige indtil man har travlt.
 push midt i en udgivelse ville sende arbejde af sted, ingen har set efter.
 
 Data er en anden sag og kører af sig selv — se den planlagte opgave
-«NoteApp - ugentlig backup». Kode og data er to backups, og den ene erstatter
+«HeyPia - ugentlig backup». Kode og data er to backups, og den ene erstatter
 ikke den anden.
 
 ## 10. Salgsargumenterne skal følge produktet

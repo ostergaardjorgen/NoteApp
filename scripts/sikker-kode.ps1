@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     Sikrer koden: pusher til GitHub, laver et git-bundt, og tager kopi af det,
     der aldrig må i git.
@@ -113,7 +113,7 @@ try {
     # --- 3. Bundtet ---------------------------------------------------------
     New-Item -ItemType Directory -Force $Destination | Out-Null
 
-    $navn = "noteapp-$(Get-Date -Format 'yyyy-MM-dd').bundle"
+    $navn = "heypia-$(Get-Date -Format 'yyyy-MM-dd').bundle"
     $bundt = Join-Path $Destination $navn
 
     Sig ''
@@ -135,7 +135,7 @@ try {
     God "$navn ($mb MB) - efterproevet laesbart"
 
     # Aeldre bundter ryddes. Uden det vokser mappen med 50 MB om ugen.
-    $gamle = @(Get-ChildItem $Destination -Filter 'noteapp-*.bundle' |
+    $gamle = @(Get-ChildItem $Destination -Filter 'heypia-*.bundle' |
                Sort-Object LastWriteTime -Descending | Select-Object -Skip $Behold)
 
     foreach ($g in $gamle) {

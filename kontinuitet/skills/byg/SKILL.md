@@ -1,9 +1,9 @@
----
+﻿---
 name: byg
-description: Bygger NoteApps installationsfil (NoteApp-setup.exe) ud fra den nuværende kode, så den "rigtige" installation kan opdateres. Brug når brugeren siger "byg", "byg installer", "lav en ny installationsfil", "opdater min installation" eller vil sende appen til en kollega.
+description: Bygger HeyPias installationsfil (HeyPia-setup.exe) ud fra den nuværende kode, så den "rigtige" installation kan opdateres. Brug når brugeren siger "byg", "byg installer", "lav en ny installationsfil", "opdater min installation" eller vil sende appen til en kollega.
 ---
 
-# Byg NoteApps installationsfil
+# Byg HeyPias installationsfil
 
 Bygger `C:\NoteApp\installer\NoteApp-setup.exe` ud fra den kode, der ligger nu.
 
@@ -54,8 +54,8 @@ Scriptet udgiver appen først og pakker derefter præcis de filer ned. Det tager
 
 Resultatet er to filer i `C:\NoteApp\installer\`:
 
-- **NoteApp-setup.exe** — den, der skal sendes eller køres. Beder selv om administratorrettigheder.
-- **NoteApp.msi** — nyttelasten. Kan bruges direkte til automatisk udrulning.
+- **HeyPia-setup.exe** — den, der skal sendes eller køres. Beder selv om administratorrettigheder.
+- **HeyPia.msi** — nyttelasten. Kan bruges direkte til automatisk udrulning.
 
 ### 3. Rapportér
 
@@ -71,9 +71,9 @@ Sig hvad der blev bygget, hvilken version, og hvor stor filen er. Nævn kun prob
 
 ## Faldgruber
 
-- **Appen må ikke køre, mens der bygges.** En exe i brug kan ikke overskrives. Scriptet lukker `NoteApp.exe` selv, men ikke en kopi, der kører fra Program Files — luk den i hånden.
+- **Appen må ikke køre, mens der bygges.** En exe i brug kan ikke overskrives. Scriptet lukker `HeyPia.exe` selv, men ikke en kopi, der kører fra Program Files — luk den i hånden.
 - **Byg aldrig pakken uden at udgive først.** Scriptet gør det som standard; `-SpringUdgivelseOver` findes kun til fejlsøgning. Bruger man den ved en fejl, pakkes gårsdagens program ned i en ny installationsfil, og det opdages først på en anden maskine.
 - **WiX er bundet til version 5.** Version 6 og 7 kræver, at man accepterer Open Source Maintenance Fee-aftalen. Opgradér ikke uden at spørge Jørgen — det er en licensaftale, ikke en teknisk detalje.
-- **`installer\*.exe` og `*.msi` er gitignoreret.** Kilderne (`NoteApp.wxs`, `Bundle.wxs`, `tema.thm`, `da-DK.wxl`, `vilkaar.rtf`) hører i git; de byggede filer gør ikke.
+- **`installer\*.exe` og `*.msi` er gitignoreret.** Kilderne (`HeyPia.wxs`, `Bundle.wxs`, `tema.thm`, `da-DK.wxl`, `vilkaar.rtf`) hører i git; de byggede filer gør ikke.
 - **`tema.thm` og `da-DK.wxl` er kopier, vi selv ejer.** Temaet er WiX 5's `RtfLargeTheme` med ét ændret mål (760×560 i stedet for 500×390); tekstfilen **erstatter** temaets egen, så enhver streng, der mangler, vises som sit rå navn på en knap. Opdateres WiX, skal begge sammenholdes med originalerne igen. De ligger i `WixToolset.BootstrapperApplications.wixext.dll` som en indlejret ressource — den er en ZIP og kan pakkes ud med `ZipFile.OpenRead`, hvor `RtfLargeTheme.xml` og `RtfTheme.wxl` findes.
-- **Efter en ændring i installationsprogrammets udseende: kør `NoteApp-setup.exe` og se på den.** Fejlen med en manglende tekst viser sig kun som en knap med rå kode på — den fanges ikke af et build, der lykkes.
+- **Efter en ændring i installationsprogrammets udseende: kør `HeyPia-setup.exe` og se på den.** Fejlen med en manglende tekst viser sig kun som en knap med rå kode på — den fanges ikke af et build, der lykkes.

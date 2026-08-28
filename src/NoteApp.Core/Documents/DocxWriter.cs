@@ -1,4 +1,4 @@
-using System.IO.Compression;
+﻿using System.IO.Compression;
 using System.Security;
 using System.Text;
 
@@ -182,8 +182,8 @@ public static class DocxWriter
                            xmlns:dcterms="http://purl.org/dc/terms/"
                            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
           <dc:title>{X(title)}</dc:title>
-          <dc:creator>NoteApp</dc:creator>
-          <cp:lastModifiedBy>NoteApp</cp:lastModifiedBy>
+          <dc:creator>HeyPia</dc:creator>
+          <cp:lastModifiedBy>HeyPia</cp:lastModifiedBy>
           <dcterms:created xsi:type="dcterms:W3CDTF">{DateTime.UtcNow:yyyy-MM-ddTHH:mm:ssZ}</dcterms:created>
         </cp:coreProperties>
         """;

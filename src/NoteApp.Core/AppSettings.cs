@@ -9,7 +9,7 @@ namespace NoteApp.Core;
 /// en backup af datamappen også tager indstillingerne med.
 ///
 /// Klassen ligger i Core og ikke i UI-projektet, fordi kommandolinjeværktøjet
-/// skal læse præcis de samme valg. Lå den i WPF-projektet, ville 'noteapp
+/// skal læse præcis de samme valg. Lå den i WPF-projektet, ville 'heypia
 /// motor' vise en anden model end den, appen faktisk bruger — og det er den
 /// slags uoverensstemmelse, man bruger en time på at forstå.
 ///

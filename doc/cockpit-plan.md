@@ -1,4 +1,4 @@
-# Cockpit — plan til gennemgang
+﻿# Cockpit — plan til gennemgang
 
 *Skrevet 21-08-2026. Et oplæg, ikke en beslutning.*
 
@@ -330,7 +330,7 @@ valg — i dag, denne uge, denne måned, i år — og en fra-til med to datovæl
 Kun **person** mangler; den kræver talernavnene, som sættes i hånden.
 
 **MÅLINGEN ER LAVET 22-08-2026.** Tyve spørgsmål med kendt facit, som kan
-køres igen med `noteapp maalsoegning`:
+køres igen med `heypia maalsoegning`:
 
 | Mål | Resultat |
 |---|---|
@@ -363,7 +363,7 @@ til replikken. Kræver datoforståelsen, som bygges her.
 - **Dansk datoforståelse.** `Microsoft.Recognizers.Text` kan fjorten sprog, og
   dansk er ikke et af dem — skrevet i hånden. Målt mod tyve kendte svar,
   regnet fra en fast onsdag: **20 af 20 rigtige, 0 forstået forkert, 0
-  opfundne datoer.** Køres med `noteapp maaldato`. Tvetydige vendinger som «i
+  opfundne datoer.** Køres med `heypia maaldato`. Tvetydige vendinger som «i
   næste uge» sættes alligevel, men mærkes usikre med et spørgsmålstegn — en
   frist, appen har gættet, må ikke se ud som en, nogen har sagt.
 - **Fristen læses ud af det, der blev sagt**, når en opgave oprettes fra et

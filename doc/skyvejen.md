@@ -1,4 +1,4 @@
-# Skyvejen — hvad den koster, hvad den giver, og hvad Mistral ikke kan
+﻿# Skyvejen — hvad den koster, hvad den giver, og hvad Mistral ikke kan
 
 *Undersøgt 25-08-2026. Alle tal om appen er målt på denne installation;
 alle tal om Mistral er slået op og har en kilde nederst.*
@@ -13,7 +13,7 @@ portugisisk, russisk, tysk, japansk, koreansk, italiensk og hollandsk. Ingen
 nordiske sprog.
 
 Det er ikke til forhandling ved at prøve sig frem. En «rent skybaseret»
-NoteApp på Mistral kan altså laves for engelske og tyske møder, men **ikke for
+HeyPia på Mistral kan altså laves for engelske og tyske møder, men **ikke for
 danske**. Det er kernemarkedet.
 
 **Opsætningen er mindre, end den ser ud — og det, der kan fjernes, ligger et
@@ -182,7 +182,7 @@ bliver på din computer. Den er nem at give ja til. Skal der stå, at lyden
 sendes til en leverandør, er det et større ja at bede om — og det er præcis
 det, teksten er sat i verden for at gøre ordentligt.
 
-**Kunden bliver dataansvarlig for noget mere.** I dag er en NoteApp-bruger
+**Kunden bliver dataansvarlig for noget mere.** I dag er en HeyPia-bruger
 dataansvarlig for tekst, der sendes. Med lyd i skyen bliver det
 personoplysninger af en anden karakter, og for nogle kunder — kommuner,
 sundhed, advokater — er det forskellen på ja og nej.
@@ -349,7 +349,7 @@ den ene knap i praksis, og så er «valget» en illusion.
 
 ### C. Rent i skyen — en anden udgave af produktet
 
-To udgaver af NoteApp: en **lokal** og en **let**. Samme app, forskellig
+To udgaver af HeyPia: en **lokal** og en **let**. Samme app, forskellig
 opsætning, forskellige argumenter, forskellig pris.
 
 Det er den ærligste måde at sælge to ting på — men det er også to

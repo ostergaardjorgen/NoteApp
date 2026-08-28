@@ -116,7 +116,7 @@ public sealed class LlmRunner
                 $"{Arbejdshukommelse.Gigabyte(fri)} fri.\n\n" +
                 "Luk nogle programmer, eller vælg en mindre model. Startes den alligevel, " +
                 "begynder Windows at bruge disken som hukommelse, og så holder hele maskinen " +
-                "op med at svare — ikke kun NoteApp.");
+                "op med at svare — ikke kun HeyPia.");
 
         // Groft skoen: dansk tekst lander omkring 3 tegn pr. token. Bevidst
         // rundhaandet, saa prompten ikke bliver klippet over.
@@ -132,7 +132,7 @@ public sealed class LlmRunner
         // graensen et sted, VI bestemmer, frem for at gaette paa udgangen.
         var medMaerke = userPrompt.TrimEnd() + "\n\n" + Skaeringsmaerke;
 
-        var promptFil = Path.Combine(Path.GetTempPath(), $"noteapp-prompt-{Guid.NewGuid():N}.txt");
+        var promptFil = Path.Combine(Path.GetTempPath(), $"heypia-prompt-{Guid.NewGuid():N}.txt");
         await File.WriteAllTextAsync(promptFil, medMaerke, new UTF8Encoding(false), ct);
 
         var args = new List<string>

@@ -1,4 +1,4 @@
-# Findings — hvad vi har målt, og hvad det betyder
+﻿# Findings — hvad vi har målt, og hvad det betyder
 
 Denne fil er hukommelsen på tværs af sessioner. Alt, der er blevet **målt**, står her med tal og dato, så beslutningerne kan efterprøves — og så den samme ting ikke bliver undersøgt to gange.
 
@@ -16,7 +16,7 @@ Denne fil er hukommelsen på tværs af sessioner. Alt, der er blevet **målt**, 
 ## Søgningen målt på tyve spørgsmål med kendt facit — 21-08-2026
 
 *Det tal, alt senere arbejde med søgningen skal måles imod. Køres igen med
-`noteapp maalsoegning`.*
+`heypia maalsoegning`.*
 
 Tyve spørgsmål til det arkiv, der lå: et møde på en time (dansk og norsk) og
 to webinarer på 22 og 54 minutter (engelsk). Facit er den optagelse, svaret
@@ -161,7 +161,7 @@ Målt under kørslen: **5,8 GB på grafikkortet, 14,1 GB i almindelig RAM.**
 
 *Ikke afklaret:* om Mistral-Small-24B ville være god nok fagligt. Det blev aldrig målt, fordi den aldrig blev færdig. Spørgsmålet er kun relevant igen på en maskine med mere VRAM.
 
-**Filen er slettet 12. august** — 13,35 GB frigjort. Modellen kan heller ikke længere hentes: `noteapp sprogmodel mistral-small-24b` afviser med begrundelsen og henviser hertil. Skal den ind igen, skal fravalget fjernes bevidst i `LlmCatalog.cs`.
+**Filen er slettet 12. august** — 13,35 GB frigjort. Modellen kan heller ikke længere hentes: `heypia sprogmodel mistral-small-24b` afviser med begrundelsen og henviser hertil. Skal den ind igen, skal fravalget fjernes bevidst i `LlmCatalog.cs`.
 
 ### 1.3 Muse-Glimmer-30B UD-Q3_K_XL — fravalgt på denne maskine
 
@@ -538,7 +538,7 @@ Det er forskellen på de to mekanismer: ordlisten påvirker en model, vi ikke ka
 
 ### 8.4 Det, der mangler for at sløjfen er hel
 
-Tre ting findes nu: at lære en regel (`noteapp laer`), at anvende reglerne automatisk, og at prøve dem af på en fil (`noteapp laer --proev`).
+Tre ting findes nu: at lære en regel (`heypia laer`), at anvende reglerne automatisk, og at prøve dem af på en fil (`heypia laer --proev`).
 
 Det, der mangler, er **opsamlingen**: der er endnu ingen skærm, hvor man retter et ord i en transskription og får det gemt som en regel. Indtil den findes, skal reglerne skrives ind i hånden, og så bliver de ikke skrevet ind. Det er det næste stykke arbejde, og det er dét, der afgør, om appen faktisk bliver bedre af at blive brugt.
 
@@ -563,7 +563,7 @@ lydfil fylder MERE end en videooptagelse i skyen. Zoom oplyser selv cirka
 og en times møde med to spor fylder 223 MB hos os. WAV er ukomprimeret med
 vilje, fordi det giver den bedste udskrift.
 
-«NoteApp fylder mindre end video» må derfor ikke siges om lydfilen. Det gælder
+«HeyPia fylder mindre end video» må derfor ikke siges om lydfilen. Det gælder
 teksten, og det gælder, at lyden ligger på egen disk og kan slettes, når
 teksten er i hus. Se [`salgsargumenter.md`](salgsargumenter.md), punkt 3.
 

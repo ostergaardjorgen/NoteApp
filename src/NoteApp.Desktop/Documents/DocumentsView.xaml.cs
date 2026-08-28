@@ -305,7 +305,7 @@ public partial class DocumentsView : UserControl
     }
 
     /// <summary>Dataformatet for et mappetræk. Samme navn som under «Optagelser».</summary>
-    private const string Mappetraek = "NoteApp.Mappesti";
+    private const string Mappetraek = "HeyPia.Mappesti";
 
     // ==================== MAPPER ====================
     //

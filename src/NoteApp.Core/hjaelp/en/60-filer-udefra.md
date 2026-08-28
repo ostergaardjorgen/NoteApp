@@ -37,8 +37,12 @@ up, it is offered at the top of Recordings.
 
 By default **nothing** is watched. In return the app finds the cloud services
 on the machine itself and offers one folder in each:
-`<cloud service>\NoteApp`. If it does not exist, there is a button that
+`<cloud service>\HeyPia`. If it does not exist, there is a button that
 creates it.
+
+The app was called NoteApp until 28 August 2026. If you already have a
+`<cloud service>\NoteApp` folder, it is still found. It is yours, and the app
+does not rename it just because it changed its own name.
 
 Not the whole cloud service — then every audio file anywhere in the cloud
 would have to be dealt with, podcasts and ringtones included.

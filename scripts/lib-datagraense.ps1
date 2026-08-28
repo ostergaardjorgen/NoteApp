@@ -3,7 +3,7 @@
     Håndhæver grundprincippet: intet forlader den pc, appen kører på.
 
 .DESCRIPTION
-    Princippet står i doc\mine-data.md og som afsnit 0 i SPEC_NoteApp_v1.md:
+    Princippet står i doc\mine-data.md og som afsnit 0 i SPEC_HeyPia_v1.md:
     ingen feature må introducere en risiko for, at data kan forlade maskinen.
 
     Kan en funktion i sagens natur alligevel flytte data væk — det gælder reelt
@@ -22,7 +22,7 @@
     står brugeren med to forskellige beslutningsgrundlag for samme beslutning.
 #>
 
-function Get-NoteAppDataRod {
+function Get-HeyPiaDataRod {
     <#
     .SYNOPSIS
         Hvor brugerens data ligger — samme rækkefølge som appen bruger.
@@ -90,7 +90,7 @@ function Show-DatagraenseRisiko {
     Write-Host "    * Det kan ikke fortrydes. En kopi, der først er ude, er ude."
     Write-Host ""
     Write-Host "  Alternativer, der holder alt lokalt:" -ForegroundColor Green
-    Write-Host "    * Standarden: $(Join-Path $env:USERPROFILE 'NoteApp-backup')"
+    Write-Host "    * Standarden: $(Join-Path $env:USERPROFILE 'HeyPia-backup')"
 
     # Drevbogstaver siger intet om, hvor et drev fysisk ligger: paa denne
     # maskine er baade E: og H: mappede shares. Derfor gaettes der ikke paa et

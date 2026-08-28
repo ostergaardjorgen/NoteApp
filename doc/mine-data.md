@@ -1,4 +1,4 @@
-# Mine data — hvor de ligger, og hvad der forlader maskinen
+﻿# Mine data — hvor de ligger, og hvad der forlader maskinen
 
 > ## ⚠️ Grundprincippet er ændret 19. august 2026
 >
@@ -26,7 +26,7 @@
 
 ## Det oprindelige grundprincip (10. august 2026, delvist ophævet)
 
-**Ingen feature i NoteApp må introducere en risiko for, at data kan forlade den pc, appen er installeret på.** Det er ikke en anbefaling og ikke en standardindstilling, der kan skrues på — det er en grænse, der ligger fast. En feature, der bryder den, bliver ikke bygget, uanset hvor nyttig den er.
+**Ingen feature i HeyPia må introducere en risiko for, at data kan forlade den pc, appen er installeret på.** Det er ikke en anbefaling og ikke en standardindstilling, der kan skrues på — det er en grænse, der ligger fast. En feature, der bryder den, bliver ikke bygget, uanset hvor nyttig den er.
 
 Besluttet 10. august 2026. Det kostede Fase 3, auto-resuméet — se afsnittet nederst. **Ophævet for udskriften 19. august 2026**, se rammen øverst. Reglen gælder uændret for lyd, noter og alt andet.
 

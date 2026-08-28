@@ -1,4 +1,4 @@
-# ============================== PRØVERNE ==============================
+﻿# ============================== PRØVERNE ==============================
 #
 # Koerer alle proever i tests\NoteApp.Tests.
 #
@@ -55,7 +55,7 @@ Write-Host ''
 $foer = Aftryk $Rigtig
 
 # Proevernes egen datamappe. Den ryddes bagefter.
-$Sandkasse = Join-Path ([IO.Path]::GetTempPath()) ("noteapp-proev-" + [guid]::NewGuid().ToString('N'))
+$Sandkasse = Join-Path ([IO.Path]::GetTempPath()) ("heypia-proev-" + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Force $Sandkasse | Out-Null
 
 $gemt = $env:NOTEAPP_DATA

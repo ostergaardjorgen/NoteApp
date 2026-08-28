@@ -15,7 +15,7 @@
   <String Id="Caption" Value="Installér [WixBundleName]" />
   <String Id="Title" Value="[WixBundleName]" />
 
-  <!-- Vises under navnet i hovedet. Uden dem stod der kun "NoteApp" og
+  <!-- Vises under navnet i hovedet. Uden dem stod der kun "HeyPia" og
        en tom flade — og man kunne ikke se, hvilken version man var ved at
        installere, hvilket er netop det, man har brug for ved en opdatering. -->
   <String Id="HeaderVersion" Value="Version [WixBundleVersion]" />
@@ -32,7 +32,7 @@
   <String Id="InstallOptionsButton" Value="&amp;Indstillinger" />
   <String Id="InstallInstallButton" Value="&amp;Installér eller opdatér" />
   <String Id="InstallCancelButton" Value="&amp;Annullér" />
-  <String Id="InstallLicenseLinkText" Value="Om NoteApp" />
+  <String Id="InstallLicenseLinkText" Value="Om HeyPia" />
 
   <String Id="OptionsHeader" Value="Installationsindstillinger" />
   <String Id="OptionsLocationLabel" Value="Installér i:" />
@@ -50,11 +50,11 @@
   <String Id="ModifyUninstallButton" Value="&amp;Afinstallér" />
   <String Id="ModifyCancelButton" Value="&amp;Luk" />
 
-  <String Id="SuccessHeader" Value="NoteApp [WixBundleVersion] er installeret" />
-  <String Id="SuccessInstallHeader" Value="NoteApp er installeret" />
+  <String Id="SuccessHeader" Value="HeyPia [WixBundleVersion] er installeret" />
+  <String Id="SuccessInstallHeader" Value="HeyPia er installeret" />
   <String Id="SuccessRepairHeader" Value="Reparationen er gennemført" />
-  <String Id="SuccessUninstallHeader" Value="NoteApp er fjernet" />
-  <String Id="SuccessLaunchButton" Value="&amp;Start NoteApp" />
+  <String Id="SuccessUninstallHeader" Value="HeyPia er fjernet" />
+  <String Id="SuccessLaunchButton" Value="&amp;Start HeyPia" />
   <String Id="SuccessRestartText" Value="Maskinen skal genstartes, før ændringerne træder i kraft." />
   <String Id="SuccessRestartButton" Value="&amp;Genstart" />
   <String Id="SuccessCancelButton" Value="&amp;Luk" />
@@ -93,8 +93,8 @@
   <String Id="SuccessCacheHeader" Value="Filerne er hentet" />
   <String Id="SuccessLayoutHeader" Value="Indholdet er pakket ud" />
   <String Id="SuccessModifyHeader" Value="Ændringen er gennemført" />
-  <String Id="SuccessUnsafeUninstallHeader" Value="NoteApp er fjernet" />
-  <String Id="SuccessUninstallRestartText" Value="Maskinen skal genstartes, før NoteApp er helt fjernet." />
+  <String Id="SuccessUnsafeUninstallHeader" Value="HeyPia er fjernet" />
+  <String Id="SuccessUninstallRestartText" Value="Maskinen skal genstartes, før HeyPia er helt fjernet." />
 
   <String Id="FailureCloseButton" Value="&amp;Luk" />
   <String Id="FailureCacheHeader" Value="Filerne kunne ikke hentes" />

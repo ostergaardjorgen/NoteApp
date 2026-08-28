@@ -367,7 +367,7 @@ public partial class TranscribeView : UserControl
         // Bade appens egne optagelser og repoets fase0-mappe. En bruger uden
         // repoet ser bare den foerste; en med begge skal ikke gaette hvor
         // optagelsen fra i formiddags ligger.
-        foreach (var rod in new[] { UserDataPaths.Meetings, Path.Combine("C:", "NoteApp", "fase0", "optagelser") })
+        foreach (var rod in new[] { UserDataPaths.Meetings, Path.Combine("C:", "HeyPia", "fase0", "optagelser") })
         {
             if (!Directory.Exists(rod)) continue;
             mapper.AddRange(Directory.EnumerateDirectories(rod));
@@ -571,7 +571,7 @@ public partial class TranscribeView : UserControl
     /// gør vidt forskellige ting: en optagelse skifter ét felt, en mappe kan
     /// omdøbe tyve.
     /// </summary>
-    private const string Mappetraek = "NoteApp.Mappesti";
+    private const string Mappetraek = "HeyPia.Mappesti";
 
     private void Trae_MusNed(object sender, MouseButtonEventArgs e) =>
         _traekStart = e.GetPosition(null);

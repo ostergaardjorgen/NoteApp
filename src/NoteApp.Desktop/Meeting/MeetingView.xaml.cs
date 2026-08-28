@@ -539,7 +539,7 @@ public partial class MeetingView : UserControl
     // MENS DER OPTAGES, ER APPEN I VEJEN.
     //
     // Man kigger på mødet — et videoopkald, en dagsorden, en andens skærm —
-    // ikke på NoteApp. Et helt programvindue ovenpå bliver skjult, og så kan
+    // ikke på HeyPia. Et helt programvindue ovenpå bliver skjult, og så kan
     // man ikke længere se, om der overhovedet stadig optages.
     //
     // Vinduet trækkes derfor helt væk, og båndet bliver tilbage: at der

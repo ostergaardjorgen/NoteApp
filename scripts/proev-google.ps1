@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     Efterprøver Google Kalender-forbindelsen hele vejen, uden at starte appen.
 
@@ -103,7 +103,7 @@ if (-not $json.KlientId) {
     exit 1
 }
 
-$vaerktoej = Join-Path $Rod 'src\NoteApp.Tools\bin\Release\net8.0-windows\noteapp.exe'
+$vaerktoej = Join-Path $Rod 'src\NoteApp.Tools\bin\Release\net8.0-windows\heypia.exe'
 
 if (-not (Test-Path $vaerktoej)) {
     Write-Host ''

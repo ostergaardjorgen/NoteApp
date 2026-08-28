@@ -1,21 +1,21 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <!--
-  Selve installationsfilen: NoteApp-setup.exe.
+  Selve installationsfilen: HeyPia-setup.exe.
 
   Hvorfor en exe, når en .msi allerede kan dobbeltklikkes: fordi det er dét,
   folk forventer at modtage, og fordi mailfiltre og firmapolitikker rutinemæssigt
   blokerer .msi-filer. Exe'en beder selv om administratorrettigheder, så man
   ikke skal vide, at den skal højreklikkes.
 
-  Indholdet er præcis den samme NoteApp.msi. Bundle'en er en indpakning, ikke
+  Indholdet er præcis den samme HeyPia.msi. Bundle'en er en indpakning, ikke
   en anden installation — afinstallation sker samme sted og med samme resultat:
   programmet fjernes, dine data bliver liggende.
 -->
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
      xmlns:bal="http://wixtoolset.org/schemas/v4/wxs/bal">
 
-  <Bundle Name="NoteApp"
-          Manufacturer="NoteApp"
+  <Bundle Name="HeyPia"
+          Manufacturer="HeyPia"
           Version="$(var.Version)"
           UpgradeCode="3b6f1d84-9a27-4c5e-b0f3-6d8e2a71c904"
           IconSourceFile="..\src\NoteApp.Desktop\app.ico">
@@ -38,7 +38,7 @@
     <WixVariable Id="WixStdbaThemeWxl" Value="da-DK.wxl" />
 
     <Chain>
-      <MsiPackage SourceFile="NoteApp.msi" Vital="yes" Compressed="yes" />
+      <MsiPackage SourceFile="HeyPia.msi" Vital="yes" Compressed="yes" />
     </Chain>
 
   </Bundle>

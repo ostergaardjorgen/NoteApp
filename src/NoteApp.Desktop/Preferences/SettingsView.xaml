@@ -76,7 +76,7 @@
             <Border Background="{DynamicResource Trykket}" BorderBrush="{DynamicResource Accent}"
                     BorderThickness="3,0,0,0" CornerRadius="4" Padding="14,11" Margin="0,12,0,0">
               <StackPanel>
-                <TextBlock Text="{i18n:Oversat settingsview.noteapp_virker_bedst_naar_den_altid_koerer}"
+                <TextBlock Text="{i18n:Oversat settingsview.heypia_virker_bedst_naar_den_altid_koerer}"
                            FontSize="12.5" FontWeight="SemiBold" />
                 <TextBlock FontSize="12" Margin="0,7,0,0" TextWrapping="Wrap" LineHeight="19"
                            Foreground="{DynamicResource Tekst}"
@@ -91,7 +91,7 @@
             </Border>
 
             <CheckBox x:Name="StartMedWindows" Margin="0,14,0,0" Click="Autostart_Klik"
-                      Content="{i18n:Oversat settingsview.start_noteapp_naar_jeg_logger_paa_windows}" />
+                      Content="{i18n:Oversat settingsview.start_heypia_naar_jeg_logger_paa_windows}" />
             <TextBlock x:Name="AutostartStatus" FontSize="12" Margin="24,6,0,0" TextWrapping="Wrap"
                        Foreground="{DynamicResource TekstMeget}" />
 

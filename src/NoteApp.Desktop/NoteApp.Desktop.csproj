@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -7,7 +7,12 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>NoteApp.Desktop</RootNamespace>
-    <AssemblyName>NoteApp</AssemblyName>
+    <!-- Filen hedder HeyPia.exe. Navnerummene hedder stadig HeyPia.* -
+         det er kodens egne navne, og de koster kun stoej at skifte.
+         Datamappen hedder ogsaa stadig C:\AppNoter: den rummer
+         optagelser og indstillinger, og et navneskift maa aldrig
+         koste data. -->
+    <AssemblyName>HeyPia</AssemblyName>
     <InvariantGlobalization>false</InvariantGlobalization>
     <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
 

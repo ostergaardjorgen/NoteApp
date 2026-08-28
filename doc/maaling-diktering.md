@@ -1,4 +1,4 @@
-# Måling: kan whisper høre danske kommandoer godt nok?
+﻿# Måling: kan whisper høre danske kommandoer godt nok?
 
 *Oprettet 21-08-2026. Facit står i denne fil; resultaterne kommer nedenunder.*
 
@@ -24,7 +24,7 @@ dem ligner en kommando med vilje.
 *(Trinene står med punkttegn og ikke tal — måleprogrammet læser facit ud af
 denne fil, og alt med et tal foran ville blive læst som en sætning.)*
 
-- Start en optagelse i NoteApp med **Ctrl+Shift+,**
+- Start en optagelse i HeyPia med **Ctrl+Shift+,**
 - Læs de 50 sætninger op i rækkefølge
 - **Hold en pause på cirka to sekunder mellem hver sætning** — det er dét,
   opdelingen bruger til at finde grænserne

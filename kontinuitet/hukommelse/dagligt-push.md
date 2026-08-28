@@ -1,4 +1,4 @@
----
+﻿---
 name: dagligt-push
 description: "Der skal committes og pushes hver dag; er det ikke sket dagen før, er det første handling på en ny dag"
 metadata: 
@@ -30,4 +30,4 @@ commits (`git rev-list --count origin/main..HEAD`). Er der det, og er de fra
 i går eller tidligere, så push dem, før du går i gang med noget nyt. Sig det
 kort — det er ikke et spørgsmål, det er en rutine.
 
-Se også [[meld-altid-release-nummer]] og [[noteapp-version-fra-commit]].
+Se også [[meld-altid-release-nummer]] og [[heypia-version-fra-commit]].

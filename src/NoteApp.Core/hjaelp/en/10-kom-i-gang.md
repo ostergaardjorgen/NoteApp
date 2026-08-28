@@ -1,8 +1,8 @@
-# Getting started
+﻿# Getting started
 
 *The four steps from a meeting to a set of minutes*
 
-NoteApp records a meeting, transcribes it to text here on your machine, and
+HeyPia records a meeting, transcribes it to text here on your machine, and
 turns the text into a document if you ask it to.
 
 ## 1. Record

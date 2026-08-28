@@ -1,4 +1,4 @@
-# NoteApp
+﻿# HeyPia
 
 Windows-app, der optager møder og webinarer, skriver dem ud til tekst og
 samler det hele ét sted, hvor man kan søge på tværs og altid finde tilbage til

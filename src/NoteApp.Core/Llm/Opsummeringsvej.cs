@@ -1,4 +1,4 @@
-namespace NoteApp.Core.Llm;
+﻿namespace NoteApp.Core.Llm;
 
 /// <summary>Hvor den korte opsummering laves.</summary>
 public enum Opsummeringssted
@@ -54,7 +54,7 @@ public enum Opsummeringssted
 /// alle andre, med tidspunkt, model, tegn, pris og kontrolsum.
 ///
 /// LlmRunner og Referatbygger ligger stadig i Core, men bruges kun fra
-/// kommandolinjen (noteapp referat). Det er dér, sammenligningen mellem
+/// kommandolinjen (heypia referat). Det er dér, sammenligningen mellem
 /// lokalt og skyen skal kunne køres igen — en måling, man ikke kan gentage,
 /// er en påstand.
 /// </summary>

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>NoteApp.Tools</RootNamespace>
-    <AssemblyName>noteapp</AssemblyName>
+    <AssemblyName>heypia</AssemblyName>
     <InvariantGlobalization>false</InvariantGlobalization>
   </PropertyGroup>
 

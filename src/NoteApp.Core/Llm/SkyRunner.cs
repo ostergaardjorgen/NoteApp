@@ -447,7 +447,7 @@ public sealed class SkyRunner
 
         using var anmodning = new HttpRequestMessage(metode, url);
         anmodning.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _noegle);
-        anmodning.Headers.UserAgent.ParseAdd("NoteApp");
+        anmodning.Headers.UserAgent.ParseAdd("HeyPia");
 
         if (json is not null)
             anmodning.Content = new StringContent(json, new UTF8Encoding(false), "application/json");
@@ -478,7 +478,7 @@ public sealed class SkyRunner
             401 => "Mistral afviste nøglen. Kontrollér den på console.mistral.ai.",
             402 => "Der er ikke dækning på Mistral-kontoen.",
             422 => $"Mistral afviste anmodningen — som regel et ukendt model-id.\n" +
-                   $"Kør «noteapp sky modeller» for at se, hvilke id'er nøglen kan bruge.\n\n{Forkort(krop, 500)}",
+                   $"Kør «heypia sky modeller» for at se, hvilke id'er nøglen kan bruge.\n\n{Forkort(krop, 500)}",
             429 => "Der er sendt for mange anmodninger til Mistral. Vent lidt og prøv igen.",
             _ => $"Mistral svarede {(int)kode}.\n\n{Forkort(krop, 800)}"
         });

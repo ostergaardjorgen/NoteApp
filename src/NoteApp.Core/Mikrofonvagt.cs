@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using Microsoft.Win32;
 
 namespace NoteApp.Core;
@@ -26,7 +26,7 @@ public sealed record Mikrofonbruger(string Noegle, string Navn, DateTime Startet
 ///
 /// MÅLT 21-08-2026 på denne maskine, mens et webinar blev afspillet OG optaget:
 ///
-///   højttaler   Reolink, NoteApp        (der var lyd)
+///   højttaler   Reolink, HeyPia        (der var lyd)
 ///   mikrofon    ingen app bruger den    (og det er svaret)
 ///
 /// Og med et program, der holdt mikrofonen åben, blev det set med navn, sti og
@@ -56,7 +56,7 @@ public static class Mikrofonvagt
         @"SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\microphone";
 
     /// <summary>
-    /// Programmerne, der bruger mikrofonen lige nu. NoteApp selv er ikke med.
+    /// Programmerne, der bruger mikrofonen lige nu. HeyPia selv er ikke med.
     ///
     /// Fejler opslaget — en nøgle, der ikke findes på en ældre Windows —
     /// er svaret en tom liste. Vagten skal kunne slå fejl uden at koste noget;
@@ -108,7 +108,7 @@ public static class Mikrofonvagt
     }
 
     /// <summary>
-    /// NoteApp skal aldrig spørge om sig selv.
+    /// HeyPia skal aldrig spørge om sig selv.
     ///
     /// Optager man et almindeligt møde, ER mikrofonen i brug — af appen. Uden
     /// det her ville vagten spørge, om den skulle optage det møde, den lige er

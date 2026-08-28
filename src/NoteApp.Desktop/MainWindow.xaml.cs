@@ -737,7 +737,7 @@ public partial class MainWindow : Window
         // proeve den optagede igen ved hver opstart.
         //
         // Men det er praecis, hvad den SKAL. Konflikten er som regel
-        // midlertidig - det var en anden NoteApp, der laa og holdt tasten -
+        // midlertidig - det var en anden HeyPia, der laa og holdt tasten -
         // og naar den er vaek, skal man have sin egen tast tilbage. Med det
         // gemte valg sad man fast paa Ctrl+Shift+1 for altid, uden nogensinde
         // at have valgt den.

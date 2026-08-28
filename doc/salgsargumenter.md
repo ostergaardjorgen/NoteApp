@@ -1,4 +1,4 @@
-# Salgsargumenter
+﻿# Salgsargumenter
 
 *Oprettet 24-08-2026. Skal vedligeholdes — se «Reglen for det her dokument» nederst.*
 
@@ -33,7 +33,7 @@ onlinemøde viser ens hjem, ens tøj, ens ansigt gennem en time — og den kan s
 igen af nogen, man ikke kender. En lydoptagelse viser, hvad man sagde. Det er
 det, mødet handlede om.
 
-NoteApp optager **kun lyd**. Der findes ingen kodesti, der gemmer et billede;
+HeyPia optager **kun lyd**. Der findes ingen kodesti, der gemmer et billede;
 appen har aldrig set skærmen eller kameraet. Det står i første linje af den
 mødeindkaldelse, appen skriver — se Indstillinger → Integrationer.
 
@@ -95,7 +95,7 @@ Til sammenligning oplyser Zoom selv **cirka 200 MB pr. time** for en
 videooptagelse i skyen ([Zoom
 Support](https://support.zoom.com/hc/en/article?id=zm_kb&sysparm_article=KB0067670)).
 
-**Sig ikke, at lydfilen fylder mindre end video.** Det gør den ikke: NoteApps
+**Sig ikke, at lydfilen fylder mindre end video.** Det gør den ikke: HeyPias
 WAV er ukomprimeret med vilje, fordi det giver den bedste udskrift, og en times
 møde med to spor fylder mere end Zooms video. Forskellen er, **hvor** den
 ligger, og at man selv kan slette den, når teksten er i hus. Videoen ligger hos
@@ -180,7 +180,7 @@ læst igennem med en dato på. At tage fejl om en konkurrent er den dyreste måd
 at miste troværdighed på, og det er den eneste tabel i dokumentet uden et
 belæg, vi selv har målt.
 
-| | Granola | NoteApp |
+| | Granola | HeyPia |
 |---|---|---|
 | Hvor lyden behandles | i skyen | på maskinen |
 | Hvad der sendes op | lyden | intet — medmindre du beder om et dokument, og så er det teksten |
@@ -212,7 +212,7 @@ sky. Der skal den behandles, og der bliver den liggende sammen med videoen, så
 længe abonnementet løber. Hos os bliver lyden på maskinen, og videoen findes
 ikke.
 
-Og: deres transskription dækker det møde, den kom fra. NoteApp søger på tværs
+Og: deres transskription dækker det møde, den kom fra. HeyPia søger på tværs
 af alle møder, alle noter og alle dokumenter — også dem fra telefonen og fra
 webinarer, som deres værktøj aldrig så.
 

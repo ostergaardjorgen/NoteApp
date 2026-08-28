@@ -1,4 +1,4 @@
-namespace NoteApp.Core;
+﻿namespace NoteApp.Core;
 
 /// <summary>
 /// Optager et kort klip fra mikrofonen — få sekunder, én fil.
@@ -32,7 +32,7 @@ public sealed class ShortClipRecorder : IDisposable
     {
         Path = path;
         _arbejdsmappe = System.IO.Path.Combine(
-            System.IO.Path.GetTempPath(), "noteapp-klip-" + Guid.NewGuid().ToString("N")[..8]);
+            System.IO.Path.GetTempPath(), "heypia-klip-" + Guid.NewGuid().ToString("N")[..8]);
     }
 
     /// <summary>Højeste niveau (0-1), så måleren kan vise, at mikrofonen hører noget.</summary>

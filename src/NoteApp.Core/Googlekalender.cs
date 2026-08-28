@@ -419,15 +419,15 @@ public static class Googlekalender
     {
         var side =
             "<!doctype html><html lang=\"da\"><meta charset=\"utf-8\">" +
-            "<title>NoteApp</title>" +
+            "<title>HeyPia</title>" +
             "<body style=\"font-family:system-ui;background:#0f1216;color:#f4f6fa;" +
             "display:flex;align-items:center;justify-content:center;height:100vh;margin:0\">" +
             "<div style=\"text-align:center;max-width:30rem;padding:2rem\">" +
             (gik
                 ? $"<h1 style=\"font-size:1.4rem\">{hvad} er forbundet</h1>" +
-                  "<p style=\"color:#9ba6b8\">Du kan lukke det her vindue og gå tilbage til NoteApp.</p>"
+                  "<p style=\"color:#9ba6b8\">Du kan lukke det her vindue og gå tilbage til HeyPia.</p>"
                 : "<h1 style=\"font-size:1.4rem\">Det blev ikke til noget</h1>" +
-                  "<p style=\"color:#9ba6b8\">Godkendelsen blev afbrudt. Luk vinduet og prøv igen i NoteApp.</p>") +
+                  "<p style=\"color:#9ba6b8\">Godkendelsen blev afbrudt. Luk vinduet og prøv igen i HeyPia.</p>") +
             "</div></body></html>";
 
         var data = Encoding.UTF8.GetBytes(side);
@@ -543,7 +543,7 @@ public static class Googlekalender
     /// <remarks>
     /// KUN TITEL OG TIDSPUNKT. Det er dem, der betyder noget for de andre
     /// deltagere, og det er dem, der står i indkaldelsen. Mappe, mødetype og
-    /// sprog er NoteApps egne felter — de findes ikke i en Google-aftale, og
+    /// sprog er HeyPias egne felter — de findes ikke i en Google-aftale, og
     /// de skal ikke findes på, for så ville en indkaldelse pludselig bære
     /// noget, ingen andre kan læse.
     ///
@@ -760,7 +760,7 @@ public static class Googlekalender
             var note = Note(sprogkode);
 
             krop["description"] =
-                beskrivelse.Contains("NoteApp", StringComparison.OrdinalIgnoreCase) ? beskrivelse
+                beskrivelse.Contains("HeyPia", StringComparison.OrdinalIgnoreCase) ? beskrivelse
                 : beskrivelse.Length > 0 ? beskrivelse.TrimEnd() + "\n\n" + note
                 : note;
         }

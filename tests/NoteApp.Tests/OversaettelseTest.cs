@@ -30,7 +30,7 @@ public class OversaettelseTest
     /// Det, der ikke er tekst, selv om det står i en Text-egenskab.
     ///
     /// Tegnene fra Segoe MDL2 Assets er ikoner, ikke ord. Det samme gælder
-    /// tal, symboler og appens eget navn — «NoteApp» hedder det samme på
+    /// tal, symboler og appens eget navn — «HeyPia» hedder det samme på
     /// ethvert sprog.
     /// </summary>
     private static bool ErIkkeTekst(string vaerdi)
@@ -48,7 +48,7 @@ public class OversaettelseTest
         // Appens navn og produktnavne, der ikke oversættes.
         string[] navne =
         {
-            "NoteApp", "Google", "Google Kalender", "Google Tasks", "Microsoft",
+            "HeyPia", "HeyPia optager", "Google", "Google Kalender", "Google Tasks", "Microsoft",
             "Microsoft 365", "Mistral", "whisper.cpp", "Qwen3", "sherpa-onnx",
             "NVIDIA", "OpenAI", "Windows", "Segoe MDL2 Assets", "Consolas",
             "Teams", "Zoom", "iCloud", "OneDrive", "Dropbox", "Nextcloud"

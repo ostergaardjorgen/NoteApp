@@ -1,4 +1,4 @@
-using System.IO;
+﻿using System.IO;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
@@ -8,7 +8,7 @@ using NoteApp.Core;
 namespace NoteApp.Desktop;
 
 /// <summary>
-/// Sørger for, at der kun kører én NoteApp ad gangen mod den samme datamappe.
+/// Sørger for, at der kun kører én HeyPia ad gangen mod den samme datamappe.
 ///
 /// HVORFOR DEN FINDES
 ///
@@ -100,7 +100,7 @@ internal static class Enkeltinstans
                     }
                 }
             })
-            { IsBackground = true, Name = "NoteApp enkeltinstans" };
+            { IsBackground = true, Name = "HeyPia enkeltinstans" };
 
             lytter.Start();
             return true;

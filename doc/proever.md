@@ -1,4 +1,4 @@
-# Prøver
+﻿# Prøver
 
 *Skrevet 24-08-2026. 63 prøver, alle består.*
 
@@ -81,7 +81,7 @@ Den er efterprøvet i hånden på en talememo fra en iPhone: 29 sekunders lyd
 læst ind på 0,4 sekund og skrevet ud som dansk tekst med 99 % sprogsikkerhed.
 
 **Google-hentningen.** Den kræver et login og et rigtigt svar fra Google. Den
-er efterprøvet mod den rigtige konto — se `noteapp google` i
+er efterprøvet mod den rigtige konto — se `heypia google` i
 kommandolinjeværktøjet.
 
 **Skærmene.** WPF kræver en vinduestråd, og en prøve, der klikker på knapper,

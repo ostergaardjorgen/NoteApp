@@ -1,4 +1,5 @@
-using Microsoft.Win32;
+﻿using Microsoft.Win32;
+using NoteApp.Core;
 
 namespace NoteApp.Desktop;
 
@@ -23,7 +24,16 @@ namespace NoteApp.Desktop;
 public static class Autostart
 {
     private const string Nøgle = @"Software\Microsoft\Windows\CurrentVersion\Run";
-    private const string Navn = "NoteApp";
+    // ============ NAVNET I RUN-NOEGLEN ============
+    //
+    // Det skiftede fra «HeyPia» til «HeyPia» 28-08-2026. Den gamle post
+    // peger paa HeyPia.exe, som ikke findes mere, og den skal ryddes -
+    // ellers proever Windows at starte en fil, der er vaek, ved hvert
+    // login. Se Ryd gamle navne nedenfor.
+    private const string Navn = "HeyPia";
+
+    /// <summary>Navne, appen har haft foer. De ryddes ved opstart.</summary>
+    private static readonly string[] Gamle = { "HeyPia" };
 
     /// <summary>Stien til den kørende exe, i anførselstegn så mellemrum overlever.</summary>
     private static string Kommando
@@ -43,6 +53,59 @@ public static class Autostart
             return k?.GetValue(Navn) is string s && s.Length > 0;
         }
         catch (Exception) { return false; }
+    }
+
+    /// <summary>
+    /// Flytter en autostart fra et gammelt navn over på det nye.
+    /// </summary>
+    /// <remarks>
+    /// APPEN SKIFTEDE NAVN 28-08-2026, og exe-filen med. Den gamle post i
+    /// Run-nøglen peger på HeyPia.exe, som ikke findes længere — Windows
+    /// ville prøve at starte den ved hvert login og fejle i stilhed.
+    ///
+    /// VÆRRE: den, der havde autostart slået til, ville miste den uden at
+    /// blive spurgt, og opdage det den dag genvejstasten ikke virkede, fordi
+    /// appen ikke kørte. Derfor flyttes valget med over — det er brugerens
+    /// valg, ikke navnets.
+    ///
+    /// Kaldes én gang ved opstart. Er der intet gammelt, sker der ingenting.
+    /// </remarks>
+    public static void RydGamleNavne()
+    {
+        try
+        {
+            using var k = Registry.CurrentUser.CreateSubKey(Nøgle, writable: true);
+            if (k is null) return;
+
+            foreach (var gammelt in Gamle)
+            {
+                if (k.GetValue(gammelt) is not string s || s.Length == 0) continue;
+
+                // Var den slaaet til under det gamle navn, skal den vaere det
+                // under det nye - med stien til den exe, der koerer NU.
+                if (k.GetValue(Navn) is not string ny || ny.Length == 0)
+                    k.SetValue(Navn, Kommando, RegistryValueKind.String);
+
+                k.DeleteValue(gammelt, throwOnMissingValue: false);
+
+                try
+                {
+                    Historik.Skriv(HaendelseType.Andet, "Autostart flyttet til det nye navn",
+                        $"«{gammelt}» pegede på en fil, der ikke findes mere. "
+                        + "Appen starter nu med Windows under navnet HeyPia.",
+                        Udfald.Fuldført);
+                }
+                catch (Exception)
+                {
+                    // Kan historikken ikke skrives, er flytningen sket alligevel.
+                }
+            }
+        }
+        catch (Exception)
+        {
+            // En autostart, der ikke kunne flyttes, maa ikke forhindre appen i
+            // at aabne. Skaermen viser tilstanden, som den faktisk er.
+        }
     }
 
     /// <summary>

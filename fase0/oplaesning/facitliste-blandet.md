@@ -1,4 +1,4 @@
-# Facitliste — blandet prøvetekst
+﻿# Facitliste — blandet prøvetekst
 
 Hører til `testtekst-blandet.md`. Denne facitliste er anderledes end de to andre: den måler ikke først og fremmest, hvor godt referatet blev, men **hvad et sprogskifte koster**.
 
@@ -6,7 +6,7 @@ Hører til `testtekst-blandet.md`. Denne facitliste er anderledes end de to andr
 
 **1. Hvilket sprog blev detekteret?**
 
-Teorien siger `da`, fordi de første tredive sekunder er dansk. Noter sandsynligheden. Bliver det `en`, er teorien om de første tredive sekunder forkert, og så skal `SPEC_NoteApp_v1.md` rettes.
+Teorien siger `da`, fordi de første tredive sekunder er dansk. Noter sandsynligheden. Bliver det `en`, er teorien om de første tredive sekunder forkert, og så skal `SPEC_HeyPia_v1.md` rettes.
 
 **2. Hvor ulæselig blev den engelske del?**
 

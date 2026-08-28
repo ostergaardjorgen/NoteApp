@@ -1,8 +1,8 @@
-# Kom i gang
+﻿# Kom i gang
 
 *De fire skridt fra et møde til et referat*
 
-NoteApp optager et møde, skriver det ud til tekst her på maskinen, og laver
+HeyPia optager et møde, skriver det ud til tekst her på maskinen, og laver
 et dokument ud af teksten, hvis du beder om det.
 
 ## 1. Optag

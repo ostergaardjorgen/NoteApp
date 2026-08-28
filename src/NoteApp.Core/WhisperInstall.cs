@@ -292,7 +292,7 @@ public static class WhisperInstall
 
         // 2. Repoets build. Stadig med, saa en udviklingsmaskine uden hentet
         //    motor virker ud af boksen.
-        yield return Path.Combine("C:", "NoteApp", "tools", "whisper");
+        yield return Path.Combine("C:", "HeyPia", "tools", "whisper");
 
         // 3. Ved siden af den installerede exe.
         yield return Path.Combine(AppContext.BaseDirectory, "whisper");

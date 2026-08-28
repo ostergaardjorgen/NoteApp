@@ -1,4 +1,4 @@
-using System.Net.Http.Headers;
+﻿using System.Net.Http.Headers;
 using System.Security.Cryptography;
 
 namespace NoteApp.Core;
@@ -39,7 +39,7 @@ public sealed class Downloader
 
         // Et neutralt User-Agent. Ingen maskinnavn, intet brugernavn, ingen
         // version af noget, der kunne identificere installationen.
-        klient.DefaultRequestHeaders.UserAgent.ParseAdd("NoteApp");
+        klient.DefaultRequestHeaders.UserAgent.ParseAdd("HeyPia");
         return klient;
     }
 

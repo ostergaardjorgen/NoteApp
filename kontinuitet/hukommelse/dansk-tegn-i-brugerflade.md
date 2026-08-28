@@ -1,4 +1,4 @@
----
+﻿---
 name: dansk-tegn-i-brugerflade
 description: "Æ, Ø og Å skal altid staves korrekt i alt, brugeren ser — aldrig ae/oe/aa"
 metadata: 
@@ -22,4 +22,4 @@ Det gælder knaptekster, statuslinjer, dialoger, fejlbeskeder, filnavne og title
 
 Er en streng både en nøgle og noget, brugeren ser, skal de skilles ad: nøglen i ASCII, visningsteksten med de rigtige tegn.
 
-Se også [[noteapp-nul-tolerance-forkert-info]].
+Se også [[heypia-nul-tolerance-forkert-info]].

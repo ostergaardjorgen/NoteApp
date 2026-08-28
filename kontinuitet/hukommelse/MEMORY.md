@@ -1,8 +1,8 @@
-- [Dagligt push](dagligt-push.md) — commit og push hver dag; er det ikke sket i går, er det dagens første handling
+﻿- [Dagligt push](dagligt-push.md) — commit og push hver dag; er det ikke sket i går, er det dagens første handling
 - [Danske tegn i brugerfladen](dansk-tegn-i-brugerflade.md) — æ, ø og å skal staves rigtigt i alt, brugeren ser; ASCII kun i kode og commits
 - [Meld altid release-nummer](meld-altid-release-nummer.md) — versionsnummer og tidsstempel skal stå i chatten efter hver udgivelse
-- [NoteApps version kommer fra commit](noteapp-version-fra-commit.md) — udgivelser uden commit imellem får samme nummer
+- [HeyPias version kommer fra commit](heypia-version-fra-commit.md) — udgivelser uden commit imellem får samme nummer
 - [Office på maskinen](office-paa-maskinen.md) — Word, Excel og PowerPoint kan styres via COM; brug dem til at efterprøve Office-filer, du laver
 - [Test på udsnit først](test-paa-udsnit-foerst.md) — nye indstillinger prøves af på et kort klip, aldrig på hele lydfilen først
-- [Målgruppe og Granola](maalgruppe-og-granola.md) — NoteApp måles op mod Granola; kunden er studerende, iværksættere og mindre selvstændige
+- [Målgruppe og Granola](maalgruppe-og-granola.md) — HeyPia måles op mod Granola; kunden er studerende, iværksættere og mindre selvstændige
 - [Lokalt før skyen](lokalt-foerst.md) — kan noget gøres begge steder, står den lokale mulighed først og er standardvalget

@@ -48,6 +48,11 @@ public partial class App : Application
             // En oprydning maa aldrig kunne forhindre appen i at aabne.
         }
 
+        // NAVNESKIFTET RYDDES OP EFTER. Den gamle autostart peger paa
+        // HeyPia.exe, som ikke findes mere - og valget skal foelge med, ikke
+        // gaa tabt. Se Autostart.RydGamleNavne.
+        Autostart.RydGamleNavne();
+
         // LYST ELLER MOERKT - foer noget som helst tegnes.
         //
         // Penslerne i App.xaml er allerede lavet paa det her tidspunkt, og
