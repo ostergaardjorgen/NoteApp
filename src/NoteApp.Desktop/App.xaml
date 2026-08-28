@@ -443,7 +443,7 @@
     <Style TargetType="TextBox">
       <Setter Property="Background" Value="{DynamicResource Trykket}" />
       <Setter Property="Foreground" Value="{DynamicResource Tekst}" />
-      <Setter Property="BorderBrush" Value="{DynamicResource PanelKant}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource FeltKant}" />
       <Setter Property="BorderThickness" Value="1" />
       <Setter Property="Padding" Value="8,6" />
       <Setter Property="FontFamily" Value="Segoe UI" />
@@ -489,7 +489,7 @@
     <Style TargetType="DatePicker">
       <Setter Property="Background" Value="{DynamicResource Trykket}" />
       <Setter Property="Foreground" Value="{DynamicResource Tekst}" />
-      <Setter Property="BorderBrush" Value="{DynamicResource PanelKant}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource FeltKant}" />
       <Setter Property="BorderThickness" Value="1" />
       <Setter Property="FontFamily" Value="Segoe UI" />
       <Setter Property="FontSize" Value="13" />
@@ -516,7 +516,7 @@
       <Setter Property="Padding" Value="8,5" />
       <Setter Property="Background" Value="{DynamicResource Trykket}" />
       <Setter Property="Foreground" Value="{DynamicResource Tekst}" />
-      <Setter Property="BorderBrush" Value="{DynamicResource PanelKant}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource FeltKant}" />
       <Setter Property="Height" Value="30" />
       <Setter Property="Template">
         <Setter.Value>
@@ -527,8 +527,8 @@
                 <ToggleButton.Template>
                   <ControlTemplate TargetType="ToggleButton">
                     <Border x:Name="kant" CornerRadius="4"
-                            Background="{DynamicResource Baggrund}"
-                            BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
+                            Background="{DynamicResource Trykket}"
+                            BorderBrush="{DynamicResource FeltKant}" BorderThickness="1">
                       <Path x:Name="pil" HorizontalAlignment="Right" VerticalAlignment="Center"
                             Margin="0,0,10,0" Data="M 0 0 L 4 4 L 8 0 Z"
                             Fill="{DynamicResource TekstSvag}" />

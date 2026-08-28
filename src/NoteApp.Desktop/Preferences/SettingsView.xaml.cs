@@ -56,66 +56,6 @@ public partial class SettingsView : UserControl
             ? "Bemærk: den gemte opstart peger på en anden placering, end appen kører fra nu. " +
               "Slå den fra og til igen, så bliver stien rettet."
             : "Appen åbner ikke et vindue ved opstart — den ligger klar, indtil du trykker genvejstasten.";
-
-        VisGenveje();
-    }
-
-    private bool _indlæserGenveje;
-
-    /// <summary>
-    /// Listen over genvejskombinationer, med hvad der faktisk er ledigt lige
-    /// nu. Ledigheden PRØVES af frem for at blive gættet — det er forskelligt
-    /// fra maskine til maskine, og et valg, der ikke kan lade sig gøre, skal
-    /// ikke stå som om det kan.
-    /// </summary>
-    private void VisGenveje()
-    {
-        var vindue = Window.GetWindow(this);
-        if (vindue is null) return;
-
-        _indlæserGenveje = true;
-
-        var valgt = AppSettings.Current.HotkeyId;
-
-        // ============ APPENS EGEN GENVEJ ER IKKE «TAGET AF ET ANDET PROGRAM» ============
-        //
-        // ErLedig proever at registrere kombinationen, og appen holder den
-        // allerede selv. Uden det her stod den aktive tast som optaget, og
-        // listen pegede paa en anden - mens topbjaelken viste den rigtige.
-        //
-        // Set 28-08-2026: bjaelken sagde Ctrl+Space, listen sagde
-        // Ctrl+Shift+Space. Den, der laeser Indstillinger, ville trykke paa
-        // den forkerte og tro, at genvejen ikke virkede.
-        var aktiv = (vindue as MainWindow)?.AktivGenvejId;
-
-        var rækker = GlobalHotkey.Muligheder.Select(m =>
-        {
-            var iBrug = m.Id == aktiv;
-            var ledig = iBrug || m.Id == valgt || GlobalHotkey.ErLedig(m, vindue);
-
-            return new
-            {
-                m.Id,
-                m.Hvorfor,
-                Visning = iBrug ? $"{m.Navn}  —  i brug nu"
-                        : ledig ? m.Navn
-                        : $"{m.Navn}  —  optaget af et andet program",
-                Ledig = ledig
-            };
-        }).ToList();
-
-        Genveje.ItemsSource = rækker;
-
-        // Har brugeren valgt noget, staar det. Ellers vises DEN, DER VIRKER -
-        // ikke den foerste ledige paa listen.
-        Genveje.SelectedItem = rækker.FirstOrDefault(r => r.Id == valgt)
-                            ?? rækker.FirstOrDefault(r => r.Id == aktiv)
-                            ?? rækker.FirstOrDefault(r => r.Ledig);
-
-        _indlæserGenveje = false;
-
-        var v = Genveje.SelectedItem as dynamic;
-        GenvejForklaring.Text = v is null ? "" : (string)v.Hvorfor;
     }
 
     // ------------------------------------------------ tryk din egen genvej
@@ -210,7 +150,6 @@ public partial class SettingsView : UserControl
         if (Window.GetWindow(this) is MainWindow hoved) hoved.TilslutGenvej();
 
         VisGenvejNu();
-        VisGenveje();
 
         Status.Text = $"Lynstart er nu {tast.Navn(GlobalHotkey.Tastetegn(tast.Vk))}.";
     }
@@ -229,34 +168,6 @@ public partial class SettingsView : UserControl
         GenvejVaelg.Content = NoteApp.Core.Sprog.T("settingsview.vaelg_genvej");
 
         if (!behold) GenvejFanger.Visibility = Visibility.Collapsed;
-    }
-
-    private void Genvej_Valgt(object sender, SelectionChangedEventArgs e)
-    {
-        if (_indlæserGenveje || Genveje.SelectedItem is null) return;
-
-        var valg = (dynamic)Genveje.SelectedItem!;
-        GenvejForklaring.Text = (string)valg.Hvorfor;
-
-        if (!(bool)valg.Ledig)
-        {
-            Status.Text = "Den kombination er taget af et andet program. Vælg en anden.";
-            return;
-        }
-
-        AppSettings.Current.HotkeyId = (string)valg.Id;
-
-        // VAELGER MAN FRA LISTEN, ER DET DET, DER GAELDER. Den egne
-        // kombination vinder ellers over listen, og saa ville valget her
-        // ikke goere noget - den vaerste slags knap.
-        AppSettings.Current.Genvejskombi = null;
-        AppSettings.Current.Save();
-
-        // Registreringen skal ske med det samme. Et valg, der foerst virker
-        // efter en genstart, er et valg, man tror er i kraft.
-        if (Window.GetWindow(this) is MainWindow hoved) hoved.TilslutGenvej();
-
-        Status.Text = $"Lynstart er nu {(string)valg.Visning}.";
     }
 
     // ---------------------------------------------------------------- temaet

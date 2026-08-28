@@ -42,8 +42,25 @@
     <TextBlock x:Name="Underskrift" Style="{StaticResource Underskrift}"
                Margin="0,4,0,0" TextWrapping="Wrap" />
 
+    <!-- ============ FELTERNE LIGGER I EN KASSE ============
+
+         De laa foer direkte paa vinduets flade, og rullelisternes fyld er den
+         SAMME farve som den flade. Kontrollerne havde altsaa ingen krop -
+         der stod en maerkat og en lille pil, og resten var luft. Set
+         28-08-2026: «meget rodet og svaert at overskue».
+
+         Kassen goer tre ting paa én gang: den giver felterne en flade at
+         staa PAA, saa de kan ses; den samler de fire valg til ét afsnit i
+         stedet for fire loese; og den skiller dem fra overskriften og fra
+         knapperne, saa oejet ved, hvor formularen begynder og slutter.
+
+         Feltkanten hjaelper resten - se App.xaml, hvor kanten om alt, man kan
+         skrive i, blev flyttet fra PanelKant til FeltKant. -->
+    <Border Background="{DynamicResource Panel}" BorderBrush="{DynamicResource PanelKant}"
+            BorderThickness="1" CornerRadius="10" Padding="20" Margin="0,18,0,0">
+
     <!-- ============ DE FIRE VALG, TO OG TO ============ -->
-    <Grid Margin="0,18,0,0">
+    <Grid>
       <Grid.ColumnDefinitions>
         <ColumnDefinition Width="*" />
         <ColumnDefinition Width="22" />
@@ -116,6 +133,7 @@
         <TextBox x:Name="Link" FontSize="12.5" Padding="10,7" />
       </StackPanel>
     </Grid>
+    </Border>
 
     <!-- ============ DET, MAN KAN HANDLE PÅ ============
          Kun ved webinar. To linjer, og begge er noget, brugeren gør noget
@@ -143,7 +161,11 @@
       </StackPanel>
     </Border>
 
-    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+    <!-- En streg over knapperne. Uden den flyder de sammen med formularen, og
+         man kan ikke se, hvor der skal svares, og hvor der skal handles. -->
+    <Border Height="1" Background="{DynamicResource PanelKant}" Margin="0,20,0,0" />
+
+    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
       <Button x:Name="FortrydKnap" Content="{i18n:Oversat faelles.fortryd}" Click="Fortryd_Klik"
               Padding="16,8" Margin="0,0,10,0" />
       <Button x:Name="StartKnap" Click="Start_Klik"

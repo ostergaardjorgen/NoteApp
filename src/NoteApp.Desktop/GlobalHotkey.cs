@@ -298,24 +298,6 @@ public sealed class GlobalHotkey : IDisposable
         StartGenforsøg();
     }
 
-    /// <summary>Er kombinationen ledig lige nu? Bruges til at vise listen ærligt.</summary>
-    public static bool ErLedig(HotkeyValg valg, Window vindue)
-    {
-        // Windows' egen tekstbehandling spoerges FOERST. Se TagetAfWindows.
-        if (TagetAfWindows().Contains((valg.Modifiers, valg.Key))) return false;
-
-        var h = new WindowInteropHelper(vindue).Handle;
-        if (h == IntPtr.Zero) return true;
-
-        // Proev at tage den, og giv den fra dig igen med det samme. Et andet
-        // id end det rigtige, saa en aktiv registrering ikke bliver forstyrret.
-        const int prøveId = 0x4E0B;
-        if (!RegisterHotKey(h, prøveId, valg.Modifiers | MOD_NOREPEAT, valg.Key)) return false;
-
-        UnregisterHotKey(h, prøveId);
-        return true;
-    }
-
     /// <summary>
     /// De kombinationer, Windows' egen tekstbehandling allerede har taget.
     ///
