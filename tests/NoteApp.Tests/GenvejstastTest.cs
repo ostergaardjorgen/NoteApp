@@ -1,4 +1,4 @@
-using NoteApp.Core;
+﻿using NoteApp.Core;
 using Xunit;
 
 namespace NoteApp.Tests;
@@ -111,6 +111,47 @@ public sealed class GenvejstastTest
     {
         // Bedre end en tom plads: saa kan man i det mindste kende den igen.
         Assert.Contains("0xF1", new Genvejstast(Ctrl, 0xF1).Navn());
+    }
+
+    // ------------------------------------------------------------ NumLock
+
+    [Fact]
+    public void Taltastaturets_taster_har_en_tvilling()
+    {
+        // Den samme fysiske tast sender to forskellige virtuelle taster alt
+        // efter NumLock. Registrerer man kun den ene, holder genvejen op med
+        // at virke i det oejeblik, nogen roerer NumLock.
+        Assert.Equal(0x2Eu, Genvejstast.Tvillingen(0x6E));   // komma <-> Delete
+        Assert.Equal(0x2Du, Genvejstast.Tvillingen(0x60));   // 0 <-> Insert
+        Assert.Equal(0x23u, Genvejstast.Tvillingen(0x61));   // 1 <-> End
+    }
+
+    [Fact]
+    public void Tvillingen_peger_begge_veje()
+    {
+        // Ellers ville den ene NumLock-tilstand vaere daekket og den anden ikke.
+        foreach (var vk in new uint[] { 0x60, 0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68, 0x69, 0x6E })
+            Assert.Equal(vk, Genvejstast.Tvillingen(Genvejstast.Tvillingen(vk)));
+    }
+
+    [Fact]
+    public void En_almindelig_tast_har_ingen_tvilling()
+    {
+        foreach (var vk in new uint[] { 0x41, 0x30, 0xBC, 0x20, 0x78 })
+            Assert.Equal(0u, Genvejstast.Tvillingen(vk));
+    }
+
+    [Fact]
+    public void Shift_duer_ikke_paa_taltastaturet()
+    {
+        // Shift vender NumLock om, mens den holdes nede. Efterproevet
+        // 28-08-2026: Ctrl+Shift+numpad-0 og Ctrl+Shift+numpad-komma er begge
+        // doede, mens de samme uden Shift virker.
+        Assert.True(new Genvejstast(Ctrl | Shift, 0x60).ShiftDuerIkke);
+        Assert.True(new Genvejstast(Ctrl | Shift, 0x6E).ShiftDuerIkke);
+
+        Assert.False(new Genvejstast(Ctrl, 0x60).ShiftDuerIkke);
+        Assert.False(new Genvejstast(Ctrl | Shift, 0xBC).ShiftDuerIkke);
     }
 
     // ------------------------------------------------------------ gemning

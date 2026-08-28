@@ -1,4 +1,4 @@
-namespace NoteApp.Core;
+﻿namespace NoteApp.Core;
 
 /// <summary>
 /// Én genvejskombination — modifikatortaster og en tast.
@@ -123,6 +123,64 @@ public readonly record struct Genvejstast(uint Mod, uint Vk)
         " " => "Mellemrum",
         _ => tegn
     };
+
+    /// <summary>
+    /// Tvillingen på taltastaturet — den tast, den SAMME finger sender, når
+    /// NumLock står omvendt. Nul, hvis tasten ikke sidder på taltastaturet.
+    /// </summary>
+    /// <remarks>
+    /// DET ER DEN, DER GØR GENVEJEN UPÅLIDELIG. Taltastaturets komma sender
+    /// 0x6E med NumLock slået til og 0x2E (Delete) med den slået fra. Registrerer
+    /// man kun den ene, holder genvejen op med at virke i det øjeblik, nogen
+    /// rører NumLock — og der er intet at se.
+    ///
+    /// Målt 28-08-2026: brugeren trykkede og fik «Ctrl+Delete» fanget. Det var
+    /// taltastaturets komma med NumLock fra.
+    ///
+    /// SHIFT VENDER NUMLOCK OM, mens den holdes nede. Derfor er
+    /// Ctrl+Shift+taltastaturtast altid død: kombinationen registreres på den
+    /// ene tast, og fingeren sender den anden.
+    /// </remarks>
+    public uint Tvilling => Tvillingen(Vk);
+
+    public static uint Tvillingen(uint vk) => vk switch
+    {
+        0x60 => 0x2D,   // 0 <-> Insert
+        0x61 => 0x23,   // 1 <-> End
+        0x62 => 0x28,   // 2 <-> Pil ned
+        0x63 => 0x22,   // 3 <-> PageDown
+        0x64 => 0x25,   // 4 <-> Venstre pil
+        0x65 => 0x0C,   // 5 <-> Clear
+        0x66 => 0x27,   // 6 <-> Hoejre pil
+        0x67 => 0x24,   // 7 <-> Home
+        0x68 => 0x26,   // 8 <-> Pil op
+        0x69 => 0x21,   // 9 <-> PageUp
+        0x6E => 0x2E,   // komma <-> Delete
+
+        0x2D => 0x60,
+        0x23 => 0x61,
+        0x28 => 0x62,
+        0x22 => 0x63,
+        0x25 => 0x64,
+        0x0C => 0x65,
+        0x27 => 0x66,
+        0x24 => 0x67,
+        0x26 => 0x68,
+        0x21 => 0x69,
+        0x2E => 0x6E,
+
+        _ => 0
+    };
+
+    /// <summary>
+    /// Shift kan ikke være med på en tast fra taltastaturet.
+    /// </summary>
+    /// <remarks>
+    /// Shift vender NumLock om, mens den holdes nede, så tasten bliver til sin
+    /// tvilling. Efterprøvet: Ctrl+Shift+numpad-0 og Ctrl+Shift+numpad-komma er
+    /// begge døde, mens Ctrl+numpad-0 og Ctrl+numpad-komma virker.
+    /// </remarks>
+    public bool ShiftDuerIkke => (Mod & MOD_SHIFT) != 0 && Tvilling != 0;
 
     // ------------------------------------------------------------ gemning
 

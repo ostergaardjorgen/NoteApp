@@ -32,6 +32,11 @@ public sealed class GlobalHotkey : IDisposable
     private const int WM_HOTKEY = 0x0312;
     private const int Id = 0x4E0A;
 
+    /// <summary>Id til tvillingen paa taltastaturet. Se registreringen nedenfor.</summary>
+    private const int TvillingId = 0x4E0D;
+
+    private bool _tvilling;
+
     private const uint MOD_CONTROL = Genvejstaster.MOD_CONTROL;
     private const uint MOD_SHIFT = Genvejstaster.MOD_SHIFT;
     private const uint MOD_NOREPEAT = 0x4000;
@@ -124,6 +129,22 @@ public sealed class GlobalHotkey : IDisposable
             && RegisterHotKey(_håndtag, Id, egen.Mod | MOD_NOREPEAT, egen.Vk))
         {
             _registreret = true;
+
+            // ============ TVILLINGEN PAA TALTASTATURET SKAL MED ============
+            //
+            // Den samme fysiske tast sender to forskellige virtuelle taster
+            // alt efter NumLock: taltastaturets komma er 0x6E med NumLock til
+            // og 0x2E (Delete) med den fra. Registrerer vi kun den ene, holder
+            // genvejen op med at virke i det oejeblik, nogen roerer NumLock -
+            // og der er intet at se.
+            //
+            // Maalt 28-08-2026: brugeren trykkede og fik «Ctrl+Delete» fanget.
+            // Det var taltastaturets komma med NumLock slaaet fra.
+            var tvilling = egen.Tvilling;
+            _tvilling = tvilling != 0
+                        && !systemtaget.Contains((egen.Mod, tvilling))
+                        && RegisterHotKey(_håndtag, TvillingId, egen.Mod | MOD_NOREPEAT, tvilling);
+
             Aktiv = new HotkeyValg("egen", egen.Navn(Tastetegn(egen.Vk)), egen.Mod, egen.Vk,
                 "Den kombination, du selv har trykket.");
             Bemærkning = null;
@@ -463,7 +484,10 @@ public sealed class GlobalHotkey : IDisposable
     /// </remarks>
     private IntPtr Hook(IntPtr hwnd, int besked, IntPtr wParam, IntPtr lParam, ref bool håndteret)
     {
-        if (besked != WM_HOTKEY || wParam.ToInt32() != Id) return IntPtr.Zero;
+        if (besked != WM_HOTKEY) return IntPtr.Zero;
+
+        var hvem = wParam.ToInt32();
+        if (hvem != Id && hvem != TvillingId) return IntPtr.Zero;
 
         håndteret = true;
 
@@ -477,7 +501,9 @@ public sealed class GlobalHotkey : IDisposable
     private void Frigiv()
     {
         if (_registreret && _håndtag != IntPtr.Zero) UnregisterHotKey(_håndtag, Id);
+        if (_tvilling && _håndtag != IntPtr.Zero) UnregisterHotKey(_håndtag, TvillingId);
         _registreret = false;
+        _tvilling = false;
         Aktiv = null;
 
         _kilde?.RemoveHook(Hook);

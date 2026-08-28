@@ -1,4 +1,4 @@
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Threading;
@@ -156,6 +156,26 @@ public sealed class Genvejsfanger : IDisposable
 
     private void Proev()
     {
+        // ============ SHIFT KAN IKKE VAERE MED PAA TALTASTATURET ============
+        //
+        // Shift vender NumLock om, mens den holdes nede, saa tasten bliver til
+        // sin tvilling: taltastaturets komma bliver til Delete, nullet bliver
+        // til Insert. Kombinationen ville blive registreret paa den ene tast,
+        // mens fingeren sendte den anden.
+        //
+        // Efterproevet 28-08-2026: Ctrl+Shift+numpad-0 og
+        // Ctrl+Shift+numpad-komma er begge doede, mens de samme uden Shift
+        // virker. Det siges her frem for at lade brugeren opdage det ved et
+        // moede, der ikke blev optaget.
+        if (Tast.ShiftDuerIkke)
+        {
+            Hvor = Trin.Fejlet;
+            Sig($"Shift kan ikke være med på {Genvejstast.Tastnavn(Tast.Vk)}. "
+                + "Shift slår NumLock fra, mens den holdes nede, så tasten bliver til noget andet. "
+                + "Prøv den samme tast uden Shift.");
+            return;
+        }
+
         if (GlobalHotkey.ErSpaerretAfWindows(Tast.Mod, Tast.Vk))
         {
             Hvor = Trin.Fejlet;
@@ -200,7 +220,19 @@ public sealed class Genvejsfanger : IDisposable
         // Windows og appen.
         Slip();
         Hvor = Trin.Bekræftet;
-        Sig($"{Navn()} virker. Den starter en optagelse fra nu af.");
+
+        // TVILLINGEN NAEVNES. Vaelger man en tast paa taltastaturet, tages
+        // BEGGE - ellers holder genvejen op med at virke, saa snart nogen
+        // roerer NumLock. Prisen er, at tvillingens egen genvej ryger med, og
+        // det skal staa, foer det opdages i Word.
+        var tvilling = Tast.Tvilling;
+
+        Sig(tvilling == 0
+            ? $"{Navn()} virker. Den starter en optagelse fra nu af."
+            : $"{Navn()} virker. Den starter en optagelse fra nu af — uanset om NumLock "
+              + $"er slået til eller fra. Prisen er, at "
+              + $"{new Genvejstast(Tast.Mod, tvilling).Navn(GlobalHotkey.Tastetegn(tvilling))} "
+              + "også bliver taget, for det er den samme tast under fingeren.");
 
         _vindue.Dispatcher.BeginInvoke(DispatcherPriority.Normal,
             () => Faerdig?.Invoke(Tast));
