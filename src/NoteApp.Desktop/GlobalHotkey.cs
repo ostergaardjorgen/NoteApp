@@ -109,14 +109,51 @@ public sealed class GlobalHotkey : IDisposable
 
         _kilde.AddHook(Hook);
 
-        var ønsket = Muligheder.FirstOrDefault(m => m.Id == _ønsketId);
-        var rækkefølge = ønsket is null
-            ? Muligheder
-            : new[] { ønsket }.Concat(Muligheder.Where(m => m.Id != ønsket.Id)).ToList();
-
         // De kombinationer, Windows selv bruger. RegisterHotKey siger ja til
         // dem, saa de skal sorteres fra HER.
         var systemtaget = TagetAfWindows();
+
+        var ønsket = Muligheder.FirstOrDefault(m => m.Id == _ønsketId);
+
+        // ============ ET GEMT VALG, DER ALDRIG KAN VIRKE, RYDDES ============
+        //
+        // Er den gemte tast reserveret af Windows selv, er den ikke
+        // «midlertidigt optaget» - den kommer aldrig til at virke paa den her
+        // maskine. Uden det her proevede appen den ved hver opstart, faldt
+        // tilbage til noget andet, og brugeren sad fast paa en tast, han
+        // aldrig havde valgt.
+        //
+        // Set 28-08-2026: HotkeyId stod paa «ctrl-shift-1», og hele
+        // Ctrl+Shift+ciffer-raekken er reserveret, naar der er mere end ét
+        // tastaturlayout. Vaerdien stammer fra en gammel opfoersel, hvor appen
+        // gemte sit eget noedvalg som om det var brugerens.
+        //
+        // Der ryddes til null = standarden. Det er ikke at overrule et valg;
+        // det er at fjerne noget, brugeren aldrig traf.
+        if (ønsket is not null && systemtaget.Contains((ønsket.Modifiers, ønsket.Key)))
+        {
+            try
+            {
+                Historik.Skriv(HaendelseType.Andet, "Et gemt genvejsvalg blev ryddet",
+                    $"{ønsket.Navn} er reserveret af Windows paa den her maskine og kunne "
+                    + "aldrig virke. Standarden bruges nu.", Udfald.SeEfter);
+
+                AppSettings.Current.HotkeyId = null;
+                AppSettings.Current.Save();
+            }
+            catch (Exception)
+            {
+                // Kan det ikke gemmes, koeres der videre paa standarden i den
+                // her omgang. Bedre end at blive staaende paa noget doedt.
+            }
+
+            _ønsketId = null;
+            ønsket = null;
+        }
+
+        var rækkefølge = ønsket is null
+            ? Muligheder
+            : new[] { ønsket }.Concat(Muligheder.Where(m => m.Id != ønsket.Id)).ToList();
         string? spærret = null;
 
         foreach (var valg in rækkefølge)

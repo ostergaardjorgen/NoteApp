@@ -18,11 +18,30 @@ namespace NoteApp.Tests;
 public sealed class GenvejTest
 {
     [Fact]
-    public void Ctrl_space_er_standarden()
+    public void Kommaet_er_standarden()
     {
         // Foerst paa listen = standard. Staar der noget andet, har nogen
         // flyttet rundt uden at vide, at raekkefoelgen er valget.
-        Assert.Equal("ctrl-space", Genvejstaster.Muligheder[0].Id);
+        //
+        // Kommaet staar der, fordi det koster mindst. Enhver global genvej
+        // opsnapper tasten fra det program, man staar i - maalt 28-08-2026 -
+        // saa spoergsmaalet er ikke OM man mister noget, men hvad.
+        // Ctrl+Shift+komma bruges praktisk talt ikke af noget program.
+        Assert.Equal("ctrl-shift-komma", Genvejstaster.Muligheder[0].Id);
+    }
+
+    [Fact]
+    public void Kommaet_er_den_samme_tast_paa_ethvert_layout()
+    {
+        // VK_OEM_COMMA er 0xBC og peger paa den samme FYSISKE tast paa dansk,
+        // amerikansk og britisk layout - efterproevet med MapVirtualKeyEx
+        // 28-08-2026: scancode 0x33 alle tre steder. Kun tegnet med Shift er
+        // forskelligt (; paa dansk, < paa engelsk).
+        //
+        // Proeven staar her, fordi det er fristende at «rette» kommaet til et
+        // punktum for engelske brugere. Det ville vaere en ANDEN tast.
+        var komma = Genvejstaster.Muligheder.First(m => m.Id == "ctrl-shift-komma");
+        Assert.Equal(0xBCu, komma.Key);
     }
 
     [Fact]
@@ -80,7 +99,7 @@ public sealed class GenvejTest
     {
         // Den vinder over Word, Excel og enhver kodeeditor. Det er et rimeligt
         // valg at traeffe - men ikke et, man skal opdage bagefter.
-        var s = Genvejstaster.Muligheder[0].Hvorfor;
+        var s = Genvejstaster.Muligheder.First(m => m.Id == "ctrl-space").Hvorfor;
 
         Assert.Contains("Word", s);
         Assert.Contains("Excel", s);

@@ -37,55 +37,29 @@ public static class Genvejstaster
     {
         var liste = new List<HotkeyValg>();
 
-        // ============ CTRL+SPACE STÅR FØRST OG ER DERMED STANDARDEN ============
+        // ============ KOMMAET STÅR FØRST OG ER DERMED STANDARDEN ============
         //
         // HotkeyId = null betyder «tag den første ledige», så rækkefølgen her
         // ER valget.
         //
-        // Efterprøvet 28-08-2026, og ikke bare med RegisterHotKey:
-        // kombinationen blev registreret, tastetrykket blev sendt, og
-        // WM_HOTKEY kom frem. Det er den eneste måde at vide det — se
-        // GlobalHotkey.TagetAfWindows for, hvorfor et ja fra RegisterHotKey
-        // ikke er nok.
+        // Grebet er delt mellem hænderne: venstre holder Ctrl+Shift nede,
+        // højre finder tasten. Efterprøvet virksom 28-08-2026 — registreret,
+        // tastetryk sendt, WM_HOTKEY kom frem.
         //
-        // Den er let: én hånd, to taster ved siden af hinanden, og
-        // mellemrumstasten kan findes uden at kigge.
+        // DEN ER VALGT, FORDI DEN KOSTER MINDST. Enhver global genvej
+        // opsnapper tasten fra det program, man står i — det er målt, ikke
+        // antaget: et tekstfelt fik Ctrl+Space, når appen ikke kørte, og fik
+        // den ikke, når den kørte. Spørgsmålet er derfor ikke OM man mister
+        // noget, men hvad. Ctrl+Shift+komma bruges praktisk talt ikke af
+        // noget program, og så er svaret: ingenting.
         //
-        // DEN KOSTER NOGET, OG DET SKAL STÅ. En global genvej vinder over det
-        // program, man står i. Ctrl+Space rydder formatering i Word, markerer
-        // hele kolonnen i Excel og åbner forslagslisten i stort set alle
-        // kodeeditorer. Vælger man den, holder de ting op med at virke — og
-        // ingen kæder det sammen med den her app. Derfor står prisen i den
-        // tekst, brugeren læser, og de andre valg bliver stående.
-        liste.Add(new HotkeyValg("ctrl-space", "Ctrl+Space", MOD_CONTROL, 0x20,
-            "Én hånd, to nabotaster, og mellemrum kan findes uden at kigge. "
-            + "Bemærk: den rydder formatering i Word, markerer kolonnen i Excel "
-            + "og åbner forslagslisten i kodeeditorer — de ting holder op med at "
-            + "virke, så længe den er valgt."));
-
-        // Naboen. Samme greb, én tast mere. Efterproevet virksom samme dag.
-        //
-        // HER STOD «UDEN KONFLIKTEN», OG DET VAR FOR MEGET SAGT. Enhver global
-        // genvej opsnapper tasten fra det program, man staar i - det er maalt,
-        // ikke antaget. Den her har bare en billigere konflikt: fast mellemrum
-        // i Word og marker omraadet i Excel, mod ryd formatering og marker
-        // kolonnen.
-        liste.Add(new HotkeyValg("ctrl-shift-space", "Ctrl+Shift+Space",
-            MOD_CONTROL | MOD_SHIFT, 0x20,
-            "Samme greb som Ctrl+Space. Den koster et fast mellemrum i Word og "
-            + "«markér området» i Excel — mindre brugte end dem, Ctrl+Space tager."));
-
-        // ============ KOMMAET - den tidligere standard ============
-        //
-        // Grebet er delt mellem haenderne: venstre holder Ctrl+Shift nede,
-        // hoejre finder tasten. Efterproevet virksom 28-08-2026.
-        //
-        // «(komma)» staar med i navnet med vilje. «Ctrl+Shift+,» slutter paa et
-        // komma, og et komma sidst i en saetning ligner tegnsaetning - man kan
+        // «(komma)» står med i navnet med vilje. «Ctrl+Shift+,» slutter på et
+        // komma, og et komma sidst i en sætning ligner tegnsætning — man kan
         // ikke se, om tasten er en del af genvejen eller bare et skilletegn.
         liste.Add(new HotkeyValg("ctrl-shift-komma", "Ctrl+Shift+, (komma)",
             MOD_CONTROL | MOD_SHIFT, 0xBC,
-            "Venstre hånd holder Ctrl+Shift, højre rammer kommaet. Fri på stort set enhver maskine."));
+            "Venstre hånd holder Ctrl+Shift, højre rammer kommaet. Fri på stort "
+            + "set enhver maskine, og den tager ikke noget fra Word, Excel eller andet."));
 
         // Punktummet lige ved siden af kommaet. Efterproevet virksom samme dag.
         // Ctrl+Alt+komma er derimod TAGET (post 00000072) og Ctrl+punktum
@@ -93,6 +67,31 @@ public static class Genvejstaster
         liste.Add(new HotkeyValg("ctrl-shift-punktum", "Ctrl+Shift+. (punktum)",
             MOD_CONTROL | MOD_SHIFT, 0xBE,
             "Nabotasten til kommaet. Lige så fri — vælg den, der falder bedst i hånden."));
+
+        // ============ MELLEMRUMSTASTEN - let at ramme, dyr at vaelge ============
+        //
+        // Efterproevet virksom 28-08-2026. Den er den letteste paa listen: én
+        // haand, to nabotaster, og mellemrum kan findes uden at kigge. Andre
+        // programmer af samme slags bruger den.
+        //
+        // Den staar alligevel ikke foerst, fordi den koster mest. Maalt samme
+        // dag: med appen koerende naaede Ctrl+Space ALDRIG frem til
+        // tekstfeltet. Vaelger man den, holder «ryd formatering» i Word,
+        // «markér kolonnen» i Excel og forslagslisten i enhver kodeeditor op
+        // med at virke - og ingen kaeder det sammen med den her app.
+        liste.Add(new HotkeyValg("ctrl-space", "Ctrl+Space", MOD_CONTROL, 0x20,
+            "Den letteste at ramme: én hånd, to nabotaster. Bemærk: den rydder "
+            + "formatering i Word, markerer kolonnen i Excel og åbner "
+            + "forslagslisten i kodeeditorer — de ting holder op med at virke, "
+            + "så længe den er valgt."));
+
+        // Naboen. Samme greb, én tast mere. Efterproevet virksom samme dag.
+        // Den opsnapper ogsaa - enhver global genvej goer det - men den tager
+        // noget, der bruges mindre.
+        liste.Add(new HotkeyValg("ctrl-shift-space", "Ctrl+Shift+Space",
+            MOD_CONTROL | MOD_SHIFT, 0x20,
+            "Samme greb som Ctrl+Space. Den koster et fast mellemrum i Word og "
+            + "«markér området» i Excel — mindre brugte end dem, Ctrl+Space tager."));
 
         // TALLENE SOM ALTERNATIV. Programmer bruger typisk bogstaver, og
         // Windows selv bruger Win+tal til proceslinjen - ikke Ctrl+Shift.
