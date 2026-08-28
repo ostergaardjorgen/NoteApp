@@ -92,6 +92,33 @@
 
              Den er mindre og mere afdæmpet end optageknappen. Møder er det
              almindelige; webinarer er det, man gør bevidst. -->
+        <!-- ==================== GENVEJEN VED KNAPPEN ====================
+
+             Den stod oeverst til hoejre, i den anden ende af bjaelken, med
+             maerkatet «OPTAG MED» foran sig. Maerkatet fandtes kun for at
+             forklare, hvad tasten hoerte til - og det behoever den ikke,
+             naar den staar lige ved siden af knappen. Placeringen siger det,
+             ordene sagde, og der blev en halv bjaelke fri.
+
+             DEN LIGNER EN TASTEKAP, IKKE EN KNAP MERE. Foer var den formet
+             som optageknappen - samme roede flade - fordi de to goer det
+             samme. Ved siden af knappen ville to roede flader vaere et
+             tastetryk, man ikke kan se hvor gaar hen. Nu er den daempet: en
+             tone dybere end bjaelken, en kant om, og teksten i bjaelkens egen
+             farve.
+
+             TEKSTEN ER «Tekst», IKKE HVID. Den stod hvid engang. Det var
+             rigtigt, saa laenge appen var moerk - og forsvandt den dag, det
+             lyse tema kom. Bjaelkens egen skriftfarve er hvid i moerkt og
+             moerk i lyst; det er dén, der virker begge steder. -->
+        <Border x:Name="GenvejPanel" CornerRadius="7" Padding="13,8" Margin="10,0,0,0"
+                VerticalAlignment="Center" Visibility="Collapsed"
+                Background="{DynamicResource Trykket}"
+                BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
+          <TextBlock x:Name="GenvejTast" FontSize="13" FontWeight="SemiBold"
+                     VerticalAlignment="Center" Foreground="{DynamicResource Tekst}" />
+        </Border>
+
         <Button x:Name="WebinarKnap" Click="Webinar_Click" Cursor="Hand"
                 VerticalAlignment="Center" Margin="10,0,0,0"
                 ToolTip="{i18n:Oversat meetingview.optag_et_webinar_kun_det_du_hoerer_halv_st}">
@@ -177,54 +204,26 @@
       <!-- ===================== Højre: handlinger ==================== -->
       <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
 
-        <!-- ==================== Genvejstasten =======================
-             DEN STAAR FREMME, IKKE KUN SOM TOOLTIP PAA KNAPPEN.
 
-             Et moede begynder, mens man staar i et andet program. Genvejen er
-             lavet til netop dét - den virker, ogsaa naar appen er skjult - men
-             et tooltip paa en knap, man ikke kan se, kan ingen laere den af.
-             Saa fandt man appen frem og trykkede, og de foerste minutter var
-             vaek.
+        <!-- ==================== DIKTERINGENS GENVEJ ====================
 
-             Den staar oeverst til hoejre, hvor der er plads, og den forsvinder
-             under optagelsen: dér er den brugt, og Pause og Stop skal have
-             pladsen. -->
-        <!-- Den er formet som selve knappen: samme hjoernerunding, samme
-             hoejde. De to hoerer sammen - det er den samme handling, ad to
-             veje - og naar de ligner hinanden, laeses genvejen som «det her
-             er den anden maade», ikke som en note ved siden af.
+             Den har ingen knap at staa ved siden af. Optagelsen har en; man
+             holder ikke en diktering i gang med musen, og der er derfor
+             ingen anden maade at laere den end at laese den.
 
-             Tasten staar som en tastekap: lysere flade, en kant, og en tone
-             dybere i bunden. Det er nok til, at oejet laeser den som noget,
-             man trykker paa, uden at den fylder mere end teksten i den. -->
-        <StackPanel x:Name="GenvejPanel" Orientation="Horizontal" VerticalAlignment="Center"
-                    Margin="0,0,18,0" Visibility="Collapsed">
-          <!-- MAERKATET SKAL KUNNE LAESES.
-               Det stod i den daempede tekstfarve og forsvandt naesten i
-               baggrunden - og et maerkat, man skal lede efter, forklarer
-               ingenting. Saa blev det hvidt som teksten paa knapperne.
+             Den staar roed som optageknappen, fordi den goer det samme paa
+             samme tast - kun holdt nede i stedet for trykket. Forskellen er
+             ordet «hold», og det er hele saetningen der forklarer den.
 
-               DET VAR RIGTIGT, SAA LAENGE APPEN VAR MOERK. Maerkatet staar paa
-               BJAELKEN og ikke paa den roede flade, saa da det lyse tema kom,
-               blev det hvidt paa lyst - vaek igen, praecis som foerste gang.
-               Set paa et skaermbillede 28-08-2026, foer nogen andre saa det.
-
-               Tekst er den farve, der virker begge steder: det er bjaelkens
-               egen skriftfarve. -->
-          <TextBlock x:Name="GenvejMaerkat" Text="{i18n:Oversat topbar.optagmed}" FontSize="11" FontWeight="SemiBold"
-                     VerticalAlignment="Center" Margin="0,1,9,0"
-                     Foreground="{DynamicResource Tekst}" />
-
-          <!-- TASTEN SER UD SOM OPTAGEKNAPPEN.
-               De to GOER det samme - starter en optagelse - og saa skal de
-               ligne hinanden. Samme roede flade, samme hjoernerunding, samme
-               hvide tekst. Foer var den en graa tastekap, og saa laeste man
-               den som en oplysning frem for som den anden vej ind. -->
-          <Border CornerRadius="7" Padding="15,8" Background="{DynamicResource Optager}">
-            <TextBlock x:Name="GenvejTast" FontSize="13" FontWeight="SemiBold"
-                       Foreground="{DynamicResource PaaOptager}" VerticalAlignment="Center" />
-          </Border>
-        </StackPanel>
+             DEN VISES KUN, NAAR DEN VIRKER: dikteringen skal vaere slaaet
+             til, og der skal vaere en noegle. En besked om en genvej, der
+             ikke goer noget, er vaerre end ingen besked. -->
+        <Border x:Name="DiktatPanel" CornerRadius="7" Padding="14,8" Margin="0,0,18,0"
+                VerticalAlignment="Center" Visibility="Collapsed"
+                Background="{DynamicResource Optager}">
+          <TextBlock x:Name="DiktatTekst" FontSize="12.5" FontWeight="SemiBold"
+                     VerticalAlignment="Center" Foreground="{DynamicResource PaaOptager}" />
+        </Border>
 
         <TextBlock x:Name="Status" VerticalAlignment="Center" FontSize="11.5" MaxWidth="300"
                    TextWrapping="Wrap" Margin="0,0,14,0" Foreground="{DynamicResource TekstMeget}" />

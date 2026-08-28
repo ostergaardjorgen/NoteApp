@@ -129,8 +129,7 @@ public partial class MeetingView : UserControl
             // Ingen af mulighederne kunne registreres. At skjule maerkatet
             // ville vaere at lade som ingenting - saa staar der, at den ikke
             // virker, og hvor man goer noget ved det.
-            GenvejMaerkat.Text = NoteApp.Core.Sprog.T("topbar.optagmed");
-            GenvejTast.Text = "ingen genvej";
+            GenvejTast.Text = NoteApp.Core.Sprog.T("topbar.ingen_genvej");
             GenvejTast.Foreground = (System.Windows.Media.Brush)FindResource("Advarsel");
             GenvejPanel.ToolTip =
                 $"Genvejstasten virker ikke: {bemærkning ?? "ukendt årsag"}. " +
@@ -140,7 +139,6 @@ public partial class MeetingView : UserControl
         }
         else
         {
-            GenvejMaerkat.Text = NoteApp.Core.Sprog.T("topbar.optagmed");
             GenvejTast.Text = tast;
             GenvejTast.Foreground = (System.Windows.Media.Brush)FindResource("Tekst");
             GenvejPanel.ToolTip = bemærkning is null
@@ -155,6 +153,35 @@ public partial class MeetingView : UserControl
         GenvejPanel.Visibility = UrPanel.Visibility == Visibility.Visible
             ? Visibility.Collapsed
             : Visibility.Visible;
+
+        VisDiktatgenvej(tast);
+    }
+
+    /// <summary>
+    /// Viser, at den samme tast HOLDT NEDE giver en diktering.
+    /// </summary>
+    /// <remarks>
+    /// DEN VISES KUN, NÅR DEN VIRKER. Dikteringen skal være slået til, og der
+    /// skal være en nøgle til leverandøren — uden en af delene sker der
+    /// ingenting, når man holder tasten nede.
+    ///
+    /// En besked om en genvej, der ikke gør noget, er værre end ingen besked:
+    /// man holder tasten, der sker intet, og så er det appen, der er i
+    /// stykker — ikke opsætningen, der mangler.
+    /// </remarks>
+    private void VisDiktatgenvej(string? tast)
+    {
+        var virker = tast is not null
+                     && NoteApp.Core.AppSettings.Current.DikteringTil
+                     && NoteApp.Core.Llm.SkyNoegle.Hent() is not null
+                     && UrPanel.Visibility != Visibility.Visible;
+
+        DiktatPanel.Visibility = virker ? Visibility.Visible : Visibility.Collapsed;
+
+        if (!virker) return;
+
+        DiktatTekst.Text = NoteApp.Core.Sprog.T("topbar.diktering_hold", tast!);
+        DiktatPanel.ToolTip = NoteApp.Core.Sprog.T("topbar.diktering_hold_tip");
     }
 
     // ---------------------------------------------------------- pladsholdere

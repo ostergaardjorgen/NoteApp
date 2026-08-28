@@ -23,7 +23,6 @@
     "optag": "Optag møde",
     "webinar": "Webinar",
     "hjaelp": "Tryk optag, når mødet begynder. Du navngiver det bagefter — og du kan skrive noter undervejs.",
-    "optagmed": "OPTAG MED",
     "pause": "❚❚ Pause",
     "fortsaet": "▶ Fortsæt",
     "stop": "■ Stop og gem",
@@ -31,7 +30,10 @@
     "sprog": "Sprog",
     "vaelgsprog": "Skift sproget i appen",
     "tilmoerkt": "Skift til mørkt tema",
-    "tillyst": "Skift til lyst tema"
+    "tillyst": "Skift til lyst tema",
+    "ingen_genvej": "ingen genvej",
+    "diktering_hold": "Hold {0} nede mens du taler",
+    "diktering_hold_tip": "Hold tasten nede, tal, og slip. Teksten skrives ud og lægges, hvor markøren står. Slås fra under Diktering."
   },
   "cockpit": {
     "titel": "Cockpit",

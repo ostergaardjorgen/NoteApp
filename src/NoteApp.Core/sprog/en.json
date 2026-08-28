@@ -23,7 +23,6 @@
     "optag": "Record meeting",
     "webinar": "Webinar",
     "hjaelp": "Press record when the meeting starts. You name it afterwards — and you can write notes as you go.",
-    "optagmed": "RECORD WITH",
     "pause": "❚❚ Pause",
     "fortsaet": "▶ Resume",
     "stop": "■ Stop and save",
@@ -31,7 +30,10 @@
     "sprog": "Language",
     "vaelgsprog": "Change the language of the app",
     "tilmoerkt": "Switch to dark theme",
-    "tillyst": "Switch to light theme"
+    "tillyst": "Switch to light theme",
+    "ingen_genvej": "no shortcut",
+    "diktering_hold": "Hold {0} down while you speak",
+    "diktering_hold_tip": "Hold the key down, speak, and let go. The text is written out and placed where the cursor is. Switch it off under Dictation."
   },
   "cockpit": {
     "titel": "Cockpit",
