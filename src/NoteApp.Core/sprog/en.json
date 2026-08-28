@@ -17,7 +17,9 @@
     "indstillinger": "Settings",
     "dinedata": "Your data",
     "skabeloner": "Meeting types",
-    "diktering": "Dictation"
+    "diktering": "Dictation",
+    "klap_ind": "Collapse the menu",
+    "klap_ud": "Expand the menu"
   },
   "topbar": {
     "optag": "Record meeting",

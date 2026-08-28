@@ -17,7 +17,9 @@
     "indstillinger": "Indstillinger",
     "dinedata": "Dine data",
     "skabeloner": "Mødetyper",
-    "diktering": "Diktering"
+    "diktering": "Diktering",
+    "klap_ind": "Klap menuen ind",
+    "klap_ud": "Klap menuen ud"
   },
   "topbar": {
     "optag": "Optag møde",

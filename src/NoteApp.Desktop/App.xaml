@@ -1,6 +1,7 @@
 ﻿<Application x:Class="NoteApp.Desktop.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:NoteApp.Desktop"
              StartupUri="MainWindow.xaml">
   <Application.Resources>
 
@@ -382,8 +383,30 @@
       <Setter Property="Template">
         <Setter.Value>
           <ControlTemplate TargetType="RadioButton">
+            <!-- IKON OG TEKST HVER FOR SIG.
+                 Naar menuen klappes ind, forsvinder teksten, og ikonet bliver
+                 tilbage. Skulle de to vaere eet stykke indhold, kunne det ikke
+                 lade sig goere - og saa ville et sammenklappet punkt enten
+                 vaere tomt eller vise afkortet tekst.
+
+                 Ikonet staar i Tag. Det er ikke elegant, men det holder
+                 Content til dét, punktet HEDDER - og det er den streng, der
+                 oversaettes, og som bliver til hjaelpeteksten, naar der kun er
+                 et ikon at se paa. -->
             <Border x:Name="kant" CornerRadius="6" Background="Transparent" Padding="12,9">
-              <ContentPresenter VerticalAlignment="Center" />
+              <Grid>
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="Auto" />
+                  <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock x:Name="ikon" Grid.Column="0" Text="{TemplateBinding Tag}"
+                           FontFamily="Segoe MDL2 Assets" FontSize="15" Width="20"
+                           VerticalAlignment="Center" TextAlignment="Center" />
+
+                <ContentPresenter x:Name="tekst" Grid.Column="1" VerticalAlignment="Center"
+                                  Margin="12,0,0,0" />
+              </Grid>
             </Border>
             <ControlTemplate.Triggers>
               <Trigger Property="IsMouseOver" Value="True">
@@ -394,6 +417,14 @@
                 <Setter Property="Foreground" Value="{DynamicResource Tekst}" />
                 <Setter Property="FontWeight" Value="SemiBold" />
               </Trigger>
+
+              <!-- Sammenklappet: teksten ud, og ikonet ind paa midten. -->
+              <DataTrigger Value="True"
+                           Binding="{Binding MenuSammenklappet,
+                                     RelativeSource={RelativeSource AncestorType={x:Type local:MainWindow}}}">
+                <Setter TargetName="tekst" Property="Visibility" Value="Collapsed" />
+                <Setter TargetName="kant" Property="Padding" Value="6,9" />
+              </DataTrigger>
             </ControlTemplate.Triggers>
           </ControlTemplate>
         </Setter.Value>

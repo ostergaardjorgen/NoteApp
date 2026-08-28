@@ -393,6 +393,11 @@ public partial class MainWindow : Window
             Preferences.SettingsView.Dikteringsskift = _ =>
                 Dispatcher.BeginInvoke(SaetDiktering);
 
+            // Klappen skal saettes EFTER skabelonen er bygget: pilen findes
+            // ikke i traeet foer.
+            Klap.ApplyTemplate();
+            SaetMenu(Core.AppSettings.Current.MenuSammenklappet, gem: false);
+
             SaetDiktering();
 
             // Skifter registreringen senere - fordi den oenskede tast blev
@@ -1031,6 +1036,89 @@ public partial class MainWindow : Window
             ? Visibility.Visible
             : Visibility.Collapsed;
     }
+
+    // ============================ MENUEN KLAPPES ============================
+
+    /// <summary>Bredden, når menuen er ude.</summary>
+    private const double MenuUde = 196;
+
+    /// <summary>Bredden, når den er inde: ét ikon plus luft på begge sider.</summary>
+    private const double MenuInde = 62;
+
+    /// <summary>
+    /// Er menuen klappet ind?
+    /// </summary>
+    /// <remarks>
+    /// DEN ER EN DEPENDENCYPROPERTY, fordi menupunkterne selv skal kunne se
+    /// den. Deres skabelon ligger i App.xaml og skjuler teksten med en
+    /// DataTrigger, der binder herop — så behøver koden ikke lede efter ni
+    /// tekstfelter inde i ni skabeloner og sætte dem enkeltvis.
+    /// </remarks>
+    public static readonly DependencyProperty MenuSammenklappetProperty =
+        DependencyProperty.Register(nameof(MenuSammenklappet), typeof(bool), typeof(MainWindow),
+                                    new PropertyMetadata(false));
+
+    public bool MenuSammenklappet
+    {
+        get => (bool)GetValue(MenuSammenklappetProperty);
+        set => SetValue(MenuSammenklappetProperty, value);
+    }
+
+    /// <summary>
+    /// Sætter menuen i den stand, den skal have — og husker den.
+    /// </summary>
+    /// <remarks>
+    /// HJÆLPETEKSTERNE SÆTTES HER OG IKKE I XAML. Sammenklappet er ikonet det
+    /// eneste, der er tilbage, og et ikon uden navn er en gætteleg. Teksten er
+    /// punktets eget navn — den, der allerede er oversat — så den kan ikke
+    /// komme til at sige noget andet end menupunktet.
+    /// </remarks>
+    private void SaetMenu(bool sammenklappet, bool gem = true)
+    {
+        MenuSammenklappet = sammenklappet;
+
+        Menubredde.Width = new GridLength(sammenklappet ? MenuInde : MenuUde);
+        Menuindhold.Margin = new Thickness(sammenklappet ? 8 : 14, 22,
+                                           sammenklappet ? 8 : 14, 16);
+
+        Logotekst.Visibility = sammenklappet ? Visibility.Collapsed : Visibility.Visible;
+        Datafod.Visibility = sammenklappet ? Visibility.Collapsed : Visibility.Visible;
+        Logolinje.Margin = new Thickness(sammenklappet ? 0 : 4, 0, 0, 2);
+        Logolinje.HorizontalAlignment = sammenklappet
+            ? HorizontalAlignment.Center
+            : HorizontalAlignment.Left;
+
+        // Pilen peger den vej, den GOER noget: ind, naar menuen er ude.
+        if (Klap.Template.FindName("pil", Klap) is System.Windows.Controls.TextBlock pil)
+            pil.Text = sammenklappet ? "\uE76C" : "\uE76B";
+
+        var klaptekst = Core.Sprog.T(sammenklappet ? "nav.klap_ud" : "nav.klap_ind");
+
+        Klap.ToolTip = klaptekst;
+
+        // EN KNAP UDEN NAVN FINDES IKKE FOR EN SKAERMLAESER. Indholdet er en
+        // pil i en ikonskrift, og den laeses som et tegn uden betydning.
+        // Navnet skal derfor saettes i haanden - og det skifter med standen,
+        // fordi knappen goer to forskellige ting.
+        System.Windows.Automation.AutomationProperties.SetName(Klap, klaptekst);
+
+        foreach (var knap in Menupunkter())
+            knap.ToolTip = sammenklappet ? knap.Content as string : null;
+
+        if (gem)
+        {
+            Core.AppSettings.Current.MenuSammenklappet = sammenklappet;
+            Core.AppSettings.Current.Save();
+        }
+    }
+
+    private IEnumerable<System.Windows.Controls.RadioButton> Menupunkter() => new[]
+    {
+        NavCockpit, NavDiktering, NavTransskriber, NavDokumenter, NavSkabeloner,
+        NavMotor, NavCompliance, NavHistorik, NavIndstillinger,
+    };
+
+    private void Klap_Klik(object sender, RoutedEventArgs e) => SaetMenu(!MenuSammenklappet);
 
     private void Nav_Changed(object sender, RoutedEventArgs e)
     {

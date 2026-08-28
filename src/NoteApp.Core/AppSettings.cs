@@ -286,6 +286,16 @@ public sealed class AppSettings
     public Dictionary<string, string> Teksttyper { get; set; } = new();
 
     /// <summary>
+    /// Er menuen klappet ind, så kun ikonerne står?
+    /// </summary>
+    /// <remarks>
+    /// Den huskes, fordi den er et valg om plads, ikke om opgave. Klappede
+    /// man den ind for at få bredde til en udskrift, ville den være ude igen
+    /// ved næste opstart — og så klapper man den ind hver morgen.
+    /// </remarks>
+    public bool MenuSammenklappet { get; set; }
+
+    /// <summary>
     /// Hvornår klokken sidst blev åbnet. Alt nyere end det er ulæst.
     ///
     /// Sættes kun, når man ÅBNER klokken — ikke ved opstart. En besked, man

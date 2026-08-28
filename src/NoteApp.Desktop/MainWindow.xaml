@@ -23,7 +23,9 @@
 
     <Grid Grid.Row="1">
     <Grid.ColumnDefinitions>
-      <ColumnDefinition Width="196" />
+      <!-- Bredden saettes i koden, naar menuen klappes. 196 er den udfoldede;
+           den sammenklappede er lige praecis et ikon plus luft. -->
+      <ColumnDefinition x:Name="Menubredde" Width="196" />
       <ColumnDefinition Width="*" />
     </Grid.ColumnDefinitions>
 
@@ -32,15 +34,19 @@
          bruges. -->
     <Border Grid.Column="0" Background="{DynamicResource Panel}"
             BorderBrush="{DynamicResource PanelKant}" BorderThickness="0,0,1,0">
+     <Grid>
       <!-- To omraader: navigationen oeverst, oplysningen om datamappen
            nederst. Laa den lige under menupunkterne, saa den ud som endnu et
            punkt man kunne klikke paa. -->
-      <DockPanel Margin="14,22,14,16" LastChildFill="False">
+      <DockPanel x:Name="Menuindhold" Margin="14,22,14,16" LastChildFill="False">
 
-        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="4,0,0,2">
+        <!-- PIA-IKONET BLIVER, NAVNET GAAR. Sammenklappet er ikonet det
+             eneste, der siger, hvilket program man er i - og det er nok, naar
+             det er dét, der staar paa proceslinjen. -->
+        <StackPanel x:Name="Logolinje" DockPanel.Dock="Top" Orientation="Horizontal" Margin="4,0,0,2">
           <Image Source="app.png" Width="30" Height="30" VerticalAlignment="Center"
                  RenderOptions.BitmapScalingMode="HighQuality" />
-          <StackPanel Margin="10,0,0,0" VerticalAlignment="Center">
+          <StackPanel x:Name="Logotekst" Margin="10,0,0,0" VerticalAlignment="Center">
             <TextBlock Text="HeyPia" FontSize="19" FontWeight="SemiBold" />
             <TextBlock x:Name="Version" Style="{StaticResource Underskrift}" />
           </StackPanel>
@@ -75,7 +81,7 @@
 
                Et menupunkt nummer tre siger, at den er noget, man går hen til.
                Øverst siger den, at den er dér, man starter. -->
-          <RadioButton x:Name="NavCockpit" GroupName="nav" Content="{i18n:Oversat nav.cockpit}"
+          <RadioButton x:Name="NavCockpit" Tag="&#xE80F;" GroupName="nav" Content="{i18n:Oversat nav.cockpit}"
                        Checked="Nav_Changed" IsChecked="True"
                        Style="{StaticResource NavKnap}" />
 
@@ -88,17 +94,17 @@
                teksttyperne, hvor formen rettes, og ordbogen, hvor et navn
                laeres. Laa de paa hver sin skaerm, var det tre opgaver i
                stedet for een - og saa bliver de ikke lavet. -->
-          <RadioButton x:Name="NavDiktering" GroupName="nav" Content="{i18n:Oversat nav.diktering}"
+          <RadioButton x:Name="NavDiktering" Tag="&#xE720;" GroupName="nav" Content="{i18n:Oversat nav.diktering}"
                        Checked="Nav_Changed"
                        Style="{StaticResource NavKnap}" />
 
           <!-- «Optagelser» frem for «Transskribér»: menupunktet siger, hvad man
                finder derinde. Handlingen står på selve skærmen, ved den
                optagelse den hører til. -->
-          <RadioButton x:Name="NavTransskriber" GroupName="nav" Content="{i18n:Oversat nav.optagelser}"
+          <RadioButton x:Name="NavTransskriber" Tag="&#xE8F1;" GroupName="nav" Content="{i18n:Oversat nav.optagelser}"
                        Checked="Nav_Changed"
                        Style="{StaticResource NavKnap}" />
-          <RadioButton x:Name="NavDokumenter" GroupName="nav" Content="{i18n:Oversat nav.dokumenter}"
+          <RadioButton x:Name="NavDokumenter" Tag="&#xE8A5;" GroupName="nav" Content="{i18n:Oversat nav.dokumenter}"
                        Checked="Nav_Changed"
                        Style="{StaticResource NavKnap}" />
           <!-- MØDETYPER, IKKE SKABELONER.
@@ -115,7 +121,7 @@
                Filerne bag hedder stadig skabeloner. Det er med vilje: de er
                skabeloner, når man skriver dem, og mødetyper, når man vælger
                dem. -->
-          <RadioButton x:Name="NavSkabeloner" GroupName="nav" Content="{i18n:Oversat nav.skabeloner}"
+          <RadioButton x:Name="NavSkabeloner" Tag="&#xE8EC;" GroupName="nav" Content="{i18n:Oversat nav.skabeloner}"
                        Checked="Nav_Changed"
                        Style="{StaticResource NavKnap}" />
           <!-- AI-modeller er det eneste menupunkt med et mærkat. Grunden er,
@@ -128,7 +134,7 @@
                det navn af sig selv. Nu er Content et Grid, og saa har punktet
                ikke laengere et navn - hverken for en skaermlaeser eller for
                den, der proever skaermene af med UI-automatik. -->
-          <RadioButton x:Name="NavMotor" GroupName="nav"
+          <RadioButton x:Name="NavMotor" Tag="&#xE9F5;" GroupName="nav"
                        Checked="Nav_Changed"
                        AutomationProperties.Name="{i18n:Oversat faelles.ai_modeller}"
                        Style="{StaticResource NavKnap}">
@@ -158,22 +164,22 @@
               </Border>
             </Grid>
           </RadioButton>
-          <RadioButton x:Name="NavCompliance" GroupName="nav" Content="{i18n:Oversat nav.compliance}"
+          <RadioButton x:Name="NavCompliance" Tag="&#xE7EE;" GroupName="nav" Content="{i18n:Oversat nav.compliance}"
                        Checked="Nav_Changed"
                        Style="{StaticResource NavKnap}" />
-          <RadioButton x:Name="NavHistorik" GroupName="nav" Content="{i18n:Oversat nav.historik}"
+          <RadioButton x:Name="NavHistorik" Tag="&#xE81C;" GroupName="nav" Content="{i18n:Oversat nav.historik}"
                        Checked="Nav_Changed"
                        Style="{StaticResource NavKnap}" />
           <!-- HER LAA «Filer og backup». Det er ikke et sted, man gaar hen
                - det er indstillinger, man aabner den dag, man skal flytte
                datamappen eller gendanne noget. Nu to faner under
                «Indstillinger». Fjernet 19-08-2026. -->
-          <RadioButton x:Name="NavIndstillinger" GroupName="nav" Content="{i18n:Oversat nav.indstillinger}"
+          <RadioButton x:Name="NavIndstillinger" Tag="&#xE713;" GroupName="nav" Content="{i18n:Oversat nav.indstillinger}"
                        Checked="Nav_Changed"
                        Style="{StaticResource NavKnap}" />
         </StackPanel>
 
-        <StackPanel DockPanel.Dock="Bottom">
+        <StackPanel x:Name="Datafod" DockPanel.Dock="Bottom">
           <Border Height="1" Background="{DynamicResource PanelKant}" Margin="6,0,6,14" />
           <TextBlock Text="{i18n:Oversat nav.dinedata}" Style="{StaticResource Underskrift}" Margin="6,0,0,3" />
           <TextBlock x:Name="DataSti" Style="{StaticResource Underskrift}"
@@ -187,6 +193,40 @@
                man laeser forbi. Fjernet 19-08-2026. -->
         </StackPanel>
       </DockPanel>
+
+      <!-- ==================== KLAPPEN ====================
+
+           DEN SIDDER PAA KANTEN, MIDT PAA SIDEN. Det er dér, oejet leder
+           efter den: en menu, der kan klappes, klapper mod indholdet, og
+           haandtaget hoerer til paa graensen mellem de to.
+
+           Den skal kunne SES uden at raabe. Derfor en rund flade i panelets
+           egen farve med en kant om - samme kant som sidebjaelkens egen, saa
+           den laeses som en del af kanten frem for som noget, der ligger
+           oven paa. Pilen peger den vej, den goer noget: ind, naar menuen er
+           ude, og ud, naar den er inde. -->
+      <Button x:Name="Klap" Click="Klap_Klik" Cursor="Hand" Width="22" Height="46"
+              HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,-11,0"
+              Background="Transparent" BorderThickness="0" Padding="0">
+        <Button.Template>
+          <ControlTemplate TargetType="Button">
+            <Border x:Name="flade" CornerRadius="11" Background="{DynamicResource Panel}"
+                    BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
+              <TextBlock x:Name="pil" FontFamily="Segoe MDL2 Assets" FontSize="10"
+                         HorizontalAlignment="Center" VerticalAlignment="Center"
+                         Foreground="{DynamicResource TekstSvag}" />
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="flade" Property="Background" Value="{DynamicResource Valgt}" />
+                <Setter TargetName="flade" Property="BorderBrush" Value="{DynamicResource Accent}" />
+                <Setter TargetName="pil" Property="Foreground" Value="{DynamicResource Tekst}" />
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Button.Template>
+      </Button>
+     </Grid>
     </Border>
 
     <!-- ============ VEJEN TILBAGE TIL SOEGNINGEN ============
