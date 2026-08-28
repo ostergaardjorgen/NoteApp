@@ -305,8 +305,16 @@ public sealed class GlobalHotkey : IDisposable
                     $"Du har valgt {ønsket.Navn}. Den var optaget, så {valg.Navn} bruges nu. "
                     + "Der prøves at få din egen tilbage hvert minut.", Udfald.SeEfter);
             else
+                // TASTEN GOER TO TING, NAAR DIKTERINGEN ER SLAAET TIL, og saa
+                // er «starter en optagelse» ikke laengere hele sandheden. Den,
+                // der laeser linjen for at finde ud af, hvorfor et hold ikke
+                // goer noget, skal kunne se det her.
                 Historik.Skriv(HaendelseType.Andet, "Genvejstasten er klar",
-                    $"{valg.Navn} starter en optagelse.", Udfald.Fuldført);
+                    AppSettings.Current.DikteringTil
+                        ? $"{valg.Navn} starter en optagelse ved et kort tryk. "
+                          + "Holdes den nede, bliver det en diktering."
+                        : $"{valg.Navn} starter en optagelse.",
+                    Udfald.Fuldført);
         }
         catch (Exception)
         {
