@@ -47,9 +47,9 @@
     <SolidColorBrush x:Key="FeltKant"      Color="{DynamicResource FeltKantFarve}" />
 
     <!-- Musen over, knappen nede, raekken valgt. Se Tema.cs. -->
-    <Color x:Key="SvaevFarve">#FFEFEFEA</Color>
+    <Color x:Key="SvaevFarve">#FFF1F1EF</Color>
     <SolidColorBrush x:Key="Svaev"         Color="{DynamicResource SvaevFarve}" />
-    <Color x:Key="TrykketFarve">#FFE4E4DD</Color>
+    <Color x:Key="TrykketFarve">#FFE8E8E5</Color>
     <SolidColorBrush x:Key="Trykket"       Color="{DynamicResource TrykketFarve}" />
     <Color x:Key="ValgtFarve">#FFD9E6F8</Color>
     <SolidColorBrush x:Key="Valgt"         Color="{DynamicResource ValgtFarve}" />
@@ -210,8 +210,21 @@
               <Trigger Property="IsMouseOver" Value="True">
                 <Setter TargetName="kant" Property="Background" Value="{StaticResource Svaev}" />
               </Trigger>
+              <!-- EN GRAA KNAP SKAL STADIG KUNNE LAESES.
+                   Her stod Opacity 0.4. Paa en naesten sort bund var det
+                   fint - blaat ved 40 % er stadig blaat. Paa en HVID bund
+                   blev den primaere knap lyseblaa med hvid skrift, og saa
+                   kunne man ikke se, hvad den hed. Set paa Optagelser
+                   28-08-2026, hvor «Opret transskription» var toma.
+
+                   Nu saettes farverne i stedet. Det virker begge steder, og
+                   teksten kan laeses - hvilket den skal, for ellers kan man
+                   ikke regne ud, hvorfor knappen ikke kan trykkes. -->
               <Trigger Property="IsEnabled" Value="False">
-                <Setter Property="Opacity" Value="0.4" />
+                <Setter TargetName="kant" Property="Background" Value="{StaticResource Trykket}" />
+                <Setter TargetName="kant" Property="BorderBrush" Value="{StaticResource PanelKant}" />
+                <Setter Property="Foreground" Value="{StaticResource Slukket}" />
+                <Setter Property="Cursor" Value="Arrow" />
               </Trigger>
             </ControlTemplate.Triggers>
           </ControlTemplate>
@@ -222,7 +235,7 @@
     <Style x:Key="Primaer" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
       <Setter Property="Background" Value="{StaticResource Accent}" />
       <Setter Property="BorderBrush" Value="{StaticResource Accent}" />
-      <Setter Property="Foreground" Value="White" />
+      <Setter Property="Foreground" Value="{StaticResource PaaAccent}" />
       <Setter Property="FontWeight" Value="SemiBold" />
     </Style>
 
@@ -361,7 +374,7 @@
     <Style x:Key="Fare" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
       <Setter Property="Background" Value="{StaticResource Optager}" />
       <Setter Property="BorderBrush" Value="{StaticResource Optager}" />
-      <Setter Property="Foreground" Value="White" />
+      <Setter Property="Foreground" Value="{StaticResource PaaOptager}" />
       <Setter Property="FontWeight" Value="SemiBold" />
     </Style>
 

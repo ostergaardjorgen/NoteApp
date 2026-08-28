@@ -17,14 +17,24 @@ namespace NoteApp.Desktop;
 /// langsommere opslag hver gang.
 ///
 /// I stedet BLIVER PENSLERNE LIGGENDE. Det er de samme objekter hele appens
-/// levetid; kun deres Color ændres. En SolidColorBrush er en DependencyObject,
-/// så WPF opdager ændringen selv og tegner alt, der bruger den, om. Ét sted at
-/// skifte, nul ændringer i skærmbillederne.
+/// levetid, og det er FARVEN bag dem, der skiftes:
 ///
-/// DERFOR MÅ PENSLERNE IKKE FRYSES. `PresentationOptions:Freeze="True"` på en
-/// pensel i App.xaml ville gøre den uforanderlig — hurtigere at tegne, og
-/// temaskiftet ville stille og roligt ikke virke på netop den farve. Der er en
-/// prøve på det: <see cref="Efterse"/>.
+///     &lt;Color x:Key="BaggrundFarve"&gt;#FFF7F7F5&lt;/Color&gt;
+///     &lt;SolidColorBrush x:Key="Baggrund" Color="{DynamicResource BaggrundFarve}" /&gt;
+///
+/// Her byttes `BaggrundFarve` ud. Penslen henter sin farve dynamisk, opdager
+/// det selv, og alt, der bruger den, bliver tegnet om. Ét sted at skifte, nul
+/// ændringer i skærmbillederne.
+///
+/// OMVEJEN OVER EN Color ER IKKE PYNT. Første forsøg satte `pensel.Color`
+/// direkte, og det virkede ikke: WPF FRYSER SELV RESURSER FRA XAML, og en
+/// frossen Freezable kan ikke ændres. Alle femogtyve pensler var frosne, og
+/// skiftet sprang dem tavst over — appen sagde «mørkt» og så lys ud.
+///
+/// En Freezable med en uafklaret dynamisk reference KAN ikke fryses. Det er
+/// hele grunden til, at farven står for sig selv. Skriver nogen farven direkte
+/// på penslen igen, fejler TemafilTest — og det er med vilje, for det er ikke
+/// noget, man kan huske om et halvt år.
 ///
 /// WINDOWS' EGNE KONTROLLER FØLGER MED
 ///

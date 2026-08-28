@@ -259,6 +259,7 @@ skrevet. Det er halvdelen af arbejdet.
 | **Mål mødet, ikke modellen** | Middel | Hvor meget var uhørligt, hvor mange talte i munden på hinanden, hvem sagde aldrig sit navn |
 | **Maskering før afsendelse** | Stor | Bliver mindre presserende, hvis 1.1 betyder, at man tit slet ikke sender noget |
 | **Forbrugsloft i appen** | Lille | Mistrals API har ingen vej til kontoens loft — efterprøvet 19-08, alle betalingsstier svarer 404. Skal derfor tastes ind |
+| **Skal læseruden se anderledes ud?** | Lille/middel | Afventer, at lys/mørk er brugt i praksis. Uddybet nedenfor |
 
 ### Appen justerer sig selv ud fra brug — og kan skrue tilbage
 *Foreslået 21-08-2026*
@@ -347,6 +348,32 @@ på filstørrelsen, ser ingenting. Det er noteret under 2.2.
 **Hvad der skulle ændre sig, før den tages op igen:** at der er kunder nok til
 at bære et produkt mere — eller at nogen efterspørger opkaldsoptagelse så
 hårdt, at den nordiske VoIP-vej er en forretning i sig selv.
+
+---
+
+### Skal læseruden se anderledes ud end resten af appen?
+*Foreslået 28-08-2026 · afventer, at omskifteren er brugt i praksis*
+
+Udskriften og teleprompteren læses i lange stræk, og det er noget andet end at
+klikke sig rundt i en app. To muligheder står åbne:
+
+- **A — ruden bliver mørk, også når appen er lys.** Den oprindelige begrundelse
+  taget alvorligt. Kræver et andet sæt pensler til netop den rude; paletten
+  gælder hele appen på én gang, så det er reelt arbejde og ikke en indstilling.
+- **B — ruden bliver papir.** Varm bund, større skrift og en begrænset
+  linjebredde, så øjet ikke skal vandre helt ud til kanten. Tættere på det,
+  Granola gør, og billigere.
+
+**Hvorfor det venter:** Appen fik lys/mørk med et valg 28-08-2026, og
+begrundelsen for at gøre den mørk fra begyndelsen stod i App.xaml:
+«teleprompteren læses i lange stræk, og lys tekst på mørk bund trætter mindre».
+Den begrundelse er ikke væk — men den kan nu løses ved at skifte tema om
+aftenen i stedet for at bygge noget. Om det er nok, kan kun afgøres ved at
+bruge appen en uges tid.
+
+**Hvis den bliver taget op:** hælder til B. Den løser det egentlige problem ved
+lange stræk — linjelængden — hvor A kun flytter farven. Og A gør appen
+tosproget i sit eget udseende, hvilket er en pris, der skal tjenes ind.
 
 ---
 

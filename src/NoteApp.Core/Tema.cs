@@ -33,10 +33,15 @@ public enum Temavalg
 ///
 /// HVORDAN SKIFTET SKER, UDEN AT ALT SKAL TEGNES OM
 ///
-/// Se Temaskift i Desktop. Kort: penslerne bliver liggende som de samme
-/// objekter, og kun deres Color ændres. WPF opdager det selv og tegner om.
-/// Havde vi byttet hele ordbogen ud, skulle alle 969 opslag have været
-/// DynamicResource — langsommere, og en ændring i hver eneste fil.
+/// Se Temaskift i Desktop. Kort: hver farve står som en `Color` i App.xaml,
+/// og penslen henter den med en DynamicResource. Temaskiftet bytter FARVEN,
+/// og penslen følger med af sig selv — de 969 opslag på `{StaticResource ...}`
+/// mærker intet.
+///
+/// FØRSTE FORSØG VAR AT ÆNDRE PENSLERNES Color DIREKTE, og det virkede ikke:
+/// WPF fryser selv resurser fra XAML, og en frossen pensel kan ikke ændres.
+/// Alle femogtyve var frosne. Omvejen over en `Color` er ikke pynt — den er
+/// den eneste måde, en pensel fra XAML kan blive ved med at kunne skifte.
 /// </summary>
 public static class Tema
 {
@@ -79,8 +84,8 @@ public static class Tema
             // App.xaml som moerkeblaa toner - femten steder, der ikke fulgte
             // med et temaskift, og som ville have staaet som moerke pletter i
             // en lys app.
-            ["Svaev"]      = "#FFEFEFEA",
-            ["Trykket"]    = "#FFE4E4DD",
+            ["Svaev"]      = "#FFF1F1EF",
+            ["Trykket"]    = "#FFE8E8E5",
             ["Valgt"]      = "#FFD9E6F8",
 
             ["Tekst"]      = "#FF1B1B19",
