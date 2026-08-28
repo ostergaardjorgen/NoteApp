@@ -15,7 +15,9 @@
     "compliance": "Compliance",
     "historik": "History",
     "indstillinger": "Settings",
-    "dinedata": "Your data"
+    "dinedata": "Your data",
+    "ordbog": "Word library",
+    "skabeloner": "Templates"
   },
   "topbar": {
     "optag": "Record meeting",
@@ -478,7 +480,16 @@
     "tilbage_til_standarden": "Back to the default",
     "tilpas_til_denne_moedetype": "Adapt to this meeting type",
     "mappe": "FOLDER",
-    "optagelser_med_den_her_moedetype_laegges": "Recordings with this meeting type are suggested for this folder. If you have chosen another yourself, it stays. Empty = no folder."
+    "optagelser_med_den_her_moedetype_laegges": "Recordings with this meeting type are suggested for this folder. If you have chosen another yourself, it stays. Empty = no folder.",
+    "fane_moedetyper": "Meeting types",
+    "fane_teksttyper": "Text types",
+    "teksttyper": "Text types",
+    "teksttyper_under": "What the spoken word becomes. The form is chosen automatically from the program you are working in — if it is not recognised, the one you chose under Settings → Dictation is used.",
+    "instruktion_under": "The instruction sent to the language model along with what you said. Edit it if the text should come out differently — it is not sacred.",
+    "nulstil": "Reset to default",
+    "teksttype_gemt": "Saved.",
+    "teksttype_nulstillet": "Put back to the app’s own.",
+    "teksttype_rettet": "edited"
   },
   "engineview": {
     "1_lyd_til_tekst_her_paa_maskinen": "1 · AUDIO TO TEXT — ON THIS MACHINE",
@@ -863,5 +874,32 @@
     "historik": "Dictation of {0} seconds",
     "indsat": "Placed in {0} — as {1}",
     "rettede": "The word library corrected {0} word(s):"
+  },
+  "ordbogview": {
+    "ordbog": "Word library",
+    "under": "Names, terms and abbreviations the transcription should know. The list is sent along with the audio as prior knowledge — and it corrects afterwards, when a word came back nearly right.",
+    "advarsel": "The list leaves the machine with every dictation. That is why it is here, where you can see it — do not put anything in it that must not be sent.",
+    "nyt": "New word — name, term or abbreviation",
+    "tilfoej": "Add",
+    "fjern": "Remove selected",
+    "gem_fil": "Save to file",
+    "hent_fil": "Load from file",
+    "tom": "The word library is empty. Add the names and terms that come back wrong.",
+    "antal": "{0} words — the first {1} are sent along",
+    "antal_alle": "{0} words",
+    "findes": "«{0}» is already there.",
+    "hentet": "Loaded {0} new words.",
+    "gemt": "{0} words saved to {1}",
+    "filter": "Text file (*.txt)|*.txt|All files (*.*)|*.*"
+  },
+  "teksttyper": {
+    "note": "Note",
+    "note_hvornaar": "Close to what you said — just tidied up",
+    "mail": "Email",
+    "mail_hvornaar": "Outlook, Gmail — full text with an opening and a closing",
+    "prompt": "Prompt",
+    "prompt_hvornaar": "Claude, ChatGPT, Cursor — no politeness",
+    "opgave": "Task",
+    "opgave_hvornaar": "Todoist, Google Tasks — one line in the imperative"
   }
 }

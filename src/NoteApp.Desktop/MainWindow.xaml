@@ -79,6 +79,18 @@
                        Checked="Nav_Changed" IsChecked="True"
                        Style="{StaticResource NavKnap}" />
 
+          <!-- ORDBOGEN LIGGER HER, LIGE UNDER COCKPITTET.
+               Cockpittet er det, man kigger i; ordbogen er det, man retter,
+               naar noget i cockpittet blev hoert forkert. De to hoerer
+               sammen.
+
+               Den laa under Indstillinger indtil 28-08-2026. En ordbog er
+               ikke en indstilling - den er noget, man arbejder i, og et navn,
+               der bliver hoert forkert, skal kunne tilfoejes med det samme. -->
+          <RadioButton x:Name="NavOrdbog" GroupName="nav" Content="{i18n:Oversat nav.ordbog}"
+                       Checked="Nav_Changed"
+                       Style="{StaticResource NavKnap}" />
+
           <!-- «Optagelser» frem for «Transskribér»: menupunktet siger, hvad man
                finder derinde. Handlingen står på selve skærmen, ved den
                optagelse den hører til. -->
@@ -88,18 +100,18 @@
           <RadioButton x:Name="NavDokumenter" GroupName="nav" Content="{i18n:Oversat nav.dokumenter}"
                        Checked="Nav_Changed"
                        Style="{StaticResource NavKnap}" />
-          <!-- MØDETYPER, IKKE SKABELONER.
-               «Skabelon» er et ord fra tekstbehandling. Det tvinger læseren
-               til at tænke i dokumenter på et tidspunkt, hvor der ikke er
-               noget dokument — og det er dér, dokumentdelen bliver svær at
-               finde ud af. Et statusmøde, en 1:1, et kundemøde: dét kan man
-               svare på, FØR mødet går i gang, og det er derfor mødetypen nu
-               vælges, når optagelsen startes.
+          <!-- SKABELONER IGEN — FORDI DER NU ER TO SLAGS.
+               Menupunktet hed «Mødetyper», mens det var det eneste, der lå
+               derinde: en mødetype kan man svare på, FØR mødet går i gang,
+               og «skabelon» tvang læseren til at tænke i dokumenter.
 
-               Filerne bag hedder stadig skabeloner. Det er med vilje: de er
-               skabeloner, når man skriver dem, og mødetyper, når man vælger
-               dem. Kun det, brugeren læser, er skiftet. -->
-          <RadioButton x:Name="NavSkabeloner" GroupName="nav" Content="{i18n:Oversat nav.moedetyper}"
+               Med dikteringen kom teksttyperne til — hvad det talte skal
+               blive til: en mail, en prompt, en opgave, en note. De er ikke
+               mødetyper, og de hører alligevel til samme sted: begge er en
+               form, noget bliver hældt i.
+
+               Derfor er det ene navn ovenover to faner. -->
+          <RadioButton x:Name="NavSkabeloner" GroupName="nav" Content="{i18n:Oversat nav.skabeloner}"
                        Checked="Nav_Changed"
                        Style="{StaticResource NavKnap}" />
           <!-- AI-modeller er det eneste menupunkt med et mærkat. Grunden er,

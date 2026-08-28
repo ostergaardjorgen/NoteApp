@@ -148,7 +148,8 @@ public sealed class Dikteringsvagt : IDisposable
             if (v.DikteringPuds)
             {
                 Melder?.Invoke(Sprog.T("diktering.rydder_op"));
-                tekst = await klient.PudsAsync(udskrift, formaal);
+                tekst = await klient.PudsAsync(
+                    udskrift, formaal, Teksttyper.Prompt(formaal, v.Teksttyper));
             }
 
             var indsat = v.DikteringIndsaet && Indsaetter.Indsaet(tekst, _maal);

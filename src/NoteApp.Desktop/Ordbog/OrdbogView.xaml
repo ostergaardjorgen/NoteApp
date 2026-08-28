@@ -1,0 +1,89 @@
+﻿<UserControl x:Class="NoteApp.Desktop.Ordbog.OrdbogView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:i18n="clr-namespace:NoteApp.Desktop"
+             Background="{DynamicResource Baggrund}">
+
+  <!-- ORDBOGEN LIGGER FOR SIG, IKKE UNDER INDSTILLINGER.
+
+       Den er ikke en indstilling. Den er noget, man ARBEJDER i: et navn, der
+       bliver hoert forkert, tilfoejer man, mens man har det for oejnene af
+       sig - ikke naeste gang man alligevel er inde at rette noget andet.
+
+       Og den skal kunne SES. Listen forlader maskinen ved hver diktering, og
+       indtil 28-08-2026 laa den som en fil, ingen havde aabnet i maanedsvis,
+       med et firmanavn i, der ikke maatte sendes. En liste, ingen kan se, er
+       en liste, ingen kan kontrollere. -->
+
+  <Grid Margin="24,20,24,20">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+
+    <StackPanel Grid.Row="0" Margin="0,0,0,12">
+      <TextBlock Text="{i18n:Oversat ordbogview.ordbog}" Style="{StaticResource Overskrift}" />
+      <TextBlock Style="{StaticResource Underskrift}" TextWrapping="Wrap" MaxWidth="760"
+                 HorizontalAlignment="Left"
+                 Text="{i18n:Oversat ordbogview.under}" />
+    </StackPanel>
+
+    <!-- Advarslen staar OEVER feltet, ikke under listen. Man skal laese den,
+         foer man skriver noget ind - ikke bagefter. -->
+    <Border Grid.Row="1" Background="{DynamicResource AdvarselFlade}" CornerRadius="10" Padding="16,12"
+            Margin="0,0,0,16" BorderBrush="{DynamicResource Advarsel}" BorderThickness="1"
+            HorizontalAlignment="Left" MaxWidth="760">
+      <TextBlock TextWrapping="Wrap" Foreground="{DynamicResource Tekst}"
+                 Text="{i18n:Oversat ordbogview.advarsel}" />
+    </Border>
+
+    <Grid Grid.Row="2" Margin="0,0,0,12" HorizontalAlignment="Left" Width="760">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*" />
+        <ColumnDefinition Width="Auto" />
+      </Grid.ColumnDefinitions>
+
+      <StackPanel Grid.Column="0">
+        <TextBlock Style="{StaticResource Underskrift}" Margin="0,0,0,4"
+                   Text="{i18n:Oversat ordbogview.nyt}" />
+        <TextBox x:Name="Nyt" Padding="10,8" KeyDown="Nyt_Tast" />
+      </StackPanel>
+
+      <Button x:Name="Tilfoej" Grid.Column="1" Margin="10,0,0,0" Padding="18,9"
+              VerticalAlignment="Bottom" Click="Tilfoej_Klik" BorderThickness="0" FontWeight="SemiBold"
+              Background="{DynamicResource Accent}" Foreground="{DynamicResource PaaAccent}"
+              Content="{i18n:Oversat ordbogview.tilfoej}" />
+    </Grid>
+
+    <Border Grid.Row="3" HorizontalAlignment="Left" Width="760"
+            Background="{DynamicResource Panel}" CornerRadius="10"
+            BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
+      <ListBox x:Name="Liste" Background="Transparent" BorderThickness="0" Padding="6"
+               ScrollViewer.VerticalScrollBarVisibility="Auto" />
+    </Border>
+
+    <Grid Grid.Row="4" Margin="0,14,0,0" HorizontalAlignment="Left" Width="760">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="Auto" />
+        <ColumnDefinition Width="*" />
+        <ColumnDefinition Width="Auto" />
+        <ColumnDefinition Width="Auto" />
+      </Grid.ColumnDefinitions>
+
+      <Button x:Name="Fjern" Grid.Column="0" Padding="16,9" Click="Fjern_Klik"
+              Content="{i18n:Oversat ordbogview.fjern}" />
+
+      <TextBlock x:Name="Antal" Grid.Column="1" VerticalAlignment="Center" Margin="16,0"
+                 TextWrapping="Wrap" Style="{StaticResource Underskrift}" />
+
+      <Button x:Name="GemFil" Grid.Column="2" Padding="16,9" Margin="0,0,8,0" Click="GemFil_Klik"
+              Content="{i18n:Oversat ordbogview.gem_fil}" />
+
+      <Button x:Name="HentFil" Grid.Column="3" Padding="16,9" Click="HentFil_Klik"
+              Content="{i18n:Oversat ordbogview.hent_fil}" />
+    </Grid>
+  </Grid>
+</UserControl>

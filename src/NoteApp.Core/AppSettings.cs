@@ -275,6 +275,17 @@ public sealed class AppSettings
     public bool DikteringEfterProgram { get; set; } = true;
 
     /// <summary>
+    /// Egne instruktioner til teksttyperne. Tom betyder «brug standarden».
+    /// </summary>
+    /// <remarks>
+    /// KUN DET, DER ER RETTET, STÅR HER. En kopi af standarden gemmes ikke —
+    /// gjorde den det, ville typen være «rettet» for altid, og en forbedring i
+    /// en ny udgave af appen ville aldrig nå frem, uden at nogen havde valgt
+    /// det. Se <see cref="Llm.Teksttyper.Saet"/>.
+    /// </remarks>
+    public Dictionary<string, string> Teksttyper { get; set; } = new();
+
+    /// <summary>
     /// Hvornår klokken sidst blev åbnet. Alt nyere end det er ulæst.
     ///
     /// Sættes kun, når man ÅBNER klokken — ikke ved opstart. En besked, man

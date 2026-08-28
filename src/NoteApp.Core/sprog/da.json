@@ -15,7 +15,9 @@
     "compliance": "Compliance",
     "historik": "Historik",
     "indstillinger": "Indstillinger",
-    "dinedata": "Dine data"
+    "dinedata": "Dine data",
+    "ordbog": "Ordbog",
+    "skabeloner": "Skabeloner"
   },
   "topbar": {
     "optag": "Optag møde",
@@ -719,7 +721,16 @@
     "tilbage_til_standarden": "Tilbage til standarden",
     "tilpas_til_denne_moedetype": "Tilpas til denne mødetype",
     "mappe": "MAPPE",
-    "optagelser_med_den_her_moedetype_laegges": "Optagelser med den her mødetype foreslås lagt i mappen. Har du selv valgt en anden, bliver den stående. Tomt felt = ingen mappe."
+    "optagelser_med_den_her_moedetype_laegges": "Optagelser med den her mødetype foreslås lagt i mappen. Har du selv valgt en anden, bliver den stående. Tomt felt = ingen mappe.",
+    "fane_moedetyper": "Mødetyper",
+    "fane_teksttyper": "Teksttyper",
+    "teksttyper": "Teksttyper",
+    "teksttyper_under": "Hvad det talte skal blive til. Formen vælges automatisk efter det program, du er i gang med — er det ikke genkendt, bruges den, du har valgt under Indstillinger → Diktering.",
+    "instruktion_under": "Instruktionen, der sendes til sprogmodellen sammen med det, du har sagt. Ret i den, hvis teksten skal se anderledes ud — den er ikke hellig.",
+    "nulstil": "Nulstil til standard",
+    "teksttype_gemt": "Gemt.",
+    "teksttype_nulstillet": "Sat tilbage til appens egen.",
+    "teksttype_rettet": "rettet"
   },
   "transcribeview": {
     "aabn_mappen_paa_disken": "Åbn mappen på disken",
@@ -863,5 +874,32 @@
     "historik": "Diktat på {0} sekunder",
     "indsat": "Lagt ind i {0} — som {1}",
     "rettede": "Ordbogen rettede {0} ord:"
+  },
+  "ordbogview": {
+    "ordbog": "Ordbog",
+    "under": "Navne, fagtermer og forkortelser, som udskriften skal kende. Listen sendes med lyden som forhåndsviden — og den retter bagefter, når et ord blev hørt næsten rigtigt.",
+    "advarsel": "Listen forlader maskinen ved hver diktering. Derfor står den her, hvor du kan se den — skriv ikke noget i den, der ikke må sendes.",
+    "nyt": "Nyt ord — navn, fagterm eller forkortelse",
+    "tilfoej": "Tilføj",
+    "fjern": "Fjern det valgte",
+    "gem_fil": "Gem som fil",
+    "hent_fil": "Hent fra fil",
+    "tom": "Ordbogen er tom. Tilføj de navne og fagord, der bliver hørt forkert.",
+    "antal": "{0} ord — de første {1} sendes med",
+    "antal_alle": "{0} ord",
+    "findes": "«{0}» står der allerede.",
+    "hentet": "Hentet {0} nye ord ind.",
+    "gemt": "{0} ord gemt i {1}",
+    "filter": "Tekstfil (*.txt)|*.txt|Alle filer (*.*)|*.*"
+  },
+  "teksttyper": {
+    "note": "Note",
+    "note_hvornaar": "Tæt på det, du sagde — kun ryddet op",
+    "mail": "Mail",
+    "mail_hvornaar": "Outlook, Gmail — hel tekst med indledning og afslutning",
+    "prompt": "Prompt",
+    "prompt_hvornaar": "Claude, ChatGPT, Cursor — ingen høflighed",
+    "opgave": "Opgave",
+    "opgave_hvornaar": "Todoist, Google Tasks — én linje i bydeform"
   }
 }

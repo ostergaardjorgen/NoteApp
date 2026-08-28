@@ -204,9 +204,14 @@ public sealed class Dikteringsklient
     /// </summary>
     /// <param name="raa">Udskriften fra <see cref="SkrivUdAsync"/>.</param>
     /// <param name="formaal">Hvor teksten skal hen. Bestemmer formen.</param>
+    /// <param name="instruktion">
+    /// Instruktionen, der skal bruges. Tom betyder standarden for formålet.
+    /// Den kan være rettet af brugeren — se <see cref="Teksttyper"/>.
+    /// </param>
     public async Task<string> PudsAsync(
         string raa,
         Dikteringsformaal formaal,
+        string? instruktion = null,
         CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(raa)) return "";
@@ -218,7 +223,13 @@ public sealed class Dikteringsklient
             model = Voxtral.Pudsemodel,
             messages = new object[]
             {
-                new { role = "system", content = Voxtral.Pudseprompt(formaal) },
+                new
+                {
+                    role = "system",
+                    content = string.IsNullOrWhiteSpace(instruktion)
+                        ? Voxtral.Pudseprompt(formaal)
+                        : instruktion.Trim(),
+                },
                 new { role = "user", content = raa },
             },
 
@@ -276,7 +287,7 @@ public sealed class Dikteringsklient
         var raa = await SkrivUdAsync(lydfil, fagord, ct);
         if (raa.Raa.Length == 0) return ("", raa);
 
-        return (await PudsAsync(raa.Raa, formaal, ct), raa);
+        return (await PudsAsync(raa.Raa, formaal, instruktion: null, ct), raa);
     }
 
     /// <summary>

@@ -1066,6 +1066,12 @@ public partial class MainWindow : Window
             _startSoegning = null;
             Indhold.Content = new Search.SearchView(ord);
         }
+        else if (NavOrdbog.IsChecked == true)
+        {
+            // Bygges hver gang: ordbogen er en tekstfil, og den kan vaere
+            // rettet i en editor siden sidst.
+            Indhold.Content = new Ordbog.OrdbogView();
+        }
         else if (NavSkabeloner.IsChecked == true)
         {
             // Bygges hver gang: skabelonerne er filer, og de kan være rettet i

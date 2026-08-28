@@ -55,6 +55,7 @@ public partial class TemplatesView : UserControl
         // ud endnu.
         try { DraftStore.SeedTemplates(); } catch (Exception) { /* vises som tom liste */ }
         Indlæs();
+        VisTeksttyper();
     }
 
     // ------------------------------------------------------------- modeller
@@ -652,5 +653,88 @@ public partial class TemplatesView : UserControl
         Directory.CreateDirectory(PromptTemplate.Directory);
         Process.Start(new ProcessStartInfo("explorer.exe", $"\"{PromptTemplate.Directory}\"")
         { UseShellExecute = true });
+    }
+
+    // ============================ TEKSTTYPER ============================
+
+    /// <summary>Én teksttype, som listen viser den.</summary>
+    private sealed record Teksttypevalg(
+        Dikteringsformaal Vaerdi, string Navn, string Hvornaar, string Maerke, Visibility ErRettet);
+
+    private Dikteringsformaal? _valgtType;
+    private bool _typeIndlaest;
+
+    /// <summary>
+    /// Fylder listen. Kaldes hver gang, fordi en type kan være rettet et andet
+    /// sted — instruktionerne ligger i indstillingsfilen.
+    /// </summary>
+    private void VisTeksttyper()
+    {
+        var egne = AppSettings.Current.Teksttyper;
+        var valgt = _valgtType;
+
+        Teksttyper.ItemsSource = Core.Llm.Teksttyper.Alle.Select(f => new Teksttypevalg(
+            f,
+            Sprog.T(Core.Llm.Teksttyper.Noegletekst(f)),
+            Sprog.T(Core.Llm.Teksttyper.Noegletekst(f) + "_hvornaar"),
+            Sprog.T("templatesview.teksttype_rettet"),
+            Core.Llm.Teksttyper.ErRettet(f, egne) ? Visibility.Visible : Visibility.Collapsed)).ToList();
+
+        Teksttyper.SelectedItem = ((IEnumerable<Teksttypevalg>)Teksttyper.ItemsSource)
+            .FirstOrDefault(t => t.Vaerdi == (valgt ?? Dikteringsformaal.Note));
+    }
+
+    private void Teksttype_Valgt(object sender, SelectionChangedEventArgs e)
+    {
+        if (Teksttyper.SelectedItem is not Teksttypevalg valg) return;
+
+        _valgtType = valg.Vaerdi;
+
+        // Flaget holder TextChanged ude, mens feltet fyldes. Uden det ville
+        // «Gem» blive aktiv, saa snart man klikkede paa en anden type.
+        _typeIndlaest = false;
+        Instruktion.Text = Core.Llm.Teksttyper.Prompt(valg.Vaerdi, AppSettings.Current.Teksttyper);
+        _typeIndlaest = true;
+
+        GemTeksttype.IsEnabled = false;
+        TeksttypeStatus.Text = "";
+    }
+
+    private void Instruktion_Aendret(object sender, TextChangedEventArgs e)
+    {
+        if (!_typeIndlaest) return;
+
+        GemTeksttype.IsEnabled = true;
+        TeksttypeStatus.Text = "";
+    }
+
+    private void GemTeksttype_Klik(object sender, RoutedEventArgs e)
+    {
+        if (_valgtType is not { } formaal) return;
+
+        // Saet fjerner selv, hvis teksten er tom eller den samme som
+        // standarden - se Teksttyper.Saet.
+        Core.Llm.Teksttyper.Saet(AppSettings.Current.Teksttyper, formaal, Instruktion.Text);
+        AppSettings.Current.Save();
+
+        GemTeksttype.IsEnabled = false;
+        TeksttypeStatus.Text = Sprog.T("templatesview.teksttype_gemt");
+        VisTeksttyper();
+    }
+
+    private void NulstilTeksttype_Klik(object sender, RoutedEventArgs e)
+    {
+        if (_valgtType is not { } formaal) return;
+
+        AppSettings.Current.Teksttyper.Remove(Core.Llm.Teksttyper.Noegle(formaal));
+        AppSettings.Current.Save();
+
+        _typeIndlaest = false;
+        Instruktion.Text = Voxtral.Pudseprompt(formaal);
+        _typeIndlaest = true;
+
+        GemTeksttype.IsEnabled = false;
+        TeksttypeStatus.Text = Sprog.T("templatesview.teksttype_nulstillet");
+        VisTeksttyper();
     }
 }
