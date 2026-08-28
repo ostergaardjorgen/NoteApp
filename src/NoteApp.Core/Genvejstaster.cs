@@ -1,4 +1,4 @@
-namespace NoteApp.Core;
+﻿namespace NoteApp.Core;
 
 /// <summary>Én kandidat til lynstart-genvejen.</summary>
 public sealed record HotkeyValg(string Id, string Navn, uint Modifiers, uint Key, string Hvorfor);
@@ -63,11 +63,17 @@ public static class Genvejstaster
             + "og åbner forslagslisten i kodeeditorer — de ting holder op med at "
             + "virke, så længe den er valgt."));
 
-        // Naboen. Samme greb, én tast mere, og uden konflikterne ovenfor.
-        // Efterproevet virksom samme dag.
+        // Naboen. Samme greb, én tast mere. Efterproevet virksom samme dag.
+        //
+        // HER STOD «UDEN KONFLIKTEN», OG DET VAR FOR MEGET SAGT. Enhver global
+        // genvej opsnapper tasten fra det program, man staar i - det er maalt,
+        // ikke antaget. Den her har bare en billigere konflikt: fast mellemrum
+        // i Word og marker omraadet i Excel, mod ryd formatering og marker
+        // kolonnen.
         liste.Add(new HotkeyValg("ctrl-shift-space", "Ctrl+Shift+Space",
             MOD_CONTROL | MOD_SHIFT, 0x20,
-            "Samme greb som Ctrl+Space, men uden konflikten i Excel og i kodeeditorer."));
+            "Samme greb som Ctrl+Space. Den koster et fast mellemrum i Word og "
+            + "«markér området» i Excel — mindre brugte end dem, Ctrl+Space tager."));
 
         // ============ KOMMAET - den tidligere standard ============
         //

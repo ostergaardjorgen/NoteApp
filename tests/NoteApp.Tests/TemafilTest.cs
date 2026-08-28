@@ -1,4 +1,4 @@
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using NoteApp.Core;
 using Xunit;
@@ -65,9 +65,13 @@ public sealed class TemafilTest
             Assert.True(pensler.ContainsKey(navn), $"App.xaml mangler penslen «{navn}»");
 
             // App.xaml er udgangspunktet, indtil Temaskift har koert. Staar der
-            // noget andet end den lyse palet, ser man et glimt af forkerte
-            // farver, foer det foerste vindue er tegnet faerdigt.
-            Assert.Equal(Tema.Lys[navn], pensler[navn]);
+            // noget andet end STANDARDTEMAET, ser man et glimt af den anden
+            // palet, foer det foerste vindue er tegnet faerdigt.
+            //
+            // Standarden staar ét sted: AppSettings.Tema. Skifter den, skal
+            // App.xaml med - og saa fejler den her, indtil den goer det.
+            var standard = Tema.Palet(lyst: new AppSettings().Tema == Temavalg.Lyst);
+            Assert.Equal(standard[navn], pensler[navn]);
         }
     }
 

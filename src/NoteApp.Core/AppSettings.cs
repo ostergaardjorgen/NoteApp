@@ -341,16 +341,17 @@ public sealed class AppSettings
     /// Lyst eller mørkt tema.
     /// </summary>
     /// <remarks>
-    /// FØLG WINDOWS ER STANDARD, og det er ikke en udenomsvej. Den, der har
-    /// sat sin maskine mørk, har allerede svaret på spørgsmålet, og en app,
-    /// der spørger igen, er en app, der ikke lyttede.
+    /// MØRKT ER STANDARD. Appen var mørk uden valg indtil 28-08-2026, og
+    /// begrundelsen står stadig: udskriften læses i lange stræk, og lys tekst
+    /// på mørk bund trætter mindre.
     ///
-    /// Appen var mørk uden valg indtil 28-08-2026. Begrundelsen står stadig:
-    /// udskriften læses i lange stræk, og lys tekst på mørk bund trætter
-    /// mindre. Men den gælder ét skærmbillede, ikke hele appen — og den kunne
-    /// ikke bære, at resten var mørkt for alle. Se <see cref="Tema"/>.
+    /// «Følg Windows» var standard i et par timer og blev valgt fra igen samme
+    /// dag. Den lyder rigtig — den, der har sat sin maskine mørk, har svaret
+    /// på spørgsmålet — men den lader et program, appen ikke kender, bestemme
+    /// udseendet af det skærmbillede, man læser længst på. Begge dele står
+    /// stadig som valg under Indstillinger og på knappen i topbjælken.
     /// </remarks>
-    public Temavalg Tema { get; set; } = Temavalg.FoelgWindows;
+    public Temavalg Tema { get; set; } = Temavalg.Moerkt;
 
     private static string Path => System.IO.Path.Combine(UserDataPaths.Root, "indstillinger.json");
 

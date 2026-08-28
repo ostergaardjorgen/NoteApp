@@ -10,8 +10,9 @@
          NoteApp.Core.Tema, hvor de kan regnes på — og Temaskift.Anvend()
          skriver dem ind i penslerne herunder, før det første vindue vises.
 
-         Det, der står her, er de lyse: det er dem, der gælder, hvis Windows
-         står lyst, og det er Windows' egen standard.
+         Det, der står her, er STANDARDTEMAET — det mørke. Står de på det
+         forkerte, ser man et glimt af den anden palet, når appen åbner.
+         En prøve holder de to i trit; se TemafilTest.
 
          PENSLERNE HER BLIVER UDSKIFTET, IKKE ÆNDRET
 
@@ -35,31 +36,31 @@
          Farverne er efterprøvet mod WCAG 2.1: brødtekst over 7:1, dæmpet
          tekst og betydningsfarver over 4,5:1, feltkanter over 3:1. Det er
          ikke et løfte, det er en prøve, der fejler. Se TemaTest. -->
-    <SolidColorBrush x:Key="Baggrund"      Color="#FFF7F7F5" />
-    <SolidColorBrush x:Key="Panel"         Color="#FFFFFFFF" />
-    <SolidColorBrush x:Key="PanelKant"     Color="#FFCCCCC5" />
+    <SolidColorBrush x:Key="Baggrund"      Color="#FF14161A" />
+    <SolidColorBrush x:Key="Panel"         Color="#FF20242C" />
+    <SolidColorBrush x:Key="PanelKant"     Color="#FF39404E" />
 
     <!-- Kanten om noget, man kan SKRIVE i. Kraftigere end PanelKant med
          vilje: en panelkant deler to flader og må gerne være svag, men
          kanten om et felt er det eneste, der siger, at feltet er der.
          WCAG 1.4.11 kræver 3:1 for netop den slags. -->
-    <SolidColorBrush x:Key="FeltKant"      Color="#FF909081" />
+    <SolidColorBrush x:Key="FeltKant"      Color="#FF626E86" />
 
     <!-- Musen over, knappen nede, raekken valgt. Se Tema.cs. -->
-    <SolidColorBrush x:Key="Svaev"         Color="#FFF1F1EF" />
-    <SolidColorBrush x:Key="Trykket"       Color="#FFE8E8E5" />
-    <SolidColorBrush x:Key="Valgt"         Color="#FFD9E6F8" />
+    <SolidColorBrush x:Key="Svaev"         Color="#FF2C323D" />
+    <SolidColorBrush x:Key="Trykket"       Color="#FF181B22" />
+    <SolidColorBrush x:Key="Valgt"         Color="#FF33405A" />
 
-    <SolidColorBrush x:Key="Tekst"         Color="#FF1B1B19" />
-    <SolidColorBrush x:Key="TekstSvag"     Color="#FF5A5A54" />
-    <SolidColorBrush x:Key="TekstMeget"    Color="#FF6E6E67" />
+    <SolidColorBrush x:Key="Tekst"         Color="#FFF4F6FA" />
+    <SolidColorBrush x:Key="TekstSvag"     Color="#FFC2CAD8" />
+    <SolidColorBrush x:Key="TekstMeget"    Color="#FFAEB6C4" />
 
     <!-- Tekst paa noget, der er slaaet fra. -->
-    <SolidColorBrush x:Key="Slukket"       Color="#FF909087" />
-    <SolidColorBrush x:Key="Accent"        Color="#FF2A6DD4" />
-    <SolidColorBrush x:Key="Optager"       Color="#FFC9313A" />
-    <SolidColorBrush x:Key="Godkendt"      Color="#FF1B7340" />
-    <SolidColorBrush x:Key="Advarsel"      Color="#FF8A5A00" />
+    <SolidColorBrush x:Key="Slukket"       Color="#FF6E7787" />
+    <SolidColorBrush x:Key="Accent"        Color="#FF5B99FF" />
+    <SolidColorBrush x:Key="Optager"       Color="#FFF05358" />
+    <SolidColorBrush x:Key="Godkendt"      Color="#FF4CBE72" />
+    <SolidColorBrush x:Key="Advarsel"      Color="#FFF0B23C" />
 
     <!-- Farven til "noget ER gaaet galt", modsat Advarsel som er "pas paa".
          Den fandtes ikke, men blev brugt: SkySetupWindow slog op paa
@@ -71,20 +72,20 @@
          paa en knap-stil laengere nede. To resurser med samme x:Key i samme
          ordbog er en fejl ved indlaesning - saa ville hele temaet vaelte i
          stedet for bare eet vindue. -->
-    <SolidColorBrush x:Key="FejlTekst"     Color="#FFC9313A" />
+    <SolidColorBrush x:Key="FejlTekst"     Color="#FFF05358" />
 
     <!-- Tekst oven paa en farvet knap, og de fire tonede flader. Se Tema.cs. -->
-    <SolidColorBrush x:Key="PaaAccent"     Color="#FFFFFFFF" />
-    <SolidColorBrush x:Key="PaaOptager"    Color="#FFFFFFFF" />
-    <SolidColorBrush x:Key="AccentFlade"   Color="#FFEAF1FC" />
-    <SolidColorBrush x:Key="GodkendtFlade" Color="#FFE7F4EC" />
-    <SolidColorBrush x:Key="AdvarselFlade" Color="#FFFAF0DC" />
-    <SolidColorBrush x:Key="FejlFlade"     Color="#FFFBEAEB" />
+    <SolidColorBrush x:Key="PaaAccent"     Color="#FF0B1220" />
+    <SolidColorBrush x:Key="PaaOptager"    Color="#FF1A0A0B" />
+    <SolidColorBrush x:Key="AccentFlade"   Color="#FF1D2530" />
+    <SolidColorBrush x:Key="GodkendtFlade" Color="#FF16241C" />
+    <SolidColorBrush x:Key="AdvarselFlade" Color="#FF2A2318" />
+    <SolidColorBrush x:Key="FejlFlade"     Color="#FF2A1A1A" />
 
     <!-- Dokumenter, og det, en soegning har fundet. Se Tema.cs. -->
-    <SolidColorBrush x:Key="Dokument"      Color="#FF7B3FAF" />
-    <SolidColorBrush x:Key="Fremhaev"      Color="#FFFFE99A" />
-    <SolidColorBrush x:Key="PaaFremhaev"   Color="#FF1B1B19" />
+    <SolidColorBrush x:Key="Dokument"      Color="#FFC98CF0" />
+    <SolidColorBrush x:Key="Fremhaev"      Color="#FFF5D13B" />
+    <SolidColorBrush x:Key="PaaFremhaev"   Color="#FF14181F" />
 
     <!-- ================== MENUER ==================
          Appen havde ingen menu foer Kopier-knappen, og saa arvede den
