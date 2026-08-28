@@ -596,7 +596,29 @@
     "tema_lyst": "Lyst",
     "tema_moerkt": "Mørkt",
     "vaelg_genvej": "Vælg genvej",
-    "eller_vaelg_fra_listen": "Eller vælg fra en liste over kombinationer, der plejer at være fri"
+    "eller_vaelg_fra_listen": "Eller vælg fra en liste over kombinationer, der plejer at være fri",
+    "diktering": "Diktering",
+    "diktering_intro": "Tal, og der står tekst. Hold genvejstasten nede, mens du taler — slipper du, skrives det ud og lægges ind, hvor du var i gang.",
+    "diktering_til": "Slå diktering til",
+    "diktering_til_under": "Holdes genvejstasten nede, bliver det en diktering i stedet for en mødeoptagelse. Et kort tryk starter stadig et møde som hidtil.",
+    "diktering_til_pris": "Prisen er et øjeblik: appen kan ikke vide, om du trykker eller holder, før du slipper — så en mødeoptagelse starter et tredjedels sekund senere, når dikteringen er slået til.",
+    "diktering_lyd": "Din egen stemme sendes til europæisk AI, når du dikterer. Mødernes lyd gør det aldrig — derfra sendes kun transkriptionen.",
+    "diktering_loft": "Længste diktering",
+    "diktering_loft_under": "Efter så lang tid stopper appen af sig selv, og det, du nåede at sige, bliver skrevet ud. Der kommer en besked om, at du skal trykke igen.",
+    "diktering_loft_hvorfor": "Loftet findes, fordi en tast kan sidde fast. Uden det ville appen optage og sende videre, til nogen opdagede det.",
+    "diktering_minutter": "minutter",
+    "diktering_formaal": "Hvad teksten skal blive til",
+    "diktering_formaal_under": "Det samme talte bliver til forskellig tekst alt efter, hvad den skal bruges til. Kan skiftes fra gang til gang.",
+    "diktering_formaal_note": "Note — tæt på det, du sagde, kun ryddet op",
+    "diktering_formaal_mail": "Mail — hel tekst med indledning og afslutning",
+    "diktering_formaal_prompt": "Prompt — ren instruktion, ingen høflighed",
+    "diktering_formaal_opgave": "Opgave — én linje i bydeform",
+    "diktering_puds": "Ryd op i det, jeg siger",
+    "diktering_puds_under": "Fjerner fyldord og gentagelser og sætter tegn. Slås den fra, kommer teksten ordret — det er dét, du vil have, når nogen skal citeres.",
+    "diktering_fagord": "Send ordlisten med",
+    "diktering_fagord_under": "Ordlisten er blevet bedre af de rettelser, du selv har lavet. Sendes den med, kender dikteringen de navne og fagord fra begyndelsen.",
+    "diktering_afbrudt": "Dikteringen nåede loftet og stoppede. Det, du nåede at sige, er skrevet ud — tryk igen for at fortsætte.",
+    "diktering_kraever_noegle": "Dikteringen kræver en API-nøgle til Mistral. Den sættes op under AI-modeller."
   },
   "setupwindow": {
     "dine_filer_ligger_her": "Dine filer ligger her",
@@ -809,5 +831,15 @@
     "hoerermoedet": "hører mødet",
     "hoererdig": "hører dig",
     "hoererbegge": "hører jer begge"
+  },
+  "diktering": {
+    "lytter": "Lytter — tal, og slip tasten når du er færdig",
+    "skriver_ud": "Skriver ud …",
+    "rydder_op": "Rydder op i teksten …",
+    "for_kort": "For kort til et diktat. Hold tasten nede, mens du taler.",
+    "intet_hoert": "Der blev ikke hørt noget. Sig til, hvis mikrofonen skal vælges om.",
+    "klar": "Klar — {0} tegn ligger i udklipsholderen. Sæt ind med Ctrl+V.",
+    "gik_galt": "Dikteringen gik galt: {0}",
+    "historik": "Diktat på {0} sekunder"
   }
 }

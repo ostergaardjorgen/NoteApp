@@ -6,6 +6,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Threading;
 using NoteApp.Core;
+using NoteApp.Core.Llm;
 
 namespace NoteApp.Desktop.Preferences;
 
@@ -42,7 +43,7 @@ public partial class SettingsView : UserControl
         _timer = new DispatcherTimer(DispatcherPriority.Background) { Interval = TimeSpan.FromMilliseconds(100) };
         _timer.Tick += (_, _) => OpdaterMaalere();
 
-        Loaded += (_, _) => { Indlaes(); VisTema(); LytPaaTema(); VisGenvejNu(); VisAutostart(); OpdaterFiler(); VisKrav(); VisPlads(); VisOvervaagede(); };
+        Loaded += (_, _) => { Indlaes(); VisTema(); LytPaaTema(); VisGenvejNu(); VisAutostart(); OpdaterFiler(); VisKrav(); VisPlads(); VisOvervaagede(); IndlaesDiktering(); };
         Unloaded += (_, _) => { _timer.Stop(); StopProber(); AfbrydTest(); };
     }
 
@@ -236,6 +237,107 @@ public partial class SettingsView : UserControl
 
         _saetterTema = false;
     }
+
+    // ============================ DIKTERING ============================
+
+    /// <summary>Et formaal, som det staar i listen.</summary>
+    private sealed record Formaalsvalg(Dikteringsformaal Vaerdi, string Navn);
+
+    private bool _dikteringIndlaest;
+
+    /// <summary>
+    /// Fylder dikteringsfanen ud fra det, der faktisk er gemt.
+    /// </summary>
+    /// <remarks>
+    /// <c>_dikteringIndlaest</c> holder hændelserne ude, mens felterne sættes.
+    /// Uden den ville hvert felt gemme sig selv under indlæsningen — og et
+    /// valg, brugeren aldrig har truffet, ville blive skrevet ned som om han
+    /// havde.
+    /// </remarks>
+    private void IndlaesDiktering()
+    {
+        _dikteringIndlaest = false;
+
+        try
+        {
+            var v = AppSettings.Current;
+
+            DikteringTil.IsChecked = v.DikteringTil;
+            DikteringPuds.IsChecked = v.DikteringPuds;
+            DikteringFagord.IsChecked = v.DikteringFagord;
+
+            // Loftet: hvert minut fra det mindste til det stoerste. En fri
+            // talindtastning ville give nul og bogstaver, og saa skal der
+            // baade valideres og forklares.
+            DikteringLoft.ItemsSource = Enumerable
+                .Range(Holdvurdering.MindsteLoftMinutter,
+                       Holdvurdering.StoersteLoftMinutter - Holdvurdering.MindsteLoftMinutter + 1)
+                .ToList();
+
+            DikteringLoft.SelectedItem =
+                (int)Holdvurdering.LoftFra(v.DikteringLoftMinutter).TotalMinutes;
+
+            DikteringFormaal.ItemsSource = new[]
+            {
+                new Formaalsvalg(Dikteringsformaal.Note, Sprog.T("settingsview.diktering_formaal_note")),
+                new Formaalsvalg(Dikteringsformaal.Mail, Sprog.T("settingsview.diktering_formaal_mail")),
+                new Formaalsvalg(Dikteringsformaal.Prompt, Sprog.T("settingsview.diktering_formaal_prompt")),
+                new Formaalsvalg(Dikteringsformaal.Opgave, Sprog.T("settingsview.diktering_formaal_opgave")),
+            };
+
+            var valgt = Enum.TryParse<Dikteringsformaal>(v.DikteringFormaal, ignoreCase: true, out var f)
+                ? f
+                : Dikteringsformaal.Note;
+
+            DikteringFormaal.SelectedItem = ((IEnumerable<Formaalsvalg>)DikteringFormaal.ItemsSource)
+                .FirstOrDefault(x => x.Vaerdi == valgt);
+
+            // Uden noegle kan der ikke dikteres. Det skal staa, FOER man slaar
+            // noget til - ikke bagefter, naar man taler til et program, der
+            // ikke kan svare.
+            DikteringNoegle.Visibility = SkyNoegle.Hent() is null
+                ? Visibility.Visible
+                : Visibility.Collapsed;
+        }
+        finally
+        {
+            _dikteringIndlaest = true;
+        }
+    }
+
+    private void GemDiktering()
+    {
+        if (!_dikteringIndlaest) return;
+
+        var v = AppSettings.Current;
+
+        v.DikteringTil = DikteringTil.IsChecked == true;
+        v.DikteringPuds = DikteringPuds.IsChecked == true;
+        v.DikteringFagord = DikteringFagord.IsChecked == true;
+
+        if (DikteringLoft.SelectedItem is int minutter) v.DikteringLoftMinutter = minutter;
+        if (DikteringFormaal.SelectedItem is Formaalsvalg f) v.DikteringFormaal = f.Vaerdi.ToString();
+
+        v.Save();
+
+        // Genvejen skal vide det MED DET SAMME. Ellers skal appen genstartes,
+        // foer et hold begynder at betyde noget - og saa tror man, det er
+        // gaaet galt.
+        Dikteringsskift?.Invoke(v.DikteringTil);
+    }
+
+    /// <summary>Siger til, når dikteringen bliver slået til eller fra.</summary>
+    public static Action<bool>? Dikteringsskift { get; set; }
+
+    private void DikteringTil_Klik(object sender, RoutedEventArgs e) => GemDiktering();
+
+    private void DikteringPuds_Klik(object sender, RoutedEventArgs e) => GemDiktering();
+
+    private void DikteringFagord_Klik(object sender, RoutedEventArgs e) => GemDiktering();
+
+    private void DikteringLoft_Valgt(object sender, SelectionChangedEventArgs e) => GemDiktering();
+
+    private void DikteringFormaal_Valgt(object sender, SelectionChangedEventArgs e) => GemDiktering();
 
     private void Autostart_Klik(object sender, RoutedEventArgs e)
     {

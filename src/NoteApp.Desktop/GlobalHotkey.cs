@@ -64,6 +64,20 @@ public sealed class GlobalHotkey : IDisposable
     public event Action? HoldSluttet;
 
     /// <summary>
+    /// Rejses, når loftet blev nået, mens tasten STADIG var nede.
+    /// </summary>
+    /// <remarks>
+    /// Den er skilt fra <see cref="HoldSluttet"/> med vilje. Har man selv
+    /// sluppet, ved man, at dikteringen er forbi. Her blev man afbrudt midt i
+    /// en sætning, og så skal der siges til — ellers taler man videre til et
+    /// program, der er holdt op med at lytte, og opdager det først, når
+    /// teksten mangler.
+    ///
+    /// Det, der ER optaget, skrives ud. Det er sagt, og det smides ikke væk.
+    /// </remarks>
+    public event Action? HoldAfbrudt;
+
+    /// <summary>
     /// Skal et hold på tasten kunne betyde noget andet end et tryk?
     /// </summary>
     /// <remarks>
@@ -572,7 +586,13 @@ public sealed class GlobalHotkey : IDisposable
         {
             var nede = (GetAsyncKeyState((int)_holdTast) & 0x8000) != 0;
 
-            switch (Holdvurdering.Naeste(DateTime.UtcNow - _holdStart, nede, _holderNu))
+            var svar = Holdvurdering.Naeste(
+                DateTime.UtcNow - _holdStart,
+                nede,
+                _holderNu,
+                Holdvurdering.LoftFra(AppSettings.Current.DikteringLoftMinutter));
+
+            switch (svar)
             {
                 case Holdsvar.Vent:
                     return;
@@ -585,6 +605,11 @@ public sealed class GlobalHotkey : IDisposable
                 case Holdsvar.Slut:
                     StopHoldur();
                     HoldSluttet?.Invoke();
+                    return;
+
+                case Holdsvar.Loftet:
+                    StopHoldur();
+                    HoldAfbrudt?.Invoke();
                     return;
 
                 default:

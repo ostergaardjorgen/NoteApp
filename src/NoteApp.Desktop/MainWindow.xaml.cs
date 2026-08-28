@@ -376,6 +376,25 @@ public partial class MainWindow : Window
             _genvej.Trykket -= LynstartOptagelse;
             _genvej.Trykket += LynstartOptagelse;
 
+            // ============ HOLD PAA SAMME TAST = DIKTERING ============
+            //
+            // Samme moenster som ovenfor: «-=» foerst, fordi Loaded fyrer
+            // igen, hver gang vinduet kommer tilbage i traeet. To abonnementer
+            // ville starte to optagere paa det samme hold.
+            _genvej.HoldBegyndt -= DiktatBegynd;
+            _genvej.HoldBegyndt += DiktatBegynd;
+            _genvej.HoldSluttet -= DiktatSlut;
+            _genvej.HoldSluttet += DiktatSlut;
+            _genvej.HoldAfbrudt -= DiktatAfbrudt;
+            _genvej.HoldAfbrudt += DiktatAfbrudt;
+
+            // Genvejen skal vide det med det samme, naar fanen aendrer det -
+            // ellers skulle appen genstartes, foer et hold betoed noget.
+            Preferences.SettingsView.Dikteringsskift = til =>
+                Dispatcher.BeginInvoke(() => _genvej.HoldGiverDiktering = til);
+
+            _genvej.HoldGiverDiktering = AppSettings.Current.DikteringTil;
+
             // Skifter registreringen senere - fordi den oenskede tast blev
             // ledig - skal bjaelken sige det nye.
             _genvej.Ændret -= VisGenvejIgen;
@@ -853,6 +872,64 @@ public partial class MainWindow : Window
     /// Genvejstasten er trykket. Vinduet hentes frem, og optagelsen går i gang
     /// med det samme — man skal ikke først finde den rigtige skærm.
     /// </summary>
+
+    private readonly Dikteringsvagt _diktat = new();
+
+    /// <summary>
+    /// Tasten er holdt nede. Dikteringen begynder at lytte.
+    /// </summary>
+    /// <remarks>
+    /// Beskederne gaar til baandet, saa man kan SE, at der lyttes. En
+    /// mikrofon, der er aaben uden at det staar nogen steder, er praecis det,
+    /// resten af appen lover ikke at goere.
+    /// </remarks>
+    private void DiktatBegynd()
+    {
+        _diktat.Melder -= VisDiktat;
+        _diktat.Melder += VisDiktat;
+        _diktat.Begynd();
+    }
+
+    private void DiktatSlut() => _ = _diktat.SlutAsync(afbrudt: false);
+
+    private void DiktatAfbrudt() => _ = _diktat.SlutAsync(afbrudt: true);
+
+    /// <summary>
+    /// Viser, hvad dikteringen laver — og skjuler bjælken igen bagefter.
+    /// </summary>
+    /// <remarks>
+    /// Den bliver staaende et par sekunder, naar teksten er klar. «Klar — 80
+    /// tegn ligger i udklipsholderen» er den eneste kvittering, man faar, og
+    /// forsvandt den med det samme, ville man ikke vide, om det lykkedes.
+    /// </remarks>
+    private void VisDiktat(string besked) => Dispatcher.BeginInvoke(() =>
+    {
+        DiktatBesked.Text = besked;
+        DiktatBjaelke.Visibility = Visibility.Visible;
+
+        _diktatUr?.Stop();
+
+        if (_diktat.Igang) return;
+
+        _diktatUr = new System.Windows.Threading.DispatcherTimer
+        {
+            Interval = TimeSpan.FromSeconds(6),
+        };
+
+        _diktatUr.Tick += (_, _) =>
+        {
+            _diktatUr?.Stop();
+            _diktatUr = null;
+
+            // Er der begyndt et nyt diktat i mellemtiden, skal bjaelken blive.
+            if (!_diktat.Igang) DiktatBjaelke.Visibility = Visibility.Collapsed;
+        };
+
+        _diktatUr.Start();
+    });
+
+    private System.Windows.Threading.DispatcherTimer? _diktatUr;
+
     private void LynstartOptagelse()
     {
         // ============ VINDUET FREM FOERST - MEN DET MAA IKKE KUNNE STOPPE OS ============

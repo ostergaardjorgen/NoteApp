@@ -623,7 +623,29 @@
     "tema_lyst": "Light",
     "tema_moerkt": "Dark",
     "vaelg_genvej": "Choose shortcut",
-    "eller_vaelg_fra_listen": "Or pick from a list of combinations that are usually free"
+    "eller_vaelg_fra_listen": "Or pick from a list of combinations that are usually free",
+    "diktering": "Dictation",
+    "diktering_intro": "Speak, and there is text. Hold the shortcut key while you talk — let go, and it is written out and placed where you were working.",
+    "diktering_til": "Turn dictation on",
+    "diktering_til_under": "Holding the shortcut key makes it a dictation instead of a meeting recording. A short press still starts a meeting, as before.",
+    "diktering_til_pris": "The cost is a moment: the app cannot know whether you are pressing or holding until you let go — so a meeting recording starts a third of a second later while dictation is on.",
+    "diktering_lyd": "Your own voice is sent to European AI when you dictate. Meeting audio never is — from there only the transcript is sent.",
+    "diktering_loft": "Longest dictation",
+    "diktering_loft_under": "After that long the app stops by itself, and what you managed to say is written out. A message tells you to press again.",
+    "diktering_loft_hvorfor": "The limit exists because a key can stick. Without it the app would keep recording and sending until somebody noticed.",
+    "diktering_minutter": "minutes",
+    "diktering_formaal": "What the text becomes",
+    "diktering_formaal_under": "The same speech becomes different text depending on what it is for. Can be changed from one time to the next.",
+    "diktering_formaal_note": "Note — close to what you said, just tidied up",
+    "diktering_formaal_mail": "Email — full text with an opening and a closing",
+    "diktering_formaal_prompt": "Prompt — plain instruction, no politeness",
+    "diktering_formaal_opgave": "Task — one line in the imperative",
+    "diktering_puds": "Tidy up what I say",
+    "diktering_puds_under": "Removes filler words and repetitions and adds punctuation. Switch it off and the text comes out verbatim — which is what you want when somebody is to be quoted.",
+    "diktering_fagord": "Send the word list along",
+    "diktering_fagord_under": "The word list has improved from the corrections you made yourself. Sent along, dictation knows those names and terms from the start.",
+    "diktering_afbrudt": "The dictation reached the limit and stopped. What you managed to say has been written out — press again to carry on.",
+    "diktering_kraever_noegle": "Dictation needs an API key for Mistral. Set it up under AI models."
   },
   "complianceview": {
     "aabner_console_mistral_ai_hvor_du_slaar_tr": "Opens console.mistral.ai, where you turn training off",
@@ -809,5 +831,15 @@
     "hoerermoedet": "hears the meeting",
     "hoererdig": "hears you",
     "hoererbegge": "hears you both"
+  },
+  "diktering": {
+    "lytter": "Listening — speak, and let go of the key when you are done",
+    "skriver_ud": "Writing out …",
+    "rydder_op": "Tidying up the text …",
+    "for_kort": "Too short for a dictation. Hold the key down while you speak.",
+    "intet_hoert": "Nothing was heard. Say so if the microphone needs changing.",
+    "klar": "Ready — {0} characters are on the clipboard. Paste with Ctrl+V.",
+    "gik_galt": "The dictation failed: {0}",
+    "historik": "Dictation of {0} seconds"
   }
 }

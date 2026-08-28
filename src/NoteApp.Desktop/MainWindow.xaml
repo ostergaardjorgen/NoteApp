@@ -16,6 +16,7 @@
       <RowDefinition Height="Auto" />
       <RowDefinition Height="*" />
       <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
     </Grid.RowDefinitions>
 
     <ContentControl x:Name="OptagBjaelke" Grid.Row="0" />
@@ -268,5 +269,25 @@
           </StackPanel>
         </Grid>
       </Border>
+    <!-- ==================== DIKTERING ====================
+
+         EGEN RAEKKE, ikke JobBjaelkes. De to kan koere samtidig - man kan
+         diktere, mens et referat bliver skrevet - og delte de samme felt,
+         ville den ene slaa den anden ihjel.
+
+         EN AABEN MIKROFON SKAL KUNNE SES. Resten af appen lover, at der ikke
+         lyttes uden videre; saa maa det ogsaa staa paa skaermen, naar der
+         goer. -->
+    <Border x:Name="DiktatBjaelke" Grid.Row="3" Grid.ColumnSpan="2" Visibility="Collapsed"
+            Background="{DynamicResource AccentFlade}" BorderBrush="{DynamicResource Accent}"
+            BorderThickness="0,1,0,0" Padding="24,10">
+      <StackPanel Orientation="Horizontal">
+        <Ellipse x:Name="DiktatPrik" Width="9" Height="9" VerticalAlignment="Center"
+                 Margin="0,0,12,0" Fill="{DynamicResource Optager}" />
+        <TextBlock x:Name="DiktatBesked" FontSize="12.5" VerticalAlignment="Center"
+                   TextWrapping="Wrap" Foreground="{DynamicResource Tekst}" />
+      </StackPanel>
+    </Border>
+
   </Grid>
 </Window>

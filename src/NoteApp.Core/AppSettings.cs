@@ -167,6 +167,78 @@ public sealed class AppSettings
     /// </remarks>
     public string? Genvejskombi { get; set; }
 
+    // ======================= DIKTERING =======================
+
+    /// <summary>
+    /// Skal et hold på genvejstasten starte en diktering?
+    /// </summary>
+    /// <remarks>
+    /// FRA SOM STANDARD, OG DET KOSTER NOGET AT SLÅ TIL.
+    ///
+    /// Skal appen kunne skelne et tryk fra et hold, kan den ikke handle på
+    /// trykket med det samme — den må vente og se, om tasten bliver sluppet.
+    /// Det forsinker starten på en mødeoptagelse med grænsen på 350 ms.
+    ///
+    /// Er den her fra, går trykket igennem med det samme, præcis som før
+    /// dikteringen fandtes. Ventetiden findes kun for den, der bruger den.
+    ///
+    /// Og der er den anden side: diktering SENDER lyd til leverandøren.
+    /// Mødernes lyd gør ikke, og det skal blive ved at være to forskellige
+    /// ting — også i den forstand, at man selv har slået det til.
+    /// </remarks>
+    public bool DikteringTil { get; set; }
+
+    /// <summary>
+    /// Længste diktering i minutter. Derefter slippes der af sig selv.
+    /// </summary>
+    /// <remarks>
+    /// EN TAST KAN SIDDE FAST. Sker det — fysisk, eller fordi et andet program
+    /// spiser slippet — ville appen ellers optage og sende, til nogen opdagede
+    /// det. Det koster penge hos leverandøren og er ikke til at se på skærmen.
+    ///
+    /// Tallet holdes inden for det, der giver mening, af
+    /// <see cref="Holdvurdering.LoftFra"/>. En indstillingsfil kan indeholde
+    /// hvad som helst.
+    /// </remarks>
+    public int DikteringLoftMinutter { get; set; } = Holdvurdering.StandardLoftMinutter;
+
+    /// <summary>
+    /// Hvad dikteringen som udgangspunkt skal blive til: note, mail, prompt
+    /// eller opgave.
+    /// </summary>
+    /// <remarks>
+    /// Formen følger opgaven — det er dét, der skiller diktering fra en
+    /// diktafon. Står her som tekst frem for som et tal, så en indstillingsfil
+    /// kan læses af et menneske.
+    /// </remarks>
+    public string? DikteringFormaal { get; set; }
+
+    /// <summary>
+    /// Skal den rå udskrift pudses af, før den lægges ind?
+    /// </summary>
+    /// <remarks>
+    /// TIL SOM STANDARD. Rå tale har fyldord, halve sætninger og ingen
+    /// tegnsætning; uden pudsningen er det en diktafon.
+    ///
+    /// Den kan slås fra, og det er ikke en teoretisk mulighed: skal man citere
+    /// nogen ordret, er det netop det rå, man vil have. Pudsningen koster
+    /// også et kald mere og et halvt sekund.
+    /// </remarks>
+    public bool DikteringPuds { get; set; } = true;
+
+    /// <summary>
+    /// Skal den indlærte ordliste sendes med som fagord?
+    /// </summary>
+    /// <remarks>
+    /// TIL SOM STANDARD. Ordlisten er blevet bedre af de rettelser, du selv
+    /// har lavet, og uden den skal dikteringen lære navnene forfra.
+    ///
+    /// Den sendes med til leverandøren sammen med lyden. Det er ord, ikke
+    /// indhold — men det er en liste over, hvad du taler om, og derfor skal
+    /// den kunne slås fra.
+    /// </remarks>
+    public bool DikteringFagord { get; set; } = true;
+
     /// <summary>
     /// Hvornår klokken sidst blev åbnet. Alt nyere end det er ulæst.
     ///

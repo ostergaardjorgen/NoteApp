@@ -9,8 +9,23 @@ public enum Holdsvar
     /// <summary>Det er et hold. Dikteringen skal begynde at lytte.</summary>
     Begynd,
 
-    /// <summary>Holdet er slut. Der skal skrives ud.</summary>
+    /// <summary>Tasten er sluppet. Der skal skrives ud.</summary>
     Slut,
+
+    /// <summary>
+    /// Loftet er nået, og tasten er STADIG nede.
+    /// </summary>
+    /// <remarks>
+    /// DEN ER IKKE DET SAMME SOM <see cref="Slut"/>, og forskellen er hele
+    /// pointen. Ved <see cref="Slut"/> har du selv sluppet, og du ved, at
+    /// dikteringen er forbi. Her blev du afbrudt midt i en sætning.
+    ///
+    /// Det, der er optaget, skal stadig skrives ud — det er sagt, og det skal
+    /// ikke smides væk. Men der SKAL siges til, ellers står man og taler
+    /// videre til et program, der er holdt op med at lytte, og opdager det
+    /// først, når teksten mangler.
+    /// </remarks>
+    Loftet,
 
     /// <summary>Det var et almindeligt tryk. Der skal startes en optagelse.</summary>
     Tryk,
@@ -42,30 +57,57 @@ public static class Holdvurdering
     /// </remarks>
     public static readonly TimeSpan Graense = TimeSpan.FromMilliseconds(350);
 
+    /// <summary>Loftet, når intet andet er valgt.</summary>
+    public const int StandardLoftMinutter = 3;
+
+    /// <summary>Korteste loft, der kan vælges.</summary>
+    /// <remarks>
+    /// Under et minut ville afbryde en almindelig besked midt i, og så ville
+    /// loftet gøre mere skade end det, det beskytter mod.
+    /// </remarks>
+    public const int MindsteLoftMinutter = 1;
+
+    /// <summary>Længste loft, der kan vælges.</summary>
+    /// <remarks>
+    /// Loftet findes, fordi en tast kan sidde fast. Sættes det for højt, er
+    /// det der ikke længere: en halv time med lyd på vej til leverandøren er
+    /// ikke noget, man opdager i tide.
+    /// </remarks>
+    public const int StoersteLoftMinutter = 20;
+
     /// <summary>
-    /// Længste hold. Derefter slippes der af sig selv.
+    /// Loftet som en tid, med tallet holdt inden for det, der giver mening.
     /// </summary>
     /// <remarks>
-    /// EN TAST KAN SIDDE FAST. Sker det — fysisk, eller fordi et andet program
-    /// spiser slippet — ville appen ellers optage og sende, til nogen opdagede
-    /// det. Det koster penge hos leverandøren og er ikke til at se på skærmen.
+    /// En indstillingsfil kan indeholde hvad som helst — den er redigeret i
+    /// hånden, eller den kommer fra en ældre udgave. Et nul ville afbryde hver
+    /// diktering med det samme, og et negativt tal ville gøre det, før den
+    /// begyndte.
     /// </remarks>
-    public static readonly TimeSpan Loft = TimeSpan.FromMinutes(3);
+    public static TimeSpan LoftFra(int minutter) => TimeSpan.FromMinutes(
+        Math.Clamp(minutter <= 0 ? StandardLoftMinutter : minutter,
+                   MindsteLoftMinutter, StoersteLoftMinutter));
 
     /// <param name="gaaet">Tid siden tasten blev trykket.</param>
     /// <param name="nede">Er tasten stadig nede?</param>
     /// <param name="holderAllerede">Er <see cref="Holdsvar.Begynd"/> allerede givet?</param>
-    public static Holdsvar Naeste(TimeSpan gaaet, bool nede, bool holderAllerede)
+    /// <param name="loft">Længste hold. Se <see cref="LoftFra"/>.</param>
+    public static Holdsvar Naeste(TimeSpan gaaet, bool nede, bool holderAllerede, TimeSpan loft)
     {
-        if (nede && gaaet < Loft)
+        if (nede)
         {
+            // Stadig nede, og tiden er gaaet: afbrudt, ikke sluppet. Der skal
+            // siges til, og det er en anden besked end den, man faar, naar man
+            // selv slipper.
+            if (gaaet >= loft) return holderAllerede ? Holdsvar.Loftet : Holdsvar.Tryk;
+
             return !holderAllerede && gaaet >= Graense
                 ? Holdsvar.Begynd
                 : Holdsvar.Vent;
         }
 
-        // Sluppet — eller loftet naaet. Var det aldrig blevet til et hold, er
-        // det et tryk, og saa skal der ske det, der altid er sket.
+        // Sluppet. Var det aldrig blevet til et hold, er det et tryk — og saa
+        // skal der ske det, der altid er sket.
         return holderAllerede ? Holdsvar.Slut : Holdsvar.Tryk;
     }
 }
