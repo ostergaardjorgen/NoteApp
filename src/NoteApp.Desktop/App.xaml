@@ -350,6 +350,19 @@
       </Setter>
     </Style>
 
+    <!-- ============ EN KASSE OM ÉT FELT ============
+         Et maerkat og den kontrol, der hoerer til det. Kassen er der, fordi
+         fire felter ved siden af hinanden uden afgraensning floed sammen -
+         man kunne ikke se, hvor det ene spoergsmaal slap, og det naeste
+         begyndte. Set paa opstartdialogen 28-08-2026. -->
+    <Style x:Key="Feltkasse" TargetType="Border">
+      <Setter Property="Background" Value="{DynamicResource Panel}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource PanelKant}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="Padding" Value="14,12" />
+    </Style>
+
     <Style x:Key="Fare" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
       <Setter Property="Background" Value="{DynamicResource Optager}" />
       <Setter Property="BorderBrush" Value="{DynamicResource Optager}" />
@@ -522,7 +535,20 @@
         <Setter.Value>
           <ControlTemplate TargetType="ComboBox">
             <Grid>
-              <ToggleButton x:Name="knap" Focusable="False" ClickMode="Press"
+              <!-- Style="{x:Null}" FJERNER TEMAETS EGEN TOGGLEBUTTON-STIL.
+                   Da ThemeMode blev slaaet til, kom Fluent-temaet med en
+                   implicit stil for ToggleButton, og den satte stoerrelse og
+                   placering. Knappen skrumpede til pilen og lagde sig til
+                   venstre - saa stod der «▾Vaelg en mappe» uden nogen kasse,
+                   og intet lignede noget, man kunne klikke paa.
+                   Set 28-08-2026 paa opstartdialogen.
+
+                   Skabelonen er vores; saa skal temaets stil ikke ogsaa
+                   vaere med. -->
+              <ToggleButton x:Name="knap" Style="{x:Null}" Focusable="False" ClickMode="Press"
+                            HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                            HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+                            Padding="0" BorderThickness="0" Background="Transparent"
                             IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
                 <ToggleButton.Template>
                   <ControlTemplate TargetType="ToggleButton">

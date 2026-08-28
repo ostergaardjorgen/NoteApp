@@ -56,11 +56,12 @@
 
          Feltkanten hjaelper resten - se App.xaml, hvor kanten om alt, man kan
          skrive i, blev flyttet fra PanelKant til FeltKant. -->
-    <Border Background="{DynamicResource Panel}" BorderBrush="{DynamicResource PanelKant}"
-            BorderThickness="1" CornerRadius="10" Padding="20" Margin="0,18,0,0">
-
-    <!-- ============ DE FIRE VALG, TO OG TO ============ -->
-    <Grid>
+    <!-- ============ DE FIRE VALG, TO OG TO ============
+         HVERT VALG I SIN EGEN KASSE. Én stor kasse om det hele samlede dem,
+         men den sagde ikke, hvor det ene spørgsmål slap, og det næste begyndte
+         — maerkat og kontrol flød sammen på tværs af spalterne. Fire kasser
+         siger det uden ord. -->
+    <Grid Margin="0,18,0,0">
       <Grid.ColumnDefinitions>
         <ColumnDefinition Width="*" />
         <ColumnDefinition Width="22" />
@@ -73,8 +74,9 @@
       </Grid.RowDefinitions>
 
       <!-- Mappen -->
-      <StackPanel x:Name="Mappefelt" Grid.Row="0" Grid.Column="0">
-        <TextBlock Text="{i18n:Oversat faelles.mappe}" FontSize="10.5" FontWeight="SemiBold" Margin="2,0,0,6"
+      <Border x:Name="Mappefelt" Grid.Row="0" Grid.Column="0" Style="{StaticResource Feltkasse}">
+      <StackPanel>
+        <TextBlock Text="{i18n:Oversat faelles.mappe}" FontSize="10.5" FontWeight="SemiBold" Margin="2,0,0,7"
                    Foreground="{DynamicResource TekstMeget}" />
         <Grid>
           <Grid.ColumnDefinitions>
@@ -98,10 +100,12 @@
                   ToolTip="{i18n:Oversat opstartwindow.opret_en_ny_mappe_uden_at_forlade_dialogen}" />
         </Grid>
       </StackPanel>
+      </Border>
 
       <!-- Mødetypen -->
-      <StackPanel x:Name="Typefelt" Grid.Row="0" Grid.Column="2">
-        <TextBlock Text="{i18n:Oversat faelles.moedetype}" FontSize="10.5" FontWeight="SemiBold" Margin="2,0,0,6"
+      <Border x:Name="Typefelt" Grid.Row="0" Grid.Column="2" Style="{StaticResource Feltkasse}">
+      <StackPanel>
+        <TextBlock Text="{i18n:Oversat faelles.moedetype}" FontSize="10.5" FontWeight="SemiBold" Margin="2,0,0,7"
                    Foreground="{DynamicResource TekstMeget}" />
         <ComboBox x:Name="Typevalg" FontSize="13" Padding="10,7"
                   SelectionChanged="Type_Valgt">
@@ -112,10 +116,12 @@
           </ComboBox.ItemTemplate>
         </ComboBox>
       </StackPanel>
+      </Border>
 
       <!-- Sproget -->
-      <StackPanel Grid.Row="2" Grid.Column="0">
-        <TextBlock x:Name="SprogMaerkat" FontSize="10.5" FontWeight="SemiBold" Margin="2,0,0,6"
+      <Border Grid.Row="2" Grid.Column="0" Style="{StaticResource Feltkasse}">
+      <StackPanel>
+        <TextBlock x:Name="SprogMaerkat" FontSize="10.5" FontWeight="SemiBold" Margin="2,0,0,7"
                    Foreground="{DynamicResource TekstMeget}" />
         <ComboBox x:Name="Sprogvalg" FontSize="13" Padding="10,7">
           <ComboBox.ItemTemplate>
@@ -125,15 +131,18 @@
           </ComboBox.ItemTemplate>
         </ComboBox>
       </StackPanel>
+      </Border>
 
       <!-- Linket — kun ved webinar -->
-      <StackPanel x:Name="Linkfelt" Grid.Row="2" Grid.Column="2" Visibility="Collapsed">
+      <Border x:Name="Linkfelt" Grid.Row="2" Grid.Column="2" Visibility="Collapsed"
+              Style="{StaticResource Feltkasse}">
+      <StackPanel>
         <TextBlock Text="{i18n:Oversat opstartwindow.link_til_webinaret_kan_staa_tomt}" FontSize="10.5" FontWeight="SemiBold"
-                   Margin="2,0,0,6" Foreground="{DynamicResource TekstMeget}" />
+                   Margin="2,0,0,7" Foreground="{DynamicResource TekstMeget}" />
         <TextBox x:Name="Link" FontSize="12.5" Padding="10,7" />
       </StackPanel>
+      </Border>
     </Grid>
-    </Border>
 
     <!-- ============ DET, MAN KAN HANDLE PÅ ============
          Kun ved webinar. To linjer, og begge er noget, brugeren gør noget
