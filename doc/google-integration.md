@@ -173,6 +173,49 @@ Optagelse, transskription, opsummering og dokumenter rører aldrig Google.
 Mangler `google-klient.json`, siger fanen «IKKE SLÅET TIL», og alt andet
 kører. Verifikationen spærrer for **én fane** — ikke for produktet.
 
+## Navnet og logoet på samtykkeskærmen
+
+Appen skiftede navn fra NoteApp til HeyPia den 28. august 2026, og
+samtykkeskærmen er det ENESTE sted, kunden møder navnet uden for appen. Stod
+der stadig «NoteApp», ville hun blive bedt om at give adgang til et program,
+hun ikke har hørt om.
+
+Rettes under **Branding**: feltet *App name* og knappen *Change logo*.
+
+**Logoet ligger klar i `design/HeyPia-logo-google-120.png`.** Det er lavet
+efter Googles krav, og de er ikke til at gætte:
+
+| Krav | Værdi |
+|---|---|
+| Format | JPG, PNG eller BMP |
+| Størrelse | 120 × 120 px |
+| Filstørrelse | under 1 MB (vores er 20 KB) |
+
+Filen er skaleret ned fra `src/NoteApp.Desktop/app.png` med LANCZOS.
+Nedskalering med nærmeste nabo gør skriften i flisen grynet, og det ses først
+på skærmen hos kunden, hvor der ikke er noget at gøre ved det. Skal den laves
+om, så brug samme fremgangsmåde.
+
+Hjørnerne er gennemsigtige, og det skal de blive ved med. Flisen er rundet,
+og lægges der hvidt bag, bliver hjørnerne firkantede på Googles hvide skærm.
+
+### Rækkefølgen betyder noget
+
+Konsollen skriver *«After you upload a logo, you will need to submit your app
+for verification»* — og separat *«Your branding needs to be verified before
+it's shown to users»*. Logoet vises altså ikke til nogen, før appen er
+godkendt.
+
+Derfor er navn og logo skiftet **før** ansøgningen sendes, ikke efter. Så
+bærer ansøgningen den rigtige identitet fra start. Var det gjort omvendt,
+ville en godkendt app skulle gennem en ny runde for et navneskift.
+
+### To steder mere, men kun i konsollen
+
+Cloud-projektet hedder stadig «NoteApp calendar sync», og OAuth-klienten under
+**Clients** bærer også det gamle navn. Ingen af dem vises til kunden — de står
+kun i konsollen. De kan rettes for sammenhængens skyld, men de haster ikke.
+
 ## Hvor det gøres
 
 | Hvad | Hvor |
