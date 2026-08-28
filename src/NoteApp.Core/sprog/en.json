@@ -612,7 +612,7 @@
     "teksten_i_moedeindkaldelsen": "The text in the meeting invitation",
     "tilfoej_mappe": "Add folder…",
     "tre_ting_kan_kun_ske_mens_appen_er_aaben_g": "Three things can only happen while the app is open: the shortcut key can start a recording, the meeting watch can ask when a program uses the microphone, and an event you have marked for automatic recording can start on its own.",
-    "tryk_kombinationen_hvor_som_helst_i_window": "Press the combination anywhere in Windows and the recording begins straight away. The list shows what is free on your particular machine — it differs from PC to PC.",
+    "tryk_kombinationen_hvor_som_helst_i_window": "Press the combination anywhere in Windows and the recording begins straight away. Press «Choose shortcut» and type the combination you want — then it is the key you actually hit, not one that merely goes by the same name.",
     "uden_hak_bliver_filen_tilbudt_paa_optagels": "Without the tick the file is offered under Recordings, and you decide",
     "uden_nvidia_kort_koerer_udskriften_paa_pro": "Without an NVIDIA card the transcription runs on the processor. It works, but an hour-long meeting takes longer than the meeting itself lasted. Recording is unaffected.",
     "vaelg_et_arkiv_for_at_se_hvad_det_indehold": "Select an archive to see what it contains.",
@@ -623,7 +623,7 @@
     "tema_lyst": "Light",
     "tema_moerkt": "Dark",
     "vaelg_genvej": "Choose shortcut",
-    "eller_vaelg_fra_listen": "Or pick from the list"
+    "eller_vaelg_fra_listen": "Or pick from a list of combinations that are usually free"
   },
   "complianceview": {
     "aabner_console_mistral_ai_hvor_du_slaar_tr": "Opens console.mistral.ai, where you turn training off",

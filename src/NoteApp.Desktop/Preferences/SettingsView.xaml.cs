@@ -149,6 +149,14 @@ public partial class SettingsView : UserControl
 
         if (_fanger is not null) { StopFanger(); return; }
 
+        // ============ DEN GAMLE GENVEJ SLIPPES FOERST ============
+        //
+        // Ellers snapper den tastetrykket, starter en optagelse, og fangeren
+        // ser aldrig noget. Det ramte netop den tast, brugeren helst ville
+        // skifte til: taltastaturets komma og Ctrl+Delete er den samme fysiske
+        // tast. Set 28-08-2026.
+        (vindue as MainWindow)?.PauseGenvej();
+
         _fanger = new Genvejsfanger(vindue);
         _fanger.Aendret += VisFanger;
         _fanger.Faerdig += GemEgenGenvej;
@@ -213,6 +221,10 @@ public partial class SettingsView : UserControl
 
         _fanger?.Dispose();
         _fanger = null;
+
+        // Er der gemt en ny, saetter TilslutGenvej den paa. Er der ikke -
+        // fordi man fortroed - skal den gamle tilbage.
+        if (!behold && Window.GetWindow(this) is MainWindow h) h.GenoptagGenvej();
 
         GenvejVaelg.Content = NoteApp.Core.Sprog.T("settingsview.vaelg_genvej");
 

@@ -895,6 +895,17 @@ public partial class MainWindow : Window
     /// <summary>Navnet paa den genvej, der er registreret nu. Null hvis ingen.</summary>
     public string? AktivGenvejNavn => _genvej.Aktiv?.Navn;
 
+    /// <summary>
+    /// Slip genvejen, mens brugeren vaelger en ny — og saet den tilbage bagefter.
+    /// </summary>
+    /// <remarks>
+    /// Uden det her snapper den GAMLE genvej tastetrykket, starter en
+    /// optagelse, og skaermen ser aldrig tasten. Se GlobalHotkey.Pause.
+    /// </remarks>
+    public void PauseGenvej() => _genvej.Pause();
+
+    public void GenoptagGenvej() => _genvej.Genoptag();
+
     /// <summary>Registreringen har skiftet — vis den nye tast.</summary>
     private void VisGenvejIgen() =>
         _moede.VisGenvej(_genvej.Aktiv?.Navn, _genvej.Bemærkning);

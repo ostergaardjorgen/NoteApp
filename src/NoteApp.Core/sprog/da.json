@@ -585,7 +585,7 @@
     "teksten_i_moedeindkaldelsen": "Teksten i mødeindkaldelsen",
     "tilfoej_mappe": "Tilføj mappe…",
     "tre_ting_kan_kun_ske_mens_appen_er_aaben_g": "Tre ting kan kun ske, mens appen er åben: genvejstasten kan starte en optagelse, mødevagten kan spørge, når et program bruger mikrofonen, og en aftale, du har markeret til automatisk optagelse, kan gå i gang af sig selv.",
-    "tryk_kombinationen_hvor_som_helst_i_window": "Tryk kombinationen hvor som helst i Windows, så begynder optagelsen med det samme. Listen viser, hvad der er ledigt på netop din maskine — det er forskelligt fra pc til pc.",
+    "tryk_kombinationen_hvor_som_helst_i_window": "Tryk kombinationen hvor som helst i Windows, så begynder optagelsen med det samme. Tryk «Vælg genvej» og tast den kombination, du vil bruge — så er det den tast, du faktisk rammer, og ikke en, der bare hedder det samme.",
     "uden_hak_bliver_filen_tilbudt_paa_optagels": "Uden hak bliver filen tilbudt på Optagelser, og du bestemmer",
     "uden_nvidia_kort_koerer_udskriften_paa_pro": "Uden NVIDIA-kort kører transkriptionen på processoren. Den virker, men en times møde tager længere end mødet selv varede. Optagelsen er upåvirket.",
     "vaelg_et_arkiv_for_at_se_hvad_det_indehold": "Vælg et arkiv for at se, hvad det indeholder.",
@@ -596,7 +596,7 @@
     "tema_lyst": "Lyst",
     "tema_moerkt": "Mørkt",
     "vaelg_genvej": "Vælg genvej",
-    "eller_vaelg_fra_listen": "Eller vælg fra listen"
+    "eller_vaelg_fra_listen": "Eller vælg fra en liste over kombinationer, der plejer at være fri"
   },
   "setupwindow": {
     "dine_filer_ligger_her": "Dine filer ligger her",

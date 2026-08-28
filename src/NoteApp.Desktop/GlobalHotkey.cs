@@ -498,6 +498,54 @@ public sealed class GlobalHotkey : IDisposable
         return IntPtr.Zero;
     }
 
+    /// <summary>
+    /// Slip genvejen midlertidigt — mens brugeren vælger en ny.
+    /// </summary>
+    /// <remarks>
+    /// EN GLOBAL GENVEJ VINDER OVER ALT ANDET. Også over den skærm, hvor man
+    /// skifter den. Blev den siddende, ville tastetrykket gå til den gamle
+    /// genvej — der ville starte en optagelse — og skærmen ville aldrig se
+    /// tasten.
+    ///
+    /// Det er værst netop for den tast, man helst vil skifte TIL: overlapper
+    /// den med den nuværende, kan man aldrig nå at vælge den. Set 28-08-2026,
+    /// hvor taltastaturets komma og Ctrl+Delete er den samme fysiske tast.
+    ///
+    /// <see cref="Genoptag"/> sætter den tilbage. Genvejstasten er ude af
+    /// drift imens, og det er den rigtige pris: man står i Indstillinger og
+    /// vælger genvej, ikke til et møde.
+    /// </remarks>
+    public void Pause()
+    {
+        if (_registreret && _håndtag != IntPtr.Zero) UnregisterHotKey(_håndtag, Id);
+        if (_tvilling && _håndtag != IntPtr.Zero) UnregisterHotKey(_håndtag, TvillingId);
+
+        _pauset = _registreret;
+        _pausetTvilling = _tvilling;
+        _registreret = false;
+        _tvilling = false;
+    }
+
+    /// <summary>Sæt den tilbage, som den var.</summary>
+    public void Genoptag()
+    {
+        if (!_pauset || Aktiv is null || _håndtag == IntPtr.Zero) return;
+
+        _registreret = RegisterHotKey(_håndtag, Id, Aktiv.Modifiers | MOD_NOREPEAT, Aktiv.Key);
+
+        if (_pausetTvilling)
+        {
+            var t = Genvejstast.Tvillingen(Aktiv.Key);
+            _tvilling = t != 0 && RegisterHotKey(_håndtag, TvillingId, Aktiv.Modifiers | MOD_NOREPEAT, t);
+        }
+
+        _pauset = false;
+        _pausetTvilling = false;
+    }
+
+    private bool _pauset;
+    private bool _pausetTvilling;
+
     private void Frigiv()
     {
         if (_registreret && _håndtag != IntPtr.Zero) UnregisterHotKey(_håndtag, Id);
