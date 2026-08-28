@@ -25,7 +25,7 @@
 
        Den lægger sig nede ved uret, hvor Windows' egne beskeder kommer. -->
 
-  <Border Background="#FF161A21" BorderBrush="{StaticResource Accent}" BorderThickness="1"
+  <Border Background="{StaticResource Trykket}" BorderBrush="{StaticResource Accent}" BorderThickness="1"
           CornerRadius="10" Padding="16,14">
     <Border.Effect>
       <DropShadowEffect BlurRadius="18" ShadowDepth="3" Opacity="0.55" Color="#FF000000" />

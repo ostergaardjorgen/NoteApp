@@ -149,7 +149,7 @@
                        goer det, kortet lige saa godt kan aabne, er et led for
                        meget - og optagelsen startes nu inde i vinduet, hvor
                        man samtidig kan se, hvad der bliver optaget som. -->
-                  <Border Background="#FF181B22" BorderBrush="{Binding Kant}"
+                  <Border Background="{StaticResource Trykket}" BorderBrush="{Binding Kant}"
                           BorderThickness="3,0,0,0" CornerRadius="6"
                           Padding="11,8" Margin="0,0,0,5"
                           Opacity="{Binding Daempning}"
@@ -267,7 +267,7 @@
               </Border>
               <ControlTemplate.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                  <Setter TargetName="flade" Property="Background" Value="#FF2C323D" />
+                  <Setter TargetName="flade" Property="Background" Value="{StaticResource Svaev}" />
                 </Trigger>
               </ControlTemplate.Triggers>
             </ControlTemplate>
@@ -435,7 +435,7 @@
           spoergsmaalet hvilket af dem - ikke om filen kan aabnes.
           Nu staar hvert sted som sin egen linje. -->
           <Border CornerRadius="10" Padding="0" Margin="0,0,0,10"
-          Background="#FF181B22" BorderThickness="1"
+          Background="{StaticResource Trykket}" BorderThickness="1"
           BorderBrush="{StaticResource PanelKant}">
           <StackPanel>
           <Grid Margin="14,12,14,8">
@@ -446,7 +446,7 @@
           </Grid.ColumnDefinitions>
 
           <Border Grid.Column="0" CornerRadius="4" Padding="7,2" Margin="0,0,10,0"
-          Background="#FF2C323D" VerticalAlignment="Center">
+          Background="{StaticResource Svaev}" VerticalAlignment="Center">
           <TextBlock Text="{Binding Maerkat}" FontSize="10.5" FontWeight="SemiBold"
           Foreground="{Binding Maerkatfarve}" />
           </Border>
@@ -478,13 +478,13 @@
           <Button.Template>
           <ControlTemplate TargetType="Button">
           <Border x:Name="rk" CornerRadius="6" Padding="11,8"
-          Background="#FF12151B" BorderThickness="1"
+          Background="{StaticResource Trykket}" BorderThickness="1"
           BorderBrush="Transparent">
           <ContentPresenter />
           </Border>
           <ControlTemplate.Triggers>
           <Trigger Property="IsMouseOver" Value="True">
-          <Setter TargetName="rk" Property="Background" Value="#FF2C323D" />
+          <Setter TargetName="rk" Property="Background" Value="{StaticResource Svaev}" />
           <Setter TargetName="rk" Property="BorderBrush" Value="{StaticResource Accent}" />
           </Trigger>
           </ControlTemplate.Triggers>
@@ -535,7 +535,7 @@
           <ItemsControl x:Name="Enkeltvis" Margin="0,16,0,0" HorizontalAlignment="Center">
           <ItemsControl.ItemTemplate>
           <DataTemplate>
-          <Border Background="#FF181B22" BorderBrush="{StaticResource PanelKant}"
+          <Border Background="{StaticResource Trykket}" BorderBrush="{StaticResource PanelKant}"
           BorderThickness="1" CornerRadius="6" Padding="12,7" Margin="0,0,0,6">
           <Grid MinWidth="360">
           <TextBlock Text="{Binding Ord}" FontSize="12.5" FontWeight="SemiBold"
@@ -621,7 +621,7 @@
                      Fluebenet, prioriteten og herkomstlinket ligger inden i.
                      De haandterer selv deres klik og markerer dem som
                      behandlede, saa de naar aldrig herud. -->
-                <Border Background="#FF181B22" BorderBrush="{Binding Farve}"
+                <Border Background="{StaticResource Trykket}" BorderBrush="{Binding Farve}"
                 BorderThickness="3,0,0,0" CornerRadius="6"
                 Padding="13,10" Margin="0,0,0,6"
                 Opacity="{Binding Daempning}"
@@ -672,7 +672,7 @@
                      helt normalt til at se ud som et tab. -->
                 <Button Content="{Binding Under}" Tag="{Binding}" Click="Opgave_Klik"
                 Padding="0" BorderThickness="0" Background="Transparent" Cursor="Hand"
-                FontSize="11" Foreground="#FF5B9DF0"
+                FontSize="11" Foreground="{StaticResource Accent}"
                 Visibility="{Binding Linkvis}"
                 ToolTip="{i18n:Oversat searchview.gaa_til_det_sted_i_transkriptionen_opgaven}">
                 <Button.Template>
@@ -691,7 +691,7 @@
                 </StackPanel>
 
                 <Border Grid.Column="2" CornerRadius="4" Padding="7,2" Margin="10,0,0,0"
-                VerticalAlignment="Top" Background="#FF2C323D"
+                VerticalAlignment="Top" Background="{StaticResource Svaev}"
                 Visibility="{Binding Fristvis}">
                 <TextBlock Text="{Binding Frist}" FontSize="11.5" FontWeight="SemiBold"
                 Foreground="{Binding Fristfarve}" />

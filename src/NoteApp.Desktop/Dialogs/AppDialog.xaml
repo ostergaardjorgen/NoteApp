@@ -40,7 +40,7 @@
              det: er de tre fejl den samme fejl, der gentager sig, eller er de
              tre tilfældige steder blandt fyrre rigtige? -->
         <Border x:Name="ListePanel" Visibility="Collapsed" Margin="0,16,0,0"
-                Background="#FF181B22" CornerRadius="8"
+                Background="{StaticResource Trykket}" CornerRadius="8"
                 BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
           <ItemsControl x:Name="Liste" MaxHeight="260" Padding="4,6,4,6">
             <ItemsControl.Template>
@@ -76,7 +76,7 @@
                   IsCancel="True" MinWidth="104" Content="{i18n:Oversat faelles.annuller}" />
           <Button x:Name="GodkendKnap" Click="Godkend_Click" Padding="22,10" MinWidth="124"
                   IsDefault="True" BorderThickness="0" FontWeight="SemiBold"
-                  Foreground="#FF0B1220" Background="{StaticResource Accent}" />
+                  Foreground="{StaticResource PaaAccent}" Background="{StaticResource Accent}" />
         </StackPanel>
       </Grid>
     </Grid>

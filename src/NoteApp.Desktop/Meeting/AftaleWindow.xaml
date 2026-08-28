@@ -106,7 +106,7 @@
     </Grid>
 
     <!-- ============ DE TRE, DER FØLGER MED TIL OPTAGELSEN ============ -->
-    <Border Background="#FF181B22" BorderBrush="{StaticResource PanelKant}" BorderThickness="1"
+    <Border Background="{StaticResource Trykket}" BorderBrush="{StaticResource PanelKant}" BorderThickness="1"
             CornerRadius="8" Padding="14,12" Margin="0,18,0,0">
       <StackPanel>
         <TextBlock Text="{i18n:Oversat aftalewindow.naar_du_trykker_optag_paa_aftalen}" FontSize="12.5" FontWeight="SemiBold" />

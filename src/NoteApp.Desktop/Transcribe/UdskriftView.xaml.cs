@@ -39,7 +39,7 @@ public sealed class Replikvisning : INotifyPropertyChanged
 
         Tekstfarve = traef
             ? Brushes.Transparent
-            : new SolidColorBrush(Color.FromRgb(0xE8, 0xEC, 0xF2));
+            : Temaskift.Pensel("Tekst");
 
         // NØGLEN ER DET, NAVNET GEMMES UNDER.
         //
@@ -61,8 +61,8 @@ public sealed class Replikvisning : INotifyPropertyChanged
         Ikon = gaester ? "" : "";
 
         Farve = gaester
-            ? new SolidColorBrush(Color.FromRgb(0xC9, 0x8C, 0xF0))
-            : new SolidColorBrush(Color.FromRgb(0x5B, 0x9D, 0xF0));
+            ? Temaskift.Pensel("Dokument")
+            : Temaskift.Pensel("Accent");
 
         var erStemme = linje.Stemme is { Length: > 0 };
 
@@ -83,7 +83,7 @@ public sealed class Replikvisning : INotifyPropertyChanged
     public string Bloktitel { get; } = "";
     public Visibility BlokSynlig { get; }
     public Visibility FremhaevSynlig { get; }
-    public Brush Tekstfarve { get; } = Brushes.White;
+    public Brush Tekstfarve { get; } = Temaskift.Pensel("Tekst");
 
     /// <summary>
     /// Teksten skåret op i stykker, hvor de gule er dem, der blev søgt på.
@@ -659,8 +659,8 @@ public partial class UdskriftView : UserControl
 
     // ---------------------------------------------------- den gule markering
 
-    private static readonly Brush Gul = new SolidColorBrush(Color.FromRgb(0xF5, 0xD1, 0x3B));
-    private static readonly Brush PaaGul = new SolidColorBrush(Color.FromRgb(0x14, 0x18, 0x1F));
+    private static readonly Brush Gul = Temaskift.Pensel("Fremhaev");
+    private static readonly Brush PaaGul = Temaskift.Pensel("PaaFremhaev");
 
     /// <summary>
     /// Tegner den gule markering i TextBlock'en bag tekstfeltet.
@@ -1079,8 +1079,8 @@ public partial class UdskriftView : UserControl
             // faa en kort stump, og forskellen mellem dem forsvinder.
             Math.Max(3, 260 * (g.Sekunder / stoerste)),
             g.Spor == Samtale.Derfra
-                ? new SolidColorBrush(Color.FromRgb(0xC9, 0x8C, 0xF0))
-                : new SolidColorBrush(Color.FromRgb(0x5B, 0x9D, 0xF0))))
+                ? Temaskift.Pensel("Dokument")
+                : Temaskift.Pensel("Accent")))
             .ToList();
 
         var taletid = TimeSpan.FromSeconds(samlet);

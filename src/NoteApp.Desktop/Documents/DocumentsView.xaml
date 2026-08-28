@@ -126,7 +126,7 @@
                        markeringen - i temaets egne farver. -->
                   <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="Transparent" />
                   <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="Transparent" />
-                  <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="#FFF4F6FA" />
+                  <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="{Binding Color, Source={StaticResource Tekst}}" />
                 </Style.Resources>
                 <Setter Property="Padding" Value="2,1" />
                 <Setter Property="AllowDrop" Value="True" />
@@ -160,13 +160,13 @@
                 </Border>
                 <HierarchicalDataTemplate.Triggers>
                   <DataTrigger Binding="{Binding ErValgt}" Value="True">
-                    <Setter TargetName="rk" Property="Background" Value="#FF33405A" />
+                    <Setter TargetName="rk" Property="Background" Value="{StaticResource Valgt}" />
                   </DataTrigger>
                   <DataTrigger Binding="{Binding ErBeholder}" Value="True">
                     <Setter TargetName="rk" Property="ToolTipService.IsEnabled" Value="False" />
                   </DataTrigger>
                   <DataTrigger Binding="{Binding ErDropmaal}" Value="True">
-                    <Setter TargetName="rk" Property="Background" Value="#FF33405A" />
+                    <Setter TargetName="rk" Property="Background" Value="{StaticResource Valgt}" />
                     <Setter TargetName="rk" Property="BorderBrush" Value="{StaticResource Accent}" />
                   </DataTrigger>
                 </HierarchicalDataTemplate.Triggers>
@@ -192,7 +192,7 @@
                lander her. Uden en bjaelke var der ingenting at se, naar man
                kom herover - og saa tror man, det gik i staa. -->
           <Border x:Name="Fremdriftsrude" Grid.Row="1" Visibility="Collapsed"
-                  Background="#FF1A2230" BorderBrush="{StaticResource Accent}"
+                  Background="{StaticResource Valgt}" BorderBrush="{StaticResource Accent}"
                   BorderThickness="0,1,0,0" CornerRadius="0,0,10,10" Padding="20,12">
             <StackPanel>
               <Grid>
@@ -204,7 +204,7 @@
               <TextBlock x:Name="JobDetaljer" FontSize="11.5" Margin="0,3,0,0" TextWrapping="Wrap"
                          Foreground="{StaticResource TekstMeget}" />
               <ProgressBar x:Name="Fremdrift" Height="5" Minimum="0" Maximum="100" Margin="0,9,0,0"
-                           Background="#FF2C323D" Foreground="{StaticResource Accent}"
+                           Background="{StaticResource Svaev}" Foreground="{StaticResource Accent}"
                            BorderThickness="0" />
             </StackPanel>
           </Border>
@@ -315,7 +315,7 @@
 
               <!-- Proveniensen. Et referat, ingen kan finde tilbage fra, er en
                    tekst, ingen tør bruge til noget. -->
-              <Border Background="#FF181B22" BorderBrush="{StaticResource PanelKant}" BorderThickness="1"
+              <Border Background="{StaticResource Trykket}" BorderBrush="{StaticResource PanelKant}" BorderThickness="1"
                       CornerRadius="8" Padding="16,13" Margin="0,14,0,0">
                 <Grid>
                   <Grid.ColumnDefinitions>
@@ -369,7 +369,7 @@
                          Text="{i18n:Oversat documentsview.beskrivelsen_staar_oeverst_i_selve_dokumen}" />
 
               <TextBlock Text="{i18n:Oversat documentsview.indhold}" Style="{StaticResource Underskrift}" Margin="0,18,0,0" />
-              <Border Background="#FF181B22" BorderBrush="{StaticResource PanelKant}" BorderThickness="1"
+              <Border Background="{StaticResource Trykket}" BorderBrush="{StaticResource PanelKant}" BorderThickness="1"
                       CornerRadius="8" Padding="16,13" Margin="0,5,0,0">
                 <!-- TextBox og ikke TextBlock. To grunde:
                      - Soegningen skal kunne springe hen til et bestemt sted,
@@ -411,14 +411,14 @@
                             BorderThickness="0" Padding="0" Background="Transparent">
                       <Button.Template>
                         <ControlTemplate TargetType="Button">
-                          <Border x:Name="kort" Background="#FF181B22" CornerRadius="6"
-                                  BorderBrush="#FFC98CF0" BorderThickness="3,0,0,0"
+                          <Border x:Name="kort" Background="{StaticResource Trykket}" CornerRadius="6"
+                                  BorderBrush="{StaticResource Accent}" BorderThickness="3,0,0,0"
                                   Padding="11,8">
                             <ContentPresenter />
                           </Border>
                           <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                              <Setter TargetName="kort" Property="Background" Value="#FF2C323D" />
+                              <Setter TargetName="kort" Property="Background" Value="{StaticResource Svaev}" />
                             </Trigger>
                           </ControlTemplate.Triggers>
                         </ControlTemplate>

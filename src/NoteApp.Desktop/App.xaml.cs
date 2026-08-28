@@ -48,9 +48,17 @@ public partial class App : Application
             // En oprydning maa aldrig kunne forhindre appen i at aabne.
         }
 
+        // LYST ELLER MOERKT - foer noget som helst tegnes.
+        //
+        // Penslerne i App.xaml er allerede lavet paa det her tidspunkt, og
+        // her faar de deres rigtige farve. Sker det senere, naar man at se et
+        // glimt af det forkerte tema, og det er den slags, der faar en app til
+        // at virke sjusket uden at man kan sige hvorfor.
+        Temaskift.Anvend();
+
         // Titellinjen paa ALLE vinduer - ogsaa dem, der endnu ikke findes.
         // Skal staa foer det foerste vindue aabner; opsaetningsvinduet lige
-        // nedenfor er det foerste, og det skal ogsaa vaere moerkt.
+        // nedenfor er det foerste, og det skal ogsaa foelge temaet.
         Vinduesramme.SlaaTil();
 
         // Foerste start: hvor filerne skal ligge, og hentning af Whisper.

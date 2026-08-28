@@ -33,6 +33,30 @@
       <TabItem Header="{i18n:Oversat settingsview.opstart}" Style="{StaticResource Fane}">
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
           <StackPanel>
+        <!-- ========================= Udseende ===============================
+             Står øverst, fordi det er det eneste her, man kan se virke med
+             det samme. Alt andet på fanen er noget, der først viser sig ved
+             næste møde. -->
+        <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20"
+                BorderBrush="{StaticResource PanelKant}" BorderThickness="1" Margin="0,0,0,14"
+                VerticalAlignment="Top">
+          <StackPanel>
+            <TextBlock Text="{i18n:Oversat settingsview.udseende}" FontSize="15" FontWeight="SemiBold" />
+            <TextBlock FontSize="12.5" Margin="0,6,0,0" TextWrapping="Wrap" LineHeight="20"
+                       Foreground="{StaticResource TekstMeget}"
+                       Text="{i18n:Oversat settingsview.udseende_forklaring}" />
+
+            <StackPanel Orientation="Horizontal" Margin="0,14,0,0">
+              <RadioButton x:Name="TemaFoelg" GroupName="Tema" Style="{StaticResource Fanevalg}"
+                           Content="{i18n:Oversat settingsview.tema_foelg}" Checked="Tema_Valgt" />
+              <RadioButton x:Name="TemaLyst" GroupName="Tema" Style="{StaticResource Fanevalg}"
+                           Content="{i18n:Oversat settingsview.tema_lyst}" Checked="Tema_Valgt" />
+              <RadioButton x:Name="TemaMoerkt" GroupName="Tema" Style="{StaticResource Fanevalg}"
+                           Content="{i18n:Oversat settingsview.tema_moerkt}" Checked="Tema_Valgt" />
+            </StackPanel>
+          </StackPanel>
+        </Border>
+
         <!-- ===================== Klar til næste møde ======================== -->
         <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20"
                 BorderBrush="{StaticResource PanelKant}" BorderThickness="1" Margin="0,0,0,14"
@@ -49,7 +73,7 @@
                  en optagelse. Staar det kun i en enkelt dialog, opdager man
                  det foerste gang et moede IKKE blev optaget - og dér er det
                  for sent. -->
-            <Border Background="#FF181B22" BorderBrush="{StaticResource Accent}"
+            <Border Background="{StaticResource Trykket}" BorderBrush="{StaticResource Accent}"
                     BorderThickness="3,0,0,0" CornerRadius="4" Padding="14,11" Margin="0,12,0,0">
               <StackPanel>
                 <TextBlock Text="{i18n:Oversat settingsview.noteapp_virker_bedst_naar_den_altid_koerer}"
@@ -71,7 +95,7 @@
             <TextBlock x:Name="AutostartStatus" FontSize="12" Margin="24,6,0,0" TextWrapping="Wrap"
                        Foreground="{StaticResource TekstMeget}" />
 
-            <Border Background="#FF181B22" BorderBrush="{StaticResource PanelKant}" BorderThickness="1"
+            <Border Background="{StaticResource Trykket}" BorderBrush="{StaticResource PanelKant}" BorderThickness="1"
                     CornerRadius="8" Padding="14,11" Margin="0,14,0,0">
               <StackPanel>
                 <TextBlock x:Name="GenvejOverskrift" FontSize="13" FontWeight="SemiBold"
@@ -108,7 +132,7 @@
             <CheckBox x:Name="MoedevagtTil" Margin="0,14,0,0" Click="Moedevagt_Klik"
                       Content="{i18n:Oversat settingsview.spoerg_mig_naar_et_program_bruger_mikrofon}" />
 
-            <Border Background="#FF181B22" BorderBrush="{StaticResource PanelKant}" BorderThickness="1"
+            <Border Background="{StaticResource Trykket}" BorderBrush="{StaticResource PanelKant}" BorderThickness="1"
                     CornerRadius="8" Padding="14,11" Margin="24,10,0,0">
               <StackPanel>
                 <TextBlock Text="{i18n:Oversat settingsview.hvad_appen_kigger_paa}" FontSize="12.5" FontWeight="SemiBold" />
@@ -138,7 +162,7 @@
               <ItemsControl x:Name="Fravalgte" Margin="0,10,0,0">
                 <ItemsControl.ItemTemplate>
                   <DataTemplate>
-                    <Border Background="#FF181B22" BorderBrush="{StaticResource PanelKant}"
+                    <Border Background="{StaticResource Trykket}" BorderBrush="{StaticResource PanelKant}"
                             BorderThickness="1" CornerRadius="6" Padding="12,8" Margin="0,0,0,6">
                       <Grid>
                         <StackPanel Margin="0,0,90,0">
@@ -187,7 +211,7 @@
                 <ItemsControl x:Name="Kravliste" Margin="0,14,0,0">
                   <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                      <Border Background="#FF181B22" BorderBrush="{Binding Kant}"
+                      <Border Background="{StaticResource Trykket}" BorderBrush="{Binding Kant}"
                               BorderThickness="3,0,0,0" CornerRadius="6"
                               Padding="14,11" Margin="0,0,0,8">
                         <StackPanel>
@@ -263,7 +287,7 @@
                          det løfte, resten af appen giver. -->
                     <Button x:Name="ProeveKnap" Content="{i18n:Oversat settingsview.proev_mikrofon_og_hoejttaler}" Click="Proeve_Click"
                             HorizontalAlignment="Right" VerticalAlignment="Center" Padding="16,9"
-                            Background="{StaticResource Accent}" Foreground="#FF0B1220" BorderThickness="0"
+                            Background="{StaticResource Accent}" Foreground="{StaticResource PaaAccent}" BorderThickness="0"
                             FontWeight="SemiBold" />
             </Grid>
         <!-- ============================ Mikrofon ============================ -->
@@ -293,7 +317,7 @@
               </Grid.ColumnDefinitions>
               <TextBlock Grid.Column="0" Text="{i18n:Oversat faelles.niveau}" Style="{StaticResource Underskrift}"
                          VerticalAlignment="Center" Width="52" />
-              <Border Grid.Column="1" Height="10" Background="#FF2C323D" CornerRadius="5"
+              <Border Grid.Column="1" Height="10" Background="{StaticResource Svaev}" CornerRadius="5"
                       VerticalAlignment="Center">
                 <Border x:Name="MikNiveau" HorizontalAlignment="Left" Width="0" Height="10"
                         CornerRadius="5" Background="{StaticResource Godkendt}" />
@@ -342,7 +366,7 @@
               </Grid.ColumnDefinitions>
               <TextBlock Grid.Column="0" Text="{i18n:Oversat faelles.niveau}" Style="{StaticResource Underskrift}"
                          VerticalAlignment="Center" Width="52" />
-              <Border Grid.Column="1" Height="10" Background="#FF2C323D" CornerRadius="5"
+              <Border Grid.Column="1" Height="10" Background="{StaticResource Svaev}" CornerRadius="5"
                       VerticalAlignment="Center">
                 <Border x:Name="HoejtNiveau" HorizontalAlignment="Left" Width="0" Height="10"
                         CornerRadius="5" Background="{StaticResource Godkendt}" />
@@ -377,13 +401,13 @@
               </StackPanel>
               <Button x:Name="TestKnap" Content="{i18n:Oversat settingsview.start_test}" Click="Test_Click"
                       HorizontalAlignment="Right" VerticalAlignment="Top" Padding="16,9" MinWidth="150"
-                      Background="{StaticResource Accent}" Foreground="#FF0B1220" BorderThickness="0"
+                      Background="{StaticResource Accent}" Foreground="{StaticResource PaaAccent}" BorderThickness="0"
                       FontWeight="SemiBold" />
             </Grid>
 
             <!-- Selve oplæsningen. Teksten skal fylde, mens den læses — man skal
                  kunne se den uden at læne sig frem. -->
-            <Border x:Name="TestRude" Background="#FF181B22" BorderBrush="{StaticResource PanelKant}"
+            <Border x:Name="TestRude" Background="{StaticResource Trykket}" BorderBrush="{StaticResource PanelKant}"
                     BorderThickness="1" CornerRadius="8" Padding="16,14" Margin="0,14,0,0"
                     Visibility="Collapsed">
               <StackPanel>
@@ -404,7 +428,7 @@
                   </Grid.ColumnDefinitions>
                   <TextBlock Grid.Column="0" Text="{i18n:Oversat faelles.niveau}" Style="{StaticResource Underskrift}"
                              VerticalAlignment="Center" Width="52" />
-                  <Border Grid.Column="1" Height="10" Background="#FF2C323D" CornerRadius="5"
+                  <Border Grid.Column="1" Height="10" Background="{StaticResource Svaev}" CornerRadius="5"
                           VerticalAlignment="Center">
                     <Border x:Name="TestNiveau" HorizontalAlignment="Left" Width="0" Height="10"
                             CornerRadius="5" Background="{StaticResource Godkendt}" />
@@ -415,7 +439,7 @@
 
             <!-- Resultatet. Tallet står stort, fordi det er det, man kom efter;
                  rådet står under, fordi et tal uden en vej videre er ubrugeligt. -->
-            <Border x:Name="TestSvar" Background="#FF181B22" BorderBrush="{StaticResource PanelKant}"
+            <Border x:Name="TestSvar" Background="{StaticResource Trykket}" BorderBrush="{StaticResource PanelKant}"
                     BorderThickness="1" CornerRadius="8" Padding="16,14" Margin="0,14,0,0"
                     Visibility="Collapsed">
               <StackPanel>
@@ -475,7 +499,7 @@
                            Foreground="{StaticResource TekstMeget}"
                            Text="{i18n:Oversat settingsview.appen_kan_laese_dine_aftaler_ind_i_kalende}" />
 
-                <Border Background="#FF181B22" BorderBrush="{StaticResource Accent}"
+                <Border Background="{StaticResource Trykket}" BorderBrush="{StaticResource Accent}"
                         BorderThickness="3,0,0,0" CornerRadius="4" Padding="14,11" Margin="0,14,0,0">
                   <StackPanel>
                     <TextBlock Text="{i18n:Oversat settingsview.hvad_der_bliver_sendt_og_hvad_der_ikke_goe}"
@@ -588,7 +612,7 @@
                         </StackPanel>
 
                         <Border CornerRadius="4" Padding="9,3" HorizontalAlignment="Right"
-                                VerticalAlignment="Top" Background="#FF2C323D">
+                                VerticalAlignment="Top" Background="{StaticResource Svaev}">
                           <TextBlock Text="{Binding Tilstand}" FontSize="10.5"
                                      FontWeight="SemiBold" Foreground="{Binding Tilstandsfarve}" />
                         </Border>
@@ -663,7 +687,7 @@
             <!-- BJAELKEN. Den siger paa ét blik, hvad disken gaar til:
                  blaat er appens lyd, graat er alt det andet, moerkt er
                  ledigt. -->
-            <Border CornerRadius="4" Height="26" Margin="0,16,0,0" Background="#FF181B22"
+            <Border CornerRadius="4" Height="26" Margin="0,16,0,0" Background="{StaticResource Trykket}"
                     BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
               <Grid>
                 <Grid.ColumnDefinitions>
@@ -672,8 +696,8 @@
                   <ColumnDefinition x:Name="SoejleFri" Width="1*" />
                 </Grid.ColumnDefinitions>
 
-                <Border Grid.Column="0" Background="#FF5B9DF0" />
-                <Border Grid.Column="1" Background="#FF3A4150" />
+                <Border Grid.Column="0" Background="{StaticResource Accent}" />
+                <Border Grid.Column="1" Background="{StaticResource PanelKant}" />
               </Grid>
             </Border>
 
@@ -686,7 +710,7 @@
 
               <StackPanel Grid.Column="0">
                 <StackPanel Orientation="Horizontal">
-                  <Border Width="10" Height="10" CornerRadius="2" Background="#FF5B9DF0"
+                  <Border Width="10" Height="10" CornerRadius="2" Background="{StaticResource Accent}"
                           VerticalAlignment="Center" Margin="0,0,7,0" />
                   <TextBlock Text="{i18n:Oversat settingsview.lydfiler}" FontSize="10.5" FontWeight="SemiBold"
                              VerticalAlignment="Center"
@@ -699,7 +723,7 @@
 
               <StackPanel Grid.Column="1">
                 <StackPanel Orientation="Horizontal">
-                  <Border Width="10" Height="10" CornerRadius="2" Background="#FF3A4150"
+                  <Border Width="10" Height="10" CornerRadius="2" Background="{StaticResource PanelKant}"
                           VerticalAlignment="Center" Margin="0,0,7,0" />
                   <TextBlock Text="{i18n:Oversat settingsview.alt_det_andet}" FontSize="10.5" FontWeight="SemiBold"
                              VerticalAlignment="Center"
@@ -720,7 +744,7 @@
             </Grid>
 
             <!-- ============ HVOR LAENGE LYDEN BLIVER LIGGENDE ============ -->
-            <Border Background="#FF181B22" BorderBrush="{StaticResource PanelKant}" BorderThickness="1"
+            <Border Background="{StaticResource Trykket}" BorderBrush="{StaticResource PanelKant}" BorderThickness="1"
                     CornerRadius="8" Padding="14,12" Margin="0,18,0,0">
               <StackPanel>
                 <TextBlock Text="{i18n:Oversat settingsview.hvor_laenge_lyden_bliver_liggende}" FontSize="13" FontWeight="SemiBold" />
@@ -773,7 +797,7 @@
             <!-- ============ HVAD DER GAAR TABT ============
                  Den staar som en advarsel og ikke som en fodnote. En
                  sletning, man fortryder om et aar, kan ikke goeres om. -->
-            <Border Background="#FF181B22" BorderBrush="{StaticResource Advarsel}"
+            <Border Background="{StaticResource Trykket}" BorderBrush="{StaticResource Advarsel}"
                     BorderThickness="3,0,0,0" CornerRadius="4" Padding="14,11" Margin="0,12,0,0">
               <StackPanel>
                 <TextBlock Text="{i18n:Oversat settingsview.det_du_ikke_kan_bagefter}" FontSize="12.5" FontWeight="SemiBold"
@@ -965,7 +989,7 @@
               <!-- Hvad kommer med. Lyd er fra som standard: den fylder alt, og
                    den er det, der er lettest at undvære — arbejdet ligger i
                    transskriptionen og de færdige dokumenter. -->
-              <Border Background="#FF181B22" CornerRadius="6" Padding="12,10" Margin="0,12,0,0"
+              <Border Background="{StaticResource Trykket}" CornerRadius="6" Padding="12,10" Margin="0,12,0,0"
                       BorderThickness="1" BorderBrush="{StaticResource PanelKant}">
                 <StackPanel>
                   <TextBlock Text="{i18n:Oversat settingsview.hvad_kommer_med}" Style="{StaticResource Underskrift}" Margin="0,0,0,8" />
@@ -1055,7 +1079,7 @@
              og så lukker man appen midt i den. -->
         <ProgressBar x:Name="BackupBjaelke" Height="5" Margin="0,7,0,0"
                      Visibility="Collapsed" Minimum="0" Maximum="100"
-                     Background="#FF232A35" BorderThickness="0"
+                     Background="{StaticResource Svaev}" BorderThickness="0"
                      Foreground="{StaticResource Accent}" />
       </StackPanel>
       <Button Grid.Column="1" Content="{i18n:Oversat settingsview.opdater_enhedslisten}" Click="Genindlaes_Click" />

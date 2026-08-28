@@ -68,6 +68,25 @@ public static class Vinduesramme
             {
                 if (afsender is Window v) Farv(v);
             }));
+
+        // ET TEMASKIFT SKAL OGSAA RAMME DE VINDUER, DER ALLEREDE ER AABNE.
+        // Loaded er sket for laenge siden paa hovedvinduet, saa uden det her
+        // bliver titellinjen staaende i den gamle farve, indtil appen
+        // genstartes - og det ligner en fejl, fordi det ER en.
+        Temaskift.Skiftet += FarvAlle;
+    }
+
+    /// <summary>Farver hvert åbent vindue om. Kaldes efter et temaskift.</summary>
+    public static void FarvAlle()
+    {
+        try
+        {
+            foreach (Window v in Application.Current.Windows) Farv(v);
+        }
+        catch (Exception)
+        {
+            // Samme regel som i Farv: en farve maa ikke vaelte noget.
+        }
     }
 
     /// <summary>
@@ -83,7 +102,13 @@ public static class Vinduesramme
             // Moerk tilstand foerst. Virker den alene, er bjaelken allerede
             // maerkbart bedre end den graa - ogsaa hvis de tre farver nedenfor
             // ikke slaar igennem paa den her udgave af Windows.
-            var til = 1;
+            //
+            // DEN FOELGER TEMAET. Her stod «var til = 1» fast, fordi appen kun
+            // fandtes i én udgave. Blev den staaende, ville et lyst tema faa
+            // en moerk titellinje paa aeldre Windows, hvor de tre farver
+            // nedenfor ikke slaar igennem - og saa er reserven vaerre end
+            // ingenting.
+            var til = Temaskift.ErLyst ? 0 : 1;
             DwmSetWindowAttribute(haandtag, Moerk, ref til, sizeof(int));
 
             var bjaelke = Farve("Baggrund", 0x14161A);

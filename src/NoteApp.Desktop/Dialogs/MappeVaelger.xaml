@@ -27,7 +27,7 @@
     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
       <Button Content="{i18n:Oversat faelles.annuller}" Click="Annuller_Click" Padding="18,9" Margin="0,0,10,0" />
       <Button Content="{i18n:Oversat mappevaelger.flyt}" Click="Flyt_Click" Padding="22,9" IsDefault="True"
-              Background="{StaticResource Accent}" Foreground="#FF0B1220"
+              Background="{StaticResource Accent}" Foreground="{StaticResource PaaAccent}"
               BorderThickness="0" FontWeight="SemiBold" />
     </StackPanel>
   </StackPanel>

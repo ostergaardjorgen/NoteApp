@@ -47,7 +47,7 @@
           <ItemsControl x:Name="Liste">
             <ItemsControl.ItemTemplate>
               <DataTemplate>
-                <Border Background="#FF181B22" CornerRadius="8" Padding="16,12" Margin="12,4"
+                <Border Background="{StaticResource Trykket}" CornerRadius="8" Padding="16,12" Margin="12,4"
                         BorderThickness="1" BorderBrush="{Binding Kantfarve}">
                   <Grid>
                     <Grid.ColumnDefinitions>

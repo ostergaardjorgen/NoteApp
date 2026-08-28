@@ -24,10 +24,10 @@ public sealed class PostVisning
 
         (UdfaldTekst, Kantfarve) = a.Udfald switch
         {
-            Udfald.Fuldført => ("✓ fuldført", new SolidColorBrush(Color.FromRgb(0x4C, 0xBE, 0x72))),
-            Udfald.SeEfter => ("! se efter", new SolidColorBrush(Color.FromRgb(0xF0, 0xB2, 0x3C))),
-            Udfald.Afbrudt => ("— afbrudt", new SolidColorBrush(Color.FromRgb(0x95, 0x9E, 0xAE))),
-            _ => ("✕ fejlet", new SolidColorBrush(Color.FromRgb(0xF0, 0x50, 0x55)))
+            Udfald.Fuldført => ("✓ fuldført", Temaskift.Pensel("Godkendt")),
+            Udfald.SeEfter => ("! se efter", Temaskift.Pensel("Advarsel")),
+            Udfald.Afbrudt => ("— afbrudt", Temaskift.Pensel("Slukket")),
+            _ => ("✕ fejlet", Temaskift.Pensel("FejlTekst"))
         };
 
         Slags = a.Slags;
@@ -47,8 +47,8 @@ public sealed class PostVisning
 
         HarLink = LinkTekst.Length > 0;
         LinkFarve = Findes
-            ? new SolidColorBrush(Color.FromRgb(0x5B, 0x9D, 0xF0))
-            : new SolidColorBrush(Color.FromRgb(0x8A, 0x92, 0xA0));
+            ? Temaskift.Pensel("Accent")
+            : Temaskift.Pensel("Slukket");
     }
 
     /// <summary>

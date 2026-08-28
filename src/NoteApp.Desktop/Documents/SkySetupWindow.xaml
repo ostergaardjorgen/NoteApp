@@ -84,7 +84,7 @@
               Padding="14,9" Margin="0,0,10,0" Visibility="Collapsed" />
       <Button Content="{i18n:Oversat faelles.annuller}" Click="Annuller_Click" Padding="18,9" Margin="0,0,10,0" />
       <Button Content="{i18n:Oversat skysetupwindow.gem_og_afproev}" Click="Gem_Click" Padding="20,9"
-              Background="{StaticResource Accent}" Foreground="#FF0B1220" BorderThickness="0"
+              Background="{StaticResource Accent}" Foreground="{StaticResource PaaAccent}" BorderThickness="0"
               FontWeight="SemiBold" IsDefault="True" />
     </StackPanel>
   </Grid>

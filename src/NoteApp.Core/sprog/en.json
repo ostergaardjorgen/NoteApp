@@ -614,7 +614,12 @@
     "uden_hak_bliver_filen_tilbudt_paa_optagels": "Without the tick the file is offered under Recordings, and you decide",
     "uden_nvidia_kort_koerer_udskriften_paa_pro": "Without an NVIDIA card the transcription runs on the processor. It works, but an hour-long meeting takes longer than the meeting itself lasted. Recording is unaffected.",
     "vaelg_et_arkiv_for_at_se_hvad_det_indehold": "Select an archive to see what it contains.",
-    "vaelg_mikrofon_og_hoejttaler_appen_lytter": "Choose microphone and speaker. The app does not listen until you press test — or press record."
+    "vaelg_mikrofon_og_hoejttaler_appen_lytter": "Choose microphone and speaker. The app does not listen until you press test — or press record.",
+    "udseende": "Appearance",
+    "udseende_forklaring": "Light or dark. Follow Windows and the app changes when your machine does — including automatically in the evening, if you have set that up.",
+    "tema_foelg": "Follow Windows",
+    "tema_lyst": "Light",
+    "tema_moerkt": "Dark"
   },
   "complianceview": {
     "aabner_console_mistral_ai_hvor_du_slaar_tr": "Opens console.mistral.ai, where you turn training off",

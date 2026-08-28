@@ -111,7 +111,7 @@
 
       <StackPanel Grid.Row="3" Margin="0,14,0,0">
         <ProgressBar x:Name="HentFremdrift" Height="6" Minimum="0" Maximum="100" Visibility="Collapsed"
-                     Background="#FF2C323D" Foreground="{StaticResource Accent}" BorderThickness="0" />
+                     Background="{StaticResource Svaev}" Foreground="{StaticResource Accent}" BorderThickness="0" />
         <TextBlock x:Name="HentStatus" Style="{StaticResource Underskrift}" Margin="0,8,0,0" />
       </StackPanel>
     </Grid>

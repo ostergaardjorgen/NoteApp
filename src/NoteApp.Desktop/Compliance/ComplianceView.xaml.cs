@@ -18,8 +18,8 @@ public sealed record Komponent(string Navn, string Licens, string Hvor, string R
     /// koster noget at opdage sent.
     /// </summary>
     public Brush Farve => Licens is "MIT" or "Apache 2.0"
-        ? new SolidColorBrush(Color.FromRgb(0x4C, 0xBE, 0x72))
-        : new SolidColorBrush(Color.FromRgb(0xF0, 0xB2, 0x3C));
+        ? Temaskift.Pensel("Godkendt")
+        : Temaskift.Pensel("Advarsel");
 }
 
 /// <summary>

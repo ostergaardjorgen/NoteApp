@@ -23,7 +23,7 @@
          Her stod navnefelterne før, og de blev læst som en søgning — hvilket
          er den rigtige forventning: et felt øverst til venstre i en tekst er
          en søgning. Navngivningen er flyttet til sin egen knap. -->
-    <Border x:Name="Hoved" Grid.Row="0" Background="#FF1B2029"
+    <Border x:Name="Hoved" Grid.Row="0" Background="{StaticResource Trykket}"
             BorderBrush="{StaticResource PanelKant}" BorderThickness="0,0,0,1"
             Padding="16,10">
       <Grid>
@@ -34,7 +34,7 @@
           <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
 
-        <Border Grid.Column="0" Background="#FF12151B" CornerRadius="6"
+        <Border Grid.Column="0" Background="{StaticResource Trykket}" CornerRadius="6"
                 BorderBrush="{StaticResource PanelKant}" BorderThickness="1"
                 Width="240" HorizontalAlignment="Left" Padding="4">
           <Grid>
@@ -67,7 +67,7 @@
                   </Border>
                   <ControlTemplate.Triggers>
                     <Trigger Property="IsMouseOver" Value="True">
-                      <Setter TargetName="flade" Property="Background" Value="#FF2C323D" />
+                      <Setter TargetName="flade" Property="Background" Value="{StaticResource Svaev}" />
                     </Trigger>
                   </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -119,7 +119,7 @@
          andet end den. -->
     <Popup x:Name="Navnerude" Placement="Bottom" StaysOpen="False"
            AllowsTransparency="True" PopupAnimation="Fade" HorizontalOffset="-6">
-      <Border Background="#FF1D2530" BorderBrush="{StaticResource Accent}"
+      <Border Background="{StaticResource AccentFlade}" BorderBrush="{StaticResource Accent}"
               BorderThickness="1" CornerRadius="9" Padding="14,12" Margin="8">
         <Border.Effect>
           <DropShadowEffect BlurRadius="16" ShadowDepth="3" Opacity="0.5" Color="#FF000000" />
@@ -231,7 +231,7 @@
                  skilles ad bagefter. Står det ikke her, opdages det først,
                  når nogen undrer sig over, at gæsten aldrig siger noget. -->
             <Border x:Name="Indlaestnote" Visibility="Collapsed"
-                    Background="#FF1D2530" CornerRadius="0,6,6,0"
+                    Background="{StaticResource AccentFlade}" CornerRadius="0,6,6,0"
                     BorderBrush="{StaticResource Accent}" BorderThickness="3,0,0,0"
                     Padding="12,9" Margin="4,6,4,14">
               <TextBlock x:Name="Indlaesttekst" FontSize="12" TextWrapping="Wrap"
@@ -258,9 +258,9 @@
                          var for spinkelt: blokkene laa taet, og oejet loeb
                          videre uden at registrere skiftet. En streg tvaers over
                          ruden er det, der faktisk skiller to ting ad. -->
-                    <Rectangle Height="1" Fill="#FF303845" Margin="4,0,4,0" />
+                    <Rectangle Height="1" Fill="{StaticResource PanelKant}" Margin="4,0,4,0" />
 
-                    <Border Background="#FF1D2530" CornerRadius="0,6,6,0"
+                    <Border Background="{StaticResource AccentFlade}" CornerRadius="0,6,6,0"
                             BorderBrush="{StaticResource Accent}" BorderThickness="3,0,0,0"
                             Padding="11,6" HorizontalAlignment="Left"
                             Margin="4,-11,0,0">
@@ -307,7 +307,7 @@
                             </Border>
                             <ControlTemplate.Triggers>
                               <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="flade" Property="Background" Value="#FF262D3A" />
+                                <Setter TargetName="flade" Property="Background" Value="{StaticResource Svaev}" />
                               </Trigger>
                             </ControlTemplate.Triggers>
                           </ControlTemplate>
@@ -416,7 +416,7 @@
                    ordene står anderledes; at fjerne den ville være at rette en
                    fejl, der måske ikke er der. -->
               <Border x:Name="OpsumTjek" Visibility="Collapsed" Margin="0,0,0,12"
-                      Background="#FF2A2318" CornerRadius="7" Padding="12,9"
+                      Background="{StaticResource AdvarselFlade}" CornerRadius="7" Padding="12,9"
                       BorderBrush="{StaticResource Advarsel}" BorderThickness="0,0,0,2">
                 <StackPanel>
                   <TextBlock x:Name="OpsumTjekTitel" FontSize="12" FontWeight="SemiBold"
@@ -469,7 +469,7 @@
                    Det er den vej, der ikke sender noget nogen steder, og
                    rækkefølgen er i sig selv en anbefaling. Skyen er der, når
                    teksten skal være bedre end kort. -->
-              <Border Grid.Column="0" Background="#FF181B22" CornerRadius="9" Padding="14,12"
+              <Border Grid.Column="0" Background="{StaticResource Trykket}" CornerRadius="9" Padding="14,12"
                       Margin="0,0,7,0" BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
                 <StackPanel>
                   <!-- MAERKATET SIGER, HVOR DEN LAVES.
@@ -492,7 +492,7 @@
                    uden et navn at gemme det under — to veje til det samme, hvor
                    den ene var ringere. Skal teksten være et rigtigt referat,
                    er dokumenter vejen, og så skal skærmen sige hvor. -->
-              <Border Grid.Column="1" Background="#FF181B22" CornerRadius="9" Padding="14,12"
+              <Border Grid.Column="1" Background="{StaticResource Trykket}" CornerRadius="9" Padding="14,12"
                       Margin="7,0,0,0" BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
                 <StackPanel>
                   <TextBlock Text="{i18n:Oversat udskriftview.skal_det_vaere_et_referat}" FontSize="10.5" FontWeight="SemiBold"
@@ -533,7 +533,7 @@
       <TabItem Header="{i18n:Oversat udskriftview.opgaver_2}" Style="{StaticResource Fane}">
         <DockPanel>
 
-          <Border DockPanel.Dock="Top" Background="#FF1B2029" Padding="16,10"
+          <Border DockPanel.Dock="Top" Background="{StaticResource Trykket}" Padding="16,10"
                   BorderBrush="{StaticResource PanelKant}" BorderThickness="0,0,0,1">
             <Grid>
               <Grid.ColumnDefinitions>
@@ -568,7 +568,7 @@
               <ItemsControl x:Name="Opgaverude">
                 <ItemsControl.ItemTemplate>
                   <DataTemplate>
-                    <Border Background="#FF181B22" CornerRadius="8" Padding="14,11" Margin="0,0,0,7"
+                    <Border Background="{StaticResource Trykket}" CornerRadius="8" Padding="14,11" Margin="0,0,0,7"
                             BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
                       <Grid>
                         <Grid.ColumnDefinitions>
@@ -633,8 +633,8 @@
               <ItemsControl x:Name="Forslagliste">
                 <ItemsControl.ItemTemplate>
                   <DataTemplate>
-                    <Border Background="#FF14181F" CornerRadius="8" Padding="14,11" Margin="0,0,0,8"
-                            BorderBrush="#FF2A313D" BorderThickness="1">
+                    <Border Background="{StaticResource Trykket}" CornerRadius="8" Padding="14,11" Margin="0,0,0,8"
+                            BorderBrush="{StaticResource Svaev}" BorderThickness="1">
                       <StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,7">
                           <TextBlock Text="{Binding Taler}" FontSize="11.5" FontWeight="SemiBold"
@@ -681,7 +681,7 @@
           <StackPanel>
 
             <!-- Mødet: hvornår og hvor længe -->
-            <Border Background="#FF181B22" CornerRadius="10" Padding="20,16"
+            <Border Background="{StaticResource Trykket}" CornerRadius="10" Padding="20,16"
                     BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
               <StackPanel>
                 <TextBlock Text="{i18n:Oversat udskriftview.moedet}" FontSize="10.5" FontWeight="SemiBold"
@@ -713,7 +713,7 @@
             </Border>
 
             <!-- Taletiden pr. taler -->
-            <Border Background="#FF181B22" CornerRadius="10" Padding="20,16" Margin="0,14,0,0"
+            <Border Background="{StaticResource Trykket}" CornerRadius="10" Padding="20,16" Margin="0,14,0,0"
                     BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
               <StackPanel>
                 <TextBlock Text="{i18n:Oversat udskriftview.taletid}" FontSize="10.5" FontWeight="SemiBold"
@@ -738,7 +738,7 @@
                              Saa staar alle bjaelker lige lange paa skaermen, og
                              det, oejet sammenligner, er den fyldte del. -->
                         <Grid Grid.Column="1" Height="16" VerticalAlignment="Center">
-                          <Border Background="#FF232A35" CornerRadius="4" />
+                          <Border Background="{StaticResource Svaev}" CornerRadius="4" />
                           <Border Background="{Binding Farve}" CornerRadius="4"
                                   HorizontalAlignment="Left" Width="{Binding Bredde}" />
                         </Grid>

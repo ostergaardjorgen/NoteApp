@@ -121,7 +121,7 @@
          Kun ved webinar. To linjer, og begge er noget, brugeren gør noget
          forskelligt på baggrund af — modsat de tal, der stod her før. -->
     <Border x:Name="Stopperselv" Visibility="Collapsed"
-            Background="#FF1D2530" BorderBrush="{StaticResource Accent}" BorderThickness="3,0,0,0"
+            Background="{StaticResource AccentFlade}" BorderBrush="{StaticResource Accent}" BorderThickness="3,0,0,0"
             CornerRadius="4" Padding="13,10" Margin="0,18,0,0">
       <StackPanel>
         <TextBlock FontSize="12" LineHeight="18" TextWrapping="Wrap"

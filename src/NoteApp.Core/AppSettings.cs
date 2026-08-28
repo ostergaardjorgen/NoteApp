@@ -337,6 +337,21 @@ public sealed class AppSettings
     /// </summary>
     public int SpoergOmLydOverMinutter { get; set; } = 120;
 
+    /// <summary>
+    /// Lyst eller mørkt tema.
+    /// </summary>
+    /// <remarks>
+    /// FØLG WINDOWS ER STANDARD, og det er ikke en udenomsvej. Den, der har
+    /// sat sin maskine mørk, har allerede svaret på spørgsmålet, og en app,
+    /// der spørger igen, er en app, der ikke lyttede.
+    ///
+    /// Appen var mørk uden valg indtil 28-08-2026. Begrundelsen står stadig:
+    /// udskriften læses i lange stræk, og lys tekst på mørk bund trætter
+    /// mindre. Men den gælder ét skærmbillede, ikke hele appen — og den kunne
+    /// ikke bære, at resten var mørkt for alle. Se <see cref="Tema"/>.
+    /// </remarks>
+    public Temavalg Tema { get; set; } = Temavalg.FoelgWindows;
+
     private static string Path => System.IO.Path.Combine(UserDataPaths.Root, "indstillinger.json");
 
     private static AppSettings? _current;

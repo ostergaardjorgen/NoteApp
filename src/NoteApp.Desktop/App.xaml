@@ -4,22 +4,74 @@
              StartupUri="MainWindow.xaml">
   <Application.Resources>
 
-    <!-- Farver. Mørk baggrund med vilje: teleprompteren læses i lange stræk,
-         og lys tekst på mørk bund trætter mindre end det omvendte. -->
-    <!-- Kontrasten er hævet 10. august 2026. Den første palet var pæn og for
-         svag: brødteksten stod i TekstSvag, som på en mørk flade lander
-         omkring 4:1 mod baggrunden — under WCAG's 4,5:1 for almindelig tekst.
-         Nu ligger brødtekst over 7:1 og den dæmpede tekst over 4,5:1. -->
-    <SolidColorBrush x:Key="Baggrund"      Color="#FF14161A" />
-    <SolidColorBrush x:Key="Panel"         Color="#FF20242C" />
-    <SolidColorBrush x:Key="PanelKant"     Color="#FF39404E" />
-    <SolidColorBrush x:Key="Tekst"         Color="#FFF4F6FA" />
-    <SolidColorBrush x:Key="TekstSvag"     Color="#FFC2CAD8" />
-    <SolidColorBrush x:Key="TekstMeget"    Color="#FFAEB6C4" />
-    <SolidColorBrush x:Key="Accent"        Color="#FF5B99FF" />
-    <SolidColorBrush x:Key="Optager"       Color="#FFF05055" />
-    <SolidColorBrush x:Key="Godkendt"      Color="#FF4CBE72" />
-    <SolidColorBrush x:Key="Advarsel"      Color="#FFF0B23C" />
+    <!-- ==================== PALETTEN ====================================
+
+         VÆRDIERNE HER ER KUN ET UDGANGSPUNKT. De rigtige farver står i
+         NoteApp.Core.Tema, hvor de kan regnes på — og Temaskift.Anvend()
+         skriver dem ind i penslerne herunder, før det første vindue vises.
+
+         Det, der står her, er de lyse: det er dem, der gælder, hvis Windows
+         står lyst, og det er Windows' egen standard.
+
+         HVORFOR HVER FARVE STÅR TO GANGE
+
+         WPF FRYSER SELV RESURSER FRA XAML. En SolidColorBrush med en fast
+         farve bliver gjort uforanderlig ved indlæsningen — det er hurtigere
+         at tegne, og det er som regel det, man vil have. Her er det præcis
+         det modsatte: en frossen pensel kan ikke skifte farve, og temaskiftet
+         sprang så samtlige femogtyve over. Uden en lyd.
+
+         Det blev fundet 28-08-2026, fordi skiftet ikke virkede, og fordi
+         koden skrev ud, HVAD den så: «FROSSET» ud for hver eneste nøgle.
+
+         Derfor går farven gennem en DynamicResource. En Freezable med en
+         uafklaret dynamisk reference KAN ikke fryses — så lader WPF den være.
+         Det er `<Color>`-værdien, temaskiftet bytter; penslen følger med af
+         sig selv, og alle 969 opslag på `{StaticResource ...}` mærker intet.
+
+         Farverne er efterprøvet mod WCAG 2.1: brødtekst over 7:1, dæmpet
+         tekst og betydningsfarver over 4,5:1, feltkanter over 3:1. Det er
+         ikke et løfte, det er en prøve, der fejler. Se TemaTest. -->
+    <Color x:Key="BaggrundFarve">#FFF7F7F5</Color>
+    <SolidColorBrush x:Key="Baggrund"      Color="{DynamicResource BaggrundFarve}" />
+    <Color x:Key="PanelFarve">#FFFFFFFF</Color>
+    <SolidColorBrush x:Key="Panel"         Color="{DynamicResource PanelFarve}" />
+    <Color x:Key="PanelKantFarve">#FFCCCCC5</Color>
+    <SolidColorBrush x:Key="PanelKant"     Color="{DynamicResource PanelKantFarve}" />
+
+    <!-- Kanten om noget, man kan SKRIVE i. Kraftigere end PanelKant med
+         vilje: en panelkant deler to flader og må gerne være svag, men
+         kanten om et felt er det eneste, der siger, at feltet er der.
+         WCAG 1.4.11 kræver 3:1 for netop den slags. -->
+    <Color x:Key="FeltKantFarve">#FF909081</Color>
+    <SolidColorBrush x:Key="FeltKant"      Color="{DynamicResource FeltKantFarve}" />
+
+    <!-- Musen over, knappen nede, raekken valgt. Se Tema.cs. -->
+    <Color x:Key="SvaevFarve">#FFEFEFEA</Color>
+    <SolidColorBrush x:Key="Svaev"         Color="{DynamicResource SvaevFarve}" />
+    <Color x:Key="TrykketFarve">#FFE4E4DD</Color>
+    <SolidColorBrush x:Key="Trykket"       Color="{DynamicResource TrykketFarve}" />
+    <Color x:Key="ValgtFarve">#FFD9E6F8</Color>
+    <SolidColorBrush x:Key="Valgt"         Color="{DynamicResource ValgtFarve}" />
+
+    <Color x:Key="TekstFarve">#FF1B1B19</Color>
+    <SolidColorBrush x:Key="Tekst"         Color="{DynamicResource TekstFarve}" />
+    <Color x:Key="TekstSvagFarve">#FF5A5A54</Color>
+    <SolidColorBrush x:Key="TekstSvag"     Color="{DynamicResource TekstSvagFarve}" />
+    <Color x:Key="TekstMegetFarve">#FF6E6E67</Color>
+    <SolidColorBrush x:Key="TekstMeget"    Color="{DynamicResource TekstMegetFarve}" />
+
+    <!-- Tekst paa noget, der er slaaet fra. -->
+    <Color x:Key="SlukketFarve">#FF909087</Color>
+    <SolidColorBrush x:Key="Slukket"       Color="{DynamicResource SlukketFarve}" />
+    <Color x:Key="AccentFarve">#FF2A6DD4</Color>
+    <SolidColorBrush x:Key="Accent"        Color="{DynamicResource AccentFarve}" />
+    <Color x:Key="OptagerFarve">#FFC9313A</Color>
+    <SolidColorBrush x:Key="Optager"       Color="{DynamicResource OptagerFarve}" />
+    <Color x:Key="GodkendtFarve">#FF1B7340</Color>
+    <SolidColorBrush x:Key="Godkendt"      Color="{DynamicResource GodkendtFarve}" />
+    <Color x:Key="AdvarselFarve">#FF8A5A00</Color>
+    <SolidColorBrush x:Key="Advarsel"      Color="{DynamicResource AdvarselFarve}" />
 
     <!-- Farven til "noget ER gaaet galt", modsat Advarsel som er "pas paa".
          Den fandtes ikke, men blev brugt: SkySetupWindow slog op paa
@@ -31,7 +83,30 @@
          paa en knap-stil laengere nede. To resurser med samme x:Key i samme
          ordbog er en fejl ved indlaesning - saa ville hele temaet vaelte i
          stedet for bare eet vindue. -->
-    <SolidColorBrush x:Key="FejlTekst"     Color="#FFF05055" />
+    <Color x:Key="FejlTekstFarve">#FFC9313A</Color>
+    <SolidColorBrush x:Key="FejlTekst"     Color="{DynamicResource FejlTekstFarve}" />
+
+    <!-- Tekst oven paa en farvet knap, og de fire tonede flader. Se Tema.cs. -->
+    <Color x:Key="PaaAccentFarve">#FFFFFFFF</Color>
+    <SolidColorBrush x:Key="PaaAccent"     Color="{DynamicResource PaaAccentFarve}" />
+    <Color x:Key="PaaOptagerFarve">#FFFFFFFF</Color>
+    <SolidColorBrush x:Key="PaaOptager"    Color="{DynamicResource PaaOptagerFarve}" />
+    <Color x:Key="AccentFladeFarve">#FFEAF1FC</Color>
+    <SolidColorBrush x:Key="AccentFlade"   Color="{DynamicResource AccentFladeFarve}" />
+    <Color x:Key="GodkendtFladeFarve">#FFE7F4EC</Color>
+    <SolidColorBrush x:Key="GodkendtFlade" Color="{DynamicResource GodkendtFladeFarve}" />
+    <Color x:Key="AdvarselFladeFarve">#FFFAF0DC</Color>
+    <SolidColorBrush x:Key="AdvarselFlade" Color="{DynamicResource AdvarselFladeFarve}" />
+    <Color x:Key="FejlFladeFarve">#FFFBEAEB</Color>
+    <SolidColorBrush x:Key="FejlFlade"     Color="{DynamicResource FejlFladeFarve}" />
+
+    <!-- Dokumenter, og det, en soegning har fundet. Se Tema.cs. -->
+    <Color x:Key="DokumentFarve">#FF7B3FAF</Color>
+    <SolidColorBrush x:Key="Dokument"      Color="{DynamicResource DokumentFarve}" />
+    <Color x:Key="FremhaevFarve">#FFFFE99A</Color>
+    <SolidColorBrush x:Key="Fremhaev"      Color="{DynamicResource FremhaevFarve}" />
+    <Color x:Key="PaaFremhaevFarve">#FF1B1B19</Color>
+    <SolidColorBrush x:Key="PaaFremhaev"   Color="{DynamicResource PaaFremhaevFarve}" />
 
     <!-- ================== MENUER ==================
          Appen havde ingen menu foer Kopier-knappen, og saa arvede den
@@ -73,7 +148,7 @@
             </Border>
             <ControlTemplate.Triggers>
               <Trigger Property="IsHighlighted" Value="True">
-                <Setter TargetName="flade" Property="Background" Value="#FF33405A" />
+                <Setter TargetName="flade" Property="Background" Value="{StaticResource Valgt}" />
               </Trigger>
               <Trigger Property="IsEnabled" Value="False">
                 <Setter Property="Foreground" Value="{StaticResource TekstMeget}" />
@@ -133,7 +208,7 @@
             </Border>
             <ControlTemplate.Triggers>
               <Trigger Property="IsMouseOver" Value="True">
-                <Setter TargetName="kant" Property="Background" Value="#FF343B48" />
+                <Setter TargetName="kant" Property="Background" Value="{StaticResource Svaev}" />
               </Trigger>
               <Trigger Property="IsEnabled" Value="False">
                 <Setter Property="Opacity" Value="0.4" />
@@ -192,14 +267,14 @@
             </Border>
             <ControlTemplate.Triggers>
               <Trigger Property="IsMouseOver" Value="True">
-                <Setter TargetName="kant" Property="Background" Value="#FF2C323D" />
+                <Setter TargetName="kant" Property="Background" Value="{StaticResource Svaev}" />
                 <Setter Property="Foreground" Value="{StaticResource Tekst}" />
               </Trigger>
               <Trigger Property="IsPressed" Value="True">
-                <Setter TargetName="kant" Property="Background" Value="#FF33405A" />
+                <Setter TargetName="kant" Property="Background" Value="{StaticResource Valgt}" />
               </Trigger>
               <Trigger Property="IsEnabled" Value="False">
-                <Setter Property="Foreground" Value="#FF4A515E" />
+                <Setter Property="Foreground" Value="{StaticResource Slukket}" />
                 <Setter Property="Cursor" Value="Arrow" />
               </Trigger>
             </ControlTemplate.Triggers>
@@ -307,10 +382,10 @@
             </Border>
             <ControlTemplate.Triggers>
               <Trigger Property="IsMouseOver" Value="True">
-                <Setter TargetName="kant" Property="Background" Value="#FF2C323D" />
+                <Setter TargetName="kant" Property="Background" Value="{StaticResource Svaev}" />
               </Trigger>
               <Trigger Property="IsChecked" Value="True">
-                <Setter TargetName="kant" Property="Background" Value="#FF33405A" />
+                <Setter TargetName="kant" Property="Background" Value="{StaticResource Valgt}" />
                 <Setter Property="Foreground" Value="{StaticResource Tekst}" />
                 <Setter Property="FontWeight" Value="SemiBold" />
               </Trigger>
@@ -337,10 +412,10 @@
             </Border>
             <ControlTemplate.Triggers>
               <Trigger Property="IsMouseOver" Value="True">
-                <Setter TargetName="kant" Property="Background" Value="#FF2C323D" />
+                <Setter TargetName="kant" Property="Background" Value="{StaticResource Svaev}" />
               </Trigger>
               <Trigger Property="IsChecked" Value="True">
-                <Setter TargetName="kant" Property="Background" Value="#FF33405A" />
+                <Setter TargetName="kant" Property="Background" Value="{StaticResource Valgt}" />
                 <Setter TargetName="kant" Property="BorderBrush" Value="{StaticResource Accent}" />
                 <Setter Property="Foreground" Value="{StaticResource Tekst}" />
                 <Setter Property="FontWeight" Value="SemiBold" />
@@ -364,7 +439,7 @@
       <Setter Property="Template">
         <Setter.Value>
           <ControlTemplate TargetType="ToolTip">
-            <Border Background="#FF262C36" BorderBrush="{StaticResource Accent}"
+            <Border Background="{StaticResource Svaev}" BorderBrush="{StaticResource Accent}"
                     BorderThickness="1" CornerRadius="8" Padding="16,13">
               <ContentPresenter />
             </Border>
@@ -374,7 +449,7 @@
     </Style>
 
     <Style TargetType="TextBox">
-      <Setter Property="Background" Value="#FF181B22" />
+      <Setter Property="Background" Value="{StaticResource Trykket}" />
       <Setter Property="Foreground" Value="{StaticResource Tekst}" />
       <Setter Property="BorderBrush" Value="{StaticResource PanelKant}" />
       <Setter Property="BorderThickness" Value="1" />
@@ -390,7 +465,7 @@
          igennem. Feltet inde i den er en DatePickerTextBox, som skal saettes
          for sig; den arver ikke den almindelige TextBox-stil. -->
     <Style TargetType="DatePickerTextBox">
-      <Setter Property="Background" Value="#FF181B22" />
+      <Setter Property="Background" Value="{StaticResource Trykket}" />
       <Setter Property="Foreground" Value="{StaticResource Tekst}" />
       <Setter Property="BorderThickness" Value="0" />
       <Setter Property="CaretBrush" Value="{StaticResource Tekst}" />
@@ -410,7 +485,7 @@
                  var laast. Set to steder, foer aarsagen stod klar. -->
             <ControlTemplate.Triggers>
               <Trigger Property="IsEnabled" Value="False">
-                <Setter TargetName="flade" Property="Background" Value="#FF181B22" />
+                <Setter TargetName="flade" Property="Background" Value="{StaticResource Trykket}" />
                 <Setter Property="Foreground" Value="{StaticResource TekstMeget}" />
               </Trigger>
             </ControlTemplate.Triggers>
@@ -420,7 +495,7 @@
     </Style>
 
     <Style TargetType="DatePicker">
-      <Setter Property="Background" Value="#FF181B22" />
+      <Setter Property="Background" Value="{StaticResource Trykket}" />
       <Setter Property="Foreground" Value="{StaticResource Tekst}" />
       <Setter Property="BorderBrush" Value="{StaticResource PanelKant}" />
       <Setter Property="BorderThickness" Value="1" />
@@ -447,7 +522,7 @@
       <Setter Property="FontFamily" Value="Segoe UI" />
       <Setter Property="FontSize" Value="13" />
       <Setter Property="Padding" Value="8,5" />
-      <Setter Property="Background" Value="#FF181B22" />
+      <Setter Property="Background" Value="{StaticResource Trykket}" />
       <Setter Property="Foreground" Value="{StaticResource Tekst}" />
       <Setter Property="BorderBrush" Value="{StaticResource PanelKant}" />
       <Setter Property="Height" Value="30" />
@@ -510,7 +585,7 @@
             </Border>
             <ControlTemplate.Triggers>
               <Trigger Property="IsHighlighted" Value="True">
-                <Setter TargetName="kant" Property="Background" Value="#FF33405A" />
+                <Setter TargetName="kant" Property="Background" Value="{StaticResource Valgt}" />
               </Trigger>
             </ControlTemplate.Triggers>
           </ControlTemplate>
@@ -519,7 +594,7 @@
     </Style>
 
     <Style TargetType="DataGridColumnHeader">
-      <Setter Property="Background" Value="#FF2C323D" />
+      <Setter Property="Background" Value="{StaticResource Svaev}" />
       <Setter Property="Foreground" Value="{StaticResource Tekst}" />
       <Setter Property="FontFamily" Value="Segoe UI" />
       <Setter Property="FontSize" Value="12" />
@@ -537,7 +612,7 @@
       <Setter Property="Padding" Value="8,6" />
       <Style.Triggers>
         <Trigger Property="IsSelected" Value="True">
-          <Setter Property="Background" Value="#FF33405A" />
+          <Setter Property="Background" Value="{StaticResource Valgt}" />
           <Setter Property="Foreground" Value="{StaticResource Tekst}" />
         </Trigger>
       </Style.Triggers>

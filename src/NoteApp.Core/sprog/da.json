@@ -587,7 +587,12 @@
     "uden_hak_bliver_filen_tilbudt_paa_optagels": "Uden hak bliver filen tilbudt på Optagelser, og du bestemmer",
     "uden_nvidia_kort_koerer_udskriften_paa_pro": "Uden NVIDIA-kort kører transkriptionen på processoren. Den virker, men en times møde tager længere end mødet selv varede. Optagelsen er upåvirket.",
     "vaelg_et_arkiv_for_at_se_hvad_det_indehold": "Vælg et arkiv for at se, hvad det indeholder.",
-    "vaelg_mikrofon_og_hoejttaler_appen_lytter": "Vælg mikrofon og højttaler. Appen lytter ikke, før du trykker prøv — eller trykker optag."
+    "vaelg_mikrofon_og_hoejttaler_appen_lytter": "Vælg mikrofon og højttaler. Appen lytter ikke, før du trykker prøv — eller trykker optag.",
+    "udseende": "Udseende",
+    "udseende_forklaring": "Lyst eller mørkt. Følger du Windows, skifter appen med, når din maskine gør — også automatisk om aftenen, hvis du har sat det op.",
+    "tema_foelg": "Følg Windows",
+    "tema_lyst": "Lyst",
+    "tema_moerkt": "Mørkt"
   },
   "setupwindow": {
     "dine_filer_ligger_her": "Dine filer ligger her",

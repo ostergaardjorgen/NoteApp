@@ -13,7 +13,7 @@
         <Setter.Value>
           <ControlTemplate TargetType="RadioButton">
             <Border x:Name="Kant" CornerRadius="7" BorderThickness="1" Padding="13,7"
-                    Background="#FF181B22" BorderBrush="{StaticResource PanelKant}">
+                    Background="{StaticResource Trykket}" BorderBrush="{StaticResource PanelKant}">
               <ContentPresenter />
             </Border>
             <ControlTemplate.Triggers>
@@ -22,7 +22,7 @@
               </Trigger>
               <Trigger Property="IsChecked" Value="True">
                 <Setter TargetName="Kant" Property="BorderBrush" Value="{StaticResource Accent}" />
-                <Setter TargetName="Kant" Property="Background" Value="#FF1D2530" />
+                <Setter TargetName="Kant" Property="Background" Value="{StaticResource AccentFlade}" />
               </Trigger>
             </ControlTemplate.Triggers>
           </ControlTemplate>
@@ -34,7 +34,7 @@
   <!-- Optagebjælken. Den ligger fast øverst i vinduet og er den samme, uanset
        hvilken skærm man står på: at optage et møde er dét, appen er til, og
        det skal ikke være et sted, man først går hen. -->
-  <Border Background="#FF1B2029" BorderBrush="{StaticResource PanelKant}" BorderThickness="0,0,0,1"
+  <Border Background="{StaticResource Trykket}" BorderBrush="{StaticResource PanelKant}" BorderThickness="0,0,0,1"
           Padding="24,12">
     <Grid>
       <Grid.ColumnDefinitions>
@@ -62,10 +62,10 @@
               <Border x:Name="flade" CornerRadius="7" Padding="15,8"
                       Background="{StaticResource Optager}">
                 <StackPanel Orientation="Horizontal">
-                  <Ellipse Width="8" Height="8" Fill="#FFFFFFFF"
+                  <Ellipse Width="8" Height="8" Fill="{StaticResource PaaOptager}"
                            VerticalAlignment="Center" Margin="0,0,8,0" />
                   <TextBlock Text="{i18n:Oversat topbar.optag}" FontSize="13" FontWeight="SemiBold"
-                             Foreground="#FFFFFFFF" VerticalAlignment="Center" />
+                             Foreground="{StaticResource PaaOptager}" VerticalAlignment="Center" />
                 </StackPanel>
               </Border>
               <ControlTemplate.Triggers>
@@ -98,7 +98,7 @@
           <Button.Template>
             <ControlTemplate TargetType="Button">
               <Border x:Name="flade" CornerRadius="7" Padding="13,8"
-                      Background="#FF262D3A" BorderBrush="#FF3A4453" BorderThickness="1">
+                      Background="{StaticResource Svaev}" BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
                 <StackPanel Orientation="Horizontal">
                   <TextBlock Text="&#xE7F4;" FontFamily="Segoe MDL2 Assets" FontSize="12"
                              VerticalAlignment="Center" Margin="0,0,7,0"
@@ -109,7 +109,7 @@
               </Border>
               <ControlTemplate.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                  <Setter TargetName="flade" Property="Background" Value="#FF303949" />
+                  <Setter TargetName="flade" Property="Background" Value="{StaticResource PanelKant}" />
                   <Setter TargetName="flade" Property="BorderBrush" Value="{StaticResource Accent}" />
                 </Trigger>
                 <Trigger Property="IsEnabled" Value="False">
@@ -202,10 +202,18 @@
           <!-- MAERKATET SKAL KUNNE LAESES.
                Det stod i den daempede tekstfarve og forsvandt naesten i
                baggrunden - og et maerkat, man skal lede efter, forklarer
-               ingenting. Nu er det den samme hvide som paa knapperne. -->
+               ingenting. Saa blev det hvidt som teksten paa knapperne.
+
+               DET VAR RIGTIGT, SAA LAENGE APPEN VAR MOERK. Maerkatet staar paa
+               BJAELKEN og ikke paa den roede flade, saa da det lyse tema kom,
+               blev det hvidt paa lyst - vaek igen, praecis som foerste gang.
+               Set paa et skaermbillede 28-08-2026, foer nogen andre saa det.
+
+               Tekst er den farve, der virker begge steder: det er bjaelkens
+               egen skriftfarve. -->
           <TextBlock x:Name="GenvejMaerkat" Text="{i18n:Oversat topbar.optagmed}" FontSize="11" FontWeight="SemiBold"
                      VerticalAlignment="Center" Margin="0,1,9,0"
-                     Foreground="#FFFFFFFF" />
+                     Foreground="{StaticResource Tekst}" />
 
           <!-- TASTEN SER UD SOM OPTAGEKNAPPEN.
                De to GOER det samme - starter en optagelse - og saa skal de
@@ -214,7 +222,7 @@
                den som en oplysning frem for som den anden vej ind. -->
           <Border CornerRadius="7" Padding="15,8" Background="{StaticResource Optager}">
             <TextBlock x:Name="GenvejTast" FontSize="13" FontWeight="SemiBold"
-                       Foreground="#FFFFFFFF" VerticalAlignment="Center" />
+                       Foreground="{StaticResource PaaOptager}" VerticalAlignment="Center" />
           </Border>
         </StackPanel>
 
@@ -224,7 +232,7 @@
         <Button x:Name="PauseKnap" Content="{i18n:Oversat topbar.pause}" Click="Pause_Click" Padding="15,9"
                 Visibility="Collapsed" Margin="0,0,8,0" />
         <Button x:Name="StopKnap" Content="{i18n:Oversat topbar.stop}" Click="Stop_Click" Padding="18,9"
-                Visibility="Collapsed" Background="{StaticResource Optager}" Foreground="#FFFFFFFF"
+                Visibility="Collapsed" Background="{StaticResource Optager}" Foreground="{StaticResource PaaOptager}"
                 BorderThickness="0" FontWeight="SemiBold" />
 
         <!-- ========================= Sproget =========================
@@ -248,7 +256,7 @@
               </Border>
               <ControlTemplate.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                  <Setter TargetName="flade" Property="Background" Value="#FF2C323D" />
+                  <Setter TargetName="flade" Property="Background" Value="{StaticResource Svaev}" />
                 </Trigger>
               </ControlTemplate.Triggers>
             </ControlTemplate>
@@ -278,7 +286,7 @@
               </Border>
               <ControlTemplate.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                  <Setter TargetName="flade" Property="Background" Value="#FF2C323D" />
+                  <Setter TargetName="flade" Property="Background" Value="{StaticResource Svaev}" />
                 </Trigger>
               </ControlTemplate.Triggers>
             </ControlTemplate>
@@ -303,7 +311,7 @@
               </Border>
               <ControlTemplate.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                  <Setter TargetName="flade" Property="Background" Value="#FF2C323D" />
+                  <Setter TargetName="flade" Property="Background" Value="{StaticResource Svaev}" />
                 </Trigger>
               </ControlTemplate.Triggers>
             </ControlTemplate>
@@ -319,7 +327,7 @@
                     MinWidth="16" Height="16" Padding="4,0" Visibility="Collapsed"
                     HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-5,-7,0">
               <TextBlock x:Name="KlokkeTal" FontSize="11" FontWeight="SemiBold"
-                         Foreground="#FFFFFFFF" HorizontalAlignment="Center"
+                         Foreground="{StaticResource PaaOptager}" HorizontalAlignment="Center"
                          VerticalAlignment="Center" />
             </Border>
           </Grid>

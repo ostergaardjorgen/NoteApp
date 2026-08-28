@@ -82,9 +82,9 @@ public sealed class Fundvisning
 
         (Maerkat, Maerkatfarve) = f.Slags switch
         {
-            Fundtype.Udskrift => ("TRANSKRIPTION", new SolidColorBrush(Color.FromRgb(0x5B, 0x9D, 0xF0))),
-            Fundtype.Note => ("DIN NOTE", new SolidColorBrush(Color.FromRgb(0x4C, 0xBE, 0x72))),
-            _ => ("DOKUMENT", new SolidColorBrush(Color.FromRgb(0xC9, 0x8C, 0xF0)))
+            Fundtype.Udskrift => ("TRANSKRIPTION", Temaskift.Pensel("Accent")),
+            Fundtype.Note => ("DIN NOTE", Temaskift.Pensel("Godkendt")),
+            _ => ("DOKUMENT", Temaskift.Pensel("Dokument"))
         };
 
         Hoejre = f.Traef.Count == 1
@@ -1584,8 +1584,8 @@ public sealed class Opgavevisning : System.ComponentModel.INotifyPropertyChanged
                 : new System.Windows.Documents.Run(tekst));
     }
 
-    private static readonly Brush Gul = new SolidColorBrush(Color.FromRgb(0xF5, 0xD1, 0x3B));
-    private static readonly Brush PaaGul = new SolidColorBrush(Color.FromRgb(0x14, 0x18, 0x1F));
+    private static readonly Brush Gul = Temaskift.Pensel("Fremhaev");
+    private static readonly Brush PaaGul = Temaskift.Pensel("PaaFremhaev");
 
     private void Sted_Klik(object sender, RoutedEventArgs e)
     {

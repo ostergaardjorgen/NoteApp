@@ -1,4 +1,4 @@
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
@@ -174,14 +174,14 @@ public partial class OptageBaand : Window
         {
             _blink.Stop();
             Prik.Opacity = 1.0;
-            Prik.Fill = new SolidColorBrush(Color.FromRgb(0xE8, 0xA3, 0x3D));
+            Prik.Fill = Temaskift.Pensel("Advarsel");
             Tilstand.Text = "PÅ PAUSE";
             PauseKnap.Content = "▶";
             PauseKnap.ToolTip = "Fortsæt optagelsen.";
         }
         else
         {
-            Prik.Fill = new SolidColorBrush(Color.FromRgb(0xE5, 0x48, 0x4D));
+            Prik.Fill = Temaskift.Pensel("Optager");
             Tilstand.Text = "OPTAGER";
             PauseKnap.Content = "❚❚";
             PauseKnap.ToolTip = "Hold pause. Der optages intet, før du fortsætter.";

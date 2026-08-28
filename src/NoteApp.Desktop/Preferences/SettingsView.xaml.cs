@@ -41,7 +41,7 @@ public partial class SettingsView : UserControl
         _timer = new DispatcherTimer(DispatcherPriority.Background) { Interval = TimeSpan.FromMilliseconds(100) };
         _timer.Tick += (_, _) => OpdaterMaalere();
 
-        Loaded += (_, _) => { Indlaes(); VisAutostart(); OpdaterFiler(); VisKrav(); VisPlads(); VisOvervaagede(); };
+        Loaded += (_, _) => { Indlaes(); VisTema(); VisAutostart(); OpdaterFiler(); VisKrav(); VisPlads(); VisOvervaagede(); };
         Unloaded += (_, _) => { _timer.Stop(); StopProber(); AfbrydTest(); };
     }
 
@@ -118,6 +118,47 @@ public partial class SettingsView : UserControl
         if (Window.GetWindow(this) is MainWindow hoved) hoved.TilslutGenvej();
 
         Status.Text = $"Lynstart er nu {(string)valg.Visning}.";
+    }
+
+    // ---------------------------------------------------------------- temaet
+
+    /// <summary>
+    /// Sandt, mens knapperne sættes op efter det gemte valg.
+    /// </summary>
+    /// <remarks>
+    /// RadioButton.Checked fyrer også, når koden sætter hakket. Uden det her
+    /// ville indlæsningen skrive indstillingen tilbage og skifte tema, hver
+    /// gang skærmen blev åbnet — usynligt, indtil man en dag ser temaet
+    /// blinke, fordi man kiggede på Indstillinger.
+    /// </remarks>
+    private bool _saetterTema;
+
+    private void Tema_Valgt(object sender, RoutedEventArgs e)
+    {
+        if (_saetterTema) return;
+
+        var valg = TemaLyst.IsChecked == true ? Temavalg.Lyst
+                 : TemaMoerkt.IsChecked == true ? Temavalg.Moerkt
+                 : Temavalg.FoelgWindows;
+
+        AppSettings.Current.Tema = valg;
+        AppSettings.Current.Save();
+
+        // Slaar igennem med det samme. Et udseende, man skal genstarte for at
+        // se, er et udseende, man ikke tror paa.
+        Temaskift.Anvend();
+    }
+
+    private void VisTema()
+    {
+        _saetterTema = true;
+
+        var valg = AppSettings.Current.Tema;
+        TemaLyst.IsChecked = valg == Temavalg.Lyst;
+        TemaMoerkt.IsChecked = valg == Temavalg.Moerkt;
+        TemaFoelg.IsChecked = valg == Temavalg.FoelgWindows;
+
+        _saetterTema = false;
     }
 
     private void Autostart_Klik(object sender, RoutedEventArgs e)

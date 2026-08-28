@@ -88,19 +88,19 @@
                 <Setter.Value>
                   <ControlTemplate TargetType="ListBoxItem">
                     <Border x:Name="kort" CornerRadius="8" Padding="14,11"
-                            Background="#FF181B22" BorderThickness="1"
+                            Background="{StaticResource Trykket}" BorderThickness="1"
                             BorderBrush="{StaticResource PanelKant}">
                       <ContentPresenter />
                     </Border>
                     <ControlTemplate.Triggers>
                       <Trigger Property="IsMouseOver" Value="True">
-                        <Setter TargetName="kort" Property="Background" Value="#FF2C323D" />
+                        <Setter TargetName="kort" Property="Background" Value="{StaticResource Svaev}" />
                       </Trigger>
                       <!-- Det VALGTE skal kunne ses paa afstand. Baade fladen
                            og kanten skifter, saa det ogsaa virker for den,
                            der ikke skelner farverne skarpt. -->
                       <Trigger Property="IsSelected" Value="True">
-                        <Setter TargetName="kort" Property="Background" Value="#FF33405A" />
+                        <Setter TargetName="kort" Property="Background" Value="{StaticResource Valgt}" />
                         <Setter TargetName="kort" Property="BorderBrush" Value="{StaticResource Accent}" />
                         <Setter TargetName="kort" Property="BorderThickness" Value="2" />
                       </Trigger>
@@ -168,7 +168,7 @@
                 Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,18,0,0">
       <Button Content="{i18n:Oversat faelles.annuller}" Click="Annuller_Click" Padding="18,9" Margin="0,0,10,0" />
       <Button x:Name="OpretKnap" Content="{i18n:Oversat faelles.opret_dokument}" Click="Opret_Click" Padding="20,9"
-              Background="{StaticResource Accent}" Foreground="#FF0B1220" BorderThickness="0"
+              Background="{StaticResource Accent}" Foreground="{StaticResource PaaAccent}" BorderThickness="0"
               FontWeight="SemiBold" IsDefault="True" />
     </StackPanel>
   </Grid>

@@ -17,7 +17,7 @@
     <TextBlock Text="{i18n:Oversat correctionwindow.skulle_have_vaeret}" Style="{StaticResource Underskrift}" Margin="0,14,0,0" />
     <TextBox x:Name="FeltRigtigt" Margin="0,4,0,0" FontSize="15" Padding="12,10" />
 
-    <Border Background="#FF181B22" BorderBrush="{StaticResource PanelKant}" BorderThickness="1"
+    <Border Background="{StaticResource Trykket}" BorderBrush="{StaticResource PanelKant}" BorderThickness="1"
             CornerRadius="8" Padding="14,11" Margin="0,16,0,0">
       <StackPanel>
         <TextBlock x:Name="Konsekvens" FontSize="12.5" LineHeight="20" TextWrapping="Wrap"
@@ -31,7 +31,7 @@
     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,22,0,0">
       <Button Content="{i18n:Oversat faelles.annuller}" Click="Annuller_Click" Padding="18,9" Margin="0,0,10,0" IsCancel="True" />
       <Button Content="{i18n:Oversat correctionwindow.laer_rettelsen}" Click="Gem_Click" Padding="22,9" IsDefault="True"
-              Background="{StaticResource Accent}" Foreground="#FF0B1220" BorderThickness="0"
+              Background="{StaticResource Accent}" Foreground="{StaticResource PaaAccent}" BorderThickness="0"
               FontWeight="SemiBold" />
     </StackPanel>
   </StackPanel>

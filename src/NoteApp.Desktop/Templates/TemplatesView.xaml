@@ -109,7 +109,7 @@
                        markeringen - i temaets egne farver. -->
                   <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="Transparent" />
                   <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="Transparent" />
-                  <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="#FFF4F6FA" />
+                  <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="{Binding Color, Source={StaticResource Tekst}}" />
                 </Style.Resources>
                 <Setter Property="Padding" Value="2,1" />
                 <Setter Property="Foreground" Value="{StaticResource TekstSvag}" />
@@ -141,7 +141,7 @@
                 </Border>
                 <HierarchicalDataTemplate.Triggers>
                   <DataTrigger Binding="{Binding ErValgt}" Value="True">
-                    <Setter TargetName="rk" Property="Background" Value="#FF33405A" />
+                    <Setter TargetName="rk" Property="Background" Value="{StaticResource Valgt}" />
                   </DataTrigger>
                   <DataTrigger Binding="{Binding ErBeholder}" Value="True">
                     <Setter TargetName="rk" Property="ToolTipService.IsEnabled" Value="False" />
@@ -252,7 +252,7 @@
                    fane, blev det erstattet med ingenting - reglerne forsvandt
                    uden en lyd, og det viste sig foerst som en opfundet
                    deltager i et referat. -->
-              <Border DockPanel.Dock="Bottom" Background="#FF181B22" CornerRadius="8"
+              <Border DockPanel.Dock="Bottom" Background="{StaticResource Trykket}" CornerRadius="8"
                       BorderBrush="{StaticResource PanelKant}" BorderThickness="1"
                       Padding="14,11" Margin="0,10,0,0">
                 <StackPanel>
@@ -307,7 +307,7 @@
                    HER, i denne tekst - og nu kan man klikke dem ind, hvor
                    markoeren staar, i stedet for at skrive kroellede
                    parenteser af i haanden. -->
-              <Border DockPanel.Dock="Bottom" Background="#FF181B22" CornerRadius="8"
+              <Border DockPanel.Dock="Bottom" Background="{StaticResource Trykket}" CornerRadius="8"
                       BorderBrush="{StaticResource PanelKant}" BorderThickness="1"
                       Padding="14,11" Margin="0,10,0,0">
                 <StackPanel>
