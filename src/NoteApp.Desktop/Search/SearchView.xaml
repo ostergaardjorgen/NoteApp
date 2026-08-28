@@ -68,8 +68,8 @@
            Aftalerne kommer fra appens egen kalender OG fra dem, der er hentet
            ind. De staar i én liste - hvem der har lagt dem ind, er ikke det,
            man leder efter, naar man skal optage om fem minutter. -->
-        <Border Grid.Column="0" Background="{StaticResource Panel}" CornerRadius="10"
-                BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+        <Border Grid.Column="0" Background="{DynamicResource Panel}" CornerRadius="10"
+                BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
           <DockPanel>
             <!-- ============ OVERSKRIFT MED SYNKRONISERING ============
 
@@ -108,7 +108,7 @@
 
               <TextBlock x:Name="Kalendersynklinje" FontSize="11" Margin="0,4,0,0"
                          Visibility="Collapsed" TextWrapping="Wrap"
-                         Foreground="{StaticResource TekstMeget}" />
+                         Foreground="{DynamicResource TekstMeget}" />
             </StackPanel>
 
             <ScrollViewer VerticalScrollBarVisibility="Auto"
@@ -132,7 +132,7 @@
                     <TextBlock Text="{Binding Dagsnavn}" FontSize="11.5"
                                FontWeight="SemiBold" Foreground="{Binding Dagsfarve}" />
                     <TextBlock Text="{Binding Dagsdato}" FontSize="10.5" Margin="0,1,0,0"
-                               Foreground="{StaticResource TekstMeget}" />
+                               Foreground="{DynamicResource TekstMeget}" />
                   </StackPanel>
 
                   <!-- Opacity og ikke en graa farve paa hvert element: den
@@ -149,7 +149,7 @@
                        goer det, kortet lige saa godt kan aabne, er et led for
                        meget - og optagelsen startes nu inde i vinduet, hvor
                        man samtidig kan se, hvad der bliver optaget som. -->
-                  <Border Background="{StaticResource Trykket}" BorderBrush="{Binding Kant}"
+                  <Border Background="{DynamicResource Trykket}" BorderBrush="{Binding Kant}"
                           BorderThickness="3,0,0,0" CornerRadius="6"
                           Padding="11,8" Margin="0,0,0,5"
                           Opacity="{Binding Daempning}"
@@ -168,9 +168,9 @@
 
                       <StackPanel Grid.Column="1">
                         <TextBlock Text="{Binding Titel}" FontSize="12" TextWrapping="Wrap"
-                                   Foreground="{StaticResource Tekst}" />
+                                   Foreground="{DynamicResource Tekst}" />
                         <TextBlock Text="{Binding Under}" FontSize="10.5" Margin="0,3,0,0"
-                                   TextWrapping="Wrap" Foreground="{StaticResource TekstMeget}" />
+                                   TextWrapping="Wrap" Foreground="{DynamicResource TekstMeget}" />
                       </StackPanel>
                     </Grid>
                   </Border>
@@ -181,7 +181,7 @@
 
             <TextBlock x:Name="IngenAftaler" FontSize="11.5" Margin="14,0,14,14"
                        TextWrapping="Wrap" LineHeight="18" Visibility="Collapsed"
-                       Foreground="{StaticResource TekstSvag}"
+                       Foreground="{DynamicResource TekstSvag}"
                        Text="{i18n:Oversat searchview.ingen_aftaler_i_kalenderen_opret_en_her_el}" />
               </StackPanel>
             </ScrollViewer>
@@ -196,8 +196,8 @@
                     ToolTip="{i18n:Oversat faelles.traek_for_at_aendre_bredden}" />
 
       <!-- ============ MIDTEN: SØGNINGEN ============ -->
-      <Border Grid.Column="2" Background="{StaticResource Panel}" CornerRadius="10"
-              BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+      <Border Grid.Column="2" Background="{DynamicResource Panel}" CornerRadius="10"
+              BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
         <Grid Margin="18,16,18,0">
           <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -222,8 +222,8 @@
                  Text="{i18n:Oversat cockpit.under}" />
     </StackPanel>
 
-    <Border Background="{StaticResource Panel}" CornerRadius="12"
-            BorderBrush="{StaticResource Accent}" BorderThickness="1" Padding="8"
+    <Border Background="{DynamicResource Panel}" CornerRadius="12"
+            BorderBrush="{DynamicResource Accent}" BorderThickness="1" Padding="8"
             MaxWidth="820" HorizontalAlignment="Stretch">
       <Border.Effect>
         <DropShadowEffect BlurRadius="18" ShadowDepth="2" Opacity="0.35" Color="#FF000000" />
@@ -237,14 +237,14 @@
 
         <TextBlock Grid.Column="0" Text="&#xE721;" FontFamily="Segoe MDL2 Assets"
                    FontSize="17" VerticalAlignment="Center" Margin="12,0,4,0"
-                   Foreground="{StaticResource Accent}" />
+                   Foreground="{DynamicResource Accent}" />
 
         <TextBox x:Name="Felt" Grid.Column="1" FontSize="18" Padding="10,12"
                  BorderThickness="0" Background="Transparent"
                  TextChanged="Felt_Aendret" KeyDown="Felt_Tast" />
         <TextBlock x:Name="Pladsholder" Grid.Column="1" IsHitTestVisible="False" FontSize="18"
                    Margin="13,0,0,0" VerticalAlignment="Center"
-                   Foreground="{StaticResource TekstMeget}"
+                   Foreground="{DynamicResource TekstMeget}"
                    Text="{i18n:Oversat cockpit.soeg}" />
 
         <!-- Krydset rydder feltet i ét klik — samme som i udskriftens
@@ -258,7 +258,7 @@
                 Visibility="Collapsed" Cursor="Hand" FontSize="13"
                 Padding="0" BorderThickness="0" Background="Transparent"
                 Width="32" Height="32" Margin="0,0,10,0"
-                Foreground="{StaticResource TekstMeget}"
+                Foreground="{DynamicResource TekstMeget}"
                 ToolTip="{i18n:Oversat faelles.ryd_soegningen_escape}">
           <Button.Template>
             <ControlTemplate TargetType="Button">
@@ -267,7 +267,7 @@
               </Border>
               <ControlTemplate.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                  <Setter TargetName="flade" Property="Background" Value="{StaticResource Svaev}" />
+                  <Setter TargetName="flade" Property="Background" Value="{DynamicResource Svaev}" />
                 </Trigger>
               </ControlTemplate.Triggers>
             </ControlTemplate>
@@ -290,7 +290,7 @@
     <StackPanel HorizontalAlignment="Center" Margin="0,12,0,0">
     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
       <TextBlock Text="{i18n:Oversat searchview.soeg_kun_i}" FontSize="11.5" VerticalAlignment="Center"
-                 Margin="0,0,10,0" Foreground="{StaticResource TekstMeget}" />
+                 Margin="0,0,10,0" Foreground="{DynamicResource TekstMeget}" />
 
       <!-- PERIODEN STÅR FØRST.
            Det er den afgrænsning, der bruges oftest — «hvad talte vi om i
@@ -337,17 +337,17 @@
     <StackPanel x:Name="Datoraekke" Orientation="Horizontal" HorizontalAlignment="Center"
                 Margin="0,8,0,0" Visibility="Collapsed">
       <TextBlock Text="{i18n:Oversat searchview.fra}" FontSize="11.5" VerticalAlignment="Center" Margin="0,0,7,0"
-                 Foreground="{StaticResource TekstMeget}" />
+                 Foreground="{DynamicResource TekstMeget}" />
       <DatePicker x:Name="FraDato" Width="135" FontSize="12"
                   SelectedDateChanged="Dato_Aendret" />
 
       <TextBlock Text="{i18n:Oversat searchview.til}" FontSize="11.5" VerticalAlignment="Center" Margin="10,0,7,0"
-                 Foreground="{StaticResource TekstMeget}" />
+                 Foreground="{DynamicResource TekstMeget}" />
       <DatePicker x:Name="TilDato" Width="135" FontSize="12"
                   SelectedDateChanged="Dato_Aendret" />
 
       <TextBlock x:Name="Datofejl" FontSize="11.5" VerticalAlignment="Center" Margin="12,0,0,0"
-                 Foreground="{StaticResource Advarsel}" />
+                 Foreground="{DynamicResource Advarsel}" />
     </StackPanel>
     </StackPanel>
 
@@ -364,10 +364,10 @@
             <TextBlock Text="{i18n:Oversat cockpit.tomtitel}" FontSize="16" FontWeight="SemiBold"
                        HorizontalAlignment="Center" />
             <TextBlock FontSize="12.5" Margin="0,10,0,0" TextWrapping="Wrap" LineHeight="20"
-                       TextAlignment="Center" Foreground="{StaticResource TekstSvag}"
+                       TextAlignment="Center" Foreground="{DynamicResource TekstSvag}"
                        Text="{i18n:Oversat cockpit.tomtekst}" />
             <TextBlock FontSize="12" Margin="0,12,0,0" TextWrapping="Wrap" LineHeight="19"
-                       TextAlignment="Center" Foreground="{StaticResource TekstMeget}"
+                       TextAlignment="Center" Foreground="{DynamicResource TekstMeget}"
                        Text="{i18n:Oversat cockpit.tomfod}" />
           </StackPanel>
 
@@ -402,7 +402,7 @@
                           <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
                               <Setter TargetName="f" Property="BorderBrush"
-                                      Value="{StaticResource Accent}" />
+                                      Value="{DynamicResource Accent}" />
                             </Trigger>
                           </ControlTemplate.Triggers>
                         </ControlTemplate>
@@ -414,7 +414,7 @@
 
               <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                 <TextBlock Text="{i18n:Oversat searchview.sorter}" FontSize="11.5" VerticalAlignment="Center"
-                           Margin="0,0,8,0" Foreground="{StaticResource TekstMeget}" />
+                           Margin="0,0,8,0" Foreground="{DynamicResource TekstMeget}" />
                 <ComboBox x:Name="Sortering" MinWidth="150" FontSize="12" Padding="8,4"
                           SelectionChanged="Sortering_Aendret">
                   <ComboBox.ItemTemplate>
@@ -435,8 +435,8 @@
           spoergsmaalet hvilket af dem - ikke om filen kan aabnes.
           Nu staar hvert sted som sin egen linje. -->
           <Border CornerRadius="10" Padding="0" Margin="0,0,0,10"
-          Background="{StaticResource Trykket}" BorderThickness="1"
-          BorderBrush="{StaticResource PanelKant}">
+          Background="{DynamicResource Trykket}" BorderThickness="1"
+          BorderBrush="{DynamicResource PanelKant}">
           <StackPanel>
           <Grid Margin="14,12,14,8">
           <Grid.ColumnDefinitions>
@@ -446,7 +446,7 @@
           </Grid.ColumnDefinitions>
 
           <Border Grid.Column="0" CornerRadius="4" Padding="7,2" Margin="0,0,10,0"
-          Background="{StaticResource Svaev}" VerticalAlignment="Center">
+          Background="{DynamicResource Svaev}" VerticalAlignment="Center">
           <TextBlock Text="{Binding Maerkat}" FontSize="10.5" FontWeight="SemiBold"
           Foreground="{Binding Maerkatfarve}" />
           </Border>
@@ -457,7 +457,7 @@
 
           <TextBlock Grid.Column="2" Text="{Binding Hoejre}" FontSize="11.5"
           VerticalAlignment="Center" Margin="12,0,0,0"
-          Foreground="{StaticResource TekstMeget}" />
+          Foreground="{DynamicResource TekstMeget}" />
           </Grid>
 
           <!-- Hvert sted. Nummeret goer det muligt at tale om «det
@@ -478,14 +478,14 @@
           <Button.Template>
           <ControlTemplate TargetType="Button">
           <Border x:Name="rk" CornerRadius="6" Padding="11,8"
-          Background="{StaticResource Trykket}" BorderThickness="1"
+          Background="{DynamicResource Trykket}" BorderThickness="1"
           BorderBrush="Transparent">
           <ContentPresenter />
           </Border>
           <ControlTemplate.Triggers>
           <Trigger Property="IsMouseOver" Value="True">
-          <Setter TargetName="rk" Property="Background" Value="{StaticResource Svaev}" />
-          <Setter TargetName="rk" Property="BorderBrush" Value="{StaticResource Accent}" />
+          <Setter TargetName="rk" Property="Background" Value="{DynamicResource Svaev}" />
+          <Setter TargetName="rk" Property="BorderBrush" Value="{DynamicResource Accent}" />
           </Trigger>
           </ControlTemplate.Triggers>
           </ControlTemplate>
@@ -497,7 +497,7 @@
           <ColumnDefinition Width="*" />
           </Grid.ColumnDefinitions>
           <TextBlock Grid.Column="0" Text="{Binding Nummer}" FontSize="11.5"
-          Foreground="{StaticResource TekstMeget}"
+          Foreground="{DynamicResource TekstMeget}"
           VerticalAlignment="Top" />
           <!-- Det soegte staar GULT, praecis som i
           udskriften. To skaerme, der goer det samme,
@@ -506,7 +506,7 @@
           <TextBlock Grid.Column="1" FontSize="12.5"
           LineHeight="19" TextWrapping="Wrap"
           Loaded="Uddrag_Ind"
-          Foreground="{StaticResource TekstSvag}" />
+          Foreground="{DynamicResource TekstSvag}" />
           </Grid>
           </Button>
           </DataTemplate>
@@ -525,7 +525,7 @@
           <TextBlock x:Name="IntetOverskrift" FontSize="17" FontWeight="SemiBold"
           HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" />
           <TextBlock x:Name="IntetTekst" FontSize="13" Margin="0,10,0,0" TextWrapping="Wrap"
-          LineHeight="21" TextAlignment="Center" Foreground="{StaticResource TekstSvag}" />
+          LineHeight="21" TextAlignment="Center" Foreground="{DynamicResource TekstSvag}" />
 
           <!-- ============ HVERT ORD FOR SIG ============
           Naar der ikke er noget fund, er spoergsmaalet ikke «findes
@@ -535,14 +535,14 @@
           <ItemsControl x:Name="Enkeltvis" Margin="0,16,0,0" HorizontalAlignment="Center">
           <ItemsControl.ItemTemplate>
           <DataTemplate>
-          <Border Background="{StaticResource Trykket}" BorderBrush="{StaticResource PanelKant}"
+          <Border Background="{DynamicResource Trykket}" BorderBrush="{DynamicResource PanelKant}"
           BorderThickness="1" CornerRadius="6" Padding="12,7" Margin="0,0,0,6">
           <Grid MinWidth="360">
           <TextBlock Text="{Binding Ord}" FontSize="12.5" FontWeight="SemiBold"
           HorizontalAlignment="Left" VerticalAlignment="Center" />
           <TextBlock Text="{Binding Hvor}" FontSize="12" Margin="0,0,80,0"
           HorizontalAlignment="Right" VerticalAlignment="Center"
-          Foreground="{StaticResource TekstMeget}" />
+          Foreground="{DynamicResource TekstMeget}" />
           <Button Content="{i18n:Oversat searchview.soeg_kun_her}" Tag="{Binding Ord}" Click="KunDet_Klik"
           HorizontalAlignment="Right" VerticalAlignment="Center"
           Padding="9,3" FontSize="11" />
@@ -553,7 +553,7 @@
           </ItemsControl>
 
           <TextBlock FontSize="12" Margin="0,10,0,0" TextWrapping="Wrap" LineHeight="19"
-          TextAlignment="Center" Foreground="{StaticResource TekstMeget}"
+          TextAlignment="Center" Foreground="{DynamicResource TekstMeget}"
           Text="{i18n:Oversat searchview.husk_at_et_moede_foerst_kan_soeges_naar_de}" />
           </StackPanel>
         </Grid>
@@ -571,8 +571,8 @@
            flyttet til venstre spalte: den ene er hvad, den anden er hvornaar,
            og de to laeses ikke i samme oejeblik. -->
       <Grid Grid.Column="4">
-        <Border Background="{StaticResource Panel}" CornerRadius="10"
-                BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+        <Border Background="{DynamicResource Panel}" CornerRadius="10"
+                BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
           <DockPanel>
             <!-- Samme som kalenderen. Opgaverne fra Google henter sig
                  heller ikke selv, og de kommer fra en HELT anden godkendelse
@@ -584,7 +584,7 @@
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"
                             VerticalAlignment="Center">
                   <TextBlock x:Name="OpgaveTal" FontSize="10.5" VerticalAlignment="Center"
-                             Foreground="{StaticResource TekstMeget}" />
+                             Foreground="{DynamicResource TekstMeget}" />
                   <Button x:Name="Opgavesynk" Click="Opgavesynk_Klik"
                           Style="{StaticResource IkonKnap}" Margin="6,0,0,0"
                           Visibility="Collapsed"
@@ -598,7 +598,7 @@
 
               <TextBlock x:Name="Opgavesynklinje" FontSize="11" Margin="0,4,0,0"
                          Visibility="Collapsed" TextWrapping="Wrap"
-                         Foreground="{StaticResource TekstMeget}" />
+                         Foreground="{DynamicResource TekstMeget}" />
             </StackPanel>
 
             <ScrollViewer Padding="7,0,7,10" VerticalScrollBarVisibility="Auto"
@@ -621,7 +621,7 @@
                      Fluebenet, prioriteten og herkomstlinket ligger inden i.
                      De haandterer selv deres klik og markerer dem som
                      behandlede, saa de naar aldrig herud. -->
-                <Border Background="{StaticResource Trykket}" BorderBrush="{Binding Farve}"
+                <Border Background="{DynamicResource Trykket}" BorderBrush="{Binding Farve}"
                 BorderThickness="3,0,0,0" CornerRadius="6"
                 Padding="13,10" Margin="0,0,0,6"
                 Opacity="{Binding Daempning}"
@@ -672,7 +672,7 @@
                      helt normalt til at se ud som et tab. -->
                 <Button Content="{Binding Under}" Tag="{Binding}" Click="Opgave_Klik"
                 Padding="0" BorderThickness="0" Background="Transparent" Cursor="Hand"
-                FontSize="11" Foreground="{StaticResource Accent}"
+                FontSize="11" Foreground="{DynamicResource Accent}"
                 Visibility="{Binding Linkvis}"
                 ToolTip="{i18n:Oversat searchview.gaa_til_det_sted_i_transkriptionen_opgaven}">
                 <Button.Template>
@@ -686,12 +686,12 @@
 
                 <TextBlock Text="{Binding Under}" FontSize="11" TextWrapping="Wrap"
                 Visibility="{Binding Kildevis}"
-                Foreground="{StaticResource TekstMeget}" />
+                Foreground="{DynamicResource TekstMeget}" />
                 </WrapPanel>
                 </StackPanel>
 
                 <Border Grid.Column="2" CornerRadius="4" Padding="7,2" Margin="10,0,0,0"
-                VerticalAlignment="Top" Background="{StaticResource Svaev}"
+                VerticalAlignment="Top" Background="{DynamicResource Svaev}"
                 Visibility="{Binding Fristvis}">
                 <TextBlock Text="{Binding Frist}" FontSize="11.5" FontWeight="SemiBold"
                 Foreground="{Binding Fristfarve}" />
@@ -713,7 +713,7 @@
                 </ItemsControl>
 
                 <TextBlock x:Name="IngenOpgaver" FontSize="13" Margin="6,10,6,0" TextWrapping="Wrap"
-                LineHeight="21" Foreground="{StaticResource TekstSvag}"
+                LineHeight="21" Foreground="{DynamicResource TekstSvag}"
                 Visibility="Collapsed"
                 Text="{i18n:Oversat searchview.der_er_ingen_aabne_opgaver_de_kommer_fra_f}" />
               </StackPanel>

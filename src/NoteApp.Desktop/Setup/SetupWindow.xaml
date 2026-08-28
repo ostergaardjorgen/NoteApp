@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:i18n="clr-namespace:NoteApp.Desktop"
         Title="Velkommen til NoteApp" Height="680" Width="780" MinHeight="520" MinWidth="640"
-        Background="{StaticResource Baggrund}" WindowStartupLocation="CenterScreen"
+        Background="{DynamicResource Baggrund}" WindowStartupLocation="CenterScreen"
         ResizeMode="CanResize" Icon="../app.ico">
   <!-- Kan ændres i størrelse. Det er det første, en ny bruger ser, og et
        vindue, hvor «Næste» ligger uden for skærmen, er ikke til at komme
@@ -27,25 +27,25 @@
 
     <!-- ===================== Trin 1: hvad appen er ====================== -->
     <StackPanel x:Name="Trin1" Grid.Row="1">
-      <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20"
-              BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+      <Border Background="{DynamicResource Panel}" CornerRadius="10" Padding="20"
+              BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
         <StackPanel>
           <TextBlock Text="{i18n:Oversat setupwindow.lyden_bliver_her_teksten_bliver_i_europa}" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,10" />
-          <TextBlock FontSize="13" LineHeight="22" Foreground="{StaticResource TekstSvag}"
+          <TextBlock FontSize="13" LineHeight="22" Foreground="{DynamicResource TekstSvag}"
                      Text="{i18n:Oversat setupwindow.noteapp_optager_dine_moeder_og_skriver_dem}" />
-          <TextBlock FontSize="13" LineHeight="22" Margin="0,12,0,0" Foreground="{StaticResource TekstSvag}"
+          <TextBlock FontSize="13" LineHeight="22" Margin="0,12,0,0" Foreground="{DynamicResource TekstSvag}"
                      Text="{i18n:Oversat setupwindow.selve_transskriptionen_laves_af_whisper_so}" />
 
-          <Border Background="#334CBE72" BorderBrush="{StaticResource Godkendt}" BorderThickness="1"
+          <Border Background="#334CBE72" BorderBrush="{DynamicResource Godkendt}" BorderThickness="1"
                   CornerRadius="6" Padding="14,10" Margin="0,16,0,0">
-            <TextBlock FontSize="12" Foreground="{StaticResource Tekst}" LineHeight="19"
+            <TextBlock FontSize="12" Foreground="{DynamicResource Tekst}" LineHeight="19"
                        Text="{i18n:Oversat setupwindow.optagelsen_kan_ikke_sendes_nogen_steder_he}" />
           </Border>
         </StackPanel>
       </Border>
 
-      <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20" Margin="0,14,0,0"
-              BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+      <Border Background="{DynamicResource Panel}" CornerRadius="10" Padding="20" Margin="0,14,0,0"
+              BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
         <Grid>
           <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
@@ -54,7 +54,7 @@
           <StackPanel Grid.Column="0">
             <TextBlock Text="{i18n:Oversat setupwindow.dine_filer_ligger_her}" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8" />
             <TextBlock x:Name="DataSti" FontSize="12" FontFamily="Consolas"
-                       Foreground="{StaticResource TekstSvag}" TextWrapping="Wrap" />
+                       Foreground="{DynamicResource TekstSvag}" TextWrapping="Wrap" />
             <TextBlock Style="{StaticResource Underskrift}" Margin="0,6,0,0"
                        Text="{i18n:Oversat setupwindow.optagelser_transkriptioner_noter_og_dokume}" />
           </StackPanel>
@@ -80,25 +80,25 @@
            intet fra din pc". Det var sandt, da alt kunne koere lokalt. Nu
            skrives dokumenter hos Mistral, og saa er saetningen forkert - to
            skaerme foer staar det rigtige, og de maa ikke modsige hinanden. -->
-      <TextBlock Grid.Row="0" FontSize="13" Foreground="{StaticResource TekstSvag}" Margin="0,0,0,16" LineHeight="20"
+      <TextBlock Grid.Row="0" FontSize="13" Foreground="{DynamicResource TekstSvag}" Margin="0,0,0,16" LineHeight="20"
                  Text="{i18n:Oversat setupwindow.transskriptionen_laves_af_whisper_som_koer}" />
 
-      <Border Grid.Row="1" Background="{StaticResource Panel}" CornerRadius="10" Padding="18,15"
-              BorderBrush="{StaticResource PanelKant}" BorderThickness="1" Margin="0,0,0,12">
+      <Border Grid.Row="1" Background="{DynamicResource Panel}" CornerRadius="10" Padding="18,15"
+              BorderBrush="{DynamicResource PanelKant}" BorderThickness="1" Margin="0,0,0,12">
         <StackPanel>
           <TextBlock x:Name="MotorOverskrift" Text="{i18n:Oversat faelles.motor}" FontSize="15" FontWeight="SemiBold" />
           <TextBlock x:Name="MotorValg" FontSize="13" Margin="0,6,0,0"
-                     Foreground="{StaticResource TekstSvag}" />
+                     Foreground="{DynamicResource TekstSvag}" />
           <TextBlock x:Name="MotorBegrundelse" Style="{StaticResource Underskrift}" Margin="0,6,0,0" />
         </StackPanel>
       </Border>
 
-      <Border Grid.Row="2" Background="{StaticResource Panel}" CornerRadius="10" Padding="18,15"
-              BorderBrush="{StaticResource PanelKant}" BorderThickness="1" VerticalAlignment="Top">
+      <Border Grid.Row="2" Background="{DynamicResource Panel}" CornerRadius="10" Padding="18,15"
+              BorderBrush="{DynamicResource PanelKant}" BorderThickness="1" VerticalAlignment="Top">
         <StackPanel>
           <TextBlock Text="{i18n:Oversat faelles.sprogmodel}" FontSize="15" FontWeight="SemiBold" />
           <TextBlock x:Name="ModelValg" FontSize="13" Margin="0,6,0,0"
-                     Foreground="{StaticResource TekstSvag}" />
+                     Foreground="{DynamicResource TekstSvag}" />
           <TextBlock x:Name="ModelBegrundelse" Style="{StaticResource Underskrift}" Margin="0,6,0,0" />
 
           <StackPanel Orientation="Horizontal" Margin="0,14,0,0">
@@ -111,7 +111,7 @@
 
       <StackPanel Grid.Row="3" Margin="0,14,0,0">
         <ProgressBar x:Name="HentFremdrift" Height="6" Minimum="0" Maximum="100" Visibility="Collapsed"
-                     Background="{StaticResource Svaev}" Foreground="{StaticResource Accent}" BorderThickness="0" />
+                     Background="{DynamicResource Svaev}" Foreground="{DynamicResource Accent}" BorderThickness="0" />
         <TextBlock x:Name="HentStatus" Style="{StaticResource Underskrift}" Margin="0,8,0,0" />
       </StackPanel>
     </Grid>

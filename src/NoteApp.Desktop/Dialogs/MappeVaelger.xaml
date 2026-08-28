@@ -4,7 +4,7 @@
         xmlns:i18n="clr-namespace:NoteApp.Desktop"
         Title="Flyt til mappe" Width="460" SizeToContent="Height" MinHeight="300"
         WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
-        Background="{StaticResource Baggrund}" Foreground="{StaticResource Tekst}">
+        Background="{DynamicResource Baggrund}" Foreground="{DynamicResource Tekst}">
 
   <StackPanel Margin="24">
     <TextBlock x:Name="Overskrift" FontSize="18" FontWeight="SemiBold" TextWrapping="Wrap" />
@@ -12,7 +12,7 @@
                TextWrapping="Wrap" />
 
     <ListBox x:Name="Liste" Margin="0,16,0,0" MaxHeight="260" FontSize="14"
-             BorderBrush="{StaticResource PanelKant}" Background="{StaticResource Panel}"
+             BorderBrush="{DynamicResource PanelKant}" Background="{DynamicResource Panel}"
              MouseDoubleClick="Liste_DobbeltKlik">
       <ListBox.ItemTemplate>
         <DataTemplate>
@@ -27,7 +27,7 @@
     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
       <Button Content="{i18n:Oversat faelles.annuller}" Click="Annuller_Click" Padding="18,9" Margin="0,0,10,0" />
       <Button Content="{i18n:Oversat mappevaelger.flyt}" Click="Flyt_Click" Padding="22,9" IsDefault="True"
-              Background="{StaticResource Accent}" Foreground="{StaticResource PaaAccent}"
+              Background="{DynamicResource Accent}" Foreground="{DynamicResource PaaAccent}"
               BorderThickness="0" FontWeight="SemiBold" />
     </StackPanel>
   </StackPanel>

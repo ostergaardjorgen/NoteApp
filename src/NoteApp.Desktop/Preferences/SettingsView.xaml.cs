@@ -41,7 +41,7 @@ public partial class SettingsView : UserControl
         _timer = new DispatcherTimer(DispatcherPriority.Background) { Interval = TimeSpan.FromMilliseconds(100) };
         _timer.Tick += (_, _) => OpdaterMaalere();
 
-        Loaded += (_, _) => { Indlaes(); VisTema(); VisAutostart(); OpdaterFiler(); VisKrav(); VisPlads(); VisOvervaagede(); };
+        Loaded += (_, _) => { Indlaes(); VisTema(); LytPaaTema(); VisAutostart(); OpdaterFiler(); VisKrav(); VisPlads(); VisOvervaagede(); };
         Unloaded += (_, _) => { _timer.Stop(); StopProber(); AfbrydTest(); };
     }
 
@@ -149,8 +149,34 @@ public partial class SettingsView : UserControl
         Temaskift.Anvend();
     }
 
+    /// <summary>
+    /// Holder de tre knapper i trit med det tema, der faktisk er i brug.
+    /// </summary>
+    /// <remarks>
+    /// TEMAET KAN OGSAA SKIFTES ANDRE STEDER FRA: knappen i topbjaelken, og
+    /// Windows selv ved solnedgang, hvis man foelger systemet. Uden det her
+    /// ville skaermen sige «Lyst», mens appen var moerk — og det ville ligne,
+    /// at valget ikke virkede.
+    /// </remarks>
+    private void LytPaaTema()
+    {
+        // Der meldes fra foerst, saa der ikke ligger to abonnementer, hvis
+        // skaermen aabnes igen. Unloaded fyrer ikke paalideligt til at rydde
+        // op alene - se MeetingView.
+        Temaskift.Skiftet -= VisTema;
+        Temaskift.Skiftet += VisTema;
+        Unloaded -= Slip;
+        Unloaded += Slip;
+    }
+
+    private void Slip(object? afsender, RoutedEventArgs e) => Temaskift.Skiftet -= VisTema;
+
     private void VisTema()
     {
+        // Knapperne findes foerst, naar skaermen er bygget. Skiftet kan komme
+        // foer det, hvis Windows skifter i samme oejeblik.
+        if (TemaLyst is null) return;
+
         _saetterTema = true;
 
         var valg = AppSettings.Current.Tema;

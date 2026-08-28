@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:i18n="clr-namespace:NoteApp.Desktop"
              xmlns:local="clr-namespace:NoteApp.Desktop.Transcribe"
-             Background="{StaticResource Baggrund}">
+             Background="{DynamicResource Baggrund}">
 
   <!-- ======================== LAYOUTET, OG HVORFOR =======================
 
@@ -47,8 +47,8 @@
     </StackPanel>
 
     <!-- ========================= Værktøjslinje ========================== -->
-    <Border Grid.Row="1" Background="{StaticResource Panel}" CornerRadius="8"
-            BorderBrush="{StaticResource PanelKant}" BorderThickness="1" Padding="8,6">
+    <Border Grid.Row="1" Background="{DynamicResource Panel}" CornerRadius="8"
+            BorderBrush="{DynamicResource PanelKant}" BorderThickness="1" Padding="8,6">
       <DockPanel>
 
         <!-- Til højre: vejen videre. De to eneste handlinger, der flytter
@@ -68,7 +68,7 @@
 
         <TextBlock DockPanel.Dock="Right" Text="&#xE76C;" FontFamily="Segoe MDL2 Assets"
                    FontSize="11" VerticalAlignment="Center" Margin="10,0"
-                   Foreground="{StaticResource PanelKant}" />
+                   Foreground="{DynamicResource PanelKant}" />
 
         <Button DockPanel.Dock="Right" x:Name="AfbrydKnap" Content="{i18n:Oversat faelles.afbryd}" Click="Afbryd_Click"
                 Visibility="Collapsed" Margin="8,0,0,0" />
@@ -79,7 +79,7 @@
                 ToolTip="{i18n:Oversat transcribeview.skriv_lyden_ud_til_tekst_her_paa_maskinen}" />
 
         <Border DockPanel.Dock="Right" Width="1" Margin="10,4,14,4"
-                Background="{StaticResource PanelKant}" />
+                Background="{DynamicResource PanelKant}" />
 
         <!-- Til venstre: oprydningen. «Ny mappe» står først og alene, fordi
              den er den eneste, der virker uden et valg. -->
@@ -104,7 +104,7 @@
         </Button>
 
         <Border DockPanel.Dock="Left" Width="1" Margin="6,4,8,4"
-                Background="{StaticResource PanelKant}" />
+                Background="{DynamicResource PanelKant}" />
 
         <Button DockPanel.Dock="Left" x:Name="FlytKnap" Style="{StaticResource IkonKnap}"
                 Click="Flyt_Click" IsEnabled="False" AutomationProperties.Name="{i18n:Oversat faelles.flyt_til_mappe}"
@@ -131,7 +131,7 @@
         </Button>
 
         <Border DockPanel.Dock="Left" Width="1" Margin="6,4,8,4"
-                Background="{StaticResource PanelKant}" />
+                Background="{DynamicResource PanelKant}" />
 
         <!-- RYD LYDEN PAA DEN ENE OPTAGELSE.
              Et heldagsseminar fylder en halv gigabyte. Har man skrevet det ud
@@ -198,14 +198,14 @@
       </Grid.ColumnDefinitions>
 
       <!-- =========================== Biblioteker ====================== -->
-      <Border Grid.Column="0" Background="{StaticResource Panel}" CornerRadius="10"
-              BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+      <Border Grid.Column="0" Background="{DynamicResource Panel}" CornerRadius="10"
+              BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
         <DockPanel>
           <TextBlock DockPanel.Dock="Top" Text="{i18n:Oversat faelles.biblioteker}" FontSize="10.5" FontWeight="SemiBold"
-                     Margin="16,14,16,8" Foreground="{StaticResource TekstMeget}" />
+                     Margin="16,14,16,8" Foreground="{DynamicResource TekstMeget}" />
 
           <TextBlock DockPanel.Dock="Bottom" Margin="16,8,16,12" FontSize="11" TextWrapping="Wrap"
-                     LineHeight="17" Foreground="{StaticResource TekstMeget}"
+                     LineHeight="17" Foreground="{DynamicResource TekstMeget}"
                      Text="{i18n:Oversat transcribeview.traek_en_optagelse_hen_paa_en_mappe_for_at}" />
 
           <!-- ============ NYE FILER I DE OVERVAAGEDE MAPPER ============
@@ -221,15 +221,15 @@
                uanset hvad man svarer. "Nej tak" betyder kun, at den ikke
                bliver tilbudt igen. -->
           <Border DockPanel.Dock="Top" x:Name="Fundbjaelke" Visibility="Collapsed"
-                  Background="{StaticResource AccentFlade}" CornerRadius="0,8,8,0" Margin="8,0,8,10"
-                  BorderBrush="{StaticResource Accent}" BorderThickness="3,0,0,0"
+                  Background="{DynamicResource AccentFlade}" CornerRadius="0,8,8,0" Margin="8,0,8,10"
+                  BorderBrush="{DynamicResource Accent}" BorderThickness="3,0,0,0"
                   Padding="12,10">
             <StackPanel>
               <TextBlock x:Name="Fundtekst" FontSize="12" FontWeight="SemiBold"
-                         TextWrapping="Wrap" Foreground="{StaticResource Tekst}" />
+                         TextWrapping="Wrap" Foreground="{DynamicResource Tekst}" />
 
               <TextBlock x:Name="Fundlinje" FontSize="11" TextWrapping="Wrap" LineHeight="17"
-                         Margin="0,5,0,0" Foreground="{StaticResource TekstMeget}" />
+                         Margin="0,5,0,0" Foreground="{DynamicResource TekstMeget}" />
 
               <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
                 <Button Content="{i18n:Oversat transcribeview.laeg_ind}" Click="FundLaegInd_Click" Padding="14,6"
@@ -259,11 +259,11 @@
                        markeringen - i temaets egne farver. -->
                   <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="Transparent" />
                   <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="Transparent" />
-                  <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="{Binding Color, Source={StaticResource Tekst}}" />
+                  <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="{Binding Color, Source={DynamicResource Tekst}}" />
                 </Style.Resources>
                 <Setter Property="Padding" Value="2,1" />
                 <Setter Property="AllowDrop" Value="True" />
-                <Setter Property="Foreground" Value="{StaticResource TekstSvag}" />
+                <Setter Property="Foreground" Value="{DynamicResource TekstSvag}" />
                 <!-- Tovejsbinding: knuden husker selv, om den er foldet ud og
                      valgt, saa traeet ikke klapper sammen og mister sin
                      markering, hver gang det bygges forfra. -->
@@ -299,7 +299,7 @@
                            væk, så en almindelig optagelse ser ud som før. -->
                       <TextBlock Text="{Binding Optagelse.Indlaestfra}" FontSize="12"
                                  Margin="0,6,0,0" TextWrapping="Wrap"
-                                 Foreground="{StaticResource TekstMeget}">
+                                 Foreground="{DynamicResource TekstMeget}">
                         <TextBlock.Style>
                           <Style TargetType="TextBlock">
                             <Style.Triggers>
@@ -318,12 +318,12 @@
                   <StackPanel Orientation="Horizontal">
                     <TextBlock Text="{Binding Glyf}" FontFamily="Segoe MDL2 Assets" FontSize="13"
                                VerticalAlignment="Center" Margin="0,0,9,0"
-                               Foreground="{StaticResource Accent}" />
+                               Foreground="{DynamicResource Accent}" />
                     <StackPanel VerticalAlignment="Center">
                       <TextBlock Text="{Binding Visning}" FontSize="12.5"
                                  TextTrimming="CharacterEllipsis" />
                       <TextBlock Text="{Binding Under}" FontSize="11.5" Margin="0,1,0,0"
-                                 Foreground="{StaticResource TekstMeget}">
+                                 Foreground="{DynamicResource TekstMeget}">
                         <TextBlock.Style>
                           <Style TargetType="TextBlock">
                             <Style.Triggers>
@@ -339,7 +339,7 @@
                 </Border>
                 <HierarchicalDataTemplate.Triggers>
                   <DataTrigger Binding="{Binding ErValgt}" Value="True">
-                    <Setter TargetName="rk" Property="Background" Value="{StaticResource Valgt}" />
+                    <Setter TargetName="rk" Property="Background" Value="{DynamicResource Valgt}" />
                   </DataTrigger>
                   <!-- Beholdere har ingen hjaelpetekst: en mappe har intet
                        tidsrum, og en tom boble er stoej. -->
@@ -347,8 +347,8 @@
                     <Setter TargetName="rk" Property="ToolTipService.IsEnabled" Value="False" />
                   </DataTrigger>
                   <DataTrigger Binding="{Binding ErDropmaal}" Value="True">
-                    <Setter TargetName="rk" Property="Background" Value="{StaticResource Valgt}" />
-                    <Setter TargetName="rk" Property="BorderBrush" Value="{StaticResource Accent}" />
+                    <Setter TargetName="rk" Property="Background" Value="{DynamicResource Valgt}" />
+                    <Setter TargetName="rk" Property="BorderBrush" Value="{DynamicResource Accent}" />
                   </DataTrigger>
                 </HierarchicalDataTemplate.Triggers>
               </HierarchicalDataTemplate>
@@ -361,8 +361,8 @@
                     Background="Transparent" />
 
       <!-- ============================= Indholdet ====================== -->
-      <Border Grid.Column="2" Background="{StaticResource Panel}" CornerRadius="10"
-              BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+      <Border Grid.Column="2" Background="{DynamicResource Panel}" CornerRadius="10"
+              BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
         <Grid>
           <Grid.RowDefinitions>
             <RowDefinition Height="*" />
@@ -375,17 +375,17 @@
                dokumenter melder hertil, saa bjaelken ikke flytter sig alt
                efter, hvad man venter paa. -->
           <Border x:Name="Fremdriftsrude" Grid.Row="1" Visibility="Collapsed"
-                  Background="{StaticResource Valgt}" BorderBrush="{StaticResource Accent}"
+                  Background="{DynamicResource Valgt}" BorderBrush="{DynamicResource Accent}"
                   BorderThickness="0,1,0,0" CornerRadius="0,0,10,10" Padding="20,12">
             <StackPanel>
               <Grid>
                 <TextBlock x:Name="Status" FontSize="12.5" FontWeight="SemiBold"
                            TextTrimming="CharacterEllipsis" Margin="0,0,60,0" />
                 <TextBlock x:Name="Fremdriftstal" FontSize="12.5" HorizontalAlignment="Right"
-                           Foreground="{StaticResource Accent}" FontFamily="Consolas" />
+                           Foreground="{DynamicResource Accent}" FontFamily="Consolas" />
               </Grid>
               <ProgressBar x:Name="Fremdrift" Height="5" Minimum="0" Maximum="100" Margin="0,9,0,0"
-                           Background="{StaticResource Svaev}" Foreground="{StaticResource Accent}"
+                           Background="{DynamicResource Svaev}" Foreground="{DynamicResource Accent}"
                            BorderThickness="0" />
             </StackPanel>
           </Border>
@@ -408,7 +408,7 @@
               <TextBlock x:Name="ForklaringOverskrift" FontSize="19" FontWeight="SemiBold"
                          TextWrapping="Wrap" Text="{i18n:Oversat transcribeview.fra_lyd_til_tekst}" />
               <TextBlock x:Name="ForklaringUnder" FontSize="13.5" LineHeight="22" Margin="0,10,0,0"
-                         TextWrapping="Wrap" Foreground="{StaticResource TekstSvag}"
+                         TextWrapping="Wrap" Foreground="{DynamicResource TekstSvag}"
                          Text="{i18n:Oversat transcribeview.fold_foldere_ud_i_traeet_til_venstre_vaelg}" />
 
               <StackPanel Margin="0,22,0,0">
@@ -418,11 +418,11 @@
                     <ColumnDefinition Width="*" />
                   </Grid.ColumnDefinitions>
                   <TextBlock Grid.Column="0" Text="1" FontSize="15" FontWeight="SemiBold"
-                             Foreground="{StaticResource Accent}" />
+                             Foreground="{DynamicResource Accent}" />
                   <StackPanel Grid.Column="1">
                     <TextBlock Text="{i18n:Oversat transcribeview.modellen_indlaeses}" FontSize="13.5" FontWeight="SemiBold" />
                     <TextBlock FontSize="12.5" LineHeight="19" TextWrapping="Wrap" Margin="0,3,0,0"
-                               Foreground="{StaticResource TekstMeget}"
+                               Foreground="{DynamicResource TekstMeget}"
                                Text="{i18n:Oversat transcribeview.tager_typisk_et_halvt_minut_foerste_gang_d}" />
                   </StackPanel>
                 </Grid>
@@ -433,14 +433,14 @@
                     <ColumnDefinition Width="*" />
                   </Grid.ColumnDefinitions>
                   <TextBlock Grid.Column="0" Text="2" FontSize="15" FontWeight="SemiBold"
-                             Foreground="{StaticResource Accent}" />
+                             Foreground="{DynamicResource Accent}" />
                   <StackPanel Grid.Column="1">
                     <TextBlock Text="{i18n:Oversat transcribeview.lyden_skrives_ud}" FontSize="13.5" FontWeight="SemiBold" />
                     <TextBlock FontSize="12.5" LineHeight="19" TextWrapping="Wrap" Margin="0,3,0,0"
-                               Foreground="{StaticResource TekstMeget}"
+                               Foreground="{DynamicResource TekstMeget}"
                                Text="{i18n:Oversat transcribeview.fremdriften_staar_nederst_i_denne_rude_med}" />
                     <TextBlock FontSize="12.5" LineHeight="19" TextWrapping="Wrap" Margin="0,6,0,0"
-                               Foreground="{StaticResource TekstMeget}"
+                               Foreground="{DynamicResource TekstMeget}"
                                Text="{i18n:Oversat transcribeview.var_moedet_online_blev_der_optaget_to_spor}" />
                   </StackPanel>
                 </Grid>
@@ -451,29 +451,29 @@
                     <ColumnDefinition Width="*" />
                   </Grid.ColumnDefinitions>
                   <TextBlock Grid.Column="0" Text="3" FontSize="15" FontWeight="SemiBold"
-                             Foreground="{StaticResource Accent}" />
+                             Foreground="{DynamicResource Accent}" />
                   <StackPanel Grid.Column="1">
                     <TextBlock Text="{i18n:Oversat transcribeview.teksten_staar_her}" FontSize="13.5" FontWeight="SemiBold" />
                     <TextBlock FontSize="12.5" LineHeight="19" TextWrapping="Wrap" Margin="0,3,0,0"
-                               Foreground="{StaticResource TekstMeget}"
+                               Foreground="{DynamicResource TekstMeget}"
                                Text="{i18n:Oversat transcribeview.den_gemmes_automatisk_ved_siden_af_optagel}" />
                   </StackPanel>
                 </Grid>
               </StackPanel>
 
-              <Border Background="#334CBE72" BorderBrush="{StaticResource Godkendt}" BorderThickness="1"
+              <Border Background="#334CBE72" BorderBrush="{DynamicResource Godkendt}" BorderThickness="1"
                       CornerRadius="10" Padding="16,13" Margin="0,22,0,0">
                 <StackPanel>
                   <TextBlock Text="{i18n:Oversat transcribeview.du_kan_roligt_lave_noget_andet_imens}" FontSize="13"
-                             FontWeight="SemiBold" Foreground="{StaticResource Tekst}" />
+                             FontWeight="SemiBold" Foreground="{DynamicResource Tekst}" />
                   <TextBlock FontSize="12.5" LineHeight="20" Margin="0,6,0,0" TextWrapping="Wrap"
-                             Foreground="{StaticResource Tekst}"
+                             Foreground="{DynamicResource Tekst}"
                              Text="{i18n:Oversat transcribeview.du_kan_lukke_skaermen_skifte_til_en_anden}" />
                 </StackPanel>
               </Border>
 
               <TextBlock FontSize="12.5" LineHeight="20" Margin="2,18,0,0" TextWrapping="Wrap"
-                         Foreground="{StaticResource TekstMeget}"
+                         Foreground="{DynamicResource TekstMeget}"
                          Text="{i18n:Oversat transcribeview.teksten_bliver_ikke_perfekt_navne_og_fagor}" />
             </StackPanel>
           </ScrollViewer>
@@ -498,12 +498,12 @@
 
            Kun de seks nyeste. Listen er en paamindelse, ikke et arkiv; hele
            arkivet staar i traeet til venstre. -->
-      <Border Grid.Column="4" Background="{StaticResource Panel}" CornerRadius="10"
-              BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+      <Border Grid.Column="4" Background="{DynamicResource Panel}" CornerRadius="10"
+              BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
         <DockPanel>
           <TextBlock DockPanel.Dock="Top" Text="{i18n:Oversat transcribeview.seneste_optagelser}" FontSize="11"
                      FontWeight="SemiBold" Margin="14,13,14,8"
-                     Foreground="{StaticResource TekstMeget}" />
+                     Foreground="{DynamicResource TekstMeget}" />
 
           <ScrollViewer Padding="7,0,7,10" VerticalScrollBarVisibility="Auto"
                         HorizontalScrollBarVisibility="Disabled">
@@ -516,14 +516,14 @@
                             BorderThickness="0" Padding="0" Background="Transparent">
                       <Button.Template>
                         <ControlTemplate TargetType="Button">
-                          <Border x:Name="kort" Background="{StaticResource Trykket}" CornerRadius="6"
+                          <Border x:Name="kort" Background="{DynamicResource Trykket}" CornerRadius="6"
                                   BorderBrush="{Binding Kant}" BorderThickness="3,0,0,0"
                                   Padding="11,8">
                             <ContentPresenter />
                           </Border>
                           <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                              <Setter TargetName="kort" Property="Background" Value="{StaticResource Svaev}" />
+                              <Setter TargetName="kort" Property="Background" Value="{DynamicResource Svaev}" />
                             </Trigger>
                           </ControlTemplate.Triggers>
                         </ControlTemplate>
@@ -531,9 +531,9 @@
 
                       <StackPanel>
                         <TextBlock Text="{Binding Titel}" FontSize="12" TextWrapping="Wrap"
-                                   Foreground="{StaticResource Tekst}" />
+                                   Foreground="{DynamicResource Tekst}" />
                         <TextBlock Text="{Binding Under}" FontSize="11.5" Margin="0,3,0,0"
-                                   TextWrapping="Wrap" Foreground="{StaticResource TekstMeget}" />
+                                   TextWrapping="Wrap" Foreground="{DynamicResource TekstMeget}" />
                       </StackPanel>
                     </Button>
                   </DataTemplate>
@@ -542,7 +542,7 @@
 
               <TextBlock x:Name="IngenOptagelser" FontSize="12" Margin="4,6,4,0"
                          TextWrapping="Wrap" LineHeight="18" Visibility="Collapsed"
-                         Foreground="{StaticResource TekstSvag}"
+                         Foreground="{DynamicResource TekstSvag}"
                          Text="{i18n:Oversat transcribeview.der_er_ikke_optaget_noget_endnu_tryk_optag}" />
             </StackPanel>
           </ScrollViewer>

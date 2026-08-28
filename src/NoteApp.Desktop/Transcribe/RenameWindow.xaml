@@ -4,7 +4,7 @@
         xmlns:i18n="clr-namespace:NoteApp.Desktop"
         x:Name="Vindue" Width="520" SizeToContent="Height" MinHeight="220"
         WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
-        Background="{StaticResource Baggrund}">
+        Background="{DynamicResource Baggrund}">
   <!-- SizeToContent frem for en fast højde: en fast højde holder kun ved
        præcis den skriftstørrelse og skalering, den blev prøvet på, og med
        NoResize er der ingen vej ud, hvis den ikke passer. -->
@@ -17,7 +17,7 @@
     <TextBox x:Name="Felt" Margin="0,18,0,0" FontSize="15" Padding="12,10" />
 
     <TextBlock x:Name="Hjaelp" FontSize="12" Margin="2,8,0,0" TextWrapping="Wrap"
-               Foreground="{StaticResource TekstMeget}" />
+               Foreground="{DynamicResource TekstMeget}" />
 
     <Grid Margin="0,22,0,0">
       <!-- Kassér står til VENSTRE og alene. Den er den eneste handling her,
@@ -25,13 +25,13 @@
            trykker på hver gang. -->
       <Button x:Name="KasserKnap" Content="{i18n:Oversat renamewindow.kasser_optagelsen}" Click="Kasser_Click"
               HorizontalAlignment="Left" Padding="16,9" Visibility="Collapsed"
-              Foreground="{StaticResource Optager}" />
+              Foreground="{DynamicResource Optager}" />
 
     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
       <Button x:Name="AnnullerKnap" Content="{i18n:Oversat faelles.annuller}" Click="Annuller_Click" Padding="18,9"
               Margin="0,0,10,0" IsCancel="True" />
       <Button x:Name="GemKnap" Content="{i18n:Oversat renamewindow.gem_navnet}" Click="Gem_Click" Padding="22,9" IsDefault="True"
-              Background="{StaticResource Accent}" Foreground="{StaticResource PaaAccent}" BorderThickness="0"
+              Background="{DynamicResource Accent}" Foreground="{DynamicResource PaaAccent}" BorderThickness="0"
               FontWeight="SemiBold" />
     </StackPanel>
     </Grid>

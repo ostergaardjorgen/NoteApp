@@ -5,7 +5,7 @@
         Title="Opgave"
         Width="720" Height="620" MinWidth="520" MinHeight="440"
         WindowStartupLocation="CenterOwner"
-        Background="{StaticResource Baggrund}"
+        Background="{DynamicResource Baggrund}"
         WindowStyle="ToolWindow">
 
   <!-- ======================== ÉN OPGAVE ========================
@@ -42,15 +42,15 @@
          opgaven paa. Staar det nederst, bliver det aldrig rettet. -->
     <StackPanel Grid.Row="1" Margin="0,18,0,0">
       <TextBlock Text="{i18n:Oversat opgavewindow.kort_navn}" FontSize="10.5" FontWeight="SemiBold"
-                 Margin="2,0,0,6" Foreground="{StaticResource TekstMeget}" />
+                 Margin="2,0,0,6" Foreground="{DynamicResource TekstMeget}" />
       <TextBox x:Name="Navn" FontSize="14" Padding="10,8" />
       <TextBlock FontSize="11" Margin="2,5,0,0" TextWrapping="Wrap"
-                 Foreground="{StaticResource TekstMeget}"
+                 Foreground="{DynamicResource TekstMeget}"
                  Text="{i18n:Oversat opgavewindow.det_der_staar_paa_listen_i_cockpittet_hold}" />
     </StackPanel>
 
     <TextBlock Grid.Row="2" Text="{i18n:Oversat opgavewindow.beskrivelse}" FontSize="10.5" FontWeight="SemiBold"
-               Margin="2,18,0,6" Foreground="{StaticResource TekstMeget}" />
+               Margin="2,18,0,6" Foreground="{DynamicResource TekstMeget}" />
 
     <!-- HELE HOEJDEN. Det er den, vinduet er aabnet for. -->
     <TextBox x:Name="Beskrivelse" Grid.Row="3" FontSize="13.5" Padding="10,8"
@@ -74,7 +74,7 @@
 
       <StackPanel Grid.Column="0">
         <TextBlock Text="{i18n:Oversat opgavewindow.frist}" FontSize="10.5" FontWeight="SemiBold"
-                   Margin="2,0,0,6" Foreground="{StaticResource TekstMeget}" />
+                   Margin="2,0,0,6" Foreground="{DynamicResource TekstMeget}" />
         <DatePicker x:Name="Frist" Width="150" FontSize="12.5" />
 
         <!-- EN LAAST DATOVAELGER SER UD SOM NOGET, DER ER GAAET I STYKKER.
@@ -83,12 +83,12 @@
              datoen som tekst i stedet. -->
         <TextBlock x:Name="Fristtekst" FontSize="13.5" Width="150"
                    Visibility="Collapsed" Margin="0,6,0,0"
-                   Foreground="{StaticResource Tekst}" />
+                   Foreground="{DynamicResource Tekst}" />
       </StackPanel>
 
       <StackPanel Grid.Column="2">
         <TextBlock Text="{i18n:Oversat opgavewindow.prioritet}" FontSize="10.5" FontWeight="SemiBold"
-                   Margin="2,0,0,6" Foreground="{StaticResource TekstMeget}" />
+                   Margin="2,0,0,6" Foreground="{DynamicResource TekstMeget}" />
         <ComboBox x:Name="Prioritet" Width="130" FontSize="12.5" Padding="8,5"
                   ToolTip="{i18n:Oversat opgavewindow.1_er_vigtigst}">
           <ComboBoxItem Content="{i18n:Oversat opgavewindow.ikke_sat}" />
@@ -119,7 +119,7 @@
 
       <TextBlock x:Name="Googlenote" FontSize="11.5" TextWrapping="Wrap"
                  LineHeight="18" Visibility="Collapsed" Margin="2,0,2,12"
-                 Foreground="{StaticResource TekstMeget}" />
+                 Foreground="{DynamicResource TekstMeget}" />
 
       <!-- To spalter frem for et overlap. Med Left og Right i den samme celle
            er det bredden paa dagen, der afgoer, om teksten kan laeses. -->
@@ -131,7 +131,7 @@
 
         <TextBlock x:Name="Fejl" Grid.Column="0" FontSize="12" TextWrapping="Wrap"
                    VerticalAlignment="Center" Margin="2,0,14,0"
-                   Foreground="{StaticResource Advarsel}" />
+                   Foreground="{DynamicResource Advarsel}" />
 
         <StackPanel Grid.Column="1" Orientation="Horizontal">
           <Button Content="{i18n:Oversat opgavewindow.luk}" Click="Luk_Klik" Padding="18,8" Margin="0,0,10,0"

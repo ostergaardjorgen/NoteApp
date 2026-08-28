@@ -23,8 +23,8 @@
          Her stod navnefelterne før, og de blev læst som en søgning — hvilket
          er den rigtige forventning: et felt øverst til venstre i en tekst er
          en søgning. Navngivningen er flyttet til sin egen knap. -->
-    <Border x:Name="Hoved" Grid.Row="0" Background="{StaticResource Trykket}"
-            BorderBrush="{StaticResource PanelKant}" BorderThickness="0,0,0,1"
+    <Border x:Name="Hoved" Grid.Row="0" Background="{DynamicResource Trykket}"
+            BorderBrush="{DynamicResource PanelKant}" BorderThickness="0,0,0,1"
             Padding="16,10">
       <Grid>
         <Grid.ColumnDefinitions>
@@ -34,8 +34,8 @@
           <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
 
-        <Border Grid.Column="0" Background="{StaticResource Trykket}" CornerRadius="6"
-                BorderBrush="{StaticResource PanelKant}" BorderThickness="1"
+        <Border Grid.Column="0" Background="{DynamicResource Trykket}" CornerRadius="6"
+                BorderBrush="{DynamicResource PanelKant}" BorderThickness="1"
                 Width="240" HorizontalAlignment="Left" Padding="4">
           <Grid>
             <Grid.ColumnDefinitions>
@@ -48,7 +48,7 @@
                      TextChanged="Soeg_Aendret" KeyDown="Soeg_Tast" />
             <TextBlock x:Name="SoegPladsholder" Grid.Column="0" IsHitTestVisible="False"
                        FontSize="12.5" Margin="10,0,0,0" VerticalAlignment="Center"
-                       Foreground="{StaticResource TekstMeget}"
+                       Foreground="{DynamicResource TekstMeget}"
                        Text="{i18n:Oversat udskriftview.soeg_i_transkriptionen}" />
 
             <!-- Krydset rydder feltet i eet klik. Et soegeord paa tyve tegn
@@ -67,7 +67,7 @@
                   </Border>
                   <ControlTemplate.Triggers>
                     <Trigger Property="IsMouseOver" Value="True">
-                      <Setter TargetName="flade" Property="Background" Value="{StaticResource Svaev}" />
+                      <Setter TargetName="flade" Property="Background" Value="{DynamicResource Svaev}" />
                     </Trigger>
                   </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -90,7 +90,7 @@
                   ToolTip="{i18n:Oversat udskriftview.vis_kun_det_en_taler_sagde}" />
 
         <TextBlock x:Name="SoegStatus" Grid.Column="2" FontSize="11.5" VerticalAlignment="Center"
-                   Margin="12,0,0,0" Foreground="{StaticResource TekstMeget}" />
+                   Margin="12,0,0,0" Foreground="{DynamicResource TekstMeget}" />
 
         <!-- HER LAA «NAVNGIV TALERE».
              Den aabnede en raekke felter i en rude for sig, hvor man skulle
@@ -119,7 +119,7 @@
          andet end den. -->
     <Popup x:Name="Navnerude" Placement="Bottom" StaysOpen="False"
            AllowsTransparency="True" PopupAnimation="Fade" HorizontalOffset="-6">
-      <Border Background="{StaticResource AccentFlade}" BorderBrush="{StaticResource Accent}"
+      <Border Background="{DynamicResource AccentFlade}" BorderBrush="{DynamicResource Accent}"
               BorderThickness="1" CornerRadius="9" Padding="14,12" Margin="8">
         <Border.Effect>
           <DropShadowEffect BlurRadius="16" ShadowDepth="3" Opacity="0.5" Color="#FF000000" />
@@ -127,7 +127,7 @@
         <StackPanel Width="264">
           <TextBlock x:Name="NavnTitel" FontSize="13" FontWeight="SemiBold" />
           <TextBlock x:Name="NavnUnder" FontSize="11.5" TextWrapping="Wrap" LineHeight="18"
-                     Margin="0,5,0,0" Foreground="{StaticResource TekstSvag}" />
+                     Margin="0,5,0,0" Foreground="{DynamicResource TekstSvag}" />
 
           <!-- ============ HENFØR ÉN REPLIK TIL EN KENDT TALER ============
                Maskinen kan ikke altid knytte en replik til en stemme - et kort
@@ -139,7 +139,7 @@
                Her flyttes kun den ene replik. -->
           <StackPanel x:Name="HenfoerRude" Visibility="Collapsed" Margin="0,12,0,0">
             <TextBlock Text="{i18n:Oversat udskriftview.laeg_replikken_hos}" FontSize="10.5" FontWeight="SemiBold"
-                       Foreground="{StaticResource Accent}" />
+                       Foreground="{DynamicResource Accent}" />
 
             <ItemsControl x:Name="Henfoer" Margin="0,7,0,0">
               <ItemsControl.ItemsPanel>
@@ -156,7 +156,7 @@
             </ItemsControl>
 
             <TextBlock FontSize="11" TextWrapping="Wrap" LineHeight="17"
-                       Foreground="{StaticResource TekstMeget}"
+                       Foreground="{DynamicResource TekstMeget}"
                        Text="{i18n:Oversat udskriftview.kun_denne_ene_replik_flyttes_de_oevrige_ro}" />
 
             <!-- ============ ELLER DEM ALLE SAMMEN ============
@@ -169,7 +169,7 @@
                  Raekken staar kun, naar der ER mere end een tilbage. -->
             <StackPanel x:Name="HenfoerAlleRude" Visibility="Collapsed" Margin="0,12,0,0">
               <TextBlock x:Name="HenfoerAlleMaerkat" FontSize="10.5" FontWeight="SemiBold"
-                         Foreground="{StaticResource TekstMeget}" />
+                         Foreground="{DynamicResource TekstMeget}" />
 
               <ItemsControl x:Name="HenfoerAlle" Margin="0,7,0,0">
                 <ItemsControl.ItemsPanel>
@@ -187,12 +187,12 @@
               </ItemsControl>
             </StackPanel>
 
-            <Rectangle Height="1" Fill="{StaticResource PanelKant}" Margin="0,12,0,0" />
+            <Rectangle Height="1" Fill="{DynamicResource PanelKant}" Margin="0,12,0,0" />
           </StackPanel>
 
           <TextBlock x:Name="NavnFeltMaerkat" FontSize="10.5" FontWeight="SemiBold"
                      Margin="0,12,0,0" Visibility="Collapsed"
-                     Foreground="{StaticResource TekstMeget}" />
+                     Foreground="{DynamicResource TekstMeget}" />
 
           <TextBox x:Name="NavnFelt" FontSize="13" Padding="9,6" Margin="0,7,0,0"
                    KeyDown="Navn_Tast" />
@@ -218,7 +218,7 @@
           <StackPanel>
             <TextBlock x:Name="IntetFundet" FontSize="13" Margin="10,20,10,0"
                        TextWrapping="Wrap" Visibility="Collapsed"
-                       Foreground="{StaticResource TekstSvag}" />
+                       Foreground="{DynamicResource TekstSvag}" />
 
             <!-- ============ LYDEN KOM UDEFRA ============
 
@@ -231,11 +231,11 @@
                  skilles ad bagefter. Står det ikke her, opdages det først,
                  når nogen undrer sig over, at gæsten aldrig siger noget. -->
             <Border x:Name="Indlaestnote" Visibility="Collapsed"
-                    Background="{StaticResource AccentFlade}" CornerRadius="0,6,6,0"
-                    BorderBrush="{StaticResource Accent}" BorderThickness="3,0,0,0"
+                    Background="{DynamicResource AccentFlade}" CornerRadius="0,6,6,0"
+                    BorderBrush="{DynamicResource Accent}" BorderThickness="3,0,0,0"
                     Padding="12,9" Margin="4,6,4,14">
               <TextBlock x:Name="Indlaesttekst" FontSize="12" TextWrapping="Wrap"
-                         LineHeight="19" Foreground="{StaticResource TekstSvag}" />
+                         LineHeight="19" Foreground="{DynamicResource TekstSvag}" />
             </Border>
 
             <ItemsControl x:Name="Liste">
@@ -258,14 +258,14 @@
                          var for spinkelt: blokkene laa taet, og oejet loeb
                          videre uden at registrere skiftet. En streg tvaers over
                          ruden er det, der faktisk skiller to ting ad. -->
-                    <Rectangle Height="1" Fill="{StaticResource PanelKant}" Margin="4,0,4,0" />
+                    <Rectangle Height="1" Fill="{DynamicResource PanelKant}" Margin="4,0,4,0" />
 
-                    <Border Background="{StaticResource AccentFlade}" CornerRadius="0,6,6,0"
-                            BorderBrush="{StaticResource Accent}" BorderThickness="3,0,0,0"
+                    <Border Background="{DynamicResource AccentFlade}" CornerRadius="0,6,6,0"
+                            BorderBrush="{DynamicResource Accent}" BorderThickness="3,0,0,0"
                             Padding="11,6" HorizontalAlignment="Left"
                             Margin="4,-11,0,0">
                       <TextBlock Text="{Binding Bloktitel}" FontSize="10.5"
-                                 FontWeight="SemiBold" Foreground="{StaticResource Accent}" />
+                                 FontWeight="SemiBold" Foreground="{DynamicResource Accent}" />
                     </Border>
                   </StackPanel>
 
@@ -285,7 +285,7 @@
                       <TextBlock Grid.Column="0" Text="{Binding Tid}" FontSize="12.5"
                                  FontFamily="Consolas" FontWeight="SemiBold"
                                  VerticalAlignment="Top"
-                                 Margin="0,3,12,0" Foreground="{StaticResource TekstSvag}" />
+                                 Margin="0,3,12,0" Foreground="{DynamicResource TekstSvag}" />
 
                       <!-- TALEREN ER EN KNAP.
                            Navngivningen laa foer bag en knap i vaerktoejslinjen,
@@ -307,7 +307,7 @@
                             </Border>
                             <ControlTemplate.Triggers>
                               <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="flade" Property="Background" Value="{StaticResource Svaev}" />
+                                <Setter TargetName="flade" Property="Background" Value="{DynamicResource Svaev}" />
                               </Trigger>
                             </ControlTemplate.Triggers>
                           </ControlTemplate>
@@ -338,7 +338,7 @@
                       <Grid Grid.Column="2">
                         <TextBlock FontSize="13.5" TextWrapping="Wrap"
                                    Visibility="{Binding FremhaevSynlig}"
-                                   Foreground="{StaticResource Tekst}"
+                                   Foreground="{DynamicResource Tekst}"
                                    Loaded="Fremhaev_Ind" Unloaded="Fremhaev_Ud" />
 
                         <TextBox Text="{Binding Tekst, UpdateSourceTrigger=PropertyChanged}"
@@ -346,7 +346,7 @@
                                  AcceptsReturn="True" BorderThickness="0" Padding="0"
                                  Background="Transparent"
                                  Foreground="{Binding Tekstfarve}"
-                                 CaretBrush="{StaticResource Tekst}"
+                                 CaretBrush="{DynamicResource Tekst}"
                                  VerticalScrollBarVisibility="Disabled"
                                  HorizontalScrollBarVisibility="Disabled" />
                       </Grid>
@@ -360,7 +360,7 @@
                                staa i samme liste, uden at listen bliver til
                                to lister. -->
                           <DataTrigger Binding="{Binding Rettet}" Value="True">
-                            <Setter Property="BorderBrush" Value="{StaticResource Accent}" />
+                            <Setter Property="BorderBrush" Value="{DynamicResource Accent}" />
                           </DataTrigger>
                         </Style.Triggers>
                       </Style>
@@ -388,7 +388,7 @@
             <StackPanel>
               <Grid Margin="0,0,0,12">
                 <TextBlock x:Name="OpsumHoved" FontSize="11.5" VerticalAlignment="Center"
-                           TextWrapping="Wrap" Foreground="{StaticResource TekstMeget}" />
+                           TextWrapping="Wrap" Foreground="{DynamicResource TekstMeget}" />
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                   <Button Content="{i18n:Oversat udskriftview.kopier_2}" Click="OpsumKopier_Klik" Padding="12,6"
                           FontSize="12" Margin="0,0,8,0" />
@@ -399,7 +399,7 @@
 
               <TextBlock x:Name="OpsumAdvarsel" FontSize="12" TextWrapping="Wrap" LineHeight="19"
                          Margin="0,0,0,12" Visibility="Collapsed"
-                         Foreground="{StaticResource Advarsel}" />
+                         Foreground="{DynamicResource Advarsel}" />
 
               <!-- ============ EFTERPRØVNINGEN ============
 
@@ -416,23 +416,23 @@
                    ordene står anderledes; at fjerne den ville være at rette en
                    fejl, der måske ikke er der. -->
               <Border x:Name="OpsumTjek" Visibility="Collapsed" Margin="0,0,0,12"
-                      Background="{StaticResource AdvarselFlade}" CornerRadius="7" Padding="12,9"
-                      BorderBrush="{StaticResource Advarsel}" BorderThickness="0,0,0,2">
+                      Background="{DynamicResource AdvarselFlade}" CornerRadius="7" Padding="12,9"
+                      BorderBrush="{DynamicResource Advarsel}" BorderThickness="0,0,0,2">
                 <StackPanel>
                   <TextBlock x:Name="OpsumTjekTitel" FontSize="12" FontWeight="SemiBold"
-                             Foreground="{StaticResource Advarsel}" />
+                             Foreground="{DynamicResource Advarsel}" />
                   <TextBlock x:Name="OpsumTjekListe" FontSize="12" TextWrapping="Wrap"
                              LineHeight="19" Margin="0,5,0,0"
-                             Foreground="{StaticResource Tekst}" />
+                             Foreground="{DynamicResource Tekst}" />
                   <TextBlock FontSize="11" TextWrapping="Wrap" LineHeight="17" Margin="0,6,0,0"
-                             Foreground="{StaticResource TekstMeget}"
+                             Foreground="{DynamicResource TekstMeget}"
                              Text="{i18n:Oversat udskriftview.det_kan_godt_vaere_rigtigt_alligevel_orden}" />
                 </StackPanel>
               </Border>
 
               <TextBox x:Name="OpsumTekst" IsReadOnly="True" FontSize="13.5" TextWrapping="Wrap"
                        BorderThickness="0" Background="Transparent" Padding="0"
-                       Foreground="{StaticResource Tekst}"
+                       Foreground="{DynamicResource Tekst}"
                        VerticalScrollBarVisibility="Disabled"
                        HorizontalScrollBarVisibility="Disabled" />
             </StackPanel>
@@ -446,7 +446,7 @@
             <TextBlock x:Name="OpsumOverskrift" Text="{i18n:Oversat udskriftview.hvad_handlede_moedet_om}" FontSize="17"
                        FontWeight="SemiBold" HorizontalAlignment="Center" />
             <TextBlock x:Name="OpsumForklaring" FontSize="13" Margin="0,10,0,0" TextWrapping="Wrap"
-                       LineHeight="21" TextAlignment="Center" Foreground="{StaticResource TekstSvag}"
+                       LineHeight="21" TextAlignment="Center" Foreground="{DynamicResource TekstSvag}"
                        Text="{i18n:Oversat udskriftview.en_kort_opsummering_paa_ti_linjer_hvad_der}" />
 
             <!-- ============ TO VEJE, OG FORSKELLEN STÅR DER ============
@@ -469,8 +469,8 @@
                    Det er den vej, der ikke sender noget nogen steder, og
                    rækkefølgen er i sig selv en anbefaling. Skyen er der, når
                    teksten skal være bedre end kort. -->
-              <Border Grid.Column="0" Background="{StaticResource Trykket}" CornerRadius="9" Padding="14,12"
-                      Margin="0,0,7,0" BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+              <Border Grid.Column="0" Background="{DynamicResource Trykket}" CornerRadius="9" Padding="14,12"
+                      Margin="0,0,7,0" BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
                 <StackPanel>
                   <!-- MAERKATET SIGER, HVOR DEN LAVES.
                        Det stod fast paa «PAA MASKINEN». Nu laves den i
@@ -478,9 +478,9 @@
                        ellers staar der noget forkert paa en skaerm, der
                        handler om, hvor data gaar hen. -->
                   <TextBlock x:Name="OpsumHvor" FontSize="10.5" FontWeight="SemiBold"
-                             Foreground="{StaticResource Accent}" />
+                             Foreground="{DynamicResource Accent}" />
                   <TextBlock x:Name="OpsumLokalTekst" FontSize="12" LineHeight="18" TextWrapping="Wrap"
-                             Margin="0,6,0,0" Foreground="{StaticResource TekstSvag}" />
+                             Margin="0,6,0,0" Foreground="{DynamicResource TekstSvag}" />
                   <Button x:Name="OpsumKnap" Content="{i18n:Oversat opsum.knap}"
                           Click="Opsum_Klik" Margin="0,12,0,0" Padding="14,8"
                           Style="{StaticResource Primaer}" />
@@ -492,16 +492,16 @@
                    uden et navn at gemme det under — to veje til det samme, hvor
                    den ene var ringere. Skal teksten være et rigtigt referat,
                    er dokumenter vejen, og så skal skærmen sige hvor. -->
-              <Border Grid.Column="1" Background="{StaticResource Trykket}" CornerRadius="9" Padding="14,12"
-                      Margin="7,0,0,0" BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+              <Border Grid.Column="1" Background="{DynamicResource Trykket}" CornerRadius="9" Padding="14,12"
+                      Margin="7,0,0,0" BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
                 <StackPanel>
                   <TextBlock Text="{i18n:Oversat udskriftview.skal_det_vaere_et_referat}" FontSize="10.5" FontWeight="SemiBold"
-                             Foreground="{StaticResource TekstMeget}" />
+                             Foreground="{DynamicResource TekstMeget}" />
                   <TextBlock FontSize="12" LineHeight="18" TextWrapping="Wrap" Margin="0,6,0,0"
-                             Foreground="{StaticResource TekstSvag}"
+                             Foreground="{DynamicResource TekstSvag}"
                              Text="{i18n:Oversat udskriftview.et_rigtigt_moedereferat_en_opgaveliste_ell}" />
                   <TextBlock FontSize="12" LineHeight="18" TextWrapping="Wrap" Margin="0,8,0,0"
-                             Foreground="{StaticResource TekstMeget}"
+                             Foreground="{DynamicResource TekstMeget}"
                              Text="{i18n:Oversat udskriftview.tryk_opret_dokument_oeverst_til_hoejre_moe}" />
                 </StackPanel>
               </Border>
@@ -509,7 +509,7 @@
 
             <TextBlock x:Name="OpsumStatus" FontSize="12" Margin="0,12,0,0"
                        HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center"
-                       Foreground="{StaticResource TekstMeget}" />
+                       Foreground="{DynamicResource TekstMeget}" />
           </StackPanel>
         </Grid>
       </TabItem>
@@ -533,8 +533,8 @@
       <TabItem Header="{i18n:Oversat udskriftview.opgaver_2}" Style="{StaticResource Fane}">
         <DockPanel>
 
-          <Border DockPanel.Dock="Top" Background="{StaticResource Trykket}" Padding="16,10"
-                  BorderBrush="{StaticResource PanelKant}" BorderThickness="0,0,0,1">
+          <Border DockPanel.Dock="Top" Background="{DynamicResource Trykket}" Padding="16,10"
+                  BorderBrush="{DynamicResource PanelKant}" BorderThickness="0,0,0,1">
             <Grid>
               <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
@@ -549,7 +549,7 @@
 
               <TextBlock Grid.Column="1" x:Name="OpgaveStatus" FontSize="11.5"
                          VerticalAlignment="Center" Margin="14,0,0,0"
-                         TextWrapping="Wrap" Foreground="{StaticResource TekstMeget}" />
+                         TextWrapping="Wrap" Foreground="{DynamicResource TekstMeget}" />
 
               <CheckBox Grid.Column="2" x:Name="VisSvage" Content="{i18n:Oversat udskriftview.vis_ogsaa_svage_forslag}"
                         Click="VisSvage_Klik" VerticalAlignment="Center" FontSize="12" />
@@ -563,13 +563,13 @@
               <!-- De oprettede opgaver. -->
               <TextBlock x:Name="OpgaveOverskrift" Text="{i18n:Oversat udskriftview.opgaver}" FontSize="10.5"
                          FontWeight="SemiBold" Margin="2,0,0,8" Visibility="Collapsed"
-                         Foreground="{StaticResource Accent}" />
+                         Foreground="{DynamicResource Accent}" />
 
               <ItemsControl x:Name="Opgaverude">
                 <ItemsControl.ItemTemplate>
                   <DataTemplate>
-                    <Border Background="{StaticResource Trykket}" CornerRadius="8" Padding="14,11" Margin="0,0,0,7"
-                            BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+                    <Border Background="{DynamicResource Trykket}" CornerRadius="8" Padding="14,11" Margin="0,0,0,7"
+                            BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
                       <Grid>
                         <Grid.ColumnDefinitions>
                           <ColumnDefinition Width="*" />
@@ -586,21 +586,21 @@
                           <TextBox Text="{Binding Navn, UpdateSourceTrigger=PropertyChanged}"
                                    FontSize="13" FontWeight="SemiBold"
                                    BorderThickness="0" Padding="0" Background="Transparent"
-                                   Foreground="{StaticResource Tekst}"
+                                   Foreground="{DynamicResource Tekst}"
                                    ToolTip="{i18n:Oversat udskriftview.det_korte_navn_det_der_staar_paa_listen_i}" />
 
                           <TextBox Text="{Binding Tekst, UpdateSourceTrigger=PropertyChanged}"
                                    FontSize="12.5" TextWrapping="Wrap" AcceptsReturn="True"
                                    Margin="0,4,0,0"
                                    BorderThickness="0" Padding="0" Background="Transparent"
-                                   Foreground="{StaticResource TekstSvag}"
+                                   Foreground="{DynamicResource TekstSvag}"
                                    ToolTip="{i18n:Oversat udskriftview.hele_opgaven_det_der_blev_sagt}" />
                           <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
                             <TextBlock Text="{Binding Ejer}" FontSize="11.5" FontWeight="SemiBold"
-                                       Foreground="{StaticResource Accent}"
+                                       Foreground="{DynamicResource Accent}"
                                        Visibility="{Binding EjerSynlig}" />
                             <TextBlock Text="{Binding Kilde}" FontSize="11" Margin="10,0,0,0"
-                                       FontFamily="Consolas" Foreground="{StaticResource TekstMeget}" />
+                                       FontFamily="Consolas" Foreground="{DynamicResource TekstMeget}" />
                           </StackPanel>
                         </StackPanel>
 
@@ -628,26 +628,26 @@
               <!-- Forslagene, der ikke er taget stilling til endnu. -->
               <TextBlock x:Name="ForslagOverskrift" Text="{i18n:Oversat udskriftview.forslag}" FontSize="10.5"
                          FontWeight="SemiBold" Margin="2,26,0,8" Visibility="Collapsed"
-                         Foreground="{StaticResource Accent}" />
+                         Foreground="{DynamicResource Accent}" />
 
               <ItemsControl x:Name="Forslagliste">
                 <ItemsControl.ItemTemplate>
                   <DataTemplate>
-                    <Border Background="{StaticResource Trykket}" CornerRadius="8" Padding="14,11" Margin="0,0,0,8"
-                            BorderBrush="{StaticResource Svaev}" BorderThickness="1">
+                    <Border Background="{DynamicResource Trykket}" CornerRadius="8" Padding="14,11" Margin="0,0,0,8"
+                            BorderBrush="{DynamicResource Svaev}" BorderThickness="1">
                       <StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,7">
                           <TextBlock Text="{Binding Taler}" FontSize="11.5" FontWeight="SemiBold"
-                                     Foreground="{StaticResource Accent}" />
+                                     Foreground="{DynamicResource Accent}" />
                           <TextBlock Text="{Binding Tid}" FontSize="12" FontFamily="Consolas"
                                      FontWeight="SemiBold"
-                                     Margin="10,0,0,0" Foreground="{StaticResource TekstSvag}" />
+                                     Margin="10,0,0,0" Foreground="{DynamicResource TekstSvag}" />
                           <TextBlock Text="{Binding Grund}" FontSize="11" Margin="14,0,0,0"
-                                     Foreground="{StaticResource TekstMeget}" />
+                                     Foreground="{DynamicResource TekstMeget}" />
                         </StackPanel>
 
                         <TextBlock Text="{Binding Tekst}" FontSize="13" TextWrapping="Wrap"
-                                   LineHeight="20" Foreground="{StaticResource Tekst}" />
+                                   LineHeight="20" Foreground="{DynamicResource Tekst}" />
 
                         <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
                           <Button Content="{i18n:Oversat udskriftview.opret_opgave}" Click="OpretOpgave_Klik"
@@ -665,7 +665,7 @@
 
               <TextBlock x:Name="OpgaveTom" FontSize="13" TextWrapping="Wrap" LineHeight="21"
                          Margin="2,18,0,0" Visibility="Collapsed"
-                         Foreground="{StaticResource TekstSvag}" />
+                         Foreground="{DynamicResource TekstSvag}" />
             </StackPanel>
           </ScrollViewer>
         </DockPanel>
@@ -681,43 +681,43 @@
           <StackPanel>
 
             <!-- Mødet: hvornår og hvor længe -->
-            <Border Background="{StaticResource Trykket}" CornerRadius="10" Padding="20,16"
-                    BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+            <Border Background="{DynamicResource Trykket}" CornerRadius="10" Padding="20,16"
+                    BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
               <StackPanel>
                 <TextBlock Text="{i18n:Oversat udskriftview.moedet}" FontSize="10.5" FontWeight="SemiBold"
-                           Foreground="{StaticResource Accent}" Margin="0,0,0,10" />
+                           Foreground="{DynamicResource Accent}" Margin="0,0,0,10" />
 
                 <TextBlock x:Name="StatDato" FontSize="16" FontWeight="SemiBold" />
 
                 <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
                   <StackPanel Margin="0,0,34,0">
                     <TextBlock Text="{i18n:Oversat udskriftview.begyndte}" FontSize="10.5" FontWeight="SemiBold"
-                               Foreground="{StaticResource TekstMeget}" />
+                               Foreground="{DynamicResource TekstMeget}" />
                     <TextBlock x:Name="StatStart" FontSize="19" FontFamily="Consolas"
                                Margin="0,3,0,0" />
                   </StackPanel>
                   <StackPanel Margin="0,0,34,0">
                     <TextBlock Text="{i18n:Oversat udskriftview.sluttede}" FontSize="10.5" FontWeight="SemiBold"
-                               Foreground="{StaticResource TekstMeget}" />
+                               Foreground="{DynamicResource TekstMeget}" />
                     <TextBlock x:Name="StatSlut" FontSize="19" FontFamily="Consolas"
                                Margin="0,3,0,0" />
                   </StackPanel>
                   <StackPanel>
                     <TextBlock Text="{i18n:Oversat udskriftview.varighed}" FontSize="10.5" FontWeight="SemiBold"
-                               Foreground="{StaticResource TekstMeget}" />
+                               Foreground="{DynamicResource TekstMeget}" />
                     <TextBlock x:Name="StatVarighed" FontSize="19" FontFamily="Consolas"
-                               Margin="0,3,0,0" Foreground="{StaticResource Accent}" />
+                               Margin="0,3,0,0" Foreground="{DynamicResource Accent}" />
                   </StackPanel>
                 </StackPanel>
               </StackPanel>
             </Border>
 
             <!-- Taletiden pr. taler -->
-            <Border Background="{StaticResource Trykket}" CornerRadius="10" Padding="20,16" Margin="0,14,0,0"
-                    BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+            <Border Background="{DynamicResource Trykket}" CornerRadius="10" Padding="20,16" Margin="0,14,0,0"
+                    BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
               <StackPanel>
                 <TextBlock Text="{i18n:Oversat udskriftview.taletid}" FontSize="10.5" FontWeight="SemiBold"
-                           Foreground="{StaticResource Accent}" Margin="0,0,0,14" />
+                           Foreground="{DynamicResource Accent}" Margin="0,0,0,14" />
 
                 <ItemsControl x:Name="StatTalere">
                   <ItemsControl.ItemTemplate>
@@ -738,7 +738,7 @@
                              Saa staar alle bjaelker lige lange paa skaermen, og
                              det, oejet sammenligner, er den fyldte del. -->
                         <Grid Grid.Column="1" Height="16" VerticalAlignment="Center">
-                          <Border Background="{StaticResource Svaev}" CornerRadius="4" />
+                          <Border Background="{DynamicResource Svaev}" CornerRadius="4" />
                           <Border Background="{Binding Farve}" CornerRadius="4"
                                   HorizontalAlignment="Left" Width="{Binding Bredde}" />
                         </Grid>
@@ -751,7 +751,7 @@
                           <TextBlock Text="{Binding Procent}" FontSize="13" FontWeight="SemiBold"
                                      FontFamily="Consolas" VerticalAlignment="Center"
                                      MinWidth="52" TextAlignment="Right"
-                                     Foreground="{StaticResource TekstSvag}" />
+                                     Foreground="{DynamicResource TekstSvag}" />
                         </StackPanel>
                       </Grid>
                     </DataTemplate>
@@ -759,12 +759,12 @@
                 </ItemsControl>
 
                 <TextBlock x:Name="StatNote" FontSize="11.5" TextWrapping="Wrap" LineHeight="18"
-                           Margin="0,4,0,0" Foreground="{StaticResource TekstMeget}" />
+                           Margin="0,4,0,0" Foreground="{DynamicResource TekstMeget}" />
               </StackPanel>
             </Border>
 
             <TextBlock x:Name="StatTom" FontSize="13" TextWrapping="Wrap" Margin="2,16,0,0"
-                       Visibility="Collapsed" Foreground="{StaticResource TekstSvag}" />
+                       Visibility="Collapsed" Foreground="{DynamicResource TekstSvag}" />
           </StackPanel>
         </ScrollViewer>
       </TabItem>
@@ -772,11 +772,11 @@
       <TabItem Header="{i18n:Oversat udskriftview.raa_tekst}" Style="{StaticResource Fane}">
         <DockPanel>
           <TextBlock DockPanel.Dock="Top" FontSize="11.5" Margin="10,8,10,10"
-                     TextWrapping="Wrap" Foreground="{StaticResource TekstMeget}"
+                     TextWrapping="Wrap" Foreground="{DynamicResource TekstMeget}"
                      Text="{i18n:Oversat udskriftview.maskinens_egne_ord_som_de_kom_ud_uden_dine}" />
           <TextBox x:Name="RaaTekst" IsReadOnly="True" FontSize="12.5" TextWrapping="Wrap"
                    BorderThickness="0" Background="Transparent" Padding="10,0,10,10"
-                   Foreground="{StaticResource TekstSvag}"
+                   Foreground="{DynamicResource TekstSvag}"
                    VerticalScrollBarVisibility="Auto"
                    HorizontalScrollBarVisibility="Disabled" />
         </DockPanel>
@@ -793,14 +793,14 @@
          Ruden ligger OVEN PÅ fanerne i samme række, så den dækker dem helt.
          En halvtom fane bagved ville se ud som et resultat. -->
     <Border x:Name="IngenUdskrift" Grid.Row="2" Visibility="Collapsed"
-            Background="{StaticResource Baggrund}">
+            Background="{DynamicResource Baggrund}">
       <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" MaxWidth="520"
                   Margin="30">
         <TextBlock x:Name="IngenOverskrift" FontSize="15" FontWeight="SemiBold"
                    TextWrapping="Wrap" HorizontalAlignment="Center" TextAlignment="Center" />
         <TextBlock x:Name="IngenTekst" FontSize="12.5" LineHeight="21" TextWrapping="Wrap"
                    Margin="0,10,0,0" TextAlignment="Center"
-                   Foreground="{StaticResource TekstMeget}" />
+                   Foreground="{DynamicResource TekstMeget}" />
       </StackPanel>
     </Border>
   </Grid>

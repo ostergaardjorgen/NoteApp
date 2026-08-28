@@ -42,6 +42,32 @@ public partial class MeetingView : UserControl
         NoteApp.Core.Sprog.Aendret += VisSprogflag;
         Unloaded += (_, _) => NoteApp.Core.Sprog.Aendret -= VisSprogflag;
 
+        // Maanen eller solen paa temaknappen. Den skal foelge med, naar temaet
+        // skiftes fra Indstillinger - eller af Windows selv ved solnedgang,
+        // hvis man foelger systemet. Hjaelpeteksten er ogsaa en oversat
+        // streng, saa den skal med, naar sproget skifter.
+        //
+        // DER MELDES TIL I LOADED OG IKKE HER. Unloaded fyrer i WPF, ogsaa
+        // naar et element kun kortvarigt er ude af traeet - og saa var der
+        // ingen, der lyttede mere. Set 28-08-2026: foerste tryk paa knappen
+        // skiftede ikonet, andet tryk gjorde ikke.
+        Loaded += (_, _) =>
+        {
+            Temaskift.Skiftet -= VisTemaikon;
+            Temaskift.Skiftet += VisTemaikon;
+            NoteApp.Core.Sprog.Aendret -= VisTemaikon;
+            NoteApp.Core.Sprog.Aendret += VisTemaikon;
+            VisTemaikon();
+        };
+
+        Unloaded += (_, _) =>
+        {
+            Temaskift.Skiftet -= VisTemaikon;
+            NoteApp.Core.Sprog.Aendret -= VisTemaikon;
+        };
+
+        VisTemaikon();
+
         _ur = new DispatcherTimer(DispatcherPriority.Render) { Interval = TimeSpan.FromMilliseconds(250) };
         _ur.Tick += (_, _) => Opdater();
 
@@ -1296,6 +1322,42 @@ public partial class MeetingView : UserControl
     /// </summary>
     private void Hjaelp_Click(object sender, RoutedEventArgs e) =>
         Help.HjaelpWindow.Aabn(Window.GetWindow(this));
+
+    // ------------------------------------------------------ lyst og mørkt
+
+    /// <summary>
+    /// Skifter mellem lyst og mørkt.
+    /// </summary>
+    /// <remarks>
+    /// KNAPPEN SÆTTER ET UDTRYKKELIGT VALG og efterlader «følg Windows».
+    /// Alternativet — at et tryk kun gjaldt indtil Windows skiftede — ville
+    /// betyde, at valget blev rullet tilbage af sig selv ved solnedgang, uden
+    /// at nogen havde rørt noget. Vil man tilbage til at følge systemet, står
+    /// den mulighed under Indstillinger.
+    /// </remarks>
+    private void Tema_Click(object sender, RoutedEventArgs e)
+    {
+        AppSettings.Current.Tema = Temaskift.ErLyst ? Temavalg.Moerkt : Temavalg.Lyst;
+        AppSettings.Current.Save();
+
+        Temaskift.Anvend();
+    }
+
+    /// <summary>
+    /// Sætter månen eller solen på knappen efter, hvad et tryk ville give.
+    /// </summary>
+    private void VisTemaikon()
+    {
+        var lyst = Temaskift.ErLyst;
+
+        // U+E708 QuietHours (maane), U+E706 Brightness (sol). Begge
+        // efterproevet mod cmap-tabellen i segmdl2.ttf.
+        TemaIkon.Text = lyst ? "\uE708" : "\uE706";
+
+        var tekst = NoteApp.Core.Sprog.T(lyst ? "topbar.tilmoerkt" : "topbar.tillyst");
+        TemaKnap.ToolTip = tekst;
+        System.Windows.Automation.AutomationProperties.SetName(TemaKnap, tekst);
+    }
 
     /// <summary>
     /// Sætter flaget på knappen efter det sprog, der vises nu.

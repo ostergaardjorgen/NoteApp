@@ -5,7 +5,7 @@
         Title="{i18n:Oversat hjaelp.titel}"
         Width="1000" Height="720" MinWidth="720" MinHeight="480"
         WindowStartupLocation="CenterOwner"
-        Background="{StaticResource Baggrund}">
+        Background="{DynamicResource Baggrund}">
 
   <!-- ============================ HJÆLPEN ============================
 
@@ -26,16 +26,16 @@
     </Grid.ColumnDefinitions>
 
     <!-- ======================= VENSTRE: LISTEN ======================= -->
-    <Border Grid.Column="0" Background="{StaticResource Panel}"
-            BorderBrush="{StaticResource PanelKant}" BorderThickness="0,0,1,0">
+    <Border Grid.Column="0" Background="{DynamicResource Panel}"
+            BorderBrush="{DynamicResource PanelKant}" BorderThickness="0,0,1,0">
       <DockPanel Margin="14,16,14,12">
 
         <StackPanel DockPanel.Dock="Top">
           <TextBlock Text="{i18n:Oversat hjaelp.titel}" FontSize="17" FontWeight="SemiBold"
                      Margin="4,0,0,10" />
 
-          <Border CornerRadius="8" Background="{StaticResource Baggrund}"
-                  BorderBrush="{StaticResource PanelKant}" BorderThickness="1"
+          <Border CornerRadius="8" Background="{DynamicResource Baggrund}"
+                  BorderBrush="{DynamicResource PanelKant}" BorderThickness="1"
                   Padding="10,0" Margin="0,0,0,12">
             <Grid>
               <Grid.ColumnDefinitions>
@@ -46,7 +46,7 @@
 
               <TextBlock Grid.Column="0" Text="&#xE721;" FontFamily="Segoe MDL2 Assets"
                          FontSize="13" VerticalAlignment="Center" Margin="0,0,8,0"
-                         Foreground="{StaticResource TekstMeget}" />
+                         Foreground="{DynamicResource TekstMeget}" />
 
               <TextBox x:Name="Felt" Grid.Column="1" FontSize="13.5" Padding="0,9"
                        BorderThickness="0" Background="Transparent"
@@ -54,20 +54,20 @@
 
               <TextBlock x:Name="Pladsholder" Grid.Column="1" IsHitTestVisible="False"
                          FontSize="13.5" VerticalAlignment="Center"
-                         Foreground="{StaticResource TekstMeget}"
+                         Foreground="{DynamicResource TekstMeget}"
                          Text="{i18n:Oversat hjaelp.soeg}" />
 
               <Button x:Name="RydKnap" Grid.Column="2" Click="Ryd_Klik" Visibility="Collapsed"
                       Padding="6,0" BorderThickness="0" Background="Transparent" Cursor="Hand"
                       ToolTip="{i18n:Oversat hjaelp.ryd}">
                 <TextBlock Text="&#xE711;" FontFamily="Segoe MDL2 Assets" FontSize="12"
-                           Foreground="{StaticResource TekstMeget}" />
+                           Foreground="{DynamicResource TekstMeget}" />
               </Button>
             </Grid>
           </Border>
 
           <TextBlock x:Name="Traeftal" FontSize="11" Margin="4,0,0,8"
-                     Visibility="Collapsed" Foreground="{StaticResource TekstMeget}" />
+                     Visibility="Collapsed" Foreground="{DynamicResource TekstMeget}" />
         </StackPanel>
 
         <ListBox x:Name="Liste" Background="Transparent" BorderThickness="0"
@@ -86,10 +86,10 @@
                     </Border>
                     <ControlTemplate.Triggers>
                       <Trigger Property="IsMouseOver" Value="True">
-                        <Setter TargetName="flade" Property="Background" Value="{StaticResource Svaev}" />
+                        <Setter TargetName="flade" Property="Background" Value="{DynamicResource Svaev}" />
                       </Trigger>
                       <Trigger Property="IsSelected" Value="True">
-                        <Setter TargetName="flade" Property="Background" Value="{StaticResource Svaev}" />
+                        <Setter TargetName="flade" Property="Background" Value="{DynamicResource Svaev}" />
                       </Trigger>
                     </ControlTemplate.Triggers>
                   </ControlTemplate>
@@ -102,14 +102,14 @@
             <DataTemplate>
               <StackPanel>
                 <TextBlock Text="{Binding Titel}" FontSize="13" FontWeight="SemiBold"
-                           TextWrapping="Wrap" Foreground="{StaticResource Tekst}" />
+                           TextWrapping="Wrap" Foreground="{DynamicResource Tekst}" />
 
                 <!-- Ved en soegning staar uddraget her i stedet for
                      undertitlen: det er dét, der viser, om traeffet er det,
                      man leder efter, uden at aabne afsnittet. -->
                 <TextBlock Text="{Binding Under}" FontSize="11.5" Margin="0,3,0,0"
                            TextWrapping="Wrap" LineHeight="17"
-                           Foreground="{StaticResource TekstMeget}">
+                           Foreground="{DynamicResource TekstMeget}">
                   <TextBlock.Style>
                     <Style TargetType="TextBlock">
                       <Style.Triggers>
@@ -146,7 +146,7 @@
       <TextBlock x:Name="IntetFundet" FontSize="13.5" TextWrapping="Wrap"
                  Visibility="Collapsed" MaxWidth="380" TextAlignment="Center"
                  HorizontalAlignment="Center" VerticalAlignment="Center"
-                 LineHeight="21" Foreground="{StaticResource TekstSvag}" />
+                 LineHeight="21" Foreground="{DynamicResource TekstSvag}" />
     </Grid>
   </Grid>
 </Window>

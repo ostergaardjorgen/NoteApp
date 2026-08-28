@@ -13,16 +13,16 @@
         <Setter.Value>
           <ControlTemplate TargetType="RadioButton">
             <Border x:Name="Kant" CornerRadius="7" BorderThickness="1" Padding="13,7"
-                    Background="{StaticResource Trykket}" BorderBrush="{StaticResource PanelKant}">
+                    Background="{DynamicResource Trykket}" BorderBrush="{DynamicResource PanelKant}">
               <ContentPresenter />
             </Border>
             <ControlTemplate.Triggers>
               <Trigger Property="IsMouseOver" Value="True">
-                <Setter TargetName="Kant" Property="BorderBrush" Value="{StaticResource TekstMeget}" />
+                <Setter TargetName="Kant" Property="BorderBrush" Value="{DynamicResource TekstMeget}" />
               </Trigger>
               <Trigger Property="IsChecked" Value="True">
-                <Setter TargetName="Kant" Property="BorderBrush" Value="{StaticResource Accent}" />
-                <Setter TargetName="Kant" Property="Background" Value="{StaticResource AccentFlade}" />
+                <Setter TargetName="Kant" Property="BorderBrush" Value="{DynamicResource Accent}" />
+                <Setter TargetName="Kant" Property="Background" Value="{DynamicResource AccentFlade}" />
               </Trigger>
             </ControlTemplate.Triggers>
           </ControlTemplate>
@@ -34,7 +34,7 @@
   <!-- Optagebjælken. Den ligger fast øverst i vinduet og er den samme, uanset
        hvilken skærm man står på: at optage et møde er dét, appen er til, og
        det skal ikke være et sted, man først går hen. -->
-  <Border Background="{StaticResource Trykket}" BorderBrush="{StaticResource PanelKant}" BorderThickness="0,0,0,1"
+  <Border Background="{DynamicResource Trykket}" BorderBrush="{DynamicResource PanelKant}" BorderThickness="0,0,0,1"
           Padding="24,12">
     <Grid>
       <Grid.ColumnDefinitions>
@@ -60,12 +60,12 @@
           <Button.Template>
             <ControlTemplate TargetType="Button">
               <Border x:Name="flade" CornerRadius="7" Padding="15,8"
-                      Background="{StaticResource Optager}">
+                      Background="{DynamicResource Optager}">
                 <StackPanel Orientation="Horizontal">
-                  <Ellipse Width="8" Height="8" Fill="{StaticResource PaaOptager}"
+                  <Ellipse Width="8" Height="8" Fill="{DynamicResource PaaOptager}"
                            VerticalAlignment="Center" Margin="0,0,8,0" />
                   <TextBlock Text="{i18n:Oversat topbar.optag}" FontSize="13" FontWeight="SemiBold"
-                             Foreground="{StaticResource PaaOptager}" VerticalAlignment="Center" />
+                             Foreground="{DynamicResource PaaOptager}" VerticalAlignment="Center" />
                 </StackPanel>
               </Border>
               <ControlTemplate.Triggers>
@@ -98,19 +98,19 @@
           <Button.Template>
             <ControlTemplate TargetType="Button">
               <Border x:Name="flade" CornerRadius="7" Padding="13,8"
-                      Background="{StaticResource Svaev}" BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+                      Background="{DynamicResource Svaev}" BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
                 <StackPanel Orientation="Horizontal">
                   <TextBlock Text="&#xE7F4;" FontFamily="Segoe MDL2 Assets" FontSize="12"
                              VerticalAlignment="Center" Margin="0,0,7,0"
-                             Foreground="{StaticResource Accent}" />
+                             Foreground="{DynamicResource Accent}" />
                   <TextBlock Text="{i18n:Oversat topbar.webinar}" FontSize="13" FontWeight="SemiBold"
                              VerticalAlignment="Center" />
                 </StackPanel>
               </Border>
               <ControlTemplate.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                  <Setter TargetName="flade" Property="Background" Value="{StaticResource PanelKant}" />
-                  <Setter TargetName="flade" Property="BorderBrush" Value="{StaticResource Accent}" />
+                  <Setter TargetName="flade" Property="Background" Value="{DynamicResource PanelKant}" />
+                  <Setter TargetName="flade" Property="BorderBrush" Value="{DynamicResource Accent}" />
                 </Trigger>
                 <Trigger Property="IsEnabled" Value="False">
                   <Setter TargetName="flade" Property="Opacity" Value="0.42" />
@@ -124,7 +124,7 @@
         <StackPanel x:Name="UrPanel" Orientation="Horizontal" VerticalAlignment="Center"
                     Visibility="Collapsed">
           <Ellipse x:Name="OptagerPrik" Width="12" Height="12" VerticalAlignment="Center"
-                   Margin="0,0,12,0" Fill="{StaticResource Optager}" />
+                   Margin="0,0,12,0" Fill="{DynamicResource Optager}" />
           <StackPanel>
             <TextBlock x:Name="Ur" Text="00:00:00" FontSize="22" FontWeight="SemiBold"
                        FontFamily="Consolas" />
@@ -144,7 +144,7 @@
              rigtigt på forhånd. -->
         <Grid x:Name="KlarFelter">
           <TextBlock x:Name="KlarTekst" VerticalAlignment="Center" FontSize="13.5"
-                     TextWrapping="Wrap" Foreground="{StaticResource TekstMeget}"
+                     TextWrapping="Wrap" Foreground="{DynamicResource TekstMeget}"
                      Text="{i18n:Oversat topbar.hjaelp}" />
         </Grid>
 
@@ -160,17 +160,17 @@
                bjælke, og man skulle gætte, at det var dér, noterne skulle. -->
           <TextBlock Grid.Column="0" Text="{i18n:Oversat meetingview.note}" FontSize="11" FontWeight="SemiBold"
                      VerticalAlignment="Center" Margin="0,0,10,0"
-                     Foreground="{StaticResource Accent}" />
+                     Foreground="{DynamicResource Accent}" />
 
           <TextBox x:Name="FeltNote" Grid.Column="1" FontSize="13.5" Padding="10,8"
                    VerticalAlignment="Center" KeyDown="Note_KeyDown" TextChanged="Note_Changed"
                    ToolTip="{i18n:Oversat meetingview.skriv_en_note_og_tryk_enter_den_bliver_tid}" />
           <TextBlock x:Name="NotePladsholder" Grid.Column="1" IsHitTestVisible="False" FontSize="13.5"
-                     Margin="13,0,0,0" VerticalAlignment="Center" Foreground="{StaticResource TekstMeget}"
+                     Margin="13,0,0,0" VerticalAlignment="Center" Foreground="{DynamicResource TekstMeget}"
                      Text="{i18n:Oversat meetingview.skriv_en_note_her_og_tryk_enter_den_bliver}" />
 
           <TextBlock x:Name="NoteTaeller" Grid.Column="2" VerticalAlignment="Center" Margin="14,0,0,0"
-                     FontSize="12" Foreground="{StaticResource Accent}" FontWeight="SemiBold" />
+                     FontSize="12" Foreground="{DynamicResource Accent}" FontWeight="SemiBold" />
         </Grid>
       </Grid>
 
@@ -213,27 +213,62 @@
                egen skriftfarve. -->
           <TextBlock x:Name="GenvejMaerkat" Text="{i18n:Oversat topbar.optagmed}" FontSize="11" FontWeight="SemiBold"
                      VerticalAlignment="Center" Margin="0,1,9,0"
-                     Foreground="{StaticResource Tekst}" />
+                     Foreground="{DynamicResource Tekst}" />
 
           <!-- TASTEN SER UD SOM OPTAGEKNAPPEN.
                De to GOER det samme - starter en optagelse - og saa skal de
                ligne hinanden. Samme roede flade, samme hjoernerunding, samme
                hvide tekst. Foer var den en graa tastekap, og saa laeste man
                den som en oplysning frem for som den anden vej ind. -->
-          <Border CornerRadius="7" Padding="15,8" Background="{StaticResource Optager}">
+          <Border CornerRadius="7" Padding="15,8" Background="{DynamicResource Optager}">
             <TextBlock x:Name="GenvejTast" FontSize="13" FontWeight="SemiBold"
-                       Foreground="{StaticResource PaaOptager}" VerticalAlignment="Center" />
+                       Foreground="{DynamicResource PaaOptager}" VerticalAlignment="Center" />
           </Border>
         </StackPanel>
 
         <TextBlock x:Name="Status" VerticalAlignment="Center" FontSize="11.5" MaxWidth="300"
-                   TextWrapping="Wrap" Margin="0,0,14,0" Foreground="{StaticResource TekstMeget}" />
+                   TextWrapping="Wrap" Margin="0,0,14,0" Foreground="{DynamicResource TekstMeget}" />
 
         <Button x:Name="PauseKnap" Content="{i18n:Oversat topbar.pause}" Click="Pause_Click" Padding="15,9"
                 Visibility="Collapsed" Margin="0,0,8,0" />
         <Button x:Name="StopKnap" Content="{i18n:Oversat topbar.stop}" Click="Stop_Click" Padding="18,9"
-                Visibility="Collapsed" Background="{StaticResource Optager}" Foreground="{StaticResource PaaOptager}"
+                Visibility="Collapsed" Background="{DynamicResource Optager}" Foreground="{DynamicResource PaaOptager}"
                 BorderThickness="0" FontWeight="SemiBold" />
+
+        <!-- ========================= Lyst og moerkt =========================
+
+             DEN STAAR HERUDE OG IKKE KUN UNDER INDSTILLINGER, fordi det er
+             det eneste valg i appen, man skifter FLERE GANGE OM DAGEN. Lyst
+             ved skrivebordet om formiddagen, moerkt naar det bliver aften.
+             Et valg, der ligger fire klik vaek, bliver truffet én gang og
+             derefter ikke igen.
+
+             IKONET VISER, HVAD MAN FAAR - ikke hvor man staar. Er appen lys,
+             staar der en maane: tryk, og den bliver moerk. Begge glyffer er
+             efterproevet mod skrifttypens cmap-tabel (U+E706 og U+E708) og
+             ikke gaettet; et manglende tegn bliver til en tom firkant, og det
+             ser man ikke ved at laese koden.
+
+             Hjaelpeteksten siger det med ord. Et ikon alene kan laeses begge
+             veje, og det er ikke vaerd at gaette paa. -->
+        <Button x:Name="TemaKnap" Click="Tema_Click" Margin="14,0,0,0"
+                Padding="0" BorderThickness="0" Background="Transparent" Cursor="Hand">
+          <Button.Template>
+            <ControlTemplate TargetType="Button">
+              <Border x:Name="flade" CornerRadius="8" Background="Transparent" Padding="9,7">
+                <ContentPresenter />
+              </Border>
+              <ControlTemplate.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                  <Setter TargetName="flade" Property="Background" Value="{DynamicResource Svaev}" />
+                </Trigger>
+              </ControlTemplate.Triggers>
+            </ControlTemplate>
+          </Button.Template>
+
+          <TextBlock x:Name="TemaIkon" FontFamily="Segoe MDL2 Assets" FontSize="16"
+                     VerticalAlignment="Center" Foreground="{DynamicResource TekstSvag}" />
+        </Button>
 
         <!-- ========================= Sproget =========================
 
@@ -256,7 +291,7 @@
               </Border>
               <ControlTemplate.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                  <Setter TargetName="flade" Property="Background" Value="{StaticResource Svaev}" />
+                  <Setter TargetName="flade" Property="Background" Value="{DynamicResource Svaev}" />
                 </Trigger>
               </ControlTemplate.Triggers>
             </ControlTemplate>
@@ -286,14 +321,14 @@
               </Border>
               <ControlTemplate.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                  <Setter TargetName="flade" Property="Background" Value="{StaticResource Svaev}" />
+                  <Setter TargetName="flade" Property="Background" Value="{DynamicResource Svaev}" />
                 </Trigger>
               </ControlTemplate.Triggers>
             </ControlTemplate>
           </Button.Template>
 
           <TextBlock Text="&#xE897;" FontFamily="Segoe MDL2 Assets" FontSize="16"
-                     VerticalAlignment="Center" Foreground="{StaticResource TekstSvag}" />
+                     VerticalAlignment="Center" Foreground="{DynamicResource TekstSvag}" />
         </Button>
 
         <!-- ========================= Klokken =========================
@@ -311,7 +346,7 @@
               </Border>
               <ControlTemplate.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                  <Setter TargetName="flade" Property="Background" Value="{StaticResource Svaev}" />
+                  <Setter TargetName="flade" Property="Background" Value="{DynamicResource Svaev}" />
                 </Trigger>
               </ControlTemplate.Triggers>
             </ControlTemplate>
@@ -323,11 +358,11 @@
             <!-- Tallet sidder PÅ klokken. En klokke uden tal siger, at der
                  findes beskeder; en med tal siger, at der er nye — og det er
                  forskellen på at kigge og at lade være. -->
-            <Border x:Name="KlokkeBadge" Background="{StaticResource Optager}" CornerRadius="8"
+            <Border x:Name="KlokkeBadge" Background="{DynamicResource Optager}" CornerRadius="8"
                     MinWidth="16" Height="16" Padding="4,0" Visibility="Collapsed"
                     HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-5,-7,0">
               <TextBlock x:Name="KlokkeTal" FontSize="11" FontWeight="SemiBold"
-                         Foreground="{StaticResource PaaOptager}" HorizontalAlignment="Center"
+                         Foreground="{DynamicResource PaaOptager}" HorizontalAlignment="Center"
                          VerticalAlignment="Center" />
             </Border>
           </Grid>

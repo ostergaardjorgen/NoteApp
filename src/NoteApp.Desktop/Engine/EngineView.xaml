@@ -2,7 +2,7 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:i18n="clr-namespace:NoteApp.Desktop"
-             Background="{StaticResource Baggrund}">
+             Background="{DynamicResource Baggrund}">
 
   <!-- ======================== HVORFOR SKÆRMEN ER TOM FOR VALG ============
        Her lå to faner og en liste med seks Whisper-modeller og et katalog
@@ -57,11 +57,11 @@
         <StackPanel>
 
         <!-- ===================== 1 · Whisper ========================== -->
-        <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20" Margin="0,0,0,14"
-                BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+        <Border Background="{DynamicResource Panel}" CornerRadius="10" Padding="20" Margin="0,0,0,14"
+                BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
           <StackPanel>
             <TextBlock Text="{i18n:Oversat engineview.1_lyd_til_tekst_her_paa_maskinen}" FontSize="11" FontWeight="SemiBold"
-                       Foreground="{StaticResource Accent}" />
+                       Foreground="{DynamicResource Accent}" />
             <Grid Margin="0,8,0,0">
               <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
@@ -76,7 +76,7 @@
                    staar to paneler her. -->
               <StackPanel Grid.Column="0" Margin="0,0,16,0">
 
-                <Border Background="{StaticResource Trykket}" BorderBrush="{StaticResource PanelKant}"
+                <Border Background="{DynamicResource Trykket}" BorderBrush="{DynamicResource PanelKant}"
                         BorderThickness="1" CornerRadius="8" Padding="14,11">
                   <Grid>
                     <Grid.ColumnDefinitions>
@@ -84,16 +84,16 @@
                       <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
                     <TextBlock Grid.Column="0" Text="{i18n:Oversat engineview.motor}" FontSize="11" FontWeight="SemiBold"
-                               Foreground="{StaticResource TekstMeget}" Margin="0,3,0,0" />
+                               Foreground="{DynamicResource TekstMeget}" Margin="0,3,0,0" />
                     <StackPanel Grid.Column="1">
                       <TextBlock x:Name="LydMotor" FontSize="14.5" FontWeight="SemiBold" />
                       <TextBlock x:Name="LydMotorLinje" FontSize="12" Margin="0,3,0,0"
-                                 TextWrapping="Wrap" Foreground="{StaticResource TekstMeget}" />
+                                 TextWrapping="Wrap" Foreground="{DynamicResource TekstMeget}" />
                     </StackPanel>
                   </Grid>
                 </Border>
 
-                <Border Background="{StaticResource Trykket}" BorderBrush="{StaticResource PanelKant}"
+                <Border Background="{DynamicResource Trykket}" BorderBrush="{DynamicResource PanelKant}"
                         BorderThickness="1" CornerRadius="8" Padding="14,11" Margin="0,8,0,0">
                   <Grid>
                     <Grid.ColumnDefinitions>
@@ -101,11 +101,11 @@
                       <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
                     <TextBlock Grid.Column="0" Text="{i18n:Oversat engineview.model}" FontSize="11" FontWeight="SemiBold"
-                               Foreground="{StaticResource TekstMeget}" Margin="0,3,0,0" />
+                               Foreground="{DynamicResource TekstMeget}" Margin="0,3,0,0" />
                     <StackPanel Grid.Column="1">
                       <TextBlock x:Name="LydModel" FontSize="14.5" FontWeight="SemiBold" />
                       <TextBlock x:Name="LydResume" FontSize="12.5" LineHeight="20" Margin="0,5,0,0"
-                                 TextWrapping="Wrap" Foreground="{StaticResource TekstSvag}" />
+                                 TextWrapping="Wrap" Foreground="{DynamicResource TekstSvag}" />
 
                       <!-- Modellen faar ikke nye udgaver. Det skal staa VED
                            modellen, ikke i en note et andet sted: knappen
@@ -113,7 +113,7 @@
                            ellers, som om der ogsaa kommer noget nyere ud af
                            den. -->
                       <TextBlock x:Name="ModelNote" FontSize="11.5" LineHeight="18" Margin="0,7,0,0"
-                                 TextWrapping="Wrap" Foreground="{StaticResource TekstMeget}" />
+                                 TextWrapping="Wrap" Foreground="{DynamicResource TekstMeget}" />
 
                       <!-- ============ VALGET MELLEM DE TO ============
 
@@ -127,7 +127,7 @@
                            Forskellen staar VED valget. Et valg mellem to
                            navne, man ikke kender, er ikke et valg. -->
                       <TextBlock Text="{i18n:Oversat model.vaelg}" FontSize="11" FontWeight="SemiBold"
-                                 Margin="0,16,0,8" Foreground="{StaticResource TekstMeget}" />
+                                 Margin="0,16,0,8" Foreground="{DynamicResource TekstMeget}" />
 
                       <ItemsControl x:Name="Modelvalg">
                         <ItemsControl.ItemTemplate>
@@ -144,22 +144,22 @@
                                 <StackPanel Grid.Column="0" Margin="0,0,12,0">
                                   <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="{Binding Navn}" FontSize="13" FontWeight="SemiBold" />
-                                    <Border Background="{StaticResource Accent}" CornerRadius="4"
+                                    <Border Background="{DynamicResource Accent}" CornerRadius="4"
                                             Padding="6,1" Margin="8,0,0,0"
                                             Visibility="{Binding BrugesSynlig}">
                                       <TextBlock Text="{Binding Bruges}" FontSize="10.5" FontWeight="SemiBold"
-                                                 Foreground="{StaticResource PaaAccent}" />
+                                                 Foreground="{DynamicResource PaaAccent}" />
                                     </Border>
                                   </StackPanel>
 
                                   <TextBlock Text="{Binding Linje}" FontSize="11.5" Margin="0,4,0,0"
-                                             Foreground="{StaticResource TekstMeget}" />
+                                             Foreground="{DynamicResource TekstMeget}" />
                                   <TextBlock Text="{Binding Godt}" FontSize="11.5" LineHeight="17"
                                              Margin="0,6,0,0" TextWrapping="Wrap"
-                                             Foreground="{StaticResource TekstSvag}" />
+                                             Foreground="{DynamicResource TekstSvag}" />
                                   <TextBlock Text="{Binding Skidt}" FontSize="11.5" LineHeight="17"
                                              Margin="0,3,0,0" TextWrapping="Wrap"
-                                             Foreground="{StaticResource TekstMeget}" />
+                                             Foreground="{DynamicResource TekstMeget}" />
                                 </StackPanel>
 
                                 <Button Grid.Column="1" Content="{Binding Knap}" Click="Modelvalg_Klik"
@@ -175,7 +175,7 @@
                 </Border>
 
                 <TextBlock x:Name="LydStatus" FontSize="11.5" Margin="2,10,0,0" TextWrapping="Wrap"
-                           Foreground="{StaticResource Accent}" />
+                           Foreground="{DynamicResource Accent}" />
               </StackPanel>
 
               <StackPanel Grid.Column="1" VerticalAlignment="Top" MinWidth="150">
@@ -192,7 +192,7 @@
             <!-- Det tekniske står i en foldbar. Man slår det op den ene gang,
                  noget driller — det skal ikke fylde skærmen hver dag. -->
             <Expander Header="{i18n:Oversat engineview.det_tekniske}" Margin="0,14,0,0" FontSize="12"
-                      Foreground="{StaticResource TekstMeget}">
+                      Foreground="{DynamicResource TekstMeget}">
               <Grid Margin="0,10,0,0" MaxWidth="520" HorizontalAlignment="Left">
                 <Grid.ColumnDefinitions>
                   <ColumnDefinition Width="Auto" />
@@ -207,26 +207,26 @@
                 </Grid.RowDefinitions>
 
                 <TextBlock Grid.Row="0" Grid.Column="0" Text="{i18n:Oversat faelles.motor}" Margin="0,0,24,0"
-                           Foreground="{StaticResource TekstMeget}" FontSize="12.5" />
+                           Foreground="{DynamicResource TekstMeget}" FontSize="12.5" />
                 <TextBlock Grid.Row="0" Grid.Column="1" x:Name="MotorNavn" HorizontalAlignment="Right" FontSize="12.5" />
 
                 <TextBlock Grid.Row="1" Grid.Column="0" x:Name="AlderLabel" Text="{i18n:Oversat engineview.sidst_opdateret}"
-                           Margin="0,6,24,0" Foreground="{StaticResource TekstMeget}" FontSize="12.5" />
+                           Margin="0,6,24,0" Foreground="{DynamicResource TekstMeget}" FontSize="12.5" />
                 <TextBlock Grid.Row="1" Grid.Column="1" x:Name="MotorVersion" HorizontalAlignment="Right"
                            FontSize="12.5" Margin="0,6,0,0" />
 
                 <TextBlock Grid.Row="2" Grid.Column="0" Text="{i18n:Oversat engineview.beregning}" Margin="0,6,24,0"
-                           Foreground="{StaticResource TekstMeget}" FontSize="12.5" />
+                           Foreground="{DynamicResource TekstMeget}" FontSize="12.5" />
                 <TextBlock Grid.Row="2" Grid.Column="1" x:Name="MotorBeregning" HorizontalAlignment="Right"
                            FontSize="12.5" Margin="0,6,0,0" />
 
                 <TextBlock Grid.Row="3" Grid.Column="0" Text="{i18n:Oversat engineview.modelfil}" Margin="0,6,24,0"
-                           Foreground="{StaticResource TekstMeget}" FontSize="12.5" />
+                           Foreground="{DynamicResource TekstMeget}" FontSize="12.5" />
                 <TextBlock Grid.Row="3" Grid.Column="1" x:Name="ModelNavn" HorizontalAlignment="Right"
                            FontSize="12.5" FontWeight="SemiBold" Margin="0,6,0,0" />
 
                 <TextBlock Grid.Row="4" Grid.ColumnSpan="2" x:Name="MotorSti" Margin="0,12,0,0"
-                           FontSize="11" TextWrapping="Wrap" Foreground="{StaticResource TekstMeget}" />
+                           FontSize="11" TextWrapping="Wrap" Foreground="{DynamicResource TekstMeget}" />
               </Grid>
             </Expander>
           </StackPanel>
@@ -239,24 +239,24 @@
       <TabItem Header="{i18n:Oversat engineview.talergenkendelse}" Style="{StaticResource Fane}">
         <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,12,0,0"
                       HorizontalScrollBarVisibility="Disabled">
-          <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20"
-                  BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+          <Border Background="{DynamicResource Panel}" CornerRadius="10" Padding="20"
+                  BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
             <StackPanel>
               <TextBlock Text="{i18n:Oversat engineview.hvem_sagde_hvad_her_paa_maskinen}" FontSize="11"
-                         FontWeight="SemiBold" Foreground="{StaticResource Accent}" />
+                         FontWeight="SemiBold" Foreground="{DynamicResource Accent}" />
 
               <TextBlock FontSize="12.5" LineHeight="20" Margin="0,8,0,0" TextWrapping="Wrap"
                          MaxWidth="720" HorizontalAlignment="Left"
-                         Foreground="{StaticResource TekstSvag}"
+                         Foreground="{DynamicResource TekstSvag}"
                          Text="{i18n:Oversat engineview.et_onlinemoede_optages_paa_to_spor_og_det}" />
 
               <TextBlock x:Name="TalerStatus" FontSize="12" Margin="0,12,0,0" TextWrapping="Wrap"
-                         Foreground="{StaticResource Accent}" />
+                         Foreground="{DynamicResource Accent}" />
 
               <ItemsControl x:Name="Talerdele" Margin="0,12,0,0">
                 <ItemsControl.ItemTemplate>
                   <DataTemplate>
-                    <Border Background="{StaticResource Trykket}" BorderBrush="{StaticResource PanelKant}"
+                    <Border Background="{DynamicResource Trykket}" BorderBrush="{DynamicResource PanelKant}"
                             BorderThickness="1" CornerRadius="8" Padding="14,11" Margin="0,0,0,8">
                       <Grid>
                         <Grid.ColumnDefinitions>
@@ -266,15 +266,15 @@
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" Text="{Binding Slags}" FontSize="11"
                                    FontWeight="SemiBold" Margin="0,3,10,0"
-                                   Foreground="{StaticResource TekstMeget}" />
+                                   Foreground="{DynamicResource TekstMeget}" />
                         <StackPanel Grid.Column="1">
                           <TextBlock Text="{Binding Navn}" FontSize="14" FontWeight="SemiBold" />
                           <TextBlock Text="{Binding Note}" FontSize="12" Margin="0,3,0,0"
-                                     TextWrapping="Wrap" Foreground="{StaticResource TekstMeget}" />
+                                     TextWrapping="Wrap" Foreground="{DynamicResource TekstMeget}" />
                         </StackPanel>
                         <TextBlock Grid.Column="2" Text="{Binding Stoerrelse}" FontSize="12"
                                    FontFamily="Consolas" VerticalAlignment="Top"
-                                   Foreground="{StaticResource TekstMeget}" />
+                                   Foreground="{DynamicResource TekstMeget}" />
                       </Grid>
                     </Border>
                   </DataTemplate>
@@ -283,11 +283,11 @@
 
               <TextBlock FontSize="11.5" LineHeight="19" Margin="0,4,0,0" TextWrapping="Wrap"
                          MaxWidth="720" HorizontalAlignment="Left"
-                         Foreground="{StaticResource TekstMeget}"
+                         Foreground="{DynamicResource TekstMeget}"
                          Text="{i18n:Oversat engineview.maalt_paa_et_moede_paa_35_minutter_med_to}" />
 
               <TextBlock x:Name="TalerSti" FontSize="11" Margin="0,12,0,0" TextWrapping="Wrap"
-                         Foreground="{StaticResource TekstMeget}" />
+                         Foreground="{DynamicResource TekstMeget}" />
             </StackPanel>
           </Border>
         </ScrollViewer>
@@ -308,11 +308,11 @@
       <TabItem Header="{i18n:Oversat engineview.dokumenter_i_skyen}" Style="{StaticResource Fane}">
         <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,12,0,0"
                       HorizontalScrollBarVisibility="Disabled">
-        <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20"
-                BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+        <Border Background="{DynamicResource Panel}" CornerRadius="10" Padding="20"
+                BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
           <StackPanel>
             <TextBlock Text="{i18n:Oversat engineview.tekst_til_dokument_i_europa}" FontSize="11" FontWeight="SemiBold"
-                       Foreground="{StaticResource Accent}" />
+                       Foreground="{DynamicResource Accent}" />
             <Grid Margin="0,8,0,0">
               <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
@@ -322,19 +322,19 @@
               <StackPanel Grid.Column="0" Margin="0,0,16,0">
                 <StackPanel Orientation="Horizontal">
                   <TextBlock x:Name="SkyModel" FontSize="16" FontWeight="SemiBold" />
-                  <Border Background="{StaticResource Accent}" CornerRadius="3"
+                  <Border Background="{DynamicResource Accent}" CornerRadius="3"
                           Padding="6,1" Margin="10,2,0,0" VerticalAlignment="Center">
-                    <TextBlock Text="{i18n:Oversat engineview.eu}" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource PaaAccent}" />
+                    <TextBlock Text="{i18n:Oversat engineview.eu}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource PaaAccent}" />
                   </Border>
                 </StackPanel>
 
                 <TextBlock FontSize="12.5" LineHeight="20" Margin="0,8,0,0" TextWrapping="Wrap"
                            MaxWidth="620" HorizontalAlignment="Left"
-                           Foreground="{StaticResource TekstSvag}"
+                           Foreground="{DynamicResource TekstSvag}"
                            Text="{i18n:Oversat engineview.den_faerdige_tekst_bliver_til_et_referat_e}" />
 
                 <TextBlock x:Name="SkyStatus" FontSize="11.5" Margin="0,10,0,0" TextWrapping="Wrap"
-                           Foreground="{StaticResource Accent}" />
+                           Foreground="{DynamicResource Accent}" />
               </StackPanel>
 
               <Button Grid.Column="1" x:Name="SkyKnap" Click="Sky_Klik" VerticalAlignment="Top"
@@ -351,13 +351,13 @@
                  sættes op, før nøglen virker, og træningen skal slås fra på
                  kontoen — appen kan ikke gøre nogen af delene. -->
             <Border x:Name="SkyVejledning" Visibility="Collapsed" Margin="0,16,0,0"
-                    Background="{StaticResource Trykket}" BorderBrush="{StaticResource PanelKant}"
+                    Background="{DynamicResource Trykket}" BorderBrush="{DynamicResource PanelKant}"
                     BorderThickness="1" CornerRadius="8" Padding="16,14">
               <StackPanel>
                 <TextBlock Text="{i18n:Oversat engineview.saadan_kommer_du_i_gang_fem_minutter}" FontSize="13.5"
                            FontWeight="SemiBold" Margin="0,0,0,4" />
                 <TextBlock FontSize="12" TextWrapping="Wrap" Margin="0,0,0,12"
-                           Foreground="{StaticResource TekstMeget}"
+                           Foreground="{DynamicResource TekstMeget}"
                            Text="{i18n:Oversat engineview.mistral_er_en_fransk_leverandoer_du_oprett}" />
 
                 <!-- Trin 1 -->
@@ -367,15 +367,15 @@
                     <ColumnDefinition Width="*" />
                   </Grid.ColumnDefinitions>
                   <Border Grid.Column="0" Width="22" Height="22" CornerRadius="11" Margin="0,1,12,0"
-                          Background="{StaticResource Accent}" VerticalAlignment="Top">
-                    <TextBlock Text="1" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource PaaAccent}"
+                          Background="{DynamicResource Accent}" VerticalAlignment="Top">
+                    <TextBlock Text="1" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource PaaAccent}"
                                HorizontalAlignment="Center" VerticalAlignment="Center" />
                   </Border>
                   <StackPanel Grid.Column="1">
                     <TextBlock Text="{i18n:Oversat engineview.opret_en_konto}" FontSize="13" FontWeight="SemiBold" />
                     <TextBlock FontSize="12.5" LineHeight="20" TextWrapping="Wrap" Margin="0,3,0,0"
                                MaxWidth="560" HorizontalAlignment="Left"
-                               Foreground="{StaticResource TekstSvag}"
+                               Foreground="{DynamicResource TekstSvag}"
                                Text="{i18n:Oversat engineview.gaa_til_console_mistral_ai_og_opret_dig_de}" />
                   </StackPanel>
                 </Grid>
@@ -387,19 +387,19 @@
                     <ColumnDefinition Width="*" />
                   </Grid.ColumnDefinitions>
                   <Border Grid.Column="0" Width="22" Height="22" CornerRadius="11" Margin="0,1,12,0"
-                          Background="{StaticResource Accent}" VerticalAlignment="Top">
-                    <TextBlock Text="2" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource PaaAccent}"
+                          Background="{DynamicResource Accent}" VerticalAlignment="Top">
+                    <TextBlock Text="2" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource PaaAccent}"
                                HorizontalAlignment="Center" VerticalAlignment="Center" />
                   </Border>
                   <StackPanel Grid.Column="1">
                     <TextBlock Text="{i18n:Oversat engineview.saet_betaling_op_vaelg_pay_as_you_go}" FontSize="13" FontWeight="SemiBold" />
                     <TextBlock FontSize="12.5" LineHeight="20" TextWrapping="Wrap" Margin="0,3,0,0"
                                MaxWidth="560" HorizontalAlignment="Left"
-                               Foreground="{StaticResource TekstSvag}"
+                               Foreground="{DynamicResource TekstSvag}"
                                Text="{i18n:Oversat engineview.under_billing_uden_den_afviser_noeglen_all}" />
                     <TextBlock FontSize="12" LineHeight="19" TextWrapping="Wrap" Margin="0,6,0,0"
                                MaxWidth="560" HorizontalAlignment="Left"
-                               Foreground="{StaticResource TekstMeget}"
+                               Foreground="{DynamicResource TekstMeget}"
                                Text="{i18n:Oversat engineview.pay_as_you_go_er_ogsaa_det_niveau_den_data}" />
                   </StackPanel>
                 </Grid>
@@ -411,16 +411,16 @@
                     <ColumnDefinition Width="*" />
                   </Grid.ColumnDefinitions>
                   <Border Grid.Column="0" Width="22" Height="22" CornerRadius="11" Margin="0,1,12,0"
-                          Background="{StaticResource Advarsel}" VerticalAlignment="Top">
-                    <TextBlock Text="3" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource PaaAccent}"
+                          Background="{DynamicResource Advarsel}" VerticalAlignment="Top">
+                    <TextBlock Text="3" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource PaaAccent}"
                                HorizontalAlignment="Center" VerticalAlignment="Center" />
                   </Border>
                   <StackPanel Grid.Column="1">
                     <TextBlock Text="{i18n:Oversat engineview.slaa_fra_at_dine_data_maa_bruges_til_traen}" FontSize="13"
-                               FontWeight="SemiBold" Foreground="{StaticResource Advarsel}" />
+                               FontWeight="SemiBold" Foreground="{DynamicResource Advarsel}" />
                     <TextBlock FontSize="12.5" LineHeight="20" TextWrapping="Wrap" Margin="0,3,0,0"
                                MaxWidth="560" HorizontalAlignment="Left"
-                               Foreground="{StaticResource TekstSvag}"
+                               Foreground="{DynamicResource TekstSvag}"
                                Text="{i18n:Oversat engineview.workspace_data_det_er_slaaet_til_som_udgan}" />
                   </StackPanel>
                 </Grid>
@@ -432,15 +432,15 @@
                     <ColumnDefinition Width="*" />
                   </Grid.ColumnDefinitions>
                   <Border Grid.Column="0" Width="22" Height="22" CornerRadius="11" Margin="0,1,12,0"
-                          Background="{StaticResource Accent}" VerticalAlignment="Top">
-                    <TextBlock Text="4" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource PaaAccent}"
+                          Background="{DynamicResource Accent}" VerticalAlignment="Top">
+                    <TextBlock Text="4" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource PaaAccent}"
                                HorizontalAlignment="Center" VerticalAlignment="Center" />
                   </Border>
                   <StackPanel Grid.Column="1">
                     <TextBlock Text="{i18n:Oversat engineview.lav_en_api_noegle_og_saet_den_ind_her}" FontSize="13" FontWeight="SemiBold" />
                     <TextBlock FontSize="12.5" LineHeight="20" TextWrapping="Wrap" Margin="0,3,0,0"
                                MaxWidth="560" HorizontalAlignment="Left"
-                               Foreground="{StaticResource TekstSvag}"
+                               Foreground="{DynamicResource TekstSvag}"
                                Text="{i18n:Oversat engineview.under_api_keys_kopier_den_med_det_samme_de}" />
                   </StackPanel>
                 </Grid>
@@ -467,7 +467,7 @@
 
       <StackPanel Grid.Column="0" VerticalAlignment="Center">
         <ProgressBar x:Name="Fremdrift" Height="6" Minimum="0" Maximum="100" Visibility="Collapsed"
-                     Background="{StaticResource Svaev}" Foreground="{StaticResource Accent}" BorderThickness="0" />
+                     Background="{DynamicResource Svaev}" Foreground="{DynamicResource Accent}" BorderThickness="0" />
         <TextBlock x:Name="Status" Style="{StaticResource Underskrift}" Margin="0,6,0,0" />
       </StackPanel>
 

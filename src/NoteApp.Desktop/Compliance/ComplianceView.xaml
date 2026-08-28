@@ -2,7 +2,7 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:i18n="clr-namespace:NoteApp.Desktop"
-             Background="{StaticResource Baggrund}">
+             Background="{DynamicResource Baggrund}">
 
   <!-- ======================= HVORFOR SKÆRMEN FINDES =====================
 
@@ -57,17 +57,17 @@
                  At leverandoeren er europaeisk er ikke det samme som, at
                  databehandlingen ER efterproevet europaeisk. Det er hele
                  forskellen, og den skal staa. -->
-            <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20,16"
-                    BorderBrush="{StaticResource Advarsel}" BorderThickness="2" Margin="0,0,0,14">
+            <Border Background="{DynamicResource Panel}" CornerRadius="10" Padding="20,16"
+                    BorderBrush="{DynamicResource Advarsel}" BorderThickness="2" Margin="0,0,0,14">
               <StackPanel>
                 <TextBlock Text="{i18n:Oversat complianceview.laes_dette_foerst}" FontSize="10.5" FontWeight="SemiBold"
-                           Foreground="{StaticResource Advarsel}" Margin="0,0,0,8" />
+                           Foreground="{DynamicResource Advarsel}" Margin="0,0,0,8" />
 
                 <TextBlock FontSize="13.5" LineHeight="22" TextWrapping="Wrap" FontWeight="SemiBold"
                            Text="{i18n:Oversat complianceview.leverandoeren_er_europaeisk_det_er_ikke_de}" />
 
                 <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,8,0,0"
-                           Foreground="{StaticResource TekstSvag}"
+                           Foreground="{DynamicResource TekstSvag}"
                            Text="{i18n:Oversat complianceview.mistral_ai_er_fransk_og_underlagt_gdpr_dir}" />
 
                 <!-- DET, DER ER EFTERPROEVET OG SIKKERT, SKAL OGSAA STAA
@@ -75,7 +75,7 @@
                      det, man kan stole paa, giver et skaevt billede: tvivlen
                      gaelder ét skridt i kaeden - teksten - og ikke lyden. -->
                 <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,10,0,0"
-                           Foreground="{StaticResource Godkendt}" FontWeight="SemiBold"
+                           Foreground="{DynamicResource Godkendt}" FontWeight="SemiBold"
                            Text="{i18n:Oversat complianceview.tvivlen_gaelder_teksten_den_gaelder_ikke_l}" />
 
                 <Grid Margin="0,16,0,0">
@@ -85,60 +85,60 @@
                     <ColumnDefinition Width="*" />
                   </Grid.ColumnDefinitions>
 
-                  <Border Grid.Column="0" Background="{StaticResource GodkendtFlade}" BorderBrush="{StaticResource Godkendt}"
+                  <Border Grid.Column="0" Background="{DynamicResource GodkendtFlade}" BorderBrush="{DynamicResource Godkendt}"
                           BorderThickness="1" CornerRadius="8" Padding="16,13">
                     <StackPanel>
                       <TextBlock Text="{i18n:Oversat complianceview.det_der_er_efterproevet}" FontSize="11" FontWeight="SemiBold"
-                                 Foreground="{StaticResource Godkendt}" Margin="0,0,0,10" />
+                                 Foreground="{DynamicResource Godkendt}" Margin="0,0,0,10" />
                       <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap"
-                                 Foreground="{StaticResource TekstSvag}"
+                                 Foreground="{DynamicResource TekstSvag}"
                                  Text="{i18n:Oversat complianceview.lyd_og_transkription_forlader_aldrig_maski}" />
                       <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
-                                 Foreground="{StaticResource TekstSvag}"
+                                 Foreground="{DynamicResource TekstSvag}"
                                  Text="{i18n:Oversat complianceview.appen_kan_kun_kalde_det_europaeiske_endepu}" />
                       <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
-                                 Foreground="{StaticResource TekstSvag}"
+                                 Foreground="{DynamicResource TekstSvag}"
                                  Text="{i18n:Oversat complianceview.mistral_ai_er_et_fransk_selskab_underlagt}" />
                       <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
-                                 Foreground="{StaticResource TekstSvag}"
+                                 Foreground="{DynamicResource TekstSvag}"
                                  Text="{i18n:Oversat complianceview.databehandleraftalen_gaelder_automatisk_de}" />
                       <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
-                                 Foreground="{StaticResource TekstSvag}"
+                                 Foreground="{DynamicResource TekstSvag}"
                                  Text="{i18n:Oversat complianceview.traening_paa_dine_data_kan_fravaelges_og_f}" />
                       <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
-                                 Foreground="{StaticResource TekstSvag}"
+                                 Foreground="{DynamicResource TekstSvag}"
                                  Text="{i18n:Oversat complianceview.iso_iec_27001_iso_iec_27701_og_soc_2_type}" />
                     </StackPanel>
                   </Border>
 
-                  <Border Grid.Column="2" Background="{StaticResource FejlFlade}" BorderBrush="{StaticResource FejlTekst}"
+                  <Border Grid.Column="2" Background="{DynamicResource FejlFlade}" BorderBrush="{DynamicResource FejlTekst}"
                           BorderThickness="1" CornerRadius="8" Padding="16,13">
                     <StackPanel>
                       <TextBlock Text="{i18n:Oversat complianceview.det_der_er_uafklaret}" FontSize="11" FontWeight="SemiBold"
-                                 Foreground="{StaticResource FejlTekst}" Margin="0,0,0,10" />
+                                 Foreground="{DynamicResource FejlTekst}" Margin="0,0,0,10" />
                       <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap"
-                                 Foreground="{StaticResource TekstSvag}"
+                                 Foreground="{DynamicResource TekstSvag}"
                                  Text="{i18n:Oversat complianceview.om_behandlingen_kontraktligt_er_bundet_til}" />
                       <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
-                                 Foreground="{StaticResource TekstSvag}"
+                                 Foreground="{DynamicResource TekstSvag}"
                                  Text="{i18n:Oversat complianceview.om_cloudflares_worldwide_og_crowdstrikes_u}" />
                       <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
-                                 Foreground="{StaticResource TekstSvag}"
+                                 Foreground="{DynamicResource TekstSvag}"
                                  Text="{i18n:Oversat complianceview.om_listen_har_aendret_sig_siden_17_08_2026}" />
                       <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
-                                 Foreground="{StaticResource TekstSvag}"
+                                 Foreground="{DynamicResource TekstSvag}"
                                  Text="{i18n:Oversat complianceview.hvor_laenge_den_enkelte_api_anmodning_opbe}" />
                       <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
-                                 Foreground="{StaticResource TekstSvag}"
+                                 Foreground="{DynamicResource TekstSvag}"
                                  Text="{i18n:Oversat complianceview.hvad_der_faktisk_sker_hos_de_amerikansk_ej}" />
                     </StackPanel>
                   </Border>
                 </Grid>
 
-                <Border Background="{StaticResource Trykket}" CornerRadius="8" Padding="16,12" Margin="0,14,0,0"
-                        BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+                <Border Background="{DynamicResource Trykket}" CornerRadius="8" Padding="16,12" Margin="0,14,0,0"
+                        BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
                   <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap"
-                             Foreground="{StaticResource Tekst}"
+                             Foreground="{DynamicResource Tekst}"
                              Text="{i18n:Oversat complianceview.hvad_det_betyder_i_praksis_loesningen_er_e}" />
                 </Border>
               </StackPanel>
@@ -151,11 +151,11 @@
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
           <StackPanel>
     <!-- ==================== Datastrømmen ========================= -->
-            <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20,16"
-                    BorderBrush="{StaticResource PanelKant}" BorderThickness="1" Margin="0,0,0,14">
+            <Border Background="{DynamicResource Panel}" CornerRadius="10" Padding="20,16"
+                    BorderBrush="{DynamicResource PanelKant}" BorderThickness="1" Margin="0,0,0,14">
               <StackPanel>
                 <TextBlock Text="{i18n:Oversat complianceview.hvor_data_gaar_hen}" FontSize="10.5" FontWeight="SemiBold"
-                           Foreground="{StaticResource TekstMeget}" Margin="0,0,0,12" />
+                           Foreground="{DynamicResource TekstMeget}" Margin="0,0,0,12" />
 
                 <Grid>
                   <Grid.ColumnDefinitions>
@@ -164,30 +164,30 @@
                     <ColumnDefinition Width="*" />
                   </Grid.ColumnDefinitions>
 
-                  <Border Grid.Column="0" Background="{StaticResource GodkendtFlade}" BorderBrush="{StaticResource Godkendt}"
+                  <Border Grid.Column="0" Background="{DynamicResource GodkendtFlade}" BorderBrush="{DynamicResource Godkendt}"
                           BorderThickness="1" CornerRadius="8" Padding="16,13">
                     <StackPanel>
                       <TextBlock Text="{i18n:Oversat complianceview.lyd_og_transkription}" FontSize="14" FontWeight="SemiBold" />
                       <TextBlock Text="{i18n:Oversat complianceview.bliver_paa_denne_pc}" FontSize="12.5" Margin="0,4,0,0"
-                                 Foreground="{StaticResource Godkendt}" FontWeight="SemiBold" />
+                                 Foreground="{DynamicResource Godkendt}" FontWeight="SemiBold" />
                       <TextBlock FontSize="12.5" LineHeight="20" Margin="0,8,0,0" TextWrapping="Wrap"
-                                 Foreground="{StaticResource TekstSvag}"
+                                 Foreground="{DynamicResource TekstSvag}"
                                  Text="{i18n:Oversat complianceview.optagelsen_laves_lokalt_og_whisper_skriver}" />
                     </StackPanel>
                   </Border>
 
                   <TextBlock Grid.Column="1" Text="&#xE76C;" FontFamily="Segoe MDL2 Assets" FontSize="16"
                              VerticalAlignment="Center" Margin="14,0"
-                             Foreground="{StaticResource PanelKant}" />
+                             Foreground="{DynamicResource PanelKant}" />
 
-                  <Border Grid.Column="2" Background="{StaticResource AccentFlade}" BorderBrush="{StaticResource Accent}"
+                  <Border Grid.Column="2" Background="{DynamicResource AccentFlade}" BorderBrush="{DynamicResource Accent}"
                           BorderThickness="1" CornerRadius="8" Padding="16,13">
                     <StackPanel>
                       <TextBlock Text="{i18n:Oversat complianceview.den_faerdige_tekst}" FontSize="14" FontWeight="SemiBold" />
                       <TextBlock x:Name="SkyLinje" FontSize="12.5" Margin="0,4,0,0"
-                                 Foreground="{StaticResource Accent}" FontWeight="SemiBold" />
+                                 Foreground="{DynamicResource Accent}" FontWeight="SemiBold" />
                       <TextBlock FontSize="12.5" LineHeight="20" Margin="0,8,0,0" TextWrapping="Wrap"
-                                 Foreground="{StaticResource TekstSvag}"
+                                 Foreground="{DynamicResource TekstSvag}"
                                  Text="{i18n:Oversat complianceview.skal_der_laves_et_referat_eller_et_andet_d}" />
                     </StackPanel>
                   </Border>
@@ -205,40 +205,40 @@
                  formaal at identificere nogen entydigt. Paastanden "en stemme
                  ER biometriske data" ville vaere forkert, og en overdrivelse
                  paa netop den her side er vaerre end ingen tekst. -->
-            <Border Background="{StaticResource GodkendtFlade}" BorderBrush="{StaticResource Godkendt}" BorderThickness="1"
+            <Border Background="{DynamicResource GodkendtFlade}" BorderBrush="{DynamicResource Godkendt}" BorderThickness="1"
                     CornerRadius="10" Padding="20,16" Margin="0,0,0,14">
               <StackPanel>
                 <TextBlock Text="{i18n:Oversat complianceview.derfor_betyder_det_noget_at_det_er_lyden_d}"
                            FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap" />
                 <TextBlock FontSize="12.5" LineHeight="21" Margin="0,8,0,14" TextWrapping="Wrap"
-                           Foreground="{StaticResource TekstSvag}"
+                           Foreground="{DynamicResource TekstSvag}"
                            Text="{i18n:Oversat complianceview.forskellen_paa_en_lydfil_og_en_transkripti}" />
 
                 <TextBlock Text="{i18n:Oversat complianceview.lyden_kan_blive_til_biometri_teksten_kan_i}" FontSize="13.5"
                            FontWeight="SemiBold" Margin="0,0,0,4" />
                 <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,0,0,12"
-                           Foreground="{StaticResource TekstSvag}"
+                           Foreground="{DynamicResource TekstSvag}"
                            Text="{i18n:Oversat complianceview.en_stemmeoptagelse_er_personoplysninger_bl}" />
 
                 <TextBlock Text="{i18n:Oversat complianceview.lyden_indeholder_mere_end_ordene}" FontSize="13.5"
                            FontWeight="SemiBold" Margin="0,0,0,4" />
                 <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,0,0,12"
-                           Foreground="{StaticResource TekstSvag}"
+                           Foreground="{DynamicResource TekstSvag}"
                            Text="{i18n:Oversat complianceview.hvem_der_talte_kan_hoeres_ogsaa_naar_navne}" />
 
                 <TextBlock Text="{i18n:Oversat complianceview.fortael_altid_deltagerne_at_du_optager}" FontSize="13.5"
                            FontWeight="SemiBold" Margin="0,0,0,4" />
                 <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,0,0,10"
-                           Foreground="{StaticResource TekstSvag}"
+                           Foreground="{DynamicResource TekstSvag}"
                            Text="{i18n:Oversat complianceview.sig_det_inden_moedet_gaar_i_gang_det_er_go}" />
                 <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap"
-                           Foreground="{StaticResource TekstSvag}"
+                           Foreground="{DynamicResource TekstSvag}"
                            Text="{i18n:Oversat complianceview.og_du_kan_sige_mere_end_at_du_optager_du_k}" />
 
-                <Border Background="{StaticResource GodkendtFlade}" BorderBrush="{StaticResource Godkendt}" BorderThickness="0,1,0,0"
+                <Border Background="{DynamicResource GodkendtFlade}" BorderBrush="{DynamicResource Godkendt}" BorderThickness="0,1,0,0"
                         Padding="0,12,0,0" Margin="0,14,0,0">
                   <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap"
-                             Foreground="{StaticResource Tekst}"
+                             Foreground="{DynamicResource Tekst}"
                              Text="{i18n:Oversat complianceview.det_er_et_designvalg_ikke_en_begraensning}" />
                 </Border>
               </StackPanel>
@@ -251,15 +251,15 @@
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
           <StackPanel>
     <!-- ==================== Leverandøren ========================= -->
-            <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20,16"
-                    BorderBrush="{StaticResource PanelKant}" BorderThickness="1" Margin="0,0,0,14">
+            <Border Background="{DynamicResource Panel}" CornerRadius="10" Padding="20,16"
+                    BorderBrush="{DynamicResource PanelKant}" BorderThickness="1" Margin="0,0,0,14">
               <StackPanel>
                 <Grid Margin="0,0,0,12">
                   <TextBlock Text="{i18n:Oversat complianceview.leverandoeren_mistral_ai}" FontSize="10.5" FontWeight="SemiBold"
-                             Foreground="{StaticResource TekstMeget}" VerticalAlignment="Center" />
+                             Foreground="{DynamicResource TekstMeget}" VerticalAlignment="Center" />
                   <TextBlock Text="{i18n:Oversat complianceview.vilkaar_gennemgaaet_17_08_2026}" FontSize="11"
                              HorizontalAlignment="Right" VerticalAlignment="Center"
-                             Foreground="{StaticResource TekstMeget}" />
+                             Foreground="{DynamicResource TekstMeget}" />
                 </Grid>
 
                 <Grid>
@@ -277,34 +277,34 @@
                   </Grid.RowDefinitions>
 
                   <TextBlock Grid.Row="0" Grid.Column="0" Text="{i18n:Oversat complianceview.selskab}" Margin="0,0,28,0"
-                             FontSize="12.5" Foreground="{StaticResource TekstMeget}" />
+                             FontSize="12.5" Foreground="{DynamicResource TekstMeget}" />
                   <TextBlock Grid.Row="0" Grid.Column="1" FontSize="12.5" TextWrapping="Wrap"
                              Text="{i18n:Oversat complianceview.mistral_ai_fransk_selskab_med_adresse_i_pa}" />
 
                   <TextBlock Grid.Row="1" Grid.Column="0" Text="{i18n:Oversat complianceview.databehandleraftale}" Margin="0,9,28,0"
-                             FontSize="12.5" Foreground="{StaticResource TekstMeget}" />
+                             FontSize="12.5" Foreground="{DynamicResource TekstMeget}" />
                   <TextBlock Grid.Row="1" Grid.Column="1" FontSize="12.5" Margin="0,9,0,0" TextWrapping="Wrap"
                              Text="{i18n:Oversat complianceview.gaelder_automatisk_incorporated_to_the_agr}" />
 
                   <TextBlock Grid.Row="2" Grid.Column="0" Text="{i18n:Oversat complianceview.endepunkt}" Margin="0,9,28,0"
-                             FontSize="12.5" Foreground="{StaticResource TekstMeget}" />
+                             FontSize="12.5" Foreground="{DynamicResource TekstMeget}" />
                   <TextBlock Grid.Row="2" Grid.Column="1" x:Name="Endepunkt" FontSize="12.5"
                              Margin="0,9,0,0" TextWrapping="Wrap" FontFamily="Consolas" />
 
                   <TextBlock Grid.Row="3" Grid.Column="0" Text="{i18n:Oversat complianceview.certificeringer}" Margin="0,9,28,0"
-                             FontSize="12.5" Foreground="{StaticResource TekstMeget}" />
+                             FontSize="12.5" Foreground="{DynamicResource TekstMeget}" />
                   <TextBlock Grid.Row="3" Grid.Column="1" FontSize="12.5" Margin="0,9,0,0" TextWrapping="Wrap"
                              Text="{i18n:Oversat complianceview.iso_iec_27001_iso_iec_27701_og_soc_2_type_2}" />
 
                   <TextBlock Grid.Row="4" Grid.Column="0" Text="{i18n:Oversat complianceview.opbevaring}" Margin="0,9,28,0"
-                             FontSize="12.5" Foreground="{StaticResource TekstMeget}" />
+                             FontSize="12.5" Foreground="{DynamicResource TekstMeget}" />
                   <TextBlock Grid.Row="4" Grid.Column="1" FontSize="12.5" Margin="0,9,0,0" TextWrapping="Wrap"
                              Text="{i18n:Oversat complianceview.aftalens_punkt_10_1_personoplysninger_er_u}" />
 
                   <TextBlock Grid.Row="5" Grid.Column="0" Text="{i18n:Oversat complianceview.traening_paa_dine_data}" Margin="0,9,28,0"
-                             FontSize="12.5" Foreground="{StaticResource TekstMeget}" />
+                             FontSize="12.5" Foreground="{DynamicResource TekstMeget}" />
                   <TextBlock Grid.Row="5" Grid.Column="1" FontSize="12.5" Margin="0,9,0,0" TextWrapping="Wrap"
-                             Foreground="{StaticResource Advarsel}"
+                             Foreground="{DynamicResource Advarsel}"
                              Text="{i18n:Oversat complianceview.aftalen_mistral_maa_behandle_oplysningerne}" />
                 </Grid>
 
@@ -326,42 +326,42 @@
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
           <StackPanel>
     <!-- ============== Det, der kræver præcision ================== -->
-            <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20,16"
-                    BorderBrush="{StaticResource Advarsel}" BorderThickness="1" Margin="0,0,0,14">
+            <Border Background="{DynamicResource Panel}" CornerRadius="10" Padding="20,16"
+                    BorderBrush="{DynamicResource Advarsel}" BorderThickness="1" Margin="0,0,0,14">
               <StackPanel>
                 <TextBlock Text="{i18n:Oversat complianceview.det_der_kraever_praecision_i_formuleringen}" FontSize="10.5"
-                           FontWeight="SemiBold" Foreground="{StaticResource Advarsel}" Margin="0,0,0,10" />
+                           FontWeight="SemiBold" Foreground="{DynamicResource Advarsel}" Margin="0,0,0,10" />
 
                 <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap"
-                           Foreground="{StaticResource TekstSvag}"
+                           Foreground="{DynamicResource TekstSvag}"
                            Text="{i18n:Oversat complianceview.listen_i_trust_center_er_gennemgaaet_navn}" />
 
                 <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,10,0,0"
-                           Foreground="{StaticResource TekstSvag}"
+                           Foreground="{DynamicResource TekstSvag}"
                            Text="{i18n:Oversat complianceview.tilbage_i_selve_behandlingskaeden_mistral}" />
 
                 <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,10,0,0"
-                           Foreground="{StaticResource FejlTekst}" FontWeight="SemiBold"
+                           Foreground="{DynamicResource FejlTekst}" FontWeight="SemiBold"
                            Text="{i18n:Oversat complianceview.to_undtagelser_er_vaerd_at_kende_crowdstri}" />
 
                 <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,10,0,0"
-                           Foreground="{StaticResource TekstSvag}"
+                           Foreground="{DynamicResource TekstSvag}"
                            Text="{i18n:Oversat complianceview.bortset_fra_google_skelner_listen_ikke_mel}" />
 
                 <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,10,0,0"
-                           Foreground="{StaticResource TekstSvag}"
+                           Foreground="{DynamicResource TekstSvag}"
                            Text="{i18n:Oversat complianceview.ejerskabet_er_den_anden_halvdel_microsoft}" />
 
-                <Border Background="{StaticResource Trykket}" CornerRadius="8" Padding="16,13" Margin="0,14,0,0"
-                        BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+                <Border Background="{DynamicResource Trykket}" CornerRadius="8" Padding="16,13" Margin="0,14,0,0"
+                        BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
                   <StackPanel>
                     <TextBlock Text="{i18n:Oversat complianceview.det_der_kan_siges_og_som_holder_hele_vejen}" FontSize="12.5"
                                FontWeight="SemiBold" Margin="0,0,0,8" />
                     <TextBlock FontSize="13" LineHeight="22" TextWrapping="Wrap"
-                               Foreground="{StaticResource Tekst}"
+                               Foreground="{DynamicResource Tekst}"
                                Text="{i18n:Oversat complianceview.optagelse_og_transskription_forlader_aldri}" />
                     <TextBlock FontSize="12" LineHeight="20" TextWrapping="Wrap" Margin="0,10,0,0"
-                               Foreground="{StaticResource TekstMeget}"
+                               Foreground="{DynamicResource TekstMeget}"
                                Text="{i18n:Oversat complianceview.ingen_amerikansk_virksomhed_er_involveret}" />
                   </StackPanel>
                 </Border>
@@ -383,27 +383,27 @@
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
           <StackPanel>
 
-            <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20,16"
-                    BorderBrush="{StaticResource PanelKant}" BorderThickness="1" Margin="0,0,0,14">
+            <Border Background="{DynamicResource Panel}" CornerRadius="10" Padding="20,16"
+                    BorderBrush="{DynamicResource PanelKant}" BorderThickness="1" Margin="0,0,0,14">
               <StackPanel>
                 <TextBlock Text="{i18n:Oversat complianceview.den_anden_vej_rundt}" FontSize="10.5" FontWeight="SemiBold"
-                           Foreground="{StaticResource TekstMeget}" Margin="0,0,0,10" />
+                           Foreground="{DynamicResource TekstMeget}" Margin="0,0,0,10" />
 
                 <TextBlock FontSize="13" LineHeight="22" TextWrapping="Wrap"
-                           Foreground="{StaticResource TekstSvag}"
+                           Foreground="{DynamicResource TekstSvag}"
                            Text="{i18n:Oversat complianceview.resten_af_denne_side_handler_om_det_appen}" />
 
                 <TextBlock FontSize="13" LineHeight="22" TextWrapping="Wrap" Margin="0,10,0,0"
-                           Foreground="{StaticResource TekstSvag}"
+                           Foreground="{DynamicResource TekstSvag}"
                            Text="{i18n:Oversat complianceview.har_du_valgt_google_workspace_eller_micros}" />
 
-                <Border Background="{StaticResource GodkendtFlade}" BorderBrush="{StaticResource Godkendt}"
+                <Border Background="{DynamicResource GodkendtFlade}" BorderBrush="{DynamicResource Godkendt}"
                         BorderThickness="1" CornerRadius="8" Padding="16,13" Margin="0,14,0,0">
                   <StackPanel>
                     <TextBlock Text="{i18n:Oversat complianceview.kalenderen_virker_uden}" FontSize="11" FontWeight="SemiBold"
-                               Foreground="{StaticResource Godkendt}" Margin="0,0,0,8" />
+                               Foreground="{DynamicResource Godkendt}" Margin="0,0,0,8" />
                     <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap"
-                               Foreground="{StaticResource TekstSvag}"
+                               Foreground="{DynamicResource TekstSvag}"
                                Text="{i18n:Oversat complianceview.det_er_ikke_en_overgangsloesning_appens_eg}" />
                   </StackPanel>
                 </Border>
@@ -411,14 +411,14 @@
             </Border>
 
             <!-- ================== GOOGLE KALENDER ==================== -->
-            <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20,16"
-                    BorderBrush="{StaticResource PanelKant}" BorderThickness="1" Margin="0,0,0,14">
+            <Border Background="{DynamicResource Panel}" CornerRadius="10" Padding="20,16"
+                    BorderBrush="{DynamicResource PanelKant}" BorderThickness="1" Margin="0,0,0,14">
               <StackPanel>
                 <Grid Margin="0,0,0,12">
                   <TextBlock Text="{i18n:Oversat complianceview.google_kalender}" FontSize="10.5" FontWeight="SemiBold"
-                             Foreground="{StaticResource TekstMeget}" />
+                             Foreground="{DynamicResource TekstMeget}" />
                   <TextBlock x:Name="GoogleTilstand" FontSize="11" HorizontalAlignment="Right"
-                             Foreground="{StaticResource TekstMeget}" />
+                             Foreground="{DynamicResource TekstMeget}" />
                 </Grid>
 
                 <Grid>
@@ -428,74 +428,74 @@
                     <ColumnDefinition Width="*" />
                   </Grid.ColumnDefinitions>
 
-                  <Border Grid.Column="0" Background="{StaticResource GodkendtFlade}" BorderBrush="{StaticResource Godkendt}"
+                  <Border Grid.Column="0" Background="{DynamicResource GodkendtFlade}" BorderBrush="{DynamicResource Godkendt}"
                           BorderThickness="1" CornerRadius="8" Padding="16,13">
                     <StackPanel>
                       <TextBlock Text="{i18n:Oversat complianceview.det_appen_maa}" FontSize="11" FontWeight="SemiBold"
-                                 Foreground="{StaticResource Godkendt}" Margin="0,0,0,10" />
+                                 Foreground="{DynamicResource Godkendt}" Margin="0,0,0,10" />
                       <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap"
-                                 Foreground="{StaticResource TekstSvag}"
+                                 Foreground="{DynamicResource TekstSvag}"
                                  Text="{i18n:Oversat complianceview.laese_dine_aftaler_titel_tidspunkt_sted_og}" />
                       <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
-                                 Foreground="{StaticResource TekstSvag}"
+                                 Foreground="{DynamicResource TekstSvag}"
                                  Text="{i18n:Oversat complianceview.oprette_en_aftale_men_kun_den_du_selv_saet}" />
                       <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
-                                 Foreground="{StaticResource TekstSvag}"
+                                 Foreground="{DynamicResource TekstSvag}"
                                  Text="{i18n:Oversat complianceview.der_bedes_om_et_omraade_calendar_events_de}" />
                     </StackPanel>
                   </Border>
 
-                  <Border Grid.Column="2" Background="{StaticResource FejlFlade}" BorderBrush="{StaticResource FejlTekst}"
+                  <Border Grid.Column="2" Background="{DynamicResource FejlFlade}" BorderBrush="{DynamicResource FejlTekst}"
                           BorderThickness="1" CornerRadius="8" Padding="16,13">
                     <StackPanel>
                       <TextBlock Text="{i18n:Oversat complianceview.det_appen_ikke_kan}" FontSize="11" FontWeight="SemiBold"
-                                 Foreground="{StaticResource FejlTekst}" Margin="0,0,0,10" />
+                                 Foreground="{DynamicResource FejlTekst}" Margin="0,0,0,10" />
                       <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap"
-                                 Foreground="{StaticResource TekstSvag}"
+                                 Foreground="{DynamicResource TekstSvag}"
                                  Text="{i18n:Oversat complianceview.se_din_mail_dine_filer_eller_dine_kontakte}" />
                       <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
-                                 Foreground="{StaticResource TekstSvag}"
+                                 Foreground="{DynamicResource TekstSvag}"
                                  Text="{i18n:Oversat complianceview.sende_lyd_transkriptioner_noter_eller_doku}" />
                       <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
-                                 Foreground="{StaticResource TekstSvag}"
+                                 Foreground="{DynamicResource TekstSvag}"
                                  Text="{i18n:Oversat complianceview.se_din_adgangskode_godkendelsen_sker_i_din}" />
                     </StackPanel>
                   </Border>
                 </Grid>
 
-                <Border Background="{StaticResource Trykket}" CornerRadius="8" Padding="16,13" Margin="0,14,0,0"
-                        BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+                <Border Background="{DynamicResource Trykket}" CornerRadius="8" Padding="16,13" Margin="0,14,0,0"
+                        BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
                   <StackPanel>
                     <TextBlock Text="{i18n:Oversat complianceview.det_der_bliver_sendt_op_og_hvornaar}" FontSize="12.5"
-                               FontWeight="SemiBold" Foreground="{StaticResource Tekst}" />
+                               FontWeight="SemiBold" Foreground="{DynamicResource Tekst}" />
                     <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
-                               Foreground="{StaticResource TekstSvag}"
+                               Foreground="{DynamicResource TekstSvag}"
                                Text="{i18n:Oversat complianceview.kun_naar_du_saetter_hak_ved_opret_ogsaa_i}" />
                     <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
-                               Foreground="{StaticResource TekstSvag}"
+                               Foreground="{DynamicResource TekstSvag}"
                                Text="{i18n:Oversat complianceview.vaelger_du_et_google_meet_link_beder_appen}" />
                     <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
-                               Foreground="{StaticResource TekstSvag}"
+                               Foreground="{DynamicResource TekstSvag}"
                                Text="{i18n:Oversat complianceview.er_aftalen_markeret_til_at_blive_optaget_s}" />
                     <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
-                               Foreground="{StaticResource TekstSvag}"
+                               Foreground="{DynamicResource TekstSvag}"
                                Text="{i18n:Oversat complianceview.gaester_inviteres_aldrig_herfra_vaelger_du}" />
                     <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
-                               Foreground="{StaticResource TekstSvag}"
+                               Foreground="{DynamicResource TekstSvag}"
                                Text="{i18n:Oversat complianceview.uden_hakket_sker_der_ingen_afsendelse_over}" />
                   </StackPanel>
                 </Border>
 
-                <Border Background="{StaticResource Trykket}" CornerRadius="8" Padding="16,13" Margin="0,10,0,0"
-                        BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+                <Border Background="{DynamicResource Trykket}" CornerRadius="8" Padding="16,13" Margin="0,10,0,0"
+                        BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
                   <StackPanel>
                     <TextBlock Text="{i18n:Oversat complianceview.naar_du_afbryder_forbindelsen}" FontSize="12.5"
-                               FontWeight="SemiBold" Foreground="{StaticResource Tekst}" />
+                               FontWeight="SemiBold" Foreground="{DynamicResource Tekst}" />
                     <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
-                               Foreground="{StaticResource TekstSvag}"
+                               Foreground="{DynamicResource TekstSvag}"
                                Text="{i18n:Oversat complianceview.noegler_og_hentede_aftaler_slettes_fra_mas}" />
                     <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
-                               Foreground="{StaticResource TekstSvag}"
+                               Foreground="{DynamicResource TekstSvag}"
                                Text="{i18n:Oversat complianceview.adgangen_kan_ogsaa_traekkes_tilbage_hos_go}" />
                   </StackPanel>
                 </Border>
@@ -506,22 +506,22 @@
                  EGET AFSNIT, FORDI DET ER EN ANDEN AFTALE END KALENDEREN.
                  Kalenderen laeser noget, der allerede laa hos Google. Her gaar
                  det begge veje, og det skal staa foerst - ikke i en fodnote. -->
-            <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20,16"
-                    BorderBrush="{StaticResource PanelKant}" BorderThickness="1" Margin="0,0,0,14">
+            <Border Background="{DynamicResource Panel}" CornerRadius="10" Padding="20,16"
+                    BorderBrush="{DynamicResource PanelKant}" BorderThickness="1" Margin="0,0,0,14">
               <StackPanel>
                 <Grid Margin="0,0,0,12">
                   <TextBlock Text="{i18n:Oversat complianceview.google_tasks}" FontSize="10.5" FontWeight="SemiBold"
-                             Foreground="{StaticResource TekstMeget}" />
+                             Foreground="{DynamicResource TekstMeget}" />
                   <TextBlock x:Name="Opgavetilstand" FontSize="11" HorizontalAlignment="Right"
-                             Foreground="{StaticResource TekstMeget}" />
+                             Foreground="{DynamicResource TekstMeget}" />
                 </Grid>
 
                 <TextBlock FontSize="13" LineHeight="22" TextWrapping="Wrap"
-                           Foreground="{StaticResource Tekst}" FontWeight="SemiBold"
+                           Foreground="{DynamicResource Tekst}" FontWeight="SemiBold"
                            Text="{i18n:Oversat complianceview.den_her_gaar_begge_veje_i_modsaetning_til}" />
 
                 <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,8,0,0"
-                           Foreground="{StaticResource TekstSvag}"
+                           Foreground="{DynamicResource TekstSvag}"
                            Text="{i18n:Oversat complianceview.opgaver_du_skriver_i_google_laeses_ind_i_c}" />
 
                 <Grid Margin="0,16,0,0">
@@ -531,45 +531,45 @@
                     <ColumnDefinition Width="*" />
                   </Grid.ColumnDefinitions>
 
-                  <Border Grid.Column="0" Background="{StaticResource GodkendtFlade}" BorderBrush="{StaticResource Godkendt}"
+                  <Border Grid.Column="0" Background="{DynamicResource GodkendtFlade}" BorderBrush="{DynamicResource Godkendt}"
                           BorderThickness="1" CornerRadius="8" Padding="16,13">
                     <StackPanel>
                       <TextBlock Text="{i18n:Oversat complianceview.det_der_sendes_op}" FontSize="11" FontWeight="SemiBold"
-                                 Foreground="{StaticResource Godkendt}" Margin="0,0,0,10" />
+                                 Foreground="{DynamicResource Godkendt}" Margin="0,0,0,10" />
                       <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap"
-                                 Foreground="{StaticResource TekstSvag}"
+                                 Foreground="{DynamicResource TekstSvag}"
                                  Text="{i18n:Oversat complianceview.kun_at_en_opgave_er_krydset_af_eller_ikke}" />
                       <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
-                                 Foreground="{StaticResource TekstSvag}"
+                                 Foreground="{DynamicResource TekstSvag}"
                                  Text="{i18n:Oversat complianceview.der_bedes_om_et_omraade_dine_opgaver_ikke}" />
                     </StackPanel>
                   </Border>
 
-                  <Border Grid.Column="2" Background="{StaticResource FejlFlade}" BorderBrush="{StaticResource FejlTekst}"
+                  <Border Grid.Column="2" Background="{DynamicResource FejlFlade}" BorderBrush="{DynamicResource FejlTekst}"
                           BorderThickness="1" CornerRadius="8" Padding="16,13">
                     <StackPanel>
                       <TextBlock Text="{i18n:Oversat complianceview.det_der_aldrig_sendes}" FontSize="11" FontWeight="SemiBold"
-                                 Foreground="{StaticResource FejlTekst}" Margin="0,0,0,10" />
+                                 Foreground="{DynamicResource FejlTekst}" Margin="0,0,0,10" />
                       <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap"
-                                 Foreground="{StaticResource TekstSvag}"
+                                 Foreground="{DynamicResource TekstSvag}"
                                  Text="{i18n:Oversat complianceview.opgaver_appen_selv_har_fundet_i_et_moede_d}" />
                       <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
-                                 Foreground="{StaticResource TekstSvag}"
+                                 Foreground="{DynamicResource TekstSvag}"
                                  Text="{i18n:Oversat complianceview.lyd_transkriptioner_noter_og_dokumenter_om}" />
                     </StackPanel>
                   </Border>
                 </Grid>
 
-                <Border Background="{StaticResource Trykket}" CornerRadius="8" Padding="16,13" Margin="0,14,0,0"
-                        BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+                <Border Background="{DynamicResource Trykket}" CornerRadius="8" Padding="16,13" Margin="0,14,0,0"
+                        BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
                   <StackPanel>
                     <TextBlock Text="{i18n:Oversat complianceview.egen_godkendelse_adskilt_fra_kalenderen}" FontSize="12.5"
-                               FontWeight="SemiBold" Foreground="{StaticResource Tekst}" />
+                               FontWeight="SemiBold" Foreground="{DynamicResource Tekst}" />
                     <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
-                               Foreground="{StaticResource TekstSvag}"
+                               Foreground="{DynamicResource TekstSvag}"
                                Text="{i18n:Oversat complianceview.det_koster_et_login_mere_og_det_er_prisen}" />
                     <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,7,0,0"
-                               Foreground="{StaticResource TekstSvag}"
+                               Foreground="{DynamicResource TekstSvag}"
                                Text="{i18n:Oversat complianceview.afbryder_du_opgaverne_forsvinder_de_hented}" />
                   </StackPanel>
                 </Border>
@@ -577,34 +577,34 @@
             </Border>
 
             <!-- ================== DET UAFKLAREDE ===================== -->
-            <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20,16"
-                    BorderBrush="{StaticResource Advarsel}" BorderThickness="1" Margin="0,0,0,14">
+            <Border Background="{DynamicResource Panel}" CornerRadius="10" Padding="20,16"
+                    BorderBrush="{DynamicResource Advarsel}" BorderThickness="1" Margin="0,0,0,14">
               <StackPanel>
                 <TextBlock Text="{i18n:Oversat complianceview.det_der_skal_vaere_klart}" FontSize="10.5" FontWeight="SemiBold"
-                           Foreground="{StaticResource Advarsel}" Margin="0,0,0,10" />
+                           Foreground="{DynamicResource Advarsel}" Margin="0,0,0,10" />
 
                 <TextBlock FontSize="12.5" LineHeight="22" TextWrapping="Wrap"
-                           Foreground="{StaticResource TekstSvag}"
+                           Foreground="{DynamicResource TekstSvag}"
                            Text="{i18n:Oversat complianceview.moedetitler_og_deltagere_er_personoplysnin}" />
 
                 <TextBlock FontSize="12.5" LineHeight="22" TextWrapping="Wrap" Margin="0,10,0,0"
-                           Foreground="{StaticResource TekstSvag}"
+                           Foreground="{DynamicResource TekstSvag}"
                            Text="{i18n:Oversat complianceview.google_er_en_amerikansk_leverandoer_det_er}" />
 
                 <TextBlock FontSize="12.5" LineHeight="22" TextWrapping="Wrap" Margin="0,10,0,0"
-                           Foreground="{StaticResource TekstSvag}"
+                           Foreground="{DynamicResource TekstSvag}"
                            Text="{i18n:Oversat complianceview.optager_du_et_moede_med_andre_til_stede_ga}" />
               </StackPanel>
             </Border>
 
             <!-- ================== MICROSOFT ========================== -->
-            <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20,16"
-                    BorderBrush="{StaticResource PanelKant}" BorderThickness="1" Margin="0,0,0,14">
+            <Border Background="{DynamicResource Panel}" CornerRadius="10" Padding="20,16"
+                    BorderBrush="{DynamicResource PanelKant}" BorderThickness="1" Margin="0,0,0,14">
               <StackPanel>
                 <TextBlock Text="{i18n:Oversat complianceview.microsoft_365_kalender}" FontSize="10.5" FontWeight="SemiBold"
-                           Foreground="{StaticResource TekstMeget}" Margin="0,0,0,8" />
+                           Foreground="{DynamicResource TekstMeget}" Margin="0,0,0,8" />
                 <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap"
-                           Foreground="{StaticResource TekstSvag}"
+                           Foreground="{DynamicResource TekstSvag}"
                            Text="{i18n:Oversat complianceview.bygges_naar_google_vejen_staar_og_virker_f}" />
               </StackPanel>
             </Border>
@@ -617,11 +617,11 @@
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
           <StackPanel>
     <!-- ==================== Modeller og licenser ================= -->
-            <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20,16"
-                    BorderBrush="{StaticResource PanelKant}" BorderThickness="1" Margin="0,0,0,14">
+            <Border Background="{DynamicResource Panel}" CornerRadius="10" Padding="20,16"
+                    BorderBrush="{DynamicResource PanelKant}" BorderThickness="1" Margin="0,0,0,14">
               <StackPanel>
                 <TextBlock Text="{i18n:Oversat complianceview.modeller_og_licenser}" FontSize="10.5" FontWeight="SemiBold"
-                           Foreground="{StaticResource TekstMeget}" Margin="0,0,0,6" />
+                           Foreground="{DynamicResource TekstMeget}" Margin="0,0,0,6" />
 
                 <!-- HVORFOR DER STAAR TRE HER OG TO PAA AI-MODELLER.
                      De to skaerme taeller ikke det samme. AI-modeller taeller LAG
@@ -630,14 +630,14 @@
                      der koerer modellen, og modelfilen selv. De har hver sin
                      rettighedshaver, og saa skal de staa hver for sig. -->
                 <TextBlock FontSize="12" LineHeight="20" TextWrapping="Wrap" Margin="0,0,0,12"
-                           Foreground="{StaticResource TekstMeget}"
+                           Foreground="{DynamicResource TekstMeget}"
                            Text="{i18n:Oversat complianceview.syv_komponenter_de_taeller_ikke_som_fanern}" />
 
                 <ItemsControl x:Name="Modeller">
                   <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                      <Border Background="{StaticResource Trykket}" CornerRadius="8" Padding="16,13" Margin="0,0,0,8"
-                              BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+                      <Border Background="{DynamicResource Trykket}" CornerRadius="8" Padding="16,13" Margin="0,0,0,8"
+                              BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
                         <StackPanel>
                           <Grid>
                             <StackPanel Orientation="Horizontal">
@@ -645,16 +645,16 @@
                               <Border Background="{Binding Farve}" CornerRadius="3" Padding="7,2"
                                       Margin="10,1,0,0" VerticalAlignment="Center">
                                 <TextBlock Text="{Binding Licens}" FontSize="11" FontWeight="SemiBold"
-                                           Foreground="{StaticResource PaaAccent}" />
+                                           Foreground="{DynamicResource PaaAccent}" />
                               </Border>
                             </StackPanel>
                             <TextBlock Text="{Binding Hvor}" FontSize="11.5" HorizontalAlignment="Right"
-                                       VerticalAlignment="Center" Foreground="{StaticResource TekstMeget}" />
+                                       VerticalAlignment="Center" Foreground="{DynamicResource TekstMeget}" />
                           </Grid>
                           <TextBlock Text="{Binding Rolle}" FontSize="12.5" LineHeight="20" Margin="0,7,0,0"
-                                     TextWrapping="Wrap" Foreground="{StaticResource TekstSvag}" />
+                                     TextWrapping="Wrap" Foreground="{DynamicResource TekstSvag}" />
                           <TextBlock Text="{Binding Note}" FontSize="11.5" LineHeight="19" Margin="0,6,0,0"
-                                     TextWrapping="Wrap" Foreground="{StaticResource TekstMeget}" />
+                                     TextWrapping="Wrap" Foreground="{DynamicResource TekstMeget}" />
                         </StackPanel>
                       </Border>
                     </DataTemplate>
@@ -678,15 +678,15 @@
           <StackPanel DockPanel.Dock="Top" Margin="0,0,0,12">
             <TextBlock Text="{i18n:Oversat complianceview.hvad_der_faktisk_er_sendt}" FontSize="15" FontWeight="SemiBold" />
             <TextBlock FontSize="12.5" LineHeight="21" Margin="0,6,0,0" TextWrapping="Wrap"
-                       Foreground="{StaticResource TekstSvag}"
+                       Foreground="{DynamicResource TekstSvag}"
                        Text="{i18n:Oversat complianceview.hver_gang_noget_forlader_maskinen_bogfoere}" />
             <TextBlock FontSize="12" LineHeight="20" Margin="0,8,0,0" TextWrapping="Wrap"
-                       Foreground="{StaticResource TekstMeget}"
+                       Foreground="{DynamicResource TekstMeget}"
                        Text="{i18n:Oversat complianceview.selve_teksten_gemmes_ikke_den_ligger_aller}" />
           </StackPanel>
 
-          <Border DockPanel.Dock="Top" Background="{StaticResource Panel}" CornerRadius="10"
-                  BorderBrush="{StaticResource PanelKant}" BorderThickness="1"
+          <Border DockPanel.Dock="Top" Background="{DynamicResource Panel}" CornerRadius="10"
+                  BorderBrush="{DynamicResource PanelKant}" BorderThickness="1"
                   Padding="18,14" Margin="0,0,0,12">
             <Grid>
               <Grid.ColumnDefinitions>
@@ -698,22 +698,22 @@
 
               <StackPanel Grid.Column="0">
                 <TextBlock Text="{i18n:Oversat complianceview.afsendelser}" FontSize="10.5" FontWeight="SemiBold"
-                           Foreground="{StaticResource TekstMeget}" />
+                           Foreground="{DynamicResource TekstMeget}" />
                 <TextBlock x:Name="KvitAntal" FontSize="20" FontWeight="SemiBold" Margin="0,3,0,0" />
               </StackPanel>
 
               <StackPanel Grid.Column="1">
                 <TextBlock Text="{i18n:Oversat complianceview.tegn_sendt_i_alt}" FontSize="10.5" FontWeight="SemiBold"
-                           Foreground="{StaticResource TekstMeget}" />
+                           Foreground="{DynamicResource TekstMeget}" />
                 <TextBlock x:Name="KvitTegn" FontSize="20" FontWeight="SemiBold" Margin="0,3,0,0" />
               </StackPanel>
 
               <StackPanel Grid.Column="2">
                 <TextBlock Text="{i18n:Oversat complianceview.samlet_pris_skoen}" FontSize="10.5" FontWeight="SemiBold"
-                           Foreground="{StaticResource TekstMeget}" />
+                           Foreground="{DynamicResource TekstMeget}" />
                 <TextBlock x:Name="KvitPris" FontSize="20" FontWeight="SemiBold" Margin="0,3,0,0" />
                 <TextBlock x:Name="KvitPrisKr" FontSize="11.5" Margin="0,2,0,0"
-                           Foreground="{StaticResource TekstMeget}" />
+                           Foreground="{DynamicResource TekstMeget}" />
               </StackPanel>
 
               <Button Grid.Column="3" Content="{i18n:Oversat faelles.aabn_mappen}" Click="Kvitteringer_Klik"
@@ -730,29 +730,29 @@
                    dollar, og hvad der faktisk staar paa fakturaen - valuta,
                    kurs, moms - er ikke efterproevet. Et tal uden det
                    forbehold ville blive laest som et regnskab. -->
-              <Border Background="{StaticResource Trykket}" BorderBrush="{StaticResource PanelKant}" BorderThickness="1"
+              <Border Background="{DynamicResource Trykket}" BorderBrush="{DynamicResource PanelKant}" BorderThickness="1"
                       CornerRadius="8" Padding="14,11" Margin="0,0,0,12">
                 <StackPanel>
                   <TextBlock Text="{i18n:Oversat complianceview.om_prisen}" FontSize="12.5" FontWeight="SemiBold" />
                   <TextBlock FontSize="12" LineHeight="19" Margin="0,4,0,0" TextWrapping="Wrap"
-                             Foreground="{StaticResource TekstMeget}"
+                             Foreground="{DynamicResource TekstMeget}"
                              Text="{i18n:Oversat complianceview.antallet_af_tokens_kommer_fra_leverandoere}" />
                   <TextBlock FontSize="12" LineHeight="19" Margin="0,6,0,0" TextWrapping="Wrap"
-                             Foreground="{StaticResource TekstMeget}"
+                             Foreground="{DynamicResource TekstMeget}"
                              Text="{i18n:Oversat complianceview.hvilken_valuta_mistral_rent_faktisk_faktur}" />
                 </StackPanel>
               </Border>
 
               <TextBlock x:Name="KvitTom" FontSize="13" LineHeight="21" TextWrapping="Wrap"
                          Margin="4,10,4,0" Visibility="Collapsed"
-                         Foreground="{StaticResource TekstSvag}"
+                         Foreground="{DynamicResource TekstSvag}"
                          Text="{i18n:Oversat complianceview.der_er_ikke_sendt_noget_endnu_foerste_gang}" />
 
               <ItemsControl x:Name="KvitListe">
                 <ItemsControl.ItemTemplate>
                   <DataTemplate>
                     <Border CornerRadius="8" Padding="14,11" Margin="0,0,0,6"
-                            Background="{StaticResource Trykket}" BorderThickness="1"
+                            Background="{DynamicResource Trykket}" BorderThickness="1"
                             BorderBrush="{Binding Kant}">
                       <StackPanel>
                         <Grid>
@@ -764,20 +764,20 @@
                                      FontWeight="SemiBold" TextWrapping="Wrap" />
                           <TextBlock Grid.Column="1" Text="{Binding Naar}" FontSize="11.5"
                                      Margin="12,0,0,0" VerticalAlignment="Top"
-                                     Foreground="{StaticResource TekstMeget}" />
+                                     Foreground="{DynamicResource TekstMeget}" />
                         </Grid>
 
                         <TextBlock Text="{Binding Linje}" FontSize="12" Margin="0,6,0,0"
                                    TextWrapping="Wrap" LineHeight="19"
-                                   Foreground="{StaticResource TekstSvag}" />
+                                   Foreground="{DynamicResource TekstSvag}" />
 
                         <TextBlock Text="{Binding Sum}" FontSize="11" Margin="0,5,0,0"
                                    FontFamily="Consolas" TextWrapping="Wrap"
-                                   Foreground="{StaticResource TekstMeget}" />
+                                   Foreground="{DynamicResource TekstMeget}" />
 
                         <TextBlock Text="{Binding Fejl}" FontSize="12" Margin="0,5,0,0"
                                    TextWrapping="Wrap" Visibility="{Binding FejlSynlig}"
-                                   Foreground="{StaticResource FejlTekst}" />
+                                   Foreground="{DynamicResource FejlTekst}" />
                       </StackPanel>
                     </Border>
                   </DataTemplate>
@@ -792,26 +792,26 @@
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
           <StackPanel>
     <!-- ==================== Det uafklarede ======================= -->
-            <Border Background="{StaticResource Panel}" CornerRadius="10" Padding="20,16"
-                    BorderBrush="{StaticResource PanelKant}" BorderThickness="1" Margin="0,0,0,4">
+            <Border Background="{DynamicResource Panel}" CornerRadius="10" Padding="20,16"
+                    BorderBrush="{DynamicResource PanelKant}" BorderThickness="1" Margin="0,0,0,4">
               <StackPanel>
                 <TextBlock Text="{i18n:Oversat complianceview.det_der_ikke_er_efterproevet}" FontSize="10.5" FontWeight="SemiBold"
-                           Foreground="{StaticResource TekstMeget}" Margin="0,0,0,10" />
+                           Foreground="{DynamicResource TekstMeget}" Margin="0,0,0,10" />
 
                 <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap"
-                           Foreground="{StaticResource TekstSvag}"
+                           Foreground="{DynamicResource TekstSvag}"
                            Text="{i18n:Oversat complianceview.listen_over_underdatabehandlere_kan_aendre}" />
 
                 <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,8,0,0"
-                           Foreground="{StaticResource TekstSvag}"
+                           Foreground="{DynamicResource TekstSvag}"
                            Text="{i18n:Oversat complianceview.opbevaringstiden_for_api_anmodninger_er_ik}" />
 
                 <TextBlock FontSize="12.5" LineHeight="21" TextWrapping="Wrap" Margin="0,8,0,0"
-                           Foreground="{StaticResource TekstSvag}"
+                           Foreground="{DynamicResource TekstSvag}"
                            Text="{i18n:Oversat complianceview.trust_center_oplyste_14_05_2026_om_en_sikk}" />
 
                 <TextBlock FontSize="11.5" LineHeight="19" TextWrapping="Wrap" Margin="0,14,0,0"
-                           Foreground="{StaticResource TekstMeget}"
+                           Foreground="{DynamicResource TekstMeget}"
                            Text="{i18n:Oversat complianceview.hele_gennemgangen_med_kildehenvisninger_st}" />
               </StackPanel>
             </Border>
@@ -823,22 +823,22 @@
                  Den siger ikke "vi tager intet ansvar" og saa alligevel
                  "compliant" oeverst. Hele skaermen er skrevet som en gengivelse
                  med dato paa, netop for at den her afslutning kan vaere sand. -->
-            <Border Background="{StaticResource Trykket}" CornerRadius="10" Padding="20,16" Margin="0,14,0,0"
-                    BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+            <Border Background="{DynamicResource Trykket}" CornerRadius="10" Padding="20,16" Margin="0,14,0,0"
+                    BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
               <StackPanel>
                 <TextBlock Text="{i18n:Oversat complianceview.ansvarsfraskrivelse}" FontSize="10.5" FontWeight="SemiBold"
-                           Foreground="{StaticResource TekstMeget}" Margin="0,0,0,10" />
+                           Foreground="{DynamicResource TekstMeget}" Margin="0,0,0,10" />
 
                 <TextBlock FontSize="12" LineHeight="20" TextWrapping="Wrap"
-                           Foreground="{StaticResource TekstMeget}"
+                           Foreground="{DynamicResource TekstMeget}"
                            Text="{i18n:Oversat complianceview.oplysningerne_under_compliance_er_en_gengi}" />
 
                 <TextBlock FontSize="12" LineHeight="20" TextWrapping="Wrap" Margin="0,9,0,0"
-                           Foreground="{StaticResource TekstMeget}"
+                           Foreground="{DynamicResource TekstMeget}"
                            Text="{i18n:Oversat complianceview.vilkaar_underdatabehandlerlister_certifice}" />
 
                 <TextBlock FontSize="12" LineHeight="20" TextWrapping="Wrap" Margin="0,9,0,0"
-                           Foreground="{StaticResource TekstMeget}"
+                           Foreground="{DynamicResource TekstMeget}"
                            Text="{i18n:Oversat complianceview.ansvaret_for_at_anvendelsen_af_programmet}" />
               </StackPanel>
             </Border>

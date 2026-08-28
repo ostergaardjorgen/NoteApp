@@ -4,7 +4,7 @@
         xmlns:i18n="clr-namespace:NoteApp.Desktop"
         Title="Opret dokument" Height="780" Width="1060" MinHeight="560" MinWidth="820"
         WindowStartupLocation="CenterOwner" ResizeMode="CanResize"
-        Background="{StaticResource Baggrund}">
+        Background="{DynamicResource Baggrund}">
   <!-- Vinduet kan ændres i størrelse. Med NoResize og en fast højde er der
        ingen vej ud, hvis indholdet ikke passer — og det gør det ikke ved en
        anden skriftstørrelse eller skalering end den, det blev prøvet på.
@@ -63,13 +63,13 @@
             Man kunne ikke se, hvad der var valgt.
          3. Raekkerne stod klods op ad hinanden. Med tre skabeloner kan man
             taelle dem; med ti skal de ligne kort, man vaelger imellem. -->
-    <Border Grid.Row="1" Grid.Column="0" Background="{StaticResource Panel}" CornerRadius="10"
-            BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+    <Border Grid.Row="1" Grid.Column="0" Background="{DynamicResource Panel}" CornerRadius="10"
+            BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
       <DockPanel>
         <TextBlock DockPanel.Dock="Top" Text="{i18n:Oversat newdocumentwindow.hvilken_moedetype}" Margin="18,15,18,4"
                    FontSize="13" FontWeight="SemiBold" />
         <TextBlock x:Name="Typehjaelp" DockPanel.Dock="Top" Margin="18,0,18,10" FontSize="11.5"
-                   TextWrapping="Wrap" Foreground="{StaticResource TekstMeget}"
+                   TextWrapping="Wrap" Foreground="{DynamicResource TekstMeget}"
                    Text="{i18n:Oversat newdocumentwindow.moedetypen_bestemmer_hvilke_afsnit_dokumen}" />
 
         <ListBox x:Name="Skabeloner" Margin="10,0,10,10" BorderThickness="0"
@@ -88,20 +88,20 @@
                 <Setter.Value>
                   <ControlTemplate TargetType="ListBoxItem">
                     <Border x:Name="kort" CornerRadius="8" Padding="14,11"
-                            Background="{StaticResource Trykket}" BorderThickness="1"
-                            BorderBrush="{StaticResource PanelKant}">
+                            Background="{DynamicResource Trykket}" BorderThickness="1"
+                            BorderBrush="{DynamicResource PanelKant}">
                       <ContentPresenter />
                     </Border>
                     <ControlTemplate.Triggers>
                       <Trigger Property="IsMouseOver" Value="True">
-                        <Setter TargetName="kort" Property="Background" Value="{StaticResource Svaev}" />
+                        <Setter TargetName="kort" Property="Background" Value="{DynamicResource Svaev}" />
                       </Trigger>
                       <!-- Det VALGTE skal kunne ses paa afstand. Baade fladen
                            og kanten skifter, saa det ogsaa virker for den,
                            der ikke skelner farverne skarpt. -->
                       <Trigger Property="IsSelected" Value="True">
-                        <Setter TargetName="kort" Property="Background" Value="{StaticResource Valgt}" />
-                        <Setter TargetName="kort" Property="BorderBrush" Value="{StaticResource Accent}" />
+                        <Setter TargetName="kort" Property="Background" Value="{DynamicResource Valgt}" />
+                        <Setter TargetName="kort" Property="BorderBrush" Value="{DynamicResource Accent}" />
                         <Setter TargetName="kort" Property="BorderThickness" Value="2" />
                       </Trigger>
                     </ControlTemplate.Triggers>
@@ -117,7 +117,7 @@
                 <TextBlock Text="{Binding Name}" FontSize="14.5" FontWeight="SemiBold"
                            TextWrapping="Wrap" />
                 <TextBlock Text="{Binding Description}" FontSize="12.5" TextWrapping="Wrap"
-                           LineHeight="19" Foreground="{StaticResource TekstSvag}"
+                           LineHeight="19" Foreground="{DynamicResource TekstSvag}"
                            Margin="0,4,0,0" />
               </StackPanel>
             </DataTemplate>
@@ -157,10 +157,10 @@
         </StackPanel>
 
         <TextBlock x:Name="Sproghjaelp" FontSize="11.5" Margin="2,6,0,0" TextWrapping="Wrap"
-                   LineHeight="17" Foreground="{StaticResource TekstMeget}" />
+                   LineHeight="17" Foreground="{DynamicResource TekstMeget}" />
 
         <TextBlock x:Name="ModelTekst" FontSize="12" Margin="2,16,0,0" TextWrapping="Wrap"
-                   LineHeight="19" Foreground="{StaticResource TekstMeget}" />
+                   LineHeight="19" Foreground="{DynamicResource TekstMeget}" />
       </StackPanel>
     </ScrollViewer>
 
@@ -168,7 +168,7 @@
                 Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,18,0,0">
       <Button Content="{i18n:Oversat faelles.annuller}" Click="Annuller_Click" Padding="18,9" Margin="0,0,10,0" />
       <Button x:Name="OpretKnap" Content="{i18n:Oversat faelles.opret_dokument}" Click="Opret_Click" Padding="20,9"
-              Background="{StaticResource Accent}" Foreground="{StaticResource PaaAccent}" BorderThickness="0"
+              Background="{DynamicResource Accent}" Foreground="{DynamicResource PaaAccent}" BorderThickness="0"
               FontWeight="SemiBold" IsDefault="True" />
     </StackPanel>
   </Grid>

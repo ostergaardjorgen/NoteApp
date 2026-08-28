@@ -33,8 +33,8 @@
        tager imod klikket. Placeringen huskes til næste møde, fordi den med to
        skærme aldrig er tilfældig. -->
 
-  <Border x:Name="Flade" CornerRadius="12" Background="{StaticResource Trykket}"
-          BorderBrush="{StaticResource PanelKant}" BorderThickness="1" Padding="14,9"
+  <Border x:Name="Flade" CornerRadius="12" Background="{DynamicResource Trykket}"
+          BorderBrush="{DynamicResource PanelKant}" BorderThickness="1" Padding="14,9"
           MouseLeftButtonDown="Flade_Traek" Cursor="SizeAll">
     <Border.Effect>
       <DropShadowEffect BlurRadius="22" ShadowDepth="3" Opacity="0.55" Color="#FF000000" />
@@ -45,21 +45,21 @@
       <!-- Greb. Det siger, at båndet kan flyttes — uden en linje tekst,
            der skal læses hver gang. -->
       <TextBlock Text="⠿" FontSize="16" VerticalAlignment="Center"
-                 Margin="0,0,12,0" Foreground="{StaticResource Slukket}" />
+                 Margin="0,0,12,0" Foreground="{DynamicResource Slukket}" />
 
       <!-- Prikken blinker, så længe der optages. Står den stille, er der
            pause — og det skal kunne ses på tværs af et lokale. -->
       <Ellipse x:Name="Prik" Width="11" Height="11" VerticalAlignment="Center"
-               Margin="0,0,10,0" Fill="{StaticResource Optager}" />
+               Margin="0,0,10,0" Fill="{DynamicResource Optager}" />
 
       <TextBlock x:Name="Ur" Text="00:00:00" FontSize="19" FontWeight="SemiBold"
                  FontFamily="Consolas" VerticalAlignment="Center"
-                 Foreground="{StaticResource Tekst}" Margin="0,0,4,0" />
+                 Foreground="{DynamicResource Tekst}" Margin="0,0,4,0" />
 
       <TextBlock x:Name="Tilstand" FontSize="11" VerticalAlignment="Center"
-                 Margin="10,2,0,0" Foreground="{StaticResource TekstMeget}" />
+                 Margin="10,2,0,0" Foreground="{DynamicResource TekstMeget}" />
 
-      <Rectangle Width="1" Height="26" Fill="{StaticResource PanelKant}" Margin="14,0,14,0" />
+      <Rectangle Width="1" Height="26" Fill="{DynamicResource PanelKant}" Margin="14,0,14,0" />
 
       <!-- ÉN KONTAKT, DER SKIFTER BEGGE VEJE.
            Appen skal kunne rulles ud og foldes sammen igen midt i en
@@ -78,7 +78,7 @@
               Content="{i18n:Oversat optagebaand.vis_appen}" Padding="14,7" FontSize="12.5"
               ToolTip="{i18n:Oversat optagebaand.vis_hele_appen_frem_optagelsen_fortsaetter}" />
 
-      <Rectangle Width="1" Height="26" Fill="{StaticResource PanelKant}" Margin="14,0,14,0" />
+      <Rectangle Width="1" Height="26" Fill="{DynamicResource PanelKant}" Margin="14,0,14,0" />
 
       <!-- Noterne skal kunne skrives HER.
            Kunne de kun skrives i appen, og appen er væk, ville funktionen
@@ -86,19 +86,19 @@
            noget værd. -->
       <Grid Width="240" VerticalAlignment="Center">
         <TextBox x:Name="Note" FontSize="12.5" Padding="9,6" Cursor="IBeam"
-                 Background="{StaticResource AccentFlade}" BorderBrush="{StaticResource PanelKant}" BorderThickness="1"
-                 Foreground="{StaticResource Tekst}" CaretBrush="{StaticResource Tekst}"
+                 Background="{DynamicResource AccentFlade}" BorderBrush="{DynamicResource PanelKant}" BorderThickness="1"
+                 Foreground="{DynamicResource Tekst}" CaretBrush="{DynamicResource Tekst}"
                  KeyDown="Note_Tast"
                  ToolTip="{i18n:Oversat optagebaand.skriv_en_note_og_tryk_enter_den_bliver_tid}" />
         <TextBlock x:Name="NotePladsholder" IsHitTestVisible="False" FontSize="12.5"
-                   Margin="12,0,0,0" VerticalAlignment="Center" Foreground="{StaticResource Slukket}"
+                   Margin="12,0,0,0" VerticalAlignment="Center" Foreground="{DynamicResource Slukket}"
                    Text="{i18n:Oversat optagebaand.note_tryk_enter}" />
       </Grid>
 
       <TextBlock x:Name="NoteTaeller" FontSize="11.5" FontWeight="SemiBold"
-                 VerticalAlignment="Center" Margin="10,0,0,0" Foreground="{StaticResource Accent}" />
+                 VerticalAlignment="Center" Margin="10,0,0,0" Foreground="{DynamicResource Accent}" />
 
-      <Rectangle Width="1" Height="26" Fill="{StaticResource PanelKant}" Margin="14,0,14,0" />
+      <Rectangle Width="1" Height="26" Fill="{DynamicResource PanelKant}" Margin="14,0,14,0" />
 
       <Button x:Name="PauseKnap" Click="Pause_Klik" Content="❚❚" Cursor="Hand"
               Padding="11,7" FontSize="12" Margin="0,0,7,0"
@@ -106,7 +106,7 @@
 
       <Button x:Name="StopKnap" Click="Stop_Klik" Content="{i18n:Oversat faelles.stop_og_gem}" Cursor="Hand"
               Padding="14,7" FontSize="12.5" FontWeight="SemiBold"
-              Background="{StaticResource Optager}" Foreground="{StaticResource PaaOptager}" BorderThickness="0"
+              Background="{DynamicResource Optager}" Foreground="{DynamicResource PaaOptager}" BorderThickness="0"
               ToolTip="{i18n:Oversat optagebaand.afslut_optagelsen_og_gem_den_du_navngiver}" />
 
       <Button x:Name="AnnullerKnap" Click="Annuller_Klik" Content="✕" Cursor="Hand"

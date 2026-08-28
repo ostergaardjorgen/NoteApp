@@ -27,7 +27,9 @@
     "stop": "■ Stop og gem",
     "beskeder": "Beskeder om det, appen har lavet færdigt",
     "sprog": "Sprog",
-    "vaelgsprog": "Skift sproget i appen"
+    "vaelgsprog": "Skift sproget i appen",
+    "tilmoerkt": "Skift til mørkt tema",
+    "tillyst": "Skift til lyst tema"
   },
   "cockpit": {
     "titel": "Cockpit",

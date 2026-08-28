@@ -6,35 +6,39 @@ using NoteApp.Core;
 namespace NoteApp.Desktop;
 
 /// <summary>
-/// Skifter appen mellem lyst og mørkt — uden at tegne den om.
+/// Skifter appen mellem lyst og mørkt.
 ///
-/// HVORDAN DET KAN LADE SIG GØRE SÅ BILLIGT
+/// HVORDAN
 ///
-/// Skærmbillederne slår farverne op på navn, `{StaticResource Baggrund}`, og
-/// det gør de 969 steder. Byttede vi ordbogen ud, ville ingen af dem opdage
-/// det: StaticResource slår op ÉN gang, ved indlæsningen. Så skulle alle 969
-/// laves om til DynamicResource — en ændring i hver eneste fil, og et
-/// langsommere opslag hver gang.
+/// Paletten ligger som femogtyve pensler i Application.Resources, og et skift
+/// UDSKIFTER dem: `app.Resources["Panel"] = new SolidColorBrush(...)`.
+/// Skærmbillederne slår dem op med `{DynamicResource Panel}`, og det opslag er
+/// levende — det opdager, at nøglen peger på noget andet, og tegner om.
 ///
-/// I stedet BLIVER PENSLERNE LIGGENDE. Det er de samme objekter hele appens
-/// levetid, og det er FARVEN bag dem, der skiftes:
+/// HVORFOR IKKE BARE ÆNDRE PENSLENS FARVE
 ///
-///     &lt;Color x:Key="BaggrundFarve"&gt;#FFF7F7F5&lt;/Color&gt;
-///     &lt;SolidColorBrush x:Key="Baggrund" Color="{DynamicResource BaggrundFarve}" /&gt;
+/// Fordi den ikke kan. WPF fryser Freezables, når den kan, og en frossen
+/// pensel er uforanderlig for altid. To omveje blev prøvet, og BEGGE SÅ
+/// RIGTIGE UD VED OPSTART:
 ///
-/// Her byttes `BaggrundFarve` ud. Penslen henter sin farve dynamisk, opdager
-/// det selv, og alt, der bruger den, bliver tegnet om. Ét sted at skifte, nul
-/// ændringer i skærmbillederne.
+///   1. Sætte `pensel.Color` direkte. Alle femogtyve pensler var allerede
+///      frosne ved indlæsningen af App.xaml, og skiftet gjorde ingenting.
+///   2. Lade farven komme fra en `&lt;Color&gt;` gennem en DynamicResource, så
+///      penslen ikke KUNNE fryses ved indlæsningen. Den blev frosset senere.
 ///
-/// OMVEJEN OVER EN Color ER IKKE PYNT. Første forsøg satte `pensel.Color`
-/// direkte, og det virkede ikke: WPF FRYSER SELV RESURSER FRA XAML, og en
-/// frossen Freezable kan ikke ændres. Alle femogtyve pensler var frosne, og
-/// skiftet sprang dem tavst over — appen sagde «mørkt» og så lys ud.
+/// Målt 28-08-2026 efter et tryk på knappen:
 ///
-/// En Freezable med en uafklaret dynamisk reference KAN ikke fryses. Det er
-/// hele grunden til, at farven står for sig selv. Skriver nogen farven direkte
-/// på penslen igen, fejler TemafilTest — og det er med vilje, for det er ikke
-/// noget, man kan huske om et halvt år.
+///     Baggrund pensel = #FF14161A  frossen=False   skiftede
+///     Panel    pensel = #FFFFFFFF  frossen=True    skiftede ikke
+///     Tekst    pensel = #FF1B1B19  frossen=True    skiftede ikke
+///
+/// Forskellen er, at `Panel` og `Tekst` bruges i STILARTER. WPF forsegler en
+/// stil, første gang den bruges, og det fryser de Freezables, der står i dens
+/// settere. `Baggrund` bruges kun direkte i markup og fryses derfor aldrig.
+///
+/// DERFOR VAR ET SKÆRMBILLEDE FRA EN OPSTART IKKE NOK. Ved opstart bygges
+/// penslerne, efter farverne er sat, og alt ser rigtigt ud. Fejlen viser sig
+/// først, når nogen trykker på knappen. Prøv den vej, ikke opstarten.
 ///
 /// WINDOWS' EGNE KONTROLLER FØLGER MED
 ///
@@ -89,9 +93,6 @@ public static class Temaskift
         }
     }
 
-    /// <summary>Navnet på farve-nøglen bag en pensel. «Baggrund» → «BaggrundFarve».</summary>
-    public static string Farvenoegle(string paletnoegle) => paletnoegle + "Farve";
-
     private static void Saet(bool lyst)
     {
         ErLyst = lyst;
@@ -99,24 +100,30 @@ public static class Temaskift
         var app = Application.Current;
         if (app is null) return;
 
+        // WINDOWS' EGNE KONTROLLER FOERST. Rullebjaelker, markering og
+        // vindueskant kommer fra WPF's Fluent-tema, ikke fra vores palet.
+#pragma warning disable WPF0001 // ThemeMode er stadig markeret som eksperimentel
+        var oensket = lyst ? ThemeMode.Light : ThemeMode.Dark;
+        if (app.ThemeMode != oensket) app.ThemeMode = oensket;
+#pragma warning restore WPF0001
+
         var mangler = new List<string>();
 
         foreach (var (navn, farve) in Tema.Palet(lyst))
         {
-            var noegle = Farvenoegle(navn);
-
-            if (app.Resources[noegle] is not Color)
+            if (app.Resources[navn] is not SolidColorBrush)
             {
                 mangler.Add(navn);
                 continue;
             }
 
-            app.Resources[noegle] = (Color)ColorConverter.ConvertFromString(farve);
+            // EN NY PENSEL HVER GANG. Den gamle kan vaere frossen, og en
+            // frossen pensel kan ikke aendres - se forklaringen paa klassen.
+            // DynamicResource-opslagene ude i skaermbillederne opdager, at
+            // noeglen peger et andet sted hen, og tegner om.
+            app.Resources[navn] = new SolidColorBrush(
+                (Color)ColorConverter.ConvertFromString(farve));
         }
-
-#pragma warning disable WPF0001 // ThemeMode er stadig markeret som eksperimentel
-        app.ThemeMode = lyst ? ThemeMode.Light : ThemeMode.Dark;
-#pragma warning restore WPF0001
 
         // DEN SKAL SIGE TIL. Foerste udgave sprang tavst over det, den ikke
         // kunne skifte - og saa blev HELE appen staaende lys, mens den mente,
@@ -189,35 +196,25 @@ public static class Temaskift
     }
 
     /// <summary>
-    /// Kan hver palet-nøgle rent faktisk skifte farve? Til prøverne.
+    /// Findes hver palet-nøgle som en pensel? Til prøverne.
     /// </summary>
-    /// <returns>Det, der er galt. Tom liste = alt kan skifte.</returns>
+    /// <returns>Det, der mangler. Tom liste = alt er der.</returns>
     /// <remarks>
-    /// Den prøver TRE ting, og alle tre har fejlet i virkeligheden:
+    /// Frossenhed prøves IKKE længere. Penslerne bliver udskiftet og ikke
+    /// ændret, så det er ligegyldigt, om den gamle var frossen — og en prøve,
+    /// der holder øje med noget, der ikke længere betyder noget, er værre end
+    /// ingen prøve: den ser ud, som om den passer på noget.
     ///
-    ///   1. At penslen findes. En manglende nøgle vælter det vindue, der
-    ///      slår den op — set 18-08-2026.
-    ///   2. At FARVEN findes ved siden af den. Uden den kan penslen ikke
-    ///      skifte, og temaet bliver hængende.
-    ///   3. At penslen ikke er frosset. Det var de alle femogtyve, første
-    ///      gang skiftet blev prøvet, fordi WPF fryser XAML-resurser af sig
-    ///      selv.
+    /// Det, der SKAL passes på, er, at skærmbillederne slår paletten op med
+    /// DynamicResource. Det prøver TemafilTest på filerne.
     /// </remarks>
     public static IReadOnlyList<string> Efterse(ResourceDictionary ordbog)
     {
         var galt = new List<string>();
 
         foreach (var navn in Tema.Nøglerne)
-        {
-            if (ordbog[navn] is not SolidColorBrush p)
-            {
+            if (ordbog[navn] is not SolidColorBrush)
                 galt.Add($"{navn}: findes ikke som pensel");
-                continue;
-            }
-
-            if (p.IsFrozen) galt.Add($"{navn}: er frosset og kan ikke skifte farve");
-            if (ordbog[Farvenoegle(navn)] is not Color) galt.Add($"{navn}: mangler {Farvenoegle(navn)}");
-        }
 
         return galt;
     }

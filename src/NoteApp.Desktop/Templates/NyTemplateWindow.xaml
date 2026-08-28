@@ -4,7 +4,7 @@
         xmlns:i18n="clr-namespace:NoteApp.Desktop"
         Title="Ny mødetype" Height="700" Width="680" MinHeight="560" MinWidth="560"
         WindowStartupLocation="CenterOwner"
-        Background="{StaticResource Baggrund}" Foreground="{StaticResource Tekst}">
+        Background="{DynamicResource Baggrund}" Foreground="{DynamicResource Tekst}">
 
   <!-- ================== HVORFOR DER SPØRGES FØRST ======================
 
@@ -32,7 +32,7 @@
     <StackPanel Grid.Row="0" Margin="0,0,0,14">
       <TextBlock Text="{i18n:Oversat faelles.ny_moedetype}" FontSize="20" FontWeight="SemiBold" />
       <TextBlock Margin="0,6,0,0" TextWrapping="Wrap" LineHeight="20"
-                 Foreground="{StaticResource TekstSvag}"
+                 Foreground="{DynamicResource TekstSvag}"
                  Text="{i18n:Oversat nytemplatewindow.svar_paa_det_du_kender_hvad_dokumentet_ska}" />
     </StackPanel>
 
@@ -42,7 +42,7 @@
 
         <TextBlock Text="{i18n:Oversat nytemplatewindow.hvad_skal_dokumentet_hedde}" Style="{StaticResource Underskrift}" />
         <TextBox x:Name="FeltNavn" Margin="0,4,0,0" FontSize="14" Padding="9,7" />
-        <TextBlock FontSize="11.5" Margin="2,5,0,0" Foreground="{StaticResource TekstMeget}"
+        <TextBlock FontSize="11.5" Margin="2,5,0,0" Foreground="{DynamicResource TekstMeget}"
                    Text="{i18n:Oversat nytemplatewindow.fx_beslutningsnotat_kundemoede_eller_tekni}" />
 
         <TextBlock Text="{i18n:Oversat nytemplatewindow.hvad_skal_der_komme_ud_af_det}" Style="{StaticResource Underskrift}"
@@ -51,13 +51,13 @@
                  AcceptsReturn="True" TextWrapping="Wrap" Height="66"
                  VerticalScrollBarVisibility="Auto" />
         <TextBlock FontSize="11.5" Margin="2,5,0,0" TextWrapping="Wrap"
-                   Foreground="{StaticResource TekstMeget}"
+                   Foreground="{DynamicResource TekstMeget}"
                    Text="{i18n:Oversat nytemplatewindow.skriv_det_som_du_ville_forklare_en_kollega}" />
 
         <TextBlock Text="{i18n:Oversat nytemplatewindow.hvem_skal_laese_det}" Style="{StaticResource Underskrift}" Margin="0,18,0,0" />
         <TextBox x:Name="FeltLaeser" Margin="0,4,0,0" FontSize="13" Padding="9,7" />
         <TextBlock FontSize="11.5" Margin="2,5,0,0" TextWrapping="Wrap"
-                   Foreground="{StaticResource TekstMeget}"
+                   Foreground="{DynamicResource TekstMeget}"
                    Text="{i18n:Oversat nytemplatewindow.det_afgoer_baade_laengden_og_sproget_en_ku}" />
 
         <TextBlock Text="{i18n:Oversat nytemplatewindow.hvad_skal_altid_med}" Style="{StaticResource Underskrift}" Margin="0,18,0,0" />
@@ -65,34 +65,34 @@
                  AcceptsReturn="True" TextWrapping="Wrap" Height="66"
                  VerticalScrollBarVisibility="Auto" />
         <TextBlock FontSize="11.5" Margin="2,5,0,0" TextWrapping="Wrap"
-                   Foreground="{StaticResource TekstMeget}"
+                   Foreground="{DynamicResource TekstMeget}"
                    Text="{i18n:Oversat nytemplatewindow.et_pr_linje_fx_beslutninger_med_begrundels}" />
 
         <TextBlock Text="{i18n:Oversat nytemplatewindow.hvor_langt_maa_det_vaere}" Style="{StaticResource Underskrift}" Margin="0,18,0,0" />
         <ComboBox x:Name="FeltLaengde" Margin="0,4,0,0" FontSize="13" Padding="9,7"
                   SelectedIndex="1" />
         <TextBlock FontSize="11.5" Margin="2,5,0,0" TextWrapping="Wrap"
-                   Foreground="{StaticResource TekstMeget}"
+                   Foreground="{DynamicResource TekstMeget}"
                    Text="{i18n:Oversat nytemplatewindow.laengden_er_en_beslutning_ikke_et_tilfaeld}" />
 
-        <Border Background="{StaticResource Trykket}" BorderBrush="{StaticResource PanelKant}" BorderThickness="1"
+        <Border Background="{DynamicResource Trykket}" BorderBrush="{DynamicResource PanelKant}" BorderThickness="1"
                 CornerRadius="8" Padding="14,11" Margin="0,20,0,0">
           <StackPanel>
             <TextBlock Text="{i18n:Oversat nytemplatewindow.det_kommer_med_af_sig_selv}" FontSize="12.5" FontWeight="SemiBold" />
             <TextBlock FontSize="12" LineHeight="19" Margin="0,5,0,0" TextWrapping="Wrap"
-                       Foreground="{StaticResource TekstMeget}"
+                       Foreground="{DynamicResource TekstMeget}"
                        Text="{i18n:Oversat nytemplatewindow.reglerne_for_hvem_der_kommer_paa_deltagerl}" />
           </StackPanel>
         </Border>
 
         <TextBlock x:Name="Fejl" Margin="0,14,0,0" TextWrapping="Wrap" LineHeight="19"
-                   Foreground="{StaticResource FejlTekst}" Visibility="Collapsed" />
+                   Foreground="{DynamicResource FejlTekst}" Visibility="Collapsed" />
       </StackPanel>
     </ScrollViewer>
 
     <Grid Grid.Row="2" Margin="0,16,0,0">
       <TextBlock x:Name="Status" VerticalAlignment="Center" FontSize="12"
-                 Foreground="{StaticResource TekstMeget}" TextWrapping="Wrap" />
+                 Foreground="{DynamicResource TekstMeget}" TextWrapping="Wrap" />
       <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
         <!-- HER LAA "Start fra en tom".
              En tom skabelon er kun brugbar for en, der ved hvad en

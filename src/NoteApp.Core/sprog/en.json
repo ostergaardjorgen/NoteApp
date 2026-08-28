@@ -27,7 +27,9 @@
     "stop": "■ Stop and save",
     "beskeder": "Notifications about what the app has finished",
     "sprog": "Language",
-    "vaelgsprog": "Change the language of the app"
+    "vaelgsprog": "Change the language of the app",
+    "tilmoerkt": "Switch to dark theme",
+    "tillyst": "Switch to light theme"
   },
   "cockpit": {
     "titel": "Cockpit",

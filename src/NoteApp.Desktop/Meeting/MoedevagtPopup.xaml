@@ -25,7 +25,7 @@
 
        Den lægger sig nede ved uret, hvor Windows' egne beskeder kommer. -->
 
-  <Border Background="{StaticResource Trykket}" BorderBrush="{StaticResource Accent}" BorderThickness="1"
+  <Border Background="{DynamicResource Trykket}" BorderBrush="{DynamicResource Accent}" BorderThickness="1"
           CornerRadius="10" Padding="16,14">
     <Border.Effect>
       <DropShadowEffect BlurRadius="18" ShadowDepth="3" Opacity="0.55" Color="#FF000000" />
@@ -35,16 +35,16 @@
 
       <Grid>
         <TextBlock x:Name="Overskrift" FontSize="14" FontWeight="SemiBold" TextWrapping="Wrap"
-                   Margin="0,0,24,0" Foreground="{StaticResource Tekst}" />
+                   Margin="0,0,24,0" Foreground="{DynamicResource Tekst}" />
 
         <Button Content="✕" Click="Luk_Klik" HorizontalAlignment="Right" VerticalAlignment="Top"
                 Background="Transparent" BorderThickness="0" Padding="6,0" FontSize="12"
-                Foreground="{StaticResource TekstMeget}" Cursor="Hand"
+                Foreground="{DynamicResource TekstMeget}" Cursor="Hand"
                 ToolTip="{i18n:Oversat moedevagtpopup.luk_der_spoerges_igen_naeste_gang_et_moede}" />
       </Grid>
 
       <TextBlock FontSize="12.5" LineHeight="19" TextWrapping="Wrap" Margin="0,6,0,0"
-                 Foreground="{StaticResource TekstSvag}"
+                 Foreground="{DynamicResource TekstSvag}"
                  Text="{i18n:Oversat moedevagtpopup.skal_moedet_optages_appen_optager_aldrig_a}" />
 
       <!-- DEN HER LINJE SKAL STÅ.
@@ -52,7 +52,7 @@
            øjnene og sige, hvor den ender. Teksten skal hjælpe med at give den
            besked — aldrig med at lade være. -->
       <TextBlock FontSize="11.5" LineHeight="17" TextWrapping="Wrap" Margin="0,8,0,0"
-                 Foreground="{StaticResource TekstMeget}"
+                 Foreground="{DynamicResource TekstMeget}"
                  Text="{i18n:Oversat moedevagtpopup.sig_til_de_andre_at_du_optager_lyden_blive}" />
 
       <StackPanel Orientation="Horizontal" Margin="0,14,0,0">
@@ -63,7 +63,7 @@
 
       <Button x:Name="AldrigKnap" Click="Aldrig_Klik" Margin="0,10,0,0" Padding="0"
               HorizontalAlignment="Left" Background="Transparent" BorderThickness="0"
-              FontSize="11.5" Cursor="Hand" Foreground="{StaticResource TekstMeget}" />
+              FontSize="11.5" Cursor="Hand" Foreground="{DynamicResource TekstMeget}" />
     </StackPanel>
   </Border>
 </Window>

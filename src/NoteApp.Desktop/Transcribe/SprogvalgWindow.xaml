@@ -4,7 +4,7 @@
         xmlns:i18n="clr-namespace:NoteApp.Desktop"
         Title="Hvilket sprog blev der talt?" SizeToContent="Height" Width="560"
         WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
-        Background="{StaticResource Baggrund}" Foreground="{StaticResource Tekst}">
+        Background="{DynamicResource Baggrund}" Foreground="{DynamicResource Tekst}">
 
   <!-- ============== SPROGET SPØRGES DER OM HER ==============
 
@@ -32,7 +32,7 @@
       <TextBlock Text="{i18n:Oversat sprogvalgwindow.hvilket_sprog_blev_der_talt}" FontSize="19" FontWeight="SemiBold"
                  TextWrapping="Wrap" />
       <TextBlock x:Name="Under" FontSize="13" LineHeight="21" Margin="0,7,0,0" TextWrapping="Wrap"
-                 Foreground="{StaticResource TekstSvag}" />
+                 Foreground="{DynamicResource TekstSvag}" />
     </StackPanel>
 
     <StackPanel Grid.Row="1">
@@ -51,16 +51,16 @@
 
     <!-- Advarslen står ved siden af valget, ikke som en fodnote. «Find selv»
          ser ud som det trygge valg, og det er det modsatte. -->
-    <Border Grid.Row="2" Background="#33E8A33D" BorderBrush="{StaticResource Advarsel}"
+    <Border Grid.Row="2" Background="#33E8A33D" BorderBrush="{DynamicResource Advarsel}"
             BorderThickness="1" CornerRadius="8" Padding="14,11" Margin="0,18,0,0">
       <TextBlock FontSize="12.5" LineHeight="20" TextWrapping="Wrap"
-                 Foreground="{StaticResource Tekst}"
+                 Foreground="{DynamicResource Tekst}"
                  Text="{i18n:Oversat sprogvalgwindow.vaelg_find_selv_kun_hvis_du_virkelig_ikke}" />
     </Border>
 
     <Grid Grid.Row="3" Margin="0,20,0,0">
       <TextBlock x:Name="Husket" VerticalAlignment="Center" FontSize="11.5"
-                 Foreground="{StaticResource TekstMeget}" TextWrapping="Wrap" MaxWidth="300"
+                 Foreground="{DynamicResource TekstMeget}" TextWrapping="Wrap" MaxWidth="300"
                  HorizontalAlignment="Left" />
       <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
         <Button Content="{i18n:Oversat faelles.annuller}" Click="Annuller_Click" Padding="18,9" Margin="0,0,10,0"

@@ -10,8 +10,8 @@
        gult trekant-ikon, der råber «kritisk fejl» — også når beskeden bare er
        et valg. Den ligner ikke resten af appen, og den skræmmer mere, end
        indholdet giver anledning til. -->
-  <Border Background="{StaticResource Panel}" CornerRadius="12"
-          BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+  <Border Background="{DynamicResource Panel}" CornerRadius="12"
+          BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
     <Border.Effect>
       <DropShadowEffect BlurRadius="28" ShadowDepth="6" Opacity="0.45" Color="#FF000000" />
     </Border.Effect>
@@ -27,21 +27,21 @@
            begivenhed; en stribe i kanten siger, hvad det handler om, uden at
            tage plads fra teksten. -->
       <Border x:Name="Stribe" Grid.Row="0" Height="4" CornerRadius="12,12,0,0"
-              Background="{StaticResource Accent}" />
+              Background="{DynamicResource Accent}" />
 
       <StackPanel Grid.Row="1" Margin="30,26,30,0">
         <TextBlock x:Name="Overskrift" FontSize="17" FontWeight="SemiBold"
-                   TextWrapping="Wrap" Foreground="{StaticResource Tekst}" />
+                   TextWrapping="Wrap" Foreground="{DynamicResource Tekst}" />
         <TextBlock x:Name="Brodtekst" FontSize="13.5" Margin="0,12,0,0" TextWrapping="Wrap"
-                   LineHeight="23" Foreground="{StaticResource TekstSvag}" />
+                   LineHeight="23" Foreground="{DynamicResource TekstSvag}" />
 
         <!-- GRUNDLAGET, foldet ud. Et tal — «43 gange, 3 forkerte» — siger, at
              man skal træffe et valg, men ikke hvad valget er. Linjerne viser
              det: er de tre fejl den samme fejl, der gentager sig, eller er de
              tre tilfældige steder blandt fyrre rigtige? -->
         <Border x:Name="ListePanel" Visibility="Collapsed" Margin="0,16,0,0"
-                Background="{StaticResource Trykket}" CornerRadius="8"
-                BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+                Background="{DynamicResource Trykket}" CornerRadius="8"
+                BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
           <ItemsControl x:Name="Liste" MaxHeight="260" Padding="4,6,4,6">
             <ItemsControl.Template>
               <ControlTemplate TargetType="ItemsControl">
@@ -76,7 +76,7 @@
                   IsCancel="True" MinWidth="104" Content="{i18n:Oversat faelles.annuller}" />
           <Button x:Name="GodkendKnap" Click="Godkend_Click" Padding="22,10" MinWidth="124"
                   IsDefault="True" BorderThickness="0" FontWeight="SemiBold"
-                  Foreground="{StaticResource PaaAccent}" Background="{StaticResource Accent}" />
+                  Foreground="{DynamicResource PaaAccent}" Background="{DynamicResource Accent}" />
         </StackPanel>
       </Grid>
     </Grid>

@@ -4,8 +4,8 @@
              xmlns:i18n="clr-namespace:NoteApp.Desktop"
              xmlns:local="clr-namespace:NoteApp.Desktop">
 
-  <Border Background="{StaticResource Panel}" CornerRadius="12" Width="440"
-          BorderBrush="{StaticResource PanelKant}" BorderThickness="1">
+  <Border Background="{DynamicResource Panel}" CornerRadius="12" Width="440"
+          BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
     <Border.Effect>
       <DropShadowEffect BlurRadius="26" ShadowDepth="6" Opacity="0.5" Color="#FF000000" />
     </Border.Effect>
@@ -17,13 +17,13 @@
         <RowDefinition Height="Auto" />
       </Grid.RowDefinitions>
 
-      <Border Grid.Row="0" Background="{StaticResource AccentFlade}" CornerRadius="12,12,0,0" Padding="20,14"
-              BorderBrush="{StaticResource PanelKant}" BorderThickness="0,0,0,1">
+      <Border Grid.Row="0" Background="{DynamicResource AccentFlade}" CornerRadius="12,12,0,0" Padding="20,14"
+              BorderBrush="{DynamicResource PanelKant}" BorderThickness="0,0,0,1">
         <Grid>
           <StackPanel VerticalAlignment="Center">
             <TextBlock Text="{i18n:Oversat notificationpopup.beskeder}" FontSize="15" FontWeight="SemiBold" />
             <TextBlock x:Name="Under" FontSize="11.5" Margin="0,2,0,0"
-                       Foreground="{StaticResource TekstMeget}" />
+                       Foreground="{DynamicResource TekstMeget}" />
           </StackPanel>
         </Grid>
       </Border>
@@ -38,11 +38,11 @@
         </ItemsControl.Template>
       </ItemsControl>
 
-      <Border Grid.Row="2" BorderBrush="{StaticResource PanelKant}" BorderThickness="0,1,0,0"
+      <Border Grid.Row="2" BorderBrush="{DynamicResource PanelKant}" BorderThickness="0,1,0,0"
               Padding="20,10">
         <Grid>
           <TextBlock x:Name="Tom" FontSize="12" VerticalAlignment="Center" TextWrapping="Wrap"
-                     Foreground="{StaticResource TekstMeget}" Margin="0,0,110,0" />
+                     Foreground="{DynamicResource TekstMeget}" Margin="0,0,110,0" />
           <Button Content="{i18n:Oversat notificationpopup.se_hele_historikken}" Click="Historik_Click" HorizontalAlignment="Right"
                   Padding="12,6" FontSize="12" />
         </Grid>
