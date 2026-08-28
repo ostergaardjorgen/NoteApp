@@ -362,7 +362,25 @@ public partial class MainWindow : Window
         {
             SaetStandardvalg();
 
+            // ============ EN GANG, OGSAA NAAR LOADED FYRER IGEN ============
+            //
+            // Loaded fyrer i WPF, hver gang vinduet kommer tilbage i traeet -
+            // ikke kun én gang. Uden «-=» foerst laa abonnementet oven i sig
+            // selv, og ét tastetryk kaldte LynstartOptagelse flere gange.
+            //
+            // Det gik som regel godt, fordi Lynstart svarer med det samme, hvis
+            // der allerede optages. Men de to kald ligger mikrosekunder fra
+            // hinanden, og «som regel» er ikke godt nok til den knap, der
+            // starter et moede. Set som moenster 28-08-2026, samme fejl som i
+            // MeetingViews temaabonnement.
+            _genvej.Trykket -= LynstartOptagelse;
             _genvej.Trykket += LynstartOptagelse;
+
+            // Skifter registreringen senere - fordi den oenskede tast blev
+            // ledig - skal bjaelken sige det nye.
+            _genvej.Ændret -= VisGenvejIgen;
+            _genvej.Ændret += VisGenvejIgen;
+
             TilslutGenvej();
 
             Moedevagten.Opdater();
@@ -837,10 +855,46 @@ public partial class MainWindow : Window
     /// </summary>
     private void LynstartOptagelse()
     {
-        App.HentFrem(this);
+        // ============ VINDUET FREM FOERST - MEN DET MAA IKKE KUNNE STOPPE OS ============
+        //
+        // Raekkefoelgen er rigtig: Lynstart kan have brug for at vise noget -
+        // «ingen mikrofon fundet», «mikrofonen er skiftet» - og en dialog paa
+        // et minimeret vindue er en dialog, ingen ser. Saa staar man med en
+        // genvej, der «ikke gjorde noget», mens svaret laa nede i proceslinjen.
+        //
+        // DET, DER MANGLEDE, VAR VAERNET. Windows kan afvise Activate() af sig
+        // selv: har et andet program netop faaet fokus, gaelder foreground-
+        // spaerren. Det er praecis situationen her - genvejen bruges, mens man
+        // staar i Teams. Uden try naaede optagelsen aldrig at begynde.
+        //
+        // OPTAGELSE MAA ALDRIG KUNNE BLOKERES. Gaar vinduet galt, optages der
+        // alligevel, og baandet ligger oeverst paa skaermen.
+        try
+        {
+            App.HentFrem(this);
+        }
+        catch (Exception)
+        {
+            // Vinduet kom ikke frem. Der optages stadig.
+        }
 
         _moede.Lynstart();
     }
+
+    /// <summary>
+    /// Den genvej, der ER registreret lige nu. Null hvis ingen lykkedes.
+    /// </summary>
+    /// <remarks>
+    /// Indstillinger skal bruge den til to ting: at vise den som valgt, naar
+    /// brugeren ikke har valgt noget udtrykkeligt, og at lade vaere med at
+    /// kalde den «optaget af et andet program». Det andet program er appen
+    /// selv.
+    /// </remarks>
+    public string? AktivGenvejId => _genvej.Aktiv?.Id;
+
+    /// <summary>Registreringen har skiftet — vis den nye tast.</summary>
+    private void VisGenvejIgen() =>
+        _moede.VisGenvej(_genvej.Aktiv?.Navn, _genvej.Bemærkning);
 
     // HER LAA OpdaterDataLoefte, som satte linjen nederst i sidebjaelken:
     // "Optagelser og udskrifter bliver paa denne pc. Referater bearbejdes

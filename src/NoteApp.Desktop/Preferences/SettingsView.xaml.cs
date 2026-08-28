@@ -75,20 +75,40 @@ public partial class SettingsView : UserControl
         _indlæserGenveje = true;
 
         var valgt = AppSettings.Current.HotkeyId;
+
+        // ============ APPENS EGEN GENVEJ ER IKKE «TAGET AF ET ANDET PROGRAM» ============
+        //
+        // ErLedig proever at registrere kombinationen, og appen holder den
+        // allerede selv. Uden det her stod den aktive tast som optaget, og
+        // listen pegede paa en anden - mens topbjaelken viste den rigtige.
+        //
+        // Set 28-08-2026: bjaelken sagde Ctrl+Space, listen sagde
+        // Ctrl+Shift+Space. Den, der laeser Indstillinger, ville trykke paa
+        // den forkerte og tro, at genvejen ikke virkede.
+        var aktiv = (vindue as MainWindow)?.AktivGenvejId;
+
         var rækker = GlobalHotkey.Muligheder.Select(m =>
         {
-            var ledig = m.Id == valgt || GlobalHotkey.ErLedig(m, vindue);
+            var iBrug = m.Id == aktiv;
+            var ledig = iBrug || m.Id == valgt || GlobalHotkey.ErLedig(m, vindue);
+
             return new
             {
                 m.Id,
                 m.Hvorfor,
-                Visning = ledig ? m.Navn : $"{m.Navn}  —  optaget af et andet program",
+                Visning = iBrug ? $"{m.Navn}  —  i brug nu"
+                        : ledig ? m.Navn
+                        : $"{m.Navn}  —  optaget af et andet program",
                 Ledig = ledig
             };
         }).ToList();
 
         Genveje.ItemsSource = rækker;
+
+        // Har brugeren valgt noget, staar det. Ellers vises DEN, DER VIRKER -
+        // ikke den foerste ledige paa listen.
         Genveje.SelectedItem = rækker.FirstOrDefault(r => r.Id == valgt)
+                            ?? rækker.FirstOrDefault(r => r.Id == aktiv)
                             ?? rækker.FirstOrDefault(r => r.Ledig);
 
         _indlæserGenveje = false;
