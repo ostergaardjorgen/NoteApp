@@ -16,8 +16,8 @@
     "historik": "History",
     "indstillinger": "Settings",
     "dinedata": "Your data",
-    "ordbog": "Word library",
-    "skabeloner": "Templates"
+    "skabeloner": "Meeting types",
+    "diktering": "Dictation"
   },
   "topbar": {
     "optag": "Record meeting",
@@ -873,7 +873,11 @@
     "gik_galt": "The dictation failed: {0}",
     "historik": "Dictation of {0} seconds",
     "indsat": "Placed in {0} — as {1}",
-    "rettede": "The word library corrected {0} word(s):"
+    "rettede": "The word library corrected {0} word(s):",
+    "proevet": "Tried as {0} — see the result above",
+    "fane_proeverum": "Practice",
+    "fane_teksttyper": "Text types",
+    "fane_ordbog": "Word library"
   },
   "ordbogview": {
     "ordbog": "Word library",
@@ -901,5 +905,13 @@
     "prompt_hvornaar": "Claude, ChatGPT, Cursor — no politeness",
     "opgave": "Task",
     "opgave_hvornaar": "Todoist, Google Tasks — one line in the imperative"
+  },
+  "proeverum": {
+    "titel": "Practice",
+    "under": "Hold the shortcut key down and speak. The text lands here — not in the program you last had in front. Change the type and say the same thing again; then you can see the difference.",
+    "vaelg_type": "What should it become?",
+    "klar": "Ready. Hold the shortcut key down and speak — it becomes a {0}.",
+    "raa": "How it was heard",
+    "pudset": "How it was written"
   }
 }

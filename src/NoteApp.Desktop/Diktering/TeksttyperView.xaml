@@ -1,0 +1,86 @@
+﻿<UserControl x:Class="NoteApp.Desktop.Diktering.TeksttyperView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:i18n="clr-namespace:NoteApp.Desktop"
+             Background="{DynamicResource Baggrund}">
+
+  <!-- HVAD DET TALTE SKAL BLIVE TIL.
+
+       Instruktionen bag hver type er den, der sendes til sprogmodellen
+       sammen med den raa udskrift, og den kan RETTES - ellers er «skabelon»
+       det forkerte ord.
+
+       STANDARDEN STAAR I KODEN, DET RETTEDE I INDSTILLINGERNE. Er der ikke
+       rettet noget, kan en ny udgave af appen forbedre den. Har man rettet,
+       vinder ens egen - ogsaa ved en opdatering. Det modsatte ville betyde,
+       at en opdatering stille kunne skrive ens egne mails om. -->
+
+  <Grid Margin="24,20,24,20">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+    </Grid.RowDefinitions>
+
+    <StackPanel Grid.Row="0" Margin="0,0,0,14">
+      <TextBlock Text="{i18n:Oversat templatesview.teksttyper}" Style="{StaticResource Overskrift}" />
+      <TextBlock Style="{StaticResource Underskrift}" TextWrapping="Wrap" MaxWidth="820"
+                 HorizontalAlignment="Left"
+                 Text="{i18n:Oversat templatesview.teksttyper_under}" />
+    </StackPanel>
+
+    <Grid Grid.Row="1">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="300" />
+        <ColumnDefinition Width="*" />
+      </Grid.ColumnDefinitions>
+
+      <Border Grid.Column="0" Background="{DynamicResource Panel}" CornerRadius="10"
+              BorderBrush="{DynamicResource PanelKant}" BorderThickness="1" Padding="6">
+        <ListBox x:Name="Liste" Background="Transparent" BorderThickness="0"
+                 SelectionChanged="Teksttype_Valgt">
+          <ListBox.ItemTemplate>
+            <DataTemplate>
+              <StackPanel Margin="6,8">
+                <TextBlock Text="{Binding Navn}" FontWeight="SemiBold" />
+                <TextBlock Text="{Binding Hvornaar}" TextWrapping="Wrap" Margin="0,2,0,0"
+                           Foreground="{DynamicResource TekstMeget}" FontSize="12" />
+                <TextBlock Text="{Binding Maerke}" Margin="0,3,0,0" FontSize="11"
+                           Foreground="{DynamicResource Accent}"
+                           Visibility="{Binding ErRettet}" />
+              </StackPanel>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+      </Border>
+
+      <Grid Grid.Column="1" Margin="16,0,0,0">
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="*" />
+          <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Style="{StaticResource Underskrift}" Margin="0,0,0,6"
+                   TextWrapping="Wrap"
+                   Text="{i18n:Oversat templatesview.instruktion_under}" />
+
+        <TextBox x:Name="Instruktion" Grid.Row="1" AcceptsReturn="True" TextWrapping="Wrap"
+                 VerticalScrollBarVisibility="Auto" Padding="12,10"
+                 TextChanged="Instruktion_Aendret" />
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,12,0,0">
+          <Button x:Name="GemTeksttype" Style="{StaticResource Primaer}" MinWidth="150"
+                  IsEnabled="False" Click="GemTeksttype_Klik"
+                  Content="{i18n:Oversat templatesview.gem_aendringer}" />
+
+          <Button x:Name="NulstilTeksttype" Margin="10,0,0,0" Padding="16,9"
+                  Click="NulstilTeksttype_Klik"
+                  Content="{i18n:Oversat templatesview.nulstil}" />
+
+          <TextBlock x:Name="TeksttypeStatus" VerticalAlignment="Center" Margin="16,0,0,0"
+                     Style="{StaticResource Underskrift}" />
+        </StackPanel>
+      </Grid>
+    </Grid>
+  </Grid>
+</UserControl>

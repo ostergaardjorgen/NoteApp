@@ -79,15 +79,16 @@
                        Checked="Nav_Changed" IsChecked="True"
                        Style="{StaticResource NavKnap}" />
 
-          <!-- ORDBOGEN LIGGER HER, LIGE UNDER COCKPITTET.
-               Cockpittet er det, man kigger i; ordbogen er det, man retter,
-               naar noget i cockpittet blev hoert forkert. De to hoerer
-               sammen.
+          <!-- DIKTERING LIGGER LIGE UNDER COCKPITTET.
+               Cockpittet er det, man kigger i; dikteringen er det, man taler
+               ind i. De to er de to maader, man bruger appen paa til daglig.
 
-               Den laa under Indstillinger indtil 28-08-2026. En ordbog er
-               ikke en indstilling - den er noget, man arbejder i, og et navn,
-               der bliver hoert forkert, skal kunne tilfoejes med det samme. -->
-          <RadioButton x:Name="NavOrdbog" GroupName="nav" Content="{i18n:Oversat nav.ordbog}"
+               Derinde ligger de tre ting, man goer, naar en diktering ikke
+               rammer: proeverummet, hvor man ser resultatet med det samme,
+               teksttyperne, hvor formen rettes, og ordbogen, hvor et navn
+               laeres. Laa de paa hver sin skaerm, var det tre opgaver i
+               stedet for een - og saa bliver de ikke lavet. -->
+          <RadioButton x:Name="NavDiktering" GroupName="nav" Content="{i18n:Oversat nav.diktering}"
                        Checked="Nav_Changed"
                        Style="{StaticResource NavKnap}" />
 
@@ -100,17 +101,20 @@
           <RadioButton x:Name="NavDokumenter" GroupName="nav" Content="{i18n:Oversat nav.dokumenter}"
                        Checked="Nav_Changed"
                        Style="{StaticResource NavKnap}" />
-          <!-- SKABELONER IGEN — FORDI DER NU ER TO SLAGS.
-               Menupunktet hed «Mødetyper», mens det var det eneste, der lå
-               derinde: en mødetype kan man svare på, FØR mødet går i gang,
-               og «skabelon» tvang læseren til at tænke i dokumenter.
+          <!-- MØDETYPER, IKKE SKABELONER.
+               «Skabelon» er et ord fra tekstbehandling. Det tvinger læseren
+               til at tænke i dokumenter på et tidspunkt, hvor der ikke er
+               noget dokument. Et statusmøde, en 1:1, et kundemøde: dét kan
+               man svare på, FØR mødet går i gang.
 
-               Med dikteringen kom teksttyperne til — hvad det talte skal
-               blive til: en mail, en prompt, en opgave, en note. De er ikke
-               mødetyper, og de hører alligevel til samme sted: begge er en
-               form, noget bliver hældt i.
+               Menupunktet hed kortvarigt «Skabeloner», mens teksttyperne lå
+               her. De ligger nu under Diktering, hvor de hører til, og så er
+               mødetyperne det eneste tilbage — og så er «Mødetyper» igen det
+               præcise ord.
 
-               Derfor er det ene navn ovenover to faner. -->
+               Filerne bag hedder stadig skabeloner. Det er med vilje: de er
+               skabeloner, når man skriver dem, og mødetyper, når man vælger
+               dem. -->
           <RadioButton x:Name="NavSkabeloner" GroupName="nav" Content="{i18n:Oversat nav.skabeloner}"
                        Checked="Nav_Changed"
                        Style="{StaticResource NavKnap}" />

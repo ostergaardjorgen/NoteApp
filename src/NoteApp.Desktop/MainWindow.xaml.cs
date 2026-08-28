@@ -1066,11 +1066,12 @@ public partial class MainWindow : Window
             _startSoegning = null;
             Indhold.Content = new Search.SearchView(ord);
         }
-        else if (NavOrdbog.IsChecked == true)
+        else if (NavDiktering.IsChecked == true)
         {
-            // Bygges hver gang: ordbogen er en tekstfil, og den kan vaere
-            // rettet i en editor siden sidst.
-            Indhold.Content = new Ordbog.OrdbogView();
+            // Bygges hver gang: ordbogen er en tekstfil, og teksttypernes
+            // instruktioner staar i indstillingerne - begge kan vaere rettet
+            // et andet sted siden sidst.
+            Indhold.Content = new Diktering.DikteringView();
         }
         else if (NavSkabeloner.IsChecked == true)
         {

@@ -36,6 +36,24 @@ public sealed class Dikteringsvagt : IDisposable
     /// <summary>Siger til undervejs, så bjælken kan vise, hvad der sker.</summary>
     public event Action<string>? Melder;
 
+    /// <summary>Et prøverum, der har taget dikteringen til sig.</summary>
+    /// <param name="Formaal">Typen, der prøves af — ikke den, programmet lægger op til.</param>
+    /// <param name="Vis">Kaldes med den rå udskrift og den pudsede tekst.</param>
+    public sealed record Proeverum(Dikteringsformaal Formaal, Action<string, string> Vis);
+
+    /// <summary>
+    /// Sat, mens prøverummet er fremme.
+    /// </summary>
+    /// <remarks>
+    /// ER DEN SAT, LANDER TEKSTEN DÉR — og ingen andre steder. Der sættes
+    /// ikke ind i noget program, og udklipsholderen røres ikke.
+    ///
+    /// Uden det ville en prøve i prøverummet skrive ind i det, man sidst
+    /// havde fremme. Man prøver netop, fordi man IKKE er sikker på, hvad der
+    /// kommer ud — og så skal det ikke lande i en mail til en kunde.
+    /// </remarks>
+    public static Proeverum? Proeve { get; set; }
+
     /// <summary>Sandt, mens der optages eller skrives ud.</summary>
     public bool Igang => _optager is not null || _arbejder;
 
@@ -138,10 +156,13 @@ public sealed class Dikteringsvagt : IDisposable
                 ? Ordretter.Ret(raa.Raa, ordbog)
                 : (raa.Raa, (IReadOnlyList<Ordrettelse>)Array.Empty<Ordrettelse>());
 
-            // Formen foelger det program, du var i gang med - se
-            // Programformaal. Er det ikke genkendt, bruges dit eget valg.
-            var formaal = Programformaal.Vaelg(
-                _maal.Proces, _maal.Titel, Formaal(), v.DikteringEfterProgram);
+            // I proeverummet er det den valgte type, der gaelder. Man er
+            // netop derinde for at proeve EN bestemt.
+            var proeve = Proeve;
+
+            var formaal = proeve is not null
+                ? proeve.Formaal
+                : Programformaal.Vaelg(_maal.Proces, _maal.Titel, Formaal(), v.DikteringEfterProgram);
 
             var tekst = udskrift;
 
@@ -150,6 +171,21 @@ public sealed class Dikteringsvagt : IDisposable
                 Melder?.Invoke(Sprog.T("diktering.rydder_op"));
                 tekst = await klient.PudsAsync(
                     udskrift, formaal, Teksttyper.Prompt(formaal, v.Teksttyper));
+            }
+
+            if (proeve is not null)
+            {
+                // Teksten bliver i proeverummet. Intet indsaettes,
+                // udklipsholderen roeres ikke, og der skrives ikke i
+                // historikken: en proeve er ikke et diktat, man skal kunne
+                // finde igen - den er noget, man kaster vaek og laver om.
+                proeve.Vis(udskrift, tekst);
+
+                Melder?.Invoke(afbrudt
+                    ? Sprog.T("settingsview.diktering_afbrudt")
+                    : Sprog.T("diktering.proevet", formaal.ToString().ToLowerInvariant()));
+
+                return;
             }
 
             var indsat = v.DikteringIndsaet && Indsaetter.Indsaet(tekst, _maal);

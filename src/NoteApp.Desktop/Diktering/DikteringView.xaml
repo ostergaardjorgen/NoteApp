@@ -1,0 +1,34 @@
+﻿<UserControl x:Class="NoteApp.Desktop.Diktering.DikteringView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:i18n="clr-namespace:NoteApp.Desktop"
+             xmlns:d="clr-namespace:NoteApp.Desktop.Diktering"
+             xmlns:o="clr-namespace:NoteApp.Desktop.Ordbog"
+             Background="{DynamicResource Baggrund}">
+
+  <!-- ALT OM DIKTERING PAA EET STED.
+
+       De tre faner er de tre ting, man goer, naar dikteringen ikke rammer:
+       man proever den af, man retter instruktionen, og man laerer den et
+       ord. Laa de paa hver sin skaerm, ville det vaere tre opgaver i stedet
+       for een - og saa bliver de ikke lavet.
+
+       PROEVERUMMET STAAR FOERST, fordi det er dér, man opdager, at noget
+       skal rettes. De to andre er svarene. -->
+
+  <TabControl Style="{StaticResource Fanerude}" Margin="24,16,24,16">
+
+    <TabItem Header="{i18n:Oversat diktering.fane_proeverum}" Style="{StaticResource Fane}">
+      <d:ProeverumView />
+    </TabItem>
+
+    <TabItem Header="{i18n:Oversat diktering.fane_teksttyper}" Style="{StaticResource Fane}">
+      <d:TeksttyperView />
+    </TabItem>
+
+    <TabItem Header="{i18n:Oversat diktering.fane_ordbog}" Style="{StaticResource Fane}">
+      <o:OrdbogView />
+    </TabItem>
+
+  </TabControl>
+</UserControl>

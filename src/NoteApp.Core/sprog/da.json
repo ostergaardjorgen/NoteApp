@@ -16,8 +16,8 @@
     "historik": "Historik",
     "indstillinger": "Indstillinger",
     "dinedata": "Dine data",
-    "ordbog": "Ordbog",
-    "skabeloner": "Skabeloner"
+    "skabeloner": "Mødetyper",
+    "diktering": "Diktering"
   },
   "topbar": {
     "optag": "Optag møde",
@@ -873,7 +873,11 @@
     "gik_galt": "Dikteringen gik galt: {0}",
     "historik": "Diktat på {0} sekunder",
     "indsat": "Lagt ind i {0} — som {1}",
-    "rettede": "Ordbogen rettede {0} ord:"
+    "rettede": "Ordbogen rettede {0} ord:",
+    "proevet": "Prøvet som {0} — se resultatet ovenfor",
+    "fane_proeverum": "Prøverum",
+    "fane_teksttyper": "Teksttyper",
+    "fane_ordbog": "Ordbog"
   },
   "ordbogview": {
     "ordbog": "Ordbog",
@@ -901,5 +905,13 @@
     "prompt_hvornaar": "Claude, ChatGPT, Cursor — ingen høflighed",
     "opgave": "Opgave",
     "opgave_hvornaar": "Todoist, Google Tasks — én linje i bydeform"
+  },
+  "proeverum": {
+    "titel": "Prøverum",
+    "under": "Hold genvejstasten nede og tal. Teksten lander her — ikke i det program, du sidst havde fremme. Skift type og sig det samme igen; så kan du se forskellen.",
+    "vaelg_type": "Hvad skal det blive til?",
+    "klar": "Klar. Hold genvejstasten nede og tal — det bliver til en {0}.",
+    "raa": "Sådan blev det hørt",
+    "pudset": "Sådan blev det skrevet"
   }
 }
