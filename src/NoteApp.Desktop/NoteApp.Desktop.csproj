@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net8.0-windows</TargetFramework>
+    <TargetFramework>net10.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -13,7 +13,7 @@
 
     <!-- Versionen følger repoets vX.YY. Den vises i sidebjælken, så en
          skærmbillede fra en fejlmelding siger hvilken build det var. -->
-    <Version>1.1.34</Version>
+    <Version>1.1.36</Version>
 
     <!-- Ikonet i exe-filen: proceslinje, Stifinder og Alt-Tab. Uden det får
          appen Windows' generiske programikon. Genskabes fra AppIkon.jpg med
