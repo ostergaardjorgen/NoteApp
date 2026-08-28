@@ -1,4 +1,5 @@
 ﻿using NoteApp.Core;
+using NoteApp.Core.Llm;
 
 // Kommandolinjeværktøj til de ting, der ikke hører hjemme i en optageknap:
 // initialisering af ordbogen, genopretning efter crash, og et hurtigt kig på
@@ -30,6 +31,7 @@ try
         "google"    => await Google(args.Skip(1).ToArray()),
         "opgaver"   => Opgaver(),
         "lydproeve" => Lydproeve(args.Skip(1).ToArray()),
+        "diktat"    => await Diktat(args.Skip(1).ToArray()),
         "plads"     => Plads(args.Skip(1).ToArray()),
         "recover"   => Genopret(),
         "hjaelp" or "--help" or "-h" => Hjælp(),
@@ -58,6 +60,8 @@ static int Hjælp()
           google    Efterprøver Google Kalender-forbindelsen hele vejen:
                       heypia google [dage]
           opgaver   Viser alle opgaver og hvor de kom fra
+          diktat    Koerer et lydklip gennem hele dikteringen:
+                      heypia diktat <wav> [note|mail|prompt|opgave]
           lydproeve Komprimerer en optagelse og pakker den ud igen:
                       heypia lydproeve <wav> [kbit ...]
           plads     Viser hvad lyden fylder, og hvad der kan ryddes:
@@ -1670,4 +1674,87 @@ static int Plads(string[] a)
                       $"paa optagelser aeldre end {dage} dage.");
 
     return 0;
+}
+
+
+static async Task<int> Diktat(string[] a)
+{
+    if (a.Length == 0)
+    {
+        Console.Error.WriteLine("Brug: heypia diktat <wav> [note|mail|prompt|opgave]");
+        return 2;
+    }
+
+    var lyd = a[0];
+    if (!File.Exists(lyd))
+    {
+        Console.Error.WriteLine($"Der er ingen lydfil paa {lyd}");
+        return 1;
+    }
+
+    if (!Enum.TryParse<Dikteringsformaal>(a.Length > 1 ? a[1] : "note", ignoreCase: true, out var formaal))
+    {
+        Console.Error.WriteLine($"Ukendt formaal: {a[1]}. Vaelg note, mail, prompt eller opgave.");
+        return 2;
+    }
+
+    var noegle = SkyNoegle.Hent();
+    if (noegle is null)
+    {
+        Console.Error.WriteLine(SkyNoegle.Vejledning);
+        return 1;
+    }
+
+    var klient = new Dikteringsklient(noegle);
+    var ur = System.Diagnostics.Stopwatch.StartNew();
+
+    var raa = await klient.SkrivUdAsync(lyd, Fagord());
+    var efterUdskrift = ur.ElapsedMilliseconds;
+
+    Console.WriteLine($"UDSKRIFT  {efterUdskrift} ms   sprog={(raa.Sprog.Length > 0 ? raa.Sprog : "?")}   " +
+                      $"{raa.Sekunder:0.#} sek lyd   {raa.Raa.Length} tegn");
+    Console.WriteLine();
+    Console.WriteLine(raa.Raa);
+    Console.WriteLine();
+
+    if (raa.Raa.Length == 0)
+    {
+        Console.Error.WriteLine("Der kom ingen tekst ud. Er der lyd paa klippet?");
+        return 1;
+    }
+
+    var pudset = await klient.PudsAsync(raa.Raa, formaal);
+
+    Console.WriteLine($"PUDSET    {ur.ElapsedMilliseconds - efterUdskrift} ms   " +
+                      $"formaal={formaal}   {pudset.Length} tegn");
+    Console.WriteLine();
+    Console.WriteLine(pudset);
+    Console.WriteLine();
+    Console.WriteLine($"I ALT     {ur.ElapsedMilliseconds} ms");
+
+    return 0;
+}
+
+/// <summary>
+/// Ordlisten, appen har laert. Sendes med, saa dikteringen kender de navne og
+/// fagtermer, transskriptionen allerede er blevet rettet i.
+/// </summary>
+static string[] Fagord()
+{
+    try
+    {
+        return File.Exists(UserDataPaths.Vocabulary)
+            ? File.ReadAllLines(UserDataPaths.Vocabulary)
+                  .Select(l => l.Trim())
+                  .Where(l => l.Length > 0 && !l.StartsWith('#'))
+                  .Take(200)
+                  .ToArray()
+            : Array.Empty<string>();
+    }
+    catch (IOException)
+    {
+        // En ulaeselig ordliste maa ikke forhindre et diktat. Uden den bliver
+        // udskriften en anelse ringere; det er alt.
+        return Array.Empty<string>();
+    }
 }

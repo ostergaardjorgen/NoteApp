@@ -77,6 +77,16 @@ public static class Voxtral
     /// </remarks>
     public const string StreamingModel = "voxtral-mini-realtime-latest";
 
+    /// <summary>
+    /// Modellen, der pudser den rå udskrift af.
+    /// </summary>
+    /// <remarks>
+    /// Den lille med vilje. Et diktat er sekunder, og ventetiden mærkes
+    /// direkte i hånden — en stor model ville skrive lidt pænere og føles
+    /// meget langsommere. Opgaven er at rydde op, ikke at tænke.
+    /// </remarks>
+    public const string Pudsemodel = "mistral-small-latest";
+
     public static string Endepunkt => $"https://{SkyKatalog.TilladtVaert}/v1/audio/transcriptions";
 
     /// <summary>
@@ -186,6 +196,90 @@ public sealed class Dikteringsklient
     }
 
     /// <summary>
+    /// Pudser den rå udskrift af, så den passer til det, den skal bruges til.
+    ///
+    /// DET ER HER DIKTERING SKILLER SIG FRA EN DIKTAFON. Rå tale har fyldord,
+    /// halve sætninger og ingen tegnsætning. Skrives den bare ned ordret, er
+    /// opgaven ikke løst — den er flyttet.
+    /// </summary>
+    /// <param name="raa">Udskriften fra <see cref="SkrivUdAsync"/>.</param>
+    /// <param name="formaal">Hvor teksten skal hen. Bestemmer formen.</param>
+    public async Task<string> PudsAsync(
+        string raa,
+        Dikteringsformaal formaal,
+        CancellationToken ct = default)
+    {
+        if (string.IsNullOrWhiteSpace(raa)) return "";
+
+        SkyKatalog.KraevEuropa(SkyKatalog.Endpoint);
+
+        var krop = JsonSerializer.Serialize(new
+        {
+            model = Voxtral.Pudsemodel,
+            messages = new object[]
+            {
+                new { role = "system", content = Voxtral.Pudseprompt(formaal) },
+                new { role = "user", content = raa },
+            },
+
+            // LAV TEMPERATUR MED VILJE. Der skal ryddes op i det, der blev
+            // sagt — ikke skrives noget nyt. En model, der faar spillerum,
+            // finder paa en indledning, du ikke har sagt.
+            temperature = 0.2,
+        });
+
+        using var anmodning = new HttpRequestMessage(HttpMethod.Post, SkyKatalog.Endpoint)
+        {
+            Content = new StringContent(krop, new UTF8Encoding(false), "application/json"),
+        };
+        anmodning.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _noegle);
+        anmodning.Headers.UserAgent.ParseAdd("HeyPia");
+
+        using var svar = await _klient.SendAsync(anmodning, ct);
+        var tekst = await svar.Content.ReadAsStringAsync(ct);
+
+        if (!svar.IsSuccessStatusCode)
+            throw new HttpRequestException(
+                $"Tekstpudsningen blev afvist ({(int)svar.StatusCode}).\n\n{Kort(tekst)}");
+
+        return LaesSvar(tekst);
+    }
+
+    /// <summary>Teksten ud af et chat-svar. Tom, hvis der ingen kom.</summary>
+    public static string LaesSvar(string json)
+    {
+        using var doc = JsonDocument.Parse(json);
+
+        return doc.RootElement.TryGetProperty("choices", out var valg)
+               && valg.ValueKind == JsonValueKind.Array
+               && valg.GetArrayLength() > 0
+               && valg[0].TryGetProperty("message", out var besked)
+               && besked.TryGetProperty("content", out var indhold)
+            ? (indhold.GetString() ?? "").Trim()
+            : "";
+    }
+
+    /// <summary>
+    /// Hele vejen: lyd ind, brugbar tekst ud.
+    /// </summary>
+    /// <remarks>
+    /// DEN RÅ TEKST FØLGER MED TILBAGE. Pudsningen kan gøre teksten forkert —
+    /// en model, der rydder op, kan rydde noget væk, du mente. Uden den rå
+    /// tekst ved siden af er der ingen vej tilbage til det, du faktisk sagde.
+    /// </remarks>
+    public async Task<(string Pudset, Dikteringsresultat Raa)> DikterAsync(
+        string lydfil,
+        Dikteringsformaal formaal = Dikteringsformaal.Note,
+        IEnumerable<string>? fagord = null,
+        CancellationToken ct = default)
+    {
+        var raa = await SkrivUdAsync(lydfil, fagord, ct);
+        if (raa.Raa.Length == 0) return ("", raa);
+
+        return (await PudsAsync(raa.Raa, formaal, ct), raa);
+    }
+
+    /// <summary>
     /// Piller svaret fra hinanden. Formen er efterprøvet mod det rigtige
     /// endepunkt 28-08-2026: <c>text</c>, <c>language</c>, <c>usage</c>.
     /// </summary>
@@ -202,12 +296,27 @@ public sealed class Dikteringsklient
             ? s.GetString() ?? ""
             : "";
 
-        var sekunder = rod.TryGetProperty("usage", out var u)
-                       && u.TryGetProperty("audio_seconds", out var a)
-                       && a.ValueKind == JsonValueKind.Number
-                       && a.TryGetDouble(out var tal)
-            ? tal
-            : 0d;
+        // FELTET HEDDER prompt_audio_seconds. Foerste udgave laeste
+        // «audio_seconds» — et navn jeg havde gaettet — og proeven paa den
+        // gaettede form bestod. Fejlen viste sig foerst, da kaeden blev koert
+        // paa et rigtigt klip og skrev «0 sek lyd» om tolv sekunders tale.
+        //
+        // «audio_seconds» staar tilbage som andet valg. Skifter leverandoeren
+        // navn igen, er det bedre at ramme det gamle end at vise nul.
+        double sekunder = 0;
+        if (rod.TryGetProperty("usage", out var u))
+        {
+            foreach (var navn in new[] { "prompt_audio_seconds", "audio_seconds" })
+            {
+                if (u.TryGetProperty(navn, out var a)
+                    && a.ValueKind == JsonValueKind.Number
+                    && a.TryGetDouble(out var tal))
+                {
+                    sekunder = tal;
+                    break;
+                }
+            }
+        }
 
         return new Dikteringsresultat(tekst.Trim(), sprog, sekunder);
     }

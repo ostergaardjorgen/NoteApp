@@ -25,6 +25,17 @@ public class DikteringTest
             () => SkyKatalog.KraevEuropa("https://api.mistral.ai/v1/audio/transcriptions"));
     }
 
+    /// <summary>
+    /// Svaret herunder er KLIPPET UD AF ET RIGTIGT SVAR, felt for felt.
+    ///
+    /// Den første udgave af den her prøve var opdigtet. Der stod
+    /// «audio_seconds», fordi det lød rigtigt, og prøven bestod. Feltet hedder
+    /// «prompt_audio_seconds», og fejlen viste sig først, da kæden blev kørt
+    /// på et klip og skrev «0 sek lyd» om tolv sekunders tale.
+    ///
+    /// «language» kommer tilbage som null fra denne model. Det er ikke en
+    /// fejl, og det må ikke vælte noget.
+    /// </summary>
     [Fact]
     public void Svaret_laeses_som_det_faktisk_kom()
     {
@@ -32,9 +43,16 @@ public class DikteringTest
         {
           "model": "voxtral-mini-latest",
           "text": " Ja. Men jeg tror, du kan være helt sikker på.",
-          "language": "da",
+          "language": null,
           "segments": [],
-          "usage": { "audio_seconds": 12, "prompt_audio_seconds": 12 },
+          "usage": {
+            "prompt_audio_seconds": 12,
+            "prompt_tokens": 3,
+            "total_tokens": 419,
+            "completion_tokens": 41,
+            "prompt_tokens_details": { "cached_tokens": 0, "audio_tokens": 375 },
+            "service_tier": "standard"
+          },
           "finish_reason": "stop"
         }
         """;
@@ -42,8 +60,18 @@ public class DikteringTest
         var r = Dikteringsklient.Laes(json);
 
         Assert.Equal("Ja. Men jeg tror, du kan være helt sikker på.", r.Raa);
-        Assert.Equal("da", r.Sprog);
+        Assert.Equal("", r.Sprog);
         Assert.Equal(12, r.Sekunder);
+    }
+
+    [Fact]
+    public void Det_gamle_feltnavn_rammes_ogsaa()
+    {
+        // Skifter leverandoeren navn igen, er det bedre at ramme det gamle
+        // end at vise nul sekunder om et helt minuts tale.
+        var r = Dikteringsklient.Laes("""{"text":"hej","usage":{"audio_seconds":7}}""");
+
+        Assert.Equal(7, r.Sekunder);
     }
 
     [Fact]
