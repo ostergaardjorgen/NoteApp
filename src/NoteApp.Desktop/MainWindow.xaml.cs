@@ -892,6 +892,9 @@ public partial class MainWindow : Window
     /// </remarks>
     public string? AktivGenvejId => _genvej.Aktiv?.Id;
 
+    /// <summary>Navnet paa den genvej, der er registreret nu. Null hvis ingen.</summary>
+    public string? AktivGenvejNavn => _genvej.Aktiv?.Navn;
+
     /// <summary>Registreringen har skiftet — vis den nye tast.</summary>
     private void VisGenvejIgen() =>
         _moede.VisGenvej(_genvej.Aktiv?.Navn, _genvej.Bemærkning);

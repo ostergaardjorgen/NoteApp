@@ -150,6 +150,24 @@ public sealed class AppSettings
     public string? HotkeyId { get; set; }
 
     /// <summary>
+    /// Den kombination, brugeren selv har TRYKKET. Tom = ikke valgt.
+    /// </summary>
+    /// <remarks>
+    /// DEN VINDER OVER <see cref="HotkeyId"/>. Listen dér er forslag, og et
+    /// forslag kan ikke skelne mellem to taster, der hedder det samme.
+    ///
+    /// Det kostede en formiddag 28-08-2026. Appen lyttede efter kommaet ved
+    /// siden af M; brugeren trykkede paa kommaet paa TALTASTATURET, som er
+    /// dét, der staar et komma paa et dansk tastatur. Det samme gaelder
+    /// tallene: talraekkens 1 og taltastaturets 1 er to forskellige taster,
+    /// og listen viser dem begge som «1».
+    ///
+    /// Trykker man kombinationen i stedet for at vaelge den, findes den
+    /// forskel ikke laengere. Se <see cref="Genvejstast"/>.
+    /// </remarks>
+    public string? Genvejskombi { get; set; }
+
+    /// <summary>
     /// Hvornår klokken sidst blev åbnet. Alt nyere end det er ulæst.
     ///
     /// Sættes kun, når man ÅBNER klokken — ikke ved opstart. En besked, man

@@ -68,6 +68,35 @@ public static class Genvejstaster
             MOD_CONTROL | MOD_SHIFT, 0xBE,
             "Nabotasten til kommaet. Lige så fri — vælg den, der falder bedst i hånden."));
 
+        // ============ TALTASTATURETS KOMMA ============
+        //
+        // Paa et dansk tastatur er tasten paa taltastaturet maerket med et
+        // KOMMA. Det er den, haanden griber ud efter, naar man taenker
+        // «Ctrl+Shift+komma» - og det er en HELT anden tast end den ved siden
+        // af M.
+        //
+        // Maalt 28-08-2026 med en lavniveau-hook, mens brugeren troede, han
+        // trykkede paa genvejen:
+        //
+        //     vk=0x2E  scancode=0x53   gentaget mange gange
+        //
+        // Scancode 0x53 er taltastaturet; 0x33 er den ved siden af M. Der kom
+        // aldrig et eneste 0xBC. Appen gjorde alt rigtigt og lyttede bare paa
+        // den anden tast.
+        //
+        // INGEN SHIFT. Med NumLock slaaet til vender Shift midlertidigt
+        // NumLock om, saa tasten bliver til Delete - derfor 0x2E i maalingen.
+        // Efterproevet samme dag: Ctrl+numpad-komma virker,
+        // Ctrl+Shift+numpad-komma er doed.
+        //
+        // DEN KRAEVER NUMLOCK. Er NumLock slaaet fra, sender tasten Delete, og
+        // genvejen sker ikke. Det staar i teksten, brugeren laeser.
+        liste.Add(new HotkeyValg("ctrl-numpad-komma", "Ctrl+, (taltastatur)",
+            MOD_CONTROL, 0x6E,
+            "Kommaet på taltastaturet — dét til højre, ikke det ved siden af M. "
+            + "Kræver NumLock slået til, og Shift kan ikke være med: Shift gør "
+            + "tasten til Delete."));
+
         // ============ MELLEMRUMSTASTEN - let at ramme, dyr at vaelge ============
         //
         // Efterproevet virksom 28-08-2026. Den er den letteste paa listen: én

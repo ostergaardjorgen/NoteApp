@@ -113,6 +113,24 @@ public sealed class GlobalHotkey : IDisposable
         // dem, saa de skal sorteres fra HER.
         var systemtaget = TagetAfWindows();
 
+        // ============ DEN, BRUGEREN SELV HAR TRYKKET, KOMMER FOERST ============
+        //
+        // Er der en egen kombination, er den bekraeftet ved at blive trykket
+        // OG ved at genvejen faktisk kom frem bagefter. Den skal derfor
+        // proeves foer alt andet.
+        var egen = Genvejstast.Laes(AppSettings.Current.Genvejskombi);
+
+        if (egen.Duer && !systemtaget.Contains((egen.Mod, egen.Vk))
+            && RegisterHotKey(_håndtag, Id, egen.Mod | MOD_NOREPEAT, egen.Vk))
+        {
+            _registreret = true;
+            Aktiv = new HotkeyValg("egen", egen.Navn(Tastetegn(egen.Vk)), egen.Mod, egen.Vk,
+                "Den kombination, du selv har trykket.");
+            Bemærkning = null;
+            Skriv(Aktiv, Aktiv);
+            return true;
+        }
+
         var ønsket = Muligheder.FirstOrDefault(m => m.Id == _ønsketId);
 
         // ============ ET GEMT VALG, DER ALDRIG KAN VIRKE, RYDDES ============
@@ -472,6 +490,51 @@ public sealed class GlobalHotkey : IDisposable
         _genforsøg = null;
         Frigiv();
     }
+
+    /// <summary>
+    /// Er kombinationen taget af Windows selv? Til <see cref="Preferences.Genvejsfanger"/>.
+    /// </summary>
+    /// <remarks>
+    /// Den skal spoerges FOER registreringen. RegisterHotKey siger ja til de
+    /// kombinationer, Windows' egen tekstbehandling har taget - og saa sker
+    /// der ingenting, naar man trykker. Se TagetAfWindows.
+    /// </remarks>
+    public static bool ErSpaerretAfWindows(uint mod, uint vk) =>
+        TagetAfWindows().Contains((mod, vk));
+
+    /// <summary>Tag en kombination med et bestemt id. Til proevekoerslen.</summary>
+    public static bool Tag(IntPtr vindue, int id, uint mod, uint vk) =>
+        RegisterHotKey(vindue, id, mod | MOD_NOREPEAT, vk);
+
+    /// <summary>Giv den fra dig igen.</summary>
+    public static void Slip(IntPtr vindue, int id) => UnregisterHotKey(vindue, id);
+
+    /// <summary>
+    /// Tegnet, en tast giver paa det aktuelle layout — til at vise navnet med.
+    /// </summary>
+    /// <remarks>
+    /// De layoutafhaengige taster har ingen fast betydning: 0xBC er «,» paa
+    /// dansk og amerikansk, men den slags kan ikke antages for alle. Windows
+    /// ved det, og Core goer ikke — derfor slaas det op her og gives videre.
+    ///
+    /// MAPVK_VK_TO_CHAR = 2. Svarer den nul, har tasten intet tegn (F-taster,
+    /// piletaster), og saa bruger Core sit eget navn.
+    /// </remarks>
+    public static string? Tastetegn(uint vk)
+    {
+        try
+        {
+            var t = MapVirtualKey(vk, 2) & 0x7FFF;
+            return t == 0 ? null : ((char)t).ToString();
+        }
+        catch (Exception)
+        {
+            return null;
+        }
+    }
+
+    [DllImport("user32.dll")]
+    private static extern uint MapVirtualKey(uint kode, uint slags);
 
     [DllImport("user32.dll", SetLastError = true)]
     private static extern bool RegisterHotKey(IntPtr hWnd, int id, uint fsModifiers, uint vk);

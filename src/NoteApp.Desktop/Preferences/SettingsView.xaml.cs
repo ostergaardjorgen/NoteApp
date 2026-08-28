@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.IO;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Threading;
@@ -41,7 +42,7 @@ public partial class SettingsView : UserControl
         _timer = new DispatcherTimer(DispatcherPriority.Background) { Interval = TimeSpan.FromMilliseconds(100) };
         _timer.Tick += (_, _) => OpdaterMaalere();
 
-        Loaded += (_, _) => { Indlaes(); VisTema(); LytPaaTema(); VisAutostart(); OpdaterFiler(); VisKrav(); VisPlads(); VisOvervaagede(); };
+        Loaded += (_, _) => { Indlaes(); VisTema(); LytPaaTema(); VisGenvejNu(); VisAutostart(); OpdaterFiler(); VisKrav(); VisPlads(); VisOvervaagede(); };
         Unloaded += (_, _) => { _timer.Stop(); StopProber(); AfbrydTest(); };
     }
 
@@ -117,6 +118,107 @@ public partial class SettingsView : UserControl
         GenvejForklaring.Text = v is null ? "" : (string)v.Hvorfor;
     }
 
+    // ------------------------------------------------ tryk din egen genvej
+
+    private Genvejsfanger? _fanger;
+
+    /// <summary>
+    /// Viser den genvej, der gælder nu — og hvor den kommer fra.
+    /// </summary>
+    private void VisGenvejNu()
+    {
+        if (GenvejNu is null) return;
+
+        var egen = Genvejstast.Laes(AppSettings.Current.Genvejskombi);
+        var aktiv = (Window.GetWindow(this) as MainWindow)?.AktivGenvejId;
+        var navn = (Window.GetWindow(this) as MainWindow)?.AktivGenvejNavn;
+
+        GenvejNu.Text = navn ?? "Ingen genvej";
+
+        GenvejStatus.Text = navn is null
+            ? "Ingen kombination kunne registreres. Vælg en anden."
+            : egen.Duer && aktiv == "egen"
+                ? "Du har trykket den selv, og den er bekræftet."
+                : "Valgt fra listen. Tryk «Vælg genvej» for at bruge den tast, du faktisk rammer.";
+    }
+
+    private void GenvejVaelg_Klik(object sender, RoutedEventArgs e)
+    {
+        var vindue = Window.GetWindow(this);
+        if (vindue is null) return;
+
+        if (_fanger is not null) { StopFanger(); return; }
+
+        _fanger = new Genvejsfanger(vindue);
+        _fanger.Aendret += VisFanger;
+        _fanger.Faerdig += GemEgenGenvej;
+
+        vindue.PreviewKeyDown += Fanger_Tast;
+
+        GenvejFanger.Visibility = Visibility.Visible;
+        GenvejVaelg.Content = "Fortryd";
+
+        _fanger.Begynd();
+    }
+
+    private void Fanger_Tast(object sender, KeyEventArgs e)
+    {
+        if (_fanger is null) return;
+        if (_fanger.Tastetryk(e)) e.Handled = true;
+    }
+
+    private void VisFanger()
+    {
+        if (_fanger is null || GenvejFanger is null) return;
+
+        GenvejFanger.Text = _fanger.Besked;
+        GenvejFanger.Foreground = (System.Windows.Media.Brush)FindResource(
+            _fanger.Hvor switch
+            {
+                Genvejsfanger.Trin.Fejlet => "FejlTekst",
+                Genvejsfanger.Trin.Bekræftet => "Godkendt",
+                _ => "Tekst"
+            });
+    }
+
+    /// <summary>
+    /// Den er trykket OG bekræftet. Nu må den gemmes.
+    /// </summary>
+    /// <remarks>
+    /// FØRST HER. Det er hele pointen: en kombination, der er valgt men aldrig
+    /// prøvet, kan være død uden at nogen ved det — RegisterHotKey siger ja til
+    /// kombinationer, Windows' egen tekstbehandling har taget. Er den derimod
+    /// kommet frem én gang, er hele kæden bevist: fingeren, tastaturet, Windows
+    /// og appen.
+    /// </remarks>
+    private void GemEgenGenvej(Genvejstast tast)
+    {
+        AppSettings.Current.Genvejskombi = tast.ToString();
+        AppSettings.Current.HotkeyId = null;
+        AppSettings.Current.Save();
+
+        StopFanger(behold: true);
+
+        if (Window.GetWindow(this) is MainWindow hoved) hoved.TilslutGenvej();
+
+        VisGenvejNu();
+        VisGenveje();
+
+        Status.Text = $"Lynstart er nu {tast.Navn(GlobalHotkey.Tastetegn(tast.Vk))}.";
+    }
+
+    private void StopFanger(bool behold = false)
+    {
+        if (Window.GetWindow(this) is { } v) v.PreviewKeyDown -= Fanger_Tast;
+
+        _fanger?.Dispose();
+        _fanger = null;
+
+        GenvejVaelg.Content = NoteApp.Core.Sprog.T("settingsview.vaelg_genvej");
+
+        if (!behold) GenvejFanger.Visibility = Visibility.Collapsed;
+    }
+
     private void Genvej_Valgt(object sender, SelectionChangedEventArgs e)
     {
         if (_indlæserGenveje || Genveje.SelectedItem is null) return;
@@ -131,6 +233,11 @@ public partial class SettingsView : UserControl
         }
 
         AppSettings.Current.HotkeyId = (string)valg.Id;
+
+        // VAELGER MAN FRA LISTEN, ER DET DET, DER GAELDER. Den egne
+        // kombination vinder ellers over listen, og saa ville valget her
+        // ikke goere noget - den vaerste slags knap.
+        AppSettings.Current.Genvejskombi = null;
         AppSettings.Current.Save();
 
         // Registreringen skal ske med det samme. Et valg, der foerst virker

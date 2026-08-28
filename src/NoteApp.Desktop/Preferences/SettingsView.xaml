@@ -104,16 +104,63 @@
                            Foreground="{DynamicResource TekstSvag}"
                            Text="{i18n:Oversat settingsview.tryk_kombinationen_hvor_som_helst_i_window}" />
 
-                <ComboBox x:Name="Genveje" Margin="0,12,0,0" SelectionChanged="Genvej_Valgt">
-                  <ComboBox.ItemTemplate>
-                    <DataTemplate>
-                      <TextBlock Text="{Binding Visning}" />
-                    </DataTemplate>
-                  </ComboBox.ItemTemplate>
-                </ComboBox>
+                <!-- ============ DEN TRYKKES, DEN VAELGES IKKE ============
 
-                <TextBlock x:Name="GenvejForklaring" FontSize="12" Margin="2,8,0,0" TextWrapping="Wrap"
-                           LineHeight="19" Foreground="{DynamicResource TekstMeget}" />
+                     En liste kan ikke skelne mellem to taster, der hedder det
+                     samme. Kommaet ved siden af M og kommaet paa
+                     taltastaturet staar begge som «komma»; talraekkens 1 og
+                     taltastaturets 1 staar begge som «1».
+
+                     Det kostede en formiddag 28-08-2026: appen lyttede efter
+                     den ene, brugeren trykkede paa den anden, og alt saa
+                     rigtigt ud i begge ender. Trykker man den i stedet, findes
+                     forskellen ikke laengere. -->
+                <Border Background="{DynamicResource Trykket}" CornerRadius="8" Padding="16"
+                        BorderBrush="{DynamicResource PanelKant}" BorderThickness="1"
+                        Margin="0,12,0,0">
+                  <StackPanel>
+                    <Grid>
+                      <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                      </Grid.ColumnDefinitions>
+
+                      <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                        <TextBlock x:Name="GenvejNu" FontSize="15" FontWeight="SemiBold" />
+                        <TextBlock x:Name="GenvejStatus" FontSize="12" Margin="0,4,0,0"
+                                   TextWrapping="Wrap" LineHeight="19"
+                                   Foreground="{DynamicResource TekstMeget}" />
+                      </StackPanel>
+
+                      <Button x:Name="GenvejVaelg" Grid.Column="1" Click="GenvejVaelg_Klik"
+                              Content="{i18n:Oversat settingsview.vaelg_genvej}"
+                              Style="{StaticResource Primaer}" VerticalAlignment="Center" />
+                    </Grid>
+
+                    <TextBlock x:Name="GenvejFanger" FontSize="13.5" Margin="0,14,0,0"
+                               TextWrapping="Wrap" LineHeight="21" Visibility="Collapsed" />
+                  </StackPanel>
+                </Border>
+
+                <!-- Listen bliver staaende som en genvej til de kendte
+                     kombinationer. Den er ikke vejen til at faa det RIGTIGE
+                     valg - det er knappen ovenfor - men den er hurtig, naar
+                     man bare vil have en, der plejer at vaere fri. -->
+                <Expander Header="{i18n:Oversat settingsview.eller_vaelg_fra_listen}" Margin="0,14,0,0"
+                          Foreground="{DynamicResource TekstSvag}" FontSize="12.5">
+                  <StackPanel Margin="0,10,0,0">
+                    <ComboBox x:Name="Genveje" SelectionChanged="Genvej_Valgt">
+                      <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                          <TextBlock Text="{Binding Visning}" />
+                        </DataTemplate>
+                      </ComboBox.ItemTemplate>
+                    </ComboBox>
+
+                    <TextBlock x:Name="GenvejForklaring" FontSize="12" Margin="2,8,0,0" TextWrapping="Wrap"
+                               LineHeight="19" Foreground="{DynamicResource TekstMeget}" />
+                  </StackPanel>
+                </Expander>
               </StackPanel>
             </Border>
           </StackPanel>

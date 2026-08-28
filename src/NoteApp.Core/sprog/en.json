@@ -621,7 +621,9 @@
     "udseende_forklaring": "Light or dark. Follow Windows and the app changes when your machine does — including automatically in the evening, if you have set that up.",
     "tema_foelg": "Follow Windows",
     "tema_lyst": "Light",
-    "tema_moerkt": "Dark"
+    "tema_moerkt": "Dark",
+    "vaelg_genvej": "Choose shortcut",
+    "eller_vaelg_fra_listen": "Or pick from the list"
   },
   "complianceview": {
     "aabner_console_mistral_ai_hvor_du_slaar_tr": "Opens console.mistral.ai, where you turn training off",

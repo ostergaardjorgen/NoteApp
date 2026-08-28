@@ -594,7 +594,9 @@
     "udseende_forklaring": "Lyst eller mørkt. Følger du Windows, skifter appen med, når din maskine gør — også automatisk om aftenen, hvis du har sat det op.",
     "tema_foelg": "Følg Windows",
     "tema_lyst": "Lyst",
-    "tema_moerkt": "Mørkt"
+    "tema_moerkt": "Mørkt",
+    "vaelg_genvej": "Vælg genvej",
+    "eller_vaelg_fra_listen": "Eller vælg fra listen"
   },
   "setupwindow": {
     "dine_filer_ligger_her": "Dine filer ligger her",
