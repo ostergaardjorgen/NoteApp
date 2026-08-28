@@ -173,20 +173,28 @@ public sealed class AppSettings
     /// Skal et hold på genvejstasten starte en diktering?
     /// </summary>
     /// <remarks>
-    /// FRA SOM STANDARD, OG DET KOSTER NOGET AT SLÅ TIL.
+    /// TIL SOM STANDARD — MEN DEN VAR FRA, OG DET VAR FORKERT.
     ///
-    /// Skal appen kunne skelne et tryk fra et hold, kan den ikke handle på
-    /// trykket med det samme — den må vente og se, om tasten bliver sluppet.
-    /// Det forsinker starten på en mødeoptagelse med grænsen på 350 ms.
+    /// Første udgave stod fra «for en sikkerheds skyld». Resultatet var, at
+    /// den, der havde bedt om dikteringen, holdt tasten nede og fik en
+    /// mødeoptagelse — to gange, før nogen tænkte på at kigge i
+    /// Indstillinger. En funktion, man har bedt om, skal virke, når den
+    /// kommer.
     ///
-    /// Er den her fra, går trykket igennem med det samme, præcis som før
-    /// dikteringen fandtes. Ventetiden findes kun for den, der bruger den.
+    /// DET KOSTER 350 ms PÅ AT STARTE EN MØDEOPTAGELSE. Skal appen kunne
+    /// skelne et tryk fra et hold, kan den ikke handle på trykket, før tasten
+    /// er sluppet. Slås dikteringen fra, går trykket igennem med det samme,
+    /// præcis som før den fandtes.
     ///
-    /// Og der er den anden side: diktering SENDER lyd til leverandøren.
-    /// Mødernes lyd gør ikke, og det skal blive ved at være to forskellige
-    /// ting — også i den forstand, at man selv har slået det til.
+    /// Prisen betales kun, når der er en nøgle. Uden en nøgle kan der ikke
+    /// dikteres, og så ville ventetiden være ren udgift — se
+    /// <c>MainWindow</c>, hvor de to ting ganges sammen.
+    ///
+    /// Diktering SENDER lyd til leverandøren. Mødernes lyd gør ikke, og de to
+    /// ting skal blive ved at være forskellige — men det er holdet på tasten,
+    /// der er samtykket, ikke et flueben, man har glemt.
     /// </remarks>
-    public bool DikteringTil { get; set; }
+    public bool DikteringTil { get; set; } = true;
 
     /// <summary>
     /// Længste diktering i minutter. Derefter slippes der af sig selv.

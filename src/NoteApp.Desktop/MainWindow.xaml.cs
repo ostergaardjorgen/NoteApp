@@ -390,10 +390,10 @@ public partial class MainWindow : Window
 
             // Genvejen skal vide det med det samme, naar fanen aendrer det -
             // ellers skulle appen genstartes, foer et hold betoed noget.
-            Preferences.SettingsView.Dikteringsskift = til =>
-                Dispatcher.BeginInvoke(() => _genvej.HoldGiverDiktering = til);
+            Preferences.SettingsView.Dikteringsskift = _ =>
+                Dispatcher.BeginInvoke(SaetDiktering);
 
-            _genvej.HoldGiverDiktering = AppSettings.Current.DikteringTil;
+            SaetDiktering();
 
             // Skifter registreringen senere - fordi den oenskede tast blev
             // ledig - skal bjaelken sige det nye.
@@ -874,6 +874,22 @@ public partial class MainWindow : Window
     /// </summary>
 
     private readonly Dikteringsvagt _diktat = new();
+
+    /// <summary>
+    /// Afgør, om et hold på tasten skal betyde noget.
+    /// </summary>
+    /// <remarks>
+    /// TO TING SKAL VÆRE SANDE, og den anden er let at glemme: uden en nøgle
+    /// til leverandøren kan der ikke dikteres. Så ville ventetiden på 350 ms
+    /// være ren udgift — man ville betale for en funktion, der ikke kan
+    /// svare.
+    ///
+    /// Der spørges her og ikke i beskedbehandlingen: at læse en fil inde i en
+    /// hook er præcis det, der ikke må ske dér.
+    /// </remarks>
+    private void SaetDiktering() =>
+        _genvej.HoldGiverDiktering =
+            AppSettings.Current.DikteringTil && Core.Llm.SkyNoegle.Hent() is not null;
 
     /// <summary>
     /// Tasten er holdt nede. Dikteringen begynder at lytte.
