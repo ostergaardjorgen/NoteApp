@@ -687,6 +687,15 @@ public partial class MeetingView : UserControl
 
     private void Stop_Click(object sender, RoutedEventArgs e) => Stop();
 
+    /// <summary>
+    /// Under det her er en optagelse et fejltryk, og der spørges ikke.
+    /// </summary>
+    /// <remarks>
+    /// FEMTEN SEKUNDER. Det er kort nok til, at intet møde kan nå at begynde,
+    /// og langt nok til, at man kan nå at fortryde et tryk uden at have travlt.
+    /// </remarks>
+    private static readonly TimeSpan ForKort = TimeSpan.FromSeconds(15);
+
     /// <summary>Stopper og gemmer. Sikker at kalde, når der ikke optages.</summary>
     public string? Stop() => Stop(spørgOmNavn: true);
 
@@ -733,7 +742,23 @@ public partial class MeetingView : UserControl
         //
         // Et webinar, der stopper af sig selv, har fået et navn med — dér er
         // der ingen at spørge, og optagelsen skal gemmes, ikke kasseres.
-        var titel = navn ?? (spørgOmNavn ? SpørgOmNavn() : null);
+        // ============ ET KVART MINUT ER ET FEJLTRYK ============
+        //
+        // Under femten sekunder er der ikke noget moede. Der er trykket
+        // forkert, eller nogen har proevet knappen. At spoerge «hvad skal
+        // moedet hedde?» og «er du sikker paa, du vil kassere?» om fire
+        // sekunders lyd er to spoergsmaal uden svar - man kan ikke navngive
+        // det, og man vil ikke gemme det.
+        //
+        // Der ryddes op med det samme, og der staar hvorfor. Historikken faar
+        // sin linje som ved enhver anden kassering, saa det ikke bare
+        // forsvinder.
+        //
+        // Et webinar, der stopper sig selv, har et navn med og roeres ikke -
+        // dér er der ingen at spoerge, og laengden er ikke et fejltryk.
+        var forKort = navn is null && spørgOmNavn && længde < ForKort;
+
+        var titel = forKort ? null : navn ?? (spørgOmNavn ? SpørgOmNavn() : null);
 
         // ============ SEGMENTERNE REDDES, HALEN KOERER BAGEFTER ============
         //
@@ -797,7 +822,9 @@ public partial class MeetingView : UserControl
 
         if (kasseret)
         {
-            Status.Text = $"Kasseret. {længde:hh\\:mm\\:ss} lyd er slettet.";
+            Status.Text = forKort
+                ? $"Optagelsen var under {ForKort.TotalSeconds:0} sekunder og er slettet."
+                : $"Kasseret. {længde:hh\\:mm\\:ss} lyd er slettet.";
 
             Historik.Skriv(HaendelseType.Optagelse, "Optagelse kasseret",
                 $"{længde:hh\\:mm\\:ss} lyd og {noter} noter slettet efter brugerens valg",
