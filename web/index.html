@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="da">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HeyPia — din personlige informationsassistent</title>
+<meta name="description" content="HeyPia optager dine moeder, skriver dem ud paa din egen maskine og samler alt, du arbejder med, ét sted.">
+<style>
+  :root {
+    --baggrund: #F0F4F8;
+    --panel: #FFFFFF;
+    --kant: #A1CBF3;
+    --tekst: #101828;
+    --svag: #3E5061;
+    --accent: #0D3B66;
+    --paa-accent: #FFFFFF;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --baggrund: #101828;
+      --panel: #112538;
+      --kant: #10497F;
+      --tekst: #F0F4F8;
+      --svag: #B3C7DB;
+      --accent: #02C39A;
+      --paa-accent: #101828;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--baggrund);
+    color: var(--tekst);
+    font: 17px/1.65 "Segoe UI", system-ui, -apple-system, sans-serif;
+  }
+  .midt { max-width: 720px; margin: 0 auto; padding: 0 24px; }
+  header { padding: 72px 0 48px; }
+  h1 { font-size: 2.6rem; line-height: 1.15; margin: 0 0 16px; letter-spacing: -0.02em; }
+  .under { font-size: 1.25rem; color: var(--svag); margin: 0; }
+  h2 { font-size: 1.35rem; margin: 48px 0 12px; }
+  section { background: var(--panel); border: 1px solid var(--kant); border-radius: 14px; padding: 4px 28px 28px; margin: 32px 0; }
+  section h2:first-child { margin-top: 24px; }
+  ul { padding-left: 22px; }
+  li { margin: 8px 0; }
+  a { color: var(--accent); }
+  .graense { border-left: 4px solid var(--accent); padding: 4px 0 4px 18px; margin: 20px 0; color: var(--svag); }
+  .graense strong { color: var(--tekst); }
+  footer { padding: 40px 0 72px; color: var(--svag); font-size: 0.95rem; }
+  footer a { margin-right: 18px; }
+</style>
+</head>
+<body>
+
+<div class="midt">
+
+  <header>
+    <h1>HeyPia</h1>
+    <p class="under">Din personlige informationsassistent. Den optager dine møder,
+    skriver dem ud, og samler alt, du arbejder med, ét sted.</p>
+  </header>
+
+  <section>
+    <h2>Hvad den gør</h2>
+    <ul>
+      <li><strong>Optager mødet</strong> — både det, der siges i lokalet, og det, der
+      kommer ud af højttaleren, så onlinemøder kommer med.</li>
+      <li><strong>Skriver det ud</strong> på din egen maskine, mens du skriver noter
+      undervejs.</li>
+      <li><strong>Laver opsummeringer, referater og opgaver</strong> ud fra teksten.</li>
+      <li><strong>Henter din kalender</strong>, så en optagelse ved, hvilket møde den
+      hører til — hvis du forbinder Google Kalender.</li>
+      <li><strong>Søger på tværs</strong> af transkriptioner, noter og dokumenter.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Grænsen går ved transkriptionen</h2>
+
+    <div class="graense">
+      <strong>Lyden forlader aldrig din maskine.</strong> Den optages og skrives ud
+      lokalt. Alt derefter — opsummering, referater, opgaver — sker hos
+      leverandøren, og det er kun tekst, der sendes.
+    </div>
+
+    <p>Den grænse står samme sted i alle tekster, også inde i appen. Den skal
+    ikke være noget, man opdager, når man er gået i gang.</p>
+
+    <p>Vil du ikke sende noget som helst, så lad være med at sætte en nøgle op.
+    Så transskriberer appen, og der forlader intet maskinen.</p>
+  </section>
+
+  <section>
+    <h2>Fortæl altid, at der optages</h2>
+    <p>Appen minder om det hver gang, og det er ikke pynt. Et møde optages med
+    dem, der er til stede — ikke bag om ryggen på dem. Reglerne for det er
+    forskellige fra land til land, men høfligheden er den samme overalt.</p>
+  </section>
+
+  <footer>
+    <a href="privatliv.html">Privatlivspolitik</a>
+    <a href="privacy.html">Privacy policy (English)</a>
+    <a href="mailto:jorgen@vagtsom.com">Kontakt</a>
+  </footer>
+
+</div>
+
+</body>
+</html>
