@@ -623,7 +623,22 @@
     "diktering_indsaet_under": "Teksten lander direkte i det program, du var i gang med. Slås den fra, ligger den i udklipsholderen, og du sætter selv ind med Ctrl+V.",
     "diktering_indsaet_hvorfor": "Der tages aldrig fokus. Er du skiftet til et andet program, mens teksten blev skrevet ud, lander den i udklipsholderen i stedet — den skal ikke havne midt i noget helt andet.",
     "diktering_efter_program": "Vælg formen efter programmet",
-    "diktering_efter_program_under": "Er du i din mail, bliver det en mail. Er du i en AI-assistent, bliver det en prompt. Kun programmer, der er til at kende — ellers bruges dit eget valg."
+    "diktering_efter_program_under": "Er du i din mail, bliver det en mail. Er du i en AI-assistent, bliver det en prompt. Kun programmer, der er til at kende — ellers bruges dit eget valg.",
+    "ordbog": "Ordbog",
+    "ordbog_under": "Navne, fagtermer og forkortelser, som udskriften skal kende. Listen sendes med lyden som forhåndsviden — og den retter bagefter, når et ord blev hørt næsten rigtigt.",
+    "ordbog_advarsel": "Listen forlader maskinen ved hver diktering. Derfor står den her, hvor du kan se den — skriv ikke noget i den, der ikke må sendes.",
+    "ordbog_tilfoej": "Tilføj ord",
+    "ordbog_nyt": "Nyt ord — navn, fagterm eller forkortelse",
+    "ordbog_fjern": "Fjern",
+    "ordbog_gem_fil": "Gem som fil",
+    "ordbog_hent_fil": "Hent fra fil",
+    "ordbog_tom": "Ordbogen er tom. Tilføj de navne og fagord, der bliver hørt forkert.",
+    "ordbog_antal": "{0} ord — de første {1} sendes med",
+    "ordbog_antal_alle": "{0} ord",
+    "ordbog_findes": "«{0}» står der allerede.",
+    "ordbog_hentet": "Hentet {0} nye ord ind.",
+    "ordbog_gemt": "{0} ord gemt i {1}",
+    "ordbog_filter": "Tekstfil (*.txt)|*.txt|Alle filer (*.*)|*.*"
   },
   "setupwindow": {
     "dine_filer_ligger_her": "Dine filer ligger her",
@@ -846,6 +861,7 @@
     "klar": "Klar — {0} tegn ligger i udklipsholderen. Sæt ind med Ctrl+V.",
     "gik_galt": "Dikteringen gik galt: {0}",
     "historik": "Diktat på {0} sekunder",
-    "indsat": "Lagt ind i {0} — som {1}"
+    "indsat": "Lagt ind i {0} — som {1}",
+    "rettede": "Ordbogen rettede {0} ord:"
   }
 }

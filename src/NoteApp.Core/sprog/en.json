@@ -650,7 +650,22 @@
     "diktering_indsaet_under": "The text lands directly in the program you were working in. Switch it off and it goes to the clipboard for you to paste with Ctrl+V.",
     "diktering_indsaet_hvorfor": "Focus is never taken. If you moved to another program while the text was being written out, it goes to the clipboard instead — it must not land in the middle of something else.",
     "diktering_efter_program": "Choose the form from the program",
-    "diktering_efter_program_under": "In your mail it becomes an email. In an AI assistant it becomes a prompt. Only programs that can be recognised — otherwise your own choice is used."
+    "diktering_efter_program_under": "In your mail it becomes an email. In an AI assistant it becomes a prompt. Only programs that can be recognised — otherwise your own choice is used.",
+    "ordbog": "Word library",
+    "ordbog_under": "Names, terms and abbreviations the transcription should know. The list is sent along with the audio as prior knowledge — and it corrects afterwards, when a word came back nearly right.",
+    "ordbog_advarsel": "The list leaves the machine with every dictation. That is why it is here, where you can see it — do not put anything in it that must not be sent.",
+    "ordbog_tilfoej": "Add word",
+    "ordbog_nyt": "New word — name, term or abbreviation",
+    "ordbog_fjern": "Remove",
+    "ordbog_gem_fil": "Save to file",
+    "ordbog_hent_fil": "Load from file",
+    "ordbog_tom": "The word library is empty. Add the names and terms that come back wrong.",
+    "ordbog_antal": "{0} words — the first {1} are sent along",
+    "ordbog_antal_alle": "{0} words",
+    "ordbog_findes": "«{0}» is already there.",
+    "ordbog_hentet": "Loaded {0} new words.",
+    "ordbog_gemt": "{0} words saved to {1}",
+    "ordbog_filter": "Text file (*.txt)|*.txt|All files (*.*)|*.*"
   },
   "complianceview": {
     "aabner_console_mistral_ai_hvor_du_slaar_tr": "Opens console.mistral.ai, where you turn training off",
@@ -846,6 +861,7 @@
     "klar": "Ready — {0} characters are on the clipboard. Paste with Ctrl+V.",
     "gik_galt": "The dictation failed: {0}",
     "historik": "Dictation of {0} seconds",
-    "indsat": "Placed in {0} — as {1}"
+    "indsat": "Placed in {0} — as {1}",
+    "rettede": "The word library corrected {0} word(s):"
   }
 }

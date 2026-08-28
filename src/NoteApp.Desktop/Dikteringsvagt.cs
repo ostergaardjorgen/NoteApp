@@ -117,7 +117,10 @@ public sealed class Dikteringsvagt : IDisposable
             var v = AppSettings.Current;
             var klient = new Dikteringsklient(noegle);
 
-            var raa = await klient.SkrivUdAsync(klip, v.DikteringFagord ? Fagord() : null);
+            var ordbog = v.DikteringFagord ? Ordbibliotek.Laes() : new List<string>();
+
+            var raa = await klient.SkrivUdAsync(
+                klip, ordbog.Count > 0 ? Ordbibliotek.TilAfsendelse(ordbog) : null);
 
             if (raa.Raa.Length == 0)
             {
@@ -125,17 +128,27 @@ public sealed class Dikteringsvagt : IDisposable
                 return;
             }
 
+            // ============ ORDBOGEN RETTER BAGEFTER OGSAA ============
+            //
+            // Forhaandsviden hjaelper udskriften, men afgoer den ikke.
+            // «Kernesys» kan stadig komme tilbage som «Kernesus», og et navn,
+            // der er een bogstavfejl fra det rigtige, skal ellers rettes i
+            // haanden hver eneste gang. Se Ordretter for forsigtigheden.
+            var (udskrift, rettelser) = ordbog.Count > 0
+                ? Ordretter.Ret(raa.Raa, ordbog)
+                : (raa.Raa, (IReadOnlyList<Ordrettelse>)Array.Empty<Ordrettelse>());
+
             // Formen foelger det program, du var i gang med - se
             // Programformaal. Er det ikke genkendt, bruges dit eget valg.
             var formaal = Programformaal.Vaelg(
                 _maal.Proces, _maal.Titel, Formaal(), v.DikteringEfterProgram);
 
-            var tekst = raa.Raa;
+            var tekst = udskrift;
 
             if (v.DikteringPuds)
             {
                 Melder?.Invoke(Sprog.T("diktering.rydder_op"));
-                tekst = await klient.PudsAsync(raa.Raa, formaal);
+                tekst = await klient.PudsAsync(udskrift, formaal);
             }
 
             var indsat = v.DikteringIndsaet && Indsaetter.Indsaet(tekst, _maal);
@@ -149,9 +162,21 @@ public sealed class Dikteringsvagt : IDisposable
                     ? Sprog.T("diktering.indsat", Vindue(), formaal.ToString().ToLowerInvariant())
                     : Sprog.T("diktering.klar", tekst.Length));
 
+            // Rettelserne skrives med. Retter ordbogen noget forkert, er det
+            // her, man kan se HVAD den rettede - ellers er der ingen vej
+            // tilbage til det, der faktisk blev sagt.
+            var spor = rettelser.Count == 0
+                ? tekst
+                : tekst
+                  + Environment.NewLine + Environment.NewLine
+                  + Sprog.T("diktering.rettede", rettelser.Count)
+                  + Environment.NewLine
+                  + string.Join(Environment.NewLine,
+                                rettelser.Select(r => $"  {r.Hoert} → {r.Rigtigt}"));
+
             Historik.Skriv(HaendelseType.Transskription,
                 Sprog.T("diktering.historik", (int)raa.Sekunder),
-                tekst);
+                spor);
         }
         catch (Exception ex)
         {
@@ -172,26 +197,6 @@ public sealed class Dikteringsvagt : IDisposable
                                          ignoreCase: true, out var f)
             ? f
             : Dikteringsformaal.Note;
-
-    /// <summary>Ordlisten, appen har lært. Højst 200, så anmodningen ikke svulmer.</summary>
-    private static string[] Fagord()
-    {
-        try
-        {
-            return File.Exists(UserDataPaths.Vocabulary)
-                ? File.ReadAllLines(UserDataPaths.Vocabulary)
-                      .Select(l => l.Trim())
-                      .Where(l => l.Length > 0 && !l.StartsWith('#'))
-                      .Take(200)
-                      .ToArray()
-                : Array.Empty<string>();
-        }
-        catch (IOException)
-        {
-            // Uden ordlisten bliver udskriften en anelse ringere. Det er alt.
-            return Array.Empty<string>();
-        }
-    }
 
     /// <summary>
     /// Klippet er din stemme. Det slettes, så snart teksten er i hus.

@@ -43,7 +43,7 @@ public partial class SettingsView : UserControl
         _timer = new DispatcherTimer(DispatcherPriority.Background) { Interval = TimeSpan.FromMilliseconds(100) };
         _timer.Tick += (_, _) => OpdaterMaalere();
 
-        Loaded += (_, _) => { Indlaes(); VisTema(); LytPaaTema(); VisGenvejNu(); VisAutostart(); OpdaterFiler(); VisKrav(); VisPlads(); VisOvervaagede(); IndlaesDiktering(); };
+        Loaded += (_, _) => { Indlaes(); VisTema(); LytPaaTema(); VisGenvejNu(); VisAutostart(); OpdaterFiler(); VisKrav(); VisPlads(); VisOvervaagede(); IndlaesDiktering(); VisOrdbog(); };
         Unloaded += (_, _) => { _timer.Stop(); StopProber(); AfbrydTest(); };
     }
 
@@ -332,6 +332,127 @@ public partial class SettingsView : UserControl
 
     /// <summary>Siger til, når dikteringen bliver slået til eller fra.</summary>
     public static Action<bool>? Dikteringsskift { get; set; }
+
+    // ============================ ORDBOGEN ============================
+
+    /// <summary>
+    /// Viser ordbogen, som den står på disken.
+    /// </summary>
+    /// <remarks>
+    /// DER LÆSES FRA FILEN HVER GANG, ikke fra en kopi i hukommelsen. Ordbogen
+    /// kan være rettet udefra — den er en tekstfil, og det er meningen, at den
+    /// skal kunne åbnes i en editor. En liste på skærmen, der viser noget
+    /// andet end det, der bliver sendt, er værre end ingen liste.
+    /// </remarks>
+    private void VisOrdbog()
+    {
+        var ord = Ordbibliotek.Laes();
+
+        OrdbogListe.ItemsSource = ord;
+
+        OrdbogAntal.Text = ord.Count == 0
+            ? Sprog.T("settingsview.ordbog_tom")
+            : ord.Count > Ordbibliotek.MaksSendte
+                ? Sprog.T("settingsview.ordbog_antal", ord.Count, Ordbibliotek.MaksSendte)
+                : Sprog.T("settingsview.ordbog_antal_alle", ord.Count);
+    }
+
+    private void OrdbogTilfoej_Klik(object sender, RoutedEventArgs e) => TilfoejOrd();
+
+    /// <summary>Enter i feltet gør det samme som knappen. Man tilføjer flere ad gangen.</summary>
+    private void OrdbogNyt_Tast(object sender, KeyEventArgs e)
+    {
+        if (e.Key != Key.Enter) return;
+
+        TilfoejOrd();
+        e.Handled = true;
+    }
+
+    private void TilfoejOrd()
+    {
+        var ord = Ordbibliotek.Rens(OrdbogNyt.Text);
+
+        if (ord.Length == 0)
+        {
+            OrdbogNyt.Clear();
+            return;
+        }
+
+        if (!Ordbibliotek.Tilfoej(ord))
+        {
+            // Det stod der allerede. Feltet ryddes IKKE - saa kan man se hvad
+            // man skrev, og rette i det.
+            Status.Text = Sprog.T("settingsview.ordbog_findes", ord);
+            return;
+        }
+
+        OrdbogNyt.Clear();
+        Status.Text = "";
+        VisOrdbog();
+
+        // Det nye ord er nederst. Uden det her ser man ikke, at der skete noget.
+        OrdbogListe.ScrollIntoView(ord);
+        OrdbogListe.SelectedItem = ord;
+    }
+
+    private void OrdbogFjern_Klik(object sender, RoutedEventArgs e)
+    {
+        if (OrdbogListe.SelectedItem is not string ord) return;
+
+        // Ingen bekraeftelse. Et ord er tilfoejet paa to sekunder igen, og en
+        // dialog for hver fjernelse goer oprydning til noget, man lader vaere
+        // med.
+        Ordbibliotek.Fjern(ord);
+        VisOrdbog();
+    }
+
+    private void OrdbogGem_Klik(object sender, RoutedEventArgs e)
+    {
+        var dialog = new Microsoft.Win32.SaveFileDialog
+        {
+            FileName = "ordbog.txt",
+            DefaultExt = ".txt",
+            Filter = Sprog.T("settingsview.ordbog_filter"),
+        };
+
+        if (dialog.ShowDialog() != true) return;
+
+        try
+        {
+            var antal = Ordbibliotek.Udlaes(dialog.FileName);
+            Status.Text = Sprog.T("settingsview.ordbog_gemt", antal, dialog.FileName);
+        }
+        catch (IOException ex)
+        {
+            Status.Text = ex.Message;
+        }
+    }
+
+    private void OrdbogHent_Klik(object sender, RoutedEventArgs e)
+    {
+        var dialog = new Microsoft.Win32.OpenFileDialog
+        {
+            DefaultExt = ".txt",
+            Filter = Sprog.T("settingsview.ordbog_filter"),
+        };
+
+        if (dialog.ShowDialog() != true) return;
+
+        try
+        {
+            // DER FLETTES, DER ERSTATTES IKKE. Ordene er laert over maaneder,
+            // een rettelse ad gangen, og en indlaesning, der sletter dem, kan
+            // ikke fortrydes.
+            var nye = Ordbibliotek.Indlaes(dialog.FileName, flet: true);
+
+            Status.Text = Sprog.T("settingsview.ordbog_hentet", nye);
+            VisOrdbog();
+        }
+        catch (IOException ex)
+        {
+            Status.Text = ex.Message;
+        }
+    }
 
     private void DikteringTil_Klik(object sender, RoutedEventArgs e) => GemDiktering();
 
