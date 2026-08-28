@@ -19,9 +19,12 @@ public enum Temavalg
 /// formel, WCAG bruger. Prøverne i TemaTest afviser en palet, hvor brødteksten
 /// ikke kan læses — så kan en pæn farve ikke snige sig ind.
 ///
-/// Det er ikke et hypotetisk problem. Den første palet var pæn og for svag:
-/// brødteksten lå omkring 4:1, under kravet på 4,5:1. Det blev fundet i hånden
-/// 10-08-2026. Anden gang blev det fundet af en prøve.
+/// Det er ikke et hypotetisk problem, og det er sket tre gange. Den første
+/// palet var pæn og for svag — brødteksten lå omkring 4:1. Da PIA's farver kom
+/// ind 28-08-2026, viste regnestykket, at mærkets grønne accent ligger på
+/// 2,3:1 mod hvidt: en CTA-knap i den farve med hvid skrift ville være
+/// ulæselig. Og prøven fangede en palet, hvor fire nøgler var blevet den samme
+/// farve, fordi der blev søgt et minimum i stedet for et mål.
 ///
 /// SAMME NØGLER I BEGGE PALETTER
 ///
@@ -61,48 +64,56 @@ public static class Tema
     };
 
     /// <summary>
-    /// Det lyse tema.
+    /// Det lyse tema — PIA's egne farver.
     /// </summary>
     /// <remarks>
-    /// BAGGRUNDEN ER IKKE HVID. Den er en anelse varm og et nøk mørkere end
-    /// panelerne, så et kort kan ses at ligge OVEN PÅ noget. Er begge dele
-    /// rent hvide, forsvinder inddelingen, og siden bliver én stor flade.
+    /// MÆRKETS EGNE: Baggrund er isblå #F0F4F8, Panel er ren hvid, Tekst er
+    /// natblå #101828 (17,8:1 på hvidt), og Accent er den dybe mørkeblå
+    /// #0D3B66 (11,5:1).
     ///
-    /// Ren hvid baggrund er også hårdere at se på i lange stræk — det er den
-    /// samme indvending, der gjorde appen mørk til at begynde med, og den
-    /// forsvinder ikke, fordi temaet skifter.
+    /// DEN FRISKE GRØNNE ER IKKE ACCENT HER. #02C39A ligger på 2,3:1 mod
+    /// hvidt — den kan hverken bære tekst eller en tynd streg. En knap i den
+    /// farve med hvid skrift ville være ulæselig. Den bruges derfor som
+    /// FLADE, hvor skriften er mørk, og som udgangspunkt for Godkendt, der er
+    /// mørknet til 5:1.
+    ///
+    /// Resten er AFLEDT: samme kulør som mærkets mørkeblå, anden lysstyrke.
+    /// Hver nøgle sigter mod sit eget tal, så der er et hierarki — første
+    /// forsøg søgte bare «mindst 4,5», og så blev PanelKant, TekstSvag,
+    /// TekstMeget og Slukket alle den SAMME farve. Prøven sagde ja, og der
+    /// var intet trin tilbage mellem dem.
     /// </remarks>
     public static readonly IReadOnlyDictionary<string, string> Lys =
         new Dictionary<string, string>
         {
-            ["Baggrund"]   = "#FFF7F7F5",
+            ["Baggrund"]   = "#FFF0F4F8",
             ["Panel"]      = "#FFFFFFFF",
-            ["PanelKant"]  = "#FFCCCCC5",
-            ["FeltKant"]   = "#FF909081",
+            ["PanelKant"]  = "#FFA1CBF3",
+            ["FeltKant"]   = "#FF2C8BE4",
 
             // Musen over, knappen nede, raekken valgt. De laa hardkodet i
             // App.xaml som moerkeblaa toner - femten steder, der ikke fulgte
             // med et temaskift, og som ville have staaet som moerke pletter i
             // en lys app.
-            ["Svaev"]      = "#FFF1F1EF",
-            ["Trykket"]    = "#FFE8E8E5",
-            ["Valgt"]      = "#FFD9E6F8",
+            ["Svaev"]      = "#FFEFF5FB",
+            ["Trykket"]    = "#FFE2EEF8",
+            ["Valgt"]      = "#FFC9DEF2",
 
-            ["Tekst"]      = "#FF1B1B19",
-            ["TekstSvag"]  = "#FF5A5A54",
-            ["TekstMeget"] = "#FF6E6E67",
+            ["Tekst"]      = "#FF101828",
+            ["TekstSvag"]  = "#FF3E5061",
+            ["TekstMeget"] = "#FF53687D",
 
             // Tekst paa noget, man ikke kan bruge. WCAG undtager
             // deaktiverede kontroller, men en knap, man ikke kan LAESE,
             // kan man heller ikke finde ud af, hvorfor man ikke kan trykke
             // paa - saa den holdes paa 3:1.
-            ["Slukket"]    = "#FF909087",
+            ["Slukket"]    = "#FF728699",
 
-            ["Accent"]     = "#FF2A6DD4",
-            ["Optager"]    = "#FFC9313A",
-            ["Godkendt"]   = "#FF1B7340",
-            ["Advarsel"]   = "#FF8A5A00",
-            ["FejlTekst"]  = "#FFC9313A",
+            ["Accent"]     = "#FF0D3B66",
+            ["Optager"]    = "#FFC72C22",
+            ["Godkendt"]   = "#FF01775E",
+            ["Advarsel"]   = "#FF876208",
+            ["FejlTekst"]  = "#FFC72C22",
 
             // Tekst OVEN PAA en farvet knap. I det lyse tema er accenten
             // moerk nok til hvid skrift; i det moerke er den lys, og saa er
@@ -112,70 +123,77 @@ public static class Tema
 
             // Flader, der er tonet i betydningens farve: den groenne kasse om
             // noget, der er i orden, den roede om noget, der ikke er.
-            ["AccentFlade"]   = "#FFEAF1FC",
-            ["GodkendtFlade"] = "#FFE7F4EC",
-            ["AdvarselFlade"] = "#FFFAF0DC",
-            ["FejlFlade"]     = "#FFFBEAEB",
+            ["AccentFlade"]   = "#FFD5E6F5",
+            ["GodkendtFlade"] = "#FFD0F9F0",
+            ["AdvarselFlade"] = "#FFF7ECD1",
+            ["FejlFlade"]     = "#FFF8E6E5",
 
             // Et dokument er ikke en udskrift og ikke en note. Den lilla er
             // det eneste sted i appen, farven BETYDER noget andet end
             // "godt/pas paa/galt" - og den skal derfor kunne skelnes fra
             // accenten, som er blaa.
-            ["Dokument"]    = "#FF7B3FAF",
+            ["Dokument"]    = "#FF7A45C0",
 
             // Fundet i en soegning. Gul med moerk skrift, som en overstregning
             // paa papir.
-            ["Fremhaev"]    = "#FFFFE99A",
-            ["PaaFremhaev"] = "#FF1B1B19"
+            ["Fremhaev"]    = "#FFF1DFA1",
+            ["PaaFremhaev"] = "#FF101828"
         };
 
     /// <summary>
-    /// Det mørke tema — det, appen havde fra begyndelsen.
+    /// Det mørke tema — PIA's egne farver.
     /// </summary>
     /// <remarks>
-    /// TO FARVER ER RETTET 28-08-2026. Optager og FejlTekst lå på 4,43:1 mod
-    /// panelfladen — lige under kravet, og ingen havde regnet efter. Det blev
-    /// fundet, første gang prøven blev skrevet, og det er hele pointen med at
-    /// have den. #FFF05055 blev til #FFF05358: forskellen kan ikke ses, og
-    /// den flytter forholdet til 4,51.
+    /// MÆRKETS EGNE: Baggrund er natblå #101828 — mærkets egen mørke farve, så
+    /// det mørke tema står på brandets grund og ikke på en tilfældig grå.
+    /// Tekst er isblå #F0F4F8 (16,1:1), og Accent er den friske grønne
+    /// #02C39A (7,8:1). Her kan den godt bære sin rolle.
+    ///
+    /// DEN DYBE MØRKEBLÅ KAN IKKE BRUGES HER. #0D3B66 ligger på 1,55:1 mod
+    /// natblå — de to har næsten samme lysstyrke. Den bruges derfor kun som
+    /// KULØR til de afledte farver, aldrig som en farve, noget skal ses på.
+    ///
+    /// Panelet er natblå løftet et nøk. Første forsøg løftede det til
+    /// #205688, og det er ikke et panel, det er en knap — alt, der blev målt
+    /// mod den flade, blev vasket ud, og Advarsel endte på ren hvid.
     /// </remarks>
     public static readonly IReadOnlyDictionary<string, string> Moerk =
         new Dictionary<string, string>
         {
-            ["Baggrund"]   = "#FF14161A",
-            ["Panel"]      = "#FF20242C",
-            ["PanelKant"]  = "#FF39404E",
-            ["FeltKant"]   = "#FF626E86",
+            ["Baggrund"]   = "#FF101828",
+            ["Panel"]      = "#FF112538",
+            ["PanelKant"]  = "#FF10497F",
+            ["FeltKant"]   = "#FF008072",
 
-            ["Svaev"]      = "#FF2C323D",
-            ["Trykket"]    = "#FF181B22",
-            ["Valgt"]      = "#FF33405A",
+            ["Svaev"]      = "#FF112D48",
+            ["Trykket"]    = "#FF0C2134",
+            ["Valgt"]      = "#FF095149",
 
-            ["Tekst"]      = "#FFF4F6FA",
-            ["TekstSvag"]  = "#FFC2CAD8",
-            ["TekstMeget"] = "#FFAEB6C4",
+            ["Tekst"]      = "#FFF0F4F8",
+            ["TekstSvag"]  = "#FFB3C7DB",
+            ["TekstMeget"] = "#FF8CABC9",
 
             // Var #FF4A515E og laa paa 1,9:1 mod panelet - en graa knap kunne
             // ikke laeses. Haevet til 3:1 samtidig med, at den blev en noegle.
-            ["Slukket"]    = "#FF6E7787",
+            ["Slukket"]    = "#FF64788A",
 
-            ["Accent"]     = "#FF5B99FF",
-            ["Optager"]    = "#FFF05358",
-            ["Godkendt"]   = "#FF4CBE72",
-            ["Advarsel"]   = "#FFF0B23C",
-            ["FejlTekst"]  = "#FFF05358",
+            ["Accent"]     = "#FF02C39A",
+            ["Optager"]    = "#FFFF676B",
+            ["Godkendt"]   = "#FF02C59B",
+            ["Advarsel"]   = "#FFEFAE31",
+            ["FejlTekst"]  = "#FFFF676B",
 
-            ["PaaAccent"]  = "#FF0B1220",
-            ["PaaOptager"] = "#FF1A0A0B",
+            ["PaaAccent"]  = "#FF101828",
+            ["PaaOptager"] = "#FF101828",
 
-            ["AccentFlade"]   = "#FF1D2530",
-            ["GodkendtFlade"] = "#FF16241C",
-            ["AdvarselFlade"] = "#FF2A2318",
-            ["FejlFlade"]     = "#FF2A1A1A",
+            ["AccentFlade"]   = "#FF08443D",
+            ["GodkendtFlade"] = "#FF09473A",
+            ["AdvarselFlade"] = "#FF523B0F",
+            ["FejlFlade"]     = "#FF5F0B0D",
 
-            ["Dokument"]    = "#FFC98CF0",
-            ["Fremhaev"]    = "#FFF5D13B",
-            ["PaaFremhaev"] = "#FF14181F"
+            ["Dokument"]    = "#FFCB90F0",
+            ["Fremhaev"]    = "#FFF4CB23",
+            ["PaaFremhaev"] = "#FF101828"
         };
 
     public static IReadOnlyDictionary<string, string> Palet(bool lyst) => lyst ? Lys : Moerk;

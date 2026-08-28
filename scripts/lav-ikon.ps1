@@ -22,7 +22,7 @@
 #>
 [CmdletBinding()]
 param(
-    [string] $Kilde = 'C:\NoteApp\AppIkon.jpg',
+    [string] $Kilde = 'C:\NoteApp\design\Pia App logo uden tekst.jpg',
     [string] $IkonFil = 'C:\NoteApp\src\NoteApp.Desktop\app.ico',
     [string] $PngFil = 'C:\NoteApp\src\NoteApp.Desktop\app.png'
 )
@@ -36,15 +36,26 @@ $original = [Drawing.Bitmap]::FromFile($Kilde)
 Write-Host "Kilde: $($original.Width) x $($original.Height)"
 
 # --- 1. Find motivet -------------------------------------------------------
-# Alt der ikke er naesten-hvidt regnes som motiv. Graensen paa 240 er sat
-# under JPEG-stoej, saa komprimeringsartefakter i den hvide flade ikke
-# taeller med som indhold.
+# MOTIVET ER MAETTET, BAGGRUNDEN ER DET IKKE.
+#
+# Foerste udgave regnede alt under 240 som motiv, fordi kildebilledet laa paa
+# ren hvid. Pia-flisen ligger paa LYSEGRAAT med en skygge under, og saa taeller
+# baade baggrund og skygge med - udsnittet ville blive hele billedet.
+#
+# Flisen er blaa og groen; baggrunden og skyggen er graa. Forskellen mellem
+# hoejeste og laveste farvekanal skiller dem rent: over 40 er der kuloer i
+# pixlen, under er der ikke.
+#
+# Den hvide skrift INDE i flisen har ingen maetning, men den er omgivet af
+# flisen til alle sider, saa rammen daekker den alligevel.
 $minX = $original.Width; $minY = $original.Height; $maxX = 0; $maxY = 0
 
 for ($y = 0; $y -lt $original.Height; $y += 2) {
     for ($x = 0; $x -lt $original.Width; $x += 2) {
         $p = $original.GetPixel($x, $y)
-        if ($p.R -lt 240 -or $p.G -lt 240 -or $p.B -lt 240) {
+        $hoej = [Math]::Max($p.R, [Math]::Max($p.G, $p.B))
+        $lav  = [Math]::Min($p.R, [Math]::Min($p.G, $p.B))
+        if (($hoej - $lav) -gt 40) {
             if ($x -lt $minX) { $minX = $x }
             if ($y -lt $minY) { $minY = $y }
             if ($x -gt $maxX) { $maxX = $x }
