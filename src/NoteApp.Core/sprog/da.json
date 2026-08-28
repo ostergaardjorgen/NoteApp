@@ -193,7 +193,7 @@
     "er_aftalen_markeret_til_at_blive_optaget_s": "Er aftalen markeret til at blive optaget, skrives der samtidig i indkaldelsen, at der anvendes mødetransskription, at det kræver at LYDEN optages, at der ikke optages video, at lyden bliver på din computer — og at man kan gøre indsigelse. Deltagerne skal kunne nå at sige fra; det er hele grundlaget for at optage et møde med andre til stede. Oplysningen findes på dansk og engelsk og følger mødets sprog. Ordlyden kan rettes under Indstillinger, men ikke fjernes. Har aftalen allerede en beskrivelse, bliver den stående — oplysningen lægges under.",
     "filerne_er_almindelig_jsonl_en_linje_pr_af": "Filerne er almindelig JSONL — én linje pr. afsendelse. De kan læses af et regneark eller et script uden appen",
     "forbehold": "Forbehold",
-    "forskellen_paa_en_lydfil_og_en_transkripti": "Forskellen på en lydfil og en transkription er ikke en gradsforskel. Det er to forskellige slags oplysninger, og den ene af dem forlader aldrig din maskine.",
+    "forskellen_paa_en_lydfil_og_en_transkripti": "Forskellen på en lydfil og en transkription er ikke en gradsforskel. Det er to forskellige slags oplysninger, og mødernes lydfiler forlader aldrig din maskine. Dikterer du selv, sendes netop det klip — det er din egen stemme, og det sker kun, mens du holder tasten nede.",
     "fortael_altid_deltagerne_at_du_optager": "Fortæl altid deltagerne, at du optager.",
     "gaelder_automatisk_incorporated_to_the_agr": "Gælder automatisk — «incorporated to the Agreement by reference». Den skal hverken bestilles hos salg eller underskrives særskilt.",
     "gaester_inviteres_aldrig_herfra_vaelger_du": "Gæster inviteres ALDRIG herfra. Vælger du at invitere, åbnes aftalen i Google Kalender i din browser, og du inviterer dér. Appen ser hverken dine kontakter eller hvem du sender til — der bedes ikke om adgang til kontakter.",
@@ -227,7 +227,7 @@
     "listen_i_trust_center_er_gennemgaaet_navn": "Listen i Trust Center er gennemgået navn for navn 18-08-2026. Den opdeler efter PRODUKT — Vibe, Studio/API, Vibe Code Web — og det kan bruges: ni af de femogtyve hører til Vibe eller Vibe Code Web og er ude af billedet, fordi appen kun kalder API'et. Fem mere rører kun konto og betaling, ikke mødeindhold.",
     "listen_over_underdatabehandlere_kan_aendre": "Listen over underdatabehandlere kan ændre sig. Mistral varsler ændringer med ti dages indsigelsesfrist, og der kan abonneres på varsler i Trust Center — det bør nogen gøre.",
     "lyd_og_transkription": "Lyd og transkription",
-    "lyd_og_transkription_forlader_aldrig_maski": "Lyd og transkription forlader aldrig maskinen. Det sker i appens egen kode, og den kan efterprøves.",
+    "lyd_og_transkription_forlader_aldrig_maski": "Mødernes lyd forlader aldrig maskinen. Det sker i appens egen kode, og den kan efterprøves.",
     "lyd_transkriptioner_noter_og_dokumenter_om": "Lyd, transkriptioner, noter og dokumenter. Området rækker ikke dertil.",
     "lyden_indeholder_mere_end_ordene": "Lyden indeholder mere end ordene.",
     "lyden_kan_blive_til_biometri_teksten_kan_i": "Lyden kan blive til biometri. Teksten kan ikke.",
@@ -251,7 +251,7 @@
     "opgaver_du_skriver_i_google_laeses_ind_i_c": "Opgaver, du skriver i Google, læses ind i Cockpittet. Krydser du en af dem af her, sendes det op til Google. Det er hele meningen: ét sted at holde øje med, ikke to.",
     "oplysningerne_under_compliance_er_en_gengi": "Oplysningerne under «Compliance» er en gengivelse af tredjepartsvilkår, licensbetingelser og offentligt tilgængelig dokumentation, som forelå på de anførte gennemgangsdatoer. De udgør ikke juridisk rådgivning og kan ikke træde i stedet for en selvstændig vurdering.",
     "oprette_en_aftale_men_kun_den_du_selv_saet": "Oprette en aftale — men kun den, du selv sætter hak ved. Der oprettes intet af sig selv.",
-    "optagelse_og_transskription_forlader_aldri": "«Optagelse og transskription forlader aldrig din pc. Bearbejdningen sker hos Mistral AI, et fransk selskab underlagt GDPR og omfattet af databehandleraftale, og appen kalder alene deres europæiske endepunkt.»",
+    "optagelse_og_transskription_forlader_aldri": "«Mødets lydoptagelse forlader aldrig min pc; den skrives ud lokalt. Det, der sendes videre, er alene teksten. Bearbejdningen sker hos Mistral AI, et fransk selskab underlagt GDPR og omfattet af databehandleraftale, og appen kalder alene deres europæiske endepunkt.»",
     "optagelsen_laves_lokalt_og_whisper_skriver": "Optagelsen laves lokalt, og Whisper skriver den ud lokalt. Appen har ingen kode, der kan sende en lydfil nogen steder hen.",
     "optager_du_et_moede_med_andre_til_stede_ga": "Optager du et møde med andre til stede, gælder det samme som altid: sig det højt, at der optages. En aftale i kalenderen er ikke et samtykke.",
     "overblik": "Overblik",
@@ -272,7 +272,7 @@
     "traening_paa_dine_data_kan_fravaelges_og_f": "Træning på dine data kan fravælges, og fravalget er dit eget. Aftalen siger det udtrykkeligt.",
     "trust_center": "Trust Center",
     "trust_center_oplyste_14_05_2026_om_en_sikk": "Trust Center oplyste 14-05-2026 om en sikkerhedshændelse i forsyningskæden. Mistral skriver, at hverken hostede tjenester eller kundedata blev berørt. Nævnt for fuldstændighedens skyld, ikke som en indvending.",
-    "tvivlen_gaelder_teksten_den_gaelder_ikke_l": "Tvivlen gælder teksten. Den gælder ikke lyden: optagelsen forlader aldrig maskinen, og det er den, der vejer tungest — se «Hvor data går hen». Til gengæld sendes teksten hver gang, der skal mere end en transkription: opsummeringen også, siden 25. august 2026, hvor den lokale mulighed blev fjernet.",
+    "tvivlen_gaelder_teksten_den_gaelder_ikke_l": "Tvivlen gælder teksten. Den gælder ikke mødets lyd: optagelsen forlader aldrig maskinen, og det er den, der vejer tungest — se «Hvor data går hen». Til gengæld sendes teksten hver gang, der skal mere end en transkription: opsummeringen også, siden 25. august 2026, hvor den lokale mulighed blev fjernet.",
     "uden_hakket_sker_der_ingen_afsendelse_over": "Uden hakket sker der ingen afsendelse overhovedet. Hentningen går kun den ene vej.",
     "underdatabehandlere": "Underdatabehandlere",
     "vaelger_du_et_google_meet_link_beder_appen": "Vælger du et Google Meet-link, beder appen Google om at oprette mødelokalet. Linket kommer med tilbage, så mødet kan startes fra kalenderen her.",
@@ -618,7 +618,12 @@
     "diktering_fagord": "Send ordlisten med",
     "diktering_fagord_under": "Ordlisten er blevet bedre af de rettelser, du selv har lavet. Sendes den med, kender dikteringen de navne og fagord fra begyndelsen.",
     "diktering_afbrudt": "Dikteringen nåede loftet og stoppede. Det, du nåede at sige, er skrevet ud — tryk igen for at fortsætte.",
-    "diktering_kraever_noegle": "Dikteringen kræver en API-nøgle til Mistral. Den sættes op under AI-modeller."
+    "diktering_kraever_noegle": "Dikteringen kræver en API-nøgle til Mistral. Den sættes op under AI-modeller.",
+    "diktering_indsaet": "Læg teksten ind, hvor markøren står",
+    "diktering_indsaet_under": "Teksten lander direkte i det program, du var i gang med. Slås den fra, ligger den i udklipsholderen, og du sætter selv ind med Ctrl+V.",
+    "diktering_indsaet_hvorfor": "Der tages aldrig fokus. Er du skiftet til et andet program, mens teksten blev skrevet ud, lander den i udklipsholderen i stedet — den skal ikke havne midt i noget helt andet.",
+    "diktering_efter_program": "Vælg formen efter programmet",
+    "diktering_efter_program_under": "Er du i din mail, bliver det en mail. Er du i en AI-assistent, bliver det en prompt. Kun programmer, der er til at kende — ellers bruges dit eget valg."
   },
   "setupwindow": {
     "dine_filer_ligger_her": "Dine filer ligger her",
@@ -628,7 +633,7 @@
     "heypia_optager_dine_moeder_og_skriver_dem": "HeyPia optager dine møder og skriver dem ud her på maskinen. Skal der laves et referat eller et dokument, sker det hos en leverandør i EU — og kun når du beder om det.",
     "optagelsen_kan_ikke_sendes_nogen_steder_he": "Optagelsen kan ikke sendes nogen steder hen. Appen har ingen kode, der kan det — kun den færdige tekst kan sendes, og kun til det europæiske endepunkt. Du sætter det selv op om lidt, og du kan lade være.",
     "optagelser_transkriptioner_noter_og_dokume": "Optagelser, transkriptioner, noter og dokumenter. Vælg en anden mappe, hvis du fx vil have dem på en krypteret disk.",
-    "selve_transskriptionen_laves_af_whisper_so": "Selve transskriptionen laves af Whisper, som kører lokalt. Lydfilerne forlader aldrig maskinen — heller ikke når der laves et dokument. Motoren og modellen skal hentes én gang, og du bliver spurgt først.",
+    "selve_transskriptionen_laves_af_whisper_so": "Selve transskriptionen laves af Whisper, som kører lokalt. Mødernes lydfiler forlader aldrig maskinen — heller ikke når der laves et dokument. Motoren og modellen skal hentes én gang, og du bliver spurgt først.",
     "skift": "Skift…",
     "tilbage": "Tilbage",
     "transskriptionen_laves_af_whisper_som_koer": "Transskriptionen laves af Whisper, som kører på din egen maskine. Motoren og en sprogmodel skal hentes én gang. Selve hentningen henter kun ned — der sendes intet fra din pc undervejs.",
@@ -840,6 +845,7 @@
     "intet_hoert": "Der blev ikke hørt noget. Sig til, hvis mikrofonen skal vælges om.",
     "klar": "Klar — {0} tegn ligger i udklipsholderen. Sæt ind med Ctrl+V.",
     "gik_galt": "Dikteringen gik galt: {0}",
-    "historik": "Diktat på {0} sekunder"
+    "historik": "Diktat på {0} sekunder",
+    "indsat": "Lagt ind i {0} — som {1}"
   }
 }

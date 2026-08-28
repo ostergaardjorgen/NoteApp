@@ -265,6 +265,8 @@ public partial class SettingsView : UserControl
             DikteringTil.IsChecked = v.DikteringTil;
             DikteringPuds.IsChecked = v.DikteringPuds;
             DikteringFagord.IsChecked = v.DikteringFagord;
+            DikteringIndsaet.IsChecked = v.DikteringIndsaet;
+            DikteringEfterProgram.IsChecked = v.DikteringEfterProgram;
 
             // Loftet: hvert minut fra det mindste til det stoerste. En fri
             // talindtastning ville give nul og bogstaver, og saa skal der
@@ -314,6 +316,8 @@ public partial class SettingsView : UserControl
         v.DikteringTil = DikteringTil.IsChecked == true;
         v.DikteringPuds = DikteringPuds.IsChecked == true;
         v.DikteringFagord = DikteringFagord.IsChecked == true;
+        v.DikteringIndsaet = DikteringIndsaet.IsChecked == true;
+        v.DikteringEfterProgram = DikteringEfterProgram.IsChecked == true;
 
         if (DikteringLoft.SelectedItem is int minutter) v.DikteringLoftMinutter = minutter;
         if (DikteringFormaal.SelectedItem is Formaalsvalg f) v.DikteringFormaal = f.Vaerdi.ToString();
@@ -334,6 +338,10 @@ public partial class SettingsView : UserControl
     private void DikteringPuds_Klik(object sender, RoutedEventArgs e) => GemDiktering();
 
     private void DikteringFagord_Klik(object sender, RoutedEventArgs e) => GemDiktering();
+
+    private void DikteringIndsaet_Klik(object sender, RoutedEventArgs e) => GemDiktering();
+
+    private void DikteringEfterProgram_Klik(object sender, RoutedEventArgs e) => GemDiktering();
 
     private void DikteringLoft_Valgt(object sender, SelectionChangedEventArgs e) => GemDiktering();
 

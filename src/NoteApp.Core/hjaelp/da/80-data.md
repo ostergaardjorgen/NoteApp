@@ -38,9 +38,23 @@ stemmeaftryk.
 
 ## Det, du kan sige — og som holder hele vejen
 
-> «Optagelse og transskription forlader aldrig min pc. Bearbejdningen sker hos
-> Mistral AI, et fransk selskab underlagt GDPR og omfattet af
-> databehandleraftale, og appen kalder alene deres europæiske endepunkt.»
+> «Mødets lydoptagelse forlader aldrig min pc; den skrives ud lokalt. Det, der
+> sendes videre, er alene teksten. Bearbejdningen sker hos Mistral AI, et
+> fransk selskab underlagt GDPR og omfattet af databehandleraftale, og appen
+> kalder alene deres europæiske endepunkt.»
+
+## Diktering er den ene undtagelse
+
+Dikterer du — holder genvejstasten nede og taler — sendes **netop det klip**
+til Mistral for at blive skrevet ud. Det er din egen stemme, dine egne
+sekunder, og det sker kun, mens du selv holder tasten nede.
+
+Det ændrer ikke noget for mødedeltagerne. Deres lyd bliver på maskinen, og fra
+et møde sendes der udelukkende transkription. Forskellen er, hvem der har
+valgt: du har trykket, de har ikke.
+
+Dikteringen kan slås fra under **Indstillinger → Diktering**. Er den fra,
+forlader ingen lyd overhovedet maskinen.
 
 ## Det, du ikke skal sige
 

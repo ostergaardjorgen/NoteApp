@@ -1,4 +1,4 @@
-# Diktering
+﻿# Diktering
 
 Besluttet 28-08-2026. Appen skal kunne diktere: du taler, og der står brugbar
 tekst — i en mail, i en prompt, i en opgave, i et notefelt. Forbilledet er
@@ -129,11 +129,33 @@ skal sendes med, ikke bygges forfra.
 
 ## Etaper
 
-**1 — diktering ind i appen.** Optageknap og Ctrl+, holdt nede. Ud kommer
-pudset tekst i notefeltet. Ingen indsættelse i andre programmer endnu.
+**1 — diktering ind i appen. FÆRDIG 28-08-2026.** Ctrl+, holdt nede giver en
+diktering; et kort tryk starter stadig et møde. Udskrift hos
+`voxtral-mini-latest`, oprydning hos `mistral-small-latest`, målt til
+1,3 sekund for tolv sekunders tale.
 
-**2 — ud i andre programmer.** Teksten lægges, hvor markøren står, uanset
-hvilket program der er fremme. Formen vælges efter programmet.
+**2 — ud i andre programmer. FÆRDIG 28-08-2026.** Teksten lægges, hvor
+markøren står, i det program du var i gang med, og formen følger programmet.
+
+Tre ting blev afgjort undervejs, og de er ikke til at gætte bagfra:
+
+*Der sættes ind, der skrives ikke.* Teksten kunne sendes tegn for tegn som
+tastetryk og lade udklipsholderen være i fred. Men et tastetryk pr. tegn er
+hundredvis af beskeder til et fremmed program, og de programmer, der taber et
+af dem — terminaler, ældre felter, alt med sin egen tastaturhåndtering — taber
+det midt i et ord. En sætning med et bogstav for lidt er værre end ingen
+indsættelse, fordi man ikke opdager den. Ctrl+V er ét tastetryk: enten virker
+det, eller også sker der ingenting.
+
+*Forgrunden læses ved starten, ikke ved slutningen.* Mellem de to ligger
+udskriften på over et sekund. Teksten skal lande dér, hvor du talte — ikke
+dér, hvor du nåede hen imens. Er du skiftet væk, indsættes der ikke, og
+teksten ligger i udklipsholderen.
+
+*Teksten bliver liggende i udklipsholderen bagefter.* Den kunne sættes tilbage
+til det, der lå der før. Men det, man lige har dikteret, er dét, man vil sætte
+ind igen, hvis det første forsøg landede et forkert sted — og blev det gamle
+sat tilbage, ville teksten være væk i samme øjeblik, man opdagede fejlen.
 
 **3 — vågeordet.** Lokal genkendelse af «HeyPia», med lyden slukket som
 standard og en tydelig visning af, at der lyttes.

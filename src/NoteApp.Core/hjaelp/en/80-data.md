@@ -39,9 +39,23 @@ voiceprint.
 
 ## What you can say — and what holds all the way
 
-> «Recording and transcription never leave my PC. The processing takes place
+> «The meeting recording never leaves my PC; it is transcribed locally. What
+> is sent onward is the text alone. The processing takes place
 > at Mistral AI, a French company subject to the GDPR and covered by a data
 > processing agreement, and the app calls only their European endpoint.»
+
+## Dictation is the one exception
+
+When you dictate — hold the shortcut key down and speak — **that one clip** is
+sent to Mistral to be written out. It is your own voice, your own seconds, and
+it happens only while you hold the key yourself.
+
+Nothing changes for the people in the meeting. Their audio stays on the
+machine, and from a meeting only the transcript is ever sent. The difference is
+who chose: you pressed, they did not.
+
+Dictation can be switched off under **Settings → Dictation**. With it off, no
+audio leaves the machine at all.
 
 ## What you should not say
 

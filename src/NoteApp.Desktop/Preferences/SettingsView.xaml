@@ -583,6 +583,24 @@
               </StackPanel>
             </Border>
 
+            <!-- ============================ Hvor teksten lander ============================ -->
+            <Border Background="{DynamicResource Panel}" CornerRadius="10" Padding="20" Margin="0,0,0,14"
+                    BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
+              <StackPanel>
+                <CheckBox x:Name="DikteringIndsaet" Click="DikteringIndsaet_Klik"
+                          Content="{i18n:Oversat settingsview.diktering_indsaet}" FontWeight="SemiBold" />
+                <TextBlock Style="{StaticResource Underskrift}" Margin="0,6,0,0" TextWrapping="Wrap"
+                           Text="{i18n:Oversat settingsview.diktering_indsaet_under}" />
+                <TextBlock Style="{StaticResource Underskrift}" Margin="0,8,0,16" TextWrapping="Wrap"
+                           Text="{i18n:Oversat settingsview.diktering_indsaet_hvorfor}" />
+
+                <CheckBox x:Name="DikteringEfterProgram" Click="DikteringEfterProgram_Klik"
+                          Content="{i18n:Oversat settingsview.diktering_efter_program}" FontWeight="SemiBold" />
+                <TextBlock Style="{StaticResource Underskrift}" Margin="0,6,0,0" TextWrapping="Wrap"
+                           Text="{i18n:Oversat settingsview.diktering_efter_program_under}" />
+              </StackPanel>
+            </Border>
+
             <!-- ============================ Oprydning og ordliste ============================ -->
             <Border Background="{DynamicResource Panel}" CornerRadius="10" Padding="20" Margin="0,0,0,14"
                     BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">

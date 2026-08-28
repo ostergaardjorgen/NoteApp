@@ -224,7 +224,7 @@
     "heypia_optager_dine_moeder_og_skriver_dem": "HeyPia records your meetings and transcribes them here on your machine. If minutes or another document are to be made from the text, that happens at Mistral AI in France — and only the text is sent.",
     "optagelsen_kan_ikke_sendes_nogen_steder_he": "The recording cannot be sent anywhere. The app has no code that could — only the finished text can be sent, and only to the European endpoint. You set that up yourself in a moment, and you may leave it be.",
     "optagelser_transkriptioner_noter_og_dokume": "Recordings, transcripts, notes and documents. Choose another folder if you want them on an encrypted disk, for instance.",
-    "selve_transskriptionen_laves_af_whisper_so": "The transcription itself is done by Whisper, which runs locally. The audio files never leave the machine — not even when a document is made. The engine and the model must be downloaded once, and you are asked first.",
+    "selve_transskriptionen_laves_af_whisper_so": "The transcription itself is done by Whisper, which runs locally. Your meeting audio files never leave the machine — not even when a document is made. The engine and the model must be downloaded once, and you are asked first.",
     "skift": "Change…",
     "tilbage": "Back",
     "transskriptionen_laves_af_whisper_som_koer": "The transcription is done by Whisper, which runs on your own machine. The engine and a language model must be downloaded once. The download only pulls down — nothing is sent from your PC along the way.",
@@ -645,7 +645,12 @@
     "diktering_fagord": "Send the word list along",
     "diktering_fagord_under": "The word list has improved from the corrections you made yourself. Sent along, dictation knows those names and terms from the start.",
     "diktering_afbrudt": "The dictation reached the limit and stopped. What you managed to say has been written out — press again to carry on.",
-    "diktering_kraever_noegle": "Dictation needs an API key for Mistral. Set it up under AI models."
+    "diktering_kraever_noegle": "Dictation needs an API key for Mistral. Set it up under AI models.",
+    "diktering_indsaet": "Place the text where the cursor is",
+    "diktering_indsaet_under": "The text lands directly in the program you were working in. Switch it off and it goes to the clipboard for you to paste with Ctrl+V.",
+    "diktering_indsaet_hvorfor": "Focus is never taken. If you moved to another program while the text was being written out, it goes to the clipboard instead — it must not land in the middle of something else.",
+    "diktering_efter_program": "Choose the form from the program",
+    "diktering_efter_program_under": "In your mail it becomes an email. In an AI assistant it becomes a prompt. Only programs that can be recognised — otherwise your own choice is used."
   },
   "complianceview": {
     "aabner_console_mistral_ai_hvor_du_slaar_tr": "Opens console.mistral.ai, where you turn training off",
@@ -698,7 +703,7 @@
     "er_aftalen_markeret_til_at_blive_optaget_s": "If the event is marked to be recorded, the invitation also states that meeting transcription is used, that it requires the AUDIO to be recorded, that no video is recorded, that the audio stays on your computer — and that anyone may object. The participants must have time to say no; that is the whole basis for recording a meeting with others present. The notice exists in Danish and English and follows the meeting's language. The wording can be edited under Settings, but not removed. If the event already has a description, it stays — the notice is added below it.",
     "filerne_er_almindelig_jsonl_en_linje_pr_af": "The files are ordinary JSONL — one line per transmission. They can be read by a spreadsheet or a script without the app",
     "forbehold": "Reservations",
-    "forskellen_paa_en_lydfil_og_en_transkripti": "The difference between an audio file and a transcript is not a difference of degree. They are two different kinds of information, and one of them never leaves your machine.",
+    "forskellen_paa_en_lydfil_og_en_transkripti": "The difference between an audio file and a transcript is not a matter of degree. They are two different kinds of information, and your meeting audio files never leave your machine. When you dictate, that one clip is sent — it is your own voice, and only while you hold the key down.",
     "fortael_altid_deltagerne_at_du_optager": "Always tell the participants that you are recording.",
     "gaelder_automatisk_incorporated_to_the_agr": "Applies automatically — «incorporated to the Agreement by reference». It has to be neither ordered from sales nor signed separately.",
     "gaester_inviteres_aldrig_herfra_vaelger_du": "Guests are NEVER invited from here. If you choose to invite, the event opens in Google Calendar in your browser, and you invite there. The app sees neither your contacts nor who you send to — no access to contacts is requested.",
@@ -732,7 +737,7 @@
     "listen_i_trust_center_er_gennemgaaet_navn": "The list in the Trust Center was reviewed name by name on 18-08-2026. It is broken down by PRODUCT — Vibe, Studio/API, Vibe Code Web — and that can be used: nine of the twenty-five belong to Vibe or Vibe Code Web and are out of the picture, because the app only calls the API. Five more touch only account and payment, not meeting content.",
     "listen_over_underdatabehandlere_kan_aendre": "The list of sub-processors can change. Mistral gives notice of changes with a ten-day objection period, and notifications can be subscribed to in the Trust Center — someone ought to.",
     "lyd_og_transkription": "Audio and transcript",
-    "lyd_og_transkription_forlader_aldrig_maski": "Audio and transcript never leave the machine. It happens in the app's own code, and that can be verified.",
+    "lyd_og_transkription_forlader_aldrig_maski": "Meeting audio never leaves the machine. It happens in the app’s own code, and that can be checked.",
     "lyd_transkriptioner_noter_og_dokumenter_om": "Audio, transcripts, notes and documents. The scope does not reach that far.",
     "lyden_indeholder_mere_end_ordene": "The audio holds more than the words.",
     "lyden_kan_blive_til_biometri_teksten_kan_i": "The audio can become biometrics. The text cannot.",
@@ -756,7 +761,7 @@
     "opgaver_du_skriver_i_google_laeses_ind_i_c": "Tasks you write in Google are read into the Cockpit. Tick one off here and it is sent up to Google. That is the whole point: one place to keep an eye on, not two.",
     "oplysningerne_under_compliance_er_en_gengi": "The information under «Compliance» is a rendering of third-party terms, licence conditions and publicly available documentation as it stood on the review dates given. It does not constitute legal advice and cannot replace an independent assessment.",
     "oprette_en_aftale_men_kun_den_du_selv_saet": "Create an event — but only the one you tick yourself. Nothing is created on its own.",
-    "optagelse_og_transskription_forlader_aldri": "«Recording and transcription never leave your PC. The processing takes place at Mistral AI, a French company subject to the GDPR and covered by a data processing agreement, and the app calls only their European endpoint.»",
+    "optagelse_og_transskription_forlader_aldri": "«The meeting recording never leaves my PC; it is transcribed locally. What is sent onward is the text alone. Processing takes place at Mistral AI, a French company subject to the GDPR and covered by a data processing agreement, and the app calls only their European endpoint.»",
     "optagelsen_laves_lokalt_og_whisper_skriver": "The recording is made locally, and Whisper transcribes it locally. The app has no code that could send an audio file anywhere.",
     "optager_du_et_moede_med_andre_til_stede_ga": "If you record a meeting with others present, the same applies as always: say out loud that you are recording. An event in the calendar is not a consent.",
     "overblik": "Overview",
@@ -777,7 +782,7 @@
     "traening_paa_dine_data_kan_fravaelges_og_f": "Training on your data can be opted out of, and the opt-out is yours. The agreement says so expressly.",
     "trust_center": "Trust Center",
     "trust_center_oplyste_14_05_2026_om_en_sikk": "On 14-05-2026 the Trust Center reported a supply chain security incident. Mistral writes that neither hosted services nor customer data were affected. Mentioned for completeness, not as an objection.",
-    "tvivlen_gaelder_teksten_den_gaelder_ikke_l": "The doubt applies to the text. It does not apply to the audio: the recording never leaves the machine, and that is what weighs most — see «Where data goes». The text, on the other hand, is sent every time more than a transcript is needed: the summary too, since 25 August 2026, when the local option was removed.",
+    "tvivlen_gaelder_teksten_den_gaelder_ikke_l": "The doubt applies to the text. It does not apply to the meeting audio: the recording never leaves the machine, and that is what weighs most — see «Where data goes». The text, on the other hand, is sent every time more than a transcript is needed: the summary too, since 25 August 2026, when the local option was removed.",
     "uden_hakket_sker_der_ingen_afsendelse_over": "Without the tick nothing is sent at all. The fetching goes only one way.",
     "underdatabehandlere": "Sub-processors",
     "vaelger_du_et_google_meet_link_beder_appen": "If you choose a Google Meet link, the app asks Google to create the meeting room. The link comes back with it, so the meeting can be started from the calendar here.",
@@ -840,6 +845,7 @@
     "intet_hoert": "Nothing was heard. Say so if the microphone needs changing.",
     "klar": "Ready — {0} characters are on the clipboard. Paste with Ctrl+V.",
     "gik_galt": "The dictation failed: {0}",
-    "historik": "Dictation of {0} seconds"
+    "historik": "Dictation of {0} seconds",
+    "indsat": "Placed in {0} — as {1}"
   }
 }

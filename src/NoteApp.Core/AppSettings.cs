@@ -248,6 +248,33 @@ public sealed class AppSettings
     public bool DikteringFagord { get; set; } = true;
 
     /// <summary>
+    /// Skal teksten lægges ind, hvor markøren står?
+    /// </summary>
+    /// <remarks>
+    /// TIL SOM STANDARD. Det er hele forskellen på en diktering og en
+    /// diktafon med en udklipsholder: man taler, og teksten er der.
+    ///
+    /// Slås den fra, ligger teksten i udklipsholderen, og man sætter selv ind.
+    /// Det er det rigtige valg i et program, hvor et Ctrl+V betyder noget
+    /// andet end at sætte ind — og i det hele taget, hvis man hellere vil se
+    /// teksten, før den lander.
+    /// </remarks>
+    public bool DikteringIndsaet { get; set; } = true;
+
+    /// <summary>
+    /// Skal formen følge det program, der er fremme?
+    /// </summary>
+    /// <remarks>
+    /// TIL SOM STANDARD. Er du i din mail, bliver det en mail; er du i en
+    /// AI-assistent, bliver det en prompt.
+    ///
+    /// Gættet er BEVIDST FORSIGTIGT — kun programmer, der er til at kende. Er
+    /// det ikke genkendt, bruges <see cref="DikteringFormaal"/>. En forkert
+    /// gætning er værre end ingen, fordi man skal opdage den og skrive om.
+    /// </remarks>
+    public bool DikteringEfterProgram { get; set; } = true;
+
+    /// <summary>
     /// Hvornår klokken sidst blev åbnet. Alt nyere end det er ulæst.
     ///
     /// Sættes kun, når man ÅBNER klokken — ikke ved opstart. En besked, man
