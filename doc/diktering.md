@@ -42,19 +42,44 @@ blev skrevet i dag:
 **Diktering sender lyd til Mistral.** Det er hele pointen med Voxtral. Så
 snart etape 1 er tændt, er sætningen ovenfor forkert alle de steder, den står.
 
-Beskeden «al lyd bliver lokalt, al tekst behandles kun af europæisk AI» kan
-altså ikke bruges som den er. Den, der kan, skelner mellem de to slags lyd:
+Beskeden «al lyd bliver lokalt» kan altså ikke bruges som den er.
 
-> **Møder optages og skrives ud på din egen maskine.** Dikterer du, sendes
-> netop det klip til europæisk AI — din egen stemme, dine egne sekunder.
+**Afgjort 28-08-2026. Det er ét slogan med to halvdele, og begge skal med:**
 
-Det er stadig et stærkt løfte, og det har den fordel at være sandt. Et møde
-med fem mennesker, der ikke er blevet spurgt, er noget andet end en sætning,
-du selv taler ind i en mail.
+> ## Din stemme bliver i europæisk sky. Dine kunders lyd bliver hos dig.
 
-**Skal afgøres, før etape 1 tændes**, ikke bagefter: privatlivspolitikken
-ligger til grund for Googles verifikation, og den skal passe på dagen, den
-sendes ind.
+| Halvdel | Hvad den siger |
+|---|---|
+| **Dine kunders lyd bliver hos dig** | Mødernes lyd forlader aldrig maskinen. Sendes der noget videre fra et møde, er det **udelukkende transkriptionen** |
+| **Din stemme bliver i europæisk sky** | Dikterer du, sendes netop det klip — din egen stemme, dine egne sekunder, fordi du selv trykkede |
+
+De to trækker i hver sin retning, og det er meningen. Den ene er et løfte om
+tilbageholdenhed, den anden om formåen: bliver dikteringen lige så god som
+Wispr Flow **og** kører på europæisk AI, er der kommet noget, de færreste har.
+
+Til et møde sidder der mennesker, der ikke selv har valgt noget. Deres stemmer
+er ikke vores at flytte. Det er dét, den første halvdel handler om, og den må
+ikke blive udvandet af den anden.
+
+### Hvad der skal rettes, den dag etape 1 tændes
+
+Løftet står **35 steder** i dag — i koden, i hjælpen, i appens tekster, på
+hjemmesiden og i privatlivspolitikken. De er sande nu, fordi dikteringen ikke
+findes, og de er derfor IKKE rettet på forskud: en app, der lover noget, den
+ikke gør, er den samme fejl med omvendt fortegn.
+
+Hjemmesiden og politikken er allerede formuleret, så de holder: de siger
+«lyden fra dine **møder**» frem for «lyden». Når dikteringen lander, skal der
+**tilføjes** et afsnit — der skal ikke rettes en usandhed.
+
+Find dem med:
+
+```
+grep -rn "forlader aldrig\|aldrig din maskine\|never leaves" src web doc
+```
+
+Privatlivspolitikken ligger til grund for Googles verifikation og skal passe
+på dagen, den sendes ind.
 
 ### 2. «Sig HeyPia» kan ikke lyttes efter i skyen
 
