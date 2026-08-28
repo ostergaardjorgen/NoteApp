@@ -51,8 +51,40 @@ public sealed class GlobalHotkey : IDisposable
     private string? _ønsketId;
     private DispatcherTimer? _genforsøg;
 
-    /// <summary>Rejses når genvejen bliver trykket.</summary>
+    /// <summary>Rejses når genvejen bliver trykket — et kort tryk.</summary>
     public event Action? Trykket;
+
+    /// <summary>
+    /// Rejses, når genvejen har været holdt nede længe nok til, at det er en
+    /// diktering og ikke et tryk.
+    /// </summary>
+    public event Action? HoldBegyndt;
+
+    /// <summary>Rejses, når tasten slippes igen. Kommer altid efter <see cref="HoldBegyndt"/>.</summary>
+    public event Action? HoldSluttet;
+
+    /// <summary>
+    /// Skal et hold på tasten kunne betyde noget andet end et tryk?
+    /// </summary>
+    /// <remarks>
+    /// DEN ER FRA SOM STANDARD, OG DET ER IKKE FORSIGTIGHED FOR EN SIKKERHEDS
+    /// SKYLD.
+    ///
+    /// Skal appen kunne skelne et tryk fra et hold, kan den ikke handle på
+    /// trykket med det samme — den er nødt til at vente og se, om tasten
+    /// bliver sluppet. Det koster <see cref="Holdvurdering.Graense"/> på at
+    /// starte en mødeoptagelse.
+    ///
+    /// Den ventetid skal kun findes for den, der faktisk brugerdiktering.
+    /// Er den her falsk, går trykket igennem med det samme, præcis som før —
+    /// samme kodesti, ingen timer, ingen forskel.
+    /// </remarks>
+    public bool HoldGiverDiktering { get; set; }
+
+    private DispatcherTimer? _holdur;
+    private DateTime _holdStart;
+    private uint _holdTast;
+    private bool _holderNu;
 
     /// <summary>Den kombination, der faktisk blev registreret. Null hvis ingen lykkedes.</summary>
     public HotkeyValg? Aktiv { get; private set; }
@@ -473,11 +505,102 @@ public sealed class GlobalHotkey : IDisposable
 
         håndteret = true;
 
-        var kald = Trykket;
-        if (kald is not null)
-            _vindue?.Dispatcher.BeginInvoke(DispatcherPriority.Normal, kald);
+        // ============ TRYK ELLER HOLD ============
+        //
+        // Er dikteringen fra, gaar trykket igennem med det samme — samme sti
+        // som foer holdet fandtes. Der er ingen timer og ingen ventetid, og
+        // en moedeoptagelse starter praecis som den altid har gjort.
+        if (!HoldGiverDiktering)
+        {
+            var kald = Trykket;
+            if (kald is not null)
+                _vindue?.Dispatcher.BeginInvoke(DispatcherPriority.Normal, kald);
+
+            return IntPtr.Zero;
+        }
+
+        // MOD_NOREPEAT giver een besked pr. tryk. Kommer der alligevel en, mens
+        // et hold er i gang, er det ikke et nyt tryk — det skal ikke starte
+        // endnu en diktering oven i den, der koerer.
+        if (_holdur is not null) return IntPtr.Zero;
+
+        // Hvilken af de to registrerede taster var det? Tvillingen paa
+        // taltastaturet er en anden vk, og der skal spoerges paa den rigtige.
+        _holdTast = hvem == TvillingId && Aktiv is not null
+            ? Genvejstast.Tvillingen(Aktiv.Key)
+            : Aktiv?.Key ?? 0;
+
+        if (_holdTast == 0)
+        {
+            var kald = Trykket;
+            if (kald is not null)
+                _vindue?.Dispatcher.BeginInvoke(DispatcherPriority.Normal, kald);
+
+            return IntPtr.Zero;
+        }
+
+        _vindue?.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(StartHoldur));
 
         return IntPtr.Zero;
+    }
+
+    /// <summary>
+    /// Følger tasten, til den slippes, og afgør undervejs om det blev et tryk
+    /// eller et hold.
+    /// </summary>
+    /// <remarks>
+    /// DER SPØRGES, DER LYTTES IKKE. Et slip kunne fanges med en global
+    /// tastaturhook, men sådan en ligger i vejen for hvert eneste tastetryk på
+    /// maskinen, kan slås fra af Windows uden varsel, og er præcis den slags,
+    /// der får en optagelse til at virke «en gang imellem».
+    ///
+    /// GetAsyncKeyState spørger i stedet efter tastens tilstand hvert 25.
+    /// millisekund, mens den er nede. Det koster ingenting, det kan ikke
+    /// blokere noget, og holder man op med at spørge, sker der ingenting.
+    /// </remarks>
+    private void StartHoldur()
+    {
+        _holdStart = DateTime.UtcNow;
+        _holderNu = false;
+
+        _holdur = new DispatcherTimer(DispatcherPriority.Input)
+        {
+            Interval = TimeSpan.FromMilliseconds(25),
+        };
+
+        _holdur.Tick += (_, _) =>
+        {
+            var nede = (GetAsyncKeyState((int)_holdTast) & 0x8000) != 0;
+
+            switch (Holdvurdering.Naeste(DateTime.UtcNow - _holdStart, nede, _holderNu))
+            {
+                case Holdsvar.Vent:
+                    return;
+
+                case Holdsvar.Begynd:
+                    _holderNu = true;
+                    HoldBegyndt?.Invoke();
+                    return;
+
+                case Holdsvar.Slut:
+                    StopHoldur();
+                    HoldSluttet?.Invoke();
+                    return;
+
+                default:
+                    StopHoldur();
+                    Trykket?.Invoke();
+                    return;
+            }
+        };
+
+        _holdur.Start();
+    }
+
+    private void StopHoldur()
+    {
+        _holdur?.Stop();
+        _holdur = null;
     }
 
     /// <summary>
@@ -499,6 +622,11 @@ public sealed class GlobalHotkey : IDisposable
     /// </remarks>
     public void Pause()
     {
+        // Et hold i gang skal ikke overleve, at genvejen bliver taget ned.
+        // Slippet ville aldrig komme, og dikteringen ville blive ved.
+        StopHoldur();
+        _holderNu = false;
+
         if (_registreret && _håndtag != IntPtr.Zero) UnregisterHotKey(_håndtag, Id);
         if (_tvilling && _håndtag != IntPtr.Zero) UnregisterHotKey(_håndtag, TvillingId);
 
@@ -542,6 +670,7 @@ public sealed class GlobalHotkey : IDisposable
 
     public void Dispose()
     {
+        StopHoldur();
         _genforsøg?.Stop();
         _genforsøg = null;
         Frigiv();
@@ -597,4 +726,7 @@ public sealed class GlobalHotkey : IDisposable
 
     [DllImport("user32.dll", SetLastError = true)]
     private static extern bool UnregisterHotKey(IntPtr hWnd, int id);
+
+    [DllImport("user32.dll")]
+    private static extern short GetAsyncKeyState(int vKey);
 }
