@@ -307,17 +307,10 @@ public partial class SearchView : UserControl
             HentBredder();
         }
 
-        var animation = new System.Windows.Media.Animation.DoubleAnimation
-        {
-            To = maal,
-            Duration = TimeSpan.FromMilliseconds(400),
-            EasingFunction = new System.Windows.Media.Animation.CubicEase
-            {
-                EasingMode = System.Windows.Media.Animation.EasingMode.EaseInOut,
-            },
-        };
-
-        BeginAnimation(UdfoldningProperty, animation);
+        // Farten staar i Glid. Menuen i venstre side bruger den samme, og de
+        // to skal bevaege sig ens - ellers laeses de som to forskellige slags
+        // ting, og man maerker det laenge foer man kan sige hvorfor.
+        BeginAnimation(UdfoldningProperty, Glid.Til(maal));
     }
 
     private double _foldesTil = 1.0;

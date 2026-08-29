@@ -397,7 +397,26 @@ public partial class MainWindow : Window
             // Klappen skal saettes EFTER skabelonen er bygget: pilen findes
             // ikke i traeet foer.
             Klap.ApplyTemplate();
-            SaetMenu(Core.AppSettings.Current.MenuSammenklappet, gem: false);
+
+            // VED OPSTART SAETTES STANDEN UDEN AT GLIDE. En menu, der folder
+            // sig ud, hver gang appen aabnes, er en bevaegelse ingen har bedt
+            // om - og den staar i vejen for det, man kom efter.
+            var inde = Core.AppSettings.Current.MenuSammenklappet;
+
+            MenuSammenklappet = inde;
+            SaetMenubredde(inde ? 0.0 : 1.0);
+
+            Logotekst.Visibility = inde ? Visibility.Collapsed : Visibility.Visible;
+            Datafod.Visibility = inde ? Visibility.Collapsed : Visibility.Visible;
+            Logolinje.Margin = new Thickness(inde ? 0 : 4, 0, 0, 2);
+            Logolinje.HorizontalAlignment = inde
+                ? HorizontalAlignment.Center
+                : HorizontalAlignment.Left;
+
+            VisKlap(inde);
+
+            foreach (var knap in Menupunkter())
+                knap.ToolTip = inde ? knap.Content as string : null;
 
             SaetDiktering();
 
@@ -406,6 +425,10 @@ public partial class MainWindow : Window
             _vaage.Hoert += VaageordHoert;
             _vaage.Melder -= VisDiktat;
             _vaage.Melder += VisDiktat;
+
+            // Fanen skal kunne taende og slukke med det samme. Ellers skal
+            // appen genstartes, foer vaageordet begynder at virke.
+            Diktering.KommandoerView.Aendret = () => Dispatcher.BeginInvoke(SaetVaageord);
 
             _vaageur?.Stop();
             _vaageur = new DispatcherTimer { Interval = TimeSpan.FromSeconds(30) };
@@ -976,14 +999,96 @@ public partial class MainWindow : Window
 
     private void VaageordHoert(string efter) => Dispatcher.BeginInvoke(() =>
     {
-        // ============ SAMME VEJ SOM ET HOLD PAA TASTEN ============
-        //
-        // Der emuleres ikke et tastetryk. Der kaldes den samme kode.
         _diktat.Melder -= VisDiktat;
         _diktat.Melder += VisDiktat;
 
+        // ============ VAR DET EN KOMMANDO? ============
+        //
+        // Blev der sagt noget efter vaageordet, kan det vaere en kommando.
+        // Kan det ikke findes i listen, var det TALE - og saa er det en
+        // diktering. Det er den rigtige vej at fejle: man faar sin tekst.
+        var kommandoer = Core.AppSettings.Current.Kommandoer is { Count: > 0 } egne
+            ? egne
+            : Core.Kommandotolk.Standard;
+
+        if (efter.Length > 0 && Core.Kommandotolk.Find(efter, kommandoer) is { } k)
+        {
+            Udfoer(k);
+            return;
+        }
+
+        // ============ SAMME VEJ SOM ET HOLD PAA TASTEN ============
+        //
+        // Der emuleres ikke et tastetryk. Der kaldes den samme kode.
         _diktat.BegyndPaaVaageord();
     });
+
+    /// <summary>
+    /// Gør det, kommandoen siger.
+    /// </summary>
+    /// <remarks>
+    /// KUN DET, DER STÅR PÅ LISTEN. Der køres ikke en tekst, brugeren ikke selv
+    /// har skrevet ind, og der findes ingen kommandotype, der kan køre noget
+    /// vilkårligt — se <see cref="Core.Kommandotype"/>.
+    /// </remarks>
+    private void Udfoer(Core.Kommando k)
+    {
+        try
+        {
+            switch (k.Type)
+            {
+                case Core.Kommandotype.Optag:
+                    LynstartOptagelse();
+                    break;
+
+                case Core.Kommandotype.Webinar:
+                    if (OptagBjaelke.Content is Meeting.MeetingView w) w.StartWebinar();
+                    break;
+
+                case Core.Kommandotype.AabnSkaerm:
+                    GaaTilSkaerm(k.Maal);
+                    break;
+
+                case Core.Kommandotype.AabnProgram:
+                    // UseShellExecute: saa virker baade et program, en mappe og
+                    // en adresse - det er de tre ting, man peger paa.
+                    if (k.Maal.Length > 0)
+                    {
+                        System.Diagnostics.Process.Start(
+                            new System.Diagnostics.ProcessStartInfo(k.Maal) { UseShellExecute = true });
+                    }
+                    break;
+            }
+
+            VisDiktat(Core.Sprog.T("kommandoer.udfoert", k.Udtryk));
+        }
+        catch (Exception ex)
+        {
+            // En kommando, der ikke kan koere, skal SIGE det. Ellers taler man
+            // til en app, der ikke svarer, og tror det er vaageordet.
+            VisDiktat(Core.Sprog.T("kommandoer.gik_galt", k.Udtryk, ex.Message));
+        }
+    }
+
+    /// <summary>Går til en skærm ud fra dens navn i kommandolisten.</summary>
+    private void GaaTilSkaerm(string navn)
+    {
+        var knap = navn.Trim().ToLowerInvariant() switch
+        {
+            "cockpit" => NavCockpit,
+            "diktering" or "ordbog" => NavDiktering,
+            "optagelser" => NavTransskriber,
+            "dokumenter" => NavDokumenter,
+            "moedetyper" or "mødetyper" or "skabeloner" => NavSkabeloner,
+            "modeller" or "ai-modeller" => NavMotor,
+            "compliance" => NavCompliance,
+            "historik" => NavHistorik,
+            "indstillinger" => NavIndstillinger,
+            _ => null,
+        };
+
+        if (knap is not null) knap.IsChecked = true;
+    }
 
     /// <summary>
     /// Afgør, om et hold på tasten skal betyde noget.
@@ -1178,24 +1283,74 @@ public partial class MainWindow : Window
     /// punktets eget navn — den, der allerede er oversat — så den kan ikke
     /// komme til at sige noget andet end menupunktet.
     /// </remarks>
+    /// <summary>
+    /// Menuens bredde undervejs: 1 er helt ude, 0 er helt inde.
+    /// </summary>
+    /// <remarks>
+    /// SAMME GREB SOM I COCKPITTET. En GridLength kan ikke animeres direkte,
+    /// så der animeres ét almindeligt tal, og bredden regnes ud af det.
+    ///
+    /// Farten står i <see cref="Glid"/> — ét sted, så menuen og sidespalterne
+    /// ikke kan komme til at bevæge sig forskelligt.
+    /// </remarks>
+    public static readonly DependencyProperty MenuudfoldningProperty =
+        DependencyProperty.Register(nameof(Menuudfoldning), typeof(double), typeof(MainWindow),
+            new PropertyMetadata(1.0, Menufoldet));
+
+    public double Menuudfoldning
+    {
+        get => (double)GetValue(MenuudfoldningProperty);
+        set => SetValue(MenuudfoldningProperty, value);
+    }
+
+    private static void Menufoldet(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        if (d is MainWindow v) v.SaetMenubredde((double)e.NewValue);
+    }
+
+    /// <summary>Sætter bredden ud fra, hvor langt foldningen er nået.</summary>
+    private void SaetMenubredde(double f)
+    {
+        Menubredde.Width = new GridLength(MenuInde + (MenuUde - MenuInde) * f);
+
+        // Polstringen følger med. Blev den stående på fjorten, mens bredden
+        // falder, klemmes ikonerne ud til siden undervejs.
+        var kant = 8 + (14 - 8) * f;
+        Menuindhold.Margin = new Thickness(kant, 22, kant, 16);
+    }
+
     private void SaetMenu(bool sammenklappet, bool gem = true)
     {
         MenuSammenklappet = sammenklappet;
 
-        Menubredde.Width = new GridLength(sammenklappet ? MenuInde : MenuUde);
-        Menuindhold.Margin = new Thickness(sammenklappet ? 8 : 14, 22,
-                                           sammenklappet ? 8 : 14, 16);
+        // ============ TEKSTEN GAAR FOERST, KOMMER SIDST ============
+        //
+        // Klappes der ind, forsvinder teksten med det samme: en tekst, der
+        // klippes over, mens bredden falder, ser i stykker ud.
+        //
+        // Klappes der ud, kommer den foerst, naar der ER plads.
+        Logotekst.Visibility = sammenklappet ? Visibility.Collapsed : Visibility.Hidden;
+        Datafod.Visibility = sammenklappet ? Visibility.Collapsed : Visibility.Hidden;
 
-        Logotekst.Visibility = sammenklappet ? Visibility.Collapsed : Visibility.Visible;
-        Datafod.Visibility = sammenklappet ? Visibility.Collapsed : Visibility.Visible;
         Logolinje.Margin = new Thickness(sammenklappet ? 0 : 4, 0, 0, 2);
         Logolinje.HorizontalAlignment = sammenklappet
             ? HorizontalAlignment.Center
             : HorizontalAlignment.Left;
 
-        // Pilen peger den vej, den GOER noget: ind, naar menuen er ude.
-        if (Klap.Template.FindName("pil", Klap) is System.Windows.Controls.TextBlock pil)
-            pil.Text = sammenklappet ? "\uE76C" : "\uE76B";
+        var animation = Glid.Til(sammenklappet ? 0.0 : 1.0);
+
+        if (!sammenklappet)
+        {
+            animation.Completed += (_, _) =>
+            {
+                Logotekst.Visibility = Visibility.Visible;
+                Datafod.Visibility = Visibility.Visible;
+            };
+        }
+
+        BeginAnimation(MenuudfoldningProperty, animation);
+
+        VisKlap(sammenklappet);
 
         var klaptekst = Core.Sprog.T(sammenklappet ? "nav.klap_ud" : "nav.klap_ind");
 
@@ -1215,6 +1370,16 @@ public partial class MainWindow : Window
             Core.AppSettings.Current.MenuSammenklappet = sammenklappet;
             Core.AppSettings.Current.Save();
         }
+    }
+
+    /// <summary>
+    /// Pilen på klappen. Den peger den vej, klappen GØR noget: ind, når menuen
+    /// er ude.
+    /// </summary>
+    private void VisKlap(bool sammenklappet)
+    {
+        if (Klap.Template.FindName("pil", Klap) is System.Windows.Controls.TextBlock pil)
+            pil.Text = sammenklappet ? "\uE76C" : "\uE76B";
     }
 
     private IEnumerable<System.Windows.Controls.RadioButton> Menupunkter() => new[]

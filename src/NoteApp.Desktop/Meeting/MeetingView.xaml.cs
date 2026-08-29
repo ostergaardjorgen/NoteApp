@@ -271,6 +271,16 @@ public partial class MeetingView : UserControl
     /// spørgsmål, der skal besvares, mens oplægsholderen går i gang, koster de
     /// første minutter — dem, hvor dagsordenen bliver ridset op.
     /// </summary>
+    /// <summary>
+    /// Starter en webinaroptagelse udefra — fra en talt kommando.
+    /// </summary>
+    /// <remarks>
+    /// Den kalder knappens egen handler frem for at gentage dens indhold. To
+    /// veje ind i det samme skal gå gennem den samme kode; ellers retter man
+    /// den ene og glemmer den anden.
+    /// </remarks>
+    public void StartWebinar() => Webinar_Click(this, new RoutedEventArgs());
+
     private void Webinar_Click(object sender, RoutedEventArgs e)
     {
         if (IsRecording) return;

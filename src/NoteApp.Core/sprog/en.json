@@ -883,7 +883,8 @@
     "proevet": "Tried as {0} — see the result above",
     "fane_proeverum": "Practice",
     "fane_teksttyper": "Text types",
-    "fane_ordbog": "Word library"
+    "fane_ordbog": "Word library",
+    "fane_kommandoer": "Commands"
   },
   "ordbogview": {
     "ordbog": "Word library",
@@ -919,5 +920,43 @@
     "klar": "Ready. Hold the shortcut key down and speak — it becomes a {0}.",
     "raa": "How it was heard",
     "pudset": "How it was written"
+  },
+  "kommandoer": {
+    "titel": "Commands",
+    "under": "Say the wake word and then a command. The list is your own — nothing can run that is not on it.",
+    "advarsel": "A command starts something. It therefore requires the whole phrase to be heard correctly — and if two commands match equally well, nothing happens.",
+    "vaageord_til": "Listen for the wake word",
+    "vaageord_til_under": "The microphone is open without you pressing anything. It listens locally, and nothing is sent until the word is heard — but it is open.",
+    "vaageord_ord": "The words listened for",
+    "vaageord_ord_under": "One per line, at least two words in each. «Pia» alone would trigger itself every time somebody mentions a name.",
+    "vaageord_kun_moeder": "Listen only around calendar appointments",
+    "vaageord_kun_moeder_under": "That is what makes it cheap: the microphone is open an hour a day instead of twenty-four. Switch it off and it listens all the time.",
+    "vaageord_foer": "minutes before",
+    "vaageord_efter": "minutes after",
+    "vaageord_ingen_motor": "The engine is missing. The wake word uses the same whisper the transcription downloads — set it up under AI models.",
+    "udtryk": "What you say",
+    "type": "What happens",
+    "maal": "Program, address or screen",
+    "tilfoej": "Add command",
+    "fjern": "Remove selected",
+    "nulstil": "Load the default list",
+    "gemt": "Saved.",
+    "findes": "«{0}» is already there.",
+    "antal": "{0} commands",
+    "tom": "No commands yet.",
+    "type_optag": "Start a meeting recording",
+    "type_webinar": "Start a webinar recording",
+    "type_skaerm": "Go to a screen in the app",
+    "type_program": "Open a program or an address",
+    "maal_hjaelp": "For a screen: cockpit, diktering, optagelser, dokumenter, moedetyper, modeller, compliance, historik, indstillinger. For a program: its path, or an address.",
+    "nulstil_spoerg": "The default list replaces the commands you have made. This cannot be undone.",
+    "udfoert": "«{0}» — done",
+    "gik_galt": "«{0}» failed: {1}"
+  },
+  "vaageord": {
+    "lytter": "Listening for the wake word",
+    "stoppet": "The wake word is off",
+    "ingen_motor": "The wake word needs the whisper engine. Set it up under AI models.",
+    "gik_galt": "The wake word failed: {0}"
   }
 }

@@ -883,7 +883,8 @@
     "proevet": "Prøvet som {0} — se resultatet ovenfor",
     "fane_proeverum": "Prøverum",
     "fane_teksttyper": "Teksttyper",
-    "fane_ordbog": "Ordbog"
+    "fane_ordbog": "Ordbog",
+    "fane_kommandoer": "Kommandoer"
   },
   "ordbogview": {
     "ordbog": "Ordbog",
@@ -919,5 +920,43 @@
     "klar": "Klar. Hold genvejstasten nede og tal — det bliver til en {0}.",
     "raa": "Sådan blev det hørt",
     "pudset": "Sådan blev det skrevet"
+  },
+  "kommandoer": {
+    "titel": "Kommandoer",
+    "under": "Sig vågeordet og derefter en kommando. Listen er din egen — der kan ikke køre noget, som ikke står her.",
+    "advarsel": "En kommando starter noget. Derfor kræver den, at hele udtrykket blev hørt rigtigt — og passer to kommandoer lige godt, sker der ingenting.",
+    "vaageord_til": "Lyt efter vågeordet",
+    "vaageord_til_under": "Mikrofonen er åben, uden at du har trykket på noget. Den lytter lokalt, og der sendes intet, før ordet er hørt — men den er åben.",
+    "vaageord_ord": "Ordene, der lyttes efter",
+    "vaageord_ord_under": "Ét pr. linje, mindst to ord i hvert. «Pia» alene ville udløse sig selv, hver gang nogen nævner et navn.",
+    "vaageord_kun_moeder": "Lyt kun omkring aftaler i kalenderen",
+    "vaageord_kun_moeder_under": "Det er dét, der gør det billigt: mikrofonen er åben en time om dagen frem for fireogtyve. Slås den fra, lyttes der altid.",
+    "vaageord_foer": "minutter før",
+    "vaageord_efter": "minutter efter",
+    "vaageord_ingen_motor": "Motoren mangler. Vågeordet bruger den samme whisper, som transskriptionen henter — sæt den op under AI-modeller.",
+    "udtryk": "Det, du siger",
+    "type": "Hvad der sker",
+    "maal": "Program, adresse eller skærm",
+    "tilfoej": "Tilføj kommando",
+    "fjern": "Fjern den valgte",
+    "nulstil": "Hent standardlisten",
+    "gemt": "Gemt.",
+    "findes": "«{0}» står der allerede.",
+    "antal": "{0} kommandoer",
+    "tom": "Ingen kommandoer endnu.",
+    "type_optag": "Start en mødeoptagelse",
+    "type_webinar": "Start en webinaroptagelse",
+    "type_skaerm": "Gå til en skærm i appen",
+    "type_program": "Åbn et program eller en adresse",
+    "maal_hjaelp": "For en skærm: cockpit, diktering, optagelser, dokumenter, moedetyper, modeller, compliance, historik, indstillinger. For et program: stien til det, eller en adresse.",
+    "nulstil_spoerg": "Standardlisten erstatter de kommandoer, du har lavet. Det kan ikke fortrydes.",
+    "udfoert": "«{0}» — udført",
+    "gik_galt": "«{0}» gik galt: {1}"
+  },
+  "vaageord": {
+    "lytter": "Lytter efter vågeordet",
+    "stoppet": "Vågeordet er slukket",
+    "ingen_motor": "Vågeordet kræver whisper-motoren. Sæt den op under AI-modeller.",
+    "gik_galt": "Vågeordet gik galt: {0}"
   }
 }
