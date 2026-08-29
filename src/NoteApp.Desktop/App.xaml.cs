@@ -66,6 +66,24 @@ public partial class App : Application
         // nedenfor er det foerste, og det skal ogsaa foelge temaet.
         Vinduesramme.SlaaTil();
 
+        // GLIDNINGEN PAA ALLE VINDUER - ogsaa dem, der endnu ikke findes.
+        //
+        // Den staar her og ikke i hver enkelt konstruktoer. Fjorten vinduer
+        // med hver sin linje er fjorten steder at glemme den, og det femtende
+        // vindue, nogen laver om et halvt aar, ville komme uden.
+        //
+        // Hovedvinduet holdes udenfor. Det popper ikke op - det ER appen, og
+        // en optoning ved opstart er ventetid, ikke elegance.
+        EventManager.RegisterClassHandler(
+            typeof(Window), FrameworkElement.LoadedEvent,
+            new RoutedEventHandler((afsender, _) =>
+            {
+                // Fuldt navn med vilje: inde i App er «MainWindow» navnet paa
+                // Applications egen egenskab, ikke paa vores vinduestype.
+                if (afsender is Window v && v is not global::NoteApp.Desktop.MainWindow)
+                    Glid.Vindue(v);
+            }));
+
         // Foerste start: hvor filerne skal ligge, og hentning af Whisper.
         // Uden motoren kan appen optage, men ikke skrive ud - og det opdager
         // man foerst efter det foerste moede, hvis der ikke spoerges her.

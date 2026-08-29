@@ -118,7 +118,7 @@
          Navnet hører til den ene stemme, så ruden skal heller ikke handle om
          andet end den. -->
     <Popup x:Name="Navnerude" Placement="Bottom" StaysOpen="False"
-           AllowsTransparency="True" PopupAnimation="Fade" HorizontalOffset="-6">
+           HorizontalOffset="-6">
       <Border Background="{DynamicResource AccentFlade}" BorderBrush="{DynamicResource Accent}"
               BorderThickness="1" CornerRadius="9" Padding="14,12" Margin="8">
         <Border.Effect>

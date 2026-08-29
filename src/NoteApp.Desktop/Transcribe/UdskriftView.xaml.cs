@@ -306,6 +306,10 @@ public partial class UdskriftView : UserControl
     {
         InitializeComponent();
 
+        // Navneruden kommer og gaar som resten af appen. Skal staa her og kun
+        // her: koeres den to gange, faar ruden to saet oejne paa musen.
+        Glid.Rude(Navnerude);
+
         // DER GEMMES EFTER EN PAUSE, IKKE VED HVERT TASTETRYK.
         //
         // En udskrift paa en time er hundredvis af replikker. At skrive hele
@@ -334,7 +338,7 @@ public partial class UdskriftView : UserControl
             Liste.ItemsSource = null;
             RaaTekst.Text = "";
             Hoved.Visibility = Visibility.Collapsed;
-            Navnerude.IsOpen = false;
+            Glid.LukRude(Navnerude);
             Meld("");
             VisIngenUdskrift(mappe);
             _indlæser = false;
@@ -367,7 +371,7 @@ public partial class UdskriftView : UserControl
         _kigEfter.Stop();
 
         Hoved.Visibility = Visibility.Visible;
-        Navnerude.IsOpen = false;
+        Glid.LukRude(Navnerude);
 
         ByggTalervalg();
 
@@ -508,7 +512,7 @@ public partial class UdskriftView : UserControl
         OpsumRude.Visibility = Visibility.Collapsed;
         OpsumTom.Visibility = Visibility.Visible;
         Hoved.Visibility = Visibility.Collapsed;
-        Navnerude.IsOpen = false;
+        Glid.LukRude(Navnerude);
 
         // Ryd betyder «ingen optagelse valgt». Saa er der heller ikke noget at
         // forklare om en manglende udskrift — ruden ville staa og sige, at man
@@ -1287,7 +1291,7 @@ public partial class UdskriftView : UserControl
     {
         _henfoer = null;
         _navngiver = null;
-        Navnerude.IsOpen = false;
+        Glid.LukRude(Navnerude);
 
         ByggTalervalg();
         Byg();
@@ -1298,7 +1302,7 @@ public partial class UdskriftView : UserControl
     private void Navn_Tast(object sender, KeyEventArgs e)
     {
         if (e.Key == Key.Enter) { SaetNavn(NavnFelt.Text); e.Handled = true; }
-        else if (e.Key == Key.Escape) { Navnerude.IsOpen = false; e.Handled = true; }
+        else if (e.Key == Key.Escape) { Glid.LukRude(Navnerude); e.Handled = true; }
     }
 
     private void NavnGem_Klik(object sender, RoutedEventArgs e) => SaetNavn(NavnFelt.Text);
@@ -1311,7 +1315,7 @@ public partial class UdskriftView : UserControl
     /// </summary>
     private void SaetNavn(string navn)
     {
-        Navnerude.IsOpen = false;
+        Glid.LukRude(Navnerude);
 
         if (_navngiver is null || _meta is null || _mappe is null) { _navngiver = null; return; }
 

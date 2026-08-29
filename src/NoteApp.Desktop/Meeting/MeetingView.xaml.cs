@@ -1451,24 +1451,30 @@ public partial class MeetingView : UserControl
     }
 
     /// <summary>
-    /// Hvornår klokkens liste sidst lukkede sig selv.
+    /// Klokkens liste, så længe den er fremme.
     /// </summary>
     /// <remarks>
-    /// ET ANDET KLIK PAA KLOKKEN SKAL LUKKE LISTEN. Det lyder ligetil og er
-    /// det ikke: listen har StaysOpen=false, saa den lukker af sig selv, saa
-    /// snart der klikkes uden for den — og klokken ER uden for den. Naar
-    /// Klokke_Click derefter koerer, er listen allerede lukket, og den ville
-    /// blive aabnet igen med det samme.
+    /// ET ANDET KLIK PAA KLOKKEN SKAL LUKKE LISTEN, og det er kun ligetil,
+    /// hvis man ved, at listen ER fremme.
     ///
-    /// Derfor huskes tidspunktet: kommer klikket inden for et oejeblik af, at
-    /// listen lukkede, var det DET klik, der lukkede den, og saa skal der ikke
-    /// aabnes igen.
+    /// Her stod foer et tidsstempel og en spaerre paa et kvart sekund. Den
+    /// fandtes, fordi listen lukkede sig selv i det oejeblik, der blev
+    /// klikket ved siden af — og klokken er ved siden af. Naar
+    /// Klokke_Click saa koerte, var listen vaek, og den blev aabnet igen.
+    ///
+    /// Nu lukker listen ikke oejeblikkeligt; den glider ud, og IsOpen staar
+    /// stadig sandt imens. Saa er svaret det enkle: er den fremme, lukkes
+    /// den, og der aabnes ikke en ny. Spaerren paa tid er vaek.
     /// </remarks>
-    private DateTime _klokkeLukket = DateTime.MinValue;
+    private System.Windows.Controls.Primitives.Popup? _klokkerude;
 
     private void Klokke_Click(object sender, RoutedEventArgs e)
     {
-        if (DateTime.UtcNow - _klokkeLukket < TimeSpan.FromMilliseconds(250)) return;
+        if (_klokkerude is { IsOpen: true } fremme)
+        {
+            Glid.LukRude(fremme);
+            return;
+        }
 
         var panel = new Notifications.NotificationPopup();
 
@@ -1479,16 +1485,17 @@ public partial class MeetingView : UserControl
             HorizontalOffset = -400,
             VerticalOffset = 6,
             StaysOpen = false,
-            AllowsTransparency = true,
-            PopupAnimation = System.Windows.Controls.Primitives.PopupAnimation.Fade,
             Child = panel
         };
 
-        pop.Closed += (_, _) => _klokkeLukket = DateTime.UtcNow;
+        // Glidningen skal saettes op, FOER ruden aabnes. Den overtager
+        // lukningen, og den kan ikke overtage noget, der allerede er sket.
+        Glid.Rude(pop);
+        _klokkerude = pop;
 
         panel.HistorikOenskes += () =>
         {
-            pop.IsOpen = false;
+            Glid.LukRude(pop);
             if (Window.GetWindow(this) is MainWindow hoved) hoved.GaaTilHistorik();
         };
 
