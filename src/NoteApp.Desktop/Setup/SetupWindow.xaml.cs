@@ -26,19 +26,36 @@ public partial class SetupWindow : Window
     private static readonly (string Titel, string Under)[] Trin =
     {
         ("Velkommen til HeyPia", "Lyden bliver på din maskine — teksten bearbejdes i Europa"),
+        ("Sådan skal den virke", "Mikrofon, genvejstast og vågeord — sat én gang, her"),
         ("Sidste trin: hent Whisper", "Motoren og en sprogmodel, så appen kan skrive dine møder ud")
     };
+
+    /// <summary>
+    /// Skal forløbet køres igen? Så er der ikke noget at hente, og teksten
+    /// skal ikke sige «velkommen» til en, der har brugt appen i en måned.
+    /// </summary>
+    private readonly bool _igen;
 
     private EngineRelease? _udgivelse;
     private EngineBuild? _motorValg;
     private WhisperModel? _modelValg;
     private bool _henter;
 
-    public SetupWindow()
+    public SetupWindow() : this(igen: false) { }
+
+    /// <param name="igen">
+    /// Kørt igen fra Indstillinger. Så er appen allerede i gang, og
+    /// overskriften skal ikke byde velkommen én gang til.
+    /// </param>
+    public SetupWindow(bool igen)
     {
         InitializeComponent();
 
+        _igen = igen;
         DataSti.Text = UserDataPaths.Root;
+
+        if (igen) Title = "Opsætning";
+
         VisTrin(0);
     }
 
@@ -47,16 +64,108 @@ public partial class SetupWindow : Window
         _trin = nr;
 
         Trin1.Visibility = nr == 0 ? Visibility.Visible : Visibility.Collapsed;
-        Trin4.Visibility = nr == 1 ? Visibility.Visible : Visibility.Collapsed;
+        Trin2.Visibility = nr == 1 ? Visibility.Visible : Visibility.Collapsed;
+        Trin4.Visibility = nr == 2 ? Visibility.Visible : Visibility.Collapsed;
 
-        TrinTitel.Text = Trin[nr].Titel;
+        TrinTitel.Text = nr == 0 && _igen ? "Opsætning" : Trin[nr].Titel;
         TrinUnder.Text = Trin[nr].Under;
         TrinTaeller.Text = $"Trin {nr + 1} af {Trin.Length}";
 
         TilbageKnap.Visibility = nr == 0 ? Visibility.Collapsed : Visibility.Visible;
-        NaesteKnap.Content = nr == 0 ? "Kom i gang" : "Hent og afslut";
 
-        if (nr == 1) _ = ForberedHentning();
+        NaesteKnap.Content = nr switch
+        {
+            0 => _igen ? "Videre" : "Kom i gang",
+            1 => "Videre",
+            _ => "Hent og afslut",
+        };
+
+        if (nr == 1) IndlaesValg();
+        if (nr == 2) _ = ForberedHentning();
+    }
+
+    // ------------------------------------------------ sådan skal den virke
+
+    /// <summary>Sat, mens felterne fyldes — så et valg ikke gemmes af sig selv.</summary>
+    private bool _fylder;
+
+    /// <summary>
+    /// Henter det, der allerede står, ind i trinnet.
+    /// </summary>
+    /// <remarks>
+    /// Autostarten læses fra Windows og ikke fra indstillingerne. Det er
+    /// registreringsdatabasen, der afgør, om appen starter — står der ét i
+    /// vores fil og noget andet dér, er det vores fil, der lyver.
+    /// </remarks>
+    private void IndlaesValg()
+    {
+        _fylder = true;
+        try
+        {
+            var v = AppSettings.Current;
+
+            var mikrofoner = AudioDevices.Microphones();
+            var hoejttalere = AudioDevices.Speakers();
+
+            OpsMikrofon.ItemsSource = mikrofoner;
+            OpsHoejttaler.ItemsSource = hoejttalere;
+
+            var mik = AudioDevices.ResolveMicrophone(v.MicrophoneId, out _);
+            var hoejt = AudioDevices.ResolveSpeaker(v.SpeakerId, out _);
+
+            OpsMikrofon.SelectedItem = mikrofoner.FirstOrDefault(d => d.Id == mik?.Id);
+            OpsHoejttaler.SelectedItem = hoejttalere.FirstOrDefault(d => d.Id == hoejt?.Id);
+
+            OpsAutostart.IsChecked = Autostart.ErSlaaetTil();
+            OpsDiktering.IsChecked = v.DikteringTil;
+            OpsVaageord.IsChecked = v.VaageordTil;
+
+            // Genvejen staar foerst fast, naar hovedvinduet har registreret
+            // den. Her nævnes den derfor ved navn og ikke som en paastand om,
+            // hvad der virker lige nu.
+            DikteringUnder.Text =
+                "Hold genvejstasten nede og tal — teksten lander, hvor markøren står. "
+                + "Genvejen vises i toppen af appen, når den er klar.";
+        }
+        finally { _fylder = false; }
+    }
+
+    private void Mikrofon_Valgt(object sender, SelectionChangedEventArgs e)
+    {
+        if (_fylder || OpsMikrofon.SelectedItem is not DeviceInfo d) return;
+        AppSettings.Current.MicrophoneId = d.Id;
+        AppSettings.Current.Save();
+    }
+
+    private void Hoejttaler_Valgt(object sender, SelectionChangedEventArgs e)
+    {
+        if (_fylder || OpsHoejttaler.SelectedItem is not DeviceInfo d) return;
+        AppSettings.Current.SpeakerId = d.Id;
+        AppSettings.Current.Save();
+    }
+
+    /// <summary>
+    /// Gemmer hakkene fra trin 2.
+    /// </summary>
+    /// <remarks>
+    /// Autostarten skrives i registreringsdatabasen med det samme. Gik det
+    /// galt, siges det — et afkrydsningsfelt, der stille ikke gjorde noget,
+    /// lover noget, det ikke holder. Se Autostart.Saet.
+    /// </remarks>
+    private void GemValg()
+    {
+        var v = AppSettings.Current;
+
+        v.DikteringTil = OpsDiktering.IsChecked == true;
+        v.VaageordTil = OpsVaageord.IsChecked == true;
+        v.Save();
+
+        var fejl = Autostart.Saet(OpsAutostart.IsChecked == true);
+        if (fejl is null) return;
+
+        Dialogs.AppDialog.Vis(this, "Autostart kunne ikke sættes",
+            $"HeyPia kunne ikke skrive opstartsvalget: {fejl}\n\n"
+            + "Resten er gemt. Du kan prøve igen under Indstillinger → Opstart.");
     }
 
     // ------------------------------------------------------- motor og model
@@ -177,6 +286,11 @@ public partial class SetupWindow : Window
     private async void Naeste_Click(object sender, RoutedEventArgs e)
     {
         if (_henter) return;
+
+        // Hakkene gemmes, NAAR MAN FORLADER TRINNET - ikke først til sidst.
+        // Gaar hentningen galt bagefter, eller lukkes vinduet, er valgene
+        // stadig truffet. Det er dem, der er svaerest at finde igen.
+        if (_trin == 1) GemValg();
 
         if (_trin < Trin.Length - 1)
         {

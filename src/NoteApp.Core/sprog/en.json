@@ -236,7 +236,21 @@
     "skift": "Change…",
     "tilbage": "Back",
     "transskriptionen_laves_af_whisper_som_koer": "The transcription is done by Whisper, which runs on your own machine. The engine and a language model must be downloaded once. The download only pulls down — nothing is sent from your PC along the way.",
-    "velkommen": "Welcome"
+    "velkommen": "Welcome",
+    "lyd_overskrift": "Audio",
+    "lyd_under": "The microphone is used for your own words — both when recording a meeting and when dictating. If you do not choose one here, the app takes whatever Windows points at, and that is not always the one in front of you.",
+    "mikrofon": "Microphone",
+    "hoejttaler": "Speaker",
+    "hoejttaler_under": "The speaker is recorded as a second track, so the others in the meeting make it into the transcript. Nothing is played through it.",
+    "klar_overskrift": "Always ready",
+    "klar_under": "The shortcut can only start a recording while the app is running. That is why the two belong together.",
+    "autostart": "Start HeyPia when I sign in to Windows",
+    "autostart_under": "The app does not open a window at startup — it sits ready until you press the shortcut. It takes up nothing while not recording.",
+    "diktering": "Dictation with a shortcut key",
+    "vaageord": "Listen for «Hej Pia»",
+    "vaageord_under": "Then a dictation can be started without touching the keyboard. Say «Hej Pia» and carry on speaking — the text lands where the cursor is.",
+    "vaageord_privatliv": "The listening happens on your own PC. Nothing is sent while it listens — neither audio nor text. What the microphone hears exists only in memory until it is decided whether the word was said. No audio file is written and no log is kept. If the screen is locked, or a recording is running, it does not listen.",
+    "kan_altid_aendres": "Everything here can be changed later under Settings — and the whole flow can be run again from the same place."
   },
   "opgavewindow": {
     "1_er_vigtigst": "1 is the most important",
@@ -682,7 +696,10 @@
     "ordbog_findes": "«{0}» is already there.",
     "ordbog_hentet": "Loaded {0} new words.",
     "ordbog_gemt": "{0} words saved to {1}",
-    "ordbog_filter": "Text file (*.txt)|*.txt|All files (*.*)|*.*"
+    "ordbog_filter": "Text file (*.txt)|*.txt|All files (*.*)|*.*",
+    "forloeb_overskrift": "Go through the setup again",
+    "forloeb_under": "Microphone, speaker, start with Windows, dictation and the wake word — gathered in one place, in the order they belong together. Useful on a new machine, with a new headset, or if something has drifted.",
+    "forloeb_knap": "Go through"
   },
   "complianceview": {
     "aabner_console_mistral_ai_hvor_du_slaar_tr": "Opens console.mistral.ai, where you turn training off",

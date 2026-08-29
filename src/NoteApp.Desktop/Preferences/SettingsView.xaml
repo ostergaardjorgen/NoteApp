@@ -95,6 +95,35 @@
             <TextBlock x:Name="AutostartStatus" FontSize="12" Margin="24,6,0,0" TextWrapping="Wrap"
                        Foreground="{DynamicResource TekstMeget}" />
 
+            <!-- ============ VELKOMSTFORLØBET IGEN ============
+
+                 Det kører én gang og forsvinder. Det er rigtigt for den, der
+                 er kommet i gang — og forkert den dag maskinen skiftes, et
+                 headset kommer til, eller indstillingerne af en eller anden
+                 grund er væk.
+
+                 Alt i forløbet kan også sættes hver for sig herinde. Men skal
+                 man vide, HVAD der skal sættes, er en liste at gå igennem
+                 bedre end en fane at lede i. -->
+            <Border Background="{DynamicResource Trykket}" BorderBrush="{DynamicResource PanelKant}" BorderThickness="1"
+                    CornerRadius="8" Padding="14,11" Margin="0,14,0,0">
+              <Grid>
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="*" />
+                  <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0">
+                  <TextBlock FontSize="13" FontWeight="SemiBold"
+                             Text="{i18n:Oversat settingsview.forloeb_overskrift}" />
+                  <TextBlock FontSize="12.5" Margin="0,6,0,0" TextWrapping="Wrap" LineHeight="20"
+                             Foreground="{DynamicResource TekstSvag}"
+                             Text="{i18n:Oversat settingsview.forloeb_under}" />
+                </StackPanel>
+                <Button Grid.Column="1" Click="Forloeb_Klik" VerticalAlignment="Center" Padding="16,9"
+                        Margin="14,0,0,0" Content="{i18n:Oversat settingsview.forloeb_knap}" />
+              </Grid>
+            </Border>
+
             <Border Background="{DynamicResource Trykket}" BorderBrush="{DynamicResource PanelKant}" BorderThickness="1"
                     CornerRadius="8" Padding="14,11" Margin="0,14,0,0">
               <StackPanel>

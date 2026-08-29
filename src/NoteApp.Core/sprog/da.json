@@ -654,7 +654,10 @@
     "ordbog_findes": "«{0}» står der allerede.",
     "ordbog_hentet": "Hentet {0} nye ord ind.",
     "ordbog_gemt": "{0} ord gemt i {1}",
-    "ordbog_filter": "Tekstfil (*.txt)|*.txt|Alle filer (*.*)|*.*"
+    "ordbog_filter": "Tekstfil (*.txt)|*.txt|Alle filer (*.*)|*.*",
+    "forloeb_overskrift": "Gennemgå opsætningen igen",
+    "forloeb_under": "Mikrofon, højttaler, opstart med Windows, diktering og vågeord — samlet ét sted, i den rækkefølge de hænger sammen. Nyttig ved en ny maskine, et nyt headset, eller hvis noget er kommet ud af trit.",
+    "forloeb_knap": "Gennemgå"
   },
   "setupwindow": {
     "dine_filer_ligger_her": "Dine filer ligger her",
@@ -668,7 +671,21 @@
     "skift": "Skift…",
     "tilbage": "Tilbage",
     "transskriptionen_laves_af_whisper_som_koer": "Transskriptionen laves af Whisper, som kører på din egen maskine. Motoren og en sprogmodel skal hentes én gang. Selve hentningen henter kun ned — der sendes intet fra din pc undervejs.",
-    "velkommen": "Velkommen"
+    "velkommen": "Velkommen",
+    "lyd_overskrift": "Lyd",
+    "lyd_under": "Mikrofonen bruges til dine egne ord — både når du optager et møde og når du dikterer. Vælges den ikke her, tager appen den, Windows peger på, og det er ikke altid den, du sidder med.",
+    "mikrofon": "Mikrofon",
+    "hoejttaler": "Højttaler",
+    "hoejttaler_under": "Højttaleren optages som andet spor, så de andre i mødet kommer med i udskriften. Der afspilles intet gennem den.",
+    "klar_overskrift": "Altid klar",
+    "klar_under": "Genvejstasten kan kun starte en optagelse, mens appen kører. Derfor hænger de to ting sammen.",
+    "autostart": "Start HeyPia, når jeg logger på Windows",
+    "autostart_under": "Appen åbner ikke et vindue ved opstart — den ligger klar, indtil du trykker på genvejstasten. Den fylder ingenting, når der ikke optages.",
+    "diktering": "Diktering med genvejstast",
+    "vaageord": "Lyt efter «Hej Pia»",
+    "vaageord_under": "Så kan en diktering startes uden at røre tastaturet. Sig «Hej Pia» og tal videre — teksten lander, hvor markøren står.",
+    "vaageord_privatliv": "Lytningen sker på din egen pc. Der sendes intet, mens den lytter — hverken lyd eller tekst. Det, mikrofonen hører, findes kun i hukommelsen, indtil det er afgjort, om ordet blev sagt. Der skrives ingen lydfil, og der føres ingen log. Er skærmen låst, eller kører der en optagelse, lyttes der ikke.",
+    "kan_altid_aendres": "Alt her kan laves om senere under Indstillinger — og hele forløbet kan køres igen samme sted."
   },
   "skysetupwindow": {
     "det_skal_du_selv_soerge_for": "Det skal du selv sørge for",

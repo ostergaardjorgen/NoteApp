@@ -64,7 +64,86 @@
       </Border>
     </StackPanel>
 
-    <!-- ===================== Trin 2: motor og model =====================
+    <!-- ================= Trin 2: sådan skal den virke ===================
+
+         HER SKAL DET HELE SPØRGES OM, OG DET ER HELE POINTEN MED TRINNET.
+
+         Før stod der kun to trin: hvad appen er, og hent motoren. Alt andet
+         skulle findes bagefter under Indstillinger — mikrofonen, autostarten,
+         vågeordet. En ny bruger vidste ikke, at der var noget at finde, og
+         appen kom aldrig til at gøre det, den kan.
+
+         Et hak, man kan sætte her, er sat. Et, man skal lede efter, bliver
+         det ikke. -->
+    <ScrollViewer x:Name="Trin2" Grid.Row="1" Visibility="Collapsed"
+                  VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+      <StackPanel>
+
+        <!-- ============================ lyden ============================ -->
+        <Border Background="{DynamicResource Panel}" CornerRadius="10" Padding="20"
+                BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
+          <StackPanel>
+            <TextBlock Text="{i18n:Oversat setupwindow.lyd_overskrift}" FontSize="15" FontWeight="SemiBold" />
+            <TextBlock Style="{StaticResource Underskrift}" Margin="0,6,0,14" TextWrapping="Wrap"
+                       Text="{i18n:Oversat setupwindow.lyd_under}" />
+
+            <TextBlock Text="{i18n:Oversat setupwindow.mikrofon}" FontWeight="SemiBold" Margin="0,0,0,5" />
+            <ComboBox x:Name="OpsMikrofon" DisplayMemberPath="Display" SelectionChanged="Mikrofon_Valgt" />
+
+            <TextBlock Text="{i18n:Oversat setupwindow.hoejttaler}" FontWeight="SemiBold" Margin="0,14,0,5" />
+            <ComboBox x:Name="OpsHoejttaler" DisplayMemberPath="Display" SelectionChanged="Hoejttaler_Valgt" />
+            <TextBlock Style="{StaticResource Underskrift}" Margin="0,6,0,0" TextWrapping="Wrap"
+                       Text="{i18n:Oversat setupwindow.hoejttaler_under}" />
+          </StackPanel>
+        </Border>
+
+        <!-- ========================= altid klar ========================= -->
+        <Border Background="{DynamicResource Panel}" CornerRadius="10" Padding="20" Margin="0,14,0,0"
+                BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
+          <StackPanel>
+            <TextBlock Text="{i18n:Oversat setupwindow.klar_overskrift}" FontSize="15" FontWeight="SemiBold" />
+            <TextBlock Style="{StaticResource Underskrift}" Margin="0,6,0,14" TextWrapping="Wrap"
+                       Text="{i18n:Oversat setupwindow.klar_under}" />
+
+            <CheckBox x:Name="OpsAutostart" FontWeight="SemiBold"
+                      Content="{i18n:Oversat setupwindow.autostart}" />
+            <TextBlock Style="{StaticResource Underskrift}" Margin="24,4,0,14" TextWrapping="Wrap"
+                       Text="{i18n:Oversat setupwindow.autostart_under}" />
+
+            <CheckBox x:Name="OpsDiktering" FontWeight="SemiBold"
+                      Content="{i18n:Oversat setupwindow.diktering}" />
+            <TextBlock x:Name="DikteringUnder" Style="{StaticResource Underskrift}"
+                       Margin="24,4,0,0" TextWrapping="Wrap" />
+          </StackPanel>
+        </Border>
+
+        <!-- ========================== vågeordet ========================= -->
+        <Border Background="{DynamicResource Panel}" CornerRadius="10" Padding="20" Margin="0,14,0,0"
+                BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
+          <StackPanel>
+            <CheckBox x:Name="OpsVaageord" FontWeight="SemiBold"
+                      Content="{i18n:Oversat setupwindow.vaageord}" />
+
+            <!-- DEN HER SKAL STAA HELT UD, OG DEN SKAL STAA HER.
+                 Et hak, der aabner mikrofonen hele dagen, maa ikke saettes,
+                 uden at der staar hvad det betyder - og hvad det IKKE
+                 betyder. Bagefter er det for sent at forklare. -->
+            <TextBlock Style="{StaticResource Underskrift}" Margin="24,6,0,0" TextWrapping="Wrap"
+                       Text="{i18n:Oversat setupwindow.vaageord_under}" />
+            <Border Background="#334CBE72" BorderBrush="{DynamicResource Godkendt}" BorderThickness="1"
+                    CornerRadius="6" Padding="14,10" Margin="24,10,0,0">
+              <TextBlock FontSize="12" Foreground="{DynamicResource Tekst}" LineHeight="19" TextWrapping="Wrap"
+                         Text="{i18n:Oversat setupwindow.vaageord_privatliv}" />
+            </Border>
+          </StackPanel>
+        </Border>
+
+        <TextBlock Style="{StaticResource Underskrift}" Margin="2,14,0,0" TextWrapping="Wrap"
+                   Text="{i18n:Oversat setupwindow.kan_altid_aendres}" />
+      </StackPanel>
+    </ScrollViewer>
+
+    <!-- ===================== Trin 3: motor og model =====================
          Her stod to trin mere: fagområde og navne. De fyldte en ordbog op,
          som blev sendt med til Whisper som ledetråd — målt til NUL forskel.
          To skærme spørgsmål, før man havde set appen, for ingenting. -->

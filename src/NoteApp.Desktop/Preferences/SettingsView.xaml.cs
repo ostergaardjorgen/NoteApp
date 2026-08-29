@@ -347,6 +347,36 @@ public partial class SettingsView : UserControl
 
     private void DikteringFormaal_Valgt(object sender, SelectionChangedEventArgs e) => GemDiktering();
 
+    /// <summary>
+    /// Kører velkomstforløbet igen.
+    /// </summary>
+    /// <remarks>
+    /// SetupCompleted røres IKKE. Forløbet vises her og nu; det skal ikke
+    /// komme igen ved næste opstart, fordi nogen kiggede på det én gang.
+    ///
+    /// Bagefter læses skærmen ind på ny. Forløbet kan have ændret mikrofonen
+    /// og hakkene, og to skærme, der viser hver sin sandhed om det samme, er
+    /// værre end én, der er lidt for langsom.
+    /// </remarks>
+    private void Forloeb_Klik(object sender, RoutedEventArgs e)
+    {
+        var vindue = new Setup.SetupWindow(igen: true) { Owner = Window.GetWindow(this) };
+        vindue.ShowDialog();
+
+        AppSettings.Reload();
+
+        Indlaes();
+        VisAutostart();
+        IndlaesDiktering();
+
+        // Genvejen og vaageordet skal foelge med det samme. Ellers skal appen
+        // genstartes, foer et hak, der lige er sat, betyder noget.
+        Dikteringsskift?.Invoke(AppSettings.Current.DikteringTil);
+        Diktering.KommandoerView.Aendret?.Invoke();
+
+        Status.Text = "Opsætningen er gennemgået.";
+    }
+
     private void Autostart_Klik(object sender, RoutedEventArgs e)
     {
         var til = StartMedWindows.IsChecked == true;
@@ -1223,12 +1253,36 @@ public partial class SettingsView : UserControl
 
         TestTrin.Text = "Skriver lyden ud …";
         TestUr.Text = "";
-        TestStatus.Text = "Det tager typisk et halvt minut.";
 
         try
         {
             var install = WhisperInstall.Locate(AppSettings.Current.PreferredModel);
             var motor = new Transcriber(install.WhisperCli!);
+
+            // ============ HER STOD «DET TAGER TYPISK ET HALVT MINUT» ============
+            //
+            // Det passede ikke, og det var et gæt uden noget bag sig. Testen
+            // skriver ud med den SAMME model som møderne — på denne maskine
+            // 2,9 GB — og et halvt minuts tale er stadig et halvt minut, den
+            // skal igennem. Det tager længere end oplæsningen selv, og
+            // maskinen kan mærkes imens.
+            //
+            // Modellen er med vilje den samme. Målte vi med en mindre, målte
+            // vi modellen og ikke mikrofonen, og tallet ville ikke sige noget
+            // om, hvad der sker under et rigtigt møde.
+            //
+            // Så siges det i stedet, hvad der foregår — og fremdriften vises.
+            // En linje, der står stille, ligner en app, der er gået i stå.
+            var navn = install.ModelFileName ?? "sprogmodellen";
+            TestStatus.Text =
+                $"Skriver ud med {navn} — den samme model som dine møder. "
+                + "Det tager typisk længere end oplæsningen selv, og maskinen "
+                + "kan mærkes imens.";
+
+            var fremdrift = new Progress<TranscriptionProgress>(p =>
+            {
+                if (p.Percent > 0) TestUr.Text = $"{p.Percent:0} %";
+            });
 
             // Sproget er LAAST til dansk her, modsat moeder hvor det er
             // "auto". Vi ved, hvad der blev sagt; et fejlgaettet sprog ville
@@ -1236,8 +1290,9 @@ public partial class SettingsView : UserControl
             var r = await motor.RunAsync(
                 new TranscriptionRequest(klip.Path, install.ModelPath!,
                                          Path.Combine(mappe!, "proeve"), "da"),
-                null, CancellationToken.None);
+                fremdrift, CancellationToken.None);
 
+            TestUr.Text = "";
             VisTestsvar(Mikrofontest.Bedoem(r.Text, sekunder));
         }
         catch (Exception ex)
