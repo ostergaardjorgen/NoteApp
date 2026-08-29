@@ -557,29 +557,116 @@ public sealed class AppSettings
 
     private static string Path => System.IO.Path.Combine(UserDataPaths.Root, "indstillinger.json");
 
+    /// <summary>Den forrige udgave. Skrives af <see cref="Save"/> ved hver gemning.</summary>
+    private static string Kopi => Path + ".forrige";
+
+    /// <summary>Filen, der skrives til først. Bliver aldrig læst.</summary>
+    private static string Kladde => Path + ".ny";
+
     private static AppSettings? _current;
+
+    /// <summary>
+    /// Gik der noget galt under indlæsningen? Null, når alt var som det skulle.
+    /// </summary>
+    /// <remarks>
+    /// Der skrives ikke i historikken herfra. Historikken læser selv
+    /// indstillinger, og en indlæsning, der kalder tilbage i sig selv, går i
+    /// ring ved opstart. Beskeden hentes af skærmen, når den er klar.
+    /// </remarks>
+    public static string? Indlaesningsfejl { get; private set; }
 
     public static AppSettings Current => _current ??= Load();
 
-    private static AppSettings Load()
+    private static AppSettings? Laes(string sti)
     {
         try
         {
-            if (File.Exists(Path))
-                return JsonSerializer.Deserialize<AppSettings>(File.ReadAllText(Path, Encoding.UTF8)) ?? new AppSettings();
+            if (!File.Exists(sti)) return null;
+            return JsonSerializer.Deserialize<AppSettings>(File.ReadAllText(sti, Encoding.UTF8));
         }
-        catch (JsonException)
+        catch (JsonException) { return null; }
+        catch (IOException) { return null; }
+    }
+
+    /// <summary>
+    /// Læser indstillingerne — og går ikke stiltiende tilbage til standarden.
+    /// </summary>
+    /// <remarks>
+    /// HER LAA EN SLETNING FORKLÆDT SOM ROBUSTHED.
+    ///
+    /// Kunne filen ikke læses, blev der svaret med standardværdier, og næste
+    /// gemning skrev dem oven i brugerens egne. Alt var væk: mikrofonen,
+    /// sproget, genvejstasten, mapperne — og der stod ingenting nogen steder.
+    /// Man opdagede det ved, at velkomstforløbet kom igen.
+    ///
+    /// Set 29-08-2026 på denne maskine. Filen blev nulstillet, og med den
+    /// forsvandt HotkeyId, så genvejen sprang fra Ctrl+, på taltastaturet til
+    /// Ctrl+Shift+, uden at nogen havde valgt det.
+    ///
+    /// Nu prøves den forrige udgave, før standarden overhovedet kommer på
+    /// tale. Og gik det galt, siges det — se <see cref="Indlaesningsfejl"/>.
+    /// En stille nulstilling er værre end en fejl, man kan se.
+    /// </remarks>
+    private static AppSettings Load()
+    {
+        Indlaesningsfejl = null;
+
+        var fra = Laes(Path);
+        if (fra is not null) return fra;
+
+        var fandtes = File.Exists(Path);
+
+        var gammel = Laes(Kopi);
+        if (gammel is not null)
         {
-            // En ødelagt indstillingsfil må ikke forhindre appen i at starte.
-            // Standardværdier er altid brugbare.
+            Indlaesningsfejl = fandtes
+                ? "Indstillingsfilen kunne ikke læses. Den forrige udgave er brugt i stedet."
+                : "Indstillingsfilen manglede. Den forrige udgave er brugt i stedet.";
+            return gammel;
         }
+
+        if (fandtes)
+        {
+            Indlaesningsfejl =
+                "Indstillingsfilen kunne ikke læses, og der var ingen forrige udgave. "
+                + "Appen er startet på standardværdier — mikrofon, sprog og genvejstast "
+                + "skal vælges igen.";
+        }
+
         return new AppSettings();
     }
 
+    /// <summary>
+    /// Gemmer indstillingerne, så en afbrydelse ikke kan koste dem.
+    /// </summary>
+    /// <remarks>
+    /// HER STOD ÉT KALD TIL File.WriteAllText, OG DET ER IKKE ÉN HANDLING.
+    ///
+    /// Filen bliver tømt først og skrevet bagefter. Dør programmet derimellem
+    /// — og det gør det, hver gang der udgives, for udgivelsen lukker en
+    /// kørende app med magt — ligger der en halv fil tilbage. Den kan ikke
+    /// læses, og så var alt væk.
+    ///
+    /// Nu skrives der til en kladde, og først når HELE filen står på disken,
+    /// bytter den plads med den rigtige. Den gamle bliver til «.forrige».
+    /// Bliver programmet dræbt undervejs, er den rigtige fil urørt.
+    /// </remarks>
     public void Save()
     {
         Directory.CreateDirectory(UserDataPaths.Root);
-        File.WriteAllText(Path, JsonSerializer.Serialize(this, Options), Encoding.UTF8);
+
+        var json = JsonSerializer.Serialize(this, Options);
+        File.WriteAllText(Kladde, json, Encoding.UTF8);
+
+        if (File.Exists(Path))
+        {
+            // File.Replace bytter om i ét hug og lægger den gamle til side.
+            File.Replace(Kladde, Path, Kopi, ignoreMetadataErrors: true);
+        }
+        else
+        {
+            File.Move(Kladde, Path);
+        }
     }
 
     /// <summary>Tvinger næste læsning til at gå på disken igen — fx efter en gendannelse.</summary>

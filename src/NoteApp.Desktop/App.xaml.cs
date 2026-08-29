@@ -29,6 +29,28 @@ public partial class App : Application
 
         DispatcherUnhandledException += VisFejl;
 
+        // ============ EN NULSTILLING SKAL KUNNE SES ============
+        //
+        // Kunne indstillingerne ikke laeses, opdagede man det foer ved, at
+        // velkomstforloebet kom igen - og saa var mikrofon, sprog og
+        // genvejstast allerede skrevet over med standarden. Der stod
+        // ingenting nogen steder. Nu staar det i historikken.
+        //
+        // Foerst her, og ikke inde i indlaesningen: Historik laeser selv
+        // indstillinger, og et kald tilbage i sig selv gaar i ring ved opstart.
+        if (AppSettings.Indlaesningsfejl is { } besked)
+        {
+            try
+            {
+                Historik.Skriv(HaendelseType.Andet, "Indstillingerne kunne ikke læses",
+                    besked, Udfald.SeEfter);
+            }
+            catch (Exception)
+            {
+                // Kan historikken ikke skrives, er der ikke mere at goere her.
+            }
+        }
+
         // LYDEN RYDDES OP VED OPSTART, ikke mens man arbejder.
         //
         // Det er den eneste stund, hvor ingenting er i gang: ingen optagelse,
