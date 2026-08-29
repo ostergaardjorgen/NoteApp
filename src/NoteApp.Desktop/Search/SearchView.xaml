@@ -68,7 +68,7 @@
            Aftalerne kommer fra appens egen kalender OG fra dem, der er hentet
            ind. De staar i én liste - hvem der har lagt dem ind, er ikke det,
            man leder efter, naar man skal optage om fem minutter. -->
-        <Border Grid.Column="0" Background="{DynamicResource Panel}" CornerRadius="10"
+        <Border x:Name="VenstreRude" Grid.Column="0" Background="{DynamicResource Panel}" CornerRadius="10"
                 BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
           <DockPanel>
             <!-- ============ OVERSKRIFT MED SYNKRONISERING ============
@@ -190,7 +190,7 @@
       <!-- Greb mellem kalenderen og soegningen. Bredden er 14 som foer -
            mellemrummet ER grebet, saa der ikke bliver bredere af at kunne
            traekke i det. -->
-      <GridSplitter Grid.Column="1" Width="14" HorizontalAlignment="Stretch"
+      <GridSplitter x:Name="VenstreSplitter" Grid.Column="1" Width="14" HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch" Background="Transparent"
                     DragCompleted="Spalte_Trukket"
                     ToolTip="{i18n:Oversat faelles.traek_for_at_aendre_bredden}" />
@@ -560,7 +560,7 @@
         </Grid>
       </Border>
 
-      <GridSplitter Grid.Column="3" Width="14" HorizontalAlignment="Stretch"
+      <GridSplitter x:Name="HoejreSplitter" Grid.Column="3" Width="14" HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch" Background="Transparent"
                     DragCompleted="Spalte_Trukket"
                     ToolTip="{i18n:Oversat faelles.traek_for_at_aendre_bredden}" />
@@ -570,7 +570,7 @@
            Opgaverne har hele hoejden nu. Kalenderen laa nedenunder og er
            flyttet til venstre spalte: den ene er hvad, den anden er hvornaar,
            og de to laeses ikke i samme oejeblik. -->
-      <Grid Grid.Column="4">
+      <Grid x:Name="HoejreRude" Grid.Column="4">
         <Border Background="{DynamicResource Panel}" CornerRadius="10"
                 BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
           <DockPanel>

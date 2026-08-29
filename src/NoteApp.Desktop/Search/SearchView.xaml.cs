@@ -220,9 +220,138 @@ public partial class SearchView : UserControl
         }
     }
 
+
+    // ============================ SPALTERNE GLIDER ============================
+
+    /// <summary>
+    /// Hvor meget sidespalterne er foldet ud: 1 er helt ude, 0 er helt inde.
+    /// </summary>
+    /// <remarks>
+    /// EN GRIDLENGTH KAN IKKE ANIMERES DIREKTE. WPF har ingen animation for
+    /// den type, og en egen ville skulle skrives fra bunden.
+    ///
+    /// I stedet animeres ét almindeligt tal, og det er dette tal, der ganges
+    /// på de bredder, spalterne HAR. Så følger de hinanden, og en spalte, du
+    /// selv har trukket bredere, folder sig ud til netop dén bredde igen.
+    /// </remarks>
+    public static readonly DependencyProperty UdfoldningProperty =
+        DependencyProperty.Register(nameof(Udfoldning), typeof(double), typeof(SearchView),
+            new PropertyMetadata(1.0, Udfoldet));
+
+    public double Udfoldning
+    {
+        get => (double)GetValue(UdfoldningProperty);
+        set => SetValue(UdfoldningProperty, value);
+    }
+
+    private static void Udfoldet(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        if (d is SearchView v) v.Saet((double)e.NewValue);
+    }
+
+    /// <summary>Bredderne, spalterne folder sig ud til.</summary>
+    private double _venstreFuld;
+    private double _hoejreFuld;
+
+    private void Saet(double f)
+    {
+        Venstrespalte.Width = new GridLength(Math.Max(0, _venstreFuld * f));
+        Hoejrespalte.Width = new GridLength(Math.Max(0, _hoejreFuld * f));
+
+        // Traekhaandtagene skal med. Blev de staaende, ville der vaere
+        // otteogtyve pixels tom kant tilbage, naar spalterne var vaek.
+        VenstreSplitter.Width = 14 * f;
+        HoejreSplitter.Width = 14 * f;
+
+        // Indholdet toner ud lidt foer pladsen er vaek. En rude, der er
+        // presset sammen til nogle faa pixels med skrift i, ser i stykker ud.
+        var toning = Math.Min(1, f * 1.6);
+        VenstreRude.Opacity = toning;
+        HoejreRude.Opacity = toning;
+
+        // MinWidth skal vaek, mens der foldes. Ellers stopper spalten paa 220
+        // og bliver staaende - og saa glider den halvvejs og hakker.
+        Venstrespalte.MinWidth = f > 0.99 ? 220 : 0;
+        Hoejrespalte.MinWidth = f > 0.99 ? 220 : 0;
+
+        VenstreSplitter.IsEnabled = f > 0.99;
+        HoejreSplitter.IsEnabled = f > 0.99;
+    }
+
+    /// <summary>
+    /// Folder spalterne ind eller ud.
+    /// </summary>
+    /// <remarks>
+    /// FIRE TIENDEDELE AF ET SEKUND, med en blød kurve i begge ender. En rude,
+    /// der forsvinder med et snup, læses som en fejl; en, der glider, læses
+    /// som en bevægelse, man selv satte i gang.
+    ///
+    /// Kortere, og det føles hastigt. Længere, og man sidder og venter på at
+    /// kunne se sit resultat.
+    /// </remarks>
+    private void Fold(bool ud)
+    {
+        var maal = ud ? 1.0 : 0.0;
+
+        // Allerede paa vej derhen? Saa skal der ikke startes forfra - det
+        // giver et ryk midt i bevaegelsen, hver gang man taster et bogstav.
+        if (Math.Abs(_foldesTil - maal) < 0.001) return;
+        _foldesTil = maal;
+
+        SikrBredder();
+
+        if (ud)
+        {
+            // Bredderne kan vaere aendret, mens spalterne var inde. Hentes de
+            // ikke igen, folder de sig ud til noget forkert.
+            HentBredder();
+        }
+
+        var animation = new System.Windows.Media.Animation.DoubleAnimation
+        {
+            To = maal,
+            Duration = TimeSpan.FromMilliseconds(400),
+            EasingFunction = new System.Windows.Media.Animation.CubicEase
+            {
+                EasingMode = System.Windows.Media.Animation.EasingMode.EaseInOut,
+            },
+        };
+
+        BeginAnimation(UdfoldningProperty, animation);
+    }
+
+    private double _foldesTil = 1.0;
+
+    /// <summary>
+    /// Henter bredderne, første gang der er brug for dem.
+    /// </summary>
+    /// <remarks>
+    /// De kan ikke hentes i konstruktøren: er de nul, folder spalterne sig ud
+    /// til ingenting, første gang søgefeltet ryddes — og så er kalenderen væk,
+    /// uden at nogen har bedt om det.
+    /// </remarks>
+    private void SikrBredder()
+    {
+        if (_venstreFuld <= 0 || _hoejreFuld <= 0) HentBredder();
+    }
+
+    private void HentBredder()
+    {
+        var v = AppSettings.Current.CockpitVenstre;
+        var h = AppSettings.Current.CockpitHoejre;
+
+        _venstreFuld = v > 0 ? v : 340;
+        _hoejreFuld = h > 0 ? h : 340;
+    }
+
     private void Felt_Aendret(object sender, TextChangedEventArgs e)
     {
         var tomt = Felt.Text.Length == 0;
+
+        // Soeger man, er det soegningen, der skal fylde. Kalenderen og
+        // opgaverne er dét, man kigger paa, naar man IKKE leder efter noget
+        // bestemt.
+        Fold(ud: tomt);
 
         Pladsholder.Visibility = tomt ? Visibility.Visible : Visibility.Collapsed;
         Ryd.Visibility = tomt ? Visibility.Collapsed : Visibility.Visible;
