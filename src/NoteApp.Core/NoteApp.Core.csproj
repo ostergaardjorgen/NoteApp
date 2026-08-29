@@ -10,7 +10,24 @@
 
   <ItemGroup>
     <PackageReference Include="NAudio" Version="2.2.1" />
-    <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.0" />
+
+    <!-- 10.0.11 OG IKKE 10.0.0, OG DET ER EN SIKKERHEDSRETTELSE.
+         =====================================================================
+         10.0.0 traak SQLitePCLRaw 2.1.11 med sig, og den har CVE-2025-6965 -
+         en hukommelsesfejl i selve SQLite, meldt hoej. Raadgivningen er
+         GHSA-2m69-gcr7-jv3q, og den daekker alt til og med 2.1.11.
+
+         Der roeres IKKE ved SQLitePCLRaw direkte. Man kan pinne den, og det
+         var det naerliggende - men saa staar der en version i projektfilen,
+         som ingen holder oeje med, og den er forkert den dag
+         Microsoft.Data.Sqlite gaar videre. 10.0.11 traekker selv 2.1.12, og
+         saa er der ét tal at vedligeholde i stedet for to.
+
+         3.x findes ogsaa. Den skifter navne paa bundterne og er ikke et rent
+         loeft - og den loeser ikke mere end det her.
+         ===================================================================== -->
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.11" />
+
     <!-- Bruges kun til at spoerge Windows, om der er et NVIDIA-kort. Uden
          det svar kan appen ikke anbefale den rigtige Whisper-udgave. -->
     <PackageReference Include="System.Management" Version="10.0.0" />
