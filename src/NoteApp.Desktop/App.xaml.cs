@@ -49,7 +49,7 @@ public partial class App : Application
         }
 
         // NAVNESKIFTET RYDDES OP EFTER. Den gamle autostart peger paa
-        // HeyPia.exe, som ikke findes mere - og valget skal foelge med, ikke
+        // NoteApp.exe, som ikke findes mere - og valget skal foelge med, ikke
         // gaa tabt. Se Autostart.RydGamleNavne.
         Autostart.RydGamleNavne();
 

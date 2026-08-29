@@ -26,14 +26,25 @@ public static class Autostart
     private const string Nøgle = @"Software\Microsoft\Windows\CurrentVersion\Run";
     // ============ NAVNET I RUN-NOEGLEN ============
     //
-    // Det skiftede fra «HeyPia» til «HeyPia» 28-08-2026. Den gamle post
-    // peger paa HeyPia.exe, som ikke findes mere, og den skal ryddes -
+    // Det skiftede fra «NoteApp» til «HeyPia» 28-08-2026. Den gamle post
+    // peger paa NoteApp.exe, som ikke findes mere, og den skal ryddes -
     // ellers proever Windows at starte en fil, der er vaek, ved hvert
     // login. Se Ryd gamle navne nedenfor.
+    //
+    // DE TO NAVNE HER STOD ET DOEGN SOM DET SAMME ORD. Navneskiftet blev
+    // koert hen over hele kildekoden, og det ramte ogsaa det gamle navn:
+    // «Gamle» kom til at indeholde «HeyPia». Saa ledte oprydningen efter det
+    // navn, appen bruger NU, fandt intet, og gjorde ingenting - mens den
+    // gamle post blev liggende og pegede paa en exe, der ikke findes mere.
+    // Autostarten var altsaa slaaet til og virkede ikke.
+    //
+    // Havde der ligget en post under det nye navn, ville den samme fejl have
+    // slettet den - ved hver opstart. Derfor staar der ogsaa et vaern nede i
+    // RydGamleNavne. Rettet 29-08-2026.
     private const string Navn = "HeyPia";
 
     /// <summary>Navne, appen har haft foer. De ryddes ved opstart.</summary>
-    private static readonly string[] Gamle = { "HeyPia" };
+    private static readonly string[] Gamle = { "NoteApp" };
 
     /// <summary>Stien til den kørende exe, i anførselstegn så mellemrum overlever.</summary>
     private static string Kommando
@@ -60,7 +71,7 @@ public static class Autostart
     /// </summary>
     /// <remarks>
     /// APPEN SKIFTEDE NAVN 28-08-2026, og exe-filen med. Den gamle post i
-    /// Run-nøglen peger på HeyPia.exe, som ikke findes længere — Windows
+    /// Run-nøglen peger på NoteApp.exe, som ikke findes længere — Windows
     /// ville prøve at starte den ved hvert login og fejle i stilhed.
     ///
     /// VÆRRE: den, der havde autostart slået til, ville miste den uden at
@@ -79,6 +90,13 @@ public static class Autostart
 
             foreach (var gammelt in Gamle)
             {
+                // ET GAMMELT NAVN, DER ER LIG DET NYE, ER IKKE ET GAMMELT NAVN.
+                // Vaernet staar her, fordi listen EEN gang kom til at indeholde
+                // det navn, appen bruger nu - og saa ville oprydningen slette
+                // den post, den var sat i verden for at redde. Sker det igen,
+                // sker der nu ingenting.
+                if (string.Equals(gammelt, Navn, StringComparison.OrdinalIgnoreCase)) continue;
+
                 if (k.GetValue(gammelt) is not string s || s.Length == 0) continue;
 
                 // Var den slaaet til under det gamle navn, skal den vaere det
