@@ -162,51 +162,93 @@ standard og en tydelig visning af, at der lyttes.
 
 ### Hvad der er undersøgt — 28-08-2026
 
-| Vej | Hvad den koster | Dom |
+**Svaret lå på maskinen hele tiden.** whisper.cpp, som appen allerede henter,
+indeholder `whisper-command.exe` — et program bygget til præcis dette. Det har
+`-p, --prompt: the required activation prompt`. Det ER et vågeord.
+
+Med følger `ggml-silero-v5.1.2.bin` på 0,9 MB: stemmevagten, der afgør, om
+nogen overhovedet taler. Den er allerede hentet.
+
+Alt sammen MIT-licens, ingen ny afhængighed, ingen Python, ingen træning i en
+sky, og dansk er understøttet med `-l da`.
+
+| Vej | Dom |
+|---|---|
+| **whisper-command.exe** | **Den vej. Ligger der allerede** |
+| Windows' egen talegenkendelse | Prøvet: kan ikke bruges |
+| Picovoice Porcupine | Bedst teknisk, men prisen er en salgssamtale |
+| openWakeWord | Gratis, men Python, egen træning og uafklaret licens på træningsdata |
+| Vosk | Ingen dansk model |
+
+**Windows' egen er prøvet og duer ikke.** `System.Speech` opretter en motor,
+men der er ingen genkender bag den: `RecognizerInfo.Culture` er tom, og
+`LoadGrammar` fejler med `0x80050022`. Kun en-US installeret.
+
+### To målinger, der begge var forkerte
+
+De står her, fordi de begge så rigtige ud, og fordi den anden var på vej i en
+rapport.
+
+**Første måling talte opstart med.** 2380 ms pr. klip — men det var
+modelindlæsningen hver gang. En vågeordsvagt indlæser modellen én gang.
+
+**Anden måling konfigurerede whisper til ikke at gøre noget.** Et klip på
+1,5 sekund kostede 3778 ms, og med `-mt 32` faldt det til 15 ms. To hundrede
+og halvtreds gange hurtigere. Det var ikke sandt: `-mt` producerede **tom
+tekst**. Der blev målt på ingenting.
+
+### Det, målingerne faktisk viste
+
+| Klip | Tid | Tekst |
 |---|---|---|
-| **Windows' egen talegenkendelse** | 0 kr, ingen ny afhængighed | **Kan ikke bruges** |
-| **Picovoice Porcupine** | Ingen offentlig pris pr. produkt | Virker, men prisen er en salgssamtale |
-| **openWakeWord** | 0 kr, hvis modellen trænes selv | **Den vej, der skal gås** |
-| **Vosk** | 0 kr, Apache 2.0 | Ingen dansk model |
-| **Whisper på korte klip** | 0 kr, ligger på maskinen | For dyr at have kørende hele tiden |
+| 0,3 sek | 3682 ms | vrøvl |
+| 1,5 sek | 3778 ms | «H lizpie Modderen udter den for kv worn» |
+| 10 sek | 331 ms | «Jeg tror at du kan være helt sikker på …» |
 
-**Windows' egen er prøvet på maskinen og duer ikke.** `System.Speech` kan
-oprette en motor, men der er ingen genkender bag den: `RecognizerInfo.Culture`
-er tom, og `LoadGrammar` fejler med `0x80050022`. Der er kun **en-US**
-installeret — ingen dansk. Det var den billigste vej, og den er lukket.
+**Et kort klip er elleve gange dyrere end et langt.** Whisper polstrer op til
+tredive sekunder, og på for lidt lyd begynder afkoderen at gentage sig selv,
+til den har brugt hele sit token-budget.
 
-**Porcupine** er den bedste teknisk — mindst CPU, færrest falske positive, og
-en .NET-pakke. Men der er ingen offentlig pris for produktet alene; det er en
-samtale med en sælger, og startpakken ligger på 6.000 USD for virksomheder
-under fem år med højst tyve ansatte.
+Det er en vigtig konklusion: **Whisper kan ikke bruges på korte vinduer.**
+`whisper-command` gør det heller ikke — den samler lyd, til stemmevagten siger,
+at en sætning er slut, og kører først derefter. Den bruger `single_segment` og
+`no_context`, som `whisper-cli` ikke kan sættes til udefra, og derfor kan dens
+pris ikke måles med `whisper-cli`.
 
-**openWakeWord** er koden under Apache 2.0. De **færdige modeller er
-ikke-kommercielle** (CC BY-NC-SA) — men man kan træne sin egen på under en
-time i en Colab-notesbog med syntetisk tale, og den er ens egen. Modellerne
-er så små, at en enkelt kerne på en Raspberry Pi 3 kan køre femten til tyve
-af dem samtidig; på en almindelig pc er det ikke til at måle.
+**Prisen kan først måles med en rigtig mikrofon.** Det kan kun Jørgen.
 
-**Det, der IKKE er efterprøvet endnu, og som skal være det først:** om
-træningsrøret selv må bruges kommercielt. Den syntetiske tale kommer fra
-Piper, og de negative eksempler fra offentlige lydsamlinger — begge har
-deres egne vilkår. Det er billigt at undersøge nu og dyrt at opdage bagefter.
+### Det smarte er ikke motoren — det er hvornår der lyttes
 
-### En vagt skal stå foran
+En mikrofon, der er åben døgnet rundt, er problemet. Men vågeordet skal ikke
+være åbent døgnet rundt: det skal være åbent, når det er brugbart.
 
-Uanset motoren må vågeordsmodellen ikke køre på hver eneste lydramme. Foran
-den skal der stå en **stemmevagt** — Silero VAD eller noget tilsvarende, en
-model på omkring en megabyte — der kun slipper igennem, når nogen faktisk
-taler. Så koster det ingenting at have tændt i et tomt kontor.
+**Appen ved allerede, hvornår det er.** Den har kalenderen, og den har
+Mødevagten. Vågeordet kan være tændt:
 
-### Prisen er ikke penge
+* fra ti minutter før en aftale i kalenderen til ti minutter efter, den
+  begyndte — og ellers ikke
+* aldrig, mens der allerede optages
+* aldrig, hvis maskinen er låst
 
-**Mikrofonen er åben hele tiden.** Den lytter lokalt, og der sendes intet,
-før vågeordet er hørt — men den er åben, og det er præcis det, resten af
-appen lover ikke at gøre.
+Så er mikrofonen åben i måske en time om dagen frem for fireogtyve. Det er
+billigere, det er lettere at forklare en kunde, og det er den samme funktion.
 
-Derfor: **fra som standard**, en tydelig visning på skærmen af, at der
-lyttes, og en linje i privatlivspolitikken, før den tændes. Samme
-rækkefølge som ved dikteringen — teksten først, funktionen bagefter.
+Det er dét, der gør løsningen smart. Motoren ligger der allerede.
+
+### Sådan skal det bygges
+
+1. **Slået fra som standard**, med en kontakt under Diktering.
+2. `whisper-command.exe` startes som et barneprogram med `-p "hey pia"`,
+   `-l da` og modellen, brugeren allerede har.
+3. Der lyttes på dens udskrift. Kommer aktiveringsordet, kaldes **den samme
+   kode som Ctrl+,** — vågeordet er en udløser, ikke en ny funktion. Alt
+   nedenunder findes og er prøvet af.
+4. Kører kun i kalendervinduet, jf. ovenfor.
+5. En tydelig visning på skærmen, mens der lyttes, og en linje i
+   privatlivspolitikken, **før** den kan tændes.
+
+Punkt 3 er hele pointen: der skal ikke bygges en ny vej. Der skal bygges en
+knap mere til den, der findes.
 
 **4 — opgaver og beskeder ud af tale.** «Mind mig om at ringe til Ibrar på
 tirsdag» bliver til en opgave med en dato, ikke til en sætning.
