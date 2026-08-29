@@ -123,6 +123,18 @@ public sealed class Vaageordsvagt : IDisposable
                 _proces = Process.Start(start);
                 if (_proces is null) return;
 
+                // ============ DEN SKAL DØ SAMMEN MED APPEN ============
+                //
+                // Lukkes appen paent, lukkes den her med i Ryd(). Men appen
+                // bliver ikke altid lukket paent - udgivelsen slaar en koerende
+                // app ihjel, og det goer Jobliste ogsaa. Saa levede den videre
+                // med sin model i hukommelsen og sit greb om grafikkortet.
+                //
+                // Maalt 29-08-2026: TRE af dem samtidig, den aeldste tretten
+                // timer gammel, 2,4 GB og 94 % af grafikkortet - mens
+                // vaageordet var slaaet FRA. Se Boernejob.
+                Boernejob.Tilfoej(_proces);
+
                 _startet = DateTime.UtcNow;
 
                 _proces.OutputDataReceived += (_, e) => Laes(e.Data);

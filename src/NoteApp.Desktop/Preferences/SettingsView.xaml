@@ -256,6 +256,71 @@
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
           <StackPanel>
 
+            <!-- ==================== HVAD DEN BRUGER LIGE NU ====================
+
+                 DEN STAAR ØVERST, OG DET ER MED VILJE.
+
+                 Appen starter andre programmer: whisper-cli skriver møderne
+                 ud, whisper-command lytter efter vågeordet. De kan hver især
+                 tage flere gigabyte og et helt grafikkort, og de kører uden
+                 for appens eget vindue.
+
+                 Målt 29-08-2026 stod der tre whisper-command tilbage fra
+                 tidligere kørsler — 2,4 GB og 94 % af grafikkortet, mens
+                 vågeordet var slået fra. Maskinen var mærkbart langsom, og der
+                 var intet sted i appen, hvor man kunne se det. I Jobliste
+                 hedder de ikke HeyPia.
+
+                 Tallene er MÅLT på processerne, ikke skønnet. -->
+            <Border Background="{DynamicResource Panel}" CornerRadius="10" Padding="20"
+                    BorderBrush="{DynamicResource PanelKant}" BorderThickness="1" Margin="0,0,0,14">
+              <StackPanel>
+                <Grid>
+                  <TextBlock Text="{i18n:Oversat settingsview.forbrug_nu}" FontSize="15" FontWeight="SemiBold"
+                             VerticalAlignment="Center" />
+                  <Button x:Name="ForbrugKnap" Click="Forbrug_Klik" HorizontalAlignment="Right"
+                          Padding="14,7" Content="{i18n:Oversat settingsview.forbrug_maal}" />
+                </Grid>
+                <TextBlock FontSize="12.5" Margin="0,6,0,0" TextWrapping="Wrap" LineHeight="20"
+                           Foreground="{DynamicResource TekstMeget}"
+                           Text="{i18n:Oversat settingsview.forbrug_under}" />
+
+                <ItemsControl x:Name="Forbrugsliste" Margin="0,14,0,0">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                      <Border Background="{DynamicResource Trykket}" BorderBrush="{Binding Kant}"
+                              BorderThickness="3,0,0,0" CornerRadius="6"
+                              Padding="14,11" Margin="0,0,0,8">
+                        <Grid>
+                          <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                          </Grid.ColumnDefinitions>
+                          <StackPanel Grid.Column="0">
+                            <TextBlock Text="{Binding Navn}" FontSize="13" FontWeight="SemiBold" />
+                            <TextBlock Text="{Binding Hvad}" FontSize="11.5" Margin="0,4,0,0"
+                                       TextWrapping="Wrap" Foreground="{DynamicResource TekstSvag}" />
+                          </StackPanel>
+                          <StackPanel Grid.Column="1" Margin="14,0,0,0" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding Cpu}" FontSize="14" FontWeight="SemiBold"
+                                       HorizontalAlignment="Right" Foreground="{Binding Kant}" />
+                            <TextBlock Text="{Binding Hukommelse}" FontSize="11.5"
+                                       HorizontalAlignment="Right" Foreground="{DynamicResource TekstSvag}" />
+                          </StackPanel>
+                        </Grid>
+                      </Border>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <TextBlock x:Name="ForbrugSum" FontSize="12.5" Margin="0,4,0,0" TextWrapping="Wrap"
+                           FontWeight="SemiBold" />
+                <TextBlock FontSize="11.5" Margin="0,8,0,0" TextWrapping="Wrap" LineHeight="18"
+                           Foreground="{DynamicResource TekstMeget}"
+                           Text="{i18n:Oversat settingsview.forbrug_hvordan}" />
+              </StackPanel>
+            </Border>
+
             <Border Background="{DynamicResource Panel}" CornerRadius="10" Padding="20"
                     BorderBrush="{DynamicResource PanelKant}" BorderThickness="1" Margin="0,0,0,14">
               <StackPanel>

@@ -760,6 +760,78 @@ public partial class SettingsView : UserControl
     /// næsten hvad som helst; forskellen er, hvor længe man venter. Et rødt
     /// kryds ville sige, at noget ikke virker.
     /// </summary>
+    // ------------------------------------------------------ hvad den bruger
+
+    /// <summary>Én linje i forbrugslisten.</summary>
+    private sealed record Forbrugsvisning(
+        string Navn, string Hvad, string Cpu, string Hukommelse, string Kant);
+
+    private bool _maaler;
+
+    /// <summary>
+    /// Måler appen og dens hjælpeprogrammer og viser det.
+    /// </summary>
+    /// <remarks>
+    /// DER MÅLES, NÅR DER TRYKKES — ikke hele tiden.
+    ///
+    /// En måling koster selv noget, og en skærm, der opdaterer sig hvert
+    /// sekund, ville stå og bruge det, den er sat til at vise. To sekunders
+    /// vindue er nok til et tal, der ligner Joblistes.
+    /// </remarks>
+    private async void Forbrug_Klik(object sender, RoutedEventArgs e)
+    {
+        if (_maaler) return;
+        _maaler = true;
+
+        ForbrugKnap.IsEnabled = false;
+        ForbrugSum.Text = Sprog.T("settingsview.forbrug_maaler");
+
+        try
+        {
+            var poster = await Ressourcer.MaalAsync(TimeSpan.FromSeconds(2));
+
+            Forbrugsliste.ItemsSource = poster.Select(p => new Forbrugsvisning(
+                p.ErOs ? "HeyPia" : p.Navn,
+                p.ErOs
+                    ? $"pid {p.Pid}"
+                    : $"pid {p.Pid} · hjælpeprogram · kørt i {Varighed(p.Alder)}",
+                $"{p.Procent:0} %",
+                $"{p.Megabyte:N0} MB",
+                Farve(p))).ToList();
+
+            var cpu = poster.Sum(p => p.Procent);
+            var mb = poster.Sum(p => p.Megabyte);
+            var kerner = Environment.ProcessorCount;
+
+            ForbrugSum.Text =
+                $"I alt {cpu:0} % af én kerne ({kerner} kerner i maskinen) og {mb:N0} MB "
+                + $"fordelt på {poster.Count} program(mer).";
+        }
+        catch (Exception ex)
+        {
+            ForbrugSum.Text = $"Kunne ikke måle: {ex.Message}";
+        }
+        finally
+        {
+            ForbrugKnap.IsEnabled = true;
+            _maaler = false;
+        }
+    }
+
+    /// <summary>
+    /// Farven på linjen. Rød, når ét program tager mere end en hel kerne —
+    /// det er dér, man mærker det.
+    /// </summary>
+    private static string Farve(Forbrugspost p) =>
+        p.Procent >= 100 || p.Megabyte >= 1500 ? "#E5484D"
+        : p.Procent >= 25 || p.Megabyte >= 500 ? "#F5A524"
+        : "#4CBE72";
+
+    private static string Varighed(TimeSpan t) =>
+        t.TotalHours >= 1 ? $"{t.TotalHours:0.#} timer"
+        : t.TotalMinutes >= 1 ? $"{t.TotalMinutes:0} min"
+        : $"{t.TotalSeconds:0} sek";
+
     private void VisKrav()
     {
         List<Krav> krav;

@@ -699,7 +699,12 @@
     "ordbog_filter": "Text file (*.txt)|*.txt|All files (*.*)|*.*",
     "forloeb_overskrift": "Go through the setup again",
     "forloeb_under": "Microphone, speaker, start with Windows, dictation and the wake word — gathered in one place, in the order they belong together. Useful on a new machine, with a new headset, or if something has drifted.",
-    "forloeb_knap": "Go through"
+    "forloeb_knap": "Go through",
+    "forbrug_nu": "What it is using right now",
+    "forbrug_maal": "Measure",
+    "forbrug_maaler": "Measuring for two seconds …",
+    "forbrug_under": "The app starts other programs: one writes out your meetings, one listens for the wake word. Each can take several gigabytes, and they run outside the app’s own window — in Task Manager they are not called HeyPia. Here they are gathered in one place.",
+    "forbrug_hvordan": "The figures are measured on the processes over two seconds, not estimated. 100 % means one processor core fully in use; on a machine with eight cores it can read more than 100 %, and that is not an error. It is the same calculation Task Manager uses, so the numbers can be compared."
   },
   "complianceview": {
     "aabner_console_mistral_ai_hvor_du_slaar_tr": "Opens console.mistral.ai, where you turn training off",

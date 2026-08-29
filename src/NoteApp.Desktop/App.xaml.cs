@@ -29,6 +29,37 @@ public partial class App : Application
 
         DispatcherUnhandledException += VisFejl;
 
+        // ============ HJÆLPEPROGRAMMER FRA SIDST RYDDES ============
+        //
+        // Vaageordet lytter med whisper-command.exe. Blev appen draebt frem
+        // for lukket - og det bliver den ved hver udgivelse - levede den
+        // videre med sin model i hukommelsen og sit greb om grafikkortet.
+        //
+        // Maalt 29-08-2026: TRE af dem samtidig, den aeldste tretten timer
+        // gammel, tilsammen 2,4 GB og 94 % af grafikkortet, mens vaageordet
+        // var slaaet FRA. Maskinen var maerkbart langsom, og intet i appen
+        // viste hvorfor.
+        //
+        // Nye foraeldreloese forhindres af jobobjektet i Boernejob. Den her
+        // rydder op efter dem, der allerede findes.
+        try
+        {
+            var lukket = Boernejob.RydForaeldreloese(
+                WhisperInstall.Root, "whisper-command", "whisper-cli");
+
+            if (lukket > 0)
+            {
+                Historik.Skriv(HaendelseType.Andet, "Hjælpeprogrammer fra sidste kørsel er lukket",
+                    $"{lukket} program(mer) kørte stadig fra en tidligere start og brugte "
+                    + "hukommelse og grafikkort uden at lave noget. De er lukket.",
+                    Udfald.Fuldført);
+            }
+        }
+        catch (Exception)
+        {
+            // En oprydning maa aldrig kunne forhindre en opstart.
+        }
+
         // ============ EN NULSTILLING SKAL KUNNE SES ============
         //
         // Kunne indstillingerne ikke laeses, opdagede man det foer ved, at
