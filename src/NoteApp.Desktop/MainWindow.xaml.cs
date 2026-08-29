@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Reflection;
 using System.Windows;
+using System.Windows.Threading;
 using NoteApp.Core;
 using NoteApp.Desktop.Engine;
 using NoteApp.Desktop.Documents;
@@ -399,6 +400,19 @@ public partial class MainWindow : Window
             SaetMenu(Core.AppSettings.Current.MenuSammenklappet, gem: false);
 
             SaetDiktering();
+
+            // ============ VAAGEORDET ============
+            _vaage.Hoert -= VaageordHoert;
+            _vaage.Hoert += VaageordHoert;
+            _vaage.Melder -= VisDiktat;
+            _vaage.Melder += VisDiktat;
+
+            _vaageur?.Stop();
+            _vaageur = new DispatcherTimer { Interval = TimeSpan.FromSeconds(30) };
+            _vaageur.Tick += (_, _) => SaetVaageord();
+            _vaageur.Start();
+
+            SaetVaageord();
 
             // Skifter registreringen senere - fordi den oenskede tast blev
             // ledig - skal bjaelken sige det nye.
@@ -879,6 +893,97 @@ public partial class MainWindow : Window
     /// </summary>
 
     private readonly Dikteringsvagt _diktat = new();
+    private readonly Vaageordsvagt _vaage = new();
+    private DispatcherTimer? _vaageur;
+
+    // ============================ VAAGEORDET ============================
+
+    /// <summary>
+    /// Slår vågeordet til eller fra, alt efter om der må lyttes lige nu.
+    /// </summary>
+    /// <remarks>
+    /// DET ER HER, LØSNINGEN BLIVER BILLIG. Vinduet omkring en aftale er
+    /// forskellen på en mikrofon, der er åben en time om dagen, og en, der er
+    /// åben fireogtyve. Se <see cref="Core.Vaageord.Skal"/>, hvor beslutningen
+    /// ligger — den kan prøves af uden mikrofon.
+    ///
+    /// Der spørges hvert halve minut. Et vindue, der åbner et halvt minut for
+    /// sent, er ikke til at mærke; et ur, der tikker hvert sekund, er.
+    /// </remarks>
+    private void SaetVaageord()
+    {
+        var v = Core.AppSettings.Current;
+
+        var svar = Core.Vaageord.Skal(
+            v.VaageordTil,
+            v.VaageordKunVedMoeder,
+            Vaageordsvagt.MotorFindes,
+            _diktat.Igang || OptagerNu(),
+            Laast(),
+            DateTimeOffset.Now,
+            NaesteAftale(),
+            v.VaageordFoerMinutter,
+            v.VaageordEfterMinutter);
+
+        if (svar == Core.Lyttesvar.Lytter)
+        {
+            _vaage.Start(Core.WhisperInstall.Locate().ModelPath ?? "", Core.Sprog.Kode);
+        }
+        else if (_vaage.Lytter)
+        {
+            _vaage.Stop();
+        }
+    }
+
+    /// <summary>Nærmeste aftale — før eller efter nu. Null, hvis der ingen er.</summary>
+    private static DateTimeOffset? NaesteAftale()
+    {
+        try
+        {
+            var nu = DateTimeOffset.Now;
+
+            return Core.Kalender.Alle()
+                .Select(a => a.Start)
+                .OrderBy(t => Math.Abs((t - nu).TotalMinutes))
+                .Select(t => (DateTimeOffset?)t)
+                .FirstOrDefault();
+        }
+        catch (Exception)
+        {
+            // Ingen kalender er ikke en fejl. Saa er der bare intet vindue.
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Kører der en optagelse?
+    /// </summary>
+    /// <remarks>
+    /// Dikteringsvagten ved det om SIN egen; mødeoptagelsen kender den ikke.
+    /// Den spørges derfor det sted, der viser den: optagebåndet. Er der ikke
+    /// noget bånd, kører der ingen optagelse.
+    /// </remarks>
+    private bool OptagerNu() =>
+        OptagBjaelke.Content is Meeting.MeetingView m && m.OptagerNu;
+
+    /// <summary>Er maskinen låst?</summary>
+    private static bool Laast()
+    {
+        // Er der ingen forgrund, er skrivebordet ikke vores - saa er skaermen
+        // laast, eller en anden bruger sidder der.
+        return Indsaetter.Laes().Haandtag == IntPtr.Zero;
+    }
+
+    private void VaageordHoert(string efter) => Dispatcher.BeginInvoke(() =>
+    {
+        // ============ SAMME VEJ SOM ET HOLD PAA TASTEN ============
+        //
+        // Der emuleres ikke et tastetryk. Der kaldes den samme kode.
+        _diktat.Melder -= VisDiktat;
+        _diktat.Melder += VisDiktat;
+
+        _diktat.BegyndPaaVaageord();
+    });
 
     /// <summary>
     /// Afgør, om et hold på tasten skal betyde noget.

@@ -305,6 +305,17 @@ public sealed class GlobalHotkey : IDisposable
                     $"Du har valgt {ønsket.Navn}. Den var optaget, så {valg.Navn} bruges nu. "
                     + "Der prøves at få din egen tilbage hvert minut.", Udfald.SeEfter);
             else
+                // ============ KUN NAAR DER ER SKET NOGET ============
+                //
+                // Linjen stod syv gange i traek med samme tekst: den blev
+                // skrevet ved hver opstart. En besked, der er identisk hver
+                // gang, er ikke information - den er stoej, og den skubber
+                // det, der ER information, ud af skaermen.
+                //
+                // Nu skrives den foerste gang, og naar tasten er blevet en
+                // ANDEN. Det er de to tilfaelde, hvor der er noget at vide.
+                if (!ErNyt(valg)) return;
+
                 // TASTEN GOER TO TING, NAAR DIKTERINGEN ER SLAAET TIL, og saa
                 // er «starter en optagelse» ikke laengere hele sandheden. Den,
                 // der laeser linjen for at finde ud af, hvorfor et hold ikke
@@ -634,6 +645,31 @@ public sealed class GlobalHotkey : IDisposable
     {
         _holdur?.Stop();
         _holdur = null;
+    }
+
+    /// <summary>
+    /// Er det her noget nyt — eller står det samme i forvejen?
+    /// </summary>
+    /// <remarks>
+    /// Der kigges i de seneste poster. Står den samme besked øverst allerede,
+    /// er der ikke sket noget, siden sidst appen startede.
+    /// </remarks>
+    private static bool ErNyt(HotkeyValg valg)
+    {
+        try
+        {
+            var sidste = Historik.Laes(40)
+                .FirstOrDefault(h => h.Slags == HaendelseType.Andet
+                                     && h.Hvad == "Genvejstasten er klar");
+
+            return sidste is null || !sidste.Detaljer.StartsWith(valg.Navn, StringComparison.Ordinal);
+        }
+        catch (Exception)
+        {
+            // Kan historikken ikke laeses, skrives der. En dublet er billigere
+            // end en linje, der aldrig kom.
+            return true;
+        }
     }
 
     /// <summary>

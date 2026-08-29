@@ -285,6 +285,55 @@ public sealed class AppSettings
     /// </remarks>
     public Dictionary<string, string> Teksttyper { get; set; } = new();
 
+    // ======================= VÅGEORDET =======================
+
+    /// <summary>
+    /// Skal appen lytte efter «Hej Pia»?
+    /// </summary>
+    /// <remarks>
+    /// FRA SOM STANDARD, OG DET ER IKKE FORSIGTIGHED FOR EN SIKKERHEDS SKYLD.
+    ///
+    /// Vågeordet betyder, at mikrofonen er åben, uden at nogen har trykket på
+    /// noget. Den lytter lokalt, og der sendes intet, før ordet er hørt — men
+    /// den er åben, og det er præcis det, resten af appen lover ikke at gøre.
+    ///
+    /// Det skal være et valg, man har truffet, ikke noget der fulgte med en
+    /// opdatering.
+    /// </remarks>
+    public bool VaageordTil { get; set; }
+
+    /// <summary>
+    /// Ordene, der lyttes efter. Tom betyder <see cref="Core.Vaageord.Standardord"/>.
+    /// </summary>
+    public List<string> Vaageord { get; set; } = new();
+
+    /// <summary>
+    /// Skal der kun lyttes omkring aftaler i kalenderen?
+    /// </summary>
+    /// <remarks>
+    /// TIL SOM STANDARD, OG DET ER HELE POINTEN. En mikrofon, der er åben
+    /// døgnet rundt, er problemet. Er vinduet ti minutter om en aftale, er den
+    /// åben måske en time om dagen frem for fireogtyve — og det er den samme
+    /// funktion.
+    /// </remarks>
+    public bool VaageordKunVedMoeder { get; set; } = true;
+
+    /// <summary>Minutter før en aftale, der lyttes.</summary>
+    public int VaageordFoerMinutter { get; set; } = Core.Vaageord.StandardFoerMinutter;
+
+    /// <summary>Minutter efter en aftales start, der lyttes.</summary>
+    public int VaageordEfterMinutter { get; set; } = Core.Vaageord.StandardEfterMinutter;
+
+    /// <summary>
+    /// Kommandoerne, brugeren selv har lavet. Tom betyder
+    /// <see cref="Kommandotolk.Standard"/>.
+    /// </summary>
+    /// <remarks>
+    /// EN HVIDLISTE. Der kan ikke køre noget, som ikke står her — og det er
+    /// brugerens egen liste, ikke appens.
+    /// </remarks>
+    public List<Kommando> Kommandoer { get; set; } = new();
+
     /// <summary>
     /// Er menuen klappet ind, så kun ikonerne står?
     /// </summary>

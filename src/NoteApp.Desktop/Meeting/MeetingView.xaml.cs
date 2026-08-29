@@ -122,6 +122,16 @@ public partial class MeetingView : UserControl
     /// er teksten ikke en fast streng i XAML, men den tast, der FAKTISK blev
     /// registreret.
     /// </summary>
+    /// <summary>
+    /// Kører der en optagelse lige nu?
+    /// </summary>
+    /// <remarks>
+    /// Uret er fremme, netop mens der optages — det er dét, der SKIFTER, og
+    /// det er derfor svaret læses dér frem for i et flag, der kunne komme ud
+    /// af trit med skærmen.
+    /// </remarks>
+    public bool OptagerNu => UrPanel.Visibility == Visibility.Visible;
+
     public void VisGenvej(string? tast, string? bemærkning)
     {
         if (tast is null)

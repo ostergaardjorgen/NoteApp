@@ -57,6 +57,61 @@ public sealed class Dikteringsvagt : IDisposable
     /// <summary>Sandt, mens der optages eller skrives ud.</summary>
     public bool Igang => _optager is not null || _arbejder;
 
+    /// <summary>
+    /// Vågeordet blev hørt. Gør det samme som et hold på genvejstasten — og
+    /// slipper selv, når der bliver stille.
+    /// </summary>
+    /// <remarks>
+    /// DER EMULERES IKKE ET TASTETRYK. Det ville være at sende Ctrl+komma ud i
+    /// Windows og håbe, at appen fangede det igen — gennem den samme
+    /// registrering, der kan være taget af et andet program. I stedet kaldes
+    /// den samme kode, som tastetrykket kalder.
+    ///
+    /// STILHEDEN SLIPPER HOLDET. Der er ingen tast at give slip på, så
+    /// mikrofonens eget niveau afgør det: <see cref="Stilhed"/>.
+    /// </remarks>
+    public void BegyndPaaVaageord()
+    {
+        Begynd();
+        if (_optager is null) return;
+
+        var start = DateTime.UtcNow;
+        var sidstHoert = DateTime.UtcNow;
+        var harTalt = false;
+
+        var loft = Holdvurdering.LoftFra(AppSettings.Current.DikteringLoftMinutter);
+
+        _stilhedsur?.Stop();
+        _stilhedsur = new System.Windows.Threading.DispatcherTimer(
+            System.Windows.Threading.DispatcherPriority.Input)
+        {
+            Interval = TimeSpan.FromMilliseconds(100),
+        };
+
+        _stilhedsur.Tick += (_, _) =>
+        {
+            if (_optager is null) { _stilhedsur?.Stop(); _stilhedsur = null; return; }
+
+            if (_optager.Niveau >= Stilhed.Graense)
+            {
+                sidstHoert = DateTime.UtcNow;
+                if (DateTime.UtcNow - start >= Stilhed.MindsteTale) harTalt = true;
+            }
+
+            if (!Stilhed.SkalSlutte(DateTime.UtcNow - sidstHoert, harTalt,
+                                    DateTime.UtcNow - start, loft)) return;
+
+            _stilhedsur?.Stop();
+            _stilhedsur = null;
+
+            _ = SlutAsync(afbrudt: false);
+        };
+
+        _stilhedsur.Start();
+    }
+
+    private System.Windows.Threading.DispatcherTimer? _stilhedsur;
+
     /// <summary>Tasten er holdt nede længe nok. Begynd at lytte.</summary>
     public void Begynd()
     {
@@ -222,6 +277,13 @@ public sealed class Dikteringsvagt : IDisposable
         finally
         {
             _arbejder = false;
+
+            // Uret hoerer til DEN diktering, der lige sluttede. Blev den
+            // afsluttet et andet sted fra - af loftet, af en fejl - ville det
+            // ellers blive ved at tikke og afslutte den NAESTE.
+            _stilhedsur?.Stop();
+            _stilhedsur = null;
+
             Slet(klip);
         }
     }

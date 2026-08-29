@@ -1,4 +1,4 @@
-namespace NoteApp.Core;
+﻿namespace NoteApp.Core;
 
 /// <summary>Hvorfor der lyttes — eller ikke gør.</summary>
 public enum Lyttesvar
@@ -43,8 +43,17 @@ public enum Lyttesvar
 /// </summary>
 public static class Vaageord
 {
-    /// <summary>Standardordet. Kan skiftes af brugeren.</summary>
-    public const string Standardord = "hey pia";
+    /// <summary>
+    /// Ordene, appen lytter efter fra begyndelsen. Brugeren kan rette i listen.
+    /// </summary>
+    /// <remarks>
+    /// TO STAVEMÅDER AF DET SAMME. «Hej» og «hey» lyder næsten ens, men en
+    /// udskrift vælger én af dem — og hvilken, afhænger af, hvor hårdt man
+    /// siger h'et. Lyttes der kun efter den ene, virker vågeordet hver anden
+    /// gang, og det er værre end slet ikke at virke: så tror man, det er én
+    /// selv, der siger det forkert.
+    /// </remarks>
+    public static readonly IReadOnlyList<string> Standardord = new[] { "hej pia", "hey pia" };
 
     /// <summary>Hvor længe før en aftale der lyttes.</summary>
     public const int StandardFoerMinutter = 10;
@@ -126,5 +135,97 @@ public static class Vaageord
         while (s.Contains("  ", StringComparison.Ordinal)) s = s.Replace("  ", " ");
 
         return s.Length >= 6 && s.Contains(' ', StringComparison.Ordinal) ? s : "";
+    }
+
+    /// <summary>
+    /// Blev et af vågeordene sagt? Giver det ord, der blev genkendt.
+    /// </summary>
+    /// <remarks>
+    /// STRENGERE END ORDBOGEN, MILDERE END KOMMANDOERNE. Et vågeord, der
+    /// udløses for let, starter en optagelse midt i et møde; et, der udløses
+    /// for svært, får folk til at gentage sig selv, til de giver op.
+    ///
+    /// Ét tegn galt går an — «hey pia» mod «hey pja». To gør ikke: så er der
+    /// for mange almindelige sætninger inden for rækkevidde.
+    /// </remarks>
+    public static string? Hoert(string? sagt, IEnumerable<string> ord)
+    {
+        var s = Kommandotolk.Rens(sagt);
+        if (s.Length == 0) return null;
+
+        foreach (var raa in ord)
+        {
+            var v = Rens(raa);
+            if (v.Length == 0) continue;
+
+            // Vaageordet staar FORREST. Bliver det sagt midt i en saetning,
+            // var det ikke et kald - det var nogen, der talte om Pia.
+            if (s.StartsWith(v, StringComparison.Ordinal)) return v;
+
+            // Hele ytringen er vaageordet, med hoejst eet tegn galt.
+            if (Math.Abs(s.Length - v.Length) <= 1 && Ordretter.Afstand(s, v, 1) <= 1) return v;
+        }
+
+        return null;
+    }
+
+    /// <summary>Det, der står tilbage, når vågeordet er skåret væk.</summary>
+    public static string Efter(string? sagt, string vaageord)
+    {
+        var s = Kommandotolk.Rens(sagt);
+        var v = Rens(vaageord);
+
+        return v.Length > 0 && s.StartsWith(v, StringComparison.Ordinal)
+            ? s[v.Length..].Trim()
+            : "";
+    }
+}
+
+/// <summary>
+/// Afgør, hvornår en diktering, der ikke blev startet med en tast, skal slutte.
+///
+/// «HOLD NEDE» HAR INGEN TAST AT SLIPPE, NÅR DET VAR ET VÅGEORD. Så må
+/// stilheden slippe den: taler man ikke længere, er man færdig.
+///
+/// TÅLMODIGHEDEN ER HELE SAGEN. For kort, og dikteringen klipper en tænkepause
+/// over midt i en sætning. For lang, og man står og venter på, at den opdager,
+/// man er færdig — og imens optages resten af rummet.
+/// </summary>
+public static class Stilhed
+{
+    /// <summary>Hvor længe der skal være stille, før dikteringen slutter.</summary>
+    /// <remarks>
+    /// Halvandet sekund. En tænkepause midt i en sætning er kortere; en pause
+    /// efter en færdig sætning er længere.
+    /// </remarks>
+    public static readonly TimeSpan Taalmodighed = TimeSpan.FromMilliseconds(1500);
+
+    /// <summary>Under dette niveau regnes der ikke for at blive talt.</summary>
+    /// <remarks>
+    /// Niveauet er 0-1 fra mikrofonen. 0,02 er valgt lavt: en stille stemme
+    /// skal kunne holde dikteringen i gang, og et rum har altid en smule støj.
+    /// </remarks>
+    public const float Graense = 0.02f;
+
+    /// <summary>Er der talt for kort til, at det var et diktat?</summary>
+    /// <remarks>
+    /// Uden den ville selve vågeordet kunne blive til et tomt diktat: man
+    /// siger «Hej Pia», tier, og der sendes et klip uden indhold.
+    /// </remarks>
+    public static readonly TimeSpan MindsteTale = TimeSpan.FromMilliseconds(400);
+
+    /// <param name="sidenTale">Tid siden mikrofonen sidst hørte noget.</param>
+    /// <param name="haltTalt">Er der overhovedet blevet talt?</param>
+    /// <param name="gaaet">Tid siden dikteringen begyndte.</param>
+    /// <param name="loft">Længste diktering.</param>
+    public static bool SkalSlutte(TimeSpan sidenTale, bool haltTalt, TimeSpan gaaet, TimeSpan loft)
+    {
+        if (gaaet >= loft) return true;
+
+        // Er der ikke sagt noget endnu, venter vi. Man skal have lov at
+        // traekke vejret, foer man begynder.
+        if (!haltTalt) return gaaet >= loft;
+
+        return sidenTale >= Taalmodighed;
     }
 }

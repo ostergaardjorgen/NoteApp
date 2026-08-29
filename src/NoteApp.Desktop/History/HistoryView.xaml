@@ -47,7 +47,7 @@
           <ItemsControl x:Name="Liste">
             <ItemsControl.ItemTemplate>
               <DataTemplate>
-                <Border Background="{DynamicResource Trykket}" CornerRadius="8" Padding="16,12" Margin="12,4"
+                <Border Background="{DynamicResource Trykket}" CornerRadius="6" Padding="14,7" Margin="12,2"
                         BorderThickness="1" BorderBrush="{Binding Kantfarve}">
                   <Grid>
                     <Grid.ColumnDefinitions>
@@ -56,19 +56,19 @@
                       <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
-                    <StackPanel Grid.Column="0" Margin="0,0,20,0" MinWidth="110">
+                    <StackPanel Grid.Column="0" Margin="0,0,16,0" MinWidth="96">
                       <TextBlock Text="{Binding Klokkeslet}" FontFamily="Consolas" FontSize="13"
                                  FontWeight="SemiBold" />
-                      <TextBlock Text="{Binding Dato}" FontSize="12" Margin="0,2,0,0"
+                      <TextBlock Text="{Binding Dato}" FontSize="11.5" Margin="0,1,0,0"
                                  Foreground="{DynamicResource TekstMeget}" />
                     </StackPanel>
 
                     <StackPanel Grid.Column="1">
                       <TextBlock Text="{Binding Hvad}" FontSize="13.5" FontWeight="SemiBold"
                                  TextWrapping="Wrap" />
-                      <TextBlock Text="{Binding Detaljer}" FontSize="12" Margin="0,3,0,0"
+                      <TextBlock Text="{Binding Detaljer}" FontSize="11.5" Margin="0,1,0,0"
                                  TextWrapping="Wrap" Foreground="{DynamicResource TekstSvag}" />
-                      <TextBlock Text="{Binding Model}" FontSize="11.5" Margin="0,3,0,0"
+                      <TextBlock Text="{Binding Model}" FontSize="11" Margin="0,1,0,0"
                                  TextWrapping="Wrap" Foreground="{DynamicResource TekstMeget}" />
 
                       <!-- VEJEN TILBAGE TIL KILDEN.
@@ -80,7 +80,7 @@
                            En knap og ikke et hyperlink: hyperlinket arver
                            ikke temaets farver og stod blaat paa blaat. -->
                       <Button Content="{Binding LinkTekst}" Tag="{Binding}" Click="Kilde_Klik"
-                              HorizontalAlignment="Left" Margin="0,6,0,0" Padding="0"
+                              HorizontalAlignment="Left" Margin="0,4,0,0" Padding="0"
                               FontSize="11.5" Cursor="Hand" BorderThickness="0"
                               Background="Transparent" Foreground="{Binding LinkFarve}"
                               IsEnabled="{Binding Findes}"
