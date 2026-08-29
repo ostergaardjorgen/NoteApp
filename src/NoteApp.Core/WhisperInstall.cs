@@ -333,6 +333,62 @@ public static class WhisperInstall
     public static string ModelDestination(WhisperModel model) =>
         Path.Combine(ModelDirectory, model.FileName);
 
+    // ==================================================================
+    //                     MODELLEN TIL VÅGEORDET
+    // ==================================================================
+
+    /// <summary>
+    /// Vælger modellen til vågeordet: den MINDSTE, der ligger på maskinen.
+    /// </summary>
+    /// <remarks>
+    /// DET ER DEN OMVENDTE REGEL AF <see cref="FindModel"/>, OG DET ER MED VILJE.
+    ///
+    /// Til et møde tages den bedste model, der findes. Vågeordet gjorde det
+    /// samme, og det var forkert: så lå der en model på knap 3 GB og lyttede
+    /// efter to ord, hele tiden. Appens egen tekst om netop den model siger,
+    /// at den er for langsom til daglig brug på en CPU — og en funktion, der
+    /// koster det, er ikke en funktion, man lader stå tændt.
+    ///
+    /// De to opgaver ligner kun hinanden. At skrive en times møde ud kræver
+    /// alt, hvad modellen kan; at høre «Hej Pia» kræver næsten ingenting.
+    /// Derfor: mindste fil vinder her.
+    ///
+    /// Stilhedsmodellen tælles ikke med. Den afgør, OM der bliver talt, og
+    /// kan ikke genkende et ord — vælges den, hører appen aldrig noget.
+    /// Fundet 29-08-2026.
+    /// </remarks>
+    public static string? Vaageordsmodel()
+    {
+        try
+        {
+            if (!Directory.Exists(ModelDirectory)) return null;
+
+            var filer = Directory.EnumerateFiles(ModelDirectory, "*.bin")
+                .Select(f => (Sti: f, Bytes: new FileInfo(f).Length));
+
+            return MindsteModel(filer);
+        }
+        catch (IOException)
+        {
+            return null;
+        }
+    }
+
+    /// <summary>Selve valget, skilt ud så det kan prøves uden en disk.</summary>
+    /// <remarks>
+    /// Nedre grænse på 20 MB: en halv fil fra en afbrudt hentning er ikke en
+    /// model, og den ville vinde hver gang, netop fordi den er lille.
+    /// </remarks>
+    public static string? MindsteModel(IEnumerable<(string Sti, long Bytes)> filer) =>
+        filer
+            .Where(f => f.Bytes >= 20_000_000)
+            .Where(f => !Path.GetFileName(f.Sti)
+                             .Equals(VadFilnavn, StringComparison.OrdinalIgnoreCase))
+            .OrderBy(f => f.Bytes)
+            .ThenBy(f => f.Sti, StringComparer.OrdinalIgnoreCase)
+            .Select(f => f.Sti)
+            .FirstOrDefault();
+
     /// <summary>Stilhedsmodellen — Silero, under 1 MB. Ligger sammen med de andre.</summary>
     public const string VadFilnavn = "ggml-silero-v5.1.2.bin";
 

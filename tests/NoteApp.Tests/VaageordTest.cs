@@ -6,10 +6,11 @@ namespace NoteApp.Tests;
 /// <summary>
 /// Prøver af, hvornår mikrofonen må være åben — og af, hvad der blev sagt.
 ///
-/// DET ER HER, LØSNINGEN BLIVER BILLIG. En mikrofon, der er åben døgnet rundt,
-/// er problemet; en, der er åben omkring aftalerne, er den samme funktion til
-/// en brøkdel. Vinduet er derfor ikke pynt, og det skal prøves af: et vindue,
-/// der aldrig lukker, er lige så galt som et, der aldrig åbner.
+/// HER STOD ET AFSNIT OM ET VINDUE OMKRING AFTALERNE. Den regel findes ikke
+/// mere: man siger «Hej Pia», når man har brug for det, og det følger ikke
+/// mødernes tidsplan. Nu lyttes der, når skærmen er låst op, og ikke når der
+/// optages — og de to ting skal prøves af, for det er dem, der afgør, om
+/// mikrofonen er åben.
 ///
 /// Og kommandoerne: en fejl i ordbogens retter koster et forkert ord i en
 /// tekst, man læser igennem. En fejl her STARTER ET PROGRAM.

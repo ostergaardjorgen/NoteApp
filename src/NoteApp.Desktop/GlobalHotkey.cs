@@ -529,6 +529,28 @@ public sealed class GlobalHotkey : IDisposable
     /// beskedbehandlingen kommer videre, og optagelsen starter et øjeblik
     /// efter — på et tidspunkt, hvor der er ryddet op.
     /// </remarks>
+    /// <summary>
+    /// MIDLERTIDIGT SPOR. Fjernes, naar fejlen er fundet.
+    /// </summary>
+    /// <remarks>
+    /// Skriver til datamappen, ikke til historikken: en linje pr. tastetryk
+    /// hoerer ikke hjemme paa en skaerm, brugeren laeser.
+    /// </remarks>
+    internal static void Spor(string tekst)
+    {
+        try
+        {
+            var sti = System.IO.Path.Combine(Core.UserDataPaths.Root, "log", "genvej-spor.log");
+            System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(sti)!);
+            System.IO.File.AppendAllText(sti,
+                $"{DateTime.Now:HH:mm:ss.fff}  {tekst}{Environment.NewLine}");
+        }
+        catch (Exception)
+        {
+            // Et spor maa aldrig kunne vaelte en genvej.
+        }
+    }
+
     private IntPtr Hook(IntPtr hwnd, int besked, IntPtr wParam, IntPtr lParam, ref bool håndteret)
     {
         if (besked != WM_HOTKEY) return IntPtr.Zero;
@@ -537,6 +559,9 @@ public sealed class GlobalHotkey : IDisposable
         if (hvem != Id && hvem != TvillingId) return IntPtr.Zero;
 
         håndteret = true;
+
+        Spor($"WM_HOTKEY id={hvem} hold={HoldGiverDiktering} ur={_holdur is not null} "
+             + $"aktiv={Aktiv?.Id ?? "-"} vindue={_vindue is not null}");
 
         // ============ TRYK ELLER HOLD ============
         //
@@ -610,6 +635,10 @@ public sealed class GlobalHotkey : IDisposable
                 nede,
                 _holderNu,
                 Holdvurdering.LoftFra(AppSettings.Current.DikteringLoftMinutter));
+
+            if (svar != Holdsvar.Vent)
+                Spor($"hold: tast=0x{_holdTast:X2} nede={nede} "
+                     + $"gaaet={(DateTime.UtcNow - _holdStart).TotalMilliseconds:F0}ms svar={svar}");
 
             switch (svar)
             {

@@ -942,15 +942,27 @@ public partial class MainWindow : Window
     {
         var v = Core.AppSettings.Current;
 
+        // ============ VAAGEORDET HAR SIN EGEN MODEL ============
+        //
+        // HER STOD Locate().ModelPath, OG DET VAR MOEDEMODELLEN. Den er
+        // valgt til at vaere den bedste, der findes - paa den her maskine
+        // knap 3 GB - og saa laa den og lyttede efter to ord hele tiden.
+        // Se WhisperInstall.Vaageordsmodel: her vinder den mindste.
+        //
+        // Er der ingen model, er der intet at lytte med, og det skal siges
+        // paa samme maade som en manglende motor. Ellers staar der «lytter»
+        // paa skaermen, mens der ikke sker noget.
+        var model = Core.WhisperInstall.Vaageordsmodel();
+
         var svar = Core.Vaageord.Skal(
             v.VaageordTil,
-            Vaageordsvagt.MotorFindes,
+            Vaageordsvagt.MotorFindes && model is not null,
             _diktat.Igang || OptagerNu(),
             Laast());
 
         if (svar == Core.Lyttesvar.Lytter)
         {
-            _vaage.Start(Core.WhisperInstall.Locate().ModelPath ?? "", Core.Sprog.Kode);
+            _vaage.Start(model!, Core.Sprog.Kode);
         }
         else if (_vaage.Lytter)
         {
@@ -1082,9 +1094,16 @@ public partial class MainWindow : Window
     /// Der spørges her og ikke i beskedbehandlingen: at læse en fil inde i en
     /// hook er præcis det, der ikke må ske dér.
     /// </remarks>
-    private void SaetDiktering() =>
-        _genvej.HoldGiverDiktering =
-            AppSettings.Current.DikteringTil && Core.Llm.SkyNoegle.Hent() is not null;
+    private void SaetDiktering()
+    {
+        var til = AppSettings.Current.DikteringTil;
+        var noegle = Core.Llm.SkyNoegle.Hent() is not null;
+
+        _genvej.HoldGiverDiktering = til && noegle;
+
+        GlobalHotkey.Spor($"SaetDiktering: DikteringTil={til} noegle={noegle} "
+                          + $"-> hold={_genvej.HoldGiverDiktering}");
+    }
 
     /// <summary>
     /// Tasten er holdt nede. Dikteringen begynder at lytte.

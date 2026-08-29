@@ -115,6 +115,8 @@ public sealed class Dikteringsvagt : IDisposable
     /// <summary>Tasten er holdt nede længe nok. Begynd at lytte.</summary>
     public void Begynd()
     {
+        GlobalHotkey.Spor($"Dikteringsvagt.Begynd: igang={Igang}");
+
         // ============ ET DIKTAT MAA IKKE LIGGE OVEN I ET ANDET ============
         //
         // Slippet kan bliver spist af et andet program, og saa kommer der et
