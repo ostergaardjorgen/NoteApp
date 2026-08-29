@@ -157,8 +157,56 @@ til det, der lå der før. Men det, man lige har dikteret, er dét, man vil sæt
 ind igen, hvis det første forsøg landede et forkert sted — og blev det gamle
 sat tilbage, ville teksten være væk i samme øjeblik, man opdagede fejlen.
 
-**3 — vågeordet.** Lokal genkendelse af «HeyPia», med lyden slukket som
+**3 — vågeordet.** Lokal genkendelse af «Hey Pia», med lyden slukket som
 standard og en tydelig visning af, at der lyttes.
+
+### Hvad der er undersøgt — 28-08-2026
+
+| Vej | Hvad den koster | Dom |
+|---|---|---|
+| **Windows' egen talegenkendelse** | 0 kr, ingen ny afhængighed | **Kan ikke bruges** |
+| **Picovoice Porcupine** | Ingen offentlig pris pr. produkt | Virker, men prisen er en salgssamtale |
+| **openWakeWord** | 0 kr, hvis modellen trænes selv | **Den vej, der skal gås** |
+| **Vosk** | 0 kr, Apache 2.0 | Ingen dansk model |
+| **Whisper på korte klip** | 0 kr, ligger på maskinen | For dyr at have kørende hele tiden |
+
+**Windows' egen er prøvet på maskinen og duer ikke.** `System.Speech` kan
+oprette en motor, men der er ingen genkender bag den: `RecognizerInfo.Culture`
+er tom, og `LoadGrammar` fejler med `0x80050022`. Der er kun **en-US**
+installeret — ingen dansk. Det var den billigste vej, og den er lukket.
+
+**Porcupine** er den bedste teknisk — mindst CPU, færrest falske positive, og
+en .NET-pakke. Men der er ingen offentlig pris for produktet alene; det er en
+samtale med en sælger, og startpakken ligger på 6.000 USD for virksomheder
+under fem år med højst tyve ansatte.
+
+**openWakeWord** er koden under Apache 2.0. De **færdige modeller er
+ikke-kommercielle** (CC BY-NC-SA) — men man kan træne sin egen på under en
+time i en Colab-notesbog med syntetisk tale, og den er ens egen. Modellerne
+er så små, at en enkelt kerne på en Raspberry Pi 3 kan køre femten til tyve
+af dem samtidig; på en almindelig pc er det ikke til at måle.
+
+**Det, der IKKE er efterprøvet endnu, og som skal være det først:** om
+træningsrøret selv må bruges kommercielt. Den syntetiske tale kommer fra
+Piper, og de negative eksempler fra offentlige lydsamlinger — begge har
+deres egne vilkår. Det er billigt at undersøge nu og dyrt at opdage bagefter.
+
+### En vagt skal stå foran
+
+Uanset motoren må vågeordsmodellen ikke køre på hver eneste lydramme. Foran
+den skal der stå en **stemmevagt** — Silero VAD eller noget tilsvarende, en
+model på omkring en megabyte — der kun slipper igennem, når nogen faktisk
+taler. Så koster det ingenting at have tændt i et tomt kontor.
+
+### Prisen er ikke penge
+
+**Mikrofonen er åben hele tiden.** Den lytter lokalt, og der sendes intet,
+før vågeordet er hørt — men den er åben, og det er præcis det, resten af
+appen lover ikke at gøre.
+
+Derfor: **fra som standard**, en tydelig visning på skærmen af, at der
+lyttes, og en linje i privatlivspolitikken, før den tændes. Samme
+rækkefølge som ved dikteringen — teksten først, funktionen bagefter.
 
 **4 — opgaver og beskeder ud af tale.** «Mind mig om at ringe til Ibrar på
 tirsdag» bliver til en opgave med en dato, ikke til en sætning.
