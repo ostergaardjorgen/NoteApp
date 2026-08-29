@@ -116,12 +116,39 @@ public static class Mikrofonvagt
     ///
     /// Nøglerne skriver stien med # i stedet for \.
     /// </summary>
-    private static bool ErOsSelv(string noegle)
-    {
-        var mig = Environment.ProcessPath;
-        if (mig is null) return false;
+    private static bool ErOsSelv(string noegle) =>
+        ErEgetProgram(noegle, Environment.ProcessPath, WhisperInstall.Root);
 
-        return noegle.Replace('#', '\\').Equals(mig, StringComparison.OrdinalIgnoreCase);
+    /// <summary>
+    /// Er det her program appen selv — eller en af dens egne motorer?
+    /// </summary>
+    /// <remarks>
+    /// HER STOD KUN «ER DET MIN EGEN EXE». Det var nok, så længe appen selv
+    /// var det eneste, der rørte mikrofonen.
+    ///
+    /// Så kom vågeordet, og det lytter med whisper-command.exe — en anden
+    /// proces, som appen selv starter. Mikrofonvagten så et fremmed program
+    /// åbne mikrofonen og spurgte, om mødet skulle optages. Appen spurgte
+    /// altså om sig selv, og svaret stod i selve boblen: «whisper-command
+    /// bruger din mikrofon». Set 29-08-2026.
+    ///
+    /// Der sammenlignes med MOTORMAPPEN og ikke med et filnavn. En liste over
+    /// navne skal vedligeholdes, og den bliver forkert den dag, motoren
+    /// skifter navn — mappen er appens egen uanset hvad der lægges i den.
+    ///
+    /// Skilt ud, fordi den kan prøves af uden et register og en mikrofon.
+    /// </remarks>
+    public static bool ErEgetProgram(string noegle, string? migSelv, string motormappe)
+    {
+        var sti = noegle.Replace('#', '\\');
+
+        if (migSelv is not null && sti.Equals(migSelv, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        if (string.IsNullOrWhiteSpace(motormappe)) return false;
+
+        var mappe = motormappe.TrimEnd('\\', '/') + '\\';
+        return sti.StartsWith(mappe, StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>
