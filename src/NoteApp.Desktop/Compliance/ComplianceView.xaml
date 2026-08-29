@@ -250,6 +250,42 @@
       <TabItem Header="{i18n:Oversat complianceview.leverandoeren}" Style="{StaticResource Fane}">
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
           <StackPanel>
+    <!-- ==================== Vågeordet =============================
+
+         DEN SKAL STAA HER, OG DEN SKAL STAA PRAECIST. En mikrofon, der er
+         aaben, uden at nogen har trykket paa noget, er dét, en kunde vil
+         spoerge om - og svaret skal ligge klar, foer spoergsmaalet kommer.
+
+         Der staar HVAD der lyttes med, HVOR det koerer, og hvad der IKKE
+         sker. Det sidste er det vigtigste: der sendes intet, og der gemmes
+         intet, mens den lytter. -->
+            <Border Background="{DynamicResource Panel}" CornerRadius="10" Padding="20,16"
+                    BorderBrush="{DynamicResource PanelKant}" BorderThickness="1" Margin="0,0,0,14">
+              <StackPanel>
+                <TextBlock Text="{i18n:Oversat complianceview.vaageord}" FontSize="10.5"
+                           FontWeight="SemiBold" Margin="0,0,0,12"
+                           Foreground="{DynamicResource Accent}" />
+
+                <TextBlock FontSize="12.5" LineHeight="19" Foreground="{DynamicResource TekstSvag}" TextWrapping="Wrap" Margin="0,0,0,12"
+                           Text="{i18n:Oversat complianceview.vaageord_hvad}" />
+
+                <TextBlock Text="{i18n:Oversat complianceview.vaageord_motor}" FontWeight="SemiBold"
+                           Margin="0,0,0,4" />
+                <TextBlock FontSize="12.5" LineHeight="19" Foreground="{DynamicResource TekstSvag}" TextWrapping="Wrap" Margin="0,0,0,12"
+                           Text="{i18n:Oversat complianceview.vaageord_motor_under}" />
+
+                <TextBlock Text="{i18n:Oversat complianceview.vaageord_intet}" FontWeight="SemiBold"
+                           Margin="0,0,0,4" />
+                <TextBlock FontSize="12.5" LineHeight="19" Foreground="{DynamicResource TekstSvag}" TextWrapping="Wrap" Margin="0,0,0,12"
+                           Text="{i18n:Oversat complianceview.vaageord_intet_under}" />
+
+                <TextBlock Text="{i18n:Oversat complianceview.vaageord_hvornaar}" FontWeight="SemiBold"
+                           Margin="0,0,0,4" />
+                <TextBlock FontSize="12.5" LineHeight="19" Foreground="{DynamicResource TekstSvag}" TextWrapping="Wrap"
+                           Text="{i18n:Oversat complianceview.vaageord_hvornaar_under}" />
+              </StackPanel>
+            </Border>
+
     <!-- ==================== Leverandøren ========================= -->
             <Border Background="{DynamicResource Panel}" CornerRadius="10" Padding="20,16"
                     BorderBrush="{DynamicResource PanelKant}" BorderThickness="1" Margin="0,0,0,14">

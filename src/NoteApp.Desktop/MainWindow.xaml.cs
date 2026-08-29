@@ -430,6 +430,11 @@ public partial class MainWindow : Window
             // appen genstartes, foer vaageordet begynder at virke.
             Diktering.KommandoerView.Aendret = () => Dispatcher.BeginInvoke(SaetVaageord);
 
+            // Fanen viser det MAALTE forbrug. «Det bruger naesten ingenting»
+            // er en paastand, ingen kan efterproeve - og den slags skal en app
+            // ikke komme med om sig selv, naar den har mikrofonen aaben.
+            Diktering.KommandoerView.Maaler = () => _vaage.Forbrug;
+
             _vaageur?.Stop();
             _vaageur = new DispatcherTimer { Interval = TimeSpan.FromSeconds(30) };
             _vaageur.Tick += (_, _) => SaetVaageord();
@@ -939,14 +944,9 @@ public partial class MainWindow : Window
 
         var svar = Core.Vaageord.Skal(
             v.VaageordTil,
-            v.VaageordKunVedMoeder,
             Vaageordsvagt.MotorFindes,
             _diktat.Igang || OptagerNu(),
-            Laast(),
-            DateTimeOffset.Now,
-            NaesteAftale(),
-            v.VaageordFoerMinutter,
-            v.VaageordEfterMinutter);
+            Laast());
 
         if (svar == Core.Lyttesvar.Lytter)
         {
@@ -955,26 +955,6 @@ public partial class MainWindow : Window
         else if (_vaage.Lytter)
         {
             _vaage.Stop();
-        }
-    }
-
-    /// <summary>Nærmeste aftale — før eller efter nu. Null, hvis der ingen er.</summary>
-    private static DateTimeOffset? NaesteAftale()
-    {
-        try
-        {
-            var nu = DateTimeOffset.Now;
-
-            return Core.Kalender.Alle()
-                .Select(a => a.Start)
-                .OrderBy(t => Math.Abs((t - nu).TotalMinutes))
-                .Select(t => (DateTimeOffset?)t)
-                .FirstOrDefault();
-        }
-        catch (Exception)
-        {
-            // Ingen kalender er ikke en fejl. Saa er der bare intet vindue.
-            return null;
         }
     }
 

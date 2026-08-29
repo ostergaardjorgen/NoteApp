@@ -819,7 +819,15 @@
     "underdatabehandlere": "Sub-processors",
     "vaelger_du_et_google_meet_link_beder_appen": "If you choose a Google Meet link, the app asks Google to create the meeting room. The link comes back with it, so the meeting can be started from the calendar here.",
     "vilkaar_gennemgaaet_17_08_2026": "Terms reviewed 17-08-2026",
-    "vilkaar_underdatabehandlerlister_certifice": "Terms, sub-processor lists, certifications and licences may have changed since the text was inserted, without that being apparent here. The user is responsible for verifying the accuracy with the suppliers concerned and for checking regularly whether anything has changed."
+    "vilkaar_underdatabehandlerlister_certifice": "Terms, sub-processor lists, certifications and licences may have changed since the text was inserted, without that being apparent here. The user is responsible for verifying the accuracy with the suppliers concerned and for checking regularly whether anything has changed.",
+    "vaageord": "THE WAKE WORD — «HEJ PIA»",
+    "vaageord_hvad": "The app can listen for a wake word so a dictation can be started without touching the keyboard. It is off until the user switches it on.",
+    "vaageord_motor": "What listens",
+    "vaageord_motor_under": "whisper.cpp — the same program that writes out the meetings, already present on the machine. In front of it sits a voice gate, Silero VAD, a 0.9 MB model, deciding whether anyone is speaking at all; recognition therefore runs only on speech and not on silence. Both are MIT-licensed and run locally. Nothing extra is downloaded to use the wake word.",
+    "vaageord_intet": "What does NOT happen",
+    "vaageord_intet_under": "Nothing is sent while it listens — neither audio nor text. Nothing is stored: what the microphone hears exists only in memory until it is decided whether the wake word was said, and then it is gone. No audio file is written, and no log of what was heard is kept. Only once the wake word HAS been heard, and the user carries on speaking, is that one clip recorded and sent — as in an ordinary dictation.",
+    "vaageord_hvornaar": "When it listens",
+    "vaageord_hvornaar_under": "When the screen is unlocked. If the machine is locked, it does not listen. If a recording is running — including an online meeting — listening stops until the recording ends. The consumption can be read on screen under Dictation → Commands, measured on the process itself."
   },
   "hjaelp": {
     "titel": "Help",
@@ -929,10 +937,6 @@
     "vaageord_til_under": "The microphone is open without you pressing anything. It listens locally, and nothing is sent until the word is heard — but it is open.",
     "vaageord_ord": "The words listened for",
     "vaageord_ord_under": "One per line, at least two words in each. «Pia» alone would trigger itself every time somebody mentions a name.",
-    "vaageord_kun_moeder": "Listen only around calendar appointments",
-    "vaageord_kun_moeder_under": "That is what makes it cheap: the microphone is open an hour a day instead of twenty-four. Switch it off and it listens all the time.",
-    "vaageord_foer": "minutes before",
-    "vaageord_efter": "minutes after",
     "vaageord_ingen_motor": "The engine is missing. The wake word uses the same whisper the transcription downloads — set it up under AI models.",
     "udtryk": "What you say",
     "type": "What happens",
@@ -951,7 +955,15 @@
     "maal_hjaelp": "For a screen: cockpit, diktering, optagelser, dokumenter, moedetyper, modeller, compliance, historik, indstillinger. For a program: its path, or an address.",
     "nulstil_spoerg": "The default list replaces the commands you have made. This cannot be undone.",
     "udfoert": "«{0}» — done",
-    "gik_galt": "«{0}» failed: {1}"
+    "gik_galt": "«{0}» failed: {1}",
+    "hvornaar": "When it listens",
+    "hvornaar_under": "When your screen is unlocked. If it is locked, nobody is there — so it does not listen. And when a recording starts, it stops: the microphone is in use for something more important, and commands should not be listened for in the middle of a meeting.",
+    "privatliv": "Why it is not shared with anyone",
+    "privatliv_under": "The listening happens on your own PC. Nothing is sent while it listens — neither audio nor text. The engine runs locally, the same one that writes out your meetings, and it has no connection to anything. Only once you have said the wake word, and you carry on speaking, is your clip sent to be written out. Everything said in the room meanwhile disappears the moment it has been heard — it is not stored, and it does not leave the machine.",
+    "forbrug": "What it costs",
+    "forbrug_tal": "Using {0} % of one processor core right now",
+    "forbrug_lytter_ikke": "Not listening — there is nothing to measure",
+    "forbrug_under": "The figure is measured on the listening, not estimated: it is the processor time it has actually used, divided by the time that has passed. You can compare it with Task Manager."
   },
   "vaageord": {
     "lytter": "Listening for the wake word",

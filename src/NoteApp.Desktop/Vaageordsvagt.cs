@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
 using System.Text;
 using NoteApp.Core;
@@ -43,6 +43,44 @@ public sealed class Vaageordsvagt : IDisposable
     /// <summary>Lytter der lige nu?</summary>
     public bool Lytter => _proces is { HasExited: false };
 
+    private DateTime _startet;
+
+    /// <summary>
+    /// Hvor meget af én kerne lytningen bruger, i procent. Null, når der ikke
+    /// lyttes.
+    /// </summary>
+    /// <remarks>
+    /// DER MAALES, DER PAASTAAS IKKE.
+    ///
+    /// «Det bruger naesten ingenting» er en paastand, ingen kan efterproeve -
+    /// og den slags skal en app ikke komme med om sig selv, naar den har
+    /// mikrofonen aaben. Tallet her er processortiden, barneprocessen faktisk
+    /// har brugt, delt med den tid der er gaaet. Det staar paa skaermen, og
+    /// det kan sammenlignes med Jobliste.
+    /// </remarks>
+    public double? Forbrug
+    {
+        get
+        {
+            try
+            {
+                if (_proces is not { HasExited: false } p) return null;
+
+                var gaaet = (DateTime.UtcNow - _startet).TotalSeconds;
+                if (gaaet < 2) return null;   // for kort til at sige noget
+
+                p.Refresh();
+                return p.TotalProcessorTime.TotalSeconds / gaaet * 100;
+            }
+            catch (Exception)
+            {
+                // Processen kan vaere doed mellem de to linjer. Saa er der
+                // ikke noget at maale.
+                return null;
+            }
+        }
+    }
+
     /// <summary>
     /// Motoren, der lyttes med. Tom, hvis den ikke er hentet.
     /// </summary>
@@ -84,6 +122,8 @@ public sealed class Vaageordsvagt : IDisposable
 
                 _proces = Process.Start(start);
                 if (_proces is null) return;
+
+                _startet = DateTime.UtcNow;
 
                 _proces.OutputDataReceived += (_, e) => Laes(e.Data);
                 _proces.BeginOutputReadLine();

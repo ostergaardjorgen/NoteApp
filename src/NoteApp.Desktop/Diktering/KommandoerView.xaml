@@ -51,20 +51,35 @@
           <TextBlock Style="{StaticResource Underskrift}" Margin="0,4,0,0" TextWrapping="Wrap"
                      Text="{i18n:Oversat kommandoer.vaageord_ord_under}" />
 
-          <CheckBox x:Name="KunMoeder" Click="KunMoeder_Klik" Margin="0,16,0,0"
-                    Content="{i18n:Oversat kommandoer.vaageord_kun_moeder}" FontWeight="SemiBold" />
-          <TextBlock Style="{StaticResource Underskrift}" Margin="0,6,0,8" TextWrapping="Wrap"
-                     Text="{i18n:Oversat kommandoer.vaageord_kun_moeder_under}" />
+          <!-- ==================== HVORNÅR OG HVAD DET KOSTER ====================
 
-          <StackPanel Orientation="Horizontal">
-            <ComboBox x:Name="Foer" Width="70" SelectionChanged="Vindue_Valgt" />
-            <TextBlock Text="{i18n:Oversat kommandoer.vaageord_foer}" VerticalAlignment="Center"
-                       Margin="8,0,20,0" Foreground="{DynamicResource TekstSvag}" />
+               HER LAA ET VINDUE PAA TI MINUTTER OM HVER AFTALE. Det var en
+               omvej: man siger «Hej Pia», naar man har brug for det, og det
+               foelger ikke moedernes tidsplan.
 
-            <ComboBox x:Name="Efter" Width="70" SelectionChanged="Vindue_Valgt" />
-            <TextBlock Text="{i18n:Oversat kommandoer.vaageord_efter}" VerticalAlignment="Center"
-                       Margin="8,0,0,0" Foreground="{DynamicResource TekstSvag}" />
-          </StackPanel>
+               I stedet staar der nu, hvad der faktisk sker - og hvad det
+               koster. Tallet er MAALT paa processen, ikke paastaaet. -->
+          <Border Background="{DynamicResource Baggrund}" CornerRadius="8" Padding="16,12"
+                  Margin="0,16,0,0" BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
+            <StackPanel>
+              <TextBlock Text="{i18n:Oversat kommandoer.hvornaar}" FontWeight="SemiBold"
+                         Margin="0,0,0,6" />
+              <TextBlock Style="{StaticResource Underskrift}" TextWrapping="Wrap"
+                         Text="{i18n:Oversat kommandoer.hvornaar_under}" />
+
+              <TextBlock Text="{i18n:Oversat kommandoer.privatliv}" FontWeight="SemiBold"
+                         Margin="0,14,0,6" />
+              <TextBlock Style="{StaticResource Underskrift}" TextWrapping="Wrap"
+                         Text="{i18n:Oversat kommandoer.privatliv_under}" />
+
+              <TextBlock Text="{i18n:Oversat kommandoer.forbrug}" FontWeight="SemiBold"
+                         Margin="0,14,0,6" />
+              <TextBlock x:Name="Forbrug" TextWrapping="Wrap"
+                         Foreground="{DynamicResource Godkendt}" FontWeight="SemiBold" />
+              <TextBlock Style="{StaticResource Underskrift}" Margin="0,3,0,0" TextWrapping="Wrap"
+                         Text="{i18n:Oversat kommandoer.forbrug_under}" />
+            </StackPanel>
+          </Border>
         </StackPanel>
       </Border>
 

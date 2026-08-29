@@ -1,4 +1,4 @@
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using NoteApp.Core;
@@ -24,10 +24,44 @@ public partial class KommandoerView : UserControl
     /// <summary>Siger til, når vågeordet er slået til eller fra.</summary>
     public static Action? Aendret { get; set; }
 
+    /// <summary>Hentes af skærmen, så forbruget kan vises. Sat af MainWindow.</summary>
+    public static Func<double?>? Maaler { get; set; }
+
+    private System.Windows.Threading.DispatcherTimer? _ur;
+
     public KommandoerView()
     {
         InitializeComponent();
-        Loaded += (_, _) => Indlaes();
+
+        Loaded += (_, _) =>
+        {
+            Indlaes();
+            VisForbrug();
+
+            // Tallet opdaterer sig, mens man kigger paa det. Et tal, der staar
+            // stille, ligner en paastand; et, der bevaeger sig, ligner en
+            // maaling - og det er dét, det er.
+            _ur?.Stop();
+            _ur = new System.Windows.Threading.DispatcherTimer
+            {
+                Interval = TimeSpan.FromSeconds(3),
+            };
+            _ur.Tick += (_, _) => VisForbrug();
+            _ur.Start();
+        };
+
+        // Uret skal stoppe, naar fanen forlades. Ellers tikker det resten af
+        // dagen for et tal, ingen kigger paa.
+        Unloaded += (_, _) => { _ur?.Stop(); _ur = null; };
+    }
+
+    private void VisForbrug()
+    {
+        var f = Maaler?.Invoke();
+
+        Forbrug.Text = f is null
+            ? Sprog.T("kommandoer.forbrug_lytter_ikke")
+            : Sprog.T("kommandoer.forbrug_tal", f.Value.ToString("0.0"));
     }
 
     private void Indlaes()
@@ -39,7 +73,6 @@ public partial class KommandoerView : UserControl
             var v = AppSettings.Current;
 
             VaageordTil.IsChecked = v.VaageordTil;
-            KunMoeder.IsChecked = v.VaageordKunVedMoeder;
 
             Ord.Text = string.Join(Environment.NewLine,
                 v.Vaageord is { Count: > 0 } egne ? egne : Vaageord.Standardord);
@@ -49,16 +82,6 @@ public partial class KommandoerView : UserControl
             IngenMotor.Visibility = Vaageordsvagt.MotorFindes
                 ? Visibility.Collapsed
                 : Visibility.Visible;
-
-            var minutter = Enumerable
-                .Range(Vaageord.MindsteMinutter,
-                       Vaageord.StoersteMinutter - Vaageord.MindsteMinutter + 1)
-                .ToList();
-
-            Foer.ItemsSource = minutter;
-            Efter.ItemsSource = minutter;
-            Foer.SelectedItem = Vaageord.Minutter(v.VaageordFoerMinutter, Vaageord.StandardFoerMinutter);
-            Efter.SelectedItem = Vaageord.Minutter(v.VaageordEfterMinutter, Vaageord.StandardEfterMinutter);
 
             NyType.ItemsSource = new[]
             {
@@ -112,10 +135,6 @@ public partial class KommandoerView : UserControl
 
     private void VaageordTil_Klik(object sender, RoutedEventArgs e) => Gem();
 
-    private void KunMoeder_Klik(object sender, RoutedEventArgs e) => Gem();
-
-    private void Vindue_Valgt(object sender, SelectionChangedEventArgs e) => Gem();
-
     /// <summary>
     /// Ordene gemmes, når feltet forlades — ikke ved hvert tastetryk.
     /// </summary>
@@ -132,10 +151,6 @@ public partial class KommandoerView : UserControl
         var v = AppSettings.Current;
 
         v.VaageordTil = VaageordTil.IsChecked == true;
-        v.VaageordKunVedMoeder = KunMoeder.IsChecked == true;
-
-        if (Foer.SelectedItem is int f) v.VaageordFoerMinutter = f;
-        if (Efter.SelectedItem is int ef) v.VaageordEfterMinutter = ef;
 
         // Kun ord, der DUER, gemmes. Et ord paa eet ord ville udloese sig selv,
         // hver gang nogen naevner et navn - se Vaageord.Rens.

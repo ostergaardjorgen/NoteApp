@@ -283,7 +283,15 @@
     "underdatabehandlere": "Underdatabehandlere",
     "vaelger_du_et_google_meet_link_beder_appen": "Vælger du et Google Meet-link, beder appen Google om at oprette mødelokalet. Linket kommer med tilbage, så mødet kan startes fra kalenderen her.",
     "vilkaar_gennemgaaet_17_08_2026": "Vilkår gennemgået 17-08-2026",
-    "vilkaar_underdatabehandlerlister_certifice": "Vilkår, underdatabehandlerlister, certificeringer og licenser kan være ændret, efter teksten blev indsat, uden at det fremgår her. Brugeren er selv ansvarlig for at efterprøve rigtigheden hos de pågældende leverandører og for løbende at kontrollere, om der er sket ændringer."
+    "vilkaar_underdatabehandlerlister_certifice": "Vilkår, underdatabehandlerlister, certificeringer og licenser kan være ændret, efter teksten blev indsat, uden at det fremgår her. Brugeren er selv ansvarlig for at efterprøve rigtigheden hos de pågældende leverandører og for løbende at kontrollere, om der er sket ændringer.",
+    "vaageord": "VÅGEORDET — «HEJ PIA»",
+    "vaageord_hvad": "Appen kan lytte efter et vågeord, så en diktering kan startes uden at røre tastaturet. Det er slået fra, indtil brugeren selv slår det til.",
+    "vaageord_motor": "Hvad der lyttes med",
+    "vaageord_motor_under": "whisper.cpp — det samme program, som skriver møderne ud, og som allerede ligger på maskinen. Foran den står en stemmevagt, Silero VAD, en model på 0,9 MB, der afgør, om nogen overhovedet taler; genkendelsen kører derfor kun på tale og ikke på stilhed. Begge dele er MIT-licenserede og kører lokalt. Der hentes intet ekstra ned for at bruge vågeordet.",
+    "vaageord_intet": "Hvad der IKKE sker",
+    "vaageord_intet_under": "Der sendes intet, mens der lyttes — hverken lyd eller tekst. Der gemmes intet: det, mikrofonen hører, findes kun i hukommelsen, indtil det er afgjort, om vågeordet blev sagt, og forsvinder derefter. Der skrives ingen lydfil, og der føres ingen log over det hørte. Først når vågeordet ER hørt, og brugeren taler videre, optages og sendes netop det klip — som ved en almindelig diktering.",
+    "vaageord_hvornaar": "Hvornår der lyttes",
+    "vaageord_hvornaar_under": "Når skærmen er låst op. Er maskinen låst, lyttes der ikke. Kører der en optagelse — også et onlinemøde — holder lytningen op, indtil optagelsen er slut. Forbruget kan aflæses på skærmen under Diktering → Kommandoer, målt på processen selv."
   },
   "correctionwindow": {
     "den_oprindelige_udskrift_gemmes_ved_siden": "Den oprindelige transkription gemmes ved siden af som .raa.txt, så en rettelse altid kan fortrydes.",
@@ -929,10 +937,6 @@
     "vaageord_til_under": "Mikrofonen er åben, uden at du har trykket på noget. Den lytter lokalt, og der sendes intet, før ordet er hørt — men den er åben.",
     "vaageord_ord": "Ordene, der lyttes efter",
     "vaageord_ord_under": "Ét pr. linje, mindst to ord i hvert. «Pia» alene ville udløse sig selv, hver gang nogen nævner et navn.",
-    "vaageord_kun_moeder": "Lyt kun omkring aftaler i kalenderen",
-    "vaageord_kun_moeder_under": "Det er dét, der gør det billigt: mikrofonen er åben en time om dagen frem for fireogtyve. Slås den fra, lyttes der altid.",
-    "vaageord_foer": "minutter før",
-    "vaageord_efter": "minutter efter",
     "vaageord_ingen_motor": "Motoren mangler. Vågeordet bruger den samme whisper, som transskriptionen henter — sæt den op under AI-modeller.",
     "udtryk": "Det, du siger",
     "type": "Hvad der sker",
@@ -951,7 +955,15 @@
     "maal_hjaelp": "For en skærm: cockpit, diktering, optagelser, dokumenter, moedetyper, modeller, compliance, historik, indstillinger. For et program: stien til det, eller en adresse.",
     "nulstil_spoerg": "Standardlisten erstatter de kommandoer, du har lavet. Det kan ikke fortrydes.",
     "udfoert": "«{0}» — udført",
-    "gik_galt": "«{0}» gik galt: {1}"
+    "gik_galt": "«{0}» gik galt: {1}",
+    "hvornaar": "Hvornår den lytter",
+    "hvornaar_under": "Når din skærm er låst op. Er den låst, sidder der ingen — så lyttes der ikke. Og starter en optagelse, holder den op: mikrofonen er i brug til noget vigtigere, og der skal ikke lyttes efter kommandoer midt i et møde.",
+    "privatliv": "Hvorfor det ikke deles med nogen",
+    "privatliv_under": "Lytningen sker på din egen pc. Der sendes intet, mens den lytter — hverken lyd eller tekst. Motoren kører lokalt, den samme som skriver dine møder ud, og den har ingen forbindelse til noget. Først når du har sagt vågeordet, og du selv taler videre, sendes dit klip til udskrift. Alt det, der bliver sagt i rummet imens, forsvinder, så snart det er hørt — det gemmes ikke, og det forlader ikke maskinen.",
+    "forbrug": "Hvad det koster",
+    "forbrug_tal": "Bruger {0} % af én processorkerne lige nu",
+    "forbrug_lytter_ikke": "Lytter ikke — der er ikke noget at måle",
+    "forbrug_under": "Tallet er målt på lytningen, ikke skønnet: det er den processortid, den faktisk har brugt, delt med den tid, der er gået. Du kan sammenligne med Jobliste."
   },
   "vaageord": {
     "lytter": "Lytter efter vågeordet",

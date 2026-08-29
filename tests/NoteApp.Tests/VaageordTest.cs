@@ -16,19 +16,24 @@ namespace NoteApp.Tests;
 /// </summary>
 public class VaageordTest
 {
-    private static readonly DateTimeOffset Nu = new(2026, 8, 28, 10, 0, 0, TimeSpan.Zero);
-
     private static Lyttesvar Svar(
-        bool til = true, bool kunVedMoeder = true, bool motor = true,
-        bool optager = false, bool laast = false, DateTimeOffset? aftale = null)
-        => Vaageord.Skal(til, kunVedMoeder, motor, optager, laast, Nu, aftale);
+        bool til = true, bool motor = true, bool optager = false, bool laast = false)
+        => Vaageord.Skal(til, motor, optager, laast);
 
     // ============================ Hvornår ============================
 
     [Fact]
+    public void Ved_en_laast_op_skaerm_lyttes_der()
+    {
+        // DET ER REGLEN. Man siger «Hej Pia», naar man har brug for det, og
+        // det foelger ikke moedernes tidsplan.
+        Assert.Equal(Lyttesvar.Lytter, Svar());
+    }
+
+    [Fact]
     public void Slukket_lytter_ikke()
     {
-        Assert.Equal(Lyttesvar.Slukket, Svar(til: false, aftale: Nu));
+        Assert.Equal(Lyttesvar.Slukket, Svar(til: false));
     }
 
     [Fact]
@@ -36,21 +41,22 @@ public class VaageordTest
     {
         // En besked om, at vaageordet er taendt, mens der ikke er noget at
         // lytte med, er en loegn man opdager ved at tale forgaeves.
-        Assert.Equal(Lyttesvar.IngenMotor, Svar(motor: false, aftale: Nu));
+        Assert.Equal(Lyttesvar.IngenMotor, Svar(motor: false));
     }
 
     [Fact]
     public void Under_en_optagelse_lyttes_der_ikke()
     {
-        // Optagelsen vinder: vaageordet har intet at starte, og mikrofonen er
-        // i brug til noget vigtigere.
-        Assert.Equal(Lyttesvar.Optager, Svar(optager: true, aftale: Nu));
+        // Gaelder ogsaa et onlinemoede: dér optages der, og saa skal der ikke
+        // lyttes efter kommandoer.
+        Assert.Equal(Lyttesvar.Optager, Svar(optager: true));
     }
 
     [Fact]
     public void En_laast_maskine_lyttes_der_ikke_paa()
     {
-        Assert.Equal(Lyttesvar.Laast, Svar(laast: true, aftale: Nu));
+        // Der sidder ingen. At lytte ville vaere at lytte til et tomt kontor.
+        Assert.Equal(Lyttesvar.Laast, Svar(laast: true));
     }
 
     [Fact]
@@ -58,47 +64,15 @@ public class VaageordTest
     {
         // Begge dele kan vaere sande. Svaret skal vaere det samme hver gang -
         // ellers staar der skiftende begrundelser paa skaermen.
-        Assert.Equal(Lyttesvar.Optager, Svar(optager: true, laast: true, aftale: Nu));
-    }
-
-    [Theory]
-    [InlineData(-11, false)]   // elleve minutter foer aftalen: for tidligt
-    [InlineData(-10, true)]    // praecis paa vinduets kant
-    [InlineData(-5, true)]
-    [InlineData(0, true)]      // aftalen begynder nu
-    [InlineData(5, true)]
-    [InlineData(10, true)]     // praecis paa den anden kant
-    [InlineData(11, false)]    // elleve minutter efter: for sent
-    public void Vinduet_om_aftalen_aabner_og_lukker(int minutterTilAftalen, bool lytter)
-    {
-        var aftale = Nu.AddMinutes(-minutterTilAftalen);
-        var svar = Svar(aftale: aftale);
-
-        Assert.Equal(lytter ? Lyttesvar.Lytter : Lyttesvar.UdenforVindue, svar);
+        Assert.Equal(Lyttesvar.Optager, Svar(optager: true, laast: true));
     }
 
     [Fact]
-    public void Ingen_aftale_giver_intet_vindue()
+    public void Slukket_vejer_tungest_af_alt()
     {
-        Assert.Equal(Lyttesvar.UdenforVindue, Svar(aftale: null));
-    }
-
-    [Fact]
-    public void Uden_vinduet_lyttes_der_altid()
-    {
-        // Den mulighed skal findes - men den er dyr, og det er dét, resten af
-        // proeverne handler om.
-        Assert.Equal(Lyttesvar.Lytter, Svar(kunVedMoeder: false, aftale: null));
-    }
-
-    [Theory]
-    [InlineData(0, Vaageord.StandardFoerMinutter)]
-    [InlineData(-5, Vaageord.StandardFoerMinutter)]
-    [InlineData(3, 3)]
-    [InlineData(9999, Vaageord.StoersteMinutter)]
-    public void Et_umuligt_vindue_bliver_til_et_muligt(int valgt, int ventet)
-    {
-        Assert.Equal(ventet, Vaageord.Minutter(valgt, Vaageord.StandardFoerMinutter));
+        // Har man slaaet det fra, er begrundelsen «det er slaaet fra» - ikke
+        // «der optages». Det er dét, man har gjort.
+        Assert.Equal(Lyttesvar.Slukket, Svar(til: false, motor: false, optager: true, laast: true));
     }
 
     // ============================ Selve ordet ============================

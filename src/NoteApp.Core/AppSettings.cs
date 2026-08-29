@@ -307,22 +307,14 @@ public sealed class AppSettings
     /// </summary>
     public List<string> Vaageord { get; set; } = new();
 
-    /// <summary>
-    /// Skal der kun lyttes omkring aftaler i kalenderen?
-    /// </summary>
-    /// <remarks>
-    /// TIL SOM STANDARD, OG DET ER HELE POINTEN. En mikrofon, der er åben
-    /// døgnet rundt, er problemet. Er vinduet ti minutter om en aftale, er den
-    /// åben måske en time om dagen frem for fireogtyve — og det er den samme
-    /// funktion.
-    /// </remarks>
-    public bool VaageordKunVedMoeder { get; set; } = true;
-
-    /// <summary>Minutter før en aftale, der lyttes.</summary>
-    public int VaageordFoerMinutter { get; set; } = Core.Vaageord.StandardFoerMinutter;
-
-    /// <summary>Minutter efter en aftales start, der lyttes.</summary>
-    public int VaageordEfterMinutter { get; set; } = Core.Vaageord.StandardEfterMinutter;
+    // HER LAA «lyt kun omkring aftaler» MED ET VINDUE I MINUTTER.
+    //
+    // Det var en omvej: man siger «Hej Pia», naar man har brug for det, og
+    // det foelger ikke moedernes tidsplan. En funktion, der kun virker ti
+    // minutter om en aftale, virker ikke - den virker en gang imellem.
+    //
+    // Nu lyttes der, naar skaermen er laast op, og ikke naar der optages.
+    // Fjernet 29-08-2026.
 
     /// <summary>
     /// Kommandoerne, brugeren selv har lavet. Tom betyder
