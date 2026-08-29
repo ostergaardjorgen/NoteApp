@@ -47,6 +47,9 @@ public partial class NotificationPopup : UserControl
         Tom.Text = poster.Count == 0
             ? "Der er ikke sket noget endnu. Her kommer besked, når en transskription eller et dokument er færdigt."
             : "";
+
+        // En knap, der ikke goer noget, skal ikke se ud, som om den goer.
+        AlleLaest.IsEnabled = nye > 0;
     }
 
     /// <summary>
@@ -116,7 +119,7 @@ public partial class NotificationPopup : UserControl
         // tingen HED; id'et er, hvad den ER.
         if (Link(h) is { } link) indhold.Children.Add(link);
 
-        return new Border
+        var kort = new Border
         {
             Background = (Brush)new BrushConverter().ConvertFrom(ny ? "#FF1D2530" : "#00000000")!,
             BorderBrush = (Brush)FindResource(farve),
@@ -126,6 +129,42 @@ public partial class NotificationPopup : UserControl
             Margin = new Thickness(0, 0, 0, 5),
             Child = indhold
         };
+
+        // ============ EN ULAEST BESKED LAESES VED AT TRYKKE PAA DEN ============
+        //
+        // Det er den anden af de to veje - den foerste er «Alle laest». At
+        // aabne klokken er ikke en af dem: saa forsvandt beskeder, man aldrig
+        // naaede at se.
+        //
+        // Haanden og hjaelpeteksten er der, fordi et kort, der kan trykkes
+        // paa, uden at se ud til det, ikke bliver trykket paa.
+        if (ny)
+        {
+            kort.Cursor = System.Windows.Input.Cursors.Hand;
+            kort.ToolTip = Sprog.T("notificationpopup.klik_for_laest");
+
+            kort.MouseLeftButtonUp += (_, _) =>
+            {
+                Notifikationer.MarkerLaest(h);
+                Indlaes();
+            };
+        }
+
+        return kort;
+    }
+
+    /// <summary>
+    /// Markerer alt som læst.
+    /// </summary>
+    /// <remarks>
+    /// DEN ENESTE VEJ TIL AT RYDDE DEM ALLE PÅ EN GANG. Indtil 28-08-2026
+    /// gjorde det at åbne klokken det samme — og så forsvandt tre beskeder,
+    /// fordi man kiggede efter den ene, man ventede på.
+    /// </remarks>
+    private void AlleLaest_Click(object sender, RoutedEventArgs e)
+    {
+        Notifikationer.MarkerAlleLaest();
+        Indlaes();
     }
 
     /// <summary>

@@ -411,7 +411,9 @@
   },
   "notificationpopup": {
     "beskeder": "Beskeder",
-    "se_hele_historikken": "Se hele historikken"
+    "se_hele_historikken": "Se hele historikken",
+    "alle_laest": "Alle læst",
+    "klik_for_laest": "Klik for at markere som læst"
   },
   "nytemplatewindow": {
     "det_afgoer_baade_laengden_og_sproget_en_ku": "Det afgør både længden og sproget. En kunde, en styregruppe og en udvikler skal ikke have det samme.",

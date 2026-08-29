@@ -42,9 +42,24 @@
               Padding="20,10">
         <Grid>
           <TextBlock x:Name="Tom" FontSize="12" VerticalAlignment="Center" TextWrapping="Wrap"
-                     Foreground="{DynamicResource TekstMeget}" Margin="0,0,110,0" />
-          <Button Content="{i18n:Oversat notificationpopup.se_hele_historikken}" Click="Historik_Click" HorizontalAlignment="Right"
-                  Padding="12,6" FontSize="12" />
+                     Foreground="{DynamicResource TekstMeget}" Margin="0,0,230,0" />
+
+          <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+            <!-- «ALLE LAEST» ER DEN ENESTE VEJ TIL AT RYDDE DEM ALLE.
+                 At aabne klokken gjorde det foer, og saa forsvandt beskeder,
+                 man aldrig havde set. Nu skal der trykkes - enten her eller
+                 paa den enkelte besked.
+
+                 Den staar til venstre for «Se hele historikken», fordi den er
+                 den, man bruger tit. Den er slaaet fra, naar der ikke er
+                 noget ulaest: en knap, der ikke goer noget, skal ikke se ud,
+                 som om den goer. -->
+            <Button x:Name="AlleLaest" Content="{i18n:Oversat notificationpopup.alle_laest}"
+                    Click="AlleLaest_Click" Padding="12,6" FontSize="12" Margin="0,0,8,0" />
+
+            <Button Content="{i18n:Oversat notificationpopup.se_hele_historikken}" Click="Historik_Click"
+                    Padding="12,6" FontSize="12" />
+          </StackPanel>
         </Grid>
       </Border>
     </Grid>

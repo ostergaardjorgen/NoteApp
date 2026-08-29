@@ -304,6 +304,21 @@ public sealed class AppSettings
     public DateTimeOffset NotifikationerSetTil { get; set; } = DateTimeOffset.MinValue;
 
     /// <summary>
+    /// De enkelte beskeder, man har trykket sig igennem — nyere end
+    /// <see cref="NotifikationerSetTil"/>.
+    /// </summary>
+    /// <remarks>
+    /// ET VANDMAERKE ALENE KAN IKKE SIGE «DEN HER, MEN IKKE DEN UNDER».
+    /// Aabner man klokken og laeser den ene besked, man ventede paa, skal de
+    /// to aeldre blive staaende som ulaeste — ellers forsvinder de, fordi man
+    /// kiggede forbi.
+    ///
+    /// Listen kan ikke vokse uden ende: den ryddes, naar vandmaerket flyttes,
+    /// og alt under vandmaerket luges ud ved hver skrivning.
+    /// </remarks>
+    public List<DateTimeOffset> NotifikationerLaeste { get; set; } = new();
+
+    /// <summary>
     /// Hvor optagebåndet stod sidst — i skærmkoordinater.
     ///
     /// Det huskes, fordi det ikke er en pyntedetalje: har man to skærme, ligger

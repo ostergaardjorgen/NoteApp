@@ -97,25 +97,64 @@ public static class Notifikationer
     public static IReadOnlyList<Haendelse> Seneste(int maks = 30) =>
         Historik.Laes(300).Where(Vaerd).Take(maks).ToList();
 
-    /// <summary>Hvor mange der er kommet, siden klokken sidst blev åbnet.</summary>
-    public static int Ulaeste()
-    {
-        var sidst = AppSettings.Current.NotifikationerSetTil;
-        return Historik.Laes(300).Count(h => Vaerd(h) && h.Tid > sidst);
-    }
-
-    /// <summary>Er en hændelse kommet, siden klokken sidst blev åbnet?</summary>
-    public static bool ErNy(Haendelse h) => h.Tid > AppSettings.Current.NotifikationerSetTil;
+    /// <summary>Hvor mange der endnu ikke er læst.</summary>
+    public static int Ulaeste() => Historik.Laes(300).Count(h => Vaerd(h) && ErNy(h));
 
     /// <summary>
-    /// Markerer alt som set. Kaldes, når klokken åbnes — ikke når appen
-    /// starter: en besked, man aldrig fik set, skal ikke forsvinde, fordi man
-    /// genstartede.
+    /// Er beskeden stadig ulæst?
     /// </summary>
-    public static void MarkerSet()
+    /// <remarks>
+    /// TO TING GØR EN BESKED LÆST: at man har trykket på netop den, eller at
+    /// man har trykket «Alle læst» og dermed flyttet vandmærket forbi den.
+    ///
+    /// AT ÅBNE KLOKKEN GØR DET IKKE. Det gjorde det indtil 28-08-2026, og så
+    /// forsvandt tre beskeder, fordi man kiggede efter den ene, man ventede
+    /// på. En besked, man ikke nåede at læse, skal blive stående.
+    /// </remarks>
+    public static bool ErNy(Haendelse h) =>
+        h.Tid > AppSettings.Current.NotifikationerSetTil
+        && !AppSettings.Current.NotifikationerLaeste.Contains(h.Tid);
+
+    /// <summary>Markerer ÉN besked som læst.</summary>
+    public static void MarkerLaest(Haendelse h)
     {
-        AppSettings.Current.NotifikationerSetTil = DateTimeOffset.Now;
+        if (!ErNy(h)) return;
+
+        AppSettings.Current.NotifikationerLaeste.Add(h.Tid);
+        Ryd();
+
         AppSettings.Current.Save();
         Nyt?.Invoke();
+    }
+
+    /// <summary>
+    /// Markerer alt som læst. Kaldes KUN fra knappen «Alle læst».
+    /// </summary>
+    /// <remarks>
+    /// Den flytter vandmærket til nu og rydder listen: alt under vandmærket
+    /// er læst i forvejen, og så er der ikke mere at huske enkeltvis.
+    /// </remarks>
+    public static void MarkerAlleLaest()
+    {
+        AppSettings.Current.NotifikationerSetTil = DateTimeOffset.Now;
+        AppSettings.Current.NotifikationerLaeste.Clear();
+
+        AppSettings.Current.Save();
+        Nyt?.Invoke();
+    }
+
+    /// <summary>
+    /// Luger de enkeltvis læste ud, der er kommet under vandmærket.
+    /// </summary>
+    /// <remarks>
+    /// Uden den ville listen vokse med hver besked, man trykkede på, og aldrig
+    /// blive kortere. Den ville stå i indstillingsfilen for evigt og sige
+    /// noget, vandmærket allerede siger.
+    /// </remarks>
+    private static void Ryd()
+    {
+        var vandmaerke = AppSettings.Current.NotifikationerSetTil;
+
+        AppSettings.Current.NotifikationerLaeste.RemoveAll(t => t <= vandmaerke);
     }
 }

@@ -1430,8 +1430,26 @@ public partial class MeetingView : UserControl
         SprogFlag.Kode = valgt?.Flag ?? nu.ToUpperInvariant();
     }
 
+    /// <summary>
+    /// Hvornår klokkens liste sidst lukkede sig selv.
+    /// </summary>
+    /// <remarks>
+    /// ET ANDET KLIK PAA KLOKKEN SKAL LUKKE LISTEN. Det lyder ligetil og er
+    /// det ikke: listen har StaysOpen=false, saa den lukker af sig selv, saa
+    /// snart der klikkes uden for den — og klokken ER uden for den. Naar
+    /// Klokke_Click derefter koerer, er listen allerede lukket, og den ville
+    /// blive aabnet igen med det samme.
+    ///
+    /// Derfor huskes tidspunktet: kommer klikket inden for et oejeblik af, at
+    /// listen lukkede, var det DET klik, der lukkede den, og saa skal der ikke
+    /// aabnes igen.
+    /// </remarks>
+    private DateTime _klokkeLukket = DateTime.MinValue;
+
     private void Klokke_Click(object sender, RoutedEventArgs e)
     {
+        if (DateTime.UtcNow - _klokkeLukket < TimeSpan.FromMilliseconds(250)) return;
+
         var panel = new Notifications.NotificationPopup();
 
         var pop = new System.Windows.Controls.Primitives.Popup
@@ -1446,6 +1464,8 @@ public partial class MeetingView : UserControl
             Child = panel
         };
 
+        pop.Closed += (_, _) => _klokkeLukket = DateTime.UtcNow;
+
         panel.HistorikOenskes += () =>
         {
             pop.IsOpen = false;
@@ -1454,9 +1474,13 @@ public partial class MeetingView : UserControl
 
         pop.IsOpen = true;
 
-        // Markeres som set, NAAR den aabnes — ikke naar appen starter. En
-        // besked, man aldrig naaede at se, skal ikke forsvinde, fordi man
-        // genstartede.
-        Notifikationer.MarkerSet();
+        // ============ HER STOD «MARKER ALT SOM SET» ============
+        //
+        // Beskederne blev laest, fordi man AABNEDE klokken. Saa forsvandt tre,
+        // fordi man kiggede efter den ene, man ventede paa - og de to andre
+        // havde man aldrig set.
+        //
+        // Nu bliver en besked kun laest af, at man trykker paa den, eller af
+        // knappen «Alle laest». Fjernet 28-08-2026.
     }
 }

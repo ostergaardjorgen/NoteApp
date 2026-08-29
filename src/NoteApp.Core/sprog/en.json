@@ -180,7 +180,9 @@
   },
   "notificationpopup": {
     "beskeder": "Notifications",
-    "se_hele_historikken": "See the full history"
+    "se_hele_historikken": "See the full history",
+    "alle_laest": "Mark all read",
+    "klik_for_laest": "Click to mark as read"
   },
   "renamewindow": {
     "gem_navnet": "Save the name",
