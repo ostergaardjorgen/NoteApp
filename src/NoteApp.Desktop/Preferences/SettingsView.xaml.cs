@@ -344,8 +344,17 @@ public partial class SettingsView : UserControl
         var vindue = new Setup.SetupWindow(igen: true) { Owner = Window.GetWindow(this) };
         vindue.ShowDialog();
 
-        AppSettings.Reload();
-
+        // HER STOD «AppSettings.Reload()», OG DEN VAR DEN DIREKTE AARSAG TIL,
+        // AT VALGTE ENHEDER FORSVANDT.
+        //
+        // Forloebet skriver i AppSettings.Current og gemmer selv. Der er intet
+        // at laese ind igen. Reload byttede objektet ud, og alle de steder,
+        // der holder fast i en reference - moedevagten fra appen starter til
+        // den lukkes - sad tilbage med det gamle. Naeste gemning derfra skrev
+        // brugerens nye valg vaek.
+        //
+        // Reload er nu ufarlig i sig selv (den fylder det samme objekt), men
+        // kaldet hoerer stadig ikke til her. Fjernet 30-08-2026.
         Indlaes();
         VisAutostart();
         IndlaesDiktering();

@@ -698,6 +698,38 @@ public sealed class AppSettings
         }
     }
 
-    /// <summary>Tvinger næste læsning til at gå på disken igen — fx efter en gendannelse.</summary>
-    public static void Reload() => _current = null;
+    /// <summary>
+    /// Læser indstillingerne fra disken igen — fx efter en gendannelse.
+    /// </summary>
+    /// <remarks>
+    /// DEN SKIFTER IKKE OBJEKTET UD, OG DET ER HELE POINTEN.
+    ///
+    /// Før stod der «_current = null», så næste opslag lavede et NYT objekt.
+    /// Det så uskyldigt ud og var en fælde: halvdelen af appen gemmer en
+    /// reference — «var s = AppSettings.Current» — og lever videre med den.
+    /// Mødevagten holder sin fra appen starter til den lukkes.
+    ///
+    /// Efter en Reload sad de med det GAMLE objekt. Skrev brugeren så en ny
+    /// mikrofon i det nye, og gemte mødevagten bagefter sit gamle, blev
+    /// mikrofonen skrevet væk igen. Det så ud, som om appen «smed valget»,
+    /// og det skete tilfældigt, fordi det afhang af, hvem der gemte sidst.
+    ///
+    /// Målt 30-08-2026: mikrofonen stod gemt kl. 14:23:55 og var væk kl.
+    /// 14:24:00, uden at nogen havde rørt noget.
+    ///
+    /// Nu fyldes DET SAMME objekt med de nye værdier. Der findes kun ét, og
+    /// så kan ingen sidde med et forældet.
+    /// </remarks>
+    public static void Reload()
+    {
+        var fra = Load();
+
+        if (_current is null) { _current = fra; return; }
+
+        foreach (var p in typeof(AppSettings).GetProperties())
+        {
+            if (!p.CanRead || !p.CanWrite) continue;
+            p.SetValue(_current, p.GetValue(fra));
+        }
+    }
 }
