@@ -35,7 +35,8 @@
     "tillyst": "Skift til lyst tema",
     "ingen_genvej": "ingen genvej",
     "diktering_hold": "Hold {0} nede mens du taler",
-    "diktering_hold_tip": "Hold tasten nede, tal, og slip. Teksten skrives ud og lægges, hvor markøren står. Slås fra under Diktering."
+    "diktering_hold_tip": "Hold tasten nede, tal, og slip. Teksten skrives ud og lægges, hvor markøren står. Slås fra under Diktering.",
+    "aabner_optagelse": "Åbner optagelse …"
   },
   "cockpit": {
     "titel": "Cockpit",
@@ -924,7 +925,10 @@
     "fane_proeverum": "Prøverum",
     "fane_teksttyper": "Teksttyper",
     "fane_ordbog": "Ordbog",
-    "fane_kommandoer": "Kommandoer"
+    "fane_kommandoer": "Kommandoer",
+    "ingen_mikrofon": "Der er ingen mikrofon. Tilslut en, eller vælg en under Indstillinger → Lyd.",
+    "lytter_paa_reserve": "Lytter på {0} — den mikrofon, du har valgt, er ikke tilsluttet lige nu.",
+    "mikrofon_svarede_ikke": "{0} svarede ikke: {1}. Prøv en anden under Indstillinger → Lyd."
   },
   "ordbogview": {
     "ordbog": "Ordbog",

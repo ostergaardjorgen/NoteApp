@@ -1136,6 +1136,28 @@ public partial class MainWindow : Window
     /// tegn ligger i udklipsholderen» er den eneste kvittering, man faar, og
     /// forsvandt den med det samme, ville man ikke vide, om det lykkedes.
     /// </remarks>
+    /// <summary>
+    /// Sætter en besked på skærmen NU — ikke når der bliver tid.
+    /// </summary>
+    /// <remarks>
+    /// VisDiktat lægger beskeden i kø, og køen bliver først tømt, når
+    /// arbejdet er færdigt. Det er præcis forkert her: beskeden skal stå der,
+    /// MENS man venter, ellers er der ikke noget at vente på.
+    ///
+    /// Derfor sættes teksten direkte, og der tvinges en tegning igennem, før
+    /// der arbejdes videre. Det koster et par millisekunder og fjerner
+    /// grunden til at trykke en gang til.
+    /// </remarks>
+    private void Kvitter(string besked)
+    {
+        DiktatBesked.Text = besked;
+        DiktatBjaelke.Visibility = Visibility.Visible;
+
+        // Tomt kald med Render-forrang: alt med hoejere forrang - herunder
+        // selve tegningen - er faerdigt, naar den vender tilbage.
+        Dispatcher.Invoke(() => { }, DispatcherPriority.Render);
+    }
+
     private void VisDiktat(string besked) => Dispatcher.BeginInvoke(() =>
     {
         DiktatBesked.Text = besked;
@@ -1164,7 +1186,43 @@ public partial class MainWindow : Window
 
     private System.Windows.Threading.DispatcherTimer? _diktatUr;
 
+    /// <summary>Sat, mens et tryk er ved at blive udført.</summary>
+    private bool _lynstartIGang;
+
     private void LynstartOptagelse()
+    {
+        // ============ ÉT TRYK ER ÉT TRYK ============
+        //
+        // Der gaar tid, foer der er noget at se: vinduet skal frem, mikrofonen
+        // aabnes, og opstartsruden bygges. I mellemtiden sker der ingenting
+        // paa skaermen, og saa trykker man igen - og igen.
+        //
+        // Set 30-08-2026: flere optagelser oven i hinanden, som alle skulle
+        // lukkes bagefter. Brugeren havde gjort det eneste rigtige; det var
+        // appen, der ikke kvitterede.
+        //
+        // To ting loeser det, og de skal begge to vaere der: der tages ikke
+        // imod flere tryk, mens det foerste arbejder - og der kommer svar med
+        // det samme, saa der ikke ER nogen grund til at trykke igen.
+        if (_lynstartIGang) return;
+        _lynstartIGang = true;
+
+        Kvitter(Core.Sprog.T("topbar.aabner_optagelse"));
+
+        try
+        {
+            LynstartNu();
+        }
+        finally
+        {
+            // Slippes foerst, naar skaermen er tegnet faerdig. Slap vi den her
+            // og nu, ville et hurtigt dobbelttryk stadig naa igennem.
+            Dispatcher.BeginInvoke(DispatcherPriority.ApplicationIdle,
+                new Action(() => _lynstartIGang = false));
+        }
+    }
+
+    private void LynstartNu()
     {
         // ============ VINDUET FREM FOERST - MEN DET MAA IKKE KUNNE STOPPE OS ============
         //

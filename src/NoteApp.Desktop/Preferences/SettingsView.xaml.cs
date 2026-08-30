@@ -1070,26 +1070,51 @@ public partial class SettingsView : UserControl
         // Visningen styres af ItemTemplate i XAML. DisplayMemberPath maa IKKE
         // ogsaa saettes — WPF kaster paa at have begge, og skaermen ville
         // vaelte i det oejeblik den aabnes.
-        Mikrofoner.ItemsSource = mikrofoner;
-        Hoejttalere.ItemsSource = hoejttalere;
+        // ============ SKÆRMEN MÅ IKKE VÆLGE FOR BRUGEREN ============
+        //
+        // HER FORSVANDT DET VALGTE HEADSET. At saette SelectedItem udloeser
+        // SelectionChanged, praecis som var det brugeren, der klikkede - og
+        // handleren gemmer valget. Var headsettet ikke tilsluttet i det
+        // sekund, blev Windows' standard gemt OVEN I brugerens eget valg.
+        //
+        // Saa skulle man vaelge sit headset igen. Og bare det at aabne
+        // fanen, mens det var vaek, gjorde det igen. Det stod paa i dagevis
+        // og blev opdaget 30-08-2026, da en diktering fejlede paa en
+        // mikrofon, brugeren aldrig havde valgt.
+        //
+        // Temaet og fristen havde laenge hver sin vagt. Lyden havde ingen.
+        _fylderLyd = true;
+        try
+        {
+            Mikrofoner.ItemsSource = mikrofoner;
+            Hoejttalere.ItemsSource = hoejttalere;
 
-        var mik = AudioDevices.ResolveMicrophone(AppSettings.Current.MicrophoneId, out var mikFallback);
-        var hoejt = AudioDevices.ResolveSpeaker(AppSettings.Current.SpeakerId, out var hoejtFallback);
+            var mik = AudioDevices.ResolveMicrophone(AppSettings.Current.MicrophoneId, out var mikFallback);
+            var hoejt = AudioDevices.ResolveSpeaker(AppSettings.Current.SpeakerId, out var hoejtFallback);
 
-        Mikrofoner.SelectedItem = mikrofoner.FirstOrDefault(d => d.Id == mik?.Id);
-        Hoejttalere.SelectedItem = hoejttalere.FirstOrDefault(d => d.Id == hoejt?.Id);
+            Mikrofoner.SelectedItem = mikrofoner.FirstOrDefault(d => d.Id == mik?.Id);
+            Hoejttalere.SelectedItem = hoejttalere.FirstOrDefault(d => d.Id == hoejt?.Id);
 
-        // Er den valgte enhed vaek — headsettet er taget ud — skal det staa
-        // her, ikke opdages naar optagelsen er slut.
-        Vis(MikAdvarsel, mikFallback,
-            "Den mikrofon, du havde valgt, er ikke tilsluttet længere. Appen bruger Windows' standard i stedet.");
-        Vis(HoejtAdvarsel, hoejtFallback,
-            "Den højttaler, du havde valgt, er ikke tilsluttet længere. Appen bruger Windows' standard i stedet.");
+            // Er den valgte enhed vaek — headsettet er taget ud — skal det staa
+            // her, ikke opdages naar optagelsen er slut.
+            //
+            // VALGET BLIVER STAAENDE. Enheden er vaek lige nu; den er ikke
+            // fravalgt. Naar headsettet kommer i igen, skal det bare virke.
+            Vis(MikAdvarsel, mikFallback,
+                "Den mikrofon, du har valgt, er ikke tilsluttet lige nu. Appen bruger Windows' "
+                + "standard imens — dit valg bliver stående og gælder igen, så snart den er tilbage.");
+            Vis(HoejtAdvarsel, hoejtFallback,
+                "Den højttaler, du har valgt, er ikke tilsluttet lige nu. Appen bruger Windows' "
+                + "standard imens — dit valg bliver stående og gælder igen, så snart den er tilbage.");
 
-        if (mikrofoner.Count == 0) MikStatus.Text = "ingen mikrofon fundet";
-        if (hoejttalere.Count == 0) HoejtStatus.Text = "ingen afspilningsenhed fundet";
-
+            if (mikrofoner.Count == 0) MikStatus.Text = "ingen mikrofon fundet";
+            if (hoejttalere.Count == 0) HoejtStatus.Text = "ingen afspilningsenhed fundet";
+        }
+        finally { _fylderLyd = false; }
     }
+
+    /// <summary>Sat, mens lydlisterne fyldes — så et valg ikke gemmes af sig selv.</summary>
+    private bool _fylderLyd;
 
     private static void Vis(TextBlock felt, bool synlig, string tekst)
     {
@@ -1107,20 +1132,26 @@ public partial class SettingsView : UserControl
 
     private void Mikrofon_Valgt(object sender, SelectionChangedEventArgs e)
     {
+        if (_fylderLyd) return;
         if (Mikrofoner.SelectedItem is not DeviceInfo d) return;
 
         AppSettings.Current.MicrophoneId = d.Id;
         AppSettings.Current.Save();
         Status.Text = $"Mikrofon: {d.FriendlyName}";
+
+        Vis(MikAdvarsel, false, "");
     }
 
     private void Hoejttaler_Valgt(object sender, SelectionChangedEventArgs e)
     {
+        if (_fylderLyd) return;
         if (Hoejttalere.SelectedItem is not DeviceInfo d) return;
 
         AppSettings.Current.SpeakerId = d.Id;
         AppSettings.Current.Save();
         Status.Text = $"Højttaler: {d.FriendlyName}";
+
+        Vis(HoejtAdvarsel, false, "");
     }
 
     private void Genindlaes_Click(object sender, RoutedEventArgs e)
@@ -1233,7 +1264,17 @@ public partial class SettingsView : UserControl
 
         try
         {
-            _testKlip.Start(AppSettings.Current.MicrophoneId);
+            // Den enhed, der FAKTISK findes - ikke et id, der maaske er vaek.
+            var enhed = AudioDevices.ResolveMicrophone(AppSettings.Current.MicrophoneId, out _);
+            if (enhed is null)
+            {
+                _testKlip.Dispose();
+                _testKlip = null;
+                TestStatus.Text = NoteApp.Core.Sprog.T("diktering.ingen_mikrofon");
+                return;
+            }
+
+            _testKlip.Start(enhed.Id);
         }
         catch (Exception ex)
         {
@@ -1999,3 +2040,4 @@ public partial class SettingsView : UserControl
         Process.Start(new ProcessStartInfo("explorer.exe", $"\"{sti}\"") { UseShellExecute = true });
     }
 }
+

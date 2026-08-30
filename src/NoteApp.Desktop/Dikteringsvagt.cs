@@ -131,6 +131,25 @@ public sealed class Dikteringsvagt : IDisposable
             return;
         }
 
+        // ============ ER DER OVERHOVEDET EN MIKROFON? ============
+        //
+        // DET SKAL SIGES NU, OG DET SKAL SIGES PRAECIST. Fejlede optagelsen
+        // foer, stod der «det gik galt» og en teknisk besked fra lydlaget -
+        // og der gik lang tid, foer nogen gaettede paa, at det var enheden.
+        //
+        // Set 30-08-2026: appen havde skiftet til Windows' standard, fordi
+        // brugerens headset ikke var tilsluttet i det oejeblik, Lyd-fanen
+        // blev aabnet. Standarden virkede ikke, og dikteringen fejlede med en
+        // besked, der ikke naevnte mikrofonen med et ord.
+        var enhed = AudioDevices.ResolveMicrophone(
+            AppSettings.Current.MicrophoneId, out var reserve);
+
+        if (enhed is null)
+        {
+            Melder?.Invoke(Sprog.T("diktering.ingen_mikrofon"));
+            return;
+        }
+
         try
         {
             _klip = Path.Combine(Path.GetTempPath(),
@@ -139,14 +158,23 @@ public sealed class Dikteringsvagt : IDisposable
             _maal = Indsaetter.Laes();
 
             _optager = new ShortClipRecorder(_klip);
-            _optager.Start(AppSettings.Current.MicrophoneId);
 
-            Melder?.Invoke(Sprog.T("diktering.lytter"));
+            // Der startes paa den enhed, der FAKTISK blev fundet - ikke paa et
+            // id, der maaske ikke findes mere.
+            _optager.Start(enhed.Id);
+
+            Melder?.Invoke(reserve
+                ? Sprog.T("diktering.lytter_paa_reserve", enhed.FriendlyName)
+                : Sprog.T("diktering.lytter"));
         }
         catch (Exception ex)
         {
             Ryd();
-            Melder?.Invoke(Sprog.T("diktering.gik_galt", ex.Message));
+
+            // Navnet paa enheden med. «Mikrofonen svarede ikke» uden at sige
+            // hvilken er ikke til at handle paa.
+            Melder?.Invoke(Sprog.T("diktering.mikrofon_svarede_ikke",
+                                   enhed.FriendlyName, ex.Message));
         }
     }
 

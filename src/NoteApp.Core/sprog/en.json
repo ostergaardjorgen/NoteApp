@@ -35,7 +35,8 @@
     "tillyst": "Switch to light theme",
     "ingen_genvej": "no shortcut",
     "diktering_hold": "Hold {0} down while you speak",
-    "diktering_hold_tip": "Hold the key down, speak, and let go. The text is written out and placed where the cursor is. Switch it off under Dictation."
+    "diktering_hold_tip": "Hold the key down, speak, and let go. The text is written out and placed where the cursor is. Switch it off under Dictation.",
+    "aabner_optagelse": "Opening recording …"
   },
   "cockpit": {
     "titel": "Cockpit",
@@ -924,7 +925,10 @@
     "fane_proeverum": "Practice",
     "fane_teksttyper": "Text types",
     "fane_ordbog": "Word library",
-    "fane_kommandoer": "Commands"
+    "fane_kommandoer": "Commands",
+    "ingen_mikrofon": "There is no microphone. Connect one, or choose one under Settings → Audio.",
+    "lytter_paa_reserve": "Listening on {0} — the microphone you chose is not connected right now.",
+    "mikrofon_svarede_ikke": "{0} did not respond: {1}. Try another one under Settings → Audio."
   },
   "ordbogview": {
     "ordbog": "Word library",
