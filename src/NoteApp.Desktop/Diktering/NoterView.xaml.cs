@@ -22,11 +22,20 @@ public partial class NoterView : UserControl
     {
         InitializeComponent();
 
-        Loaded += (_, _) => Vis();
+        // Samme regel som i proeverummet: det afgoeres af, om fanen kan SES.
+        // «Loaded» daekker ogsaa en fane, man er klikket vaek fra.
+        IsVisibleChanged += (_, _) =>
+        {
+            if (!IsVisible) { Aendret = null; return; }
 
-        // Gemmes en note fra baandet, mens fanen er fremme, skal den dukke op
-        // uden at man skal klikke rundt for at faa den frem.
-        Aendret = () => Dispatcher.BeginInvoke(new Action(Vis));
+            Vis();
+
+            // Gemmes en note fra baandet, mens fanen er fremme, skal den dukke
+            // op uden at man skal klikke rundt for at faa den frem.
+            Aendret = () => Dispatcher.BeginInvoke(new Action(Vis));
+        };
+
+        Loaded += (_, _) => Vis();
         Unloaded += (_, _) => Aendret = null;
     }
 

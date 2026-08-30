@@ -22,17 +22,28 @@ public partial class ProeverumView : UserControl
     {
         InitializeComponent();
 
-        Loaded += (_, _) =>
+        Loaded += (_, _) => VisTyper();
+
+        // ============ DET AFGØRES AF, OM RUMMET KAN SES ============
+        //
+        // Her stod Loaded og Unloaded. Det er ikke det samme som «fremme»:
+        // en fane, man klikker væk fra, bliver siddende i træet, og så holdt
+        // prøverummet fast i dikteringen, længe efter man var gået videre.
+        //
+        // Set 30-08-2026: brugeren stod på Noter-fanen, dikterede, og fik
+        // «Prøvet som note — se resultatet ovenfor». Der var ingenting
+        // ovenfor, teksten kom aldrig i udklipsholderen, og den blev aldrig
+        // tilbudt som note. Prøverummet havde taget den, to faner væk.
+        //
+        // IsVisible følger fanevalget. Kan rummet ikke ses, er det ikke
+        // rummet, der skal have teksten.
+        IsVisibleChanged += (_, _) =>
         {
-            VisTyper();
-            Tag();
+            if (IsVisible) Tag();
+            else Slip();
         };
 
-        // ============ PRØVERUMMET SKAL SLIPPES IGEN ============
-        //
-        // Bliver det siddende, naar man gaar til en anden skaerm, ville hvert
-        // eneste diktat resten af dagen lande i et vindue, ingen kigger paa -
-        // og aldrig i den mail, man sad og skrev.
+        // Baelte og seler: forlader man skaermen helt, slippes den ogsaa.
         Unloaded += (_, _) => Slip();
     }
 

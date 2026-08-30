@@ -126,6 +126,22 @@ public sealed class Dikteringsvagt : IDisposable
 
     private System.Windows.Threading.DispatcherTimer? _stilhedsur;
 
+    /// <summary>
+    /// Var det HeyPia selv, der var fremme, da holdet begyndte?
+    /// </summary>
+    /// <remarks>
+    /// Prøverummet må kun tage dikteringen, når man faktisk står og kigger på
+    /// det. Ellers ville en fane, man for en time siden klikkede væk fra,
+    /// opsluge hver eneste diktering resten af dagen.
+    ///
+    /// Der ses på PROCESSEN og ikke på vinduet: appen har flere — hovedvindue,
+    /// optagebånd, opstartsrude — og de er alle sammen os.
+    /// </remarks>
+    private static bool Vores(Forgrundsvindue maal) =>
+        maal.Findes && maal.Proces.Equals(
+            System.Diagnostics.Process.GetCurrentProcess().ProcessName,
+            StringComparison.OrdinalIgnoreCase);
+
     /// <summary>Tasten er holdt nede længe nok. Begynd at lytte.</summary>
     public void Begynd()
     {
@@ -256,7 +272,19 @@ public sealed class Dikteringsvagt : IDisposable
 
             // I proeverummet er det den valgte type, der gaelder. Man er
             // netop derinde for at proeve EN bestemt.
-            var proeve = Proeve;
+            //
+            // ============ MEN KUN HVIS MAN STOD DER ============
+            //
+            // Proeverummet maa kun tage dikteringen, naar HeyPia var det
+            // vindue, man havde fremme, da man begyndte at tale. Dikterer man
+            // ind i en mail, er det mailen, teksten skal i - ogsaa selv om
+            // proeverummet tilfaeldigvis er den valgte fane bag ved.
+            //
+            // Set 30-08-2026: brugeren dikterede og fik «Proevet som note -
+            // se resultatet ovenfor». Teksten kom aldrig i udklipsholderen og
+            // blev aldrig tilbudt som note. Proeverummet havde taget den, fra
+            // en fane han ikke engang kiggede paa.
+            var proeve = Vores(_maal) ? Proeve : null;
 
             var formaal = proeve is not null
                 ? proeve.Formaal
