@@ -287,6 +287,15 @@ public partial class SetupWindow : Window
     {
         if (_henter) return;
 
+        // Kvitteringen staar paa siden. Naar den er der, er der kun ét
+        // tilbage at gøre, og knappen hedder «Luk».
+        if (_faerdig)
+        {
+            DialogResult = true;
+            Close();
+            return;
+        }
+
         // Hakkene gemmes, NAAR MAN FORLADER TRINNET - ikke først til sidst.
         // Gaar hentningen galt bagefter, eller lukkes vinduet, er valgene
         // stadig truffet. Det er dem, der er svaerest at finde igen.
@@ -370,24 +379,54 @@ public partial class SetupWindow : Window
         }
     }
 
+    /// <summary>Er kvitteringen vist? Så er næste klik en lukning.</summary>
+    private bool _faerdig;
+
+    /// <summary>
+    /// Viser kvitteringen — på siden, ikke i et vindue oven på den.
+    /// </summary>
+    /// <remarks>
+    /// HER LAA ET POP OP-VINDUE. Man kom igennem tre skærme og fik så en
+    /// fjerde kasse oven i den, man stod på, for at få at vide, at man var
+    /// færdig. En kasse, der lægger sig over det hele, læses som en
+    /// fejlmeddelelse — og det er den modsatte besked af den, der skal gives.
+    ///
+    /// Nu står den som det sidste på den sidste side, og «Luk» er det eneste,
+    /// der er tilbage at gøre.
+    /// </remarks>
+    private void VisKvittering()
+    {
+        var install = WhisperInstall.Locate(AppSettings.Current.PreferredModel);
+
+        KvitteringTitel.Text = install.IsComplete ? "Alt er klar" : "Næsten klar";
+
+        var klar = install.IsComplete
+            ? $"Whisper er klar: {install.ModelFileName} på {install.Engine}."
+            : "Motor eller model mangler stadig — hent dem under «AI-modeller».";
+
+        KvitteringTekst.Text = klar + "\n\n"
+            + "Tryk «Optag møde», når dit næste møde begynder — så er du i gang.\n\n"
+            // HER STOD «Start her». Det menupunkt findes ikke mere - det
+            // hoerte til oplaesning og traening, som er fjernet. Testen af
+            // mikrofonen er tilbage under Indstillinger, hvor man er, naar
+            // man vaelger mikrofon.
+            + "Vil du vide, om din mikrofon er god nok, kan du læse en prøvetekst "
+            + "op under «Indstillinger» → «Lyd». Det er frivilligt.";
+
+        Kvittering.Visibility = Visibility.Visible;
+
+        _faerdig = true;
+        TilbageKnap.Visibility = Visibility.Collapsed;
+        NaesteKnap.Content = "Luk";
+        NaesteKnap.IsEnabled = true;
+    }
+
     private void Afslut(bool visKvittering = true)
     {
         if (visKvittering)
         {
-            var install = WhisperInstall.Locate(AppSettings.Current.PreferredModel);
-
-            var klar = install.IsComplete
-                ? $"Whisper er klar: {install.ModelFileName} på {install.Engine}."
-                : "Motor eller model mangler stadig — hent dem under «AI-modeller».";
-
-            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Klar", klar + "\n\n" +
-                "Tryk «Optag møde», når dit næste møde begynder — så er du i gang.\n\n" +
-                // HER STOD «Start her». Det menupunkt findes ikke mere - det
-                // hoerte til oplaesning og traening, som er fjernet. Testen af
-                // mikrofonen er tilbage under Indstillinger, hvor man er, naar
-                // man vaelger mikrofon.
-                "Vil du vide, om din mikrofon er god nok, kan du læse en prøvetekst " +
-                "op under «Indstillinger» → «Lyd». Det er frivilligt.", Dialogs.Slags.Valg);
+            VisKvittering();
+            return;
         }
 
         DialogResult = true;
