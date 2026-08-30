@@ -337,12 +337,32 @@
     <Border x:Name="DiktatBjaelke" Grid.Row="3" Grid.ColumnSpan="2" Visibility="Collapsed"
             Background="{DynamicResource AccentFlade}" BorderBrush="{DynamicResource Accent}"
             BorderThickness="0,1,0,0" Padding="24,10">
-      <StackPanel Orientation="Horizontal">
-        <Ellipse x:Name="DiktatPrik" Width="9" Height="9" VerticalAlignment="Center"
-                 Margin="0,0,12,0" Fill="{DynamicResource Optager}" />
-        <TextBlock x:Name="DiktatBesked" FontSize="12.5" VerticalAlignment="Center"
-                   TextWrapping="Wrap" Foreground="{DynamicResource Tekst}" />
-      </StackPanel>
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+
+        <StackPanel Grid.Column="0" Orientation="Horizontal">
+          <Ellipse x:Name="DiktatPrik" Width="9" Height="9" VerticalAlignment="Center"
+                   Margin="0,0,12,0" Fill="{DynamicResource Optager}" />
+          <TextBlock x:Name="DiktatBesked" FontSize="12.5" VerticalAlignment="Center"
+                     TextWrapping="Wrap" Foreground="{DynamicResource Tekst}" />
+        </StackPanel>
+
+        <!-- ============ «GEM SOM NOTE» — OG IKKE EN DIALOG ============
+
+             Der SKAL spørges, men ikke med et vindue. En diktering bruges,
+             mens man står i et andet program, og teksten er lige landet dér.
+             En dialog ville rive fokus væk fra netop det felt, i samme
+             sekund man var færdig — og så ville svaret koste mere end
+             spørgsmålet er værd.
+
+             Knappen står her i stedet. Den venter, til man kigger. -->
+        <Button x:Name="GemNoteKnap" Grid.Column="1" Visibility="Collapsed"
+                Click="GemNote_Klik" Padding="14,6" Margin="16,0,0,0"
+                Content="{i18n:Oversat noter.gem_som_note}" />
+      </Grid>
     </Border>
 
   </Grid>

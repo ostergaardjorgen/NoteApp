@@ -1121,6 +1121,8 @@ public partial class MainWindow : Window
     {
         _diktat.Melder -= VisDiktat;
         _diktat.Melder += VisDiktat;
+        _diktat.Faerdig -= DiktatFaerdig;
+        _diktat.Faerdig += DiktatFaerdig;
         _diktat.Begynd();
     }
 
@@ -1128,14 +1130,41 @@ public partial class MainWindow : Window
 
     private void DiktatAfbrudt() => _ = _diktat.SlutAsync(afbrudt: true);
 
+    /// <summary>Den seneste diktering — så den kan gemmes, hvis man vil.</summary>
+    private string? _sidsteDiktat;
+
     /// <summary>
-    /// Viser, hvad dikteringen laver — og skjuler bjælken igen bagefter.
+    /// En diktering er landet. Nu tilbydes den som note.
     /// </summary>
     /// <remarks>
-    /// Den bliver staaende et par sekunder, naar teksten er klar. «Klar — 80
-    /// tegn ligger i udklipsholderen» er den eneste kvittering, man faar, og
-    /// forsvandt den med det samme, ville man ikke vide, om det lykkedes.
+    /// KNAPPEN ER SPØRGSMÅLET. En dialog ville rive fokus væk fra det felt,
+    /// teksten lige er landet i — i samme sekund man var færdig med at tale.
+    /// Knappen står på bjælken og venter, til man kigger.
+    ///
+    /// Den forsvinder sammen med bjælken. Gemte man ikke, var svaret nej.
     /// </remarks>
+    private void DiktatFaerdig(string tekst) => Dispatcher.BeginInvoke(() =>
+    {
+        _sidsteDiktat = tekst;
+        GemNoteKnap.Visibility = Visibility.Visible;
+        GemNoteKnap.IsEnabled = true;
+    });
+
+    private void GemNote_Klik(object sender, RoutedEventArgs e)
+    {
+        if (_sidsteDiktat is not { Length: > 0 } tekst) return;
+
+        Core.Diktatnoter.Tilfoej(tekst);
+
+        GemNoteKnap.IsEnabled = false;
+        _sidsteDiktat = null;
+
+        DiktatBesked.Text = Core.Sprog.T("noter.gemt");
+
+        // Er Noter-fanen fremme, skal den vise den med det samme.
+        Diktering.NoterView.Aendret?.Invoke();
+    }
+
     /// <summary>
     /// Sætter en besked på skærmen NU — ikke når der bliver tid.
     /// </summary>
@@ -1158,18 +1187,37 @@ public partial class MainWindow : Window
         Dispatcher.Invoke(() => { }, DispatcherPriority.Render);
     }
 
+    /// <summary>
+    /// Viser, hvad dikteringen laver — og skjuler bjælken igen bagefter.
+    /// </summary>
+    /// <remarks>
+    /// Den bliver staaende et par sekunder, naar teksten er klar. «Klar — 80
+    /// tegn ligger i udklipsholderen» er den eneste kvittering, man faar, og
+    /// forsvandt den med det samme, ville man ikke vide, om det lykkedes.
+    /// </remarks>
     private void VisDiktat(string besked) => Dispatcher.BeginInvoke(() =>
     {
         DiktatBesked.Text = besked;
         DiktatBjaelke.Visibility = Visibility.Visible;
 
+        // En NY diktering rydder tilbuddet fra den forrige. Ellers ville man
+        // gemme det forkerte, fordi knappen stod der endnu.
+        if (_diktat.Igang)
+        {
+            GemNoteKnap.Visibility = Visibility.Collapsed;
+            _sidsteDiktat = null;
+        }
+
         _diktatUr?.Stop();
 
         if (_diktat.Igang) return;
 
+        // TILBUDDET SKAL KUNNE NAAS. Seks sekunder er nok til at laese en
+        // kvittering, men ikke til at komme tilbage fra det program, man
+        // dikterede ind i, og tage stilling til en note.
         _diktatUr = new System.Windows.Threading.DispatcherTimer
         {
-            Interval = TimeSpan.FromSeconds(6),
+            Interval = TimeSpan.FromSeconds(GemNoteKnap.Visibility == Visibility.Visible ? 45 : 6),
         };
 
         _diktatUr.Tick += (_, _) =>
@@ -1178,7 +1226,13 @@ public partial class MainWindow : Window
             _diktatUr = null;
 
             // Er der begyndt et nyt diktat i mellemtiden, skal bjaelken blive.
-            if (!_diktat.Igang) DiktatBjaelke.Visibility = Visibility.Collapsed;
+            if (_diktat.Igang) return;
+
+            DiktatBjaelke.Visibility = Visibility.Collapsed;
+
+            // Gemte man ikke, mens den stod der, var svaret nej.
+            GemNoteKnap.Visibility = Visibility.Collapsed;
+            _sidsteDiktat = null;
         };
 
         _diktatUr.Start();

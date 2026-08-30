@@ -928,7 +928,8 @@
     "fane_kommandoer": "Commands",
     "ingen_mikrofon": "There is no microphone. Connect one, or choose one under Settings → Audio.",
     "lytter_paa_reserve": "Listening on {0} — the microphone you chose is not connected right now.",
-    "mikrofon_svarede_ikke": "{0} did not respond: {1}. Try another one under Settings → Audio."
+    "mikrofon_svarede_ikke": "{0} did not respond: {1}. Try another one under Settings → Audio.",
+    "fane_noter": "Notes"
   },
   "ordbogview": {
     "ordbog": "Word library",
@@ -1006,5 +1007,16 @@
     "stoppet": "The wake word is off",
     "ingen_motor": "The wake word needs the whisper engine. Set it up under AI models.",
     "gik_galt": "The wake word failed: {0}"
+  },
+  "noter": {
+    "titel": "Notes",
+    "under": "Dictations you have chosen to keep. Nothing is saved automatically — a dictation is usually on its way somewhere else and has already landed there by the time the text arrives.",
+    "indsaet": "The latest dictation is ready in memory",
+    "indsaet_under": "After each dictation the text is placed on the clipboard. Go to where it belongs and press Ctrl+V — or Shift+Insert, which works where Ctrl+V does not, including terminals and older programs. It stays there until you copy something else.",
+    "tom": "No saved notes yet. Hold the shortcut key and speak — when the text arrives, «Save as note» appears at the bottom of the window.",
+    "ryd": "Delete all",
+    "kopier": "Copy",
+    "gem_som_note": "Save as note",
+    "gemt": "Saved as a note — you will find it under Dictation → Notes."
   }
 }

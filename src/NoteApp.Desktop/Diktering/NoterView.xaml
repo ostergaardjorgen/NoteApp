@@ -1,0 +1,97 @@
+﻿<UserControl x:Class="NoteApp.Desktop.Diktering.NoterView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:i18n="clr-namespace:NoteApp.Desktop"
+             Background="Transparent">
+
+  <!-- DE DIKTERINGER, MAN HAR VALGT AT GEMME.
+
+       Der gemmes ikke automatisk. En diktering er som regel paa vej et andet
+       sted hen og er allerede landet dér, naar teksten kommer. Gemte appen
+       hver eneste, ville den lave et arkiv af alt, hvad man havde sagt hele
+       dagen - og det ville ingen have bedt om. -->
+
+  <Grid Margin="4,10,4,4">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+    </Grid.RowDefinitions>
+
+    <StackPanel Grid.Row="0" Margin="0,0,0,12">
+      <TextBlock Text="{i18n:Oversat noter.titel}" FontSize="19" FontWeight="SemiBold" />
+      <TextBlock Style="{StaticResource Underskrift}" Margin="0,6,0,0" TextWrapping="Wrap"
+                 Text="{i18n:Oversat noter.under}" />
+    </StackPanel>
+
+    <!-- ============ SAADAN SAETTER DU DEN IND ============
+
+         Den staar HER og ikke kun i en besked, der forsvinder. Teksten
+         ligger i udklipsholderen efter hver diktering, og de to
+         tastekombinationer er ikke lige gode alle steder: Ctrl+V virker de
+         fleste steder, Shift+Insert virker ogsaa i terminaler og aeldre
+         programmer, hvor Ctrl+V ikke goer. Derfor staar begge. -->
+    <Border Grid.Row="1" Background="{DynamicResource Trykket}" CornerRadius="8" Padding="16,12"
+            BorderBrush="{DynamicResource PanelKant}" BorderThickness="1" Margin="0,0,0,14">
+      <StackPanel>
+        <TextBlock Text="{i18n:Oversat noter.indsaet}" FontWeight="SemiBold" FontSize="13" />
+        <TextBlock Style="{StaticResource Underskrift}" Margin="0,6,0,0" TextWrapping="Wrap"
+                   LineHeight="20" Text="{i18n:Oversat noter.indsaet_under}" />
+      </StackPanel>
+    </Border>
+
+    <Border Grid.Row="2" Background="{DynamicResource Panel}" CornerRadius="10"
+            BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
+      <Grid>
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Margin="16,12,16,10">
+          <TextBlock x:Name="Antal" VerticalAlignment="Center" FontSize="12.5"
+                     Foreground="{DynamicResource TekstSvag}" />
+          <Button x:Name="RydKnap" Click="Ryd_Klik" HorizontalAlignment="Right" Padding="12,6"
+                  Content="{i18n:Oversat noter.ryd}" />
+        </Grid>
+
+        <TextBlock x:Name="Tom" Grid.Row="1" Margin="16,20,16,20" TextWrapping="Wrap"
+                   Foreground="{DynamicResource TekstMeget}" VerticalAlignment="Top"
+                   Text="{i18n:Oversat noter.tom}" />
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,0,0,8">
+          <ItemsControl x:Name="Liste" Margin="12,0,12,0">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <Border Background="{DynamicResource Trykket}" CornerRadius="8" Padding="14,11"
+                        Margin="0,0,0,8" BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
+                  <Grid>
+                    <Grid.ColumnDefinitions>
+                      <ColumnDefinition Width="*" />
+                      <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0">
+                      <TextBlock Text="{Binding Naar}" FontSize="11"
+                                 Foreground="{DynamicResource TekstMeget}" />
+                      <TextBlock Text="{Binding Tekst}" FontSize="13" TextWrapping="Wrap"
+                                 LineHeight="20" Margin="0,5,0,0" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="12,0,0,0"
+                                VerticalAlignment="Top">
+                      <Button Content="{i18n:Oversat noter.kopier}" Padding="12,6" Margin="0,0,6,0"
+                              Click="Kopier_Klik" Tag="{Binding}" />
+                      <Button Content="{i18n:Oversat faelles.slet}" Padding="12,6"
+                              Click="Slet_Klik" Tag="{Binding}" />
+                    </StackPanel>
+                  </Grid>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </ScrollViewer>
+      </Grid>
+    </Border>
+  </Grid>
+</UserControl>

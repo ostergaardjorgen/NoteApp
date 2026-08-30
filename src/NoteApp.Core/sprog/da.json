@@ -928,7 +928,8 @@
     "fane_kommandoer": "Kommandoer",
     "ingen_mikrofon": "Der er ingen mikrofon. Tilslut en, eller vælg en under Indstillinger → Lyd.",
     "lytter_paa_reserve": "Lytter på {0} — den mikrofon, du har valgt, er ikke tilsluttet lige nu.",
-    "mikrofon_svarede_ikke": "{0} svarede ikke: {1}. Prøv en anden under Indstillinger → Lyd."
+    "mikrofon_svarede_ikke": "{0} svarede ikke: {1}. Prøv en anden under Indstillinger → Lyd.",
+    "fane_noter": "Noter"
   },
   "ordbogview": {
     "ordbog": "Ordbog",
@@ -1006,5 +1007,16 @@
     "stoppet": "Vågeordet er slukket",
     "ingen_motor": "Vågeordet kræver whisper-motoren. Sæt den op under AI-modeller.",
     "gik_galt": "Vågeordet gik galt: {0}"
+  },
+  "noter": {
+    "titel": "Noter",
+    "under": "Dikteringer, du har valgt at gemme. Der gemmes ikke automatisk — en diktering er som regel på vej et andet sted hen og er allerede landet dér, når teksten kommer.",
+    "indsaet": "Den seneste diktering ligger klar i hukommelsen",
+    "indsaet_under": "Efter hver diktering lægges teksten i udklipsholderen. Gå hen, hvor den skal ind, og tryk Ctrl+V — eller Shift+Insert, som virker de steder, hvor Ctrl+V ikke gør, blandt andet i terminaler og ældre programmer. Den bliver liggende, til du kopierer noget andet.",
+    "tom": "Ingen gemte noter endnu. Hold genvejstasten nede og tal — når teksten er kommet, står der «Gem som note» nederst i vinduet.",
+    "ryd": "Slet alle",
+    "kopier": "Kopiér",
+    "gem_som_note": "Gem som note",
+    "gemt": "Gemt som note — den ligger under Diktering → Noter."
   }
 }

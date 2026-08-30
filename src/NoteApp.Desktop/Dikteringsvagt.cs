@@ -36,6 +36,20 @@ public sealed class Dikteringsvagt : IDisposable
     /// <summary>Siger til undervejs, så bjælken kan vise, hvad der sker.</summary>
     public event Action<string>? Melder;
 
+    /// <summary>
+    /// Rejses med den færdige tekst, når en diktering er landet.
+    /// </summary>
+    /// <remarks>
+    /// DER GEMMES IKKE HER. Teksten gives videre, og skærmen tilbyder at
+    /// gemme den som note — men valget er brugerens. Gemte appen hver eneste
+    /// diktering, ville den lave et arkiv over alt, hvad der var sagt i løbet
+    /// af en dag, uden at nogen havde bedt om det.
+    ///
+    /// Prøverummet rejser den ikke: dér er teksten netop noget, man kaster
+    /// væk og laver om.
+    /// </remarks>
+    public event Action<string>? Faerdig;
+
     /// <summary>Et prøverum, der har taget dikteringen til sig.</summary>
     /// <param name="Formaal">Typen, der prøves af — ikke den, programmet lægger op til.</param>
     /// <param name="Vis">Kaldes med den rå udskrift og den pudsede tekst.</param>
@@ -275,6 +289,10 @@ public sealed class Dikteringsvagt : IDisposable
 
             var indsat = v.DikteringIndsaet && Indsaetter.Indsaet(tekst, _maal);
             if (!indsat) Indsaetter.Læg(tekst);
+
+            // Skaermen skal kunne tilbyde at gemme den. Teksten gives med -
+            // vagten gemmer ikke selv, for det er brugerens valg.
+            Faerdig?.Invoke(tekst);
 
             // BESKEDEN OM AFBRYDELSEN KOMMER TIL SIDST, efter teksten er i hus.
             // Kom den foerst, ville man tro, at det, man havde sagt, var tabt.
