@@ -568,7 +568,46 @@ public sealed class AppSettings
     /// </remarks>
     public static string? Indlaesningsfejl { get; private set; }
 
-    public static AppSettings Current => _current ??= Load();
+    private static readonly object Laas = new();
+
+    /// <summary>
+    /// Indstillingerne. Der findes ÉT sæt, og kun ét.
+    /// </summary>
+    /// <remarks>
+    /// HER STOD «_current ??= Load()», OG DET VAR AARSAGEN TIL, AT VALG
+    /// FORSVANDT.
+    ///
+    /// Den linje er ikke sikker, når flere tråde spørger samtidig. Ved
+    /// opstart gør de netop det: skærmen, mødevagten og notifikationerne
+    /// starter alle i samme øjeblik. Alle tre ser <c>null</c>, alle tre
+    /// kalder Load, og alle tre får HVER SIT objekt. Det sidste, der bliver
+    /// tildelt, er det, alle andre får bagefter — men de to første er
+    /// allerede delt ud, og de bliver ved med at leve.
+    ///
+    /// Så skrev brugeren sin mikrofon i det ene, og et af de andre gemte sit
+    /// eget oven i lidt senere. Valget var væk, uden at nogen havde rørt
+    /// noget, og det skete på skift, fordi det afhang af, hvem der nåede
+    /// først.
+    ///
+    /// Målt 30-08-2026 med sporet: TRE indlæsninger i den samme proces inden
+    /// for 25 millisekunder. Der skal være én.
+    ///
+    /// Dobbelttjekket lås: den hurtige vej er uden lås, når objektet først
+    /// findes — og det gør det i al den tid, appen kører.
+    /// </remarks>
+    public static AppSettings Current
+    {
+        get
+        {
+            var nu = _current;
+            if (nu is not null) return nu;
+
+            lock (Laas)
+            {
+                return _current ??= Load();
+            }
+        }
+    }
 
     private static AppSettings? Laes(string sti)
     {
@@ -757,14 +796,17 @@ public sealed class AppSettings
     /// </remarks>
     public static void Reload()
     {
-        var fra = Load();
-
-        if (_current is null) { _current = fra; return; }
-
-        foreach (var p in typeof(AppSettings).GetProperties())
+        lock (Laas)
         {
-            if (!p.CanRead || !p.CanWrite) continue;
-            p.SetValue(_current, p.GetValue(fra));
+            var fra = Load();
+
+            if (_current is null) { _current = fra; return; }
+
+            foreach (var p in typeof(AppSettings).GetProperties())
+            {
+                if (!p.CanRead || !p.CanWrite) continue;
+                p.SetValue(_current, p.GetValue(fra));
+            }
         }
     }
 }
