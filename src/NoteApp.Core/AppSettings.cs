@@ -644,6 +644,7 @@ public sealed class AppSettings
         Indlaesningsfejl = null;
 
         var fra = Laes(Path);
+        Sporlaesning(fra);
         if (fra is not null) return fra;
 
         var fandtes = File.Exists(Path);
@@ -687,6 +688,8 @@ public sealed class AppSettings
     {
         Directory.CreateDirectory(UserDataPaths.Root);
 
+        Spor("GEMMER");
+
         var json = JsonSerializer.Serialize(this, Options);
         File.WriteAllText(Kladde, json, Encoding.UTF8);
 
@@ -701,6 +704,68 @@ public sealed class AppSettings
         }
     }
 
+    /// <summary>
+    /// MIDLERTIDIGT SPOR. Indstillinger falder stadig tilbage til standarden,
+    /// og hverken kode eller ræsonnement har kunnet forklare hvorfor.
+    /// </summary>
+    /// <remarks>
+    /// DEN BLEV FJERNET FOR TIDLIGT ÉN GANG. Kapløbet i Current var fundet og
+    /// rettet, og det så ud til at være nok — men tilbagefaldet kom igen
+    /// samme eftermiddag, og så var der ingenting at se på.
+    ///
+    /// Denne gang er kaldsstakken med: den siger, HVEM der bad om det, og det
+    /// var netop dét, der manglede. Der skrives ingen personlige data —
+    /// procesnummer, trådnummer, metodenavne, og om tre felter var tomme.
+    /// </remarks>
+    private void Spor(string hvad)
+    {
+        try
+        {
+            var sti = System.IO.Path.Combine(UserDataPaths.Root, "log", "indstillinger-spor.log");
+            Directory.CreateDirectory(System.IO.Path.GetDirectoryName(sti)!);
+
+            var stak = new System.Diagnostics.StackTrace(fNeedFileInfo: false)
+                .GetFrames()
+                .Skip(1).Take(6)
+                .Select(f => f.GetMethod())
+                .Where(m => m is not null)
+                .Select(m => $"{m!.DeclaringType?.Name}.{m.Name}");
+
+            File.AppendAllText(sti,
+                $"{DateTime.Now:HH:mm:ss.fff}  pid {Environment.ProcessId,-6} "
+                + $"traad {Environment.CurrentManagedThreadId,-3} {hvad}  "
+                + $"mik={(string.IsNullOrEmpty(MicrophoneId) ? "TOM" : "sat")} "
+                + $"greb={(string.IsNullOrEmpty(Genvejsgreb) ? "TOM" : Genvejsgreb)} "
+                + $"setup={SetupCompleted} std={StandardvalgSat}"
+                + Environment.NewLine
+                + "        <- " + string.Join(" <- ", stak) + Environment.NewLine);
+        }
+        catch (Exception)
+        {
+            // Et spor maa aldrig kunne forhindre en gemning.
+        }
+    }
+
+    /// <summary>Skriver, hvad der blev læst — også når det lykkedes.</summary>
+    private static void Sporlaesning(AppSettings? fra)
+    {
+        try
+        {
+            var sti = System.IO.Path.Combine(UserDataPaths.Root, "log", "indstillinger-spor.log");
+            Directory.CreateDirectory(System.IO.Path.GetDirectoryName(sti)!);
+
+            var hvad = fra is null
+                ? "INDLAEST  KUNNE IKKE LAESES"
+                : $"INDLAEST  mik={(string.IsNullOrEmpty(fra.MicrophoneId) ? "TOM" : "sat")} "
+                  + $"greb={(string.IsNullOrEmpty(fra.Genvejsgreb) ? "TOM" : fra.Genvejsgreb)} "
+                  + $"setup={fra.SetupCompleted} std={fra.StandardvalgSat}";
+
+            File.AppendAllText(sti,
+                $"{DateTime.Now:HH:mm:ss.fff}  pid {Environment.ProcessId,-6} "
+                + $"traad {Environment.CurrentManagedThreadId,-3} {hvad}" + Environment.NewLine);
+        }
+        catch (Exception) { }
+    }
 
     /// <summary>
     /// Læser indstillingerne fra disken igen — fx efter en gendannelse.
