@@ -140,32 +140,25 @@ public sealed class AppSettings
     // Fjernet 18-08-2026.
 
     /// <summary>
-    /// Den genvejstast, der lynstarter en optagelse — gemt som id, ikke som
-    /// tastekombination, så navnet kan skrives om uden at valget går tabt.
-    ///
-    /// Null betyder «tag den første ledige». Genvejstaster er optaget af vidt
-    /// forskellige programmer fra maskine til maskine, og et fast valg, der
-    /// ikke kan lade sig gøre, er ingen genvej.
-    /// </summary>
-    public string? HotkeyId { get; set; }
-
-    /// <summary>
-    /// Den kombination, brugeren selv har TRYKKET. Tom = ikke valgt.
+    /// Grebet på tastaturet, der lynstarter en optagelse og starter en
+    /// diktering. Null = <see cref="Core.Genvejsgreb.Standard"/>.
     /// </summary>
     /// <remarks>
-    /// DEN VINDER OVER <see cref="HotkeyId"/>. Listen dér er forslag, og et
-    /// forslag kan ikke skelne mellem to taster, der hedder det samme.
+    /// GEMT SOM TASTENS FYSISKE PLADS, ikke som den tastkode Windows nåede
+    /// frem til. Det er hele grunden til, at det virker nu.
     ///
-    /// Det kostede en formiddag 28-08-2026. Appen lyttede efter kommaet ved
-    /// siden af M; brugeren trykkede paa kommaet paa TALTASTATURET, som er
-    /// dét, der staar et komma paa et dansk tastatur. Det samme gaelder
-    /// tallene: talraekkens 1 og taltastaturets 1 er to forskellige taster,
-    /// og listen viser dem begge som «1».
+    /// Målt 30-08-2026: 669 tryk i træk på taltastaturets komma kom ind som
+    /// vk=0x2E (Delete), fordi Shift midlertidigt vender NumLock om. Appen
+    /// lyttede efter 0xBC — kommaet ved siden af M — og hørte derfor
+    /// ingenting. Tasten er mærket med et komma, så hverken bruger eller
+    /// udvikler kunne se det.
     ///
-    /// Trykker man kombinationen i stedet for at vaelge den, findes den
-    /// forskel ikke laengere. Se <see cref="Genvejstast"/>.
+    /// HER LAA TO FELTER: «HotkeyId» og «Genvejskombi». Det første var et
+    /// nummer i en liste af forslag, det andet den kombination, brugeren
+    /// havde trykket, og de kunne modsige hinanden. Begge byggede på Windows'
+    /// egen genvejsmekanisme, som appen ikke bruger mere. Fjernet 30-08-2026.
     /// </remarks>
-    public string? Genvejskombi { get; set; }
+    public string? Genvejsgreb { get; set; }
 
     // ======================= DIKTERING =======================
 

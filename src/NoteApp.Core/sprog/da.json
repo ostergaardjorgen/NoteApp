@@ -291,7 +291,17 @@
     "vaageord_intet": "Hvad der IKKE sker",
     "vaageord_intet_under": "Der sendes intet, mens der lyttes — hverken lyd eller tekst. Der gemmes intet: det, mikrofonen hører, findes kun i hukommelsen, indtil det er afgjort, om vågeordet blev sagt, og forsvinder derefter. Der skrives ingen lydfil, og der føres ingen log over det hørte. Først når vågeordet ER hørt, og brugeren taler videre, optages og sendes netop det klip — som ved en almindelig diktering.",
     "vaageord_hvornaar": "Hvornår der lyttes",
-    "vaageord_hvornaar_under": "Når skærmen er låst op. Er maskinen låst, lyttes der ikke. Kører der en optagelse — også et onlinemøde — holder lytningen op, indtil optagelsen er slut. Forbruget kan aflæses på skærmen under Diktering → Kommandoer, målt på processen selv."
+    "vaageord_hvornaar_under": "Når skærmen er låst op. Er maskinen låst, lyttes der ikke. Kører der en optagelse — også et onlinemøde — holder lytningen op, indtil optagelsen er slut. Forbruget kan aflæses på skærmen under Diktering → Kommandoer, målt på processen selv.",
+    "tastatur": "GENVEJSTASTEN — HVORDAN DEN AFLÆSES",
+    "tastatur_hvad": "For at en genvejstast kan virke, mens du er i et andet program, må appen kunne se, at du trykker på den. Det gør den med en tastaturvagt hos Windows — den samme slags, som Windows selv, PowerToys og de fleste genvejsprogrammer bruger.",
+    "tastatur_hvorfor": "Hvorfor ikke Windows’ egen genvejsordning",
+    "tastatur_hvorfor_under": "Den blev brugt indtil 30-08-2026 og virkede ikke pålideligt. Den er først til mølle, så et andet program kan have taget tasten; den kan lykkes og alligevel ikke virke; og den oversætter tasten, før appen ser den — målt på en dansk maskine kom 669 tryk på taltastaturets komma ind som «Delete», fordi Shift midlertidigt vender NumLock om. Genvejen skiftede derfor tast af sig selv fra dag til dag.",
+    "tastatur_ser": "Hvad den ser",
+    "tastatur_ser_under": "Hvert tastetryk passerer forbi, mens appen kører. For hvert tryk aflæses tre ting: hvor tasten sad fysisk på tastaturet, om det var et tryk eller et slip, og om Ctrl, Shift eller Alt blev holdt nede.",
+    "tastatur_intet": "Hvad den IKKE gør",
+    "tastatur_intet_under": "Der slås aldrig et tegn op. Appen spørger ikke Windows, hvilket BOGSTAV en tast svarer til — kun hvor den sad. Der skrives intet ned: ingen fil, ingen liste, ingen log. Der huskes én ting mellem to tryk, og det er, om netop din genvejstast er nede lige nu. Alt andet sendes videre uændret og er glemt i samme øjeblik. Og der sendes intet nogen steder — aflæsningen sker udelukkende på din egen pc.",
+    "tastatur_efterproev": "Sådan efterprøver du det",
+    "tastatur_efterproev_under": "Påstanden står i koden og kan læses: filen hedder Tastehook.cs. Under Indstillinger → Krav til maskinen kan du desuden måle, hvad appen bruger — en aflæsning, der skrev noget ned, ville koste både tid og plads."
   },
   "correctionwindow": {
     "den_oprindelige_udskrift_gemmes_ved_siden": "Den oprindelige transkription gemmes ved siden af som .raa.txt, så en rettelse altid kan fortrydes.",

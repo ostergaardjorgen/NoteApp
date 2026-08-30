@@ -16,7 +16,7 @@ namespace NoteApp.Desktop;
 public partial class MainWindow : Window
 {
     private readonly MeetingView _moede = new();
-    private readonly GlobalHotkey _genvej = new();
+    private readonly Tastehook _genvej = new();
 
     /// <summary>Optagelsen, Optagelser-skærmen skal åbne på. Bruges én gang.</summary>
     private string? _aabnOptagelse;
@@ -442,11 +442,12 @@ public partial class MainWindow : Window
 
             SaetVaageord();
 
-            // Skifter registreringen senere - fordi den oenskede tast blev
-            // ledig - skal bjaelken sige det nye.
-            _genvej.Ændret -= VisGenvejIgen;
-            _genvej.Ændret += VisGenvejIgen;
-
+            // HER LAA ET ABONNEMENT PAA «AENDRET». Registreringen kunne skifte
+            // af sig selv, fordi den oenskede tast blev ledig igen - og saa
+            // skulle bjaelken sige noget nyt.
+            //
+            // Det kan ikke ske mere. Grebet skifter kun, naar brugeren trykker
+            // en ny tast, og saa er det den skaerm, der siger til.
             TilslutGenvej();
 
             Moedevagten.Opdater();
@@ -788,30 +789,33 @@ public partial class MainWindow : Window
     }
 
     /// <summary>
-    /// Registrerer genvejen og fortæller mødeskærmen, hvad der blev til noget.
-    /// Kaldes igen, når valget ændres under Indstillinger.
+    /// Sætter genvejen i gang og fortæller mødeskærmen, hvad der gælder.
+    /// Kaldes igen, når brugeren har trykket en ny tast.
     /// </summary>
+    /// <remarks>
+    /// HER STOD EN REGISTRERING, DER KUNNE MISLYKKES.
+    ///
+    /// Appen bad Windows om en genvej. Var den taget, tog appen den næste på
+    /// en liste og skrev en bemærkning om det — og hvilken tast der gjaldt,
+    /// afhang derfor af, hvad der tilfældigvis var ledigt i det sekund.
+    ///
+    /// Nu ser appen tastaturet selv. Der er ingen at komme i vejen for, intet
+    /// at falde tilbage på og ingen liste. Grebet er brugerens og skifter kun,
+    /// når han trykker en ny tast. Se <see cref="Tastehook"/>.
+    /// </remarks>
     public void TilslutGenvej()
     {
-        var ok = _genvej.Tilslut(this, AppSettings.Current.HotkeyId);
-        _moede.VisGenvej(ok ? _genvej.Aktiv!.Navn : null, _genvej.Bemærkning);
+        _genvej.Greb = Core.Genvejsgreb.Laes(AppSettings.Current.Genvejsgreb)
+                       ?? Core.Genvejsgreb.Standard;
 
-        // HER BLEV NOEDLOESNINGEN GEMT SOM ET VALG.
-        //
-        // Var den oenskede tast optaget, tog appen den naeste ledige og
-        // skrev den i indstillingerne. Begrundelsen var, at den ellers ville
-        // proeve den optagede igen ved hver opstart.
-        //
-        // Men det er praecis, hvad den SKAL. Konflikten er som regel
-        // midlertidig - det var en anden HeyPia, der laa og holdt tasten -
-        // og naar den er vaek, skal man have sin egen tast tilbage. Med det
-        // gemte valg sad man fast paa Ctrl+Shift+1 for altid, uden nogensinde
-        // at have valgt den.
-        //
-        // HotkeyId er nu OENSKET og intet andet: enten det, brugeren har
-        // valgt under Indstillinger, eller null for standarden. Hvad der
-        // faktisk blev registreret, staar oeverst til hoejre og i
-        // bemaerkningen - dér hoerer en midlertidig tilstand hjemme.
+        var kører = _genvej.Kører || _genvej.Start();
+
+        _moede.VisGenvej(
+            kører ? _genvej.Greb.Navn() : null,
+            kører ? null : "tastaturvagten kunne ikke sættes i gang");
+
+        Spor.Skriv($"TilslutGenvej: greb={_genvej.Greb.Gem()} ({_genvej.Greb.Navn()}) "
+                   + $"koerer={kører}");
     }
 
     /// <summary>
@@ -1101,7 +1105,7 @@ public partial class MainWindow : Window
 
         _genvej.HoldGiverDiktering = til && noegle;
 
-        GlobalHotkey.Spor($"SaetDiktering: DikteringTil={til} noegle={noegle} "
+        Spor.Skriv($"SaetDiktering: DikteringTil={til} noegle={noegle} "
                           + $"-> hold={_genvej.HoldGiverDiktering}");
     }
 
@@ -1188,34 +1192,29 @@ public partial class MainWindow : Window
         _moede.Lynstart();
     }
 
-    /// <summary>
-    /// Den genvej, der ER registreret lige nu. Null hvis ingen lykkedes.
-    /// </summary>
-    /// <remarks>
-    /// Indstillinger skal bruge den til to ting: at vise den som valgt, naar
-    /// brugeren ikke har valgt noget udtrykkeligt, og at lade vaere med at
-    /// kalde den «optaget af et andet program». Det andet program er appen
-    /// selv.
-    /// </remarks>
-    public string? AktivGenvejId => _genvej.Aktiv?.Id;
+    /// <summary>Grebet, der gælder nu. Null hvis vagten ikke kører.</summary>
+    public Core.Genvejsgreb? AktivtGreb => _genvej.Kører ? _genvej.Greb : null;
 
-    /// <summary>Navnet paa den genvej, der er registreret nu. Null hvis ingen.</summary>
-    public string? AktivGenvejNavn => _genvej.Aktiv?.Navn;
+    /// <summary>Navnet på genvejen, som brugeren ser den. Null hvis ingen.</summary>
+    public string? AktivGenvejNavn => AktivtGreb?.Navn();
 
     /// <summary>
-    /// Slip genvejen, mens brugeren vaelger en ny — og saet den tilbage bagefter.
+    /// Lader brugeren trykke sin egen tast. Svaret kommer, når han har trykket.
     /// </summary>
     /// <remarks>
-    /// Uden det her snapper den GAMLE genvej tastetrykket, starter en
-    /// optagelse, og skaermen ser aldrig tasten. Se GlobalHotkey.Pause.
+    /// HER STOD «PAUSE» OG «GENOPTAG». Den gamle genvej skulle slippes, mens
+    /// brugeren valgte en ny — ellers snappede den tastetrykket, startede en
+    /// optagelse, og skærmen så aldrig tasten.
+    ///
+    /// Det problem findes ikke mere. Vagten ser tastaturet selv, og mens den
+    /// fanger, udløser den ingenting. Trykket bliver også ædt, så det ikke
+    /// samtidig lander i et tekstfelt bagved.
     /// </remarks>
-    public void PauseGenvej() => _genvej.Pause();
+    public void FangGreb(Action<Core.Genvejsgreb> naarTrykket) =>
+        _genvej.Fanger = naarTrykket;
 
-    public void GenoptagGenvej() => _genvej.Genoptag();
-
-    /// <summary>Registreringen har skiftet — vis den nye tast.</summary>
-    private void VisGenvejIgen() =>
-        _moede.VisGenvej(_genvej.Aktiv?.Navn, _genvej.Bemærkning);
+    /// <summary>Fortryder en fangst, der er i gang.</summary>
+    public void AfbrydFangst() => _genvej.Fanger = null;
 
     // HER LAA OpdaterDataLoefte, som satte linjen nederst i sidebjaelken:
     // "Optagelser og udskrifter bliver paa denne pc. Referater bearbejdes

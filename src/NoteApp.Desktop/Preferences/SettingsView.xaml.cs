@@ -61,114 +61,95 @@ public partial class SettingsView : UserControl
 
     // ------------------------------------------------ tryk din egen genvej
 
-    private Genvejsfanger? _fanger;
+    private bool _fanger;
 
     /// <summary>
-    /// Viser den genvej, der gælder nu — og hvor den kommer fra.
+    /// Viser den genvej, der gælder nu — og hvilken tast det er.
     /// </summary>
+    /// <remarks>
+    /// NAVNET ER DET, DER STÅR PÅ TASTEN: «Ctrl+Shift+,». Hvilket af de to
+    /// kommaer det er, står som en linje nedenunder — det er dér, forskellen
+    /// hører til, ikke inde i navnet.
+    /// </remarks>
     private void VisGenvejNu()
     {
         if (GenvejNu is null) return;
 
-        var egen = Genvejstast.Laes(AppSettings.Current.Genvejskombi);
-        var aktiv = (Window.GetWindow(this) as MainWindow)?.AktivGenvejId;
-        var navn = (Window.GetWindow(this) as MainWindow)?.AktivGenvejNavn;
+        var greb = (Window.GetWindow(this) as MainWindow)?.AktivtGreb;
 
-        GenvejNu.Text = navn ?? "Ingen genvej";
+        GenvejNu.Text = greb?.Navn() ?? "Ingen genvej";
 
-        GenvejStatus.Text = navn is null
-            ? "Ingen kombination kunne registreres. Vælg en anden."
-            : egen.Duer && aktiv == "egen"
-                ? "Du har trykket den selv, og den er bekræftet."
-                : "Valgt fra listen. Tryk «Vælg genvej» for at bruge den tast, du faktisk rammer.";
-    }
+        if (greb is null)
+        {
+            GenvejStatus.Text = "Tastaturvagten kører ikke. Genstart appen.";
+            return;
+        }
 
-    private void GenvejVaelg_Klik(object sender, RoutedEventArgs e)
-    {
-        var vindue = Window.GetWindow(this);
-        if (vindue is null) return;
+        var hvor = greb.Hvor();
+        var egen = AppSettings.Current.Genvejsgreb is not null;
 
-        if (_fanger is not null) { StopFanger(); return; }
-
-        // ============ DEN GAMLE GENVEJ SLIPPES FOERST ============
-        //
-        // Ellers snapper den tastetrykket, starter en optagelse, og fangeren
-        // ser aldrig noget. Det ramte netop den tast, brugeren helst ville
-        // skifte til: taltastaturets komma og Ctrl+Delete er den samme fysiske
-        // tast. Set 28-08-2026.
-        (vindue as MainWindow)?.PauseGenvej();
-
-        _fanger = new Genvejsfanger(vindue);
-        _fanger.Aendret += VisFanger;
-        _fanger.Faerdig += GemEgenGenvej;
-
-        vindue.PreviewKeyDown += Fanger_Tast;
-
-        GenvejFanger.Visibility = Visibility.Visible;
-        GenvejVaelg.Content = "Fortryd";
-
-        _fanger.Begynd();
-    }
-
-    private void Fanger_Tast(object sender, KeyEventArgs e)
-    {
-        if (_fanger is null) return;
-        if (_fanger.Tastetryk(e)) e.Handled = true;
-    }
-
-    private void VisFanger()
-    {
-        if (_fanger is null || GenvejFanger is null) return;
-
-        GenvejFanger.Text = _fanger.Besked;
-        GenvejFanger.Foreground = (System.Windows.Media.Brush)FindResource(
-            _fanger.Hvor switch
-            {
-                Genvejsfanger.Trin.Fejlet => "FejlTekst",
-                Genvejsfanger.Trin.Bekræftet => "Godkendt",
-                _ => "Tekst"
-            });
+        GenvejStatus.Text =
+            (hvor.Length > 0 ? $"Det er {hvor}. " : "")
+            + (egen
+                ? "Du har trykket den selv."
+                : "Standardvalget. Tryk «Vælg genvej», og brug den tast, du faktisk rammer.");
     }
 
     /// <summary>
-    /// Den er trykket OG bekræftet. Nu må den gemmes.
+    /// Lader brugeren trykke sin egen tast.
     /// </summary>
     /// <remarks>
-    /// FØRST HER. Det er hele pointen: en kombination, der er valgt men aldrig
-    /// prøvet, kan være død uden at nogen ved det — RegisterHotKey siger ja til
-    /// kombinationer, Windows' egen tekstbehandling har taget. Er den derimod
-    /// kommet frem én gang, er hele kæden bevist: fingeren, tastaturet, Windows
-    /// og appen.
+    /// HER LAA TRE TRIN: fang, registrér, og bekræft med et ekstra tryk. Det
+    /// midterste kunne mislykkes — Windows kunne have taget kombinationen — og
+    /// det sidste fandtes, fordi de to første kunne lykkes, mens genvejen
+    /// alligevel var død.
+    ///
+    /// Ingen af delene findes mere. Appen ser tastaturet selv, så der er ingen
+    /// registrering at mislykkes med, og intet at bekræfte: den tast, der blev
+    /// trykket, ER den, der lyttes efter. Ét trin.
     /// </remarks>
-    private void GemEgenGenvej(Genvejstast tast)
+    private void GenvejVaelg_Klik(object sender, RoutedEventArgs e)
     {
-        AppSettings.Current.Genvejskombi = tast.ToString();
-        AppSettings.Current.HotkeyId = null;
+        if (Window.GetWindow(this) is not MainWindow hoved) return;
+
+        if (_fanger)
+        {
+            hoved.AfbrydFangst();
+            StopFanger();
+            return;
+        }
+
+        _fanger = true;
+        GenvejFanger.Visibility = Visibility.Visible;
+        GenvejFanger.Foreground = (System.Windows.Media.Brush)FindResource("Tekst");
+        GenvejFanger.Text = "Tryk den kombination, du vil bruge — hold Ctrl, Shift eller Alt nede.";
+        GenvejVaelg.Content = "Fortryd";
+
+        hoved.FangGreb(GemGreb);
+    }
+
+    /// <summary>Tasten er trykket. Så er det den, der gælder.</summary>
+    private void GemGreb(Genvejsgreb greb)
+    {
+        AppSettings.Current.Genvejsgreb = greb.Gem();
         AppSettings.Current.Save();
 
-        StopFanger(behold: true);
+        StopFanger();
 
         if (Window.GetWindow(this) is MainWindow hoved) hoved.TilslutGenvej();
 
         VisGenvejNu();
 
-        Status.Text = $"Lynstart er nu {tast.Navn(GlobalHotkey.Tastetegn(tast.Vk))}.";
+        var hvor = greb.Hvor();
+        Status.Text = $"Genvejen er nu {greb.Navn()}"
+                      + (hvor.Length > 0 ? $" — {hvor}." : ".");
     }
 
-    private void StopFanger(bool behold = false)
+    private void StopFanger()
     {
-        if (Window.GetWindow(this) is { } v) v.PreviewKeyDown -= Fanger_Tast;
-
-        _fanger?.Dispose();
-        _fanger = null;
-
-        // Er der gemt en ny, saetter TilslutGenvej den paa. Er der ikke -
-        // fordi man fortroed - skal den gamle tilbage.
-        if (!behold && Window.GetWindow(this) is MainWindow h) h.GenoptagGenvej();
-
+        _fanger = false;
         GenvejVaelg.Content = NoteApp.Core.Sprog.T("settingsview.vaelg_genvej");
-
-        if (!behold) GenvejFanger.Visibility = Visibility.Collapsed;
+        GenvejFanger.Visibility = Visibility.Collapsed;
     }
 
     // ---------------------------------------------------------------- temaet

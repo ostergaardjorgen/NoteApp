@@ -849,7 +849,17 @@
     "vaageord_intet": "What does NOT happen",
     "vaageord_intet_under": "Nothing is sent while it listens — neither audio nor text. Nothing is stored: what the microphone hears exists only in memory until it is decided whether the wake word was said, and then it is gone. No audio file is written, and no log of what was heard is kept. Only once the wake word HAS been heard, and the user carries on speaking, is that one clip recorded and sent — as in an ordinary dictation.",
     "vaageord_hvornaar": "When it listens",
-    "vaageord_hvornaar_under": "When the screen is unlocked. If the machine is locked, it does not listen. If a recording is running — including an online meeting — listening stops until the recording ends. The consumption can be read on screen under Dictation → Commands, measured on the process itself."
+    "vaageord_hvornaar_under": "When the screen is unlocked. If the machine is locked, it does not listen. If a recording is running — including an online meeting — listening stops until the recording ends. The consumption can be read on screen under Dictation → Commands, measured on the process itself.",
+    "tastatur": "THE SHORTCUT KEY — HOW IT IS READ",
+    "tastatur_hvad": "For a shortcut key to work while you are in another program, the app must be able to see that you press it. It does so with a keyboard watch in Windows — the same kind Windows itself, PowerToys and most shortcut programs use.",
+    "tastatur_hvorfor": "Why not Windows’ own shortcut registration",
+    "tastatur_hvorfor_under": "It was used until 30-08-2026 and did not work reliably. It is first-come-first-served, so another program may hold the key; it can succeed and still not work; and it translates the key before the app sees it — measured on a Danish machine, 669 presses of the numeric keypad comma arrived as «Delete», because Shift temporarily inverts NumLock. The shortcut therefore changed key by itself from day to day.",
+    "tastatur_ser": "What it sees",
+    "tastatur_ser_under": "Every keystroke passes by while the app runs. For each one, three things are read: where the key sat physically on the keyboard, whether it was a press or a release, and whether Ctrl, Shift or Alt was held down.",
+    "tastatur_intet": "What it does NOT do",
+    "tastatur_intet_under": "No character is ever looked up. The app does not ask Windows which LETTER a key corresponds to — only where it sat. Nothing is written down: no file, no list, no log. One thing is remembered between two keystrokes, and that is whether your shortcut key is down right now. Everything else is passed on unchanged and forgotten the same instant. And nothing is sent anywhere — the reading happens solely on your own PC.",
+    "tastatur_efterproev": "How to verify it",
+    "tastatur_efterproev_under": "The claim is in the code and can be read: the file is called Tastehook.cs. Under Settings → Machine requirements you can also measure what the app uses — a reading that wrote something down would cost both time and space."
   },
   "hjaelp": {
     "titel": "Help",
