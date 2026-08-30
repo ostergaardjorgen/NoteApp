@@ -103,9 +103,20 @@ public sealed class AppSettings
     /// fra møde til møde. Et dansk-norsk møde giver dansk på det ene spor og
     /// norsk på det andet — og det er det rigtige svar, ikke et problem.
     ///
-    /// «auto» lader appen gætte, som den gjorde før. Null betyder dansk.
+    /// «auto» lader appen gætte, som den gjorde før.
+    ///
+    /// DANSK FRA INSTALLATIONEN, ligesom brugerfladen. Det stod som null før,
+    /// og null blev læst som dansk de fleste steder — men ikke alle: den, der
+    /// åbnede rullelisten, så et tomt felt og kunne ikke se, hvad appen
+    /// egentlig gjorde. Og dikteringen sendte slet intet sprog med, så
+    /// modellen gættede.
+    ///
+    /// Målt 30-08-2026: «hallo, hallo, hallo» sagt på dansk kom tilbage som
+    /// «Alors, alors, alors ?». Fransk. En standard, der står skrevet, kan
+    /// ses og laves om; en, der kun findes som en antagelse i koden, kan
+    /// ingen af delene.
     /// </summary>
-    public string? MitSprog { get; set; }
+    public string? MitSprog { get; set; } = "da";
 
     /// <summary>
     /// Sproget, de ØVRIGE mødedeltagere taler. Bruges til loopback-sporet.
