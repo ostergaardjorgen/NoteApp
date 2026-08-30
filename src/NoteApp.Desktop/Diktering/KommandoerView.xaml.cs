@@ -55,13 +55,36 @@ public partial class KommandoerView : UserControl
         Unloaded += (_, _) => { _ur?.Stop(); _ur = null; };
     }
 
+    /// <summary>
+    /// Viser forbruget — og sætter det i forhold til maskinen.
+    /// </summary>
+    /// <remarks>
+    /// «28,6 % af én kerne» LYDER VOLDSOMT, OG DET ER DET IKKE.
+    ///
+    /// Tallet er rigtigt, men det står alene, og så læser man det som 28,6 %
+    /// af maskinen. På otte kerner er det 3,6 %. Forskellen er en faktor
+    /// otte, og den afgør, om man tør lade funktionen være tændt.
+    ///
+    /// Derfor siges begge dele: hvad det er af én kerne, og hvad det er af
+    /// hele maskinen. Det andet tal er det, spørgsmålet egentlig handler om.
+    /// </remarks>
     private void VisForbrug()
     {
         var f = Maaler?.Invoke();
 
-        Forbrug.Text = f is null
-            ? Sprog.T("kommandoer.forbrug_lytter_ikke")
-            : Sprog.T("kommandoer.forbrug_tal", f.Value.ToString("0.0"));
+        if (f is null)
+        {
+            Forbrug.Text = Sprog.T("kommandoer.forbrug_lytter_ikke");
+            return;
+        }
+
+        var kerner = Environment.ProcessorCount;
+        var afMaskinen = f.Value / kerner;
+
+        Forbrug.Text = Sprog.T("kommandoer.forbrug_tal",
+            f.Value.ToString("0.0"),
+            afMaskinen.ToString("0.0"),
+            kerner.ToString());
     }
 
     private void Indlaes()

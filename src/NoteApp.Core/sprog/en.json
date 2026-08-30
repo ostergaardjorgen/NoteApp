@@ -1001,9 +1001,9 @@
     "privatliv": "Why it is not shared with anyone",
     "privatliv_under": "The listening happens on your own PC. Nothing is sent while it listens — neither audio nor text. It is the same program that writes out your meetings, but with the smallest model on the machine: it only has to hear two words. It runs locally and has no connection to anything. Only once you have said the wake word, and you carry on speaking yourself, is your clip sent to be written out. Everything else said in the room meanwhile disappears as soon as it has been heard — it is not stored, and it does not leave the machine.",
     "forbrug": "What it costs",
-    "forbrug_tal": "Using {0} % of one processor core right now",
+    "forbrug_tal": "Using {0} % of one core — that is {1} % of your machine’s {2} cores",
     "forbrug_lytter_ikke": "Not listening — there is nothing to measure",
-    "forbrug_under": "The figure is measured on the listening, not estimated: it is the processor time it has actually used, divided by the time that has passed. You can compare it with Task Manager."
+    "forbrug_under": "The figure is measured on the listening, not estimated: it is the processor time it has actually used, divided by the time elapsed. Task Manager calculates the same way — it shows the figure for the whole machine, that is, the second of the two."
   },
   "vaageord": {
     "lytter": "Listening for the wake word",

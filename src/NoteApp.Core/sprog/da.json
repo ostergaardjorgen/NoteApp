@@ -1001,9 +1001,9 @@
     "privatliv": "Hvorfor det ikke deles med nogen",
     "privatliv_under": "Lytningen sker på din egen pc. Der sendes intet, mens den lytter — hverken lyd eller tekst. Det er det samme program, som skriver dine møder ud, men med den mindste model, der ligger på maskinen: den skal kun høre to ord. Den kører lokalt og har ingen forbindelse til noget. Først når du har sagt vågeordet, og du selv taler videre, sendes dit klip til udskrift. Alt det, der bliver sagt i rummet imens, forsvinder, så snart det er hørt — det gemmes ikke, og det forlader ikke maskinen.",
     "forbrug": "Hvad det koster",
-    "forbrug_tal": "Bruger {0} % af én processorkerne lige nu",
+    "forbrug_tal": "Bruger {0} % af én kerne — det er {1} % af din maskines {2} kerner",
     "forbrug_lytter_ikke": "Lytter ikke — der er ikke noget at måle",
-    "forbrug_under": "Tallet er målt på lytningen, ikke skønnet: det er den processortid, den faktisk har brugt, delt med den tid, der er gået. Du kan sammenligne med Jobliste."
+    "forbrug_under": "Tallet er målt på lytningen, ikke skønnet: det er den processortid, den faktisk har brugt, delt med den tid, der er gået. Jobliste regner på samme måde — den viser tallet for hele maskinen, altså det sidste af de to."
   },
   "vaageord": {
     "lytter": "Lytter efter vågeordet",
