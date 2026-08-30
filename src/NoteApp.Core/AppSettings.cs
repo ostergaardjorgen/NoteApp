@@ -605,6 +605,12 @@ public sealed class AppSettings
         Indlaesningsfejl = null;
 
         var fra = Laes(Path);
+
+        // OGSAA NAAR DET GAAR GODT. Uden en linje ved hver indlaesning kan man
+        // ikke se, OM en vaerdi forsvandt under koerslen eller allerede var
+        // vaek, da filen blev laest - og de to har vidt forskellige aarsager.
+        Sporlaesning(fra);
+
         if (fra is not null) return fra;
 
         var fandtes = File.Exists(Path);
@@ -677,6 +683,30 @@ public sealed class AppSettings
     /// Der skrives ingen personlige data — kun et metodenavn, et filnavn og
     /// om to felter var tomme. Fjernes, når kilden er fundet.
     /// </remarks>
+    /// <summary>Skriver, hvad der blev LÆST — også når det lykkedes.</summary>
+    private static void Sporlaesning(AppSettings? fra)
+    {
+        try
+        {
+            var sti = System.IO.Path.Combine(UserDataPaths.Root, "log", "indstillinger-spor.log");
+            Directory.CreateDirectory(System.IO.Path.GetDirectoryName(sti)!);
+
+            var hvad = fra is null
+                ? "KUNNE IKKE LAESES"
+                : $"mikrofon={(string.IsNullOrEmpty(fra.MicrophoneId) ? "TOM" : "sat")} "
+                  + $"greb={(string.IsNullOrEmpty(fra.Genvejsgreb) ? "TOM" : fra.Genvejsgreb)} "
+                  + $"setup={fra.SetupCompleted}";
+
+            File.AppendAllText(sti,
+                $"{DateTime.Now:HH:mm:ss.fff}  pid {Environment.ProcessId,-6} "
+                + $"INDLAEST  {hvad}" + Environment.NewLine);
+        }
+        catch (Exception)
+        {
+            // Et spor maa aldrig kunne forhindre en opstart.
+        }
+    }
+
     private void Spor(string? hvem, string? fil, int linje)
     {
         try
@@ -686,10 +716,15 @@ public sealed class AppSettings
 
             var navn = fil is null ? "?" : System.IO.Path.GetFileName(fil);
 
+            // PROCESSENS NUMMER SKAL MED. Uden det kan to koersler ikke
+            // skelnes, og saa ligner en genstart en aendring midt i en
+            // koersel. Det kostede en eftermiddags fejlsoegning.
             File.AppendAllText(sti,
-                $"{DateTime.Now:HH:mm:ss.fff}  {navn}:{linje} {hvem}  "
+                $"{DateTime.Now:HH:mm:ss.fff}  pid {Environment.ProcessId,-6} "
+                + $"{navn}:{linje} {hvem}  "
                 + $"mikrofon={(string.IsNullOrEmpty(MicrophoneId) ? "TOM" : "sat")} "
-                + $"greb={(string.IsNullOrEmpty(Genvejsgreb) ? "TOM" : Genvejsgreb)}"
+                + $"greb={(string.IsNullOrEmpty(Genvejsgreb) ? "TOM" : Genvejsgreb)} "
+                + $"setup={SetupCompleted}"
                 + Environment.NewLine);
         }
         catch (Exception)
