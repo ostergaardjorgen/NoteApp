@@ -90,6 +90,59 @@ public static class Voxtral
     public static string Endepunkt => $"https://{SkyKatalog.TilladtVaert}/v1/audio/transcriptions";
 
     /// <summary>
+    /// De sprog, Voxtral tager imod som VALGT sprog.
+    /// </summary>
+    /// <remarks>
+    /// DANSK ER IKKE PÅ LISTEN, OG DET ER VÆRD AT VIDE.
+    ///
+    /// Listen er ikke gættet. Den står ordret i afvisningen fra endepunktet,
+    /// målt 30-08-2026:
+    ///
+    ///   Got unsupported language `da`, should be one of: ['ar', 'en', 'de',
+    ///   'es', 'fr', 'hi', 'it', 'nl', 'pt', 'zh', 'ru', 'ko', 'ja']
+    ///
+    /// Modellen KAN skrive dansk ud — det har den gjort hele tiden — den vil
+    /// bare ikke have det som instruks. Sender man «da», afvises hele kaldet
+    /// med 400, og så kommer der ingen tekst overhovedet.
+    ///
+    /// Derfor: er sproget ikke på listen, sendes der intet sprog, og
+    /// modellen finder det selv. Se <see cref="Ledetraad"/> for det, der
+    /// gøres i stedet.
+    /// </remarks>
+    public static readonly IReadOnlyList<string> Sprog = new[]
+    {
+        "ar", "en", "de", "es", "fr", "hi", "it", "nl", "pt", "zh", "ru", "ko", "ja",
+    };
+
+    /// <summary>Kan sproget vælges, eller skal modellen finde det selv?</summary>
+    public static bool Kendes(string? sprog) =>
+        !string.IsNullOrWhiteSpace(sprog)
+        && Sprog.Contains(sprog.Trim().ToLowerInvariant());
+
+    /// <summary>
+    /// En ledetråd på det talte sprog, når sproget ikke kan vælges.
+    /// </summary>
+    /// <remarks>
+    /// DET ER DET BEDSTE, DER KAN GØRES FOR DANSK.
+    ///
+    /// Prompten er tænkt som forhåndsviden — navne og fagord — men modellen
+    /// læser den også som en smagsprøve på sproget. En dansk sætning forrest
+    /// trækker udskriften mod dansk, og det er dét, der skal til på et klip
+    /// på tre ord, hvor der ellers ikke er noget at gå efter.
+    ///
+    /// Det er en påvirkning, ikke en garanti. En garanti findes ikke, så
+    /// længe sproget ikke kan vælges — og det skal siges, som det er, i
+    /// stedet for at love noget andet.
+    /// </remarks>
+    public static string? Ledetraad(string? sprog) => sprog?.Trim().ToLowerInvariant() switch
+    {
+        "da" => "Følgende er en diktering på dansk.",
+        "no" => "Det følgende er en diktat på norsk.",
+        "sv" => "Det följande är en diktering på svenska.",
+        _ => null,
+    };
+
+    /// <summary>
     /// Instruktionen til tekstpudsningen. Ren funktion, så den kan prøves af
     /// uden at der sendes noget nogen steder.
     /// </summary>
@@ -193,16 +246,37 @@ public sealed class Dikteringsklient
         indhold.Add(lyd, "file", Path.GetFileName(lydfil));
         indhold.Add(new StringContent(Voxtral.Model), "model");
 
-        // «auto» og tomt betyder: lad modellen gaette. Alt andet siges.
-        if (!string.IsNullOrWhiteSpace(sprog)
-            && !sprog.Equals("auto", StringComparison.OrdinalIgnoreCase))
-        {
-            indhold.Add(new StringContent(sprog.Trim()), "language");
-        }
+        // ============ KUN DE SPROG, DEN TAGER IMOD ============
+        //
+        // Voxtral afviser HELE kaldet med 400, hvis sproget ikke er paa dens
+        // liste - og dansk er ikke paa den. Maalt 30-08-2026:
+        //
+        //   Got unsupported language `da`, should be one of: ['ar', 'en',
+        //   'de', 'es', 'fr', 'hi', 'it', 'nl', 'pt', 'zh', 'ru', 'ko', 'ja']
+        //
+        // Modellen KAN skrive dansk ud. Den vil bare ikke have det som
+        // instruks. Saa er svaret ikke at sende det alligevel - saa kommer
+        // der ingen tekst overhovedet.
+        var kanVaelges = Voxtral.Kendes(sprog);
+        if (kanVaelges) indhold.Add(new StringContent(sprog!.Trim().ToLowerInvariant()), "language");
+
+        // ============ LEDETRAADEN, NAAR SPROGET IKKE KAN VAELGES ============
+        //
+        // Prompten er taenkt som forhaandsviden - navne og fagord - men
+        // modellen laeser den ogsaa som en smagsproeve paa sproget. En dansk
+        // saetning forrest traekker udskriften mod dansk.
+        //
+        // Det er en paavirkning, ikke en garanti. Paa et klip paa tre ord er
+        // det til gengaeld forskellen paa dansk og «Alors, alors, alors ?».
+        var dele = new List<string>();
+
+        if (!kanVaelges && Voxtral.Ledetraad(sprog) is { } ledetraad) dele.Add(ledetraad);
 
         var liste = fagord?.Where(o => !string.IsNullOrWhiteSpace(o)).ToList();
-        if (liste is { Count: > 0 })
-            indhold.Add(new StringContent(string.Join(", ", liste), new UTF8Encoding(false)), "prompt");
+        if (liste is { Count: > 0 }) dele.Add(string.Join(", ", liste));
+
+        if (dele.Count > 0)
+            indhold.Add(new StringContent(string.Join(" ", dele), new UTF8Encoding(false)), "prompt");
 
         using var anmodning = new HttpRequestMessage(HttpMethod.Post, Voxtral.Endepunkt)
         {
