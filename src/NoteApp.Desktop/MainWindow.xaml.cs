@@ -813,9 +813,6 @@ public partial class MainWindow : Window
         _moede.VisGenvej(
             kører ? _genvej.Greb.Navn() : null,
             kører ? null : "tastaturvagten kunne ikke sættes i gang");
-
-        Spor.Skriv($"TilslutGenvej: greb={_genvej.Greb.Gem()} ({_genvej.Greb.Navn()}) "
-                   + $"koerer={kører}");
     }
 
     /// <summary>
@@ -1104,9 +1101,6 @@ public partial class MainWindow : Window
         var noegle = Core.Llm.SkyNoegle.Hent() is not null;
 
         _genvej.HoldGiverDiktering = til && noegle;
-
-        Spor.Skriv($"SaetDiktering: DikteringTil={til} noegle={noegle} "
-                          + $"-> hold={_genvej.HoldGiverDiktering}");
     }
 
     /// <summary>
@@ -1675,3 +1669,4 @@ public partial class MainWindow : Window
         }
     }
 }
+

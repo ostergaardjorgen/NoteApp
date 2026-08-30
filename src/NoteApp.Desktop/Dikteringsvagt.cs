@@ -129,7 +129,6 @@ public sealed class Dikteringsvagt : IDisposable
     /// <summary>Tasten er holdt nede længe nok. Begynd at lytte.</summary>
     public void Begynd()
     {
-        Spor.Skriv($"Dikteringsvagt.Begynd: igang={Igang}");
 
         // ============ ET DIKTAT MAA IKKE LIGGE OVEN I ET ANDET ============
         //
@@ -365,4 +364,6 @@ public sealed class Dikteringsvagt : IDisposable
 
     public void Dispose() => Ryd();
 }
+
+
 
