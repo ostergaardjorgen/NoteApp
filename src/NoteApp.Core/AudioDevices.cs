@@ -1,4 +1,4 @@
-using NAudio.CoreAudioApi;
+﻿using NAudio.CoreAudioApi;
 using NAudio.Wave;
 
 namespace NoteApp.Core;
@@ -9,22 +9,16 @@ public sealed record DeviceInfo(string Id, string FriendlyName, bool IsDefault =
     /// Navnet, som det står på skærmen.
     /// </summary>
     /// <remarks>
-    /// HER STOD BARE «(Windows' standard)», OG DET VAR MISVISENDE.
+    /// Windows har TO standardmikrofoner: «Standardenhed» og
+    /// «Standardkommunikationsenhed». Appen læser den FØRSTE — den, der
+    /// sættes i Indstillinger → System → Lyd, og som brugeren derfor kan se.
     ///
-    /// Windows har TO standardmikrofoner, ikke én: «Standardenhed» og
-    /// «Standardkommunikationsenhed». De sættes hvert sit sted, og de er
-    /// sjældent den samme.
-    ///
-    /// Appen bruger kommunikationsenheden — det er den, Windows selv peger
-    /// på til tale. Set 30-08-2026: brugeren havde sat sit headset som
-    /// standardENHED og fik alligevel et andet apparat vist som «Windows'
-    /// standard». Han troede, appen ikke kunne huske hans valg. Den kiggede
-    /// bare på den anden af de to.
-    ///
-    /// Nu står der hvilken.
+    /// Etiketten her betyder altså det samme som fluebenet i Windows' egen
+    /// lydskærm. Stod der noget andet, ville de to modsige hinanden, og det
+    /// gjorde de: se <see cref="AudioDevices.Microphones"/>.
     /// </remarks>
     public string Display => IsDefault
-        ? $"{FriendlyName}  (Windows' standard til tale)"
+        ? $"{FriendlyName}  (Windows' standard)"
         : FriendlyName;
 }
 
@@ -44,7 +38,23 @@ public sealed record DeviceInfo(string Id, string FriendlyName, bool IsDefault =
 public static class AudioDevices
 {
     /// <summary>Alle mikrofoner, Windows kender. Standarden står først.</summary>
-    public static IReadOnlyList<DeviceInfo> Microphones() => Enumerate(DataFlow.Capture, Role.Communications);
+    /// <remarks>
+    /// MULTIMEDIA OG IKKE COMMUNICATIONS — OG DET ER EN RETTELSE.
+    ///
+    /// Windows har to standardmikrofoner. «Standardenhed» sættes i
+    /// Indstillinger → System → Lyd, som er dér, folk går hen.
+    /// «Standardkommunikationsenhed» sættes kun i det gamle kontrolpanel,
+    /// som Windows 11 ikke længere viser vej til.
+    ///
+    /// Appen læste kommunikationsenheden. Set 30-08-2026: brugeren havde sat
+    /// sit headset som standardenhed og fik alligevel et helt andet apparat
+    /// vist som standard. Han troede, appen ikke kunne huske hans valg — og
+    /// der var ingen måde at se, at den kiggede et andet sted hen.
+    ///
+    /// Nu læses den, brugeren faktisk kan se og sætte. Højttalerne har hele
+    /// tiden brugt den samme.
+    /// </remarks>
+    public static IReadOnlyList<DeviceInfo> Microphones() => Enumerate(DataFlow.Capture, Role.Multimedia);
 
     /// <summary>Alle afspilningsenheder. Loopback optages fra den, lyden faktisk går til.</summary>
     public static IReadOnlyList<DeviceInfo> Speakers() => Enumerate(DataFlow.Render, Role.Multimedia);
@@ -122,7 +132,8 @@ public static class AudioDevices
         try
         {
             using var e = new MMDeviceEnumerator();
-            var d = e.GetDefaultAudioEndpoint(DataFlow.Capture, Role.Communications);
+            // Samme rolle som Microphones() - se forklaringen dér.
+            var d = e.GetDefaultAudioEndpoint(DataFlow.Capture, Role.Multimedia);
             return new DeviceInfo(d.ID, d.FriendlyName);
         }
         catch (Exception)
@@ -217,3 +228,4 @@ public static class PeakMeter
     /// <summary>0..1 til en niveaumåler, hvor -60 dBFS er bunden.</summary>
     public static float ToMeterScale(float peak) => Math.Clamp((ToDb(peak) + 60f) / 60f, 0f, 1f);
 }
+
