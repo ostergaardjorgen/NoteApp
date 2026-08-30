@@ -88,6 +88,37 @@ public class OrdbibliotekTest
         "Entra ID", "SCIM", "IAM",
     };
 
+    /// <summary>
+    /// EN APOSTROF DELTE ORDET I TO, OG SAA BLEV DET ALDRIG RETTET.
+    ///
+    /// Maalt 30-08-2026: brugeren sagde «Omada» og fik «O'Mara». Han lagde
+    /// «Omada» i ordbogen, og det hjalp ikke - apostroffen talte ikke med i
+    /// et ord, saa «O'Mara» blev til «O» og «Mara», begge under
+    /// mindstelaengden. Retteren saa dem aldrig.
+    /// </summary>
+    [Fact]
+    public void En_apostrof_forhindrer_ikke_en_rettelse()
+    {
+        var ordbog = new[] { "Omada" };
+
+        var (ud, rettelser) = Ordretter.Ret("vi bruger O'Mara til det", ordbog);
+
+        Assert.Equal("vi bruger Omada til det", ud);
+        Assert.Single(rettelser);
+    }
+
+    [Fact]
+    public void Bindestregen_bliver_staaende()
+    {
+        // «JIT-adgang» er ét ord med en bindestreg i, ikke to. Fjernede vi
+        // den, ville ordbogens egne termer holde op med at ligne sig selv.
+        var ordbog = new[] { "JIT-adgang" };
+
+        var (ud, _) = Ordretter.Ret("vi giver JIT-adgang", ordbog);
+
+        Assert.Equal("vi giver JIT-adgang", ud);
+    }
+
     [Theory]
     [InlineData("Vi bruger Kernesus til det", "Vi bruger Kernesys til det")]
     [InlineData("Det var Norby, der ringede", "Det var Nordby, der ringede")]

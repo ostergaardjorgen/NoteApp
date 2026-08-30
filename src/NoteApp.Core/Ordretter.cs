@@ -118,6 +118,11 @@ public static class Ordretter
             return praecis is not null && praecis != ord ? praecis : null;
         }
 
+        // Der sammenlignes paa bogstaverne. «O'Mara» og «Omada» er ét
+        // bogstavs forskel; med apostroffen med ville de vaere to.
+        var rent = Bogstaver(ord);
+        if (rent.Length < MindsteLaengde) return null;
+
         string? fundet = null;
         var bedste = int.MaxValue;
         var flere = false;
@@ -126,9 +131,9 @@ public static class Ordretter
         {
             // Et ord, der er meget laengere eller kortere, er ikke det samme.
             // Kontrollen sparer ogsaa den dyre udregning.
-            if (Math.Abs(k.Length - ord.Length) > Taerskel(k.Length)) continue;
+            if (Math.Abs(k.Length - rent.Length) > Taerskel(k.Length)) continue;
 
-            var d = Afstand(ord, k, Taerskel(k.Length));
+            var d = Afstand(rent, k, Taerskel(k.Length));
             if (d > Taerskel(k.Length)) continue;
 
             if (d < bedste) { bedste = d; fundet = k; flere = false; }
@@ -181,5 +186,34 @@ public static class Ordretter
         return forrige[b.Length];
     }
 
-    private static bool ErOrdtegn(char c) => char.IsLetterOrDigit(c) || c == '-';
+    /// <summary>
+    /// Hører tegnet med til et ord?
+    /// </summary>
+    /// <remarks>
+    /// APOSTROFFEN SKAL MED, OG DET KOSTEDE EN RETTELSE, DER ALDRIG SKETE.
+    ///
+    /// Målt 30-08-2026: brugeren sagde «Omada» og fik «O'Mara». Han lagde
+    /// «Omada» i ordbogen, og det hjalp ikke. Grunden var her: apostroffen
+    /// talte ikke med i et ord, så «O'Mara» blev delt i «O» og «Mara» — to
+    /// stumper på ét og fire tegn, begge under mindstelængden. Retteren så
+    /// dem aldrig.
+    ///
+    /// Med apostroffen indenfor bliver ordet «O'Mara», og sammenligningen
+    /// sker på bogstaverne alene: «omara» mod «omada» er ét bogstavs
+    /// forskel, og så er det den samme.
+    /// </remarks>
+    private static bool ErOrdtegn(char c) =>
+        char.IsLetterOrDigit(c) || c == '-' || c == '\'' || c == '’';
+
+    /// <summary>
+    /// Ordet uden apostroffer — det, der sammenlignes på.
+    /// </summary>
+    /// <remarks>
+    /// Bindestregen bliver STÅENDE. «JIT-adgang» er ét ord med en bindestreg
+    /// i, ikke to ord — og fjernede vi den, ville ordbogens egne termer holde
+    /// op med at ligne sig selv.
+    /// </remarks>
+    private static string Bogstaver(string ord) =>
+        ord.Replace("'", "", StringComparison.Ordinal)
+           .Replace("’", "", StringComparison.Ordinal);
 }
