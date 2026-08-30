@@ -251,8 +251,20 @@ public sealed class Dikteringsvagt : IDisposable
 
             var ordbog = v.DikteringFagord ? Ordbibliotek.Laes() : new List<string>();
 
+            // ============ SPROGET SKAL MED ============
+            //
+            // Uden det gaetter modellen, og paa et kort klip er der naesten
+            // intet at gaette ud fra. Maalt 30-08-2026: «hallo, hallo, hallo»
+            // paa dansk kom tilbage som «Alors, alors, alors ?» - fransk.
+            // Teksten var ikke forkert hoert; den var hoert paa det forkerte
+            // sprog, og saa er hvert eneste ord forkert.
+            //
+            // MitSprog er dét, brugeren TALER. Null betyder dansk; «auto»
+            // lader modellen gaette som foer.
             var raa = await klient.SkrivUdAsync(
-                klip, ordbog.Count > 0 ? Ordbibliotek.TilAfsendelse(ordbog) : null);
+                klip,
+                ordbog.Count > 0 ? Ordbibliotek.TilAfsendelse(ordbog) : null,
+                v.MitSprog ?? "da");
 
             if (raa.Raa.Length == 0)
             {

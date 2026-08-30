@@ -155,9 +155,28 @@ public sealed class Dikteringsklient
     /// bygget forfra, ellers lærer dikteringen ikke det, transskriptionen
     /// allerede har lært.
     /// </param>
+    /// <param name="sprog">
+    /// Sproget, der bliver talt — «da», «en» og så videre. Tomt eller «auto»
+    /// lader modellen gætte.
+    /// </param>
+    /// <remarks>
+    /// SPROGET SKAL MED, OG DET KOSTEDE EN DIKTERING AT OPDAGE.
+    ///
+    /// Kaldet sendte kun lyden, modellen og ordbogen. Uden et sprog gætter
+    /// Voxtral — og på et kort klip er der næsten intet at gætte ud fra.
+    ///
+    /// Målt 30-08-2026: brugeren sagde «hallo, hallo, hallo» på dansk og fik
+    /// «Alors, alors, alors, alors ?» tilbage. FRANSK. Teksten var ikke
+    /// forkert hørt; den var hørt på det forkerte sprog, og så er hvert
+    /// eneste ord forkert.
+    ///
+    /// Det rammer værst dét, dikteringen bruges mest til: korte sætninger.
+    /// Jo mindre der bliver sagt, jo mindre er der at gætte ud fra.
+    /// </remarks>
     public async Task<Dikteringsresultat> SkrivUdAsync(
         string lydfil,
         IEnumerable<string>? fagord = null,
+        string? sprog = null,
         CancellationToken ct = default)
     {
         if (!File.Exists(lydfil))
@@ -173,6 +192,13 @@ public sealed class Dikteringsklient
 
         indhold.Add(lyd, "file", Path.GetFileName(lydfil));
         indhold.Add(new StringContent(Voxtral.Model), "model");
+
+        // «auto» og tomt betyder: lad modellen gaette. Alt andet siges.
+        if (!string.IsNullOrWhiteSpace(sprog)
+            && !sprog.Equals("auto", StringComparison.OrdinalIgnoreCase))
+        {
+            indhold.Add(new StringContent(sprog.Trim()), "language");
+        }
 
         var liste = fagord?.Where(o => !string.IsNullOrWhiteSpace(o)).ToList();
         if (liste is { Count: > 0 })
@@ -282,9 +308,10 @@ public sealed class Dikteringsklient
         string lydfil,
         Dikteringsformaal formaal = Dikteringsformaal.Note,
         IEnumerable<string>? fagord = null,
+        string? sprog = null,
         CancellationToken ct = default)
     {
-        var raa = await SkrivUdAsync(lydfil, fagord, ct);
+        var raa = await SkrivUdAsync(lydfil, fagord, sprog, ct);
         if (raa.Raa.Length == 0) return ("", raa);
 
         return (await PudsAsync(raa.Raa, formaal, instruktion: null, ct), raa);
@@ -352,3 +379,4 @@ public sealed class Dikteringsklient
 
     private static string Kort(string s) => s.Length <= 400 ? s : s[..400] + "…";
 }
+

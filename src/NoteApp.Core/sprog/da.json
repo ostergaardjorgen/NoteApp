@@ -673,7 +673,10 @@
     "forbrug_maal": "Mål",
     "forbrug_maaler": "Måler i to sekunder …",
     "forbrug_under": "Appen starter andre programmer: ét skriver dine møder ud, ét lytter efter vågeordet. De kan hver især tage flere gigabyte, og de kører uden for appens eget vindue — i Jobliste hedder de ikke HeyPia. Her står de samlet.",
-    "forbrug_hvordan": "Tallene er målt på processerne over to sekunder, ikke skønnet. 100 % betyder én processorkerne fuldt i brug; har maskinen otte kerner, kan der stå mere end 100 %, og det er ikke en fejl. Det er den samme regnemåde som Joblistes, så tallene kan holdes op mod hinanden."
+    "forbrug_hvordan": "Tallene er målt på processerne over to sekunder, ikke skønnet. 100 % betyder én processorkerne fuldt i brug; har maskinen otte kerner, kan der stå mere end 100 %, og det er ikke en fejl. Det er den samme regnemåde som Joblistes, så tallene kan holdes op mod hinanden.",
+    "diktering_sprog": "Sproget, du taler",
+    "diktering_sprog_under": "Sendes med hver diktering, så modellen ikke skal gætte.",
+    "diktering_sprog_hvorfor": "Gætter den forkert, er hvert eneste ord forkert — ikke bare et enkelt. Målt 30-08-2026: «hallo, hallo, hallo» sagt på dansk kom tilbage som «Alors, alors, alors ?». Fransk. Det rammer værst det, dikteringen bruges mest til: korte sætninger, hvor der næsten ingenting er at gætte ud fra."
   },
   "setupwindow": {
     "dine_filer_ligger_her": "Dine filer ligger her",

@@ -222,6 +222,9 @@ public partial class SettingsView : UserControl
     // ============================ DIKTERING ============================
 
     /// <summary>Et formaal, som det staar i listen.</summary>
+    /// <summary>Ét sprog i rullelisten under Diktering.</summary>
+    private sealed record Sprogvalg(string Kode, string Navn);
+
     private sealed record Formaalsvalg(Dikteringsformaal Vaerdi, string Navn);
 
     private bool _dikteringIndlaest;
@@ -242,6 +245,27 @@ public partial class SettingsView : UserControl
         try
         {
             var v = AppSettings.Current;
+
+            // ============ SPROGET, DU TALER ============
+            //
+            // Samme liste som moederne bruger. «Lad appen finde selv» er med,
+            // men den er ikke standarden: uden et sprog gaetter modellen, og
+            // paa et kort klip er der naesten intet at gaette ud fra.
+            //
+            // Maalt 30-08-2026: «hallo, hallo, hallo» paa dansk kom tilbage
+            // som «Alors, alors, alors ?». Fransk.
+            DikteringSprog.ItemsSource = Transcribe.SprogvalgWindow.Sprog
+                .Select(s => new { s.Kode, s.Navn })
+                .ToList();
+
+            var mit = v.MitSprog ?? "da";
+            DikteringSprog.SelectedItem = Transcribe.SprogvalgWindow.Sprog
+                .Select(s => s.Kode)
+                .Contains(mit)
+                    ? ((IEnumerable<Sprogvalg>)DikteringSprog.ItemsSource)
+                        .FirstOrDefault(s => s.Kode == mit)
+                    : ((IEnumerable<Sprogvalg>)DikteringSprog.ItemsSource)
+                        .FirstOrDefault(s => s.Kode == "da");
 
             DikteringTil.IsChecked = v.DikteringTil;
             DikteringPuds.IsChecked = v.DikteringPuds;
@@ -303,6 +327,14 @@ public partial class SettingsView : UserControl
         if (DikteringLoft.SelectedItem is int minutter) v.DikteringLoftMinutter = minutter;
         if (DikteringFormaal.SelectedItem is Formaalsvalg f) v.DikteringFormaal = f.Vaerdi.ToString();
 
+        // Sproget, brugeren TALER. Det sendes med hver diktering, saa modellen
+        // ikke skal gaette paa et klip, der maaske er tre ord langt.
+        if (DikteringSprog.SelectedItem is not null)
+        {
+            var kode = (string)((dynamic)DikteringSprog.SelectedItem).Kode;
+            v.MitSprog = kode;
+        }
+
         v.Save();
 
         // Genvejen skal vide det MED DET SAMME. Ellers skal appen genstartes,
@@ -327,6 +359,8 @@ public partial class SettingsView : UserControl
     private void DikteringLoft_Valgt(object sender, SelectionChangedEventArgs e) => GemDiktering();
 
     private void DikteringFormaal_Valgt(object sender, SelectionChangedEventArgs e) => GemDiktering();
+
+    private void DikteringSprog_Valgt(object sender, SelectionChangedEventArgs e) => GemDiktering();
 
     /// <summary>
     /// Kører velkomstforløbet igen.
@@ -2049,4 +2083,6 @@ public partial class SettingsView : UserControl
         Process.Start(new ProcessStartInfo("explorer.exe", $"\"{sti}\"") { UseShellExecute = true });
     }
 }
+
+
 

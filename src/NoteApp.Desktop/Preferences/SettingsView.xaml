@@ -640,6 +640,40 @@
               </StackPanel>
             </Border>
 
+            <!-- ======================== Sproget, DU taler ========================
+
+                 DET SKAL VÆLGES, OG DET SKAL STÅ HØJT PÅ SIDEN.
+
+                 Uden et sprog gætter modellen. På et kort klip er der næsten
+                 intet at gætte ud fra, og gætter den forkert, er hvert eneste
+                 ord forkert — ikke bare et enkelt.
+
+                 Målt 30-08-2026: «hallo, hallo, hallo» sagt på dansk kom
+                 tilbage som «Alors, alors, alors ?». Fransk.
+
+                 Og man VED altid, hvilket sprog man selv dikterer på. Det er
+                 ens egen stemme; der er ikke noget at gætte om. -->
+            <Border Background="{DynamicResource Panel}" CornerRadius="10" Padding="20" Margin="0,0,0,14"
+                    BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
+              <StackPanel>
+                <TextBlock Text="{i18n:Oversat settingsview.diktering_sprog}" FontSize="15" FontWeight="SemiBold" />
+                <TextBlock Style="{StaticResource Underskrift}" Margin="0,3,0,10" TextWrapping="Wrap"
+                           Text="{i18n:Oversat settingsview.diktering_sprog_under}" />
+
+                <ComboBox x:Name="DikteringSprog" Width="240" HorizontalAlignment="Left"
+                          SelectionChanged="DikteringSprog_Valgt">
+                  <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                      <TextBlock Text="{Binding Navn}" />
+                    </DataTemplate>
+                  </ComboBox.ItemTemplate>
+                </ComboBox>
+
+                <TextBlock Style="{StaticResource Underskrift}" Margin="0,12,0,0" TextWrapping="Wrap"
+                           Text="{i18n:Oversat settingsview.diktering_sprog_hvorfor}" />
+              </StackPanel>
+            </Border>
+
             <!-- ============================ Laengste diktering ============================ -->
             <Border Background="{DynamicResource Panel}" CornerRadius="10" Padding="20" Margin="0,0,0,14"
                     BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">

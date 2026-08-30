@@ -705,7 +705,10 @@
     "forbrug_maal": "Measure",
     "forbrug_maaler": "Measuring for two seconds …",
     "forbrug_under": "The app starts other programs: one writes out your meetings, one listens for the wake word. Each can take several gigabytes, and they run outside the app’s own window — in Task Manager they are not called HeyPia. Here they are gathered in one place.",
-    "forbrug_hvordan": "The figures are measured on the processes over two seconds, not estimated. 100 % means one processor core fully in use; on a machine with eight cores it can read more than 100 %, and that is not an error. It is the same calculation Task Manager uses, so the numbers can be compared."
+    "forbrug_hvordan": "The figures are measured on the processes over two seconds, not estimated. 100 % means one processor core fully in use; on a machine with eight cores it can read more than 100 %, and that is not an error. It is the same calculation Task Manager uses, so the numbers can be compared.",
+    "diktering_sprog": "The language you speak",
+    "diktering_sprog_under": "Sent with every dictation, so the model does not have to guess.",
+    "diktering_sprog_hvorfor": "If it guesses wrong, every single word is wrong — not just one. Measured 30-08-2026: «hallo, hallo, hallo» spoken in Danish came back as «Alors, alors, alors ?». French. It hits hardest what dictation is used for most: short sentences, where there is almost nothing to guess from."
   },
   "complianceview": {
     "aabner_console_mistral_ai_hvor_du_slaar_tr": "Opens console.mistral.ai, where you turn training off",
