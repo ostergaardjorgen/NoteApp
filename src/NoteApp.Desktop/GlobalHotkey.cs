@@ -256,6 +256,21 @@ public sealed class GlobalHotkey : IDisposable
             _registreret = true;
             Aktiv = valg;
 
+            // ============ TVILLINGEN SKAL MED HER OGSAA ============
+            //
+            // Den blev kun registreret for en tast, brugeren SELV havde
+            // trykket - ikke for en fra listen. Faldt appen tilbage til
+            // «Ctrl+, (taltastatur)», holdt genvejen derfor op med at virke i
+            // det oejeblik nogen roerte NumLock: den samme finger sender 0x6E
+            // med NumLock til og 0x2E (Delete) med den fra.
+            //
+            // Det er den samme fejl som i den anden gren, bare et andet sted.
+            // Set 30-08-2026.
+            var tv = Genvejstast.Tvillingen(valg.Key);
+            _tvilling = tv != 0
+                        && !systemtaget.Contains((valg.Modifiers, tv))
+                        && RegisterHotKey(_håndtag, TvillingId, valg.Modifiers | MOD_NOREPEAT, tv);
+
             Bemærkning = valg.Navn == spærret ? null
                 : spærret is not null && (ønsket is null || ønsket.Navn == spærret)
                     ? $"{spærret} bruger Windows selv til at skifte tastatursprog — bruger {valg.Navn} i stedet"
