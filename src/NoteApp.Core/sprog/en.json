@@ -239,7 +239,7 @@
     "transskriptionen_laves_af_whisper_som_koer": "The transcription is done by Whisper, which runs on your own machine. The engine and a language model must be downloaded once. The download only pulls down — nothing is sent from your PC along the way.",
     "velkommen": "Welcome",
     "lyd_overskrift": "Audio",
-    "lyd_under": "The microphone is used for your own words — both when recording a meeting and when dictating. If you do not choose one here, the app takes whatever Windows points at, and that is not always the one in front of you.",
+    "lyd_under": "The microphone is used for your own words — both when recording a meeting and when dictating. If you do not choose one here, the app takes the one Windows points at for SPEECH — which is not always the same as the Windows default device. The two are set in different places. Choose yours here and you need not think about it.",
     "mikrofon": "Microphone",
     "hoejttaler": "Speaker",
     "hoejttaler_under": "The speaker is recorded as a second track, so the others in the meeting make it into the transcript. Nothing is played through it.",

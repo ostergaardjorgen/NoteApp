@@ -689,7 +689,7 @@
     "transskriptionen_laves_af_whisper_som_koer": "Transskriptionen laves af Whisper, som kører på din egen maskine. Motoren og en sprogmodel skal hentes én gang. Selve hentningen henter kun ned — der sendes intet fra din pc undervejs.",
     "velkommen": "Velkommen",
     "lyd_overskrift": "Lyd",
-    "lyd_under": "Mikrofonen bruges til dine egne ord — både når du optager et møde og når du dikterer. Vælges den ikke her, tager appen den, Windows peger på, og det er ikke altid den, du sidder med.",
+    "lyd_under": "Mikrofonen bruges til dine egne ord — både når du optager et møde og når du dikterer. Vælges den ikke her, tager appen den, Windows peger på til TALE — og det er ikke altid den samme som Windows’ standardenhed. De to sættes hvert sit sted. Vælg din her, så er du fri for at tænke på det.",
     "mikrofon": "Mikrofon",
     "hoejttaler": "Højttaler",
     "hoejttaler_under": "Højttaleren optages som andet spor, så de andre i mødet kommer med i udskriften. Der afspilles intet gennem den.",

@@ -5,7 +5,27 @@ namespace NoteApp.Core;
 
 public sealed record DeviceInfo(string Id, string FriendlyName, bool IsDefault = false)
 {
-    public string Display => IsDefault ? $"{FriendlyName}  (Windows' standard)" : FriendlyName;
+    /// <summary>
+    /// Navnet, som det står på skærmen.
+    /// </summary>
+    /// <remarks>
+    /// HER STOD BARE «(Windows' standard)», OG DET VAR MISVISENDE.
+    ///
+    /// Windows har TO standardmikrofoner, ikke én: «Standardenhed» og
+    /// «Standardkommunikationsenhed». De sættes hvert sit sted, og de er
+    /// sjældent den samme.
+    ///
+    /// Appen bruger kommunikationsenheden — det er den, Windows selv peger
+    /// på til tale. Set 30-08-2026: brugeren havde sat sit headset som
+    /// standardENHED og fik alligevel et andet apparat vist som «Windows'
+    /// standard». Han troede, appen ikke kunne huske hans valg. Den kiggede
+    /// bare på den anden af de to.
+    ///
+    /// Nu står der hvilken.
+    /// </remarks>
+    public string Display => IsDefault
+        ? $"{FriendlyName}  (Windows' standard til tale)"
+        : FriendlyName;
 }
 
 /// <summary>
