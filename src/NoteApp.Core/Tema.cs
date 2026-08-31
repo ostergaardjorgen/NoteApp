@@ -60,6 +60,7 @@ public static class Tema
         "Accent", "Optager", "Godkendt", "Advarsel", "FejlTekst",
         "PaaAccent", "PaaOptager",
         "AccentFlade", "GodkendtFlade", "AdvarselFlade", "FejlFlade",
+        "OptagerFlade",
         "Dokument", "Fremhaev", "PaaFremhaev"
     };
 
@@ -128,6 +129,9 @@ public static class Tema
             ["AdvarselFlade"] = "#FFF7ECD1",
             ["FejlFlade"]     = "#FFF8E6E5",
 
+            // Fladen bag «der optages nu». Se Optager.
+            ["OptagerFlade"]  = "#FFFBE4E5",
+
             // Et dokument er ikke en udskrift og ikke en note. Den lilla er
             // det eneste sted i appen, farven BETYDER noget andet end
             // "godt/pas paa/galt" - og den skal derfor kunne skelnes fra
@@ -190,6 +194,7 @@ public static class Tema
             ["GodkendtFlade"] = "#FF09473A",
             ["AdvarselFlade"] = "#FF523B0F",
             ["FejlFlade"]     = "#FF5F0B0D",
+            ["OptagerFlade"]  = "#FF4A1416",
 
             ["Dokument"]    = "#FFCB90F0",
             ["Fremhaev"]    = "#FFF4CB23",

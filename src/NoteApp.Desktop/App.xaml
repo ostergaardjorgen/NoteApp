@@ -83,6 +83,9 @@
     <SolidColorBrush x:Key="AdvarselFlade" Color="#FF523B0F" />
     <SolidColorBrush x:Key="FejlFlade"     Color="#FF5F0B0D" />
 
+    <!-- Fladen bag «der optages nu». Se DiktatBjaelke. -->
+    <SolidColorBrush x:Key="OptagerFlade"  Color="#FF4A1416" />
+
     <!-- Dokumenter, og det, en soegning har fundet. Se Tema.cs. -->
     <SolidColorBrush x:Key="Dokument"      Color="#FFCB90F0" />
     <SolidColorBrush x:Key="Fremhaev"      Color="#FFF4CB23" />

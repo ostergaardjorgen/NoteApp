@@ -146,15 +146,29 @@ public sealed class Foroptager : IDisposable
     /// Hvorfor skærer du noget? Hej Pia. Skærer du noget nu». Vågeordet står
     /// MIDT i teksten, og alt før det er noget, der blev sagt til en anden.
     ///
-    /// Fire sekunder er nok, fordi vågeordet udløser KORT efter, det er
-    /// sagt: motoren bedømmer først, når man holder pause, og bedømmer de
-    /// sidste halvandet sekund. Er der gået længere, var det ikke vågeordet,
-    /// den hørte — så udløste den slet ikke.
+    /// FIRE SEKUNDER VAR FOR LIDT. Tallet blev sat ud fra en antagelse om, at
+    /// vågeordet udløser kort efter, det er sagt. Det holder, når motoren
+    /// bedømmer tit — men hvor tit den gør det, afhænger af, hvornår den
+    /// mener, man er holdt op med at tale, og det er ikke noget, appen styrer.
+    ///
+    /// Brugerens note 31-08-2026: «lyden ser ikke ud til at blive optaget før
+    /// senere, når optagelsen er gået i gang». Kommer udløsningen fem eller
+    /// otte sekunder efter «Hej Pia», er de første ord for længst faldet ud
+    /// af det, der tages med — og så mangler de, uden at noget siger det.
+    ///
+    /// Ti sekunder dækker de udløsninger, der er målt. Det er stadig langt
+    /// mindre end ringens femten, så en samtale, der lå og kørte i rummet
+    /// inden, kommer ikke med i sin helhed.
+    ///
+    /// DEN RIGTIGE LØSNING ER IKKE ET TAL. Det, der skal med, er DEN YTRING,
+    /// vågeordet stod i — ikke et fast antal sekunder. Skæres der i stedet
+    /// fra det sidste ophold før vågeordet, er svaret rigtigt, uanset hvor
+    /// længe udløsningen tog. Se roadmappen.
     ///
     /// Det, der kommer EFTER, tages med uanset længde. Det er dét, man
     /// dikterer.
     /// </remarks>
-    public const double Bagudsekunder = 4.0;
+    public const double Bagudsekunder = 10.0;
 
     /// <summary>
     /// Vågeordet er hørt: behold de sidste sekunder — og alt hvad der kommer
