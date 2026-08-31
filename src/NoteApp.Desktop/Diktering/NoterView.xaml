@@ -65,55 +65,72 @@
               <DataTemplate>
                 <Border Background="{DynamicResource Trykket}" CornerRadius="8" Padding="14,11"
                         Margin="0,0,0,8" BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
-                  <Grid>
-                    <Grid.ColumnDefinitions>
-                      <ColumnDefinition Width="*" />
-                      <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
 
-                    <StackPanel Grid.Column="0">
-                      <TextBlock Text="{Binding Naar}" FontSize="11"
-                                 Foreground="{DynamicResource TekstMeget}" />
-                      <TextBlock Text="{Binding Tekst}" FontSize="13" TextWrapping="Wrap"
-                                 LineHeight="20" Margin="0,5,0,0" />
-                    </StackPanel>
+                  <!-- ============ TEKSTEN FYLDER BREDDEN ============
 
-                    <StackPanel Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Top">
+                       Foerste udgave satte knapperne i en kolonne ved siden af
+                       teksten. Knapperne bar de lange navne fra indstillingerne
+                       - «Note - taet paa det, du sagde, kun ryddet op» - og de
+                       fire af dem pressede tekstkolonnen ned i NUL bredde. Der
+                       stod et tidspunkt og noget vaerktoej, og ikke et ord af
+                       det, noten faktisk indeholdt. Set 31-08-2026.
+
+                       Derfor ligger alt nu i raekker: teksten faar hele
+                       bredden, og knapperne kan ikke tage den fra den. -->
+                  <StackPanel>
+
+                    <Grid>
+                      <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding Naar}" FontSize="11"
+                                   Foreground="{DynamicResource TekstMeget}" />
+                        <Border Background="{DynamicResource Panel}" CornerRadius="4" Margin="8,0,0,0"
+                                Padding="6,1" VerticalAlignment="Center">
+                          <TextBlock Text="{Binding Form}" FontSize="10.5" FontWeight="SemiBold"
+                                     Foreground="{DynamicResource TekstSvag}" />
+                        </Border>
+                      </StackPanel>
+
                       <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                         <Button Content="{i18n:Oversat noter.kopier}" Padding="12,6" Margin="0,0,6,0"
                                 Click="Kopier_Klik" Tag="{Binding}" />
                         <Button Content="{i18n:Oversat faelles.slet}" Padding="12,6"
                                 Click="Slet_Klik" Tag="{Binding}" />
                       </StackPanel>
+                    </Grid>
 
-                      <!-- ============ DEN SAMME TALE, EN ANDEN FORM ============
+                    <TextBlock Text="{Binding Tekst}" FontSize="13" TextWrapping="Wrap"
+                               LineHeight="20" Margin="0,9,0,0" />
 
-                           Der skrives om fra den RÅ udskrift, ikke fra teksten
-                           ved siden af. Pudsningen har allerede kastet
-                           fyldordene væk og valgt en form; en omskrivning af
-                           en omskrivning driver længere og længere væk fra
-                           det, der faktisk blev sagt. -->
-                      <StackPanel x:Name="Typer" Orientation="Horizontal" Margin="0,8,0,0"
-                                  HorizontalAlignment="Right"
-                                  Visibility="{Binding KanSkifte}">
-                        <TextBlock Text="{i18n:Oversat noter.skift}" VerticalAlignment="Center"
-                                   FontSize="11.5" Margin="0,0,8,0"
-                                   Foreground="{DynamicResource TekstMeget}" />
-                        <Button Content="{i18n:Oversat settingsview.diktering_formaal_note}"
-                                Padding="9,4" Margin="0,0,4,0" FontSize="11.5"
-                                Click="Skift_Klik" Tag="{Binding}" CommandParameter="Note" />
-                        <Button Content="{i18n:Oversat settingsview.diktering_formaal_mail}"
-                                Padding="9,4" Margin="0,0,4,0" FontSize="11.5"
-                                Click="Skift_Klik" Tag="{Binding}" CommandParameter="Mail" />
-                        <Button Content="{i18n:Oversat settingsview.diktering_formaal_prompt}"
-                                Padding="9,4" Margin="0,0,4,0" FontSize="11.5"
-                                Click="Skift_Klik" Tag="{Binding}" CommandParameter="Prompt" />
-                        <Button Content="{i18n:Oversat settingsview.diktering_formaal_opgave}"
-                                Padding="9,4" FontSize="11.5"
-                                Click="Skift_Klik" Tag="{Binding}" CommandParameter="Opgave" />
-                      </StackPanel>
+                    <!-- ============ DEN SAMME TALE, EN ANDEN FORM ============
+
+                         Der skrives om fra den RAA udskrift, ikke fra teksten
+                         ovenfor. Pudsningen har allerede kastet fyldordene vaek
+                         og valgt en form; en omskrivning af en omskrivning
+                         driver laengere og laengere vaek fra det, der faktisk
+                         blev sagt.
+
+                         KNAPPERNE BAERER KORTE NAVNE. De lange hoerer hjemme i
+                         indstillingerne, hvor der er plads til at forklare
+                         forskellen. Her skal de kunne staa paa en linje. -->
+                    <StackPanel Orientation="Horizontal" Margin="0,11,0,0"
+                                Visibility="{Binding KanSkifte}">
+                      <TextBlock Text="{i18n:Oversat noter.skift}" VerticalAlignment="Center"
+                                 FontSize="11.5" Margin="0,0,8,0"
+                                 Foreground="{DynamicResource TekstMeget}" />
+                      <Button Content="{i18n:Oversat noter.type_note}"
+                              Padding="10,4" Margin="0,0,5,0" FontSize="11.5"
+                              Click="Skift_Klik" Tag="{Binding}" CommandParameter="Note" />
+                      <Button Content="{i18n:Oversat noter.type_mail}"
+                              Padding="10,4" Margin="0,0,5,0" FontSize="11.5"
+                              Click="Skift_Klik" Tag="{Binding}" CommandParameter="Mail" />
+                      <Button Content="{i18n:Oversat noter.type_prompt}"
+                              Padding="10,4" Margin="0,0,5,0" FontSize="11.5"
+                              Click="Skift_Klik" Tag="{Binding}" CommandParameter="Prompt" />
+                      <Button Content="{i18n:Oversat noter.type_opgave}"
+                              Padding="10,4" FontSize="11.5"
+                              Click="Skift_Klik" Tag="{Binding}" CommandParameter="Opgave" />
                     </StackPanel>
-                  </Grid>
+                  </StackPanel>
                 </Border>
               </DataTemplate>
             </ItemsControl.ItemTemplate>

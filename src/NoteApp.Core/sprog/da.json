@@ -161,7 +161,7 @@
     "andre_integrationer": "Andre integrationer",
     "ansvaret_for_at_anvendelsen_af_programmet": "Ansvaret for, at anvendelsen af programmet er i overensstemmelse med databeskyttelsesforordningen og øvrig gældende ret — herunder rollefordelingen som dataansvarlig, behandlingsgrundlag, oplysningspligt og fortegnelse over behandlingsaktiviteter — påhviler alene brugeren som dataansvarlig. Der påtages intet ansvar for direkte eller indirekte tab som følge af, at oplysningerne under «Compliance» lægges til grund.",
     "ansvarsfraskrivelse": "ANSVARSFRASKRIVELSE",
-    "antallet_af_tokens_kommer_fra_leverandoere": "Antallet af tokens kommer fra leverandøren og er det, der faktureres. Prisen herover er derimod et skøn: den er regnet ud fra listeprisen på Mistrals prisside, som er noteret i dollar. Kronebeløbet bruger en fast kurs på 6,50 kr./USD — ikke en dagskurs.",
+    "antallet_af_tokens_kommer_fra_leverandoere": "Antallet af tokens kommer fra leverandøren og er det, der faktureres. Prisen herover er derimod et skøn: den er regnet ud fra listeprisen på Mistrals prisside. Afregningen sker i euro, og kronebeløbet bruger en fast kurs på 7,46 kr./EUR — ikke en dagskurs.",
     "appen_kan_kun_kalde_det_europaeiske_endepu": "Appen kan kun kalde det europæiske endepunkt. Det er spærret i koden, ikke en indstilling.",
     "bliver_paa_denne_pc": "Bliver på denne pc",
     "bortset_fra_google_skelner_listen_ikke_mel": "Bortset fra Google skelner listen ikke mellem endepunkter, kun mellem produkter. At bruge det europæiske endepunkt fjerner altså ikke i sig selv et navn fra listen — og databehandleraftalen opdeler dem heller ikke.",
@@ -214,7 +214,7 @@
     "hvad_det_betyder_i_praksis_loesningen_er_e": "Hvad det betyder i praksis: løsningen er et velbegrundet valg, og den er bedre stillet end en amerikansk tjeneste. Men den er ikke en efterprøvet garanti for, at data bliver i Europa — og den forskel skal frem, INDEN nogen skriver det i et tilbud. Vil du kunne stå på mål for det, skal leverandøren bekræfte det skriftligt.",
     "hvem_der_talte_kan_hoeres_ogsaa_naar_navne": "Hvem der talte, kan høres, også når navnet aldrig bliver sagt. Dertil kommer tonefald, tøven, accent og ting om helbred og sindstilstand, som ingen har sagt højt. Intet af det følger med en transkription.",
     "hver_gang_noget_forlader_maskinen_bogfoere": "Hver gang noget forlader maskinen, bogføres det her: tidspunkt, adresse, model, hvor mange tegn der gik, hvad det kostede — og en kontrolsum af de nøjagtige bytes. Også når kaldet fejler; en fejlet afsendelse har stadig sendt.",
-    "hvilken_valuta_mistral_rent_faktisk_faktur": "Hvilken valuta Mistral rent faktisk fakturerer i, og om der lægges moms oveni, er ikke efterprøvet. Skal tallet bruges til bogføring, så tag det fra fakturaen — ikke herfra.",
+    "hvilken_valuta_mistral_rent_faktisk_faktur": "Om der lægges moms oveni på fakturaen, er ikke efterprøvet. Skal tallet bruges til bogføring, så tag det fra fakturaen — ikke herfra.",
     "hvor_data_gaar_hen": "HVOR DATA GÅR HEN",
     "hvor_data_gaar_hen_2": "Hvor data går hen",
     "hvor_dine_data_gaar_hen_hvem_der_kan_roere": "Hvor dine data går hen, hvem der kan røre dem, og hvilke licenser der følger med. Kort sagt: grænsen går ved transkriptionen — lyden og teksten bliver på maskinen, og alt derefter sker hos Mistral.",
@@ -704,7 +704,9 @@
     "vaageord": "Lyt efter «Hej Pia»",
     "vaageord_under": "Så kan en diktering startes uden at røre tastaturet. Sig «Hej Pia» og tal videre — teksten lander, hvor markøren står.",
     "vaageord_privatliv": "Lytningen sker på din egen pc. Der sendes intet, mens den lytter — hverken lyd eller tekst. Det, mikrofonen hører, findes kun i hukommelsen, indtil det er afgjort, om ordet blev sagt. Der skrives ingen lydfil, og der føres ingen log. Er skærmen låst, eller kører der en optagelse, lyttes der ikke.",
-    "kan_altid_aendres": "Alt her kan laves om senere under Indstillinger — og hele forløbet kan køres igen samme sted."
+    "kan_altid_aendres": "Alt her kan laves om senere under Indstillinger — og hele forløbet kan køres igen samme sted.",
+    "navn_overskrift": "Dit navn",
+    "navn_under": "Bruges, når en diktering laves om til en mail, så den kan underskrives. Lader du feltet stå tomt, skrives der ingen underskrift."
   },
   "skysetupwindow": {
     "det_skal_du_selv_soerge_for": "Det skal du selv sørge for",
@@ -932,7 +934,8 @@
     "ingen_mikrofon": "Der er ingen mikrofon. Tilslut en, eller vælg en under Indstillinger → Lyd.",
     "lytter_paa_reserve": "Lytter på {0} — den mikrofon, du har valgt, er ikke tilsluttet lige nu.",
     "mikrofon_svarede_ikke": "{0} svarede ikke: {1}. Prøv en anden under Indstillinger → Lyd.",
-    "fane_noter": "Noter"
+    "fane_noter": "Noter",
+    "fane_indstillinger": "Indstillinger"
   },
   "ordbogview": {
     "ordbog": "Ordbog",
@@ -1032,7 +1035,11 @@
     "skift": "Vis som",
     "skift_under": "Den samme tale, skrevet på en anden måde. Der skrives om fra den rå udskrift, ikke fra teksten ovenfor — ellers ville hver omskrivning drive længere væk fra det, du faktisk sagde.",
     "skift_kan_ikke": "Denne note er fra før den rå udskrift blev gemt med, så den kan ikke skrives om.",
-    "skifter": "Skriver om …"
+    "skifter": "Skriver om …",
+    "type_note": "Note",
+    "type_mail": "Mail",
+    "type_prompt": "Prompt",
+    "type_opgave": "Opgave"
   },
   "lytteboble": {
     "pause": "Sæt lytningen på pause",

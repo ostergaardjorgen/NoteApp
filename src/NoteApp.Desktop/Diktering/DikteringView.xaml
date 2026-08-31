@@ -1,4 +1,4 @@
-<UserControl x:Class="NoteApp.Desktop.Diktering.DikteringView"
+﻿<UserControl x:Class="NoteApp.Desktop.Diktering.DikteringView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:i18n="clr-namespace:NoteApp.Desktop"
@@ -38,6 +38,12 @@
 
     <TabItem Header="{i18n:Oversat diktering.fane_kommandoer}" Style="{StaticResource Fane}">
       <d:KommandoerView />
+    </TabItem>
+
+    <!-- INDSTILLINGERNE STAAR SIDST. De laa under Indstillinger foer, og det
+         var ét sted for meget: alt andet om diktering laa allerede her. -->
+    <TabItem Header="{i18n:Oversat diktering.fane_indstillinger}" Style="{StaticResource Fane}">
+      <d:IndstillingerView />
     </TabItem>
 
   </TabControl>

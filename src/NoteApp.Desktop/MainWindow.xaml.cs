@@ -391,7 +391,7 @@ public partial class MainWindow : Window
 
             // Genvejen skal vide det med det samme, naar fanen aendrer det -
             // ellers skulle appen genstartes, foer et hold betoed noget.
-            Preferences.SettingsView.Dikteringsskift = _ =>
+            Diktering.IndstillingerView.Dikteringsskift = _ =>
                 Dispatcher.BeginInvoke(SaetDiktering);
 
             // Klappen skal saettes EFTER skabelonen er bygget: pilen findes

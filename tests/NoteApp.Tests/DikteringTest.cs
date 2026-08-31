@@ -1,4 +1,4 @@
-using NoteApp.Core.Llm;
+﻿using NoteApp.Core.Llm;
 using Xunit;
 
 namespace NoteApp.Tests;
@@ -95,10 +95,16 @@ public class DikteringTest
     {
         // En sprogmodel, der faar lov, skriver en indledning, du ikke har sagt
         // - og i en mail, du sender videre, staar din underskrift under den.
+        //
+        // FORBUDDET LAA I HVER ENKELT INSTRUKTION FOER. Det holdt ikke: mail-
+        // instruktionen bad samtidig om en indledning og en afslutning, og
+        // saa blev formen fyldt ud med en opdigtet opgaveliste. Nu staar
+        // reglen ét sted og saettes foran dem alle - se Voxtral.Grundregel.
         var p = Voxtral.Pudseprompt(formaal);
 
-        Assert.Contains("Tilføj intet", p);
-        Assert.Contains("rå udskrift", p);
+        Assert.StartsWith(Voxtral.Grundregel, p);
+        Assert.Contains("må ikke tilføje oplysninger", p);
+        Assert.Contains("RÅ UDSKRIFT ER DEN ENESTE KILDE", p);
     }
 
     [Fact]
@@ -108,7 +114,7 @@ public class DikteringTest
         // foelger opgaven. Giver to formaal samme instruktion, er der en, der
         // ikke virker - og det ses ikke paa teksten, foer den er sendt.
         var alle = Enum.GetValues<Dikteringsformaal>()
-                       .Select(Voxtral.Pudseprompt)
+                       .Select(f => Voxtral.Pudseprompt(f))
                        .ToList();
 
         Assert.Equal(alle.Count, alle.Distinct().Count());

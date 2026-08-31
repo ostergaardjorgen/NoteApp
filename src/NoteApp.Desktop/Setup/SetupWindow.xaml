@@ -79,8 +79,23 @@
                   VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
       <StackPanel>
 
-        <!-- ============================ lyden ============================ -->
+        <!-- ============================ navnet ============================
+
+             DET SPOERGES OM HER OG IKKE BAGEFTER. Uden navnet skrev
+             pudsningen «[Dit navn]» under en dikteret mail. Feltet maa gerne
+             staa tomt - saa skrives der slet ingen underskrift. -->
         <Border Background="{DynamicResource Panel}" CornerRadius="10" Padding="20"
+                BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
+          <StackPanel>
+            <TextBlock Text="{i18n:Oversat setupwindow.navn_overskrift}" FontSize="15" FontWeight="SemiBold" />
+            <TextBlock Style="{StaticResource Underskrift}" Margin="0,6,0,14" TextWrapping="Wrap"
+                       Text="{i18n:Oversat setupwindow.navn_under}" />
+            <TextBox x:Name="OpsNavn" MaxLength="80" LostFocus="Navn_Forladt" />
+          </StackPanel>
+        </Border>
+
+        <!-- ============================ lyden ============================ -->
+        <Border Background="{DynamicResource Panel}" CornerRadius="10" Padding="20" Margin="0,14,0,0"
                 BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
           <StackPanel>
             <TextBlock Text="{i18n:Oversat setupwindow.lyd_overskrift}" FontSize="15" FontWeight="SemiBold" />

@@ -16,7 +16,17 @@ public partial class NoterView : UserControl
     /// <summary>Kaldes, når der er kommet eller forsvundet en note.</summary>
     public static Action? Aendret;
 
-    private sealed record Visning(string Naar, string Tekst, Diktatnote Note, Visibility KanSkifte);
+    private sealed record Visning(
+        string Naar, string Tekst, string Form, Diktatnote Note, Visibility KanSkifte);
+
+    /// <summary>Formen som et kort navn, saa man kan se, hvad noten er nu.</summary>
+    private static string Form(string? formaal) => formaal switch
+    {
+        "Mail" => Sprog.T("noter.type_mail"),
+        "Prompt" => Sprog.T("noter.type_prompt"),
+        "Opgave" => Sprog.T("noter.type_opgave"),
+        _ => Sprog.T("noter.type_note"),
+    };
 
     public NoterView()
     {
@@ -45,7 +55,7 @@ public partial class NoterView : UserControl
 
         Liste.ItemsSource = noter
             .Select(n => new Visning(
-                Naar(n.Tid), n.Tekst, n,
+                Naar(n.Tid), n.Tekst, Form(n.Formaal), n,
                 n.KanSkiftes ? Visibility.Visible : Visibility.Collapsed))
             .ToList();
 

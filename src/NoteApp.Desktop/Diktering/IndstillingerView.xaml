@@ -1,0 +1,186 @@
+﻿<UserControl x:Class="NoteApp.Desktop.Diktering.IndstillingerView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:i18n="clr-namespace:NoteApp.Desktop"
+             Background="Transparent">
+
+  <!-- DIKTERINGENS EGNE INDSTILLINGER.
+
+       DE LAA UNDER INDSTILLINGER FOER. Det var et forkert sted: alt andet om
+       diktering - noterne, proeverummet, teksttyperne, ordbogen og
+       kommandoerne - laa allerede her, og saa skulle man alligevel forbi en
+       anden skaerm for at slaa den til eller vaelge sprog. Flyttet 31-08-2026.
+
+       HER SENDES DIN EGEN STEMME UD AF HUSET, og det staar oeverst frem for
+       nede ved kontakten. Moedernes lyd bliver paa maskinen; det gaelder ikke
+       det, du selv dikterer, og forskellen skal vaere til at se, FOER man
+       slaar noget til. -->
+
+  <Grid Margin="4,10,4,4">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="*" />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+
+    <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+      <StackPanel>
+
+        <TextBlock Style="{StaticResource Underskrift}" TextWrapping="Wrap" MaxWidth="700"
+                   HorizontalAlignment="Left" Margin="0,0,0,14"
+                   Text="{i18n:Oversat settingsview.diktering_intro}" />
+
+        <!-- Graensen for lyden. Staar med accentkant, fordi den er
+             forskellen paa det, der bliver, og det, der sendes. -->
+        <Border Background="{DynamicResource AccentFlade}" CornerRadius="10" Padding="20"
+                Margin="0,0,0,14" BorderBrush="{DynamicResource Accent}" BorderThickness="1">
+          <TextBlock TextWrapping="Wrap" Foreground="{DynamicResource Tekst}"
+                     Text="{i18n:Oversat settingsview.diktering_lyd}" />
+        </Border>
+
+        <!-- ============================ dit navn ============================
+
+             DET STAAR HER OG SPOERGES OM UNDER OPSAETNINGEN. Uden det skrev
+             pudsningen «[Dit navn]» under en dikteret mail. Feltet maa gerne
+             vaere tomt - saa skrives der slet ingen underskrift. -->
+        <Border Background="{DynamicResource Panel}" CornerRadius="10" Padding="20"
+                Margin="0,0,0,14" BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
+          <StackPanel>
+            <TextBlock Text="{i18n:Oversat setupwindow.navn_overskrift}"
+                       FontSize="15" FontWeight="SemiBold" />
+            <TextBlock Style="{StaticResource Underskrift}" Margin="0,6,0,12" TextWrapping="Wrap"
+                       MaxWidth="700" HorizontalAlignment="Left"
+                       Text="{i18n:Oversat setupwindow.navn_under}" />
+            <TextBox x:Name="DitNavn" MaxLength="80" MaxWidth="380"
+                     HorizontalAlignment="Left" LostFocus="DitNavn_Forladt" />
+          </StackPanel>
+        </Border>
+
+        <!-- ============================ Til eller fra ============================ -->
+        <Border Background="{DynamicResource Panel}" CornerRadius="10" Padding="20" Margin="0,0,0,14"
+                BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
+          <StackPanel>
+            <CheckBox x:Name="DikteringTil" Click="DikteringTil_Klik"
+                      Content="{i18n:Oversat settingsview.diktering_til}" FontWeight="SemiBold" />
+            <TextBlock Style="{StaticResource Underskrift}" Margin="0,6,0,0" TextWrapping="Wrap"
+                       Text="{i18n:Oversat settingsview.diktering_til_under}" />
+            <TextBlock Style="{StaticResource Underskrift}" Margin="0,8,0,0" TextWrapping="Wrap"
+                       Text="{i18n:Oversat settingsview.diktering_til_pris}" />
+
+            <TextBlock x:Name="DikteringNoegle" Margin="0,10,0,0" TextWrapping="Wrap"
+                       Foreground="{DynamicResource Advarsel}" Visibility="Collapsed"
+                       Text="{i18n:Oversat settingsview.diktering_kraever_noegle}" />
+          </StackPanel>
+        </Border>
+
+        <!-- ======================== Sproget, DU taler ========================
+
+             DET SKAL VÆLGES, OG DET SKAL STÅ HØJT PÅ SIDEN.
+
+             Uden et sprog gætter modellen. På et kort klip er der næsten
+             intet at gætte ud fra, og gætter den forkert, er hvert eneste
+             ord forkert — ikke bare et enkelt.
+
+             Målt 30-08-2026: «hallo, hallo, hallo» sagt på dansk kom
+             tilbage som «Alors, alors, alors ?». Fransk.
+
+             Og man VED altid, hvilket sprog man selv dikterer på. Det er
+             ens egen stemme; der er ikke noget at gætte om. -->
+        <Border Background="{DynamicResource Panel}" CornerRadius="10" Padding="20" Margin="0,0,0,14"
+                BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
+          <StackPanel>
+            <TextBlock Text="{i18n:Oversat settingsview.diktering_sprog}" FontSize="15" FontWeight="SemiBold" />
+            <TextBlock Style="{StaticResource Underskrift}" Margin="0,3,0,10" TextWrapping="Wrap"
+                       Text="{i18n:Oversat settingsview.diktering_sprog_under}" />
+
+            <ComboBox x:Name="DikteringSprog" Width="240" HorizontalAlignment="Left"
+                      SelectionChanged="DikteringSprog_Valgt">
+              <ComboBox.ItemTemplate>
+                <DataTemplate>
+                  <TextBlock Text="{Binding Navn}" />
+                </DataTemplate>
+              </ComboBox.ItemTemplate>
+            </ComboBox>
+
+            <TextBlock Style="{StaticResource Underskrift}" Margin="0,12,0,0" TextWrapping="Wrap"
+                       Text="{i18n:Oversat settingsview.diktering_sprog_hvorfor}" />
+          </StackPanel>
+        </Border>
+
+        <!-- ============================ Laengste diktering ============================ -->
+        <Border Background="{DynamicResource Panel}" CornerRadius="10" Padding="20" Margin="0,0,0,14"
+                BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
+          <StackPanel>
+            <TextBlock Text="{i18n:Oversat settingsview.diktering_loft}" FontSize="15" FontWeight="SemiBold" />
+            <TextBlock Style="{StaticResource Underskrift}" Margin="0,3,0,10" TextWrapping="Wrap"
+                       Text="{i18n:Oversat settingsview.diktering_loft_under}" />
+
+            <StackPanel Orientation="Horizontal">
+              <ComboBox x:Name="DikteringLoft" Width="90" SelectionChanged="DikteringLoft_Valgt" />
+              <TextBlock Text="{i18n:Oversat settingsview.diktering_minutter}" VerticalAlignment="Center"
+                         Margin="10,0,0,0" Foreground="{DynamicResource TekstSvag}" />
+            </StackPanel>
+
+            <TextBlock Style="{StaticResource Underskrift}" Margin="0,12,0,0" TextWrapping="Wrap"
+                       Text="{i18n:Oversat settingsview.diktering_loft_hvorfor}" />
+          </StackPanel>
+        </Border>
+
+        <!-- ============================ Formen ============================ -->
+        <Border Background="{DynamicResource Panel}" CornerRadius="10" Padding="20" Margin="0,0,0,14"
+                BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
+          <StackPanel>
+            <TextBlock Text="{i18n:Oversat settingsview.diktering_formaal}" FontSize="15" FontWeight="SemiBold" />
+            <TextBlock Style="{StaticResource Underskrift}" Margin="0,3,0,10" TextWrapping="Wrap"
+                       Text="{i18n:Oversat settingsview.diktering_formaal_under}" />
+
+            <ComboBox x:Name="DikteringFormaal" SelectionChanged="DikteringFormaal_Valgt">
+              <ComboBox.ItemTemplate>
+                <DataTemplate>
+                  <TextBlock Text="{Binding Navn}" TextTrimming="CharacterEllipsis" />
+                </DataTemplate>
+              </ComboBox.ItemTemplate>
+            </ComboBox>
+          </StackPanel>
+        </Border>
+
+        <!-- ============================ Hvor teksten lander ============================ -->
+        <Border Background="{DynamicResource Panel}" CornerRadius="10" Padding="20" Margin="0,0,0,14"
+                BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
+          <StackPanel>
+            <CheckBox x:Name="DikteringIndsaet" Click="DikteringIndsaet_Klik"
+                      Content="{i18n:Oversat settingsview.diktering_indsaet}" FontWeight="SemiBold" />
+            <TextBlock Style="{StaticResource Underskrift}" Margin="0,6,0,0" TextWrapping="Wrap"
+                       Text="{i18n:Oversat settingsview.diktering_indsaet_under}" />
+            <TextBlock Style="{StaticResource Underskrift}" Margin="0,8,0,16" TextWrapping="Wrap"
+                       Text="{i18n:Oversat settingsview.diktering_indsaet_hvorfor}" />
+
+            <CheckBox x:Name="DikteringEfterProgram" Click="DikteringEfterProgram_Klik"
+                      Content="{i18n:Oversat settingsview.diktering_efter_program}" FontWeight="SemiBold" />
+            <TextBlock Style="{StaticResource Underskrift}" Margin="0,6,0,0" TextWrapping="Wrap"
+                       Text="{i18n:Oversat settingsview.diktering_efter_program_under}" />
+          </StackPanel>
+        </Border>
+
+        <!-- ============================ Oprydning og ordliste ============================ -->
+        <Border Background="{DynamicResource Panel}" CornerRadius="10" Padding="20" Margin="0,0,0,14"
+                BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
+          <StackPanel>
+            <CheckBox x:Name="DikteringPuds" Click="DikteringPuds_Klik"
+                      Content="{i18n:Oversat settingsview.diktering_puds}" FontWeight="SemiBold" />
+            <TextBlock Style="{StaticResource Underskrift}" Margin="0,6,0,16" TextWrapping="Wrap"
+                       Text="{i18n:Oversat settingsview.diktering_puds_under}" />
+
+            <CheckBox x:Name="DikteringFagord" Click="DikteringFagord_Klik"
+                      Content="{i18n:Oversat settingsview.diktering_fagord}" FontWeight="SemiBold" />
+            <TextBlock Style="{StaticResource Underskrift}" Margin="0,6,0,0" TextWrapping="Wrap"
+                       Text="{i18n:Oversat settingsview.diktering_fagord_under}" />
+          </StackPanel>
+        </Border>
+
+      </StackPanel>
+    </ScrollViewer>
+
+    <TextBlock x:Name="Status" Grid.Row="1" Margin="0,10,0,0" TextWrapping="Wrap"
+               FontSize="12.5" Foreground="{DynamicResource TekstSvag}" />
+  </Grid>
+</UserControl>

@@ -43,7 +43,7 @@ public partial class SettingsView : UserControl
         _timer = new DispatcherTimer(DispatcherPriority.Background) { Interval = TimeSpan.FromMilliseconds(100) };
         _timer.Tick += (_, _) => OpdaterMaalere();
 
-        Loaded += (_, _) => { Indlaes(); VisTema(); LytPaaTema(); VisGenvejNu(); VisAutostart(); OpdaterFiler(); VisKrav(); VisPlads(); VisOvervaagede(); IndlaesDiktering(); };
+        Loaded += (_, _) => { Indlaes(); VisTema(); LytPaaTema(); VisGenvejNu(); VisAutostart(); OpdaterFiler(); VisKrav(); VisPlads(); VisOvervaagede(); };
         Unloaded += (_, _) => { _timer.Stop(); StopProber(); AfbrydTest(); };
     }
 
@@ -219,176 +219,6 @@ public partial class SettingsView : UserControl
         _saetterTema = false;
     }
 
-    // ============================ DIKTERING ============================
-
-    /// <summary>Et formaal, som det staar i listen.</summary>
-    /// <summary>Ét sprog i rullelisten under Diktering.</summary>
-    private sealed record Sprogvalg(string Kode, string Navn);
-
-    private sealed record Formaalsvalg(Dikteringsformaal Vaerdi, string Navn);
-
-    private bool _dikteringIndlaest;
-
-    /// <summary>
-    /// Fylder dikteringsfanen ud fra det, der faktisk er gemt.
-    /// </summary>
-    /// <remarks>
-    /// <c>_dikteringIndlaest</c> holder hændelserne ude, mens felterne sættes.
-    /// Uden den ville hvert felt gemme sig selv under indlæsningen — og et
-    /// valg, brugeren aldrig har truffet, ville blive skrevet ned som om han
-    /// havde.
-    /// </remarks>
-    private void IndlaesDiktering()
-    {
-        _dikteringIndlaest = false;
-
-        try
-        {
-            var v = AppSettings.Current;
-
-            // ============ SPROGET, DU TALER ============
-            //
-            // Samme liste som moederne bruger. «Lad appen finde selv» er med,
-            // men den er ikke standarden: uden et sprog gaetter modellen, og
-            // paa et kort klip er der naesten intet at gaette ud fra.
-            //
-            // Maalt 30-08-2026: «hallo, hallo, hallo» paa dansk kom tilbage
-            // som «Alors, alors, alors ?». Fransk.
-            // EN NAVNGIVEN TYPE OG IKKE EN ANONYM. Den anonyme oversatte fint
-            // og braekkede foerst paa skaermen: castet til Sprogvalg kan ikke
-            // kontrolleres af oversaetteren, saa fejlen viste sig som
-            // «InvalidCastException», da fanen blev aabnet. Set 30-08-2026.
-            var sprogene = Transcribe.SprogvalgWindow.Sprog
-                .Select(s => new Sprogvalg(s.Kode, s.Navn))
-                .ToList();
-
-            DikteringSprog.ItemsSource = sprogene;
-
-            var mit = v.MitSprog ?? "da";
-            DikteringSprog.SelectedItem =
-                sprogene.FirstOrDefault(s => s.Kode == mit)
-                ?? sprogene.FirstOrDefault(s => s.Kode == "da");
-
-            DikteringTil.IsChecked = v.DikteringTil;
-            DikteringPuds.IsChecked = v.DikteringPuds;
-            DikteringFagord.IsChecked = v.DikteringFagord;
-            DikteringIndsaet.IsChecked = v.DikteringIndsaet;
-            DikteringEfterProgram.IsChecked = v.DikteringEfterProgram;
-
-            // Loftet: hvert minut fra det mindste til det stoerste. En fri
-            // talindtastning ville give nul og bogstaver, og saa skal der
-            // baade valideres og forklares.
-            DikteringLoft.ItemsSource = Enumerable
-                .Range(Holdvurdering.MindsteLoftMinutter,
-                       Holdvurdering.StoersteLoftMinutter - Holdvurdering.MindsteLoftMinutter + 1)
-                .ToList();
-
-            DikteringLoft.SelectedItem =
-                (int)Holdvurdering.LoftFra(v.DikteringLoftMinutter).TotalMinutes;
-
-            DikteringFormaal.ItemsSource = new[]
-            {
-                new Formaalsvalg(Dikteringsformaal.Note, Sprog.T("settingsview.diktering_formaal_note")),
-                new Formaalsvalg(Dikteringsformaal.Mail, Sprog.T("settingsview.diktering_formaal_mail")),
-                new Formaalsvalg(Dikteringsformaal.Prompt, Sprog.T("settingsview.diktering_formaal_prompt")),
-                new Formaalsvalg(Dikteringsformaal.Opgave, Sprog.T("settingsview.diktering_formaal_opgave")),
-            };
-
-            var valgt = Enum.TryParse<Dikteringsformaal>(v.DikteringFormaal, ignoreCase: true, out var f)
-                ? f
-                : Dikteringsformaal.Note;
-
-            DikteringFormaal.SelectedItem = ((IEnumerable<Formaalsvalg>)DikteringFormaal.ItemsSource)
-                .FirstOrDefault(x => x.Vaerdi == valgt);
-
-            // Uden noegle kan der ikke dikteres. Det skal staa, FOER man slaar
-            // noget til - ikke bagefter, naar man taler til et program, der
-            // ikke kan svare.
-            DikteringNoegle.Visibility = SkyNoegle.Hent() is null
-                ? Visibility.Visible
-                : Visibility.Collapsed;
-        }
-        catch (Exception ex)
-        {
-            // ============ ÉN FANE MÅ IKKE VÆLTE HELE SKÆRMEN ============
-            //
-            // Her var kun «finally». Gik indlaesningen galt, slap fejlen ud
-            // til appens faelles haandtering, og saa kom «Der gik noget galt»
-            // som en modal kasse - oven paa en skaerm, brugeren ikke engang
-            // kunne bruge bagefter.
-            //
-            // Set 30-08-2026: et forkert cast i sprogvalget. Det oversatte
-            // fint og braekkede foerst, da fanen blev aabnet.
-            //
-            // Fejlen skjules ikke - den skrives i historikken og staar paa
-            // fanen. Men resten af indstillingerne bliver ved med at virke.
-            Status.Text = $"Dikteringsindstillingerne kunne ikke læses: {ex.Message}";
-
-            try
-            {
-                Historik.Skriv(HaendelseType.Andet, "En indstillingsfane kunne ikke læses",
-                    $"Diktering: {ex.GetType().Name} — {ex.Message}", Udfald.SeEfter);
-            }
-            catch (Exception)
-            {
-                // Kan historikken ikke skrives, er der ikke mere at goere.
-            }
-        }
-        finally
-        {
-            _dikteringIndlaest = true;
-        }
-    }
-
-    private void GemDiktering()
-    {
-        if (!_dikteringIndlaest) return;
-
-        var v = AppSettings.Current;
-
-        v.DikteringTil = DikteringTil.IsChecked == true;
-        v.DikteringPuds = DikteringPuds.IsChecked == true;
-        v.DikteringFagord = DikteringFagord.IsChecked == true;
-        v.DikteringIndsaet = DikteringIndsaet.IsChecked == true;
-        v.DikteringEfterProgram = DikteringEfterProgram.IsChecked == true;
-
-        if (DikteringLoft.SelectedItem is int minutter) v.DikteringLoftMinutter = minutter;
-        if (DikteringFormaal.SelectedItem is Formaalsvalg f) v.DikteringFormaal = f.Vaerdi.ToString();
-
-        // Sproget, brugeren TALER. Det sendes med hver diktering, saa modellen
-        // ikke skal gaette paa et klip, der maaske er tre ord langt.
-        //
-        // «is Sprogvalg» og ikke dynamic: passer typen ikke, sker der
-        // ingenting - i stedet for at vaelte skaermen med en fejl, der
-        // foerst viser sig, naar nogen aabner fanen.
-        if (DikteringSprog.SelectedItem is Sprogvalg valgtSprog) v.MitSprog = valgtSprog.Kode;
-
-        v.Save();
-
-        // Genvejen skal vide det MED DET SAMME. Ellers skal appen genstartes,
-        // foer et hold begynder at betyde noget - og saa tror man, det er
-        // gaaet galt.
-        Dikteringsskift?.Invoke(v.DikteringTil);
-    }
-
-    /// <summary>Siger til, når dikteringen bliver slået til eller fra.</summary>
-    public static Action<bool>? Dikteringsskift { get; set; }
-
-    private void DikteringTil_Klik(object sender, RoutedEventArgs e) => GemDiktering();
-
-    private void DikteringPuds_Klik(object sender, RoutedEventArgs e) => GemDiktering();
-
-    private void DikteringFagord_Klik(object sender, RoutedEventArgs e) => GemDiktering();
-
-    private void DikteringIndsaet_Klik(object sender, RoutedEventArgs e) => GemDiktering();
-
-    private void DikteringEfterProgram_Klik(object sender, RoutedEventArgs e) => GemDiktering();
-
-    private void DikteringLoft_Valgt(object sender, SelectionChangedEventArgs e) => GemDiktering();
-
-    private void DikteringFormaal_Valgt(object sender, SelectionChangedEventArgs e) => GemDiktering();
-
-    private void DikteringSprog_Valgt(object sender, SelectionChangedEventArgs e) => GemDiktering();
 
     /// <summary>
     /// Kører velkomstforløbet igen.
@@ -419,11 +249,10 @@ public partial class SettingsView : UserControl
         // kaldet hoerer stadig ikke til her. Fjernet 30-08-2026.
         Indlaes();
         VisAutostart();
-        IndlaesDiktering();
 
         // Genvejen og vaageordet skal foelge med det samme. Ellers skal appen
         // genstartes, foer et hak, der lige er sat, betyder noget.
-        Dikteringsskift?.Invoke(AppSettings.Current.DikteringTil);
+        Diktering.IndstillingerView.Dikteringsskift?.Invoke(AppSettings.Current.DikteringTil);
         Diktering.KommandoerView.Aendret?.Invoke();
 
         Status.Text = "Opsætningen er gennemgået.";

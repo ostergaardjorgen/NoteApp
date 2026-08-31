@@ -26,7 +26,7 @@ public partial class SetupWindow : Window
     private static readonly (string Titel, string Under)[] Trin =
     {
         ("Velkommen til HeyPia", "Lyden bliver på din maskine — teksten bearbejdes i Europa"),
-        ("Sådan skal den virke", "Mikrofon, genvejstast og vågeord — sat én gang, her"),
+        ("Sådan skal den virke", "Navn, mikrofon, genvejstast og vågeord — sat én gang, her"),
         ("Sidste trin: hent Whisper", "Motoren og en sprogmodel, så appen kan skrive dine møder ud")
     };
 
@@ -116,6 +116,8 @@ public partial class SetupWindow : Window
             OpsMikrofon.SelectedItem = mikrofoner.FirstOrDefault(d => d.Id == mik?.Id);
             OpsHoejttaler.SelectedItem = hoejttalere.FirstOrDefault(d => d.Id == hoejt?.Id);
 
+            OpsNavn.Text = v.DitNavn ?? "";
+
             OpsAutostart.IsChecked = Autostart.ErSlaaetTil();
             OpsDiktering.IsChecked = v.DikteringTil;
             OpsVaageord.IsChecked = v.VaageordTil;
@@ -128,6 +130,22 @@ public partial class SetupWindow : Window
                 + "Genvejen vises i toppen af appen, når den er klar.";
         }
         finally { _fylder = false; }
+    }
+
+    /// <summary>
+    /// Gemmer navnet, naar feltet forlades.
+    /// </summary>
+    /// <remarks>
+    /// Tomt felt betyder tomt navn og ikke «husk det gamle». Sletter man
+    /// navnet med vilje, skal underskriften ogsaa vaere vaek.
+    /// </remarks>
+    private void Navn_Forladt(object sender, RoutedEventArgs e)
+    {
+        if (_fylder) return;
+
+        var navn = OpsNavn.Text.Trim();
+        AppSettings.Current.DitNavn = navn.Length == 0 ? null : navn;
+        AppSettings.Current.Save();
     }
 
     private void Mikrofon_Valgt(object sender, SelectionChangedEventArgs e)
@@ -155,6 +173,9 @@ public partial class SetupWindow : Window
     private void GemValg()
     {
         var v = AppSettings.Current;
+
+        var navn = OpsNavn.Text.Trim();
+        v.DitNavn = navn.Length == 0 ? null : navn;
 
         v.DikteringTil = OpsDiktering.IsChecked == true;
         v.VaageordTil = OpsVaageord.IsChecked == true;

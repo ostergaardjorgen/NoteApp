@@ -251,7 +251,9 @@
     "vaageord": "Listen for «Hej Pia»",
     "vaageord_under": "Then a dictation can be started without touching the keyboard. Say «Hej Pia» and carry on speaking — the text lands where the cursor is.",
     "vaageord_privatliv": "The listening happens on your own PC. Nothing is sent while it listens — neither audio nor text. What the microphone hears exists only in memory until it is decided whether the word was said. No audio file is written and no log is kept. If the screen is locked, or a recording is running, it does not listen.",
-    "kan_altid_aendres": "Everything here can be changed later under Settings — and the whole flow can be run again from the same place."
+    "kan_altid_aendres": "Everything here can be changed later under Settings — and the whole flow can be run again from the same place.",
+    "navn_overskrift": "Your name",
+    "navn_under": "Used when a dictation is turned into an email, so it can be signed. Leave it empty and no signature is written."
   },
   "opgavewindow": {
     "1_er_vigtigst": "1 is the most important",
@@ -722,7 +724,7 @@
     "andre_integrationer": "Other integrations",
     "ansvaret_for_at_anvendelsen_af_programmet": "Responsibility for ensuring that use of the program complies with the General Data Protection Regulation and other applicable law — including the allocation of roles as data controller, the legal basis for processing, the duty to inform and the record of processing activities — rests solely with the user as data controller. No liability is accepted for direct or indirect loss arising from reliance on the information under «Compliance».",
     "ansvarsfraskrivelse": "DISCLAIMER",
-    "antallet_af_tokens_kommer_fra_leverandoere": "The number of tokens comes from the supplier and is what is invoiced. The price above, however, is an estimate: it is calculated from the list price on Mistral's pricing page, which is quoted in dollars. The krone amount uses a fixed rate of 6.50 DKK/USD — not a daily rate.",
+    "antallet_af_tokens_kommer_fra_leverandoere": "The number of tokens comes from the supplier and is what is invoiced. The price above, however, is an estimate: it is calculated from the list price on Mistral’s pricing page. Settlement is in euro, and the krone amount uses a fixed rate of 7.46 DKK/EUR — not a daily rate.",
     "appen_kan_kun_kalde_det_europaeiske_endepu": "The app can only call the European endpoint. That is locked in the code, not a setting.",
     "bliver_paa_denne_pc": "Stays on this PC",
     "bortset_fra_google_skelner_listen_ikke_mel": "Apart from Google, the list does not distinguish between endpoints, only between products. Using the European endpoint therefore does not in itself remove a name from the list — and the data processing agreement does not separate them either.",
@@ -775,7 +777,7 @@
     "hvad_det_betyder_i_praksis_loesningen_er_e": "What it means in practice: the solution is a well-founded choice, and it is better placed than an American service. But it is not a verified guarantee that data stays in Europe — and that difference must come out BEFORE anyone writes it in a proposal. If you want to stand behind it, the supplier must confirm it in writing.",
     "hvem_der_talte_kan_hoeres_ogsaa_naar_navne": "Who spoke can be heard, even when the name is never said. On top of that come tone of voice, hesitation, accent and things about health and state of mind that nobody said out loud. None of that travels with a transcript.",
     "hver_gang_noget_forlader_maskinen_bogfoere": "Every time something leaves the machine, it is recorded here: time, address, model, how many characters went, what it cost — and a checksum of the exact bytes. Also when the call fails; a failed transmission has still been sent.",
-    "hvilken_valuta_mistral_rent_faktisk_faktur": "Which currency Mistral actually invoices in, and whether VAT is added on top, has not been verified. If the figure is to be used for bookkeeping, take it from the invoice — not from here.",
+    "hvilken_valuta_mistral_rent_faktisk_faktur": "Whether VAT is added on the invoice has not been verified. If the figure is to be used for accounting, take it from the invoice — not from here.",
     "hvor_data_gaar_hen": "WHERE DATA GOES",
     "hvor_data_gaar_hen_2": "Where data goes",
     "hvor_dine_data_gaar_hen_hvem_der_kan_roere": "Where your data goes, who can touch it, and which licences come with it. In short: the line is drawn at the transcript — the audio and the text stay on the machine, and everything after that happens at Mistral.",
@@ -932,7 +934,8 @@
     "ingen_mikrofon": "There is no microphone. Connect one, or choose one under Settings → Audio.",
     "lytter_paa_reserve": "Listening on {0} — the microphone you chose is not connected right now.",
     "mikrofon_svarede_ikke": "{0} did not respond: {1}. Try another one under Settings → Audio.",
-    "fane_noter": "Notes"
+    "fane_noter": "Notes",
+    "fane_indstillinger": "Settings"
   },
   "ordbogview": {
     "ordbog": "Word library",
@@ -1032,7 +1035,11 @@
     "skift": "Show as",
     "skift_under": "The same speech, written a different way. It is rewritten from the raw transcript, not from the text above — otherwise each rewrite would drift further from what you actually said.",
     "skift_kan_ikke": "This note predates storing the raw transcript, so it cannot be rewritten.",
-    "skifter": "Rewriting …"
+    "skifter": "Rewriting …",
+    "type_note": "Note",
+    "type_mail": "Email",
+    "type_prompt": "Prompt",
+    "type_opgave": "Task"
   },
   "lytteboble": {
     "pause": "Pause the listening",

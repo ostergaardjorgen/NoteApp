@@ -810,9 +810,10 @@
             <StackPanel>
               <!-- PRISEN ER ET SKOEN, OG DET SKAL STAA.
                    Tokentallene er leverandoerens egne og er noejagtige. Det
-                   er OMREGNINGEN, der ikke er: listeprisen er noteret i
-                   dollar, og hvad der faktisk staar paa fakturaen - valuta,
-                   kurs, moms - er ikke efterproevet. Et tal uden det
+                   er OMREGNINGEN, der ikke er: prisen er en listepris, og
+                   hvad der faktisk staar paa fakturaen - moms, rabatter,
+                   afrunding - er ikke efterproevet. Afregningen sker i EURO,
+                   og baade tallet og kursen foelger den. Et tal uden det
                    forbehold ville blive laest som et regnskab. -->
               <Border Background="{DynamicResource Trykket}" BorderBrush="{DynamicResource PanelKant}" BorderThickness="1"
                       CornerRadius="8" Padding="14,11" Margin="0,0,0,12">

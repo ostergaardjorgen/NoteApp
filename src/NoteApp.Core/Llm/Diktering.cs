@@ -151,7 +151,44 @@ public static class Voxtral
     /// finder på en indledning, du ikke har sagt — og i en mail, du sender
     /// videre, er det din underskrift, der står under det.
     /// </remarks>
-    public static string Pudseprompt(Dikteringsformaal formaal) => formaal switch
+    /// <summary>
+    /// Reglen, der står i ALLE fire instruktioner.
+    /// </summary>
+    /// <remarks>
+    /// DEN KOM TIL, FORDI MODELLEN SKREV EN HEL MAIL, INGEN HAVDE SAGT.
+    ///
+    /// Målt 31-08-2026: brugeren dikterede et par sætninger og bad om formen
+    /// «mail». Tilbage kom et helt brev med en prioriteret opgaveliste —
+    /// «Afslut rapporten til ledelsen om Q2-resultaterne – deadline er mandag
+    /// kl. 12:00» — deadlines, mødetidspunkter og et «[Dit navn]». Intet af
+    /// det var sagt.
+    ///
+    /// «Tilføj intet indhold, der ikke blev sagt» stod der allerede. Det var
+    /// ikke nok, fordi resten af instruktionen BAD om en form, der skal
+    /// fyldes: en indledning, et indhold, en afslutning. Så fyldte den.
+    ///
+    /// Derfor står forbuddet nu først, det er konkret om hvad der ikke må
+    /// findes på, og det siger, hvad der skal ske i stedet: er der for lidt
+    /// at gøre formen af, kommer teksten næsten uændret tilbage. En kort mail
+    /// er et rigtigt svar. En opdigtet er ikke.
+    /// </remarks>
+    public const string Grundregel =
+        "DEN RÅ UDSKRIFT ER DEN ENESTE KILDE. Du må ikke tilføje oplysninger: "
+        + "ingen navne, datoer, klokkeslæt, tal, punkter eller emner, der ikke "
+        + "står i den. Du må ikke fylde en form ud med noget, du selv finder på, "
+        + "og du må ikke skrive pladsholdere som [Dit navn]. "
+        + "Er der for lidt til den ønskede form, så giv teksten næsten uændret "
+        + "tilbage — et kort svar er rigtigt, et opdigtet er forkert. "
+        + "Svar KUN med teksten selv, uden forklaring. ";
+
+    /// <param name="navn">
+    /// Dit navn, hvis det er sat under opsætningen. Bruges KUN til en mail —
+    /// en note skal ikke underskrives. Er det tomt, skrives der slet ingen
+    /// underskrift; det var «[Dit navn]» dér, der gjorde en dikteret mail
+    /// ubrugelig at sende videre.
+    /// </param>
+    public static string Pudseprompt(Dikteringsformaal formaal, string? navn = null)
+        => Grundregel + (formaal switch
     {
         Dikteringsformaal.Note =>
             "Du er en dikteringsassistent. Ryd op i den følgende rå udskrift: "
@@ -159,26 +196,28 @@ public static class Voxtral
             + "Behold ordvalget og tonen. Tilføj intet, og forklar intet.",
 
         Dikteringsformaal.Mail =>
-            "Du er en dikteringsassistent. Skriv den følgende rå udskrift om til "
-            + "en mail: en kort indledning, indholdet i hele sætninger, og en "
-            + "afslutning. Behold afsenderens tone. Tilføj intet indhold, der "
-            + "ikke blev sagt, og skriv ingen emnelinje.",
+            "Du er en dikteringsassistent. Sæt den følgende rå udskrift op som "
+            + "en mail: ryd op i sætningerne, og skriv en hilsen først og en "
+            + "afsked til sidst. Selve INDHOLDET skal være dét, der blev sagt — "
+            + "hverken mere eller mindre. Ingen emnelinje. "
+            + (string.IsNullOrWhiteSpace(navn)
+                ? "Skriv ingen underskrift, og aldrig en pladsholder til et navn."
+                : $"Slut med «Med venlig hilsen» og navnet {navn.Trim()}."),
 
         Dikteringsformaal.Prompt =>
             "Du er en dikteringsassistent. Skriv den følgende rå udskrift om til "
             + "en instruktion til en AI-assistent. Ingen høflighed, ingen "
-            + "indledning, ingen forklaring — kun opgaven, klart formuleret. "
-            + "Tilføj intet, der ikke blev sagt.",
+            + "indledning, ingen forklaring — kun opgaven, klart formuleret.",
 
         Dikteringsformaal.Opgave =>
             "Du er en dikteringsassistent. Skriv den følgende rå udskrift om til "
             + "ÉN opgavelinje i bydeform, højst 80 tegn. Ingen forklaring, ingen "
             + "punktum i slutningen. Nævnes en dato eller et tidspunkt, skal det "
-            + "stå med i linjen. Tilføj intet, der ikke blev sagt — en opgave, "
-            + "der er fundet på, lander på listen og skal gøres.",
+            + "stå med i linjen — men find aldrig et på. En opgave, der er "
+            + "fundet på, lander på listen og skal gøres.",
 
         _ => throw new ArgumentOutOfRangeException(nameof(formaal)),
-    };
+    });
 }
 
 /// <summary>
@@ -327,7 +366,7 @@ public sealed class Dikteringsklient
                 {
                     role = "system",
                     content = string.IsNullOrWhiteSpace(instruktion)
-                        ? Voxtral.Pudseprompt(formaal)
+                        ? Voxtral.Pudseprompt(formaal, AppSettings.Current.DitNavn)
                         : instruktion.Trim(),
                 },
                 new { role = "user", content = raa },
@@ -353,7 +392,16 @@ public sealed class Dikteringsklient
             throw new HttpRequestException(
                 $"Tekstpudsningen blev afvist ({(int)svar.StatusCode}).\n\n{Kort(tekst)}");
 
-        return LaesSvar(tekst);
+        var pudset = LaesSvar(tekst);
+
+        // EFTERPROEV SVARET. Instruktionen siger, at der ikke maa komme
+        // indhold til, men en model, der er bedt om en mail, laver en mail.
+        // Er svaret vokset ud over enhver oprydning, er der fundet paa noget
+        // - og saa er den raa udskrift det aerlige svar. Se Pudsevagt.
+        if (Pudsevagt.ErOppustet(raa, pudset))
+            return raa.Trim();
+
+        return pudset;
     }
 
     /// <summary>Teksten ud af et chat-svar. Tom, hvis der ingen kom.</summary>

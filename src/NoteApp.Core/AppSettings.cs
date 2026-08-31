@@ -119,6 +119,23 @@ public sealed class AppSettings
     public string? MitSprog { get; set; } = "da";
 
     /// <summary>
+    /// Dit navn. Sættes under opsætningen og kan rettes under Diktering.
+    /// </summary>
+    /// <remarks>
+    /// DET FINDES, FORDI EN MAIL SKAL UNDERSKRIVES AF ET MENNESKE.
+    ///
+    /// Uden det skrev pudsningen «[Dit navn]» under en dikteret mail — en
+    /// pladsholder, der ser ud som en fejl, hvis den slipper med ud. Nu er
+    /// der to udfald og ingen tredje: står navnet her, sættes det under;
+    /// står det ikke, skrives der ingen underskrift.
+    ///
+    /// DET SENDES KUN MED, NÅR DER LAVES EN MAIL. En note, en opgave eller
+    /// en prompt skal ikke underskrives, og et navn, der ikke skal bruges,
+    /// har intet at gøre i det, der sendes ud af huset.
+    /// </remarks>
+    public string? DitNavn { get; set; }
+
+    /// <summary>
     /// Sproget, de ØVRIGE mødedeltagere taler. Bruges til loopback-sporet.
     ///
     /// HVORFOR OGSÅ DET ER EN INDSTILLING

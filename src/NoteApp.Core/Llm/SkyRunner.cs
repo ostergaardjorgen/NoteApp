@@ -37,8 +37,14 @@ public sealed record SkyModel(
     bool Standard = false)
 {
     /// <summary>
-    /// Hvad én kørsel kostede, i dollar. Regnet på de tokens, leverandøren
+    /// Hvad én kørsel kostede, i EURO. Regnet på de tokens, leverandøren
     /// selv oplyser — ikke på et skøn over teksten.
+    ///
+    /// VALUTAEN ER EURO OG IKKE DOLLAR. Her stod «dollar» indtil 31-08-2026,
+    /// og feltet, tallet lander i, hed hele tiden PrisEur. Kvitteringerne
+    /// skrev € ud fra et tal, dokumentationen kaldte dollar — to valutaer om
+    /// det samme beløb, og ingen af dem til at stole på. Afregningen sker i
+    /// euro, og det er den, der gælder.
     ///
     /// EU-tillægget på 10 % er ganget på. Uden det ville prisen se rigtig ud
     /// og være for lav, og et budget lagt på tallet ville skride.
