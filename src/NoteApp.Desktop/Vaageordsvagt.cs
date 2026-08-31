@@ -202,10 +202,26 @@ public sealed class Vaageordsvagt : IDisposable
                 _proces.OutputDataReceived += (_, e) => Laes(e.Data);
                 _proces.BeginOutputReadLine();
 
-                // Fejlstroemmen laeses OGSAA. Gjorde den ikke det, ville
-                // roeret loebe fuldt, og programmet ville staa stille uden at
-                // sige hvorfor - whisper skriver sin opstart paa stderr.
-                _proces.ErrorDataReceived += (_, _) => { };
+                // ============ FEJLSTROEMMEN ER DEN ENESTE STROEM ============
+                //
+                // HER BLEV DEN KASTET VAEK. Linjerne blev laest for ikke at
+                // fylde roeret op, og saa smidt paa gulvet - ud fra en
+                // antagelse om, at det vigtige stod paa stdout.
+                //
+                // MAALT 31-08-2026: stdout er HELT TOM. whisper-command
+                // skriver hvert eneste ord paa stderr - ogsaa «listening for a
+                // command», som er den, der saetter Klar, og «Capture device
+                // #N», som er den, der finder mikrofonens nummer.
+                //
+                // To ting virkede derfor aldrig: skaermen fik aldrig at vide,
+                // at vaageordet var klar, og nummeret paa mikrofonen blev
+                // aldrig fundet eller gemt. Det sidste kunne ses direkte i
+                // indstillingerne, hvor VaageordMikrofonNummer stod tomt,
+                // uanset hvor mange gange motoren havde vaeret startet.
+                //
+                // Begge stroemme laeses nu det samme sted. Kommer en linje en
+                // dag paa stdout i stedet, virker det stadig.
+                _proces.ErrorDataReceived += (_, e) => Laes(e.Data);
                 _proces.BeginErrorReadLine();
 
                 Klar = false;
@@ -249,6 +265,20 @@ public sealed class Vaageordsvagt : IDisposable
     /// <summary>Mikrofonens nummer hos motoren. −1 = ikke fundet endnu.</summary>
     private int _kendtIndeks = -1;
 
+    private double? _kortMB;
+    private double? _modelMB;
+
+    /// <summary>
+    /// Hvad vågeordet fylder på grafikkortet — målt af motoren selv.
+    /// </summary>
+    /// <remarks>
+    /// Null, indtil motoren har skrevet begge tal, og null hele vejen på en
+    /// maskine uden CUDA. Der er ikke noget mellemsvar: enten er begge tal
+    /// læst, eller også er der ingenting at sige.
+    /// </remarks>
+    public Grafikmaal? Grafik =>
+        _kortMB is { } kort && _modelMB is { } model ? new Grafikmaal(model, kort) : null;
+
     /// <summary>Skal vi genstarte for at få den rigtige mikrofon?</summary>
     private bool _skalSkifteMikrofon;
 
@@ -286,6 +316,10 @@ public sealed class Vaageordsvagt : IDisposable
         if (string.IsNullOrWhiteSpace(linje)) return;
 
         Mikrofonlinje(linje);
+
+        // Grafikkortet. Motoren skriver begge tal ved opstart - se Grafikmaal.
+        _kortMB ??= Grafikmaal.Kort(linje);
+        _modelMB ??= Grafikmaal.Model(linje);
         SkiftMikrofonHvisNoedvendigt(linje);
 
         // ============ HVORNAAR ER DEN KLAR? ============

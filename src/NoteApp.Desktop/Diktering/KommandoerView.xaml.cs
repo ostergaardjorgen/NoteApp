@@ -27,6 +27,9 @@ public partial class KommandoerView : UserControl
     /// <summary>Hentes af skærmen, så forbruget kan vises. Sat af MainWindow.</summary>
     public static Func<double?>? Maaler { get; set; }
 
+    /// <summary>Hvad vågeordet fylder på grafikkortet.</summary>
+    public static Func<Grafikmaal?>? Grafikmaaler { get; set; }
+
     private System.Windows.Threading.DispatcherTimer? _ur;
 
     public KommandoerView()
@@ -81,10 +84,29 @@ public partial class KommandoerView : UserControl
         var kerner = Environment.ProcessorCount;
         var afMaskinen = f.Value / kerner;
 
-        Forbrug.Text = Sprog.T("kommandoer.forbrug_tal",
+        var tekst = Sprog.T("kommandoer.forbrug_tal",
             f.Value.ToString("0.0"),
             afMaskinen.ToString("0.0"),
             kerner.ToString());
+
+        // ============ OG HVAD DER LIGGER PAA GRAFIKKORTET ============
+        //
+        // Modellen bliver liggende dér, saa laenge der lyttes - det er dét,
+        // der goer, at vaageordet svarer paa et par hundrede millisekunder i
+        // stedet for at skulle laeses ind hver gang.
+        //
+        // Tallet staar med sin PROCENT af kortet. «487 MB» siger ikke, om
+        // det er meget; «8 % af kortets 6 GB» goer. Samme grund som ved
+        // kernerne ovenfor.
+        if (Grafikmaaler?.Invoke() is { } g)
+        {
+            tekst += " · " + Sprog.T("kommandoer.forbrug_grafik",
+                g.ModelMB.ToString("0"),
+                g.Procent.ToString("0.0"),
+                (g.KortMB / 1024.0).ToString("0.0"));
+        }
+
+        Forbrug.Text = tekst;
     }
 
     private void Indlaes()

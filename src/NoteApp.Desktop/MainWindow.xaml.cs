@@ -434,6 +434,7 @@ public partial class MainWindow : Window
             // er en paastand, ingen kan efterproeve - og den slags skal en app
             // ikke komme med om sig selv, naar den har mikrofonen aaben.
             Diktering.KommandoerView.Maaler = () => _vaage.Forbrug;
+            Diktering.KommandoerView.Grafikmaaler = () => _vaage.Grafik;
 
             _vaageur?.Stop();
             _vaageur = new DispatcherTimer { Interval = TimeSpan.FromSeconds(30) };

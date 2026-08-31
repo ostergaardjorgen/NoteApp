@@ -1006,7 +1006,8 @@
     "forbrug": "What it costs",
     "forbrug_tal": "Using {0} % of one core — that is {1} % of your machine’s {2} cores",
     "forbrug_lytter_ikke": "Not listening — there is nothing to measure",
-    "forbrug_under": "The figure is measured on the listening, not estimated: it is the processor time it has actually used, divided by the time elapsed. Task Manager calculates the same way — it shows the figure for the whole machine, that is, the second of the two."
+    "forbrug_under": "The figure is measured on the listening, not estimated: it is the processor time it has actually used, divided by the time elapsed. Task Manager calculates the same way — it shows the figure for the whole machine, that is, the second of the two.",
+    "forbrug_grafik": "and {0} MB on the graphics card — {1} % of its {2} GB"
   },
   "vaageord": {
     "lytter": "Listening for the wake word",

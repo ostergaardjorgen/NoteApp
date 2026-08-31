@@ -1006,7 +1006,8 @@
     "forbrug": "Hvad det koster",
     "forbrug_tal": "Bruger {0} % af én kerne — det er {1} % af din maskines {2} kerner",
     "forbrug_lytter_ikke": "Lytter ikke — der er ikke noget at måle",
-    "forbrug_under": "Tallet er målt på lytningen, ikke skønnet: det er den processortid, den faktisk har brugt, delt med den tid, der er gået. Jobliste regner på samme måde — den viser tallet for hele maskinen, altså det sidste af de to."
+    "forbrug_under": "Tallet er målt på lytningen, ikke skønnet: det er den processortid, den faktisk har brugt, delt med den tid, der er gået. Jobliste regner på samme måde — den viser tallet for hele maskinen, altså det sidste af de to.",
+    "forbrug_grafik": "og {0} MB på grafikkortet — {1} % af dets {2} GB"
   },
   "vaageord": {
     "lytter": "Lytter efter vågeordet",
