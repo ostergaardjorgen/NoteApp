@@ -67,6 +67,7 @@
     "aabne": "Open tasks",
     "haster": "{0} due now",
     "ialt": "{0} in total from {1} recordings",
+    "nyopgave": "New task",
     "hentopgaver": "Fetch tasks from Google",
     "hentopgaverhjaelp": "Fetch the tasks from Google Tasks now. They are also fetched automatically every fifteen minutes"
   },
@@ -266,6 +267,10 @@
     "kort_navn": "SHORT NAME",
     "luk": "Close",
     "lukker_uden_at_gemme": "Closes without saving",
+    "liste": "LIST",
+    "hvilken_liste": "Which of your Google Tasks lists the task ends up in",
+    "ny_opgave": "New task",
+    "ny_under": "It goes into the Cockpit along with your other tasks",
     "opgave": "Task",
     "opgaven_er_gjort": "The task is done",
     "prioritet": "PRIORITY",
@@ -1020,7 +1025,7 @@
     "aftale_blev_opgave": "Added to your tasks: {0} — the app cannot create calendar appointments yet, because a spoken time has to be read correctly first.",
     "intet_sagt": "Nothing was said beyond the wake word.",
     "goer_klar": "The wake word is getting ready — the model is loading onto the graphics card. It takes a few seconds. This message stays until «Hej Pia» works. The shortcut key works meanwhile.",
-    "klar": "Ready — say «Hej Pia» and keep talking"
+    "klar": "Ready — say «Hej Pia», pause briefly, then speak"
   },
   "noter": {
     "titel": "Notes",

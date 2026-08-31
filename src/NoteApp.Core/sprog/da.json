@@ -67,6 +67,7 @@
     "aabne": "Åbne opgaver",
     "haster": "{0} skal gøres nu",
     "ialt": "{0} i alt fra {1} optagelser",
+    "nyopgave": "Ny opgave",
     "hentopgaver": "Hent opgaver fra Google",
     "hentopgaverhjaelp": "Hent opgaverne fra Google Tasks nu. Der hentes også af sig selv hvert kvarter"
   },
@@ -463,6 +464,10 @@
     "kort_navn": "KORT NAVN",
     "luk": "Luk",
     "lukker_uden_at_gemme": "Lukker uden at gemme",
+    "liste": "LISTE",
+    "hvilken_liste": "Hvilken af dine lister i Google Tasks opgaven havner i",
+    "ny_opgave": "Ny opgave",
+    "ny_under": "Den lægger sig i Cockpittet sammen med de øvrige opgaver",
     "opgave": "Opgave",
     "opgaven_er_gjort": "Opgaven er gjort",
     "prioritet": "PRIORITET",
@@ -1020,7 +1025,7 @@
     "aftale_blev_opgave": "Lagt på opgavelisten: {0} — aftaler i kalenderen kan appen ikke oprette endnu, for et tidspunkt sagt i tale skal læses rigtigt først.",
     "intet_sagt": "Der blev ikke sagt andet end vågeordet.",
     "goer_klar": "Vågeordet gør klar — modellen læses ind på grafikkortet. Det tager et par sekunder. Beskeden bliver stående, indtil «Hej Pia» virker. Genvejstasten virker imens.",
-    "klar": "Klar — sig «Hej Pia», og tal videre"
+    "klar": "Klar — sig «Hej Pia», hold en kort pause, og tal så"
   },
   "noter": {
     "titel": "Noter",

@@ -80,6 +80,34 @@ public static class Vaageord
     /// </remarks>
     public const int Kommandovindue = 1500;
 
+    /// <summary>
+    /// Hvor let motoren afgør, at du er holdt op med at tale. 0–1.
+    /// </summary>
+    /// <remarks>
+    /// MOTOREN AFGØR FØRST NOGET, NÅR DU HOLDER PAUSE.
+    ///
+    /// Det er sådan whisper-commands lytteløkke er bygget: den henter to
+    /// sekunders lyd, spørger om de sidste tusinde millisekunder er faldet
+    /// til ro i forhold til resten, og først DA bedømmer den vinduet.
+    ///
+    /// Det forklarer det, ingen indstilling ellers kunne forklare. Siger man
+    /// «Hej Pia» og taler videre uden ophold, indeholder vinduet, der
+    /// bedømmes, slutningen af sætningen — ikke vågeordet. Så sker der
+    /// ingenting, uanset hvor tydeligt det blev sagt, og man siger det igen
+    /// og igen. Målt 31-08-2026.
+    ///
+    /// Tallet er, hvor meget energi de sidste tusinde millisekunder må have i
+    /// forhold til resten, før det stadig regnes som tale. Standarden er 0,60.
+    /// Et HØJERE tal betyder, at der skal mindre til, før motoren kalder det
+    /// en pause — og så er de små ophold, der findes i almindelig tale, nok.
+    ///
+    /// 0,8 er valgt, fordi det gør de naturlige mikropauser brugbare uden at
+    /// gøre enhver dæmpning til et ophold. Udløser den for tit, koster det
+    /// kun en bedømmelse, der ikke matcher: et vindue uden vågeordet i sig
+    /// bliver kasseret på navnet.
+    /// </remarks>
+    public const double Pausetaerskel = 0.8;
+
     /// <param name="til">Er vågeordet slået til?</param>
     /// <param name="motorFindes">Er der en motor at lytte med?</param>
     /// <param name="optager">Kører der en optagelse — også et onlinemøde?</param>

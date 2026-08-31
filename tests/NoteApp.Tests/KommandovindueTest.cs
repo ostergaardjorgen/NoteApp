@@ -1,4 +1,4 @@
-using NoteApp.Core;
+﻿using NoteApp.Core;
 using Xunit;
 
 namespace NoteApp.Tests;
@@ -52,5 +52,36 @@ public class KommandovindueTest
         // Det er dét, hele aendringen handler om: syv sekunder er ubrugeligt,
         // og under to er til at leve med.
         Assert.True(Vaageord.Kommandovindue <= 2000);
+    }
+
+    /// <summary>
+    /// Motoren skal reagere paa de smaa ophold i almindelig tale.
+    /// </summary>
+    /// <remarks>
+    /// whisper-command afgoer foerst noget, naar den mener, du er holdt op
+    /// med at tale. Standarden 0,60 kraever et tydeligt ophold - og siger man
+    /// «Hej Pia» og taler videre, kommer det ophold aldrig. Saa bedoemmes
+    /// slutningen af saetningen i stedet for vaageordet, og der sker
+    /// ingenting. Maalt 31-08-2026.
+    ///
+    /// Et HOEJERE tal betyder, at der skal mindre til, foer det kaldes en
+    /// pause.
+    /// </remarks>
+    [Fact]
+    public void Pausetaersklen_er_lettere_end_motorens_standard()
+    {
+        const double standard = 0.60;
+
+        Assert.True(Vaageord.Pausetaerskel > standard,
+            "Taersklen er tilbage paa motorens standard. Saa kraeves der et "
+            + "tydeligt ophold, foer vaageordet overhovedet bedoemmes.");
+    }
+
+    [Fact]
+    public void Pausetaersklen_er_stadig_en_taerskel()
+    {
+        // 1,0 ville betyde, at ALT regnes som en pause, og saa bedoemmer den
+        // konstant paa lyd, der ikke er holdt op.
+        Assert.True(Vaageord.Pausetaerskel < 1.0);
     }
 }

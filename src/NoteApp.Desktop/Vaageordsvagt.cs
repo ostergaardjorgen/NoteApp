@@ -201,7 +201,10 @@ public sealed class Vaageordsvagt : IDisposable
                 // vejen for noget.
                 var start = new ProcessStartInfo(Motorsti)
                 {
-                    Arguments = $"-m \"{model}\" -l {sprog} -t 4 -cms {Vaageord.Kommandovindue} "
+                    Arguments = $"-m \"{model}\" -l {sprog} -t 4 "
+                              + $"-cms {Vaageord.Kommandovindue} "
+                              + "-vth " + Vaageord.Pausetaerskel.ToString(
+                                    System.Globalization.CultureInfo.InvariantCulture) + " "
                               + $"-cmd \"{listefil}\"{mikrofon}",
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
