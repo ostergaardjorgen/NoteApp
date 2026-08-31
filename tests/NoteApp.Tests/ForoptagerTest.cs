@@ -75,4 +75,43 @@ public class ForoptagerTest
         // halvandet - plus den tid, bedoemmelsen selv tager.
         Assert.True(Foroptager.Bagudsekunder >= 3.0);
     }
+
+    /// <summary>
+    /// «Stille» skal maales mod DET rum, man staar i.
+    /// </summary>
+    /// <remarks>
+    /// MAALT 31-08-2026 med radio i rummet: 91 sekunders optagelse gav
+    /// teksten «Korsus. Tak.», og 52 sekunder gav «Hvad er Sarah?». De to ord
+    /// er ikke en afkortning - det er alt, modellen kunne finde i et minut,
+    /// der mest var radio.
+    ///
+    /// Graensen stod fast paa 0,02. Med en radio koerende laa rummet hele
+    /// tiden over det, saa der blev aldrig stille, og dikteringen sluttede
+    /// aldrig.
+    /// </remarks>
+    [Fact]
+    public void I_et_tyst_rum_gaelder_det_faste_tal()
+    {
+        Assert.Equal(Stilhed.Graense, Stilhed.Graensen(0f));
+        Assert.Equal(Stilhed.Graense, Stilhed.Graensen(0.001f));
+    }
+
+    [Fact]
+    public void I_et_rum_med_radio_stiger_graensen_med()
+    {
+        // Et rum med radio ligger let paa 0,05. Saa skal der mere end 0,02
+        // til, foer det er tale - ellers slutter dikteringen aldrig.
+        var medRadio = Stilhed.Graensen(0.05f);
+
+        Assert.True(medRadio > Stilhed.Graense);
+        Assert.Equal(0.05f * Stilhed.OverGulvet, medRadio, 4);
+    }
+
+    [Fact]
+    public void Graensen_kan_aldrig_falde_under_det_faste_tal()
+    {
+        // Et gulv paa nul er ikke en invitation til at hoere alt.
+        foreach (var gulv in new[] { 0f, 0.0001f, 0.005f })
+            Assert.True(Stilhed.Graensen(gulv) >= Stilhed.Graense);
+    }
 }

@@ -79,6 +79,24 @@ public sealed class Foroptager : IDisposable
     public float Niveau { get; private set; }
 
     /// <summary>
+    /// Rummets eget niveau — det laveste, mikrofonen har hørt.
+    /// </summary>
+    /// <remarks>
+    /// DEN FINDES, FORDI ET FAST TAL IKKE DUER I ET RUM MED LYD I.
+    ///
+    /// Dikteringen slutter, når der bliver stille. «Stille» var et fast tal,
+    /// og med en radio kørende lå rummet hele tiden over det — så blev der
+    /// aldrig stille, og klippet voksede til halvandet minut. Se
+    /// <see cref="Stilhed.OverGulvet"/>.
+    ///
+    /// Gulvet findes ved at holde øje med det LAVESTE, der er målt, og lade
+    /// det stige langsomt igen. Stiger det ikke, ville et enkelt sekunds
+    /// tavshed sætte gulvet i nul for resten af dagen — og så var vi tilbage
+    /// ved et fast tal.
+    /// </remarks>
+    public float Stoejgulv { get; private set; }
+
+    /// <summary>
     /// Åbner mikrofonen og begynder at fylde ringen.
     /// </summary>
     public bool Start(string? mikrofonId)
@@ -129,6 +147,7 @@ public sealed class Foroptager : IDisposable
         _ring = null;
         _beholdt = null;
         Niveau = 0;
+        Stoejgulv = 0;
     }
 
     /// <summary>
@@ -292,6 +311,14 @@ public sealed class Foroptager : IDisposable
         lock (_laas)
         {
             Niveau = top;
+
+            // Gulvet foelger det laveste, der er hoert - men kravler
+            // langsomt op igen, saa et enkelt sekunds tavshed ikke saetter
+            // det i nul for resten af dagen.
+            Stoejgulv = top < Stoejgulv || Stoejgulv <= 0
+                ? top
+                : Stoejgulv * 1.0005f;
+
             _ring?.Skriv(mono);
             _beholdt?.AddRange(mono);
         }

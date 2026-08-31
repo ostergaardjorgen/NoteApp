@@ -308,6 +308,41 @@ public static class Stilhed
     /// </remarks>
     public const float Graense = 0.02f;
 
+    /// <summary>
+    /// Hvor meget over rummets eget niveau der skal til, før det er tale.
+    /// </summary>
+    /// <remarks>
+    /// ET FAST TAL DUER IKKE I ET RUM MED LYD I.
+    ///
+    /// Grænsen på 0,02 er sat lavt, så en stille stemme kan holde dikteringen
+    /// i gang. Det virker i et tyst rum. Kører der en radio, ligger rummets
+    /// eget niveau HELE TIDEN over 0,02 — og så bliver der aldrig stille,
+    /// dikteringen slutter aldrig, og klippet vokser.
+    ///
+    /// MÅLT 31-08-2026, med radio i rummet:
+    ///
+    ///   91 sekunders optagelse  →  «Korsus. Tak.»
+    ///   52 sekunders optagelse  →  «Hvad er Sarah?»
+    ///
+    /// De to ord er ikke en afkortning. Det er alt, hvad modellen kunne finde
+    /// i et minut, der mest var radio. Brugeren troede, appen svarede på hans
+    /// spørgsmål i stedet for at skrive det ned — den druknede.
+    ///
+    /// Derfor måles der nu mod DET RUM, man står i. Gulvet er det laveste,
+    /// mikrofonen har hørt, mens der blev lyttet; tale skal ligge et stykke
+    /// over det. To en halv gang er valgt, fordi en stemme tæt på mikrofonen
+    /// er mange gange kraftigere end en radio i baggrunden — også når radioen
+    /// er tydelig at høre.
+    /// </remarks>
+    public const float OverGulvet = 2.5f;
+
+    /// <summary>
+    /// Grænsen, der gælder i DET her rum.
+    /// </summary>
+    /// <param name="gulv">Rummets eget niveau, målt mens der blev lyttet.</param>
+    public static float Graensen(float gulv) =>
+        Math.Max(Graense, gulv * OverGulvet);
+
     /// <summary>Er der talt for kort til, at det var et diktat?</summary>
     /// <remarks>
     /// Uden den ville selve vågeordet kunne blive til et tomt diktat: man

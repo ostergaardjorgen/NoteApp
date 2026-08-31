@@ -170,7 +170,9 @@ public sealed class Dikteringsvagt : IDisposable
             // gang, uanset hvor tydeligt der staar noget.
             Melder?.Invoke(Sprog.T("diktering.lytter_vaageord"));
 
-            Stilhedsur(() => forud.Niveau);
+            // GULVET FOELGER MED. Kommer dikteringen fra vaageordet, har
+            // foroptageren staaet og lyttet og ved, hvad rummet selv larmer.
+            Stilhedsur(() => forud.Niveau, () => forud.Stoejgulv);
             return;
         }
 
@@ -178,7 +180,9 @@ public sealed class Dikteringsvagt : IDisposable
         _fraVaageord = _optager is not null;
         if (_optager is null) return;
 
-        Stilhedsur(() => _optager?.Niveau ?? 0);
+        // Et hold paa tasten har ingen foroptager bag sig, og saa er der
+        // ikke maalt et gulv. Nul betyder «brug det faste tal».
+        Stilhedsur(() => _optager?.Niveau ?? 0, () => Foroptagelse?.Stoejgulv ?? 0f);
     }
 
     /// <summary>
@@ -189,7 +193,7 @@ public sealed class Dikteringsvagt : IDisposable
     /// det. Skilt ud, fordi de to veje ind — foroptageren og den almindelige
     /// optager — måler på hver sin kilde, men skal slippe ens.
     /// </remarks>
-    private void Stilhedsur(Func<float> niveau)
+    private void Stilhedsur(Func<float> niveau, Func<float> gulv)
     {
         var start = DateTime.UtcNow;
         var sidstHoert = DateTime.UtcNow;
@@ -216,7 +220,16 @@ public sealed class Dikteringsvagt : IDisposable
                 return;
             }
 
-            if (niveau() >= Stilhed.Graense)
+            // ============ STILLE I FORHOLD TIL HVAD? ============
+            //
+            // Her stod et fast tal, og med en radio i rummet laa niveauet
+            // HELE TIDEN over det. Saa blev der aldrig stille, dikteringen
+            // sluttede aldrig, og klippet voksede: maalt 31-08-2026 gav 91
+            // sekunders optagelse teksten «Korsus. Tak.» - alt hvad modellen
+            // kunne finde i et minut, der mest var radio.
+            //
+            // Se Stilhed.Graensen.
+            if (niveau() >= Stilhed.Graensen(gulv()))
             {
                 sidstHoert = DateTime.UtcNow;
                 if (DateTime.UtcNow - start >= Stilhed.MindsteTale) harTalt = true;
