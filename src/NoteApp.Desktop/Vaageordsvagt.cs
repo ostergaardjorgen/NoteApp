@@ -174,11 +174,35 @@ public sealed class Vaageordsvagt : IDisposable
 
                 var mikrofon = _kendtIndeks >= 0 ? $" -c {_kendtIndeks}" : "";
 
+                // ============ VINDUET, DER KOSTEDE SYV SEKUNDER ============
+                //
+                // «-cms» er, hvor lang tid motoren optager, FOER den bedoemmer.
+                // Standarden er 8000 ms, og den stod uroert. Derfor gik der
+                // otte sekunder fra «Hej Pia» blev sagt, til der skete noget -
+                // maalt til ca. syv 31-08-2026.
+                //
+                // MEN DET VAR IKKE KUN LANGSOMT. DET VAR OGSAA DERFOR, DET
+                // RAMTE FORKERT.
+                //
+                // Motoren bedoemmer HELE vinduet mod listen. Er vinduet otte
+                // sekunder, og vaageordet fylder ét af dem, skal to ord
+                // forklare syv sekunders stilhed - og saa vinder den mest
+                // almindelige saetning paa listen i stedet. Maalt samme dag:
+                // hver eneste bedoemmelse landede paa «vi ses i morgen» med
+                // 0,15-0,24. «hej pia» optraadte ikke ÉN gang, uanset hvor
+                // mange gange brugeren sagde det.
+                //
+                // 1500 ms passer til det, der skal hoeres: to ord. Vinduet
+                // bliver dét, vaageordet fylder, i stedet for syv sekunders
+                // stilhed med to ord i.
+                //
+                // -t 4 og ikke 2: ventetiden er det, der goer den ubrugelig,
+                // og fire traade paa en maskine med otte er stadig ikke i
+                // vejen for noget.
                 var start = new ProcessStartInfo(Motorsti)
                 {
-                    // -t 2: to traade. Vagten skal ikke tage maskinen fra det,
-                    // brugeren laver - den skal bare vaere der.
-                    Arguments = $"-m \"{model}\" -l {sprog} -t 2 -cmd \"{listefil}\"{mikrofon}",
+                    Arguments = $"-m \"{model}\" -l {sprog} -t 4 -cms {Vaageord.Kommandovindue} "
+                              + $"-cmd \"{listefil}\"{mikrofon}",
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
                     UseShellExecute = false,
@@ -271,6 +295,7 @@ public sealed class Vaageordsvagt : IDisposable
 
     /// <summary>Mikrofonens nummer hos motoren. −1 = ikke fundet endnu.</summary>
     private int _kendtIndeks = -1;
+
 
     /// <summary>Hvor længe fund fra samme ytring lægges sammen.</summary>
     private static readonly TimeSpan Vindue = TimeSpan.FromMilliseconds(700);

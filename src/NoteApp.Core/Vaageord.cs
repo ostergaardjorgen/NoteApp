@@ -55,6 +55,31 @@ public static class Vaageord
     /// </remarks>
     public static readonly IReadOnlyList<string> Standardord = new[] { "hej pia", "hey pia" };
 
+    /// <summary>
+    /// Hvor længe motoren optager, før den bedømmer. Millisekunder.
+    /// </summary>
+    /// <remarks>
+    /// TALLET KOSTEDE BÅDE HASTIGHEDEN OG TRÆFSIKKERHEDEN.
+    ///
+    /// whisper-command optager «-cms» millisekunder og bedømmer så HELE
+    /// vinduet mod listen af udtryk. Standarden er 8000, og den stod urørt.
+    ///
+    /// MÅLT 31-08-2026: der gik omkring syv sekunder fra «Hej Pia» blev sagt,
+    /// til der skete noget. Og hver eneste bedømmelse landede på lokkeordet
+    /// «vi ses i morgen» med 0,15–0,24 — «hej pia» optrådte ikke ÉN gang,
+    /// uanset hvor mange gange brugeren sagde det.
+    ///
+    /// De to ting var det samme problem. Skal to ord forklare syv sekunders
+    /// stilhed, passer de dårligt, og så vinder den mest almindelige sætning
+    /// på listen i stedet. Vinduet var både for langt at vente på og for
+    /// langt til at ramme rigtigt.
+    ///
+    /// Halvandet sekund er dét, vågeordet fylder. Bliver vågeordet en dag
+    /// længere, skal tallet med op: et vindue, der er kortere end det, der
+    /// skal siges, klipper ordet midt over.
+    /// </remarks>
+    public const int Kommandovindue = 1500;
+
     /// <param name="til">Er vågeordet slået til?</param>
     /// <param name="motorFindes">Er der en motor at lytte med?</param>
     /// <param name="optager">Kører der en optagelse — også et onlinemøde?</param>
