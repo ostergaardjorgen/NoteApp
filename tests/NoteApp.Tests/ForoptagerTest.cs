@@ -1,4 +1,4 @@
-using NoteApp.Core;
+﻿using NoteApp.Core;
 using Xunit;
 
 namespace NoteApp.Tests;
@@ -47,5 +47,32 @@ public class ForoptagerTest
         var ring = Lydring.Til(Foroptager.Sekunder, 16000);
 
         Assert.Equal((int)(Foroptager.Sekunder * 16000), ring.Plads);
+    }
+
+    /// <summary>
+    /// Ringens laengde og det, der TAGES MED, er to ting.
+    /// </summary>
+    /// <remarks>
+    /// Ringen er lang, saa intet kan naa at falde ud, mens motoren taenker.
+    /// Men da Behold() tog HELE ringen med, kom der femten sekunders gammel
+    /// tale med i hver eneste diktering.
+    ///
+    /// Maalt 31-08-2026: «Hop, saa er du. Hvorfor skaerer du noget? Hej Pia.
+    /// Skaerer du noget nu». Vaageordet staar MIDT i teksten, og alt foer det
+    /// er noget, der blev sagt til en anden.
+    /// </remarks>
+    [Fact]
+    public void Der_tages_mindre_med_end_ringen_rummer()
+    {
+        Assert.True(Foroptager.Bagudsekunder < Foroptager.Sekunder,
+            "Tages hele ringen med, kommer gammel tale med i hver diktering.");
+    }
+
+    [Fact]
+    public void Der_tages_nok_med_til_at_daekke_vaageordet()
+    {
+        // Vaageordet fylder omkring et sekund, og motoren bedoemmer de sidste
+        // halvandet - plus den tid, bedoemmelsen selv tager.
+        Assert.True(Foroptager.Bagudsekunder >= 3.0);
     }
 }

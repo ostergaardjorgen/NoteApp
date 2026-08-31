@@ -67,21 +67,30 @@ public class KommandovindueTest
     /// Et HOEJERE tal betyder, at der skal mindre til, foer det kaldes en
     /// pause.
     /// </remarks>
+    /// <summary>
+    /// Taersklen maa ikke saettes op igen uden en maaling.
+    /// </summary>
+    /// <remarks>
+    /// 0,8 blev proevet 31-08-2026 for at goere de naturlige mikropauser nok.
+    /// Det, der skete, var, at motoren bedoemte konstant: TI bedoemmelser paa
+    /// sytten sekunder, mens der ikke blev sagt noget - hver gang med det
+    /// samme lokkeord og hver gang med en koeretur paa grafikkortet.
+    ///
+    /// Ved 0,60 blev der maalt NUL bedoemmelser paa fyrre sekunders stilhed.
+    /// </remarks>
     [Fact]
-    public void Pausetaersklen_er_lettere_end_motorens_standard()
+    public void Pausetaersklen_er_ikke_saa_hoej_at_den_bedoemmer_konstant()
     {
-        const double standard = 0.60;
-
-        Assert.True(Vaageord.Pausetaerskel > standard,
-            "Taersklen er tilbage paa motorens standard. Saa kraeves der et "
-            + "tydeligt ophold, foer vaageordet overhovedet bedoemmes.");
+        Assert.True(Vaageord.Pausetaerskel <= 0.60,
+            "Ved 0,8 bedoemte motoren ti gange paa sytten sekunders stilhed. "
+            + "Saettes tallet op igen, skal det maales foerst.");
     }
 
     [Fact]
     public void Pausetaersklen_er_stadig_en_taerskel()
     {
-        // 1,0 ville betyde, at ALT regnes som en pause, og saa bedoemmer den
-        // konstant paa lyd, der ikke er holdt op.
-        Assert.True(Vaageord.Pausetaerskel < 1.0);
+        // 0 ville betyde, at der ALDRIG blev regnet som en pause, og saa
+        // bedoemmes der aldrig.
+        Assert.True(Vaageord.Pausetaerskel > 0.0);
     }
 }

@@ -414,19 +414,34 @@ public sealed class Vaageordsvagt : IDisposable
         // udloese en gang til, naeste gang der kommer en linje.
         if (taeller) _nyligeFund.Clear();
 
-        // Linjen skrives, OGSAA naar fundet ikke taeller. Det er netop de
-        // fund, der blev kasseret, der siger, om graensen sidder forkert.
-        try
+        // ============ KUN DE FUND, DER BETYDER NOGET ============
+        //
+        // HER BLEV HVERT ENESTE FUND SKREVET NED, ogsaa de kasserede, og som
+        // «se efter». Det var sat ind for at kunne maale, hvorfor vaageordet
+        // ikke svarede, og det gjorde sit arbejde: det var dét, der viste, at
+        // motoren altid valgte lokkeordet «vi ses i morgen».
+        //
+        // Men maalingen er gjort, og linjerne blev staaende. Set 31-08-2026:
+        // 500 poster i historikken, hvoraf de 502 var «Vaageordet hoerte noget
+        // andet» - gule advarsler om noget helt normalt. Historikken er dér,
+        // hvor man leder efter, hvad appen har gjort ved ens data, og den var
+        // fyldt med stoej fra en lytning, der virkede.
+        //
+        // Nu skrives kun de fund, der UDLOESER noget. Et kasseret fund er ikke
+        // en haendelse; det er lytningen, der goer sit arbejde.
+        if (taeller)
         {
-            Historik.Skriv(HaendelseType.Andet,
-                taeller ? "Vågeordet blev hørt" : "Vågeordet hørte noget andet",
-                $"«{fund.Udtryk}» · sikkerhed {fund.Sikkerhed:0.00} · "
-                + $"grænse {Vaageordsliste.Graense(_antalUdtryk):0.00}",
-                taeller ? Udfald.Fuldført : Udfald.SeEfter);
-        }
-        catch (Exception)
-        {
-            // En log, der ikke kan skrives, maa ikke stoppe lytningen.
+            try
+            {
+                Historik.Skriv(HaendelseType.Andet, "Vågeordet blev hørt",
+                    $"«{fund.Udtryk}» · sikkerhed {fund.Sikkerhed:0.00} · "
+                    + $"grænse {Vaageordsliste.Graense(_antalUdtryk):0.00}",
+                    Udfald.Fuldført);
+            }
+            catch (Exception)
+            {
+                // En log, der ikke kan skrives, maa ikke stoppe lytningen.
+            }
         }
 
         if (!taeller) return;

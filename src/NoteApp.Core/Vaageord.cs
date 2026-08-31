@@ -101,12 +101,22 @@ public static class Vaageord
     /// Et HØJERE tal betyder, at der skal mindre til, før motoren kalder det
     /// en pause — og så er de små ophold, der findes i almindelig tale, nok.
     ///
-    /// 0,8 er valgt, fordi det gør de naturlige mikropauser brugbare uden at
-    /// gøre enhver dæmpning til et ophold. Udløser den for tit, koster det
-    /// kun en bedømmelse, der ikke matcher: et vindue uden vågeordet i sig
-    /// bliver kasseret på navnet.
+    /// 0,8 BLEV PRØVET OG ER RULLET TILBAGE. Tanken var, at de naturlige
+    /// mikropauser så ville være nok. Det, der faktisk skete, var, at motoren
+    /// bedømte konstant: målt 31-08-2026 kom der TI bedømmelser på sytten
+    /// sekunder, mens der ikke blev sagt noget — hver gang med det samme
+    /// lokkeord, «vi ses i morgen», og hver gang med en køretur på
+    /// grafikkortet.
+    ///
+    /// Ved 0,60 blev der målt NUL bedømmelser på fyrre sekunders stilhed.
+    /// Prisen er, at ophold skal være tydelige — og det er dét, teksten på
+    /// bjælken beder om: sig «Hej Pia», hold en kort pause, og tal så.
+    ///
+    /// DEN RIGTIGE LØSNING ER IKKE ET TAL HER. Så længe motoren først
+    /// bedømmer, når man holder pause, er valget mellem «langsom» og «kører
+    /// hele tiden». Vågeordet skal høres, MENS man taler — se roadmappen.
     /// </remarks>
-    public const double Pausetaerskel = 0.8;
+    public const double Pausetaerskel = 0.60;
 
     /// <param name="til">Er vågeordet slået til?</param>
     /// <param name="motorFindes">Er der en motor at lytte med?</param>

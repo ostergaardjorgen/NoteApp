@@ -132,8 +132,33 @@ public sealed class Foroptager : IDisposable
     }
 
     /// <summary>
-    /// Vågeordet er hørt: behold det, der ligger i ringen, og alt hvad der
-    /// kommer nu.
+    /// Hvor langt tilbage der TAGES MED, når vågeordet er hørt.
+    /// </summary>
+    /// <remarks>
+    /// IKKE DET SAMME SOM RINGENS LÆNGDE, OG DET KOSTEDE EN UDSKRIFT.
+    ///
+    /// Ringen er lang, så intet kan nå at falde ud, mens motoren tænker. Men
+    /// da <see cref="Behold"/> tog HELE ringen med, kom der femten sekunders
+    /// gammel tale med i hver eneste diktering — det, der blev sagt i rummet,
+    /// før nogen kaldte på appen.
+    ///
+    /// Målt 31-08-2026 kom denne udskrift ud af en diktering: «Hop, så er du.
+    /// Hvorfor skærer du noget? Hej Pia. Skærer du noget nu». Vågeordet står
+    /// MIDT i teksten, og alt før det er noget, der blev sagt til en anden.
+    ///
+    /// Fire sekunder er nok, fordi vågeordet udløser KORT efter, det er
+    /// sagt: motoren bedømmer først, når man holder pause, og bedømmer de
+    /// sidste halvandet sekund. Er der gået længere, var det ikke vågeordet,
+    /// den hørte — så udløste den slet ikke.
+    ///
+    /// Det, der kommer EFTER, tages med uanset længde. Det er dét, man
+    /// dikterer.
+    /// </remarks>
+    public const double Bagudsekunder = 4.0;
+
+    /// <summary>
+    /// Vågeordet er hørt: behold de sidste sekunder — og alt hvad der kommer
+    /// nu.
     /// </summary>
     public void Behold()
     {
@@ -141,7 +166,14 @@ public sealed class Foroptager : IDisposable
         {
             if (_ring is null) return;
 
-            _beholdt = new List<short>(_ring.Laes());
+            var alt = _ring.Laes();
+            var bagud = (int)(Bagudsekunder * Frekvens);
+
+            // Er ringen kortere end det, vi vil have med, tages det, der er.
+            var fra = Math.Max(0, alt.Length - bagud);
+
+            _beholdt = new List<short>(alt.Length - fra);
+            _beholdt.AddRange(alt.AsSpan(fra).ToArray());
         }
     }
 
