@@ -51,6 +51,40 @@
           <TextBlock Style="{StaticResource Underskrift}" Margin="0,4,0,0" TextWrapping="Wrap"
                      Text="{i18n:Oversat kommandoer.vaageord_ord_under}" />
 
+          <!-- ============ SIG DET SELV ============
+
+               Motoren sammenligner det, den hoerer, med de BOGSTAVER, der
+               staar paa listen. Hoerer den din stemme som «hej bia», og staar
+               der «hej pia», rammer den skaevt hver gang.
+
+               Maalt 31-08-2026: en diktering landede som «Hej Bia», og
+               brugerens «Hej Pia» blev bedoemt til 0,109 og 0,141 - under
+               graensen, saa der skete ingenting.
+
+               Herfra spoerges der i stedet: sig ordet tre gange, lad motoren
+               skrive det ned, og laeg DEN stavemaade paa listen. Saa
+               sammenligner den med sig selv.
+
+               DET SKER PAA MASKINEN. Klippene skrives ud lokalt og slettes
+               bagefter. En stemmeproeve er noget af det mest personlige, der
+               findes. -->
+          <Border Background="{DynamicResource Baggrund}" CornerRadius="8" Padding="16,12"
+                  Margin="0,14,0,0" BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
+            <StackPanel>
+              <TextBlock Text="{i18n:Oversat kommandoer.laer_overskrift}" FontWeight="SemiBold" />
+              <TextBlock Style="{StaticResource Underskrift}" Margin="0,6,0,12" TextWrapping="Wrap"
+                         Text="{i18n:Oversat kommandoer.laer_under}" />
+
+              <StackPanel Orientation="Horizontal">
+                <Button x:Name="LaerKnap" Click="Laer_Klik" Padding="14,7"
+                        Content="{i18n:Oversat kommandoer.laer_knap}" />
+                <TextBlock x:Name="LaerStatus" VerticalAlignment="Center" Margin="12,0,0,0"
+                           FontSize="12.5" TextWrapping="Wrap" MaxWidth="480"
+                           Foreground="{DynamicResource TekstSvag}" />
+              </StackPanel>
+            </StackPanel>
+          </Border>
+
           <!-- ==================== HVORNÅR OG HVAD DET KOSTER ====================
 
                HER LAA ET VINDUE PAA TI MINUTTER OM HVER AFTALE. Det var en

@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.IO;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using NoteApp.Core;
@@ -304,5 +305,139 @@ public partial class KommandoerView : UserControl
         AppSettings.Current.Save();
 
         VisListe();
+    }
+
+    // ==================== SIG DET SELV ====================
+
+    /// <summary>
+    /// Optager brugerens egen udtale og lægger den på listen.
+    /// </summary>
+    /// <remarks>
+    /// BRUGERENS EGEN IDÉ, OG DEN PASSER TIL DEN MOTOR, VI HAR.
+    ///
+    /// whisper-command i guided mode sammenligner det, den hører, med de
+    /// BOGSTAVER, der står på listen. Hører den stemmen som «hej bia», og
+    /// står der «hej pia», rammer den skævt hver gang.
+    ///
+    /// Målt 31-08-2026: en diktering landede som «Hej Bia», og brugerens
+    /// «Hej Pia» blev bedømt til 0,109 og 0,141 — under grænsen, så der skete
+    /// ingenting. Modellen hørte ham fint; den fik bare udleveret en anden
+    /// stavemåde end den, den selv ville skrive.
+    ///
+    /// LYTNINGEN STOPPES IMENS. Vågeordsmotoren har mikrofonen, og to
+    /// optagere på den samme enhed er en vej til at stå fast. Den startes
+    /// igen bagefter — med den nye liste.
+    /// </remarks>
+    private async void Laer_Klik(object sender, RoutedEventArgs e)
+    {
+        if (!Core.Lokaludskrift.Kan())
+        {
+            LaerStatus.Text = Sprog.T("kommandoer.laer_ingen_motor");
+            return;
+        }
+
+        LaerKnap.IsEnabled = false;
+        var stod = AppSettings.Current.VaageordTil;
+
+        try
+        {
+            // Mikrofonen skal vaere fri. Slaas lytningen fra her, foelger
+            // vagten med af sig selv - se MainWindow.SaetVaageord.
+            if (stod)
+            {
+                AppSettings.Current.VaageordTil = false;
+                AppSettings.Current.Save();
+                Aendret?.Invoke();
+
+                // Motoren skal naa at slippe enheden.
+                await Task.Delay(700);
+            }
+
+            var forsoeg = new List<Core.Vaageordsforsoeg>();
+
+            for (var nr = 1; nr <= Core.Vaageordsproeve.Gange; nr++)
+            {
+                LaerStatus.Text = Sprog.T("kommandoer.laer_igang",
+                    nr.ToString(), Core.Vaageordsproeve.Gange.ToString());
+
+                var hoert = await EtForsoegAsync();
+                if (hoert.Length > 0)
+                {
+                    forsoeg.Add(new Core.Vaageordsforsoeg(hoert, 0));
+                    LaerStatus.Text = Sprog.T("kommandoer.laer_hoerte", hoert);
+                }
+
+                // Et oejeblik mellem hver, saa man kan naa at trakke vejret.
+                await Task.Delay(400);
+            }
+
+            var valgt = Core.Vaageordsproeve.Vaelg(
+                forsoeg.Where(f => Core.Vaageordsproeve.Duer(f.Hoert)));
+
+            if (valgt.Count == 0)
+            {
+                LaerStatus.Text = Sprog.T("kommandoer.laer_intet");
+                return;
+            }
+
+            AppSettings.Current.Vaageord = valgt.ToList();
+            AppSettings.Current.Save();
+
+            Ord.Text = string.Join(Environment.NewLine, valgt);
+            LaerStatus.Text = Sprog.T("kommandoer.laer_faerdig", string.Join(", ", valgt));
+        }
+        catch (Exception ex)
+        {
+            LaerStatus.Text = Sprog.T("kommandoer.laer_gik_galt", ex.Message);
+        }
+        finally
+        {
+            if (stod)
+            {
+                AppSettings.Current.VaageordTil = true;
+                AppSettings.Current.Save();
+            }
+
+            LaerKnap.IsEnabled = true;
+            Aendret?.Invoke();
+        }
+    }
+
+    /// <summary>
+    /// Ét forsøg: optag, skriv ud på maskinen, slet klippet.
+    /// </summary>
+    /// <remarks>
+    /// KLIPPET SLETTES ALTID. En stemmeprøve er noget af det mest personlige,
+    /// der findes, og den skal hverken blive liggende eller ud af huset for
+    /// at appen kan lære at høre efter to ord.
+    /// </remarks>
+    private static async Task<string> EtForsoegAsync()
+    {
+        var forop = new Core.Foroptager();
+        var sti = Path.Combine(Path.GetTempPath(),
+                               "heypia-vaageord-" + Guid.NewGuid().ToString("N")[..8] + ".wav");
+
+        try
+        {
+            if (!forop.Start(AppSettings.Current.MicrophoneId)) return "";
+
+            forop.Behold();
+            await Task.Delay(Core.Vaageordsproeve.Loft);
+
+            forop.Gem(sti);
+            forop.Stop();
+
+            if (!File.Exists(sti)) return "";
+
+            var hoert = await Core.Lokaludskrift.SkrivUdAsync(
+                sti, AppSettings.Current.Talesprog);
+
+            return Core.Vaageordsproeve.Rens(hoert);
+        }
+        finally
+        {
+            try { forop.Dispose(); } catch (Exception) { }
+            try { if (File.Exists(sti)) File.Delete(sti); } catch (Exception) { }
+        }
     }
 }

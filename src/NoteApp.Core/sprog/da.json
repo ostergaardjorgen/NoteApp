@@ -1012,7 +1012,16 @@
     "forbrug_tal": "Bruger {0} % af én kerne — det er {1} % af din maskines {2} kerner",
     "forbrug_lytter_ikke": "Lytter ikke — der er ikke noget at måle",
     "forbrug_under": "Tallet er målt på lytningen, ikke skønnet: det er den processortid, den faktisk har brugt, delt med den tid, der er gået. Jobliste regner på samme måde — den viser tallet for hele maskinen, altså det sidste af de to.",
-    "forbrug_grafik": "og {0} MB på grafikkortet — {1} % af dets {2} GB"
+    "forbrug_grafik": "og {0} MB på grafikkortet — {1} % af dets {2} GB",
+    "laer_overskrift": "Lær appen din måde at sige det på",
+    "laer_under": "Motoren sammenligner det, den hører, med de bogstaver, der står ovenfor. Siger du ordet tre gange, skriver den ned, hvad den faktisk hører fra din stemme og din mikrofon — og så leder den efter dét. Lyden bliver på maskinen og slettes bagefter.",
+    "laer_knap": "Sig «Hej Pia» tre gange",
+    "laer_igang": "Sig «Hej Pia» nu … ({0} af {1})",
+    "laer_hoerte": "Hørte: {0}",
+    "laer_faerdig": "Appen lytter nu efter: {0}",
+    "laer_intet": "Der blev ikke hørt noget brugbart. Prøv igen, gerne tættere på mikrofonen.",
+    "laer_ingen_motor": "Der er ingen motor til at skrive lyden ud endnu.",
+    "laer_gik_galt": "Det gik galt: {0}"
   },
   "vaageord": {
     "lytter": "Lytter efter vågeordet",

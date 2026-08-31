@@ -54,6 +54,29 @@ public static class Vaageordsliste
         "tak for det",
         "hej med dig",
         "hvordan går det",
+
+        // ============ RADIOEN SKAL OGSAA HAVE ET STED AT GAA HEN ============
+        //
+        // Guided mode KAN ikke svare «ingenting» - den vaelger altid noget fra
+        // listen. Er der kun danske hverdagsvendinger paa den, bliver musik og
+        // engelsk tale tvunget over paa dem, og saa er det tilfaeldigt, om det
+        // lander paa et lokkeord eller paa vaageordet.
+        //
+        // Maalt 31-08-2026: brugeren hoerte blandet musik- og taleradio, og
+        // appen begyndte at optage af sig selv. Alle de falske udslag laa paa
+        // «hey pia», som siden er taget af listen - men stoejen skal stadig
+        // have et sted at lande, saa den ikke naermer sig det ord, der er
+        // tilbage.
+        //
+        // Musik skrives af whisper som «[MUSIK]» og lignende, og engelsk tale
+        // som engelsk. Begge dele staar her nu, saa listen ligner det, der
+        // faktisk kommer ud af en radio.
+        "musik",
+        "sang og musik",
+        "thank you very much",
+        "and now the news",
+        "welcome back to the show",
+        "yeah yeah yeah",
     };
 
     /// <summary>

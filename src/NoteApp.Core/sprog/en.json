@@ -1012,7 +1012,16 @@
     "forbrug_tal": "Using {0} % of one core — that is {1} % of your machine’s {2} cores",
     "forbrug_lytter_ikke": "Not listening — there is nothing to measure",
     "forbrug_under": "The figure is measured on the listening, not estimated: it is the processor time it has actually used, divided by the time elapsed. Task Manager calculates the same way — it shows the figure for the whole machine, that is, the second of the two.",
-    "forbrug_grafik": "and {0} MB on the graphics card — {1} % of its {2} GB"
+    "forbrug_grafik": "and {0} MB on the graphics card — {1} % of its {2} GB",
+    "laer_overskrift": "Teach the app how you say it",
+    "laer_under": "The engine compares what it hears with the letters above. Say the phrase three times and it writes down what it actually hears from your voice and your microphone — and then looks for that. The audio stays on the machine and is deleted afterwards.",
+    "laer_knap": "Say «Hej Pia» three times",
+    "laer_igang": "Say «Hej Pia» now … ({0} of {1})",
+    "laer_hoerte": "Heard: {0}",
+    "laer_faerdig": "The app now listens for: {0}",
+    "laer_intet": "Nothing usable was heard. Try again, closer to the microphone.",
+    "laer_ingen_motor": "There is no engine to write the audio out yet.",
+    "laer_gik_galt": "It went wrong: {0}"
   },
   "vaageord": {
     "lytter": "Listening for the wake word",
