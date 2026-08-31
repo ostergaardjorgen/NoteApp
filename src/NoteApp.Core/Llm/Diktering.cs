@@ -136,11 +136,67 @@ public static class Voxtral
     /// </remarks>
     public static string? Ledetraad(string? sprog) => sprog?.Trim().ToLowerInvariant() switch
     {
-        "da" => "Følgende er en diktering på dansk.",
-        "no" => "Det følgende er en diktat på norsk.",
-        "sv" => "Det följande är en diktering på svenska.",
+        "da" => "Der tales dansk. Det følgende er en diktering på dansk.",
+        "no" => "Det snakkes norsk. Det følgende er en diktat på norsk.",
+        "sv" => "Det talas svenska. Det följande är en diktering på svenska.",
         _ => null,
     };
+
+    /// <summary>
+    /// Sætningen, der indleder ordlisten — på det talte sprog.
+    /// </summary>
+    /// <remarks>
+    /// ORDLISTEN SKAL STÅ I EN DANSK SÆTNING og ikke bare komme som en
+    /// række ord. Fagordene er som regel engelske — SCIM, SSO, MFA — og
+    /// modellen læser hele prompten som en smagsprøve på sproget. Uden en
+    /// ramme omkring dem er de fyrre stemmer for engelsk mod én for dansk.
+    /// </remarks>
+    public static string Ordindledning(string? sprog) => sprog?.Trim().ToLowerInvariant() switch
+    {
+        "no" => "Disse ordene kan forekomme:",
+        "sv" => "Dessa ord kan förekomma:",
+        _ => "Disse ord kan forekomme:",
+    };
+
+    /// <summary>
+    /// Ledetråden, der sendes med lyden.
+    /// </summary>
+    /// <remarks>
+    /// ORDLISTEN OVERDØVEDE SPROGET. Prompten var bygget som «ledetråd, så
+    /// ordliste», og det holdt ikke: ledetråden er ÉN dansk sætning,
+    /// ordlisten er fyrre fagord, og de fleste af dem er engelske — SCIM,
+    /// SSO, MFA, Microsoft Graph, IAM. Modellen læser hele prompten som en
+    /// smagsprøve på sproget, og så vejer fyrre engelske ord tungere end én
+    /// dansk sætning.
+    ///
+    /// MÅLT 31-08-2026: en diktering på dansk kom tilbage på TYSK — «Hi Pia,
+    /// kannst du mir helfen ...». Det var ikke hørt forkert; det var hørt på
+    /// det forkerte sprog, og så er hvert eneste ord galt.
+    ///
+    /// Sproget står nu i BEGGE ENDER, og ordlisten står inde i en dansk
+    /// sætning. Det sidste, modellen læser før lyden, er dansk — ikke en
+    /// række engelske forkortelser.
+    ///
+    /// Ren funktion, så rækkefølgen kan prøves af uden at der sendes noget.
+    /// </remarks>
+    public static string Prompt(string? sprog, bool sprogetErValgt, IEnumerable<string>? fagord)
+    {
+        var ledetraad = sprogetErValgt ? null : Ledetraad(sprog);
+        var liste = fagord?.Where(o => !string.IsNullOrWhiteSpace(o)).ToList();
+
+        var dele = new List<string>();
+
+        if (ledetraad is not null) dele.Add(ledetraad);
+
+        if (liste is { Count: > 0 })
+        {
+            dele.Add(Ordindledning(sprog) + " " + string.Join(", ", liste) + ".");
+
+            if (ledetraad is not null) dele.Add(ledetraad);
+        }
+
+        return string.Join(" ", dele);
+    }
 
     /// <summary>
     /// Instruktionen til tekstpudsningen. Ren funktion, så den kan prøves af
@@ -339,15 +395,25 @@ public sealed class Dikteringsklient
         //
         // Det er en paavirkning, ikke en garanti. Paa et klip paa tre ord er
         // det til gengaeld forskellen paa dansk og «Alors, alors, alors ?».
-        var dele = new List<string>();
+        // ============ ORDLISTEN OVERDOEVEDE SPROGET ============
+        //
+        // Prompten var bygget som «ledetraad, saa ordliste», og det holdt
+        // ikke. Ledetraaden er ÉN dansk saetning; ordlisten er fyrre fagord,
+        // og de fleste af dem er engelske: SCIM, SSO, MFA, Microsoft Graph,
+        // IAM. Modellen laeser hele prompten som en smagsproeve paa sproget,
+        // og saa vejer fyrre engelske ord tungere end én dansk saetning.
+        //
+        // MAALT 31-08-2026: en diktering paa dansk kom tilbage paa TYSK -
+        // «Hi Pia, kannst du mir helfen ...». Det var ikke hoert forkert; det
+        // var hoert paa det forkerte sprog, og saa er hvert eneste ord galt.
+        //
+        // Sproget staar nu i BEGGE ENDER, saa ordlisten er noget, der staar
+        // inde i en dansk sammenhaeng - ikke noget, der afsluttet prompten og
+        // fik det sidste ord.
+        var prompt = Voxtral.Prompt(sprog, kanVaelges, fagord);
 
-        if (!kanVaelges && Voxtral.Ledetraad(sprog) is { } ledetraad) dele.Add(ledetraad);
-
-        var liste = fagord?.Where(o => !string.IsNullOrWhiteSpace(o)).ToList();
-        if (liste is { Count: > 0 }) dele.Add(string.Join(", ", liste));
-
-        if (dele.Count > 0)
-            indhold.Add(new StringContent(string.Join(" ", dele), new UTF8Encoding(false)), "prompt");
+        if (prompt.Length > 0)
+            indhold.Add(new StringContent(prompt, new UTF8Encoding(false)), "prompt");
 
         using var anmodning = new HttpRequestMessage(HttpMethod.Post, Voxtral.Endepunkt)
         {
