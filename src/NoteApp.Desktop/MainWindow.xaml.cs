@@ -1421,57 +1421,79 @@ public partial class MainWindow : Window
     }
 
     /// <summary>
-    /// Prikken lyser, når mikrofonen hører dig.
+    /// Lydbølgerne, der viser at der bliver optaget.
     /// </summary>
     /// <remarks>
-    /// DET ENESTE SIGNAL, DER KAN KOMME MED DET SAMME.
+    /// EN BESKED OM AT DER OPTAGES ER EN PÅSTAND. En kurve, der følger
+    /// stemmen, er et bevis — og forskellen mærkes i det sekund, hvor man
+    /// begynder at tale og ikke ved, om appen er med. Brugerens note
+    /// 31-08-2026: «jeg begynder at tale uden at vide, om den er klar til at
+    /// modtage info».
     ///
-    /// Motoren afgør først, om der blev sagt «Hej Pia», når man holder en
-    /// pause — og indtil da står man og taler uden at vide, om appen
-    /// overhovedet er med. Brugeren skrev det ind som en note 31-08-2026:
-    /// «jeg begynder at tale uden at vide, om den er klar til at modtage».
+    /// Først lyste prikken bare op efter niveauet. Det var for lidt til at
+    /// ses i øjenkrogen, mens man kigger et andet sted hen.
     ///
-    /// Appens EGEN mikrofon står allerede åben — føroptageren har den, mens
-    /// vågeordet lyttes efter — og dens niveau er der lige nu. Den kan ikke
-    /// sige, HVAD der blev sagt, men den kan sige «jeg kan høre dig», og det
-    /// er dét, spørgsmålet handler om.
+    /// DE VISES KUN UNDER EN DIKTERING. En kurve, der bevæger sig, mens
+    /// appen bare lytter efter vågeordet, ville læses som «den optager nu» —
+    /// og det er præcis den forveksling, hele bjælken er sat i verden for at
+    /// undgå.
     ///
-    /// Prikken er ikke en måler med tal. Den lyser op, når der er lyd, og
-    /// falder tilbage, når der ikke er. Man skal kunne se den i øjenkrogen,
-    /// mens man kigger et andet sted hen.
+    /// SØJLERNE RYKKER, DE HOPPER IKKE HVER FOR SIG. Det nyeste niveau
+    /// kommer ind til højre, og resten skubbes til venstre. Så er billedet
+    /// de sidste sekunders tale og ikke syv tal, der blinker uafhængigt —
+    /// det første ligner lyd, det andet ligner en fejl.
     /// </remarks>
-    private void SaetLydprik()
+    private readonly double[] _boelger = new double[7];
+
+    private const double Boelgebund = 4.0;
+    private const double Boelgetop = 18.0;
+
+    private void SaetBoelger()
     {
-        var n = _forop?.Niveau ?? 0f;
+        // Skalaen: graensen i Stilhed er 0,02 - dét, der regnes som «der
+        // bliver talt». Almindelig tale skal ramme toppen, saa der er noget
+        // at se, og et stille rum skal ligge i bund.
+        var n = Math.Clamp(_diktat.Niveau / 0.05, 0.0, 1.0);
 
-        // Skalaen er valgt, saa almindelig tale rammer toppen og et stille
-        // rum ligger i bunden. Graensen i Stilhed er 0,02 - dét, der regnes
-        // som «der bliver talt» - saa den skal vaere tydeligt oppe.
-        var lys = Math.Clamp(0.30 + n / 0.05 * 0.70, 0.30, 1.0);
+        Array.Copy(_boelger, 1, _boelger, 0, _boelger.Length - 1);
+        _boelger[^1] = n;
 
-        DiktatPrik.Opacity = lys;
-        _boble?.SaetLyd(lys);
+        var felter = new[] { Boelge0, Boelge1, Boelge2, Boelge3, Boelge4, Boelge5, Boelge6 };
+
+        for (var i = 0; i < felter.Length; i++)
+            felter[i].Height = Boelgebund + _boelger[i] * (Boelgetop - Boelgebund);
+
+        _boble?.SaetBoelger(_boelger);
     }
 
     private DispatcherTimer? _lydur;
 
-    /// <summary>Starter og stopper lydprikken sammen med lytningen.</summary>
+    /// <summary>Starter og stopper bølgerne sammen med optagelsen.</summary>
     private void SaetLydur(bool koer)
     {
         if (!koer)
         {
             _lydur?.Stop();
             _lydur = null;
-            DiktatPrik.Opacity = 1.0;
+
+            Array.Clear(_boelger);
+
+            Lydboelger.Visibility = Visibility.Collapsed;
+            DiktatPrik.Visibility = Visibility.Visible;
+            _boble?.VisBoelger(false);
             return;
         }
 
+        Lydboelger.Visibility = Visibility.Visible;
+        DiktatPrik.Visibility = Visibility.Collapsed;
+        _boble?.VisBoelger(true);
+
         if (_lydur is not null) return;
 
-        // Ti gange i sekundet. Hurtigt nok til at foelge stemmen, langsomt nok
-        // til ikke at koste noget - det er ét feltopslag pr. gang.
-        _lydur = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(100) };
-        _lydur.Tick += (_, _) => SaetLydprik();
+        // Tyve gange i sekundet. Hurtigt nok til at foelge en stemme - ved ti
+        // saa det hakkende ud - og stadig kun ét feltopslag pr. gang.
+        _lydur = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(50) };
+        _lydur.Tick += (_, _) => SaetBoelger();
         _lydur.Start();
     }
 
@@ -1606,10 +1628,9 @@ public partial class MainWindow : Window
         DiktatBjaelke.Visibility = Visibility.Visible;
         VisBoble(besked, pulser: !_vaage.Klar, skjulEfter: null);
 
-        // Prikken foelger mikrofonen, saa laenge der er klar. Mens modellen
-        // laeses ind, pulserer den i stedet - dér er der ikke noget at hoere
-        // med endnu.
-        SaetLydur(_vaage.Klar);
+        // Lyttes der bare, staar prikken stille. Boelgerne hoerer til
+        // optagelsen og maa ikke kunne forveksles med den.
+        SaetLydur(false);
     }
 
     private void VisDiktat(string besked) => Dispatcher.BeginInvoke(() =>
@@ -1622,6 +1643,11 @@ public partial class MainWindow : Window
                  skjulEfter: _diktat.Igang ? null : TimeSpan.FromSeconds(7));
         DiktatBesked.Text = besked;
         DiktatBjaelke.Visibility = Visibility.Visible;
+
+        // BOELGERNE FOELGER OPTAGELSEN OG INTET ANDET. De taendes, naar der
+        // optages, og slukkes i det oejeblik lyden er i hus - ogsaa mens der
+        // skrives ud, hvor der ikke laengere er en stemme at foelge.
+        SaetLydur(_diktat.Igang);
 
         // En NY diktering rydder tilbuddet fra den forrige. Ellers ville man
         // gemme det forkerte, fordi knappen stod der endnu.

@@ -37,6 +37,27 @@
       <Ellipse x:Name="Prik" Width="11" Height="11" VerticalAlignment="Center"
                Margin="0,0,12,0" Fill="{DynamicResource Optager}" />
 
+      <!-- Samme boelger som paa bjaelken. Boblen er dét, man ser, mens man
+           staar i et andet program - og det er netop dér, spoergsmaalet «er
+           den med nu» opstaar. Se MainWindow.SaetBoelger. -->
+      <StackPanel x:Name="Boelger" Orientation="Horizontal" Visibility="Collapsed"
+                  VerticalAlignment="Center" Height="18">
+        <Rectangle x:Name="B0" Width="3" Height="4" RadiusX="1.5" RadiusY="1.5"
+                   VerticalAlignment="Center" Fill="{DynamicResource Optager}" />
+        <Rectangle x:Name="B1" Width="3" Height="4" RadiusX="1.5" RadiusY="1.5"
+                   Margin="2,0,0,0" VerticalAlignment="Center" Fill="{DynamicResource Optager}" />
+        <Rectangle x:Name="B2" Width="3" Height="4" RadiusX="1.5" RadiusY="1.5"
+                   Margin="2,0,0,0" VerticalAlignment="Center" Fill="{DynamicResource Optager}" />
+        <Rectangle x:Name="B3" Width="3" Height="4" RadiusX="1.5" RadiusY="1.5"
+                   Margin="2,0,0,0" VerticalAlignment="Center" Fill="{DynamicResource Optager}" />
+        <Rectangle x:Name="B4" Width="3" Height="4" RadiusX="1.5" RadiusY="1.5"
+                   Margin="2,0,0,0" VerticalAlignment="Center" Fill="{DynamicResource Optager}" />
+        <Rectangle x:Name="B5" Width="3" Height="4" RadiusX="1.5" RadiusY="1.5"
+                   Margin="2,0,0,0" VerticalAlignment="Center" Fill="{DynamicResource Optager}" />
+        <Rectangle x:Name="B6" Width="3" Height="4" RadiusX="1.5" RadiusY="1.5"
+                   Margin="2,0,0,0" VerticalAlignment="Center" Fill="{DynamicResource Optager}" />
+      </StackPanel>
+
       <TextBlock x:Name="Besked" FontSize="13.5" VerticalAlignment="Center"
                  Foreground="{DynamicResource Tekst}" MaxWidth="420" TextTrimming="CharacterEllipsis" />
 

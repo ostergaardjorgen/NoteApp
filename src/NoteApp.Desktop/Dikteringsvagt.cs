@@ -96,6 +96,24 @@ public sealed class Dikteringsvagt : IDisposable
         _optager is not null || _arbejder || Foroptagelse is { Beholder: true };
 
     /// <summary>
+    /// Mikrofonens niveau lige nu, 0–1. Nul, når der ikke optages.
+    /// </summary>
+    /// <remarks>
+    /// DEN FINDES, FOR AT MAN KAN SE, AT DER BLIVER OPTAGET.
+    ///
+    /// En besked om, at der optages, er en påstand. En kurve, der følger
+    /// stemmen, er et bevis — og forskellen mærkes i det sekund, hvor man
+    /// begynder at tale og ikke ved, om appen er med.
+    ///
+    /// De to veje ind måler på hver sin kilde: et hold på tasten optager
+    /// direkte, et vågeord henter fra ringen. Udad til er det det samme
+    /// spørgsmål, og det skal have det samme svar.
+    /// </remarks>
+    public float Niveau =>
+        _optager?.Niveau
+        ?? (Foroptagelse is { Beholder: true } f ? f.Niveau : 0f);
+
+    /// <summary>
     /// Mikrofonen, der allerede er åben, mens der lyttes. Sat af skærmen.
     /// </summary>
     /// <remarks>

@@ -160,27 +160,38 @@ public partial class Lytteboble : Window
             skjulEfter: TimeSpan.FromSeconds(nyTilstand ? 3 : 6));
     }
 
-    /// <summary>
-    /// Lader prikken følge mikrofonens niveau.
-    /// </summary>
+    /// <summary>Viser bølgerne i stedet for prikken — eller omvendt.</summary>
     /// <remarks>
-    /// Boblen er dét, man ser, mens man står i et andet program — og det er
-    /// netop dér, spørgsmålet «kan den høre mig» opstår. Se
-    /// MainWindow.SaetLydprik for hvorfor.
-    ///
-    /// Pulsen slås fra imens: to ting, der begge får prikken til at ændre
-    /// sig, ville se ud som støj i stedet for som et svar.
+    /// Kun ÉN af dem ad gangen. To ting, der begge fortæller om lyd, læses
+    /// som støj i stedet for som et svar.
     /// </remarks>
-    public void SaetLyd(double lys)
+    public void VisBoelger(bool til)
     {
         try
         {
-            Prik.BeginAnimation(OpacityProperty, null);
-            Prik.Opacity = lys;
+            Boelger.Visibility = til ? Visibility.Visible : Visibility.Collapsed;
+            Prik.Visibility = til ? Visibility.Collapsed : Visibility.Visible;
         }
         catch (Exception)
         {
-            // En prik, der ikke kan taendes, maa ikke kunne stoppe noget.
+            // En boble, der ikke kan tegnes, maa ikke kunne stoppe en
+            // diktering. Bjaelken i vinduet siger det samme.
+        }
+    }
+
+    /// <summary>Sætter søjlernes højde. Nyeste værdi står yderst til højre.</summary>
+    public void SaetBoelger(IReadOnlyList<double> niveauer)
+    {
+        try
+        {
+            var felter = new[] { B0, B1, B2, B3, B4, B5, B6 };
+
+            for (var i = 0; i < felter.Length && i < niveauer.Count; i++)
+                felter[i].Height = 4.0 + niveauer[i] * 14.0;
+        }
+        catch (Exception)
+        {
+            // Se VisBoelger.
         }
     }
 

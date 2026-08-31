@@ -346,6 +346,38 @@
         <StackPanel Grid.Column="0" Orientation="Horizontal">
           <Ellipse x:Name="DiktatPrik" Width="9" Height="9" VerticalAlignment="Center"
                    Margin="0,0,12,0" Fill="{DynamicResource Optager}" />
+
+          <!-- ============ LYDBOELGER, KUN MENS DER OPTAGES ============
+
+               EN BESKED OM AT DER OPTAGES ER EN PAASTAND. En kurve, der
+               foelger stemmen, er et bevis - og forskellen maerkes i det
+               sekund, hvor man begynder at tale og ikke ved, om appen er med.
+
+               Prikken lyste op efter niveauet foer. Det var for lidt til at
+               ses i oejenkrogen, mens man kigger et andet sted hen.
+
+               DE VISES KUN UNDER EN DIKTERING. En kurve, der bevaeger sig,
+               mens appen bare lytter efter vaageordet, ville laeses som «den
+               optager nu» - og det er praecis den forveksling, hele bjaelken
+               er sat i verden for at undgaa. Lyttes der bare, staar prikken
+               stille. -->
+          <StackPanel x:Name="Lydboelger" Orientation="Horizontal" Visibility="Collapsed"
+                      VerticalAlignment="Center" Height="18" Margin="0,0,12,0">
+            <Rectangle x:Name="Boelge0" Width="3" Height="4" RadiusX="1.5" RadiusY="1.5"
+                       VerticalAlignment="Center" Fill="{DynamicResource Optager}" />
+            <Rectangle x:Name="Boelge1" Width="3" Height="4" RadiusX="1.5" RadiusY="1.5"
+                       Margin="2,0,0,0" VerticalAlignment="Center" Fill="{DynamicResource Optager}" />
+            <Rectangle x:Name="Boelge2" Width="3" Height="4" RadiusX="1.5" RadiusY="1.5"
+                       Margin="2,0,0,0" VerticalAlignment="Center" Fill="{DynamicResource Optager}" />
+            <Rectangle x:Name="Boelge3" Width="3" Height="4" RadiusX="1.5" RadiusY="1.5"
+                       Margin="2,0,0,0" VerticalAlignment="Center" Fill="{DynamicResource Optager}" />
+            <Rectangle x:Name="Boelge4" Width="3" Height="4" RadiusX="1.5" RadiusY="1.5"
+                       Margin="2,0,0,0" VerticalAlignment="Center" Fill="{DynamicResource Optager}" />
+            <Rectangle x:Name="Boelge5" Width="3" Height="4" RadiusX="1.5" RadiusY="1.5"
+                       Margin="2,0,0,0" VerticalAlignment="Center" Fill="{DynamicResource Optager}" />
+            <Rectangle x:Name="Boelge6" Width="3" Height="4" RadiusX="1.5" RadiusY="1.5"
+                       Margin="2,0,0,0" VerticalAlignment="Center" Fill="{DynamicResource Optager}" />
+          </StackPanel>
           <TextBlock x:Name="DiktatBesked" FontSize="12.5" VerticalAlignment="Center"
                      TextWrapping="Wrap" Foreground="{DynamicResource Tekst}" />
         </StackPanel>
