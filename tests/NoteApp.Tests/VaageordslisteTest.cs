@@ -164,4 +164,58 @@ public class VaageordslisteTest
         Assert.Equal("hej pia", Vaageordsliste.Udenfarver("[1mhej pia[0m"));
         Assert.Equal("uden koder", Vaageordsliste.Udenfarver("uden koder"));
     }
+
+    // ============ VARIANTERNE LAGT SAMMEN ============
+
+    /// <summary>
+    /// To stavemaader af det samme ord deler sikkerheden.
+    /// </summary>
+    /// <remarks>
+    /// Maalt 30-08-2026: det SAMME «Hej Pia» gav «hej pia» 0,584 og «hey pia»
+    /// 0,416. Hver for sig ser de svage ud; lagt sammen er de 1,0.
+    /// </remarks>
+    [Fact]
+    public void To_stavemaader_af_samme_ord_lgges_sammen()
+    {
+        var fund = new[]
+        {
+            new Vaageordsfund("hej pia", 0.09),
+            new Vaageordsfund("hey pia", 0.08),
+        };
+
+        // Hver for sig er de under graensen paa 0,107.
+        Assert.False(Vaageordsliste.Taeller(fund[0], Vaageord.Standardord, 14));
+        Assert.False(Vaageordsliste.Taeller(fund[1], Vaageord.Standardord, 14));
+
+        // Sammen er de over.
+        Assert.True(Vaageordsliste.Taeller(fund, Vaageord.Standardord, 14));
+    }
+
+    /// <summary>
+    /// Lokkeord taeller ikke med i summen, uanset hvor hoejt de scorer.
+    /// </summary>
+    /// <remarks>
+    /// Det er dét, der goer sammenlaegningen ufarlig. Kunne lokkeordene
+    /// taelle med, ville summen altid naa en hvilken som helst graense, og
+    /// saa ville alt udloese vaageordet.
+    /// </remarks>
+    [Fact]
+    public void Lokkeord_taeller_ikke_med_i_summen()
+    {
+        var fund = new[]
+        {
+            new Vaageordsfund("nej ikke lige nu", 0.54),
+            new Vaageordsfund("det lyder godt", 0.30),
+            new Vaageordsfund("hej pia", 0.02),
+        };
+
+        Assert.False(Vaageordsliste.Taeller(fund, Vaageord.Standardord, 14));
+    }
+
+    [Fact]
+    public void Ingen_fund_udloeser_ingenting()
+    {
+        Assert.False(Vaageordsliste.Taeller(
+            Array.Empty<Vaageordsfund>(), Vaageord.Standardord, 14));
+    }
 }

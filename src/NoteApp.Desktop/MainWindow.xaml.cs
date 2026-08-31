@@ -1353,6 +1353,10 @@ public partial class MainWindow : Window
     /// </remarks>
     private void VisBoble(string besked, bool pulser, TimeSpan? skjulEfter)
     {
+        // Lukkede brugeren den med krydset, bliver den lukket. Bjaelken
+        // nederst siger stadig, at der lyttes - se HentBoble_Klik.
+        if (_bobleLukket) return;
+
         try
         {
             if (_boble is null)
@@ -1365,6 +1369,14 @@ public partial class MainWindow : Window
                     Skiftet = _ => Dispatcher.BeginInvoke(SaetVaageord),
                 };
             }
+
+            _boble.Lukket = () => Dispatcher.BeginInvoke(new Action(() =>
+            {
+                _bobleLukket = true;
+                HentBobleKnap.Visibility = _vaage.Lytter
+                    ? Visibility.Visible
+                    : Visibility.Collapsed;
+            }));
 
             _boble.VisLytning(Core.AppSettings.Current.VaageordTil);
             _boble.Vis(besked, pulser, skjulEfter);
@@ -1381,6 +1393,27 @@ public partial class MainWindow : Window
     {
         try { _boble?.Hide(); }
         catch (Exception) { }
+    }
+
+    /// <summary>
+    /// Lukkede brugeren boblen med krydset?
+    /// </summary>
+    /// <remarks>
+    /// ET KRYDS SKAL BLIVE VED AT GAELDE. Uden det her ville boblen komme
+    /// tilbage ved naeste besked - og saa er krydset ikke en beslutning, men
+    /// en pause paa et par sekunder.
+    ///
+    /// Den gaelder kun, saa laenge appen koerer. Et valg om, hvad der skal
+    /// ligge oven paa skaermen lige nu, hoerer ikke hjemme i en fil, der
+    /// overlever en genstart.
+    /// </remarks>
+    private bool _bobleLukket;
+
+    private void HentBoble_Klik(object sender, RoutedEventArgs e)
+    {
+        _bobleLukket = false;
+        HentBobleKnap.Visibility = Visibility.Collapsed;
+        VisLyttestatus();
     }
 
     /// <summary>

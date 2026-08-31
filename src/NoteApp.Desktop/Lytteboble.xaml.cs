@@ -109,13 +109,17 @@ public partial class Lytteboble : Window
     /// </summary>
     public void VisLytning(bool til)
     {
-        // E769 = pause, E768 = afspil. Ikonet viser, hvad knappen GOER - ikke
-        // hvilken tilstand man staar i. Det modsatte er den klassiske
-        // forveksling, og den koster et fejlklik hver gang.
-        // Skrevet som kodepunkter, ikke som tegn: glyfferne ligger i Segoe
-        // MDL2 privatomraade, og saadan et tegn overlever ikke altid en tur
-        // gennem et redigeringsvaerktoej. Saa staar der en tom knap.
-        PauseKnap.Content = til ? "\uE769" : "\uE768";
+        // IKONET VISER, HVAD KNAPPEN GOER - ikke hvilken tilstand man staar
+        // i. Det modsatte er den klassiske forveksling, og den koster et
+        // fejlklik hver gang. Lyttes der, goer knappen pause; er der pause,
+        // starter den igen.
+        //
+        // TEGNET OG IKKE SAT MED EN SKRIFTTYPE. Her stod to kodepunkter fra
+        // Segoe MDL2, og paa skaermen kom der to TOMME FIRKANTER. En figur,
+        // der er tegnet, kan ikke mangle - uanset hvilke skrifttyper der er
+        // installeret paa maskinen.
+        Pausetegn.Visibility = til ? Visibility.Visible : Visibility.Collapsed;
+        Starttegn.Visibility = til ? Visibility.Collapsed : Visibility.Visible;
 
         var navn = Sprog.T(til ? "lytteboble.pause" : "lytteboble.start");
         PauseKnap.ToolTip = navn;
@@ -156,5 +160,22 @@ public partial class Lytteboble : Window
             skjulEfter: TimeSpan.FromSeconds(nyTilstand ? 3 : 6));
     }
 
-    private void Luk_Klik(object sender, RoutedEventArgs e) => Skjul();
+    /// <summary>Siger til, når brugeren lukker boblen med krydset.</summary>
+    public Action? Lukket { get; set; }
+
+    /// <summary>
+    /// Krydset lukker BOKSEN — ikke lytningen.
+    /// </summary>
+    /// <remarks>
+    /// Lytningen fortsætter, og den grønne bjælke nederst i appen bliver
+    /// stående og siger det. Derfra kan boblen hentes tilbage.
+    ///
+    /// Skal lytningen stoppe, er svaret pause ved siden af — og så stopper
+    /// den også rigtigt, i stedet for at fortsætte usynligt.
+    /// </remarks>
+    private void Luk_Klik(object sender, RoutedEventArgs e)
+    {
+        Skjul();
+        Lukket?.Invoke();
+    }
 }

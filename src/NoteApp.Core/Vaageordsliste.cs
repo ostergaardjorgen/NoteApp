@@ -112,6 +112,14 @@ public static class Vaageordsliste
     public static double Graense(int antalUdtryk) =>
         antalUdtryk <= 1 ? 1.0 : Math.Min(0.9, 1.5 / antalUdtryk);
 
+    /// <summary>Er udtrykket ét af vågeordene?</summary>
+    public static bool ErVaageord(string udtryk, IEnumerable<string> vaageord)
+    {
+        var v = Vaageord.Rens(udtryk);
+        return v.Length > 0
+               && vaageord.Any(o => Vaageord.Rens(o).Equals(v, StringComparison.OrdinalIgnoreCase));
+    }
+
     /// <summary>
     /// Blev et vågeord hørt sikkert nok?
     /// </summary>
@@ -119,9 +127,38 @@ public static class Vaageordsliste
     {
         if (fund.Sikkerhed < Graense(antalUdtryk)) return false;
 
-        var v = Vaageord.Rens(fund.Udtryk);
-        return v.Length > 0
-               && vaageord.Any(o => Vaageord.Rens(o).Equals(v, StringComparison.OrdinalIgnoreCase));
+        return ErVaageord(fund.Udtryk, vaageord);
+    }
+
+    /// <summary>
+    /// Blev der sagt et vågeord — når varianterne lægges sammen?
+    /// </summary>
+    /// <remarks>
+    /// «HEJ PIA» OG «HEY PIA» ER DET SAMME ORD, OG DE DELER SANDSYNLIGHEDEN.
+    ///
+    /// Motoren fordeler sin sikkerhed mellem alle udtryk på listen. To
+    /// stavemåder af det samme vågeord konkurrerer derfor med hinanden:
+    /// målt 30-08-2026 fik «hej pia» 0,584 og «hey pia» 0,416 af det SAMME
+    /// «Hej Pia». Hver for sig ser de svage ud. Lagt sammen er de 1,0.
+    ///
+    /// Det er derfor, et rigtigt vågeord kun nåede 0,36 den 31-08-2026: en
+    /// del af det lå på den anden stavemåde. Grænsen bedømte den halve
+    /// sikkerhed og kasserede et ord, der var sagt tydeligt.
+    ///
+    /// Her lægges de sammen, før der bedømmes. Det kan ikke give falske
+    /// udslag: der summeres KUN over udtryk, der er vågeord, og lokkeordene
+    /// tæller ikke med, uanset hvor højt de scorer.
+    /// </remarks>
+    public static bool Taeller(
+        IEnumerable<Vaageordsfund> fund, IEnumerable<string> vaageord, int antalUdtryk)
+    {
+        var ord = vaageord as IReadOnlyCollection<string> ?? vaageord.ToList();
+
+        var samlet = fund
+            .Where(f => ErVaageord(f.Udtryk, ord))
+            .Sum(f => f.Sikkerhed);
+
+        return samlet >= Graense(antalUdtryk);
     }
 
     /// <summary>

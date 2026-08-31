@@ -42,23 +42,63 @@
 
       <!-- ============ PAUSE OG START ============
 
-           Herfra kan lytningen slås fra uden at finde appen frem. Det er dét,
-           man har brug for, når man skal sige noget, appen ikke skal blande
-           sig i — og at skulle åbne et program for at få ro er for meget
-           besvær til, at nogen gør det. -->
+           Herfra kan lytningen slaas fra uden at finde appen frem. Det er dét,
+           man har brug for, naar man skal sige noget, appen ikke skal blande
+           sig i - og at skulle aabne et program for at faa ro er for meget
+           besvaer til, at nogen goer det.
+
+           IKONET ER TEGNET OG IKKE SAT MED EN SKRIFTTYPE. Der stod to
+           kodepunkter fra Segoe MDL2 (E769 og E768), og paa skaermen kom der
+           to TOMME FIRKANTER. En glyf, der ikke findes, siger ingenting - og
+           knappen er den eneste maade at faa ro paa.
+
+           En tegnet figur kan ikke mangle. To bjaelker er en pause, og en
+           trekant er afspil, uanset hvilke skrifttyper der er installeret.
+
+           KRYDSET LUKKER BOKSEN - IKKE LYTNINGEN. Her stod foer en «skjul» med
+           en glyf, der heller ikke fandtes. Forskellen er ikke kosmetisk:
+           boblen ER tegnet paa, at mikrofonen staar aaben, og et signal, der
+           kan slukkes, mens lytningen fortsaetter, er ingen signal.
+
+           Derfor er den bundet op: krydset tager KUN boblen vaek. Den
+           groenne bjaelke nederst i appen bliver staaende og lytter med, og
+           derfra kan boblen hentes tilbage. Skal lytningen stoppe, er svaret
+           pause - og saa stopper den ogsaa rigtigt. -->
       <Button x:Name="PauseKnap" Click="Pause_Klik" Margin="14,0,0,0"
               Width="30" Height="30" Padding="0" BorderThickness="0"
-              Background="Transparent" Foreground="{DynamicResource Tekst}"
-              FontFamily="Segoe MDL2 Assets" FontSize="13" Content="&#xE769;"
+              Background="Transparent"
               ToolTip="{i18n:Oversat lytteboble.pause}"
-              AutomationProperties.Name="{i18n:Oversat lytteboble.pause}" />
+              AutomationProperties.Name="{i18n:Oversat lytteboble.pause}">
+        <Grid Width="14" Height="14">
+          <!-- To bjaelker: pause. Vises, mens der lyttes. -->
+          <StackPanel x:Name="Pausetegn" Orientation="Horizontal"
+                      HorizontalAlignment="Center" VerticalAlignment="Center">
+            <Rectangle Width="4" Height="13" RadiusX="1.5" RadiusY="1.5"
+                       Fill="{DynamicResource Tekst}" />
+            <Rectangle Width="4" Height="13" RadiusX="1.5" RadiusY="1.5"
+                       Margin="4,0,0,0" Fill="{DynamicResource Tekst}" />
+          </StackPanel>
 
+          <!-- Trekant: start igen. Vises, mens der er sat paa pause. -->
+          <Path x:Name="Starttegn" Visibility="Collapsed"
+                HorizontalAlignment="Center" VerticalAlignment="Center"
+                Data="M 0,0 L 12,6.5 L 0,13 Z" Fill="{DynamicResource Tekst}" />
+        </Grid>
+      </Button>
+
+      <!-- Krydset er to streger og ikke en glyf. Samme grund som pausen. -->
       <Button x:Name="LukKnap" Click="Luk_Klik" Margin="2,0,0,0"
               Width="30" Height="30" Padding="0" BorderThickness="0"
-              Background="Transparent" Foreground="{DynamicResource TekstMeget}"
-              FontFamily="Segoe MDL2 Assets" FontSize="11" Content="&#xE711;"
-              ToolTip="{i18n:Oversat lytteboble.skjul}"
-              AutomationProperties.Name="{i18n:Oversat lytteboble.skjul}" />
+              Background="Transparent"
+              ToolTip="{i18n:Oversat lytteboble.luk}"
+              AutomationProperties.Name="{i18n:Oversat lytteboble.luk}">
+        <Grid Width="11" Height="11">
+          <Path Data="M 0,0 L 11,11" Stroke="{DynamicResource TekstMeget}"
+                StrokeThickness="1.6" StrokeStartLineCap="Round" StrokeEndLineCap="Round" />
+          <Path Data="M 11,0 L 0,11" Stroke="{DynamicResource TekstMeget}"
+                StrokeThickness="1.6" StrokeStartLineCap="Round" StrokeEndLineCap="Round" />
+        </Grid>
+      </Button>
     </StackPanel>
   </Border>
 </Window>

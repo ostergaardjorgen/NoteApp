@@ -1048,6 +1048,8 @@
     "skjul": "Skjul",
     "sat_paa_pause": "Lytningen er sat på pause. Genvejstasten virker stadig.",
     "lytter_igen": "Lytter efter «Hej Pia» igen",
-    "lytter": "Lytter efter «Hej Pia»"
+    "lytter": "Lytter efter «Hej Pia»",
+    "luk": "Luk boblen — den grønne bjælke lytter videre",
+    "hent": "Vis boblen igen"
   }
 }

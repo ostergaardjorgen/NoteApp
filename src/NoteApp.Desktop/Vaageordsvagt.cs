@@ -272,6 +272,13 @@ public sealed class Vaageordsvagt : IDisposable
     /// <summary>Mikrofonens nummer hos motoren. −1 = ikke fundet endnu.</summary>
     private int _kendtIndeks = -1;
 
+    /// <summary>Hvor længe fund fra samme ytring lægges sammen.</summary>
+    private static readonly TimeSpan Vindue = TimeSpan.FromMilliseconds(700);
+
+    private sealed record Nyligt(DateTime Naar, Vaageordsfund Fund);
+
+    private readonly List<Nyligt> _nyligeFund = new();
+
     private double? _kortMB;
     private double? _modelMB;
 
@@ -359,7 +366,25 @@ public sealed class Vaageordsvagt : IDisposable
         // GRAENSEN ER DET, DER GOER DEN BRUGBAR. Motoren vaelger altid et
         // udtryk; det er listens laengde, der afgoer, hvornaar et valg er
         // mere end et gaet. Se Vaageordsliste.Graense.
-        var taeller = Vaageordsliste.Taeller(fund, ord, _antalUdtryk);
+        // ============ VARIANTERNE LAEGGES SAMMEN ============
+        //
+        // «hej pia» og «hey pia» er det samme ord og deler sikkerheden mellem
+        // sig. Et vaageord, der er sagt tydeligt, ser derfor svagt ud, naar
+        // det bedoemmes alene - se Vaageordsliste.Taeller.
+        //
+        // Vinduet er kort med vilje. Fundene fra ÉN ytring kommer inden for
+        // faa hundrede millisekunder; er der gaaet laengere, er det noget
+        // andet, der blev sagt, og saa maa det staa paa egne ben.
+        var nu = DateTime.UtcNow;
+        _nyligeFund.RemoveAll(f => nu - f.Naar > Vindue);
+        _nyligeFund.Add(new Nyligt(nu, fund));
+
+        var taeller = Vaageordsliste.Taeller(
+            _nyligeFund.Select(f => f.Fund), ord, _antalUdtryk);
+
+        // Udloeste det, ryddes vinduet. Ellers ville de samme fund kunne
+        // udloese en gang til, naeste gang der kommer en linje.
+        if (taeller) _nyligeFund.Clear();
 
         // Linjen skrives, OGSAA naar fundet ikke taeller. Det er netop de
         // fund, der blev kasseret, der siger, om graensen sidder forkert.

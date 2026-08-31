@@ -359,9 +359,25 @@
              spørgsmålet er værd.
 
              Knappen står her i stedet. Den venter, til man kigger. -->
-        <Button x:Name="GemNoteKnap" Grid.Column="1" Visibility="Collapsed"
-                Click="GemNote_Klik" Padding="14,6" Margin="16,0,0,0"
-                Content="{i18n:Oversat noter.vis_noten}" />
+        <StackPanel Grid.Column="1" Orientation="Horizontal">
+
+          <!-- ============ BOBLEN HENTES TILBAGE HERFRA ============
+
+               Krydset paa boblen lukker KUN boblen. Lytningen fortsaetter, og
+               den her bjaelke bliver staaende og siger det - den er signalet,
+               boblen er bekvemmeligheden.
+
+               Derfor hoerer vejen tilbage til netop her: der, hvor man kan se,
+               at der stadig lyttes. Knappen staar kun frem, naar boblen er
+               lukket, og der faktisk er noget at hente tilbage. -->
+          <Button x:Name="HentBobleKnap" Visibility="Collapsed"
+                  Click="HentBoble_Klik" Padding="12,6" Margin="16,0,0,0"
+                  Content="{i18n:Oversat lytteboble.hent}" />
+
+          <Button x:Name="GemNoteKnap" Visibility="Collapsed"
+                  Click="GemNote_Klik" Padding="14,6" Margin="10,0,0,0"
+                  Content="{i18n:Oversat noter.vis_noten}" />
+        </StackPanel>
       </Grid>
     </Border>
 
