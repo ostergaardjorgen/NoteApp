@@ -110,7 +110,7 @@ public partial class SetupWindow : Window
             OpsMikrofon.ItemsSource = mikrofoner;
             OpsHoejttaler.ItemsSource = hoejttalere;
 
-            var mik = AudioDevices.ResolveMicrophone(v.MicrophoneId, out _);
+            var mik = Mikrofon.Valgt();
             var hoejt = AudioDevices.ResolveSpeaker(v.SpeakerId, out _);
 
             OpsMikrofon.SelectedItem = mikrofoner.FirstOrDefault(d => d.Id == mik?.Id);
@@ -151,8 +151,10 @@ public partial class SetupWindow : Window
     private void Mikrofon_Valgt(object sender, SelectionChangedEventArgs e)
     {
         if (_fylder || OpsMikrofon.SelectedItem is not DeviceInfo d) return;
-        AppSettings.Current.MicrophoneId = d.Id;
-        AppSettings.Current.Save();
+        // GENNEM Mikrofon.Vaelg. Den rydder motorens eget nummer med -
+        // det hoerte til den gamle enhed, og et tal, der peger forkert, faar
+        // vaageordet til at lytte et andet sted, end skaermen siger.
+        Mikrofon.Vaelg(d.Id);
     }
 
     private void Hoejttaler_Valgt(object sender, SelectionChangedEventArgs e)

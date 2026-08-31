@@ -170,7 +170,7 @@ public sealed class Vaageordsvagt : IDisposable
                 // Derfor gemmes nummeret sammen med NAVNET. Rykker enhederne
                 // rundt, passer nummeret ikke laengere, og saa findes det
                 // forfra frem for at lytte paa den forkerte.
-                if (_kendtIndeks < 0) _kendtIndeks = HusketIndeks();
+                if (_kendtIndeks < 0) _kendtIndeks = Mikrofon.Nummer();
 
                 var mikrofon = _kendtIndeks >= 0 ? $" -c {_kendtIndeks}" : "";
 
@@ -387,7 +387,7 @@ public sealed class Vaageordsvagt : IDisposable
         if (navn.Length == 0) return;
 
         DeviceInfo? valgt;
-        try { valgt = AudioDevices.ResolveMicrophone(AppSettings.Current.MicrophoneId, out _); }
+        try { valgt = Mikrofon.Valgt(); }
         catch (Exception) { return; }
 
         if (valgt is null || !navn.Equals(valgt.FriendlyName, StringComparison.OrdinalIgnoreCase))
@@ -400,10 +400,7 @@ public sealed class Vaageordsvagt : IDisposable
         // skifter enhederne plads, opdages det, fordi navnet ikke passer.
         try
         {
-            var v = AppSettings.Current;
-            v.VaageordMikrofonNummer = nr;
-            v.VaageordMikrofonNavn = valgt.FriendlyName;
-            v.Save();
+            Mikrofon.HuskNummer(nr, valgt.FriendlyName);
         }
         catch (Exception)
         {

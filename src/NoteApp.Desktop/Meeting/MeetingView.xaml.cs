@@ -77,7 +77,7 @@ public partial class MeetingView : UserControl
         Notifikationer.Nyt += () => Dispatcher.Invoke(VisKlokke);
         Loaded += (_, _) => VisKlokke();
 
-                var mik = AudioDevices.ResolveMicrophone(AppSettings.Current.MicrophoneId, out _);
+                var mik = Mikrofon.Valgt();
         StartKnap.IsEnabled = mik is not null;
         if (mik is null) Status.Text = "Ingen mikrofon fundet";
 
@@ -483,7 +483,7 @@ public partial class MeetingView : UserControl
 
         if (IsRecording) return;
 
-        var mik = AudioDevices.ResolveMicrophone(AppSettings.Current.MicrophoneId, out var fallback);
+        var mik = Mikrofon.Valgt(out var fallback);
 
         // MIKROFONEN SKAL FINDES — OGSÅ TIL ET WEBINAR.
         //

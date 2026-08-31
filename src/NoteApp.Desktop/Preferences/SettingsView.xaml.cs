@@ -989,7 +989,7 @@ public partial class SettingsView : UserControl
             Mikrofoner.ItemsSource = mikrofoner;
             Hoejttalere.ItemsSource = hoejttalere;
 
-            var mik = AudioDevices.ResolveMicrophone(AppSettings.Current.MicrophoneId, out var mikFallback);
+            var mik = Mikrofon.Valgt(out var mikFallback);
             var hoejt = AudioDevices.ResolveSpeaker(AppSettings.Current.SpeakerId, out var hoejtFallback);
 
             Mikrofoner.SelectedItem = mikrofoner.FirstOrDefault(d => d.Id == mik?.Id);
@@ -1035,8 +1035,10 @@ public partial class SettingsView : UserControl
         if (_fylderLyd) return;
         if (Mikrofoner.SelectedItem is not DeviceInfo d) return;
 
-        AppSettings.Current.MicrophoneId = d.Id;
-        AppSettings.Current.Save();
+        // GENNEM Mikrofon.Vaelg. Den rydder lyttemotorens eget nummer med -
+        // det hoerte til den gamle enhed, og et tal, der peger forkert, faar
+        // vaageordet til at lytte et andet sted, end skaermen siger.
+        Mikrofon.Vaelg(d.Id);
         Status.Text = $"Mikrofon: {d.FriendlyName}";
 
         Vis(MikAdvarsel, false, "");
@@ -1165,7 +1167,7 @@ public partial class SettingsView : UserControl
         try
         {
             // Den enhed, der FAKTISK findes - ikke et id, der maaske er vaek.
-            var enhed = AudioDevices.ResolveMicrophone(AppSettings.Current.MicrophoneId, out _);
+            var enhed = Mikrofon.Valgt();
             if (enhed is null)
             {
                 _testKlip.Dispose();

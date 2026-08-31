@@ -1208,7 +1208,7 @@ static int Mikrofontest(string[] a)
 {
     var sekunder = a.Length > 0 && double.TryParse(a[0], out var s) ? s : 5.0;
 
-    var mik = AudioDevices.ResolveMicrophone(AppSettings.Current.MicrophoneId, out var faldtTilbage);
+    var mik = Mikrofon.Valgt(out var faldtTilbage);
     if (mik is null) { Console.Error.WriteLine("Ingen mikrofon fundet."); return 1; }
 
     Console.WriteLine($"Mikrofon : {mik.FriendlyName}{(faldtTilbage ? "  (IKKE den valgte — faldt tilbage)" : "")}");

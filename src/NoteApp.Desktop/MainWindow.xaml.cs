@@ -436,6 +436,18 @@ public partial class MainWindow : Window
             Diktering.KommandoerView.Maaler = () => _vaage.Forbrug;
             Diktering.KommandoerView.Grafikmaaler = () => _vaage.Grafik;
 
+            // ============ SKIFTER MIKROFONEN, FOELGER LYTNINGEN MED ============
+            //
+            // Motoren fik sin mikrofon at vide ved opstart. Blev der valgt en
+            // anden bagefter, lyttede den videre paa den gamle - og skaermen
+            // sagde noget andet. Nu startes den om, saa de to passer sammen.
+            Core.Mikrofon.Skiftet = () => Dispatcher.BeginInvoke(new Action(() =>
+            {
+                if (!_vaage.Lytter) return;
+                _vaage.Stop();
+                SaetVaageord();
+            }));
+
             _vaageur?.Stop();
             _vaageur = new DispatcherTimer { Interval = TimeSpan.FromSeconds(30) };
             _vaageur.Tick += (_, _) => SaetVaageord();

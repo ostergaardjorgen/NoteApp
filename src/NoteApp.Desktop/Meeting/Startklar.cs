@@ -103,7 +103,7 @@ public sealed class Startklar : IDisposable
 
         try
         {
-            var mik = AudioDevices.ResolveMicrophone(AppSettings.Current.MicrophoneId, out _);
+            var mik = Mikrofon.Valgt();
             if (mik is null) return;
 
             // ET FYSISK MØDE HAR INGEN HØJTTALER. Så er der ingen modpart at
