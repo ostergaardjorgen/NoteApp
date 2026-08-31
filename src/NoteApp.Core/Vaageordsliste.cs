@@ -59,7 +59,7 @@ public static class Vaageordsliste
     /// <summary>
     /// Hele listen, motoren skal have: vågeordene først, lokkeordene efter.
     /// </summary>
-    public static IReadOnlyList<string> Byg(IEnumerable<string> vaageord)
+    public static IReadOnlyList<string> Byg(IEnumerable<string> vaageord, string? sprog = null)
     {
         var rene = vaageord
             .Select(Vaageord.Rens)
@@ -67,7 +67,7 @@ public static class Vaageordsliste
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList();
 
-        if (rene.Count == 0) rene = Vaageord.Standardord.ToList();
+        if (rene.Count == 0) rene = Vaageord.Standardord(sprog).ToList();
 
         // Lokkeord, der ligner et vaageord, ville tage fra det. Det er
         // usandsynligt, men listen kan aendres af brugeren.

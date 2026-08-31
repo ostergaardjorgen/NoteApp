@@ -47,13 +47,36 @@ public static class Vaageord
     /// Ordene, appen lytter efter fra begyndelsen. Brugeren kan rette i listen.
     /// </summary>
     /// <remarks>
-    /// TO STAVEMÅDER AF DET SAMME. «Hej» og «hey» lyder næsten ens, men en
-    /// udskrift vælger én af dem — og hvilken, afhænger af, hvor hårdt man
-    /// siger h'et. Lyttes der kun efter den ene, virker vågeordet hver anden
-    /// gang, og det er værre end slet ikke at virke: så tror man, det er én
-    /// selv, der siger det forkert.
+    /// ÉT ORD PR. SPROG — IKKE BEGGE PÅ ÉN GANG.
+    ///
+    /// Her stod begge stavemåder, ud fra den tanke at «hej» og «hey» lyder
+    /// næsten ens, og at man ellers ville ramme forbi hver anden gang.
+    ///
+    /// Det kostede to ting, og begge er målt 31-08-2026:
+    ///
+    ///   DE DELTE SIKKERHEDEN. Motoren fordeler sin sandsynlighed mellem alle
+    ///   udtryk på listen, så to stavemåder af det SAMME ord konkurrerer med
+    ///   hinanden: det samme «Hej Pia» gav «hej pia» 0,584 og «hey pia» 0,416.
+    ///   Hver for sig ser de svage ud.
+    ///
+    ///   «HEY PIA» GAV DET ENESTE TVIVLSOMME UDSLAG. Én optagelse startede af
+    ///   sig selv med «hey pia» på 0,497, mens der spillede radio i rummet.
+    ///   Alle bekræftede træf kom via «hej pia».
+    ///
+    /// Sproget afgør det nu, og det er hverken et gæt eller en indstilling
+    /// mere: taler man dansk, hedder det «hej pia»; taler man engelsk, hedder
+    /// det «hey pia». Man siger i forvejen sit eget sprogs udgave — det var
+    /// kun appen, der lyttede efter begge.
+    ///
+    /// Norsk og svensk får «hej pia» med. Det er det samme ord i alle tre
+    /// sprog, og h'et udtales ens.
     /// </remarks>
-    public static readonly IReadOnlyList<string> Standardord = new[] { "hej pia", "hey pia" };
+    public static IReadOnlyList<string> Standardord(string? sprog) =>
+        sprog?.Trim().ToLowerInvariant() switch
+        {
+            "en" => new[] { "hey pia" },
+            _ => new[] { "hej pia" },
+        };
 
     /// <summary>
     /// Hvor længe motoren optager, før den bedømmer. Millisekunder.

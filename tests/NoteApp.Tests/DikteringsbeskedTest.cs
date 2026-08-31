@@ -65,7 +65,7 @@ public class DikteringsbeskedTest
     }
 
     /// <summary>
-    /// Hvileteksten skal sige, at man ikke behoever vente.
+    /// Hvileteksten skal sige, hvad man goer - og ikke mere.
     /// </summary>
     /// <remarks>
     /// «jeg begynder at tale uden at vide, om den er klar til at modtage» -
@@ -77,14 +77,14 @@ public class DikteringsbeskedTest
     /// ikke behoever.
     /// </remarks>
     [Fact]
-    public void Hvileteksten_siger_at_det_sagte_er_med()
+    public void Hvileteksten_siger_hvad_man_goer()
     {
         Sprog.Skift("da");
 
         var t = Sprog.T("vaageord.klar");
 
-        Assert.Contains("er med", t);
         Assert.Contains("Hej Pia", t);
+        Assert.Contains("tal videre", t);
     }
 
     /// <summary>
@@ -102,5 +102,36 @@ public class DikteringsbeskedTest
         // bedoemmer et vindue paa 1,5 sekund. Selv en lang saetning skal
         // kunne staa i ringen imens.
         Assert.True(Foroptager.Sekunder >= 10);
+    }
+
+    /// <summary>
+    /// Boblen maa kun fylde ÉN linje.
+    /// </summary>
+    /// <remarks>
+    /// Den ligger oven paa alt andet paa skaermen. En boble, der vokser til
+    /// to linjer, tager plads fra dét, man sidder og laver.
+    ///
+    /// Teksten forkortes med «...», hvis den er for lang - men det er et
+    /// vaern og ikke en plan. Beskederne skal kunne staa paa linjen.
+    /// </remarks>
+    [Theory]
+    [InlineData("da")]
+    [InlineData("en")]
+    public void Boblens_beskeder_er_korte_nok_til_én_linje(string sprog)
+    {
+        Sprog.Skift(sprog);
+
+        foreach (var noegle in new[]
+                 {
+                     "vaageord.klar", "vaageord.goer_klar",
+                     "diktering.lytter_vaageord", "diktering.skriver_ud",
+                 })
+        {
+            var t = Sprog.T(noegle);
+
+            // 460 pixel ved 13,5 punkt raekker til omkring halvfjerds tegn.
+            Assert.True(t.Length <= 90,
+                $"«{noegle}» er {t.Length} tegn: «{t}»");
+        }
     }
 }

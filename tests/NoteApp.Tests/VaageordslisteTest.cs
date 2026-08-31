@@ -33,12 +33,39 @@ public class VaageordslisteTest
     }
 
     [Fact]
-    public void En_tom_liste_falder_tilbage_paa_standardordene()
+    public void En_tom_liste_falder_tilbage_paa_standardordet()
     {
-        var liste = Vaageordsliste.Byg(new string[0]);
+        Assert.Contains("hej pia", Vaageordsliste.Byg(new string[0], "da"));
+        Assert.Contains("hey pia", Vaageordsliste.Byg(new string[0], "en"));
+    }
 
-        Assert.Contains("hej pia", liste);
-        Assert.Contains("hey pia", liste);
+    /// <summary>
+    /// ÉT vaageord ad gangen, ikke begge stavemaader.
+    /// </summary>
+    /// <remarks>
+    /// De to delte sandsynligheden mellem sig - det samme «Hej Pia» gav «hej
+    /// pia» 0,584 og «hey pia» 0,416 - og «hey pia» gav det eneste tvivlsomme
+    /// udslag, der er maalt: en optagelse, der startede af sig selv paa 0,497,
+    /// mens der spillede radio.
+    ///
+    /// Man siger i forvejen sit eget sprogs udgave. Det var kun appen, der
+    /// lyttede efter begge.
+    /// </remarks>
+    [Fact]
+    public void Der_lyttes_kun_efter_ét_vaageord()
+    {
+        Assert.DoesNotContain("hey pia", Vaageordsliste.Byg(new string[0], "da"));
+        Assert.DoesNotContain("hej pia", Vaageordsliste.Byg(new string[0], "en"));
+    }
+
+    /// <summary>Norsk og svensk siger det samme som dansk.</summary>
+    [Theory]
+    [InlineData("no")]
+    [InlineData("sv")]
+    [InlineData(null)]
+    public void De_skandinaviske_sprog_faar_hej(string? sprog)
+    {
+        Assert.Contains("hej pia", Vaageord.Standardord(sprog));
     }
 
     [Fact]
@@ -54,7 +81,7 @@ public class VaageordslisteTest
     [Fact]
     public void Graensen_foelger_faktoren()
     {
-        Assert.Equal(Vaageordsliste.Faktor / 14, Vaageordsliste.Graense(14), 5);
+        Assert.Equal(Vaageordsliste.Faktor / 13, Vaageordsliste.Graense(13), 5);
     }
 
     /// <summary>
@@ -71,7 +98,7 @@ public class VaageordslisteTest
     [Fact]
     public void Graensen_har_luft_til_stoej_i_rummet()
     {
-        Assert.True(Vaageordsliste.Graense(14) >= 0.20,
+        Assert.True(Vaageordsliste.Graense(13) >= 0.20,
             "Ved 0,11 startede radioen en optagelse.");
     }
 
@@ -94,7 +121,7 @@ public class VaageordslisteTest
     {
         var fund = new Vaageordsfund("hej pia", sikkerhed);
 
-        Assert.True(Vaageordsliste.Taeller(fund, Vaageord.Standardord, 14));
+        Assert.True(Vaageordsliste.Taeller(fund, Vaageord.Standardord("da"), 13));
     }
 
     /// <summary>
@@ -110,7 +137,7 @@ public class VaageordslisteTest
     {
         var fund = new Vaageordsfund("nej ikke lige nu", 0.54);
 
-        Assert.False(Vaageordsliste.Taeller(fund, Vaageord.Standardord, 14));
+        Assert.False(Vaageordsliste.Taeller(fund, Vaageord.Standardord("da"), 13));
     }
 
     [Fact]
@@ -196,16 +223,16 @@ public class VaageordslisteTest
     {
         var fund = new[]
         {
-            new Vaageordsfund("hej pia", 0.18),
-            new Vaageordsfund("hey pia", 0.14),
+            new Vaageordsfund("hej pia", 0.14),
+            new Vaageordsfund("hej pia", 0.12),
         };
 
         // Hver for sig er de under graensen paa 0,214.
-        Assert.False(Vaageordsliste.Taeller(fund[0], Vaageord.Standardord, 14));
-        Assert.False(Vaageordsliste.Taeller(fund[1], Vaageord.Standardord, 14));
+        Assert.False(Vaageordsliste.Taeller(fund[0], Vaageord.Standardord("da"), 13));
+        Assert.False(Vaageordsliste.Taeller(fund[1], Vaageord.Standardord("da"), 13));
 
         // Sammen er de over.
-        Assert.True(Vaageordsliste.Taeller(fund, Vaageord.Standardord, 14));
+        Assert.True(Vaageordsliste.Taeller(fund, Vaageord.Standardord("da"), 13));
     }
 
     /// <summary>
@@ -226,13 +253,13 @@ public class VaageordslisteTest
             new Vaageordsfund("hej pia", 0.02),
         };
 
-        Assert.False(Vaageordsliste.Taeller(fund, Vaageord.Standardord, 14));
+        Assert.False(Vaageordsliste.Taeller(fund, Vaageord.Standardord("da"), 13));
     }
 
     [Fact]
     public void Ingen_fund_udloeser_ingenting()
     {
         Assert.False(Vaageordsliste.Taeller(
-            Array.Empty<Vaageordsfund>(), Vaageord.Standardord, 14));
+            Array.Empty<Vaageordsfund>(), Vaageord.Standardord("da"), 13));
     }
 }

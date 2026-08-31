@@ -63,8 +63,20 @@
                    Margin="2,0,0,0" VerticalAlignment="Center" Fill="{DynamicResource Optager}" />
       </StackPanel>
 
+      <!-- ÉN LINJE, ALTID.
+
+           TextTrimming alene raekker ikke: en TextBlock ombryder som
+           standard, naar den moeder sin MaxWidth, og saa bliver boblen to
+           linjer hoej. Den ligger oven paa alt andet paa skaermen, og en
+           boble, der vokser, tager plads fra dét, man sidder og laver.
+
+           NoWrap goer trimningen til den eneste udvej: er teksten for lang,
+           bliver den forkortet med «...» i stedet for at fylde mere.
+           Beskederne er skrevet til at kunne staa paa linjen; forkortelsen er
+           et vaern og ikke en plan. -->
       <TextBlock x:Name="Besked" FontSize="13.5" VerticalAlignment="Center"
-                 Foreground="{DynamicResource Tekst}" MaxWidth="420" TextTrimming="CharacterEllipsis" />
+                 Foreground="{DynamicResource Tekst}" MaxWidth="460"
+                 TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" />
 
       <!-- ============ PAUSE OG START ============
 

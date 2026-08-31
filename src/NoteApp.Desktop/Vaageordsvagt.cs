@@ -142,7 +142,8 @@ public sealed class Vaageordsvagt : IDisposable
                 var liste = Vaageordsliste.Byg(
                     AppSettings.Current.Vaageord is { Count: > 0 } egne
                         ? egne
-                        : Vaageord.Standardord);
+                        : Vaageord.Standardord(AppSettings.Current.Talesprog),
+                    AppSettings.Current.Talesprog);
 
                 _antalUdtryk = liste.Count;
                 var listefil = SkrivListe(liste);
@@ -389,7 +390,7 @@ public sealed class Vaageordsvagt : IDisposable
         //
         var ord = AppSettings.Current.Vaageord is { Count: > 0 } egne
             ? egne
-            : Vaageord.Standardord;
+            : Vaageord.Standardord(AppSettings.Current.Talesprog);
 
         // GRAENSEN ER DET, DER GOER DEN BRUGBAR. Motoren vaelger altid et
         // udtryk; det er listens laengde, der afgoer, hvornaar et valg er
