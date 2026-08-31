@@ -1018,7 +1018,7 @@
     "blev_soegning": "Searching for «{0}»",
     "aftale_blev_opgave": "Added to your tasks: {0} — the app cannot create calendar appointments yet, because a spoken time has to be read correctly first.",
     "intet_sagt": "Nothing was said beyond the wake word.",
-    "goer_klar": "The wake word is getting ready — the model is loading. It takes a moment the first time. The shortcut key works meanwhile.",
+    "goer_klar": "The wake word is getting ready — the model is loading. The first time takes up to a minute. This message stays until «Hej Pia» works. The shortcut key works meanwhile.",
     "klar": "The wake word is ready. Say «Hej Pia»."
   },
   "noter": {

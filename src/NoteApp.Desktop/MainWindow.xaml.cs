@@ -423,8 +423,8 @@ public partial class MainWindow : Window
             // ============ VAAGEORDET ============
             _vaage.Hoert -= VaageordHoert;
             _vaage.Hoert += VaageordHoert;
-            _vaage.Melder -= VisDiktat;
-            _vaage.Melder += VisDiktat;
+            _vaage.Melder -= VisVaageord;
+            _vaage.Melder += VisVaageord;
 
             // Fanen skal kunne taende og slukke med det samme. Ellers skal
             // appen genstartes, foer vaageordet begynder at virke.
@@ -1373,6 +1373,62 @@ public partial class MainWindow : Window
     /// DEN SAMME BESKED GAAR I BOBLEN. Bjaelken kan kun ses inde i appen, og
     /// vaageordet bruges netop, naar man staar et andet sted.
     /// </remarks>
+    /// <summary>
+    /// Vågeordets egne beskeder.
+    /// </summary>
+    /// <remarks>
+    /// BJÆLKEN BLIVER STÅENDE, INDTIL VÅGEORDET VIRKER.
+    ///
+    /// Den gik gennem <see cref="VisDiktat"/> før og forsvandt efter seks
+    /// sekunder — også mens modellen stadig blev læst ind. Så stod man med en
+    /// besked om, at der blev gjort klar, som gik væk, længe før der VAR
+    /// klar, og eneste måde at finde ud af det på var at sige «Hej Pia» og se,
+    /// om der skete noget. Første gang tager indlæsningen op mod et minut.
+    ///
+    /// Nu er der to tilstande og ingen tvivl: står bjælken der, er vågeordet
+    /// ikke klar endnu. Forsvinder den, er det. Kvitteringen for «klar» får
+    /// et par sekunder og går så væk af sig selv — den skal ses, ikke blive.
+    ///
+    /// En diktering, der går i gang imens, tager bjælken tilbage. Det, man
+    /// selv har sat i gang, står over en statusbesked.
+    /// </remarks>
+    private void VisVaageord(string besked) => Dispatcher.BeginInvoke(() =>
+    {
+        if (_diktat.Igang) return;
+
+        DiktatBesked.Text = besked;
+        DiktatBjaelke.Visibility = Visibility.Visible;
+
+        _diktatUr?.Stop();
+        _diktatUr = null;
+
+        // Ikke klar endnu: bjaelken bliver staaende. Uden ur, uden nedtaelling.
+        if (!_vaage.Klar)
+        {
+            VisBoble(besked, pulser: true, skjulEfter: null);
+            return;
+        }
+
+        VisBoble(besked, pulser: false, skjulEfter: TimeSpan.FromSeconds(4));
+
+        _diktatUr = new System.Windows.Threading.DispatcherTimer
+        {
+            Interval = TimeSpan.FromSeconds(4),
+        };
+
+        _diktatUr.Tick += (_, _) =>
+        {
+            _diktatUr?.Stop();
+            _diktatUr = null;
+
+            if (_diktat.Igang) return;
+
+            DiktatBjaelke.Visibility = Visibility.Collapsed;
+        };
+
+        _diktatUr.Start();
+    });
+
     private void VisDiktat(string besked) => Dispatcher.BeginInvoke(() =>
     {
         // Mens der optages eller skrives ud, bliver boblen staaende. Foerst

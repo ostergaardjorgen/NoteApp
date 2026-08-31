@@ -1018,7 +1018,7 @@
     "blev_soegning": "Søger efter «{0}»",
     "aftale_blev_opgave": "Lagt på opgavelisten: {0} — aftaler i kalenderen kan appen ikke oprette endnu, for et tidspunkt sagt i tale skal læses rigtigt først.",
     "intet_sagt": "Der blev ikke sagt andet end vågeordet.",
-    "goer_klar": "Vågeordet gør klar — modellen læses ind. Det tager et øjeblik første gang. Genvejstasten virker imens.",
+    "goer_klar": "Vågeordet gør klar — modellen læses ind. Første gang tager det op mod et minut. Denne besked bliver stående, indtil «Hej Pia» virker. Genvejstasten virker imens.",
     "klar": "Vågeordet er klar. Sig «Hej Pia»."
   },
   "noter": {
