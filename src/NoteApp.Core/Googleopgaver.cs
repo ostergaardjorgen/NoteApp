@@ -124,6 +124,27 @@ public static class Googleopgaver
         return ud;
     }
 
+    /// <summary>
+    /// Brugerens opgavelister — id og navn.
+    /// </summary>
+    /// <remarks>
+    /// DEN FINDES, FOR AT MAN KAN VÆLGE, HVOR EN NY OPGAVE HAVNER.
+    ///
+    /// Google har mindst én liste og tit flere: «Mine opgaver» ved siden af én
+    /// til studiet og én til huset. Faldt valget altid på den første, ville en
+    /// opgave, man laver i HeyPia, lande et andet sted end den, man skriver på
+    /// telefonen — og så er der to lister igen, hvilket er præcis det,
+    /// integrationen findes for at undgå.
+    ///
+    /// DEN KASTER, HVIS GOOGLE IKKE SVARER. Den, der spørger, skal selv
+    /// bestemme, hvad det betyder: for en dialog, der er ved at blive åbnet,
+    /// er svaret at lade være med at vise valget — ikke at nægte at oprette
+    /// opgaven. Se opgavevinduet.
+    /// </remarks>
+    public static async Task<List<(string Id, string Navn)>> ListerAsync(
+        string opdateringsnoegle, CancellationToken ct = default) =>
+        await Listerne(await Noegle(opdateringsnoegle, ct), ct);
+
     /// <summary>Brugerens opgavelister. Google har mindst én, «Mine opgaver».</summary>
     private static async Task<List<(string Id, string Navn)>> Listerne(string noegle,
                                                                        CancellationToken ct)

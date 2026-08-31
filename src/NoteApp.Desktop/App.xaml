@@ -539,7 +539,367 @@
       </Setter>
     </Style>
 
+    <!-- ================= DATOVÆLGERENS KALENDER =========================
+
+         POPUP'EN ARVEDE IKKE TEMAET, OG EN IMPLICIT STIL KUNNE IKKE REDDE DEN.
+
+         Klikkede man på kalenderikonet i «Ny aftale», kom der en HVID kasse
+         frem med lys skrift i det mørke tema — datoerne var der, man kunne
+         bare ikke se dem. Stilarterne for DatePicker og DatePickerTextBox
+         ovenfor rammer kun feltet, ikke det, der folder sig ud.
+
+         DatePicker laver sin egen Calendar og styrer dens Style i KODE:
+
+             _calendar.SetBinding(StyleProperty,
+                 GetDatePickerBinding(CalendarStyleProperty));
+
+         En binding er en lokal værdi. Så længe CalendarStyle er tom, står der
+         altså Style = null på kalenderen — og en kontrol med en lokal Style
+         slår ALDRIG en implicit stil op. Derfor virkede det ikke bare at
+         skrive «Style TargetType="Calendar"» her i filen; den vej findes ikke
+         for en datovælger. Det er CalendarStyle på datovælgeren, der er
+         indgangen, og den sættes nedenfor.
+
+         Hele skabelonen skrives ud — samme grund som ved ComboBox og menuerne:
+         WPF's standardchrome er hvid og lytter ikke til Background.
+
+         RÆKKEFØLGEN ER IKKE TILFÆLDIG. StaticResource kan kun se opad i
+         filen, så dagen og måneden skal stå før kassen, kassen før kalenderen
+         og kalenderen før datovælgeren. -->
+
+    <!-- EN DAG I MÅNEDEN.
+         I DAG har en kant, den VALGTE har en flade. To forskellige ting, der
+         ikke må ligne hinanden — ellers kan man ikke se, om man har valgt
+         noget, den dag man åbner kalenderen på dagens dato. -->
+    <Style x:Key="Kalenderdag" TargetType="CalendarDayButton">
+      <Setter Property="Foreground" Value="{DynamicResource Tekst}" />
+      <Setter Property="FontFamily" Value="Segoe UI" />
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="MinWidth" Value="32" />
+      <Setter Property="MinHeight" Value="30" />
+      <Setter Property="Cursor" Value="Hand" />
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="CalendarDayButton">
+            <Border x:Name="flade" Margin="1" CornerRadius="5"
+                    Background="Transparent"
+                    BorderBrush="Transparent" BorderThickness="1">
+              <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Border>
+            <ControlTemplate.Triggers>
+              <!-- Dagene fra nabomaanederne. De kan vaelges, men de er ikke
+                   den maaned, man kigger paa. -->
+              <Trigger Property="IsInactive" Value="True">
+                <Setter Property="Foreground" Value="{DynamicResource Slukket}" />
+              </Trigger>
+
+              <Trigger Property="IsToday" Value="True">
+                <Setter TargetName="flade" Property="BorderBrush" Value="{DynamicResource Accent}" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+              </Trigger>
+
+              <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="flade" Property="Background" Value="{DynamicResource Svaev}" />
+              </Trigger>
+
+              <!-- MARKERINGEN STAAR EFTER MUSEN, saa den vinder. Stod den
+                   foer, ville den valgte dag skifte til svaevefarven, saa
+                   snart musen kom hen over den - og saa saa det ud, som om
+                   valget forsvandt. -->
+              <Trigger Property="IsSelected" Value="True">
+                <Setter TargetName="flade" Property="Background" Value="{DynamicResource Accent}" />
+                <Setter TargetName="flade" Property="BorderBrush" Value="{DynamicResource Accent}" />
+                <Setter Property="Foreground" Value="{DynamicResource PaaAccent}" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+              </Trigger>
+
+              <Trigger Property="IsBlackedOut" Value="True">
+                <Setter Property="Foreground" Value="{DynamicResource Slukket}" />
+              </Trigger>
+
+              <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Foreground" Value="{DynamicResource Slukket}" />
+                <Setter Property="Cursor" Value="Arrow" />
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
+    <!-- EN MAANED ELLER ET AARSTAL. Den vises, naar man trykker paa
+         overskriften og springer et helt aar frem. Samme udseende som dagen,
+         bare bredere - felterne er «jan», «feb» og firecifrede aarstal. -->
+    <Style x:Key="Kalendermaaned" TargetType="CalendarButton">
+      <Setter Property="Foreground" Value="{DynamicResource Tekst}" />
+      <Setter Property="FontFamily" Value="Segoe UI" />
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="MinWidth" Value="56" />
+      <Setter Property="MinHeight" Value="42" />
+      <Setter Property="Cursor" Value="Hand" />
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="CalendarButton">
+            <Border x:Name="flade" Margin="2" CornerRadius="5"
+                    Background="Transparent"
+                    BorderBrush="Transparent" BorderThickness="1">
+              <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsInactive" Value="True">
+                <Setter Property="Foreground" Value="{DynamicResource Slukket}" />
+              </Trigger>
+              <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="flade" Property="Background" Value="{DynamicResource Svaev}" />
+              </Trigger>
+              <!-- HER HEDDER DEN IKKE «IsSelected».
+                   CalendarButton er ikke en dag, men en hel maaned eller et
+                   helt aar, og den kan ikke selv vaere valgt - den svarer paa,
+                   om der ligger en valgt dag INDE i den. Egenskaben findes
+                   ikke, og oversaetteren siger fra:
+                   «Cannot find the Template Property 'IsSelected'». -->
+              <Trigger Property="HasSelectedDays" Value="True">
+                <Setter TargetName="flade" Property="Background" Value="{DynamicResource Accent}" />
+                <Setter TargetName="flade" Property="BorderBrush" Value="{DynamicResource Accent}" />
+                <Setter Property="Foreground" Value="{DynamicResource PaaAccent}" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+              </Trigger>
+              <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Foreground" Value="{DynamicResource Slukket}" />
+                <Setter Property="Cursor" Value="Arrow" />
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
+    <!-- SELVE KASSEN: overskriften med pilene, ugedagene og gitteret.
+         Det er HER, det hvide kom fra - CalendarItem er den del, WPF tegner
+         med sin egen chrome. -->
+    <Style x:Key="Kalenderkassen" TargetType="CalendarItem">
+      <Setter Property="Background" Value="{DynamicResource Panel}" />
+      <Setter Property="Foreground" Value="{DynamicResource Tekst}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource PanelKant}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="FontFamily" Value="Segoe UI" />
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="CalendarItem">
+            <ControlTemplate.Resources>
+              <!-- UGEDAGENES FORBOGSTAVER.
+                   Teksten kommer fra Windows' kultur og ikke fra
+                   sprogfilerne - det er den samme kalender, resten af
+                   systemet viser, og en app, der oversaetter ugedagene selv,
+                   ville kunne komme til at sige noget andet end uret nede i
+                   hjoernet.
+
+                   SKABELONEN SKAL LIGGE PRAECIS HER. CalendarItem henter den
+                   i sin egen Template.Resources og ingen andre steder -
+                   flyttes den ud i filen, staar raekken med ugedage tom. -->
+              <DataTemplate x:Key="{x:Static CalendarItem.DayTitleTemplateResourceKey}">
+                <TextBlock Text="{Binding}" FontSize="10.5" FontWeight="SemiBold"
+                           HorizontalAlignment="Center" Margin="0,4,0,6"
+                           Foreground="{DynamicResource TekstMeget}" />
+              </DataTemplate>
+            </ControlTemplate.Resources>
+
+            <Grid x:Name="PART_Root">
+              <Border Background="{TemplateBinding Background}"
+                      BorderBrush="{TemplateBinding BorderBrush}"
+                      BorderThickness="{TemplateBinding BorderThickness}"
+                      CornerRadius="8" Padding="8,6,8,8">
+                <Grid>
+                  <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                  </Grid.RowDefinitions>
+
+                  <!-- ============ OVERSKRIFTEN ============
+                       Pilene faar deres egen skabelon. Uden den ville appens
+                       almindelige knap-stil slaa igennem, og saa stod der to
+                       kasser med kant og polstring, hvor der skulle have
+                       vaeret to smaa pile - samme fejl som rullelisten havde,
+                       da Fluent-temaet kom til. -->
+                  <Grid Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                      <ColumnDefinition Width="Auto" />
+                      <ColumnDefinition Width="*" />
+                      <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <Button x:Name="PART_PreviousButton" Grid.Column="0"
+                            Focusable="False" Width="28" Height="26" Cursor="Hand">
+                      <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                          <Border x:Name="kant" Background="Transparent" CornerRadius="5">
+                            <Path HorizontalAlignment="Center" VerticalAlignment="Center"
+                                  Data="M 6,0 L 6,10 L 0,5 Z"
+                                  Fill="{DynamicResource TekstSvag}" />
+                          </Border>
+                          <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                              <Setter TargetName="kant" Property="Background"
+                                      Value="{DynamicResource Svaev}" />
+                            </Trigger>
+                          </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                      </Button.Template>
+                    </Button>
+
+                    <!-- MAANED OG AAR. Teksten saettes af WPF ud fra kulturen,
+                         saa der er ingen noegle fra sprogfilerne at binde. -->
+                    <Button x:Name="PART_HeaderButton" Grid.Column="1"
+                            Focusable="False" Cursor="Hand"
+                            FontSize="13" FontWeight="SemiBold"
+                            HorizontalAlignment="Center" VerticalAlignment="Center">
+                      <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                          <Border x:Name="kant" Background="Transparent"
+                                  CornerRadius="5" Padding="10,4">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+                          </Border>
+                          <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                              <Setter TargetName="kant" Property="Background"
+                                      Value="{DynamicResource Svaev}" />
+                            </Trigger>
+                          </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                      </Button.Template>
+                    </Button>
+
+                    <Button x:Name="PART_NextButton" Grid.Column="2"
+                            Focusable="False" Width="28" Height="26" Cursor="Hand">
+                      <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                          <Border x:Name="kant" Background="Transparent" CornerRadius="5">
+                            <Path HorizontalAlignment="Center" VerticalAlignment="Center"
+                                  Data="M 0,0 L 6,5 L 0,10 Z"
+                                  Fill="{DynamicResource TekstSvag}" />
+                          </Border>
+                          <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                              <Setter TargetName="kant" Property="Background"
+                                      Value="{DynamicResource Svaev}" />
+                            </Trigger>
+                          </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                      </Button.Template>
+                    </Button>
+                  </Grid>
+
+                  <!-- ============ DAGENE ============
+                       Syv spalter og syv raekker: én til ugedagenes navne og
+                       seks til de uger, en maaned kan strække sig over.
+                       Tallene er ikke til at vaelge - CalendarItem fylder
+                       gitteret med Grid.Row og Grid.Column i kode og regner
+                       med praecis den stoerrelse. -->
+                  <Grid x:Name="PART_MonthView" Grid.Row="1" Margin="0,2,0,0"
+                        HorizontalAlignment="Center" Visibility="Visible">
+                    <Grid.ColumnDefinitions>
+                      <ColumnDefinition Width="Auto" />
+                      <ColumnDefinition Width="Auto" />
+                      <ColumnDefinition Width="Auto" />
+                      <ColumnDefinition Width="Auto" />
+                      <ColumnDefinition Width="Auto" />
+                      <ColumnDefinition Width="Auto" />
+                      <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                      <RowDefinition Height="Auto" />
+                      <RowDefinition Height="Auto" />
+                      <RowDefinition Height="Auto" />
+                      <RowDefinition Height="Auto" />
+                      <RowDefinition Height="Auto" />
+                      <RowDefinition Height="Auto" />
+                      <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                  </Grid>
+
+                  <!-- ============ MAANEDER OG AARSTAL ============
+                       Fire spalter og tre raekker - tolv felter, som er tolv
+                       maaneder eller ti aarstal med et paa hver side. -->
+                  <Grid x:Name="PART_YearView" Grid.Row="1" Margin="0,2,0,0"
+                        HorizontalAlignment="Center" Visibility="Hidden">
+                    <Grid.ColumnDefinitions>
+                      <ColumnDefinition Width="Auto" />
+                      <ColumnDefinition Width="Auto" />
+                      <ColumnDefinition Width="Auto" />
+                      <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                      <RowDefinition Height="Auto" />
+                      <RowDefinition Height="Auto" />
+                      <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                  </Grid>
+                </Grid>
+              </Border>
+            </Grid>
+
+            <ControlTemplate.Triggers>
+              <!-- HVILKEN AF DE TO VISNINGER, DER STAAR FREM, AFGOERES AF
+                   KALENDEREN OVENOVER. CalendarItem har ikke selv en
+                   DisplayMode - den spoerger sin Calendar. -->
+              <DataTrigger Value="Year"
+                           Binding="{Binding DisplayMode,
+                                     RelativeSource={RelativeSource AncestorType={x:Type Calendar}}}">
+                <Setter TargetName="PART_MonthView" Property="Visibility" Value="Hidden" />
+                <Setter TargetName="PART_YearView" Property="Visibility" Value="Visible" />
+              </DataTrigger>
+              <DataTrigger Value="Decade"
+                           Binding="{Binding DisplayMode,
+                                     RelativeSource={RelativeSource AncestorType={x:Type Calendar}}}">
+                <Setter TargetName="PART_MonthView" Property="Visibility" Value="Hidden" />
+                <Setter TargetName="PART_YearView" Property="Visibility" Value="Visible" />
+              </DataTrigger>
+
+              <!-- Laast betyder daempet, ikke hvid - samme regel som paa
+                   datovaelgeren selv. -->
+              <Trigger Property="IsEnabled" Value="False">
+                <Setter TargetName="PART_Root" Property="Opacity" Value="0.6" />
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
+    <Style x:Key="Kalenderstil" TargetType="Calendar">
+      <Setter Property="Background" Value="{DynamicResource Panel}" />
+      <Setter Property="Foreground" Value="{DynamicResource Tekst}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource PanelKant}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="FontFamily" Value="Segoe UI" />
+      <Setter Property="CalendarItemStyle" Value="{StaticResource Kalenderkassen}" />
+      <Setter Property="CalendarDayButtonStyle" Value="{StaticResource Kalenderdag}" />
+      <Setter Property="CalendarButtonStyle" Value="{StaticResource Kalendermaaned}" />
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="Calendar">
+            <StackPanel x:Name="PART_Root" HorizontalAlignment="Center">
+              <CalendarItem x:Name="PART_CalendarItem"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            Style="{TemplateBinding CalendarItemStyle}" />
+            </StackPanel>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
+    <!-- En kalender, der staar direkte i et skaermbillede, kan naas af en
+         implicit stil. Datovaelgerens kan ikke - se forklaringen ovenfor. -->
+    <Style TargetType="Calendar" BasedOn="{StaticResource Kalenderstil}" />
+
     <Style TargetType="DatePicker">
+      <!-- DEN HER LINJE ER SVARET PAA DEN HVIDE POPUP.
+           CalendarStyle er den eneste vej ind til den kalender, datovaelgeren
+           selv laver - se den lange forklaring ovenfor. -->
+      <Setter Property="CalendarStyle" Value="{StaticResource Kalenderstil}" />
       <Setter Property="Background" Value="{DynamicResource Trykket}" />
       <Setter Property="Foreground" Value="{DynamicResource Tekst}" />
       <Setter Property="BorderBrush" Value="{DynamicResource FeltKant}" />
@@ -547,14 +907,80 @@
       <Setter Property="FontFamily" Value="Segoe UI" />
       <Setter Property="FontSize" Value="13" />
       <Setter Property="Padding" Value="2" />
-      <Style.Triggers>
-        <!-- LAAST BETYDER DAEMPET, IKKE HVID. Et felt, man ikke kan rette,
-             skal se ud som noget, der er laast - ikke som noget, der er
-             gaaet i stykker. -->
-        <Trigger Property="IsEnabled" Value="False">
-          <Setter Property="Opacity" Value="0.6" />
-        </Trigger>
-      </Style.Triggers>
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+
+      <!-- OGSAA SELVE FELTET FIK EN SKABELON.
+           Farverne ovenfor naaede aldrig kalenderikonet til hoejre: WPF tegner
+           knappen med sin egen chrome og en hardkodet hvid glyf, saa der stod
+           en lille HVID kasse midt i det moerke felt. Og laast blev hele
+           feltet lysegraat - «gaaet i stykker», ikke «laast».
+
+           Delenes navne er ikke til at vaelge. DatePicker slaar PART_TextBox,
+           PART_Button og PART_Popup op ved navn og goer ingenting, hvis en af
+           dem mangler. Popup'ens indhold saettes af DatePicker selv - det er
+           dén kalender, CalendarStyle ovenfor rammer. -->
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="DatePicker">
+            <Border x:Name="kant" CornerRadius="4"
+                    Background="{TemplateBinding Background}"
+                    BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}">
+              <Grid x:Name="PART_Root">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="*" />
+                  <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <DatePickerTextBox x:Name="PART_TextBox" Grid.Column="0"
+                                   Focusable="{TemplateBinding Focusable}"
+                                   VerticalContentAlignment="Center" />
+
+                <Button x:Name="PART_Button" Grid.Column="1" Focusable="False"
+                        Width="30" Cursor="Hand">
+                  <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                      <Border x:Name="knap" Background="Transparent" CornerRadius="4">
+                        <!-- Glyffen «Calendar» fra Segoe MDL2 Assets. Skriften
+                             foelger med Windows, saa der er ingen billedfil at
+                             holde styr paa. -->
+                        <TextBlock Text="&#xE787;" FontFamily="Segoe MDL2 Assets"
+                                   FontSize="14" HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource TekstSvag}" />
+                      </Border>
+                      <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                          <Setter TargetName="knap" Property="Background"
+                                  Value="{DynamicResource Svaev}" />
+                        </Trigger>
+                      </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                  </Button.Template>
+                </Button>
+
+                <Popup x:Name="PART_Popup" AllowsTransparency="True"
+                       Placement="Bottom" StaysOpen="False"
+                       PlacementTarget="{Binding ElementName=PART_TextBox}" />
+              </Grid>
+            </Border>
+
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="kant" Property="BorderBrush" Value="{DynamicResource Accent}" />
+              </Trigger>
+
+              <!-- LAAST BETYDER DAEMPET, IKKE HVID. Et felt, man ikke kan
+                   rette, skal se ud som noget, der er laast - ikke som noget,
+                   der er gaaet i stykker. -->
+              <Trigger Property="IsEnabled" Value="False">
+                <Setter TargetName="kant" Property="BorderBrush" Value="{DynamicResource PanelKant}" />
+                <Setter Property="Foreground" Value="{DynamicResource Slukket}" />
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
     </Style>
 
     <!-- ComboBox og DataGrid arver ikke temaet af sig selv: uden disse to

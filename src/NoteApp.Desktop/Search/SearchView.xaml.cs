@@ -723,6 +723,31 @@ public partial class SearchView : UserControl
         if (vindue.Gemt) VisOpgaver();
     }
 
+    /// <summary>
+    /// En opgave, man selv skriver.
+    /// </summary>
+    /// <remarks>
+    /// DEN SKAL KUNNE LAVES UDEN ET MØDE OG UDEN EN INTEGRATION — samme
+    /// begrundelse som «Ny aftale» ved siden af kalenderen. Indtil nu kunne
+    /// Cockpittet kun VISE opgaver: dem, appen selv havde fundet i en
+    /// transkription, og dem, der lå i Google Tasks. Alt andet skulle skrives
+    /// et andet sted, og så er listen her ikke længere den ene liste, den er
+    /// bygget for at være.
+    ///
+    /// Den bruger det samme vindue som en opgave, der rettes. Felterne, den
+    /// måde der gemmes på, og vejen op til Google er de samme — se
+    /// <see cref="OpgaveWindow"/>.
+    /// </remarks>
+    private void NyOpgave_Klik(object sender, RoutedEventArgs e)
+    {
+        var vindue = OpgaveWindow.Ny();
+        vindue.Owner = Window.GetWindow(this);
+
+        vindue.ShowDialog();
+
+        if (vindue.Gemt) VisOpgaver();
+    }
+
     private void AabnHosGoogle(string webadresse)
     {
         if (webadresse.Length == 0) return;

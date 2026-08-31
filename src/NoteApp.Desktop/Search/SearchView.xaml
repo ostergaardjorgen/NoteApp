@@ -585,6 +585,17 @@
                             VerticalAlignment="Center">
                   <TextBlock x:Name="OpgaveTal" FontSize="10.5" VerticalAlignment="Center"
                              Foreground="{DynamicResource TekstMeget}" />
+
+                  <!-- «NY OPGAVE» STAAR, HVOR «NY AFTALE» STAAR.
+                       Man kunne laegge en aftale ind i haanden, men ikke en
+                       opgave - appen kunne kun vise dem, den selv havde fundet
+                       i et moede, eller dem, Google havde. En opgave bliver
+                       til paa vej hjem og midt i en mail, og saa skal der
+                       vaere et sted at skrive den. -->
+                  <Button Content="{i18n:Oversat opgaver.nyopgave}" Click="NyOpgave_Klik"
+                          VerticalAlignment="Center" Padding="10,3" FontSize="11"
+                          Margin="8,0,0,0" />
+
                   <Button x:Name="Opgavesynk" Click="Opgavesynk_Klik"
                           Style="{StaticResource IkonKnap}" Margin="6,0,0,0"
                           Visibility="Collapsed"
