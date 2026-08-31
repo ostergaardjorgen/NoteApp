@@ -75,7 +75,7 @@ public partial class IndstillingerView : UserControl
 
             DikteringSprog.ItemsSource = sprogene;
 
-            var mit = v.MitSprog ?? "da";
+            var mit = v.Talesprog;
             DikteringSprog.SelectedItem =
                 sprogene.FirstOrDefault(s => s.Kode == mit)
                 ?? sprogene.FirstOrDefault(s => s.Kode == "da");

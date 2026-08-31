@@ -354,7 +354,7 @@ public sealed class Dikteringsvagt : IDisposable
             var raa = await klient.SkrivUdAsync(
                 klip,
                 ordbog.Count > 0 ? Ordbibliotek.TilAfsendelse(ordbog) : null,
-                v.MitSprog ?? "da");
+                v.Talesprog);
 
             if (raa.Raa.Length == 0)
             {

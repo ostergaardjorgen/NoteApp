@@ -1,4 +1,4 @@
-namespace NoteApp.Core;
+﻿namespace NoteApp.Core;
 
 /// <summary>Det, motoren meldte, at den hørte.</summary>
 /// <param name="Udtryk">Udtrykket fra listen — som det står i filen.</param>
@@ -81,16 +81,36 @@ public static class Vaageordsliste
     /// Hvor sikker skal motoren være, før et fund tæller?
     /// </summary>
     /// <remarks>
-    /// TRE GANGE REN GÆTNING. Med fjorten udtryk er gætning 7 %, og grænsen
-    /// bliver 21 %. Det lyder lavt og er det ikke: sandsynlighederne fordeles
-    /// mellem alle udtrykkene, så et udtryk, der får en femtedel af det hele,
-    /// skiller sig markant ud fra de tretten andre.
+    /// HALVANDEN GANG REN GÆTNING. Med fjorten udtryk er gætning 7 %, og
+    /// grænsen bliver knap 11 %.
+    ///
+    /// DER STOD TRE GANGE, OG DET VAR MÅLT FORKERT — ikke fordi tallet var
+    /// gættet, men fordi det aldrig var holdt op mod, hvad et RIGTIGT
+    /// vågeord faktisk scorer.
+    ///
+    /// Målt 31-08-2026 på brugerens egen maskine: «hej pia», sagt tydeligt og
+    /// hørt korrekt, fik 0,36 mod en grænse på 0,21. Den slap lige igennem.
+    /// Et vågeord sagt en anelse svagere, længere fra mikrofonen eller midt i
+    /// en sætning lander under, og så sker der ingenting — uden at noget
+    /// siger hvorfor. Brugeren sagde «Hej Pia» i tyve sekunder, før én af
+    /// dem var stærk nok.
+    ///
+    /// HVORFOR EN LAV GRÆNSE ER FORSVARLIG HER. Den beskytter kun mod ÉN
+    /// ting: at støj bliver bedømt til at være et vågeord. Den beskytter
+    /// ikke mod lokkeordene — de kasseres på navnet i <see cref="Taeller"/>,
+    /// uanset hvor sikker motoren er. Og et lokkeord kan score højt: «nej
+    /// ikke lige nu» blev målt til 0,54, altså højere end det rigtige
+    /// vågeord nogensinde nåede.
+    ///
+    /// Målt samme dag: fyrre sekunders stilhed gav NUL fund. Motoren melder
+    /// ikke noget, når der ikke bliver sagt noget, og så er det ikke støjen,
+    /// grænsen skal holdes stram for.
     ///
     /// Grænsen følger listens længde i stedet for at være et fast tal. Så
     /// holder den, når nogen tilføjer et vågeord mere.
     /// </remarks>
     public static double Graense(int antalUdtryk) =>
-        antalUdtryk <= 1 ? 1.0 : Math.Min(0.9, 3.0 / antalUdtryk);
+        antalUdtryk <= 1 ? 1.0 : Math.Min(0.9, 1.5 / antalUdtryk);
 
     /// <summary>
     /// Blev et vågeord hørt sikkert nok?

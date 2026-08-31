@@ -119,6 +119,28 @@ public sealed class AppSettings
     public string? MitSprog { get; set; } = "da";
 
     /// <summary>
+    /// Sproget, du taler — altid et rigtigt svar.
+    /// </summary>
+    /// <remarks>
+    /// TOM ER IKKE DET SAMME SOM NULL, OG DET KOSTEDE EN UDSKRIFT.
+    ///
+    /// Kaldet stod som <c>MitSprog ?? "da"</c>, og det fanger kun null. På
+    /// brugerens maskine stod der en TOM streng, og den slap igennem: så blev
+    /// der hverken sendt et sprog med eller lagt en dansk ledetråd foran, og
+    /// modellen gættede.
+    ///
+    /// Målt 31-08-2026: «Omada, IBM, NetIQ» — alle tre i ordlisten — kom
+    /// tilbage som «Onera, IPM, NenaQ». Ordlisten var sendt med; det, der
+    /// manglede, var sproget. En ordliste kan ikke rette et forkert gæt på,
+    /// hvilket sprog der bliver talt.
+    ///
+    /// Her er der ingen tredje mulighed: står der ingenting, er svaret
+    /// dansk, ligesom det er i brugerfladen. Se <see cref="MitSprog"/>.
+    /// </remarks>
+    public string Talesprog =>
+        string.IsNullOrWhiteSpace(MitSprog) ? "da" : MitSprog.Trim();
+
+    /// <summary>
     /// Dit navn. Sættes under opsætningen og kan rettes under Diktering.
     /// </summary>
     /// <remarks>

@@ -1,4 +1,4 @@
-using System.Linq;
+﻿using System.Linq;
 using NoteApp.Core;
 using Xunit;
 
@@ -52,10 +52,48 @@ public class VaageordslisteTest
     // ======================= graensen =======================
 
     [Fact]
-    public void Graensen_er_tre_gange_gaetning()
+    public void Graensen_er_halvanden_gang_gaetning()
     {
-        // Fjorten udtryk: gaetning er 7 %, graensen 21 %.
-        Assert.Equal(3.0 / 14, Vaageordsliste.Graense(14), 5);
+        // Fjorten udtryk: gaetning er 7 %, graensen knap 11 %.
+        Assert.Equal(1.5 / 14, Vaageordsliste.Graense(14), 5);
+    }
+
+    /// <summary>
+    /// Det MAALTE vaageord skal komme igennem.
+    /// </summary>
+    /// <remarks>
+    /// 31-08-2026 paa brugerens maskine: «hej pia», sagt tydeligt og hoert
+    /// korrekt, fik 0,36. Med den gamle graense paa 0,21 slap den lige
+    /// igennem - og et vaageord sagt en anelse svagere gjorde ikke.
+    ///
+    /// Tallet staar her, saa graensen ikke kan strammes tilbage uden at
+    /// nogen ser, hvad den saa afviser.
+    /// </remarks>
+    [Theory]
+    [InlineData(0.36)]   // maalt: tydeligt sagt, hoert korrekt
+    [InlineData(0.20)]   // svagere - blev afvist foer
+    [InlineData(0.15)]
+    public void Et_rigtigt_vaageord_i_den_maalte_styrke_taeller(double sikkerhed)
+    {
+        var fund = new Vaageordsfund("hej pia", sikkerhed);
+
+        Assert.True(Vaageordsliste.Taeller(fund, Vaageord.Standardord, 14));
+    }
+
+    /// <summary>
+    /// Et lokkeord taeller ikke, uanset hvor sikker motoren er.
+    /// </summary>
+    /// <remarks>
+    /// «nej ikke lige nu» blev maalt til 0,54 - hoejere end det rigtige
+    /// vaageord nogensinde naaede. Det er derfor, graensen ikke er det, der
+    /// holder lokkeordene ude; det er navnet.
+    /// </remarks>
+    [Fact]
+    public void Et_lokkeord_taeller_ikke_selv_ved_hoej_sikkerhed()
+    {
+        var fund = new Vaageordsfund("nej ikke lige nu", 0.54);
+
+        Assert.False(Vaageordsliste.Taeller(fund, Vaageord.Standardord, 14));
     }
 
     [Fact]
