@@ -921,7 +921,7 @@
   },
   "diktering": {
     "lytter": "Lytter — tal, og slip tasten når du er færdig",
-    "skriver_ud": "Skriver ud …",
+    "skriver_ud": "Skriver teksten ud …",
     "rydder_op": "Rydder op i teksten …",
     "for_kort": "For kort til et diktat. Hold tasten nede, mens du taler.",
     "intet_hoert": "Der blev ikke hørt noget. Sig til, hvis mikrofonen skal vælges om.",
@@ -939,7 +939,8 @@
     "lytter_paa_reserve": "Lytter på {0} — den mikrofon, du har valgt, er ikke tilsluttet lige nu.",
     "mikrofon_svarede_ikke": "{0} svarede ikke: {1}. Prøv en anden under Indstillinger → Lyd.",
     "fane_noter": "Noter",
-    "fane_indstillinger": "Indstillinger"
+    "fane_indstillinger": "Indstillinger",
+    "lytter_vaageord": "Optager — tal nu. Den stopper af sig selv, når du holder en pause"
   },
   "ordbogview": {
     "ordbog": "Ordbog",

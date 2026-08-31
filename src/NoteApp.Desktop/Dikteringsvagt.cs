@@ -137,7 +137,20 @@ public sealed class Dikteringsvagt : IDisposable
             forud.Behold();
 
             _fraVaageord = true;
-            Melder?.Invoke(Sprog.T("diktering.lytter"));
+
+            // ============ IKKE DEN SAMME BESKED SOM VED TASTEN ============
+            //
+            // HER STOD «Lytter - tal, og slip TASTEN naar du er faerdig».
+            // Teksten er skrevet til genvejstasten og blev genbrugt her, hvor
+            // der ingen tast er: efter et vaageord slutter dikteringen af sig
+            // selv, naar man holder en pause.
+            //
+            // Brugeren skrev det selv ind som en note 31-08-2026: «det virker
+            // faktisk, som om den reagerer rigtigt, men man kan ikke se det
+            // paa den groenne bar». Bjaelken beskrev en anden fremgangsmaade
+            // end den, appen brugte - og saa kan man ikke laese, om den er i
+            // gang, uanset hvor tydeligt der staar noget.
+            Melder?.Invoke(Sprog.T("diktering.lytter_vaageord"));
 
             Stilhedsur(() => forud.Niveau);
             return;

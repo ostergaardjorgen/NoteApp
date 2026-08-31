@@ -921,7 +921,7 @@
   },
   "diktering": {
     "lytter": "Listening — speak, and let go of the key when you are done",
-    "skriver_ud": "Writing out …",
+    "skriver_ud": "Writing out the text …",
     "rydder_op": "Tidying up the text …",
     "for_kort": "Too short for a dictation. Hold the key down while you speak.",
     "intet_hoert": "Nothing was heard. Say so if the microphone needs changing.",
@@ -939,7 +939,8 @@
     "lytter_paa_reserve": "Listening on {0} — the microphone you chose is not connected right now.",
     "mikrofon_svarede_ikke": "{0} did not respond: {1}. Try another one under Settings → Audio.",
     "fane_noter": "Notes",
-    "fane_indstillinger": "Settings"
+    "fane_indstillinger": "Settings",
+    "lytter_vaageord": "Recording — speak now. It stops on its own when you pause"
   },
   "ordbogview": {
     "ordbog": "Word library",
