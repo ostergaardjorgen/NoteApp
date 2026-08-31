@@ -1,4 +1,4 @@
-using NoteApp.Core;
+﻿using NoteApp.Core;
 using Xunit;
 
 namespace NoteApp.Tests;
@@ -51,5 +51,38 @@ public class VaageordAfskaeringTest
         // «Hej Pia» og intet andet: der er ikke noget tilbage at diktere, og
         // saa skal teksten ikke blive til en tom streng, der ligner et svar.
         Assert.Equal("Hej Pia", Hensigtstolk.UdenVaageord("Hej Pia", new[] { "goddag pia" }));
+    }
+
+    /// <summary>
+    /// Ogsaa naar der IKKE er en hensigt at genkende.
+    /// </summary>
+    /// <remarks>
+    /// AFSKAERINGEN LAA FOR SENT. Den skete inde i ruteren - altsaa kun, naar
+    /// der var en hensigt som «opret en note» at genkende. Sagde man «Hej Pia,
+    /// kan vi optage det nu», svarede ruteren falsk, teksten gik den
+    /// almindelige vej, og «Hej Pia» fulgte med baade i udklipsholderen og i
+    /// noten. Set 31-08-2026.
+    /// </remarks>
+    [Theory]
+    [InlineData("Hej Pia. Kan vi optage det nu, eller hvordan har du det med det?",
+                "Kan vi optage det nu, eller hvordan har du det med det?")]
+    [InlineData("Hej Pia, jeg skal huske at ringe til min mor",
+                "jeg skal huske at ringe til min mor")]
+    public void Vaageordet_skaeres_af_ogsaa_uden_en_hensigt(string sagt, string vented)
+    {
+        Assert.Equal(vented, Hensigtstolk.UdenVaageord(sagt, new[] { "hej pia" }));
+    }
+
+    /// <summary>
+    /// Blev der ikke sagt andet end ordet, maa teksten ikke blive tom.
+    /// </summary>
+    /// <remarks>
+    /// En tom note er vaerre end en med to ord i: saa ved man ikke, om der
+    /// blev optaget noget som helst.
+    /// </remarks>
+    [Fact]
+    public void Kun_vaageordet_giver_en_tom_rest()
+    {
+        Assert.Equal("", Hensigtstolk.UdenVaageord("Hej Pia.", new[] { "hej pia" }));
     }
 }

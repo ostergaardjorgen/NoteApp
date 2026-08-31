@@ -1448,38 +1448,13 @@ public partial class MainWindow : Window
     private const double Boelgebund = 4.0;
     private const double Boelgetop = 18.0;
 
-    /// <summary>
-    /// Farver bjælken efter, hvad appen laver.
-    /// </summary>
-    /// <remarks>
-    /// SKIFTET SKAL KUNNE SES UDEN AT BLIVE LÆST.
-    ///
-    /// Bjælken var grøn i begge tilstande, og kun teksten skiftede. Man
-    /// dikterer ind i et andet program og kigger et andet sted hen — en
-    /// sætning, der bliver til en anden sætning i samme farve, fanger ingen i
-    /// øjenkrogen. Brugerens note 31-08-2026: «man tror ikke, at appen er
-    /// gået i gang med at optage».
-    ///
-    /// Nu er der to farver og ingen tvivl: grøn betyder «klar og lytter»,
-    /// rød betyder «der optages nu». Det er den samme røde, som optageknappen
-    /// og prikken bruger, så farven betyder det samme over hele appen.
-    /// </remarks>
-    private void SaetBjaelkefarve(bool optager)
-    {
-        try
-        {
-            DiktatBjaelke.Background = (System.Windows.Media.Brush)FindResource(
-                optager ? "OptagerFlade" : "AccentFlade");
-
-            DiktatBjaelke.BorderBrush = (System.Windows.Media.Brush)FindResource(
-                optager ? "Optager" : "Accent");
-        }
-        catch (Exception)
-        {
-            // En farve, der ikke kan slaas op, maa ikke kunne stoppe en
-            // diktering. Teksten siger det samme.
-        }
-    }
+    // HER LAA EN FARVESKIFTER. Bjaelken blev roed, mens der blev optaget, og
+    // groen igen bagefter - for at skiftet kunne ses uden at blive laest.
+    //
+    // Fjernet 31-08-2026 paa brugerens ord: «den skal heller ikke aendre
+    // baggrundsfarve paa baren, den groenne er fin». Boelgerne siger allerede,
+    // at der optages, og de siger det tydeligere. To signaler om det samme er
+    // ikke dobbelt saa klart - det er uroligt.
 
     private void SaetBoelger()
     {
@@ -1659,7 +1634,6 @@ public partial class MainWindow : Window
 
         DiktatBesked.Text = besked;
         DiktatBjaelke.Visibility = Visibility.Visible;
-        SaetBjaelkefarve(false);
         VisBoble(besked, pulser: !_vaage.Klar, skjulEfter: null);
 
         // Lyttes der bare, staar prikken stille. Boelgerne hoerer til
@@ -1682,7 +1656,6 @@ public partial class MainWindow : Window
         // optages, og slukkes i det oejeblik lyden er i hus - ogsaa mens der
         // skrives ud, hvor der ikke laengere er en stemme at foelge.
         SaetLydur(_diktat.Igang);
-        SaetBjaelkefarve(_diktat.Igang);
 
         // En NY diktering rydder tilbuddet fra den forrige. Ellers ville man
         // gemme det forkerte, fordi knappen stod der endnu.

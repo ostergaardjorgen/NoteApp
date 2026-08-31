@@ -471,6 +471,28 @@ public sealed class Dikteringsvagt : IDisposable
                 return;
             }
 
+            // ============ VAAGEORDET SKAL UD AF TEKSTEN ============
+            //
+            // Optagelsen begynder BAGUD i tiden, saa «Hej Pia» er med i lyden
+            // og bliver skrevet ud sammen med resten. Det skal skaeres af.
+            //
+            // HER LAA DET FOER, OG DET LAA FOR SENT. Afskaeringen skete inde i
+            // ruteren - altsaa kun, naar der VAR en hensigt at genkende. Sagde
+            // man «Hej Pia, kan vi optage det nu», svarede ruteren falsk,
+            // teksten gik den almindelige vej, og «Hej Pia» fulgte med baade i
+            // udklipsholderen og i noten. Set 31-08-2026.
+            //
+            // Nu skaeres der ét sted, foer teksten bruges til noget som helst.
+            if (_fraVaageord)
+            {
+                var uden = Hensigtstolk.UdenVaageord(
+                    tekst, Vaageord.Valgte(v.Vaageord, v.Talesprog));
+
+                // Blev der ikke sagt andet end ordet, beholdes den raa tekst.
+                // En tom note er vaerre end en med to ord i.
+                if (uden.Trim().Length > 0) tekst = uden;
+            }
+
             // ============ KOM DET FRA VAAGEORDET? ============
             //
             // Saa er der som regel sagt HVAD det skal bruges til, og teksten
