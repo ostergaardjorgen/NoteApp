@@ -108,17 +108,57 @@ public sealed class Vaageordsvagt : IDisposable
 
             try
             {
+                // ============ GUIDED MODE, IKKE FRI TRANSSKRIPTION ============
+                //
+                // HER STOD DER INTET FLAG, OG DET VAR HELE FEJLEN.
+                //
+                // Uden -cmd og uden -p koerer whisper-command i en tilstand,
+                // hvor den FOERST kraever, at man siger en fast engelsk
+                // saetning. Maalt 30-08-2026, mens brugeren sagde «Hej Pia»:
+                //
+                //   Say the following phrase: 'Ok Whisper, start listening
+                //   for commands.'
+                //   Heard '[Skib]'
+                //   WARNING: prompt not recognized, try again
+                //
+                // Appen lyttede efter «hej pia» i en stroem, hvor ordene
+                // aldrig kunne staa. Og den frie transskription hallucinerede
+                // paa de korte klip: [Skib], [MUSIK], [Tekstet af Vigre].
+                //
+                // Med -cmd bindes afkodningen til en liste. Saa KAN den ikke
+                // finde paa noget - den kan svare med et af udtrykkene eller
+                // ingenting. Se Vaageordsliste for lokkeordene, der giver den
+                // et sted at gaa hen, naar ordet ikke blev sagt.
+                var liste = Vaageordsliste.Byg(
+                    AppSettings.Current.Vaageord is { Count: > 0 } egne
+                        ? egne
+                        : Vaageord.Standardord);
+
+                _antalUdtryk = liste.Count;
+                var listefil = SkrivListe(liste);
+
+                // ============ DEN MIKROFON, BRUGEREN HAR VALGT ============
+                //
+                // Uden -c aabner motoren «default capture device». Maalt
+                // 30-08-2026 var der FIRE at vaelge imellem paa maskinen, og
+                // appen sagde ikke hvilken. Resten af appen bruger brugerens
+                // valg; vaageordet gjorde ikke.
+                var mikrofon = _kendtIndeks >= 0 ? $" -c {_kendtIndeks}" : "";
+
                 var start = new ProcessStartInfo(Motorsti)
                 {
                     // -t 2: to traade. Vagten skal ikke tage maskinen fra det,
                     // brugeren laver - den skal bare vaere der.
-                    Arguments = $"-m \"{model}\" -l {sprog} -t 2",
+                    Arguments = $"-m \"{model}\" -l {sprog} -t 2 -cmd \"{listefil}\"{mikrofon}",
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
                     UseShellExecute = false,
                     CreateNoWindow = true,
                     StandardOutputEncoding = Encoding.UTF8,
                 };
+
+                _sidsteModel = model;
+                _sidsteSprog = sprog;
 
                 _proces = Process.Start(start);
                 if (_proces is null) return;
@@ -180,18 +220,143 @@ public sealed class Vaageordsvagt : IDisposable
     /// Det er også dét, der gør, at et møde ikke starter en diktering: der
     /// tales i timevis, og ingen af sætningerne begynder med «Hej Pia».
     /// </remarks>
+    /// <summary>Hvor mange udtryk motoren vælger imellem. Afgør grænsen.</summary>
+    private int _antalUdtryk;
+
+    /// <summary>Mikrofonens nummer hos motoren. −1 = ikke fundet endnu.</summary>
+    private int _kendtIndeks = -1;
+
+    /// <summary>Skal vi genstarte for at få den rigtige mikrofon?</summary>
+    private bool _skalSkifteMikrofon;
+
+    /// <summary>
+    /// Skriver listen, motoren skal vælge imellem.
+    /// </summary>
+    /// <remarks>
+    /// UDEN BOM. PowerShell skrev den med, og så stod der «ï»¿hej pia» som
+    /// første udtryk — motoren tog byterne med i ordet, og det første
+    /// vågeord kunne aldrig rammes. Set 30-08-2026 under målingen.
+    /// </remarks>
+    private static string SkrivListe(IReadOnlyList<string> udtryk)
+    {
+        var sti = Path.Combine(UserDataPaths.Root, "vaageord-liste.txt");
+        Directory.CreateDirectory(UserDataPaths.Root);
+
+        File.WriteAllLines(sti, udtryk, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+        return sti;
+    }
+
+    /// <summary>
+    /// Læser en linje fra motoren.
+    /// </summary>
+    /// <remarks>
+    /// TO SLAGS LINJER ER INTERESSANTE.
+    ///
+    /// Listen over mikrofoner kommer ved opstart. Den bruges til at finde
+    /// nummeret på DEN mikrofon, brugeren har valgt — motoren kender dem kun
+    /// ved navn og nummer, og nummeret er dens eget.
+    ///
+    /// Og fundene: «detected command: hej pia | p = 0.58 | t = 555 ms».
+    /// </remarks>
     private void Laes(string? linje)
     {
         if (string.IsNullOrWhiteSpace(linje)) return;
+
+        Mikrofonlinje(linje);
+        SkiftMikrofonHvisNoedvendigt(linje);
+
+        if (Vaageordsliste.Laes(linje) is not { } fund) return;
 
         var ord = AppSettings.Current.Vaageord is { Count: > 0 } egne
             ? egne
             : Vaageord.Standardord;
 
-        if (Vaageord.Hoert(linje, ord) is not { } fundet) return;
+        // GRAENSEN ER DET, DER GOER DEN BRUGBAR. Motoren vaelger altid et
+        // udtryk; det er listens laengde, der afgoer, hvornaar et valg er
+        // mere end et gaet. Se Vaageordsliste.Graense.
+        if (!Vaageordsliste.Taeller(fund, ord, _antalUdtryk)) return;
 
-        Hoert?.Invoke(Vaageord.Efter(linje, fundet));
+        Hoert?.Invoke("");
     }
+
+    /// <summary>
+    /// Finder brugerens mikrofon i motorens egen liste.
+    /// </summary>
+    /// <remarks>
+    /// Motoren skriver ved opstart:
+    ///
+    ///   init:    - Capture device #1: 'Mikrofon (Jabra SPEAK 510 USB)'
+    ///
+    /// Navnene er Windows' egne, så de kan sammenlignes direkte med det, der
+    /// står i indstillingerne. Er den valgte en anden end den, motoren tog,
+    /// startes den om ÉN gang med det rigtige nummer.
+    /// </remarks>
+    private void Mikrofonlinje(string linje)
+    {
+        if (_kendtIndeks >= 0) return;
+
+        const string maerke = "Capture device #";
+        var i = linje.IndexOf(maerke, StringComparison.Ordinal);
+        if (i < 0) return;
+
+        var rest = linje[(i + maerke.Length)..];
+        var kolon = rest.IndexOf(':');
+        if (kolon < 0) return;
+
+        if (!int.TryParse(rest[..kolon].Trim(), out var nr)) return;
+
+        var navn = rest[(kolon + 1)..].Trim().Trim('\'');
+        if (navn.Length == 0) return;
+
+        DeviceInfo? valgt;
+        try { valgt = AudioDevices.ResolveMicrophone(AppSettings.Current.MicrophoneId, out _); }
+        catch (Exception) { return; }
+
+        if (valgt is null || !navn.Equals(valgt.FriendlyName, StringComparison.OrdinalIgnoreCase))
+            return;
+
+        _kendtIndeks = nr;
+        _skalSkifteMikrofon = true;
+    }
+
+    /// <summary>Er motoren startet om for at få den rigtige mikrofon?</summary>
+    private bool _harSkiftet;
+
+    /// <summary>
+    /// Starter motoren om, når vi har fundet nummeret på den rigtige mikrofon.
+    /// </summary>
+    /// <remarks>
+    /// DET KOSTER ÉN GENSTART VED FØRSTE OPSTART, og det er prisen for at
+    /// lytte på den rigtige. Motoren kender kun sine mikrofoner ved nummer,
+    /// og nummeret står først i dens egen udskrift — altså efter den er
+    /// startet. Der er ikke nogen vej udenom.
+    ///
+    /// Kun én gang. Ellers ville en mikrofon, motoren ikke kan åbne, sende
+    /// den i ring.
+    /// </remarks>
+    private void SkiftMikrofonHvisNoedvendigt(string linje)
+    {
+        if (_harSkiftet || !_skalSkifteMikrofon) return;
+        if (!linje.Contains("attempt to open default capture device", StringComparison.Ordinal)) return;
+
+        _harSkiftet = true;
+        _skalSkifteMikrofon = false;
+
+        var model = _sidsteModel;
+        var sprog = _sidsteSprog;
+        if (model is null || sprog is null) return;
+
+        // Ud af laesningens egen traad. At lukke processen inde fra dens
+        // stdout-kald er en vej til at staa fast.
+        System.Windows.Application.Current?.Dispatcher.BeginInvoke(new Action(() =>
+        {
+            Stop();
+            Start(model, sprog);
+        }));
+    }
+
+    private string? _sidsteModel;
+    private string? _sidsteSprog;
 
     private void Ryd()
     {
