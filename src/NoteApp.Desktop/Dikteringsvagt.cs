@@ -87,7 +87,13 @@ public sealed class Dikteringsvagt : IDisposable
     public static Proeverum? Proeve { get; set; }
 
     /// <summary>Sandt, mens der optages eller skrives ud.</summary>
-    public bool Igang => _optager is not null || _arbejder;
+    /// <remarks>
+    /// Foroptageren taeller MED, naar den er ved at samle et diktat op.
+    /// Uden det ville et nyt «Hej Pia» midt i en saetning starte en diktering
+    /// oven i den, der allerede kører.
+    /// </remarks>
+    public bool Igang =>
+        _optager is not null || _arbejder || Foroptagelse is { Beholder: true };
 
     /// <summary>
     /// Vågeordet blev hørt. Gør det samme som et hold på genvejstasten — og
@@ -102,12 +108,58 @@ public sealed class Dikteringsvagt : IDisposable
     /// STILHEDEN SLIPPER HOLDET. Der er ingen tast at give slip på, så
     /// mikrofonens eget niveau afgør det: <see cref="Stilhed"/>.
     /// </remarks>
+    /// <summary>
+    /// Mikrofonen, der allerede er åben, mens der lyttes. Sat af skærmen.
+    /// </summary>
+    /// <remarks>
+    /// DEN FJERNER VENTETIDEN. Uden den blev mikrofonen først åbnet, NÅR
+    /// vågeordet var hørt — og så lå der to ventetider efter hinanden:
+    /// motorens afgørelse (målt 60–555 ms) og åbningen af lydenheden. Man
+    /// talte ud i ingenting, og de første ord blev klippet.
+    ///
+    /// Med den er lyden der allerede. Se <see cref="Foroptager"/>.
+    /// </remarks>
+    public Foroptager? Foroptagelse { get; set; }
+
     public void BegyndPaaVaageord()
     {
+        // ============ ER LYDEN DER ALLEREDE? ============
+        //
+        // Er foroptageren i gang, er de sidste sekunder i hukommelsen, og
+        // dikteringen begynder BAGUD i tiden - inklusive «Hej Pia» selv, som
+        // skaeres vaek af teksten bagefter.
+        if (Foroptagelse is { Koerer: true } forud && !Igang)
+        {
+            _klip = Path.Combine(Path.GetTempPath(),
+                                 "heypia-diktat-" + Guid.NewGuid().ToString("N")[..8] + ".wav");
+
+            _maal = Indsaetter.Laes();
+            forud.Behold();
+
+            _fraVaageord = true;
+            Melder?.Invoke(Sprog.T("diktering.lytter"));
+
+            Stilhedsur(() => forud.Niveau);
+            return;
+        }
+
         Begynd();
         _fraVaageord = _optager is not null;
         if (_optager is null) return;
 
+        Stilhedsur(() => _optager?.Niveau ?? 0);
+    }
+
+    /// <summary>
+    /// Slipper holdet, når der bliver stille.
+    /// </summary>
+    /// <remarks>
+    /// Der er ingen tast at give slip på, så mikrofonens eget niveau afgør
+    /// det. Skilt ud, fordi de to veje ind — foroptageren og den almindelige
+    /// optager — måler på hver sin kilde, men skal slippe ens.
+    /// </remarks>
+    private void Stilhedsur(Func<float> niveau)
+    {
         var start = DateTime.UtcNow;
         var sidstHoert = DateTime.UtcNow;
         var harTalt = false;
@@ -123,9 +175,17 @@ public sealed class Dikteringsvagt : IDisposable
 
         _stilhedsur.Tick += (_, _) =>
         {
-            if (_optager is null) { _stilhedsur?.Stop(); _stilhedsur = null; return; }
+            // Er der ingenting i gang laengere - hverken en optager eller
+            // noget paa vej i hus fra ringen - er der heller ikke noget at
+            // slippe.
+            if (_optager is null && Foroptagelse is not { Beholder: true })
+            {
+                _stilhedsur?.Stop();
+                _stilhedsur = null;
+                return;
+            }
 
-            if (_optager.Niveau >= Stilhed.Graense)
+            if (niveau() >= Stilhed.Graense)
             {
                 sidstHoert = DateTime.UtcNow;
                 if (DateTime.UtcNow - start >= Stilhed.MindsteTale) harTalt = true;
@@ -240,7 +300,11 @@ public sealed class Dikteringsvagt : IDisposable
     /// </param>
     public async Task SlutAsync(bool afbrudt)
     {
-        if (_optager is null) return;
+        // FOROPTAGEREN HAR INGEN «_optager». Den holder mikrofonen aaben hele
+        // tiden, og der er derfor ingen at stoppe - kun noget at gemme.
+        var fraRing = Foroptagelse is { Beholder: true };
+
+        if (_optager is null && !fraRing) return;
 
         var optager = _optager;
         var klip = _klip!;
@@ -249,8 +313,11 @@ public sealed class Dikteringsvagt : IDisposable
 
         try
         {
-            var sekunder = optager.Stop();
-            optager.Dispose();
+            var sekunder = fraRing
+                ? Foroptagelse!.Gem(klip)
+                : optager!.Stop();
+
+            optager?.Dispose();
 
             // Under et halvt sekund er et fejltryk, ikke et diktat. At sende
             // det ville koste et kald og give en tom streng tilbage.

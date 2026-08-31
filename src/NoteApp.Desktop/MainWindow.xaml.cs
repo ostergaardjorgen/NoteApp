@@ -964,12 +964,38 @@ public partial class MainWindow : Window
         if (svar == Core.Lyttesvar.Lytter)
         {
             _vaage.Start(model!, Core.Sprog.Kode);
+
+            // ============ MIKROFONEN ER ALLEREDE AABEN ============
+            //
+            // Uden den her blev mikrofonen foerst aabnet, NAAR vaageordet var
+            // hoert - og saa laa der to ventetider efter hinanden: motorens
+            // afgoerelse (maalt 60-555 ms) og aabningen af lydenheden. Man
+            // talte ud i ingenting, og de foerste ord blev klippet.
+            //
+            // Nu ligger de sidste fire sekunder i hukommelsen, og dikteringen
+            // begynder BAGUD i tiden. Der skrives ingenting ned, foer ordet er
+            // hoert - se Foroptager.
+            _forop ??= new Core.Foroptager();
+            _diktat.Foroptagelse = _forop;
+
+            if (!_forop.Koerer) _forop.Start(Core.AppSettings.Current.MicrophoneId);
         }
-        else if (_vaage.Lytter)
+        else
         {
-            _vaage.Stop();
+            if (_vaage.Lytter) _vaage.Stop();
+
+            // Mikrofonen lukkes med. Lytter vi ikke, er der ikke noget at
+            // huske - og en aaben mikrofon uden en grund er praecis dét, hele
+            // afsnittet i Compliance handler om ikke at have.
+            //
+            // Er der et diktat paa vej i hus lige nu, faar det lov at blive
+            // faerdigt foerst.
+            if (_forop is { Koerer: true, Beholder: false }) _forop.Stop();
         }
     }
+
+    /// <summary>Mikrofonen, der står åben, mens vågeordet lytter.</summary>
+    private Core.Foroptager? _forop;
 
     /// <summary>
     /// Kører der en optagelse?
@@ -1737,6 +1763,11 @@ public partial class MainWindow : Window
         // lukningen, og processen blev staaende uden noget at se paa.
         try { _boble?.Close(); } catch (Exception) { }
         _boble = null;
+
+        // Mikrofonen skal lukkes. En aaben lydenhed efter nedlukningen holder
+        // baade appen og enheden i live.
+        try { _forop?.Dispose(); } catch (Exception) { }
+        _forop = null;
 
         base.OnClosing(e);
     }
