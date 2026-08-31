@@ -350,6 +350,32 @@ public static class Stilhed
     /// </remarks>
     public static readonly TimeSpan MindsteTale = TimeSpan.FromMilliseconds(400);
 
+    /// <summary>
+    /// Hvor længe der ventes på tale, der aldrig kommer.
+    /// </summary>
+    /// <remarks>
+    /// FORDI DET, DER BLEV SAGT, ALLEREDE KAN LIGGE I RINGEN.
+    ///
+    /// Motoren afgør først, at der blev sagt «Hej Pia», når man holder pause.
+    /// Siger man hele sætningen i ét stræk — «Hej Pia, kan du lave et nyt
+    /// referat til mig?» — kommer udløsningen altså EFTER, man er holdt op.
+    /// Hele sætningen ligger i føroptagerens ring og er med; der er bare
+    /// ingenting tilbage at høre.
+    ///
+    /// Uret ventede på den tale. Uden den blev <c>harTalt</c> aldrig sat, og
+    /// så sluttede dikteringen først ved loftet på tre minutter.
+    ///
+    /// Brugerens ord 31-08-2026: «hvis jeg laver en kort besked, er den ikke
+    /// lang nok til at den registrerer, jeg holder op med at tale. Så står den
+    /// og lytter, indtil jeg siger et nyt ord og så er stille igen.» Det nye
+    /// ord var dét, der endelig satte <c>harTalt</c>.
+    ///
+    /// Fire sekunder er valgt, fordi bjælken beder om en kort pause efter
+    /// vågeordet: der skal være tid til at nå at begynde. Er der ikke sagt
+    /// noget derefter, var alt sagt inden — og så er klippet færdigt.
+    /// </remarks>
+    public static readonly TimeSpan UdenTale = TimeSpan.FromSeconds(4);
+
     /// <param name="sidenTale">Tid siden mikrofonen sidst hørte noget.</param>
     /// <param name="haltTalt">Er der overhovedet blevet talt?</param>
     /// <param name="gaaet">Tid siden dikteringen begyndte.</param>
@@ -358,9 +384,15 @@ public static class Stilhed
     {
         if (gaaet >= loft) return true;
 
-        // Er der ikke sagt noget endnu, venter vi. Man skal have lov at
-        // traekke vejret, foer man begynder.
-        if (!haltTalt) return gaaet >= loft;
+        // ============ TALE, DER ALDRIG KOMMER ============
+        //
+        // HER STOD «vent til loftet», og loftet er tre minutter.
+        //
+        // Man skal have lov at traekke vejret, foer man begynder - men siger
+        // man hele saetningen i ét straek, kommer udloesningen EFTER, man er
+        // holdt op. Saa er der ingenting tilbage at hoere, og uret ventede tre
+        // minutter paa tale, der allerede laa i ringen. Se Stilhed.UdenTale.
+        if (!haltTalt) return gaaet >= UdenTale;
 
         return sidenTale >= Taalmodighed;
     }

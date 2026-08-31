@@ -114,4 +114,52 @@ public class ForoptagerTest
         foreach (var gulv in new[] { 0f, 0.0001f, 0.005f })
             Assert.True(Stilhed.Graensen(gulv) >= Stilhed.Graense);
     }
+
+    // ============ TALE, DER ALDRIG KOMMER ============
+
+    /// <summary>
+    /// Siges hele saetningen foer udloesningen, slutter klippet af sig selv.
+    /// </summary>
+    /// <remarks>
+    /// Motoren afgoer foerst, at der blev sagt «Hej Pia», naar man holder
+    /// pause. Siger man hele saetningen i ét straek, kommer udloesningen
+    /// EFTER, man er holdt op - og saa ligger det hele i ringen, mens der
+    /// ikke er mere at hoere.
+    ///
+    /// Brugerens ord 31-08-2026: «saa staar den og lytter, indtil jeg siger et
+    /// nyt ord og saa er stille igen».
+    /// </remarks>
+    [Fact]
+    public void Uden_tale_slutter_klippet_efter_faa_sekunder()
+    {
+        var loft = TimeSpan.FromMinutes(3);
+
+        Assert.False(Stilhed.SkalSlutte(
+            TimeSpan.Zero, haltTalt: false, gaaet: TimeSpan.FromSeconds(2), loft));
+
+        Assert.True(Stilhed.SkalSlutte(
+            TimeSpan.Zero, haltTalt: false, gaaet: Stilhed.UdenTale, loft));
+    }
+
+    [Fact]
+    public void Der_er_tid_til_at_naa_at_begynde()
+    {
+        // Bjaelken beder om en kort pause efter vaageordet. Slutter klippet
+        // foer den pause er ovre, faar man aldrig sagt noget.
+        Assert.True(Stilhed.UdenTale >= TimeSpan.FromSeconds(3));
+    }
+
+    [Fact]
+    public void Har_man_talt_gaelder_taalmodigheden()
+    {
+        var loft = TimeSpan.FromMinutes(3);
+
+        Assert.False(Stilhed.SkalSlutte(
+            TimeSpan.FromMilliseconds(500), haltTalt: true,
+            gaaet: TimeSpan.FromSeconds(20), loft));
+
+        Assert.True(Stilhed.SkalSlutte(
+            Stilhed.Taalmodighed, haltTalt: true,
+            gaaet: TimeSpan.FromSeconds(20), loft));
+    }
 }
