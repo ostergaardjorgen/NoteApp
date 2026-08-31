@@ -1456,12 +1456,34 @@ public partial class MainWindow : Window
     // at der optages, og de siger det tydeligere. To signaler om det samme er
     // ikke dobbelt saa klart - det er uroligt.
 
+    /// <summary>Sidste gang mikrofonen hørte noget, der talte som tale.</summary>
+    private DateTime _sidstHoert = DateTime.MinValue;
+
+    /// <summary>
+    /// Hvor længe bølgerne bliver stående, efter der blev tyst.
+    /// </summary>
+    /// <remarks>
+    /// Uden den ville de blinke ud og ind mellem hvert ord. Halvandet sekund
+    /// er den samme tålmodighed, dikteringen selv bruger til at afgøre, at
+    /// man er færdig — se <see cref="Core.Stilhed.Taalmodighed"/>.
+    /// </remarks>
+    private static readonly TimeSpan Boelgero = TimeSpan.FromMilliseconds(1500);
+
     private void SaetBoelger()
     {
+        // ============ HVEM HAR MIKROFONEN LIGE NU? ============
+        //
+        // Under en diktering er det optageren; ellers er det foroptageren, der
+        // holder ringen fyldt, mens vaageordet lyttes efter. Begge maaler det
+        // samme: om der bliver sagt noget.
+        var raa = _diktat.Igang ? _diktat.Niveau : _forop?.Niveau ?? 0f;
+
+        if (raa >= Core.Stilhed.Graense) _sidstHoert = DateTime.UtcNow;
+
         // Skalaen: graensen i Stilhed er 0,02 - dét, der regnes som «der
         // bliver talt». Almindelig tale skal ramme toppen, saa der er noget
         // at se, og et stille rum skal ligge i bund.
-        var n = Math.Clamp(_diktat.Niveau / 0.05, 0.0, 1.0);
+        var n = Math.Clamp(raa / 0.05, 0.0, 1.0);
 
         Array.Copy(_boelger, 1, _boelger, 0, _boelger.Length - 1);
         _boelger[^1] = n;
@@ -1472,6 +1494,28 @@ public partial class MainWindow : Window
             felter[i].Height = Boelgebund + _boelger[i] * (Boelgetop - Boelgebund);
 
         _boble?.SaetBoelger(_boelger);
+
+        // ============ BOELGERNE KOMMER, NAAR MIKROFONEN HOERER DIG ============
+        //
+        // IKKE FOERST NAAR MOTOREN HAR AFGJORT, AT DER BLEV SAGT «HEJ PIA».
+        //
+        // Den afgoerelse tager tid, fordi motoren venter paa, at man holder
+        // pause. Indtil da stod bjaelken helt stille, og man troede, appen
+        // ikke var i gang - selv om lyden for laengst laa i ringen.
+        //
+        // OG DET ER SANDT AT VISE DEM. Foroptageren holder de sidste femten
+        // sekunder i hukommelsen, mens der lyttes. Bevaeger boelgerne sig, ER
+        // det, man siger, gemt - uanset om vaageordet naaede at blive
+        // genkendt endnu. Boelgerne siger «jeg hoerer dig og holder fast»,
+        // og det er praecis det, man staar og vil vide.
+        //
+        // Er der tyst, falder de tilbage til prikken igen. Et signal, der
+        // altid staar der, siger ingenting.
+        var hoerer = _diktat.Igang || DateTime.UtcNow - _sidstHoert < Boelgero;
+
+        Lydboelger.Visibility = hoerer ? Visibility.Visible : Visibility.Collapsed;
+        DiktatPrik.Visibility = hoerer ? Visibility.Collapsed : Visibility.Visible;
+        _boble?.VisBoelger(hoerer);
     }
 
     private DispatcherTimer? _lydur;
@@ -1485,6 +1529,7 @@ public partial class MainWindow : Window
             _lydur = null;
 
             Array.Clear(_boelger);
+            _sidstHoert = DateTime.MinValue;
 
             Lydboelger.Visibility = Visibility.Collapsed;
             DiktatPrik.Visibility = Visibility.Visible;
@@ -1492,10 +1537,7 @@ public partial class MainWindow : Window
             return;
         }
 
-        Lydboelger.Visibility = Visibility.Visible;
-        DiktatPrik.Visibility = Visibility.Collapsed;
-        _boble?.VisBoelger(true);
-
+        // Synligheden afgoeres af, om mikrofonen hoerer noget - se SaetBoelger.
         if (_lydur is not null) return;
 
         // Tyve gange i sekundet. Hurtigt nok til at foelge en stemme - ved ti
@@ -1636,9 +1678,9 @@ public partial class MainWindow : Window
         DiktatBjaelke.Visibility = Visibility.Visible;
         VisBoble(besked, pulser: !_vaage.Klar, skjulEfter: null);
 
-        // Lyttes der bare, staar prikken stille. Boelgerne hoerer til
-        // optagelsen og maa ikke kunne forveksles med den.
-        SaetLydur(false);
+        // URET KOERER, SAA LAENGE DER ER KLAR. Boelgerne kommer af sig selv,
+        // naar mikrofonen hoerer noget - se SaetBoelger.
+        SaetLydur(_vaage.Klar);
     }
 
     private void VisDiktat(string besked) => Dispatcher.BeginInvoke(() =>
@@ -1655,7 +1697,10 @@ public partial class MainWindow : Window
         // BOELGERNE FOELGER OPTAGELSEN OG INTET ANDET. De taendes, naar der
         // optages, og slukkes i det oejeblik lyden er i hus - ogsaa mens der
         // skrives ud, hvor der ikke laengere er en stemme at foelge.
-        SaetLydur(_diktat.Igang);
+        // Uret koerer baade under en diktering og imens der lyttes. Ellers
+        // faldt boelgerne vaek i sekunderne mellem to dikteringer, hvor
+        // mikrofonen stadig hoerer efter.
+        SaetLydur(_diktat.Igang || _vaage.Lytter);
 
         // En NY diktering rydder tilbuddet fra den forrige. Ellers ville man
         // gemme det forkerte, fordi knappen stod der endnu.
