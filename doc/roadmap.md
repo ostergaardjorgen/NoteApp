@@ -261,6 +261,50 @@ skrevet. Det er halvdelen af arbejdet.
 | **Forbrugsloft i appen** | Lille | Mistrals API har ingen vej til kontoens loft — efterprøvet 19-08, alle betalingsstier svarer 404. Skal derfor tastes ind |
 | **Skal læseruden se anderledes ud?** | Lille/middel | Afventer, at lys/mørk er brugt i praksis. Uddybet nedenfor |
 
+### Vågeordet skal kunne høres, MENS man taler
+*Foreslået 31-08-2026*
+
+whisper-command afgør først noget, når man holder pause. Dens lytteløkke henter
+to sekunders lyd, spørger om de sidste 1000 ms er faldet til ro i forhold til
+resten, og bedømmer først derefter vinduet mod listen af udtryk.
+
+Det betyder, at man skal sige «Hej Pia», holde en kort pause, og så tale.
+Rytmen står i brugerfladen, fordi den er nødvendig — men det er en
+brugerflade, der beder om at blive tilpasset maskinen frem for omvendt.
+
+**Hvorfor:** Målt 31-08-2026 sagde brugeren «Hej Pia» og talte videre uden
+ophold. Så indeholdt det vindue, der blev bedømt, slutningen af sætningen og
+ikke vågeordet — og der skete ingenting, uanset hvor tydeligt det blev sagt.
+Han nåede at sige hele sætningen, før appen meldte, at den lyttede.
+
+Den rigtige løsning er at lytte efter vågeordet i appen selv, på føroptagerens
+ring, i overlappende vinduer på omkring halvandet sekund. Så opdages ordet
+midt i en sætning, og pausen er ikke længere et krav. Ringen findes allerede
+(15 sekunder, se `Foroptager`), og motoren ligger på grafikkortet i forvejen.
+
+### Valgfri lokal diktering ved siden af skyen
+*Foreslået 31-08-2026*
+
+Brugeren skal kunne vælge motor — eller appen skal kunne falde tilbage til den
+lokale, når der ikke er internet.
+
+**Hvorfor:** Voxtral afviser `da` som sprogvalg. Sproget kan derfor kun
+*påvirkes* gennem prompten, aldrig *vælges*. Målt 31-08-2026 kom en dansk
+diktering tilbage på tysk — «Hi Pia, kannst du mir helfen» — fordi brugerens
+egen ordliste på fyrre overvejende engelske fagord vejede tungere end den ene
+danske ledetråd. Prompten er strammet siden, men det er stadig en påvirkning
+og ikke en garanti.
+
+Lokal whisper tager imod `-l da`. Det er den eneste måde at fjerne gættet helt
+— og lyden ville slet ikke forlade maskinen, hvilket passer med, at lokalt går
+forud for skyen.
+
+**Skal undersøges først:** hvad det kræver af maskinen. Vågeordets model fylder
+487 MB på grafikkortet og er målt til under otte procent af et RTX 2060.
+Dikteringen ville bruge en større model og skal måles for sig — både i tid pr.
+klip og i, om udskriften bliver bedre eller dårligere end Voxtrals. Bliver den
+dårligere, er svaret to motorer at vælge imellem, ikke én ny.
+
 ### Appen justerer sig selv ud fra brug — og kan skrue tilbage
 *Foreslået 21-08-2026*
 
