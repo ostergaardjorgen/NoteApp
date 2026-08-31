@@ -254,18 +254,20 @@ public partial class SettingsView : UserControl
             //
             // Maalt 30-08-2026: «hallo, hallo, hallo» paa dansk kom tilbage
             // som «Alors, alors, alors ?». Fransk.
-            DikteringSprog.ItemsSource = Transcribe.SprogvalgWindow.Sprog
-                .Select(s => new { s.Kode, s.Navn })
+            // EN NAVNGIVEN TYPE OG IKKE EN ANONYM. Den anonyme oversatte fint
+            // og braekkede foerst paa skaermen: castet til Sprogvalg kan ikke
+            // kontrolleres af oversaetteren, saa fejlen viste sig som
+            // «InvalidCastException», da fanen blev aabnet. Set 30-08-2026.
+            var sprogene = Transcribe.SprogvalgWindow.Sprog
+                .Select(s => new Sprogvalg(s.Kode, s.Navn))
                 .ToList();
 
+            DikteringSprog.ItemsSource = sprogene;
+
             var mit = v.MitSprog ?? "da";
-            DikteringSprog.SelectedItem = Transcribe.SprogvalgWindow.Sprog
-                .Select(s => s.Kode)
-                .Contains(mit)
-                    ? ((IEnumerable<Sprogvalg>)DikteringSprog.ItemsSource)
-                        .FirstOrDefault(s => s.Kode == mit)
-                    : ((IEnumerable<Sprogvalg>)DikteringSprog.ItemsSource)
-                        .FirstOrDefault(s => s.Kode == "da");
+            DikteringSprog.SelectedItem =
+                sprogene.FirstOrDefault(s => s.Kode == mit)
+                ?? sprogene.FirstOrDefault(s => s.Kode == "da");
 
             DikteringTil.IsChecked = v.DikteringTil;
             DikteringPuds.IsChecked = v.DikteringPuds;
@@ -306,6 +308,32 @@ public partial class SettingsView : UserControl
                 ? Visibility.Visible
                 : Visibility.Collapsed;
         }
+        catch (Exception ex)
+        {
+            // ============ ÉN FANE MÅ IKKE VÆLTE HELE SKÆRMEN ============
+            //
+            // Her var kun «finally». Gik indlaesningen galt, slap fejlen ud
+            // til appens faelles haandtering, og saa kom «Der gik noget galt»
+            // som en modal kasse - oven paa en skaerm, brugeren ikke engang
+            // kunne bruge bagefter.
+            //
+            // Set 30-08-2026: et forkert cast i sprogvalget. Det oversatte
+            // fint og braekkede foerst, da fanen blev aabnet.
+            //
+            // Fejlen skjules ikke - den skrives i historikken og staar paa
+            // fanen. Men resten af indstillingerne bliver ved med at virke.
+            Status.Text = $"Dikteringsindstillingerne kunne ikke læses: {ex.Message}";
+
+            try
+            {
+                Historik.Skriv(HaendelseType.Andet, "En indstillingsfane kunne ikke læses",
+                    $"Diktering: {ex.GetType().Name} — {ex.Message}", Udfald.SeEfter);
+            }
+            catch (Exception)
+            {
+                // Kan historikken ikke skrives, er der ikke mere at goere.
+            }
+        }
         finally
         {
             _dikteringIndlaest = true;
@@ -329,11 +357,11 @@ public partial class SettingsView : UserControl
 
         // Sproget, brugeren TALER. Det sendes med hver diktering, saa modellen
         // ikke skal gaette paa et klip, der maaske er tre ord langt.
-        if (DikteringSprog.SelectedItem is not null)
-        {
-            var kode = (string)((dynamic)DikteringSprog.SelectedItem).Kode;
-            v.MitSprog = kode;
-        }
+        //
+        // «is Sprogvalg» og ikke dynamic: passer typen ikke, sker der
+        // ingenting - i stedet for at vaelte skaermen med en fejl, der
+        // foerst viser sig, naar nogen aabner fanen.
+        if (DikteringSprog.SelectedItem is Sprogvalg valgtSprog) v.MitSprog = valgtSprog.Kode;
 
         v.Save();
 
