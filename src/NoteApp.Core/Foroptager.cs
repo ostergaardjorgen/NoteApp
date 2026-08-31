@@ -40,12 +40,29 @@ public sealed class Foroptager : IDisposable
     /// Hvor langt tilbage der huskes.
     /// </summary>
     /// <remarks>
-    /// Fire sekunder. Det dækker «Hej Pia» plus den tid, motoren bruger på at
-    /// afgøre det — med rigelig margen. Længere ville koste hukommelse for
-    /// lyd, ingen kommer til at bruge: 16 kHz i 16 bit er 32 kB pr. sekund,
-    /// så fire sekunder er 128 kB.
+    /// FEMTEN SEKUNDER. Her stod fire, ud fra en antagelse om, at motoren
+    /// afgør sagen på under et sekund. Det gør den ikke.
+    ///
+    /// MÅLT 31-08-2026: der gik omkring SYV sekunder fra «Hej Pia» blev sagt,
+    /// til appen reagerede. Motoren venter på, at ytringen er slut, kører
+    /// modellen og melder først derefter — og i de syv sekunder havde
+    /// brugeren for længst talt videre.
+    ///
+    /// Med fire sekunders hukommelse var «Hej Pia» og de første tre sekunder
+    /// af det, der blev sagt, faldet ud af ringen, INDEN appen fik at vide,
+    /// at den skulle beholde noget. Derfor følelsen af, at man skal vente,
+    /// før man må tale: det var ikke en fornemmelse, det var lyd, der blev
+    /// smidt væk.
+    ///
+    /// Femten sekunder dækker de målte syv med god margen. Prisen er
+    /// ingenting: 16 kHz i 16 bit er 32 kB pr. sekund, så det er 480 kB
+    /// hukommelse — mod 128 kB før.
+    ///
+    /// RINGEN ER STADIG KUN HUKOMMELSE. Længere hukommelse er ikke en
+    /// længere optagelse: det, der falder ud, findes ingen steder, og der
+    /// skrives fortsat intet ned, før vågeordet er hørt.
     /// </remarks>
-    public const double Sekunder = 4.0;
+    public const double Sekunder = 15.0;
 
     private WasapiCapture? _optager;
     private Lydring? _ring;

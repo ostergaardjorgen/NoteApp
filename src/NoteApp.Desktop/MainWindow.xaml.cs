@@ -969,10 +969,31 @@ public partial class MainWindow : Window
         // paa skaermen, mens der ikke sker noget.
         var model = Core.WhisperInstall.Vaageordsmodel();
 
+        // ============ EN DIKTERING SLAAR IKKE LYTNINGEN IHJEL ============
+        //
+        // HER STOD «_diktat.Igang || OptagerNu()», OG DET KOSTEDE EN
+        // GENSTART EFTER HVER ENESTE BRUG.
+        //
+        // Lytningen er en PROCES med en model paa grafikkortet. Blev den
+        // stoppet, mens man dikterede, skulle modellen laeses ind igen
+        // bagefter - tre sekunder, hver gang, oven i de syv det i forvejen
+        // tog at hoere vaageordet. Bjaelken forsvandt imens, fordi der
+        // faktisk IKKE blev lyttet, og saa saa det ud som om appen gik i sig
+        // selv efter hver diktering. Maalt 31-08-2026.
+        //
+        // Mikrofonen var aldrig grunden: foroptageren har den allerede aaben
+        // samtidig med motoren - Windows deler den fint. Grunden var, at
+        // vaageordet ikke skal udloese noget af det, man selv dikterer. Det
+        // loeses ved at SE BORT FRA det, motoren hoerer imens - se
+        // VaageordHoert - og ikke ved at rive processen ned.
+        //
+        // EN OPTAGELSE ER NOGET ANDET. Dér er mikrofonen i brug til noget
+        // vigtigere, og appen skal ikke lytte efter kommandoer midt i et
+        // moede. Den bliver staaende som grund.
         var svar = Core.Vaageord.Skal(
             v.VaageordTil,
             Vaageordsvagt.MotorFindes && model is not null,
-            _diktat.Igang || OptagerNu(),
+            OptagerNu(),
             Laast());
 
         if (svar == Core.Lyttesvar.Lytter)
@@ -1128,6 +1149,17 @@ public partial class MainWindow : Window
 
     private void VaageordHoert(string efter) => Dispatcher.BeginInvoke(() =>
     {
+        // ============ IKKE MIDT I EN DIKTERING ============
+        //
+        // Motoren lytter videre, mens man dikterer - den bliver ikke stoppet
+        // laengere, se SaetVaageord. Til gengaeld skal den ikke kunne udloese
+        // noget af det, man selv staar og siger.
+        //
+        // Det er her, det haandteres, og ikke ved at slaa processen ihjel:
+        // en ignoreret linje koster ingenting, en genstart koster tre
+        // sekunders modelindlaesning efter hver eneste brug.
+        if (_diktat.Igang) return;
+
         _diktat.Melder -= VisDiktat;
         _diktat.Melder += VisDiktat;
         _diktat.Faerdig -= DiktatFaerdig;
@@ -1502,6 +1534,10 @@ public partial class MainWindow : Window
 
         if (!_vaage.Lytter)
         {
+            // Staar notetilbuddet der endnu, skal bjaelken blive - ellers
+            // forsvinder knappen, foer man naaede at tage stilling.
+            if (GemNoteKnap.Visibility == Visibility.Visible) return;
+
             DiktatBjaelke.Visibility = Visibility.Collapsed;
             SkjulBoble();
             return;
@@ -1537,12 +1573,24 @@ public partial class MainWindow : Window
 
         if (_diktat.Igang) return;
 
-        // TILBUDDET SKAL KUNNE NAAS. Seks sekunder er nok til at laese en
-        // kvittering, men ikke til at komme tilbage fra det program, man
-        // dikterede ind i, og tage stilling til en note.
+        // ============ KVITTERINGEN LAASER IKKE BJAELKEN ============
+        //
+        // HER STOD OP TIL 45 SEKUNDER. Var der et notetilbud, blev
+        // kvitteringen staaende saa laenge, og foerst DEREFTER kom bjaelken
+        // tilbage til «klar». Man havde altsaa dikteret faerdig, og saa stod
+        // der tre kvarte minut noget om den forrige diktering, mens
+        // vaageordet i virkeligheden var klar hele tiden. Maalt 31-08-2026.
+        //
+        // De to ting er skilt ad nu:
+        //
+        //   SEKS SEKUNDER   kvitteringen. Nok til at laese den.
+        //   HALVANDET MINUT notetilbuddet. Det skal kunne naas, ogsaa naar
+        //                   man foerst kigger paa skaermen bagefter - og det
+        //                   staar ved siden af «klar» i stedet for at
+        //                   spaerre for den.
         _diktatUr = new System.Windows.Threading.DispatcherTimer
         {
-            Interval = TimeSpan.FromSeconds(GemNoteKnap.Visibility == Visibility.Visible ? 45 : 6),
+            Interval = TimeSpan.FromSeconds(6),
         };
 
         _diktatUr.Tick += (_, _) =>
@@ -1553,22 +1601,43 @@ public partial class MainWindow : Window
             // Er der begyndt et nyt diktat i mellemtiden, skal bjaelken blive.
             if (_diktat.Igang) return;
 
-            DiktatBjaelke.Visibility = Visibility.Collapsed;
-
-            // Gemte man ikke, mens den stod der, var svaret nej.
-            GemNoteKnap.Visibility = Visibility.Collapsed;
-            _sidsteDiktat = null;
-
-            // TILBAGE TIL TILSTANDSLYSET. Lyttes der stadig, skal bjaelken
-            // sige det - ellers staar man efter en diktering og ved ikke, om
-            // vaageordet er der endnu.
+            // TILBAGE TIL TILSTANDSLYSET MED DET SAMME. Lyttes der stadig,
+            // skal bjaelken sige det - ellers staar man efter en diktering og
+            // ved ikke, om vaageordet er der endnu.
+            //
+            // Lyttes der ikke, tager VisLyttestatus bjaelken ned.
             VisLyttestatus();
         };
 
         _diktatUr.Start();
+
+        // Tilbuddet har sit eget ur og sin egen levetid.
+        _noteur?.Stop();
+
+        if (GemNoteKnap.Visibility != Visibility.Visible) return;
+
+        _noteur = new System.Windows.Threading.DispatcherTimer
+        {
+            Interval = TimeSpan.FromSeconds(90),
+        };
+
+        _noteur.Tick += (_, _) =>
+        {
+            _noteur?.Stop();
+            _noteur = null;
+
+            // Gemte man ikke, mens den stod der, var svaret nej.
+            GemNoteKnap.Visibility = Visibility.Collapsed;
+            _sidsteDiktat = null;
+        };
+
+        _noteur.Start();
     });
 
     private System.Windows.Threading.DispatcherTimer? _diktatUr;
+
+    /// <summary>Tilbuddet om at gemme en note har sin egen levetid.</summary>
+    private System.Windows.Threading.DispatcherTimer? _noteur;
 
     /// <summary>Sat, mens et tryk er ved at blive udført.</summary>
     private bool _lynstartIGang;
