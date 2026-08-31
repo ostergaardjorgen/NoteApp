@@ -1,0 +1,65 @@
+﻿<Window x:Class="NoteApp.Desktop.Lytteboble"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:i18n="clr-namespace:NoteApp.Desktop"
+        Title="HeyPia lytter"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        ResizeMode="NoResize" SizeToContent="WidthAndHeight"
+        Topmost="True" ShowInTaskbar="False" ShowActivated="False">
+
+  <!-- ======================= LYTTEBOBLEN =======================
+
+       Vågeordet bruges, mens man står i et ANDET program. Bjælken nederst i
+       appens eget vindue kunne derfor ikke ses af den, der brugte den — man
+       sagde «Hej Pia» og havde ingen måde at vide, om den hørte efter.
+
+       Boblen er lille, ligger nederst i midten og over alt andet. Den dukker
+       op, når der bliver lyttet, og forsvinder igen bagefter.
+
+       DEN TAGER IKKE FOKUS. ShowActivated=False, og der klikkes ikke i den
+       for at bruge den. Tog den fokus, ville markøren forlade det felt, man
+       netop skal diktere ind i — og så ville teksten lande et andet sted.
+
+       DEN STÅR IKKE I PROCESLINJEN. Optagebåndet gør, fordi det er det
+       eneste, der er tilbage af appen under et møde. Boblen er kortvarig og
+       ville kun larme dernede. -->
+
+  <Border Background="{DynamicResource Panel}" CornerRadius="22" Padding="16,10"
+          BorderBrush="{DynamicResource Accent}" BorderThickness="1">
+    <Border.Effect>
+      <DropShadowEffect BlurRadius="24" ShadowDepth="4" Opacity="0.55" Color="#FF000000" />
+    </Border.Effect>
+
+    <StackPanel Orientation="Horizontal">
+
+      <!-- Prikken puster, mens der lyttes. Et stillestående ikon siger ikke,
+           om noget er i gang. -->
+      <Ellipse x:Name="Prik" Width="11" Height="11" VerticalAlignment="Center"
+               Margin="0,0,12,0" Fill="{DynamicResource Optager}" />
+
+      <TextBlock x:Name="Besked" FontSize="13.5" VerticalAlignment="Center"
+                 Foreground="{DynamicResource Tekst}" MaxWidth="420" TextTrimming="CharacterEllipsis" />
+
+      <!-- ============ PAUSE OG START ============
+
+           Herfra kan lytningen slås fra uden at finde appen frem. Det er dét,
+           man har brug for, når man skal sige noget, appen ikke skal blande
+           sig i — og at skulle åbne et program for at få ro er for meget
+           besvær til, at nogen gør det. -->
+      <Button x:Name="PauseKnap" Click="Pause_Klik" Margin="14,0,0,0"
+              Width="30" Height="30" Padding="0" BorderThickness="0"
+              Background="Transparent" Foreground="{DynamicResource Tekst}"
+              FontFamily="Segoe MDL2 Assets" FontSize="13" Content="&#xE769;"
+              ToolTip="{i18n:Oversat lytteboble.pause}"
+              AutomationProperties.Name="{i18n:Oversat lytteboble.pause}" />
+
+      <Button x:Name="LukKnap" Click="Luk_Klik" Margin="2,0,0,0"
+              Width="30" Height="30" Padding="0" BorderThickness="0"
+              Background="Transparent" Foreground="{DynamicResource TekstMeget}"
+              FontFamily="Segoe MDL2 Assets" FontSize="11" Content="&#xE711;"
+              ToolTip="{i18n:Oversat lytteboble.skjul}"
+              AutomationProperties.Name="{i18n:Oversat lytteboble.skjul}" />
+    </StackPanel>
+  </Border>
+</Window>
+

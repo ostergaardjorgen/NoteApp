@@ -1267,6 +1267,45 @@ public partial class MainWindow : Window
         Dispatcher.Invoke(() => { }, DispatcherPriority.Render);
     }
 
+    /// <summary>Boblen, der ligger over alt andet. Laves først, når den skal bruges.</summary>
+    private Lytteboble? _boble;
+
+    /// <summary>
+    /// Viser en besked i boblen — dér hvor man kan se den.
+    /// </summary>
+    /// <remarks>
+    /// VÅGEORDET BRUGES, MENS MAN STÅR I ET ANDET PROGRAM. Bjælken nederst i
+    /// appens eget vindue kunne derfor ikke ses af den, der brugte den: man
+    /// sagde «Hej Pia» og havde ingen måde at vide, om den hørte efter.
+    ///
+    /// Boblen laves først, når den skal bruges. Et vindue, der ligger og
+    /// venter hele dagen på noget, der måske aldrig sker, er spild.
+    /// </remarks>
+    private void VisBoble(string besked, bool pulser, TimeSpan? skjulEfter)
+    {
+        try
+        {
+            if (_boble is null)
+            {
+                _boble = new Lytteboble
+                {
+                    // Ingen ejer. Med hovedvinduet som ejer ville boblen
+                    // blive minimeret sammen med det - og det er praecis
+                    // naar hovedvinduet ER nede, den skal ses.
+                    Skiftet = _ => Dispatcher.BeginInvoke(SaetVaageord),
+                };
+            }
+
+            _boble.VisLytning(Core.AppSettings.Current.VaageordTil);
+            _boble.Vis(besked, pulser, skjulEfter);
+        }
+        catch (Exception)
+        {
+            // En boble, der ikke kan vises, maa ikke kunne stoppe en
+            // diktering. Bjaelken i vinduet siger det samme.
+        }
+    }
+
     /// <summary>
     /// Viser, hvad dikteringen laver — og skjuler bjælken igen bagefter.
     /// </summary>
@@ -1274,9 +1313,18 @@ public partial class MainWindow : Window
     /// Den bliver staaende et par sekunder, naar teksten er klar. «Klar — 80
     /// tegn ligger i udklipsholderen» er den eneste kvittering, man faar, og
     /// forsvandt den med det samme, ville man ikke vide, om det lykkedes.
+    ///
+    /// DEN SAMME BESKED GAAR I BOBLEN. Bjaelken kan kun ses inde i appen, og
+    /// vaageordet bruges netop, naar man staar et andet sted.
     /// </remarks>
     private void VisDiktat(string besked) => Dispatcher.BeginInvoke(() =>
     {
+        // Mens der optages eller skrives ud, bliver boblen staaende. Foerst
+        // naar der er et svar, taeller den ned - ellers ville den forsvinde
+        // midt i det, man sagde.
+        VisBoble(besked,
+                 pulser: _diktat.Igang,
+                 skjulEfter: _diktat.Igang ? null : TimeSpan.FromSeconds(7));
         DiktatBesked.Text = besked;
         DiktatBjaelke.Visibility = Visibility.Visible;
 
@@ -1683,6 +1731,13 @@ public partial class MainWindow : Window
         GemVinduesstoerrelse();
 
         _genvej.Dispose();
+
+        // Boblen har ingen ejer - med vilje, saa den ikke minimeres sammen
+        // med hovedvinduet. Uden det her ville den holde appen i live efter
+        // lukningen, og processen blev staaende uden noget at se paa.
+        try { _boble?.Close(); } catch (Exception) { }
+        _boble = null;
+
         base.OnClosing(e);
     }
 

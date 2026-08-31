@@ -1025,5 +1025,13 @@
     "kopier": "Copy",
     "gem_som_note": "Save as note",
     "gemt": "Saved as a note — you will find it under Dictation → Notes."
+  },
+  "lytteboble": {
+    "pause": "Pause the listening",
+    "start": "Listen for the wake word again",
+    "skjul": "Hide",
+    "sat_paa_pause": "Listening is paused. The shortcut key still works.",
+    "lytter_igen": "Listening for «Hej Pia» again",
+    "lytter": "Listening for «Hej Pia»"
   }
 }

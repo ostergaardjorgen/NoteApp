@@ -1025,5 +1025,13 @@
     "kopier": "Kopiér",
     "gem_som_note": "Gem som note",
     "gemt": "Gemt som note — den ligger under Diktering → Noter."
+  },
+  "lytteboble": {
+    "pause": "Sæt lytningen på pause",
+    "start": "Lyt efter vågeordet igen",
+    "skjul": "Skjul",
+    "sat_paa_pause": "Lytningen er sat på pause. Genvejstasten virker stadig.",
+    "lytter_igen": "Lytter efter «Hej Pia» igen",
+    "lytter": "Lytter efter «Hej Pia»"
   }
 }
