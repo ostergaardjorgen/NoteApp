@@ -583,8 +583,19 @@
                            VerticalAlignment="Center" />
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"
                             VerticalAlignment="Center">
-                  <TextBlock x:Name="OpgaveTal" FontSize="10.5" VerticalAlignment="Center"
-                             Foreground="{DynamicResource TekstMeget}" />
+                  <!-- HER STOD «6 i alt fra 1 optagelser» MED SVAG SKRIFT.
+
+                       Den er vaek 31-08-2026, og af to grunde.
+
+                       Den var ulaeselig - saa svag, at man ikke kunne se, hvad
+                       der stod, uden at gaa taet paa skaermen. Og den var
+                       forkert: flere af opgaverne er skrevet i haanden eller
+                       hentet fra Google Tasks og kommer slet ikke fra en
+                       optagelse. «fra 1 optagelser» talte kun de moeder, der
+                       tilfaeldigvis havde afsat en opgave.
+
+                       Tallet staar nu i overskriften, praecis som kalenderen
+                       goer det ved siden af: «Opgaver - 6». -->
 
                   <!-- «NY OPGAVE» STAAR, HVOR «NY AFTALE» STAAR.
                        Man kunne laegge en aftale ind i haanden, men ikke en

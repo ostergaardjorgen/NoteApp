@@ -852,14 +852,22 @@ public partial class SearchView : UserControl
         var haster = aabne.Count(r => r.Hastighed(idag)
             is Hastighed.Overskredet or Hastighed.I_dag);
 
+        // ============ SAMME OVERSKRIFT SOM KALENDEREN ============
+        //
+        // Kalenderen ved siden af skriver «Kalender - 4». Her stod et tal med
+        // svag skrift ude i hoejre side i stedet - «6 i alt fra 1
+        // optagelser» - og det var baade ulaeseligt og forkert: opgaver
+        // skrevet i haanden eller hentet fra Google kommer ikke fra en
+        // optagelse. Se kommentaren i XAML'en.
+        //
+        // Haster noget, siger overskriften DET. Saa er antallet af aabne det
+        // mindst vigtige tal paa skaermen, og de haastende staar i forvejen
+        // med roed dato paa hvert kort.
         OpgaveOverskrift.Text = aabne.Count == 0
             ? Sprog.T("opgaver.ingen")
-            : haster > 0 ? Sprog.T("opgaver.haster", haster) : Sprog.T("opgaver.aabne");
-
-        OpgaveTal.Text = aabne.Count == 0
-            ? ""
-            : Sprog.T("opgaver.ialt", aabne.Count,
-                      aabne.Select(r => r.MoedeId).Distinct().Count());
+            : haster > 0
+                ? Sprog.T("opgaver.haster", haster)
+                : Sprog.T("opgaver.aabne") + " · " + aabne.Count;
 
         VisSynktilstand();
     }

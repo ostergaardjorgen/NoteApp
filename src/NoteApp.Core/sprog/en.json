@@ -66,7 +66,6 @@
     "ingen": "No open tasks",
     "aabne": "Open tasks",
     "haster": "{0} due now",
-    "ialt": "{0} in total from {1} recordings",
     "nyopgave": "New task",
     "hentopgaver": "Fetch tasks from Google",
     "hentopgaverhjaelp": "Fetch the tasks from Google Tasks now. They are also fetched automatically every fifteen minutes"
