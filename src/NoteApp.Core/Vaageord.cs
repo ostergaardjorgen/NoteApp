@@ -101,22 +101,39 @@ public static class Vaageord
     /// Et HØJERE tal betyder, at der skal mindre til, før motoren kalder det
     /// en pause — og så er de små ophold, der findes i almindelig tale, nok.
     ///
-    /// 0,8 BLEV PRØVET OG ER RULLET TILBAGE. Tanken var, at de naturlige
-    /// mikropauser så ville være nok. Det, der faktisk skete, var, at motoren
-    /// bedømte konstant: målt 31-08-2026 kom der TI bedømmelser på sytten
-    /// sekunder, mens der ikke blev sagt noget — hver gang med det samme
-    /// lokkeord, «vi ses i morgen», og hver gang med en køretur på
-    /// grafikkortet.
+    /// DEN HAR VÆRET 0,8, ER RULLET TILBAGE TIL 0,60 OG ER NU 0,8 IGEN.
+    /// Mellemregningen er værd at kende, fordi rullebakket var forkert.
     ///
-    /// Ved 0,60 blev der målt NUL bedømmelser på fyrre sekunders stilhed.
-    /// Prisen er, at ophold skal være tydelige — og det er dét, teksten på
-    /// bjælken beder om: sig «Hej Pia», hold en kort pause, og tal så.
+    /// 0,8 blev sat, så de små ophold i almindelig tale var nok. Den blev
+    /// rullet tilbage samme dag, fordi den fik motoren til at bedømme «hele
+    /// tiden» — ti gange på sytten sekunder. Det så ud som støj.
     ///
-    /// DEN RIGTIGE LØSNING ER IKKE ET TAL HER. Så længe motoren først
-    /// bedømmer, når man holder pause, er valget mellem «langsom» og «kører
-    /// hele tiden». Vågeordet skal høres, MENS man taler — se roadmappen.
+    /// DET VAR IKKE STØJ. DET VAR PRÆCIS DÉT, DER SKULLE TIL.
+    ///
+    /// Målt 31-08-2026 kl. 16:12–16:14, mens brugeren sagde «Hej Pia» gang på
+    /// gang: ved 0,60 bedømte motoren KUN 13 gange på to minutter — altså hvert
+    /// tiende til femtende sekund. Vågeordet skal ramme præcis det ene vindue
+    /// på halvandet sekund, motoren tilfældigvis kigger på. Gør det ikke, bliver
+    /// det aldrig hørt, og man siger det igen og igen.
+    ///
+    /// Brugerens egen note: «Jeg sagde hej Pia rigtig mange gange, før du
+    /// fandt ud af det.»
+    ///
+    /// FALSKE UDSLAG HOLDES UDE AF GRÆNSEN, IKKE AF HVOR SJÆLDENT DER
+    /// BEDØMMES. Den samme måling viser rene skel: baggrundsstøj rammer
+    /// «hej pia» på 0,113–0,157, brugerens egne på 0,287–0,497, og grænsen
+    /// ligger på 0,214 midt imellem. Flere bedømmelser giver derfor flere
+    /// chancer for at høre ordet — ikke flere fejl.
+    ///
+    /// Og det, der så ud som støj, var LOGGEN. Den lå i historikken dengang;
+    /// den ligger nu i en målefil, hvor den hører hjemme.
+    ///
+    /// DEN RIGTIGE LØSNING ER STADIG IKKE ET TAL HER. Så længe motoren først
+    /// bedømmer, når man holder pause, er det et spørgsmål om hvor tit den
+    /// får lov at kigge. Vågeordet skal høres, MENS man taler — se
+    /// roadmappen.
     /// </remarks>
-    public const double Pausetaerskel = 0.60;
+    public const double Pausetaerskel = 0.8;
 
     /// <param name="til">Er vågeordet slået til?</param>
     /// <param name="motorFindes">Er der en motor at lytte med?</param>

@@ -68,29 +68,34 @@ public class KommandovindueTest
     /// pause.
     /// </remarks>
     /// <summary>
-    /// Taersklen maa ikke saettes op igen uden en maaling.
+    /// Motoren skal faa lov at kigge tit nok.
     /// </summary>
     /// <remarks>
-    /// 0,8 blev proevet 31-08-2026 for at goere de naturlige mikropauser nok.
-    /// Det, der skete, var, at motoren bedoemte konstant: TI bedoemmelser paa
-    /// sytten sekunder, mens der ikke blev sagt noget - hver gang med det
-    /// samme lokkeord og hver gang med en koeretur paa grafikkortet.
+    /// Motoren bedoemmer foerst, naar den mener, man er holdt op med at tale.
+    /// Ved 0,60 skete det kun hvert tiende til femtende sekund - maalt
+    /// 31-08-2026 kl. 16:12-16:14, mens brugeren sagde «Hej Pia» gang paa
+    /// gang: 13 bedoemmelser paa to minutter.
     ///
-    /// Ved 0,60 blev der maalt NUL bedoemmelser paa fyrre sekunders stilhed.
+    /// Vaageordet skal ramme praecis det ene vindue paa halvandet sekund,
+    /// motoren tilfaeldigvis kigger paa. Gjorde det ikke det, blev det aldrig
+    /// hoert.
+    ///
+    /// FALSKE UDSLAG HOLDES UDE AF GRAENSEN og ikke af, hvor sjaeldent der
+    /// bedoemmes - se Graensen_har_luft_til_stoej_i_rummet.
     /// </remarks>
     [Fact]
-    public void Pausetaersklen_er_ikke_saa_hoej_at_den_bedoemmer_konstant()
+    public void Pausetaersklen_lader_motoren_kigge_tit()
     {
-        Assert.True(Vaageord.Pausetaerskel <= 0.60,
-            "Ved 0,8 bedoemte motoren ti gange paa sytten sekunders stilhed. "
-            + "Saettes tallet op igen, skal det maales foerst.");
+        Assert.True(Vaageord.Pausetaerskel > 0.60,
+            "Ved 0,60 bedoemte motoren kun 13 gange paa to minutter, mens "
+            + "brugeren sagde «Hej Pia» gang paa gang.");
     }
 
     [Fact]
     public void Pausetaersklen_er_stadig_en_taerskel()
     {
-        // 0 ville betyde, at der ALDRIG blev regnet som en pause, og saa
-        // bedoemmes der aldrig.
-        Assert.True(Vaageord.Pausetaerskel > 0.0);
+        // 1,0 ville betyde, at ALT regnes som en pause, ogsaa midt i en
+        // saetning - og saa bedoemmes der paa halve ord.
+        Assert.True(Vaageord.Pausetaerskel < 1.0);
     }
 }
