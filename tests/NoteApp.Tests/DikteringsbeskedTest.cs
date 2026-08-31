@@ -1,4 +1,4 @@
-using NoteApp.Core;
+﻿using NoteApp.Core;
 using Xunit;
 
 namespace NoteApp.Tests;
@@ -62,5 +62,45 @@ public class DikteringsbeskedTest
 
         Assert.Contains(ord, Sprog.T("diktering.lytter_vaageord"),
             System.StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// Hvileteksten skal sige, at man ikke behoever vente.
+    /// </summary>
+    /// <remarks>
+    /// «jeg begynder at tale uden at vide, om den er klar til at modtage» -
+    /// brugerens egen note 31-08-2026.
+    ///
+    /// Svaret er, at den ER klar: foroptageren husker femten sekunder bagud,
+    /// saa det, man siger FOER beskeden skifter, er med alligevel. Det stod
+    /// bare ikke nogen steder, og saa staar man og venter paa en besked, man
+    /// ikke behoever.
+    /// </remarks>
+    [Fact]
+    public void Hvileteksten_siger_at_det_sagte_er_med()
+    {
+        Sprog.Skift("da");
+
+        var t = Sprog.T("vaageord.klar");
+
+        Assert.Contains("er med", t);
+        Assert.Contains("Hej Pia", t);
+    }
+
+    /// <summary>
+    /// Og det skal vaere SANDT: ringen skal raekke.
+    /// </summary>
+    /// <remarks>
+    /// Loeftet i teksten hviler paa foroptagerens laengde. Skaeres den ned,
+    /// bliver teksten en paastand, der ikke holder - og saa mister man tekst
+    /// uden at vide det.
+    /// </remarks>
+    [Fact]
+    public void Loeftet_hviler_paa_ringen_og_ringen_raekker()
+    {
+        // Vaageordet hoeres foerst, naar man holder pause, og motoren
+        // bedoemmer et vindue paa 1,5 sekund. Selv en lang saetning skal
+        // kunne staa i ringen imens.
+        Assert.True(Foroptager.Sekunder >= 10);
     }
 }

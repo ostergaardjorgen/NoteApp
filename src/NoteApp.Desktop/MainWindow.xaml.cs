@@ -1420,6 +1420,61 @@ public partial class MainWindow : Window
         }
     }
 
+    /// <summary>
+    /// Prikken lyser, når mikrofonen hører dig.
+    /// </summary>
+    /// <remarks>
+    /// DET ENESTE SIGNAL, DER KAN KOMME MED DET SAMME.
+    ///
+    /// Motoren afgør først, om der blev sagt «Hej Pia», når man holder en
+    /// pause — og indtil da står man og taler uden at vide, om appen
+    /// overhovedet er med. Brugeren skrev det ind som en note 31-08-2026:
+    /// «jeg begynder at tale uden at vide, om den er klar til at modtage».
+    ///
+    /// Appens EGEN mikrofon står allerede åben — føroptageren har den, mens
+    /// vågeordet lyttes efter — og dens niveau er der lige nu. Den kan ikke
+    /// sige, HVAD der blev sagt, men den kan sige «jeg kan høre dig», og det
+    /// er dét, spørgsmålet handler om.
+    ///
+    /// Prikken er ikke en måler med tal. Den lyser op, når der er lyd, og
+    /// falder tilbage, når der ikke er. Man skal kunne se den i øjenkrogen,
+    /// mens man kigger et andet sted hen.
+    /// </remarks>
+    private void SaetLydprik()
+    {
+        var n = _forop?.Niveau ?? 0f;
+
+        // Skalaen er valgt, saa almindelig tale rammer toppen og et stille
+        // rum ligger i bunden. Graensen i Stilhed er 0,02 - dét, der regnes
+        // som «der bliver talt» - saa den skal vaere tydeligt oppe.
+        var lys = Math.Clamp(0.30 + n / 0.05 * 0.70, 0.30, 1.0);
+
+        DiktatPrik.Opacity = lys;
+        _boble?.SaetLyd(lys);
+    }
+
+    private DispatcherTimer? _lydur;
+
+    /// <summary>Starter og stopper lydprikken sammen med lytningen.</summary>
+    private void SaetLydur(bool koer)
+    {
+        if (!koer)
+        {
+            _lydur?.Stop();
+            _lydur = null;
+            DiktatPrik.Opacity = 1.0;
+            return;
+        }
+
+        if (_lydur is not null) return;
+
+        // Ti gange i sekundet. Hurtigt nok til at foelge stemmen, langsomt nok
+        // til ikke at koste noget - det er ét feltopslag pr. gang.
+        _lydur = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(100) };
+        _lydur.Tick += (_, _) => SaetLydprik();
+        _lydur.Start();
+    }
+
     /// <summary>Tager boblen ned. Lytter vi ikke, skal der ikke ligge noget.</summary>
     private void SkjulBoble()
     {
@@ -1534,6 +1589,8 @@ public partial class MainWindow : Window
 
         if (!_vaage.Lytter)
         {
+            SaetLydur(false);
+
             // Staar notetilbuddet der endnu, skal bjaelken blive - ellers
             // forsvinder knappen, foer man naaede at tage stilling.
             if (GemNoteKnap.Visibility == Visibility.Visible) return;
@@ -1548,6 +1605,11 @@ public partial class MainWindow : Window
         DiktatBesked.Text = besked;
         DiktatBjaelke.Visibility = Visibility.Visible;
         VisBoble(besked, pulser: !_vaage.Klar, skjulEfter: null);
+
+        // Prikken foelger mikrofonen, saa laenge der er klar. Mens modellen
+        // laeses ind, pulserer den i stedet - dér er der ikke noget at hoere
+        // med endnu.
+        SaetLydur(_vaage.Klar);
     }
 
     private void VisDiktat(string besked) => Dispatcher.BeginInvoke(() =>

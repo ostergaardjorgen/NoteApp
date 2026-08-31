@@ -160,6 +160,30 @@ public partial class Lytteboble : Window
             skjulEfter: TimeSpan.FromSeconds(nyTilstand ? 3 : 6));
     }
 
+    /// <summary>
+    /// Lader prikken følge mikrofonens niveau.
+    /// </summary>
+    /// <remarks>
+    /// Boblen er dét, man ser, mens man står i et andet program — og det er
+    /// netop dér, spørgsmålet «kan den høre mig» opstår. Se
+    /// MainWindow.SaetLydprik for hvorfor.
+    ///
+    /// Pulsen slås fra imens: to ting, der begge får prikken til at ændre
+    /// sig, ville se ud som støj i stedet for som et svar.
+    /// </remarks>
+    public void SaetLyd(double lys)
+    {
+        try
+        {
+            Prik.BeginAnimation(OpacityProperty, null);
+            Prik.Opacity = lys;
+        }
+        catch (Exception)
+        {
+            // En prik, der ikke kan taendes, maa ikke kunne stoppe noget.
+        }
+    }
+
     /// <summary>Siger til, når brugeren lukker boblen med krydset.</summary>
     public Action? Lukket { get; set; }
 
