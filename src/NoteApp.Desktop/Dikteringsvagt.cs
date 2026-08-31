@@ -382,10 +382,34 @@ public sealed class Dikteringsvagt : IDisposable
             //
             // MitSprog er dét, brugeren TALER. Null betyder dansk; «auto»
             // lader modellen gaette som foer.
-            var raa = await klient.SkrivUdAsync(
-                klip,
-                ordbog.Count > 0 ? Ordbibliotek.TilAfsendelse(ordbog) : null,
-                v.Talesprog);
+            // ============ LYDEN SKRIVES UD PAA MASKINEN ============
+            //
+            // NAAR SPROGET IKKE KAN VAELGES I SKYEN, GAAR LYDEN IKKE DERUD.
+            //
+            // Voxtral afviser «da» som sprogvalg - efterproevet igen
+            // 31-08-2026, ogsaa mod den nyeste model. Sproget kunne derfor kun
+            // paavirkes gennem en ledetraad, og det holdt ikke: den samme
+            // danske diktering kom tilbage som fransk, tysk og hollandsk paa
+            // tre forskellige dage. En paavirkning er ikke et valg, og hver
+            // gang den fejler, er HVERT ORD forkert.
+            //
+            // whisper.cpp tager imod «-l da». Maalt samme dag: 2,5 sekunder
+            // med den bedste model, inklusive indlaesningen - paa niveau med
+            // et kald ud af huset.
+            //
+            // ARBEJDSDELINGEN ER MED VILJE. Lyden bliver paa maskinen, hvor
+            // sproget kan vaelges. Teksten sendes til Mistral for at blive
+            // ryddet op, for dét virker, og det er den samme aftale, moederne
+            // allerede har: lyd bliver, tekst kan gaa.
+            var lokalt = !Voxtral.Kendes(v.Talesprog) && Lokaludskrift.Kan();
+
+            var raa = lokalt
+                ? new Dikteringsresultat(
+                      await Lokaludskrift.SkrivUdAsync(klip, v.Talesprog), v.Talesprog, sekunder)
+                : await klient.SkrivUdAsync(
+                      klip,
+                      ordbog.Count > 0 ? Ordbibliotek.TilAfsendelse(ordbog) : null,
+                      v.Talesprog);
 
             if (raa.Raa.Length == 0)
             {
