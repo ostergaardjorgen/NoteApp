@@ -1456,29 +1456,9 @@ public partial class MainWindow : Window
     // at der optages, og de siger det tydeligere. To signaler om det samme er
     // ikke dobbelt saa klart - det er uroligt.
 
-    /// <summary>Sidste gang mikrofonen hørte noget, der talte som tale.</summary>
-    private DateTime _sidstHoert = DateTime.MinValue;
-
-    /// <summary>
-    /// Hvor længe bølgerne bliver stående, efter der blev tyst.
-    /// </summary>
-    /// <remarks>
-    /// Uden den ville de blinke ud og ind mellem hvert ord. Halvandet sekund
-    /// er den samme tålmodighed, dikteringen selv bruger til at afgøre, at
-    /// man er færdig — se <see cref="Core.Stilhed.Taalmodighed"/>.
-    /// </remarks>
-    private static readonly TimeSpan Boelgero = TimeSpan.FromMilliseconds(1500);
-
     private void SaetBoelger()
     {
-        // ============ HVEM HAR MIKROFONEN LIGE NU? ============
-        //
-        // Under en diktering er det optageren; ellers er det foroptageren, der
-        // holder ringen fyldt, mens vaageordet lyttes efter. Begge maaler det
-        // samme: om der bliver sagt noget.
-        var raa = _diktat.Igang ? _diktat.Niveau : _forop?.Niveau ?? 0f;
-
-        if (raa >= Core.Stilhed.Graense) _sidstHoert = DateTime.UtcNow;
+        var raa = _diktat.Niveau;
 
         // Skalaen: graensen i Stilhed er 0,02 - dét, der regnes som «der
         // bliver talt». Almindelig tale skal ramme toppen, saa der er noget
@@ -1495,27 +1475,23 @@ public partial class MainWindow : Window
 
         _boble?.SaetBoelger(_boelger);
 
-        // ============ BOELGERNE KOMMER, NAAR MIKROFONEN HOERER DIG ============
+        // ============ FOERST NAAR «HEJ PIA» ER SAGT ============
         //
-        // IKKE FOERST NAAR MOTOREN HAR AFGJORT, AT DER BLEV SAGT «HEJ PIA».
+        // BOELGERNE FULGTE MIKROFONEN FRIT I ÉN UDGAVE, og tanken var god:
+        // ringen holder lyden i forvejen, saa det VAR sandt, at det, man sagde,
+        // blev gemt - ogsaa foer vaageordet var genkendt.
         //
-        // Den afgoerelse tager tid, fordi motoren venter paa, at man holder
-        // pause. Indtil da stod bjaelken helt stille, og man troede, appen
-        // ikke var i gang - selv om lyden for laengst laa i ringen.
+        // Det holdt bare ikke i praksis. Boelgerne reagerede paa ALT: radio,
+        // tastatur, en samtale i rummet. Et signal, der bevaeger sig hele
+        // dagen, betyder ingenting, og saa kan man ikke bruge det til at se,
+        // om appen er i gang med DET, MAN SELV SAGDE.
         //
-        // OG DET ER SANDT AT VISE DEM. Foroptageren holder de sidste femten
-        // sekunder i hukommelsen, mens der lyttes. Bevaeger boelgerne sig, ER
-        // det, man siger, gemt - uanset om vaageordet naaede at blive
-        // genkendt endnu. Boelgerne siger «jeg hoerer dig og holder fast»,
-        // og det er praecis det, man staar og vil vide.
+        // Brugerens ord 31-08-2026, efter at have proevet begge dele: «Kan du
+        // aendre det, saa den ikke viser boelger FOER der er sagt Hej Pia».
         //
-        // Er der tyst, falder de tilbage til prikken igen. Et signal, der
-        // altid staar der, siger ingenting.
-        var hoerer = _diktat.Igang || DateTime.UtcNow - _sidstHoert < Boelgero;
-
-        Lydboelger.Visibility = hoerer ? Visibility.Visible : Visibility.Collapsed;
-        DiktatPrik.Visibility = hoerer ? Visibility.Collapsed : Visibility.Visible;
-        _boble?.VisBoelger(hoerer);
+        // Boelgerne betyder nu ét: der optages, og det er dit. Loeftet om, at
+        // ringen holder paa lyden imens, staar i teksten - dér hvor en
+        // paastand hoerer hjemme, og hvor den ikke flimrer.
     }
 
     private DispatcherTimer? _lydur;
@@ -1529,7 +1505,6 @@ public partial class MainWindow : Window
             _lydur = null;
 
             Array.Clear(_boelger);
-            _sidstHoert = DateTime.MinValue;
 
             Lydboelger.Visibility = Visibility.Collapsed;
             DiktatPrik.Visibility = Visibility.Visible;
@@ -1537,7 +1512,10 @@ public partial class MainWindow : Window
             return;
         }
 
-        // Synligheden afgoeres af, om mikrofonen hoerer noget - se SaetBoelger.
+        Lydboelger.Visibility = Visibility.Visible;
+        DiktatPrik.Visibility = Visibility.Collapsed;
+        _boble?.VisBoelger(true);
+
         if (_lydur is not null) return;
 
         // Tyve gange i sekundet. Hurtigt nok til at foelge en stemme - ved ti
@@ -1678,9 +1656,9 @@ public partial class MainWindow : Window
         DiktatBjaelke.Visibility = Visibility.Visible;
         VisBoble(besked, pulser: !_vaage.Klar, skjulEfter: null);
 
-        // URET KOERER, SAA LAENGE DER ER KLAR. Boelgerne kommer af sig selv,
-        // naar mikrofonen hoerer noget - se SaetBoelger.
-        SaetLydur(_vaage.Klar);
+        // Lyttes der bare, staar prikken stille. Boelgerne hoerer til
+        // optagelsen, og de maa ikke kunne forveksles med den.
+        SaetLydur(false);
     }
 
     private void VisDiktat(string besked) => Dispatcher.BeginInvoke(() =>
@@ -1697,10 +1675,7 @@ public partial class MainWindow : Window
         // BOELGERNE FOELGER OPTAGELSEN OG INTET ANDET. De taendes, naar der
         // optages, og slukkes i det oejeblik lyden er i hus - ogsaa mens der
         // skrives ud, hvor der ikke laengere er en stemme at foelge.
-        // Uret koerer baade under en diktering og imens der lyttes. Ellers
-        // faldt boelgerne vaek i sekunderne mellem to dikteringer, hvor
-        // mikrofonen stadig hoerer efter.
-        SaetLydur(_diktat.Igang || _vaage.Lytter);
+        SaetLydur(_diktat.Igang);
 
         // En NY diktering rydder tilbuddet fra den forrige. Ellers ville man
         // gemme det forkerte, fordi knappen stod der endnu.
