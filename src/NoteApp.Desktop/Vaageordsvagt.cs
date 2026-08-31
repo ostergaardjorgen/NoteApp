@@ -157,8 +157,15 @@ public sealed class Vaageordsvagt : IDisposable
                 //
                 // Foerste gang koster det en genstart: motoren startes,
                 // listen laeses, og den startes om med det rigtige nummer.
-                // Det er to modelindlaesninger, og maalt 31-08-2026 var
-                // vaageordet foerst klar efter cirka et minut.
+                // Det er to modelindlaesninger. Maalt 31-08-2026 tager ÉN
+                // indlaesning 3,2 sekunder, saa genstarten koster godt tre
+                // sekunder mere - ikke et minut, som der stod her.
+                //
+                // MINUTTET VAR EN FEJLSLUTNING. Det blev maalt paa en opstart,
+                // hvor «Capture device»-linjen aldrig naaede frem, fordi
+                // stderr blev kastet vaek, og hvor der derfor blev ledt
+                // forgaeves. Tiden gik med at vente paa noget, der aldrig kom,
+                // og ikke med at laese modellen ind.
                 //
                 // Derfor gemmes nummeret sammen med NAVNET. Rykker enhederne
                 // rundt, passer nummeret ikke laengere, og saa findes det
