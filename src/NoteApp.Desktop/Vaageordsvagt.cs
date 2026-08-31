@@ -43,6 +43,16 @@ public sealed class Vaageordsvagt : IDisposable
     /// <summary>Lytter der lige nu?</summary>
     public bool Lytter => _proces is { HasExited: false };
 
+    /// <summary>
+    /// Er motoren faerdig med at laese modellen ind og klar til at hoere?
+    /// </summary>
+    /// <remarks>
+    /// «Lytter» og «klar» er ikke det samme. Processen koerer straks; modellen
+    /// skal foerst paa grafikkortet, og det tager tid. Sagde skaermen «lytter»
+    /// i den tid, sagde man «Hej Pia» og troede, det ikke virkede.
+    /// </remarks>
+    public bool Klar { get; private set; }
+
     private DateTime _startet;
 
     /// <summary>
@@ -143,6 +153,18 @@ public sealed class Vaageordsvagt : IDisposable
                 // 30-08-2026 var der FIRE at vaelge imellem paa maskinen, og
                 // appen sagde ikke hvilken. Resten af appen bruger brugerens
                 // valg; vaageordet gjorde ikke.
+                // ============ NUMMERET HUSKES ============
+                //
+                // Foerste gang koster det en genstart: motoren startes,
+                // listen laeses, og den startes om med det rigtige nummer.
+                // Det er to modelindlaesninger, og maalt 31-08-2026 var
+                // vaageordet foerst klar efter cirka et minut.
+                //
+                // Derfor gemmes nummeret sammen med NAVNET. Rykker enhederne
+                // rundt, passer nummeret ikke laengere, og saa findes det
+                // forfra frem for at lytte paa den forkerte.
+                if (_kendtIndeks < 0) _kendtIndeks = HusketIndeks();
+
                 var mikrofon = _kendtIndeks >= 0 ? $" -c {_kendtIndeks}" : "";
 
                 var start = new ProcessStartInfo(Motorsti)
@@ -186,7 +208,8 @@ public sealed class Vaageordsvagt : IDisposable
                 _proces.ErrorDataReceived += (_, _) => { };
                 _proces.BeginErrorReadLine();
 
-                Melder?.Invoke(Sprog.T("vaageord.lytter"));
+                Klar = false;
+                Melder?.Invoke(Sprog.T("vaageord.goer_klar"));
             }
             catch (Exception ex)
             {
@@ -265,6 +288,20 @@ public sealed class Vaageordsvagt : IDisposable
         Mikrofonlinje(linje);
         SkiftMikrofonHvisNoedvendigt(linje);
 
+        // ============ HVORNAAR ER DEN KLAR? ============
+        //
+        // Modellen skal indlaeses paa grafikkortet, foer der kan hoeres noget.
+        // Det tager tid, og i den tid sagde appen «lytter» - saa sagde man
+        // «Hej Pia» og troede, det ikke virkede.
+        //
+        // Motoren siger selv til: «listening for a command ...». Foerst dér
+        // er den klar, og foerst dér skal skaermen sige det.
+        if (!Klar && linje.Contains("listening for a command", StringComparison.Ordinal))
+        {
+            Klar = true;
+            Melder?.Invoke(Sprog.T("vaageord.klar"));
+        }
+
         if (Vaageordsliste.Laes(linje) is not { } fund) return;
 
         var ord = AppSettings.Current.Vaageord is { Count: > 0 } egne
@@ -317,6 +354,47 @@ public sealed class Vaageordsvagt : IDisposable
 
         _kendtIndeks = nr;
         _skalSkifteMikrofon = true;
+
+        // Gemmes med NAVNET. Naeste opstart springer genstarten over - og
+        // skifter enhederne plads, opdages det, fordi navnet ikke passer.
+        try
+        {
+            var v = AppSettings.Current;
+            v.VaageordMikrofonNummer = nr;
+            v.VaageordMikrofonNavn = valgt.FriendlyName;
+            v.Save();
+        }
+        catch (Exception)
+        {
+            // Kan det ikke gemmes, koster det bare en genstart naeste gang.
+        }
+    }
+
+    /// <summary>
+    /// Det huskede nummer — hvis det stadig hører til den valgte mikrofon.
+    /// </summary>
+    private static int HusketIndeks()
+    {
+        try
+        {
+            var v = AppSettings.Current;
+            if (v.VaageordMikrofonNummer is not { } nr) return -1;
+            if (string.IsNullOrWhiteSpace(v.VaageordMikrofonNavn)) return -1;
+
+            var valgt = AudioDevices.ResolveMicrophone(v.MicrophoneId, out _);
+
+            // Passer navnet ikke, er enhederne rykket rundt. Saa er nummeret
+            // ikke bare forkert - det peger paa en ANDEN mikrofon, og saa
+            // ville vaageordet lytte det forkerte sted uden at sige det.
+            return valgt is not null
+                   && v.VaageordMikrofonNavn.Equals(valgt.FriendlyName, StringComparison.OrdinalIgnoreCase)
+                ? nr
+                : -1;
+        }
+        catch (Exception)
+        {
+            return -1;
+        }
     }
 
     /// <summary>Er motoren startet om for at få den rigtige mikrofon?</summary>
@@ -379,3 +457,4 @@ public sealed class Vaageordsvagt : IDisposable
 
     public void Dispose() => Ryd();
 }
+

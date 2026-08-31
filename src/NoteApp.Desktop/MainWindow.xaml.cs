@@ -1034,8 +1034,9 @@ public partial class MainWindow : Window
     /// almindelige vej — ned hvor markøren står. Man mister ikke det, man
     /// sagde.
     /// </remarks>
-    private bool RutVaageordstekst(string tekst)
+    private bool RutVaageordstekst(Core.Diktatudfald udfald)
     {
+        var tekst = udfald.Tekst;
         var ord = Core.AppSettings.Current.Vaageord is { Count: > 0 } egne
             ? egne
             : Core.Vaageord.Standardord;
@@ -1046,12 +1047,28 @@ public partial class MainWindow : Window
         var sagt = Core.Hensigtstolk.UdenVaageord(tekst, ord);
         var fund = Core.Hensigtstolk.Tolk(sagt);
 
-        if (fund.Tekst.Length == 0) return false;
+        // ============ BLEV DER SAGT ANDET END ORDET? ============
+        //
+        // Sagde man BARE «Hej Pia», er der ingenting at gøre med. Her stod
+        // «returner falsk», og falsk betyder «gå den almindelige vej» — så
+        // blev ordet selv sat ind som tekst.
+        //
+        // Set 31-08-2026: «Hej Pia.» landede i søgefeltet. Det så ud som om
+        // vågeordet ikke blev skåret af; det blev det, men den tomme rest
+        // faldt tilbage på indsættelsen af den fulde tekst.
+        //
+        // Nu er svaret sandt: der er taget hånd om det, og der skal ingenting
+        // sættes ind.
+        if (fund.Tekst.Length == 0)
+        {
+            VisDiktat(Core.Sprog.T("vaageord.intet_sagt"));
+            return true;
+        }
 
         switch (fund.Hvad)
         {
             case Core.Hensigt.Note:
-                Core.Diktatnoter.Tilfoej(fund.Tekst);
+                Core.Diktatnoter.Tilfoej(fund.Tekst, udfald.Raa, udfald.Formaal);
                 Diktering.NoterView.Aendret?.Invoke();
                 VisDiktat(Core.Sprog.T("vaageord.blev_note", Core.Opgave.Kort(fund.Tekst)));
                 return true;
@@ -1237,37 +1254,50 @@ public partial class MainWindow : Window
     private void DiktatAfbrudt() => _ = _diktat.SlutAsync(afbrudt: true);
 
     /// <summary>Den seneste diktering — så den kan gemmes, hvis man vil.</summary>
-    private string? _sidsteDiktat;
+    private Core.Diktatudfald? _sidsteDiktat;
 
     /// <summary>
-    /// En diktering er landet. Nu tilbydes den som note.
+    /// En diktering er landet. Den gemmes som note, og knappen viser den.
     /// </summary>
     /// <remarks>
-    /// KNAPPEN ER SPØRGSMÅLET. En dialog ville rive fokus væk fra det felt,
-    /// teksten lige er landet i — i samme sekund man var færdig med at tale.
-    /// Knappen står på bjælken og venter, til man kigger.
+    /// HER STOD «GEM SOM NOTE», OG DET VAR ET SPØRGSMÅL FOR MEGET.
     ///
-    /// Den forsvinder sammen med bjælken. Gemte man ikke, var svaret nej.
+    /// Man havde lige talt, teksten var landet, og så skulle man tage endnu
+    /// en beslutning om noget, man ikke kunne se. Nu er den gemt, og knappen
+    /// åbner den — dér kan man kopiere den, skifte dens type eller slette
+    /// den, med teksten foran sig.
+    ///
+    /// PRISEN ER, AT DER SAMLER SIG NOTER. De 200 nyeste huskes, og resten
+    /// falder ud af sig selv. Det er brugerens valg, og det er lettere at
+    /// slette én, man kan se, end at gætte på forhånd, om man får brug for
+    /// den.
     /// </remarks>
-    private void DiktatFaerdig(string tekst) => Dispatcher.BeginInvoke(() =>
+    private void DiktatFaerdig(Core.Diktatudfald udfald) => Dispatcher.BeginInvoke(() =>
     {
-        _sidsteDiktat = tekst;
+        _sidsteDiktat = udfald;
+
+        if (udfald.Tekst.Length == 0) return;
+
+        Core.Diktatnoter.Tilfoej(udfald.Tekst, udfald.Raa, udfald.Formaal);
+        Diktering.NoterView.Aendret?.Invoke();
+
         GemNoteKnap.Visibility = Visibility.Visible;
         GemNoteKnap.IsEnabled = true;
     });
 
+    /// <summary>Åbner Noter-fanen, hvor den lige gemte note ligger øverst.</summary>
     private void GemNote_Klik(object sender, RoutedEventArgs e)
     {
-        if (_sidsteDiktat is not { Length: > 0 } tekst) return;
-
-        Core.Diktatnoter.Tilfoej(tekst);
-
-        GemNoteKnap.IsEnabled = false;
+        GemNoteKnap.Visibility = Visibility.Collapsed;
         _sidsteDiktat = null;
 
-        DiktatBesked.Text = Core.Sprog.T("noter.gemt");
+        App.HentFrem(this);
 
-        // Er Noter-fanen fremme, skal den vise den med det samme.
+        // Noter er den foerste fane. Der aabnes paa den, saa knappen foerer
+        // hen til noten og ikke bare til skaermen.
+        Diktering.DikteringView.StartFane = 0;
+        NavDiktering.IsChecked = true;
+
         Diktering.NoterView.Aendret?.Invoke();
     }
 
@@ -1841,4 +1871,5 @@ public partial class MainWindow : Window
         }
     }
 }
+
 

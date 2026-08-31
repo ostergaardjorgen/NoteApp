@@ -1013,18 +1013,26 @@
     "blev_note": "Saved as a note: {0}",
     "blev_opgave": "Added to your tasks: {0}",
     "blev_soegning": "Searching for «{0}»",
-    "aftale_blev_opgave": "Added to your tasks: {0} — the app cannot create calendar appointments yet, because a spoken time has to be read correctly first."
+    "aftale_blev_opgave": "Added to your tasks: {0} — the app cannot create calendar appointments yet, because a spoken time has to be read correctly first.",
+    "intet_sagt": "Nothing was said beyond the wake word.",
+    "goer_klar": "The wake word is getting ready — the model is loading. It takes a moment the first time. The shortcut key works meanwhile.",
+    "klar": "The wake word is ready. Say «Hej Pia»."
   },
   "noter": {
     "titel": "Notes",
-    "under": "Dictations you have chosen to keep. Nothing is saved automatically — a dictation is usually on its way somewhere else and has already landed there by the time the text arrives.",
+    "under": "Everything you dictate is kept here — the 200 most recent. If a note is not worth keeping, delete it; that is easier than guessing in advance whether you will need it.",
     "indsaet": "The latest dictation is ready in memory",
     "indsaet_under": "After each dictation the text is placed on the clipboard. Go to where it belongs and press Ctrl+V — or Shift+Insert, which works where Ctrl+V does not, including terminals and older programs. It stays there until you copy something else.",
-    "tom": "No saved notes yet. Hold the shortcut key and speak — when the text arrives, «Save as note» appears at the bottom of the window.",
+    "tom": "No notes yet. Hold the shortcut key and speak, or say «Hej Pia» — what comes out lands here.",
     "ryd": "Delete all",
     "kopier": "Copy",
     "gem_som_note": "Save as note",
-    "gemt": "Saved as a note — you will find it under Dictation → Notes."
+    "gemt": "Saved as a note — you will find it under Dictation → Notes.",
+    "vis_noten": "Show the note",
+    "skift": "Show as",
+    "skift_under": "The same speech, written a different way. It is rewritten from the raw transcript, not from the text above — otherwise each rewrite would drift further from what you actually said.",
+    "skift_kan_ikke": "This note predates storing the raw transcript, so it cannot be rewritten.",
+    "skifter": "Rewriting …"
   },
   "lytteboble": {
     "pause": "Pause the listening",

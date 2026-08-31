@@ -361,9 +361,10 @@
              Knappen står her i stedet. Den venter, til man kigger. -->
         <Button x:Name="GemNoteKnap" Grid.Column="1" Visibility="Collapsed"
                 Click="GemNote_Klik" Padding="14,6" Margin="16,0,0,0"
-                Content="{i18n:Oversat noter.gem_som_note}" />
+                Content="{i18n:Oversat noter.vis_noten}" />
       </Grid>
     </Border>
 
   </Grid>
 </Window>
+

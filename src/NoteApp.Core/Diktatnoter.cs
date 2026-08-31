@@ -3,11 +3,47 @@ using System.Text.Json;
 
 namespace NoteApp.Core;
 
+/// <summary>Det, en færdig diktering gav.</summary>
+/// <param name="Tekst">Den pudsede tekst — den, der lander et sted.</param>
+/// <param name="Raa">
+/// Udskriften før pudsningen, med ordbogens rettelser i.
+/// </param>
+/// <param name="Formaal">Hvilken type den blev pudset som.</param>
+/// <remarks>
+/// DEN RÅ TEKST FØLGER MED HELE VEJEN. Uden den kan en note ikke laves om til
+/// en mail: pudsningen har allerede kastet fyldordene væk og valgt en form,
+/// og en omskrivning af en omskrivning driver længere og længere væk fra det,
+/// der faktisk blev sagt.
+/// </remarks>
+public sealed record Diktatudfald(string Tekst, string Raa, string Formaal);
+
 /// <summary>En gemt diktering.</summary>
 /// <param name="Tid">Hvornår den blev sagt.</param>
-/// <param name="Tekst">Det, der kom ud — den pudsede tekst, ikke den rå.</param>
-public sealed record Diktatnote(DateTime Tid, string Tekst)
+/// <param name="Tekst">Det, der kom ud — den pudsede tekst.</param>
+/// <param name="Raa">
+/// Den RÅ udskrift, før den blev pudset af.
+/// </param>
+/// <param name="Formaal">Hvilken type teksten er pudset som.</param>
+/// <remarks>
+/// DEN RÅ TEKST GEMMES MED, OG DET ER DET, DER GØR NOTEN OM.
+///
+/// En pudset note kan ikke laves om til en mail: pudsningen har allerede
+/// kastet fyldordene væk og valgt en form. Skulle den skrives om, ville
+/// modellen skrive om på sin egen tekst og drive længere og længere væk fra
+/// det, der faktisk blev sagt.
+///
+/// Med den rå udskrift kan enhver type laves forfra ud fra det samme
+/// grundlag — og det er også dét, der gør, at man kan komme tilbage til det,
+/// man rent faktisk sagde.
+///
+/// Tom på noter fra før feltet fandtes. Så kan typen ikke skiftes, og det
+/// siges i stedet for at gætte.
+/// </remarks>
+public sealed record Diktatnote(DateTime Tid, string Tekst, string Raa = "", string Formaal = "")
 {
+    /// <summary>Kan noten skrives om til en anden type?</summary>
+    public bool KanSkiftes => Raa.Trim().Length > 0;
+
     /// <summary>De første ord, så noten kan kendes igen på en liste.</summary>
     public string Overskrift
     {
@@ -85,13 +121,33 @@ public static class Diktatnoter
     }
 
     /// <summary>Lægger en note til. Tom tekst gemmes ikke.</summary>
-    public static void Tilfoej(string tekst, DateTime? tid = null)
+    /// <param name="raa">
+    /// Den rå udskrift. Uden den kan noten ikke laves om til en anden type —
+    /// se <see cref="Diktatnote"/>.
+    /// </param>
+    public static Diktatnote? Tilfoej(string tekst, string raa = "",
+                                      string formaal = "", DateTime? tid = null)
     {
-        if (string.IsNullOrWhiteSpace(tekst)) return;
+        if (string.IsNullOrWhiteSpace(tekst)) return null;
+
+        var note = new Diktatnote(tid ?? DateTime.Now, tekst.Trim(), (raa ?? "").Trim(), formaal);
 
         var alle = Laes();
-        alle.Insert(0, new Diktatnote(tid ?? DateTime.Now, tekst.Trim()));
+        alle.Insert(0, note);
 
+        Skriv(alle);
+        return note;
+    }
+
+    /// <summary>Erstatter en note med en ny udgave — fx en anden teksttype.</summary>
+    public static void Erstat(Diktatnote gammel, Diktatnote ny)
+    {
+        var alle = Laes();
+
+        var i = alle.FindIndex(n => n == gammel);
+        if (i < 0) return;
+
+        alle[i] = ny;
         Skriv(alle);
     }
 

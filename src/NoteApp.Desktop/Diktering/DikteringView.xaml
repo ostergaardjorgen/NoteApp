@@ -16,7 +16,7 @@
        PROEVERUMMET STAAR FOERST, fordi det er dér, man opdager, at noget
        skal rettes. De to andre er svarene. -->
 
-  <TabControl Style="{StaticResource Fanerude}" Margin="24,16,24,16">
+  <TabControl x:Name="Faner" Style="{StaticResource Fanerude}" Margin="24,16,24,16">
 
     <!-- NOTERNE STAAR FOERST, fordi det er dem, man kommer for. De tre andre
          er opsaetning: noget man goer én gang og sjaeldent igen. -->

@@ -171,6 +171,29 @@ public sealed class AppSettings
     /// </remarks>
     public string? Genvejsgreb { get; set; }
 
+    /// <summary>
+    /// Nummeret på den mikrofon, vågeordsmotoren skal bruge — og navnet, det
+    /// hører til.
+    /// </summary>
+    /// <remarks>
+    /// MOTOREN KENDER KUN SINE MIKROFONER VED NUMMER, og nummeret står først
+    /// i dens egen udskrift — altså efter den er startet. Første gang koster
+    /// det derfor en genstart: motoren startes, listen læses, og den startes
+    /// om med det rigtige nummer.
+    ///
+    /// Målt 31-08-2026: to modelindlæsninger efter hinanden, og vågeordet var
+    /// først klar efter cirka et minut. Brugeren nåede at prøve to gange og
+    /// tro, at det ikke virkede.
+    ///
+    /// Derfor huskes nummeret. NAVNET huskes med: rykker enhederne rundt —
+    /// et headset sat i eller ud — passer nummeret ikke længere, og så skal
+    /// det findes forfra frem for at lytte på den forkerte.
+    /// </remarks>
+    public int? VaageordMikrofonNummer { get; set; }
+
+    /// <summary>Navnet, <see cref="VaageordMikrofonNummer"/> hørte til.</summary>
+    public string? VaageordMikrofonNavn { get; set; }
+
     // ======================= DIKTERING =======================
 
     /// <summary>

@@ -1,4 +1,4 @@
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using NoteApp.Core;
 
@@ -16,7 +16,7 @@ public partial class NoterView : UserControl
     /// <summary>Kaldes, når der er kommet eller forsvundet en note.</summary>
     public static Action? Aendret;
 
-    private sealed record Visning(string Naar, string Tekst, Diktatnote Note);
+    private sealed record Visning(string Naar, string Tekst, Diktatnote Note, Visibility KanSkifte);
 
     public NoterView()
     {
@@ -44,7 +44,9 @@ public partial class NoterView : UserControl
         var noter = Diktatnoter.Laes();
 
         Liste.ItemsSource = noter
-            .Select(n => new Visning(Naar(n.Tid), n.Tekst, n))
+            .Select(n => new Visning(
+                Naar(n.Tid), n.Tekst, n,
+                n.KanSkiftes ? Visibility.Visible : Visibility.Collapsed))
             .ToList();
 
         Tom.Visibility = noter.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
@@ -93,6 +95,56 @@ public partial class NoterView : UserControl
         }
     }
 
+    /// <summary>
+    /// Skriver noten om til en anden teksttype.
+    /// </summary>
+    /// <remarks>
+    /// DER SKRIVES OM FRA DEN RÅ UDSKRIFT, ikke fra den tekst, der står på
+    /// skærmen. Pudsningen har allerede kastet fyldordene væk og valgt en
+    /// form; en omskrivning af en omskrivning driver længere og længere væk
+    /// fra det, der faktisk blev sagt.
+    ///
+    /// Noter fra før den rå udskrift blev gemt med, kan ikke skiftes. Så står
+    /// knapperne der ikke — frem for at stå der og ikke virke.
+    /// </remarks>
+    private async void Skift_Klik(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button knap) return;
+        if (knap.Tag is not Visning v) return;
+        if (!v.Note.KanSkiftes) { Antal.Text = Sprog.T("noter.skift_kan_ikke"); return; }
+
+        if (!Enum.TryParse<Core.Llm.Dikteringsformaal>((string)knap.CommandParameter, out var formaal)) return;
+
+        var noegle = Core.Llm.SkyNoegle.Hent();
+        if (noegle is null)
+        {
+            Antal.Text = Sprog.T("settingsview.diktering_kraever_noegle");
+            return;
+        }
+
+        Antal.Text = Sprog.T("noter.skifter");
+        IsEnabled = false;
+
+        try
+        {
+            var klient = new Core.Llm.Dikteringsklient(noegle);
+            var ny = await klient.PudsAsync(v.Note.Raa, formaal);
+
+            if (ny.Trim().Length == 0) { Antal.Text = Sprog.T("diktering.intet_hoert"); return; }
+
+            Diktatnoter.Erstat(v.Note, v.Note with { Tekst = ny.Trim(), Formaal = formaal.ToString() });
+            Vis();
+        }
+        catch (Exception ex)
+        {
+            Antal.Text = Sprog.T("diktering.gik_galt", ex.Message);
+        }
+        finally
+        {
+            IsEnabled = true;
+        }
+    }
+
     private void Slet_Klik(object sender, RoutedEventArgs e)
     {
         if ((sender as FrameworkElement)?.Tag is not Visning v) return;
@@ -114,3 +166,4 @@ public partial class NoterView : UserControl
         Vis();
     }
 }
+

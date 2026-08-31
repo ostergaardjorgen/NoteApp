@@ -48,7 +48,7 @@ public sealed class Dikteringsvagt : IDisposable
     /// Prøverummet rejser den ikke: dér er teksten netop noget, man kaster
     /// væk og laver om.
     /// </remarks>
-    public event Action<string>? Faerdig;
+    public event Action<Core.Diktatudfald>? Faerdig;
 
     /// <summary>
     /// Sat, når dikteringen kom fra vågeordet. Får den færdige tekst og
@@ -63,7 +63,7 @@ public sealed class Dikteringsvagt : IDisposable
     /// teksten den almindelige vej. Det er den rigtige måde at fejle på: man
     /// får sin tekst, den havner bare et andet sted.
     /// </remarks>
-    public Func<string, bool>? Ruter { get; set; }
+    public Func<Core.Diktatudfald, bool>? Ruter { get; set; }
 
     /// <summary>Kom den igangværende diktering fra vågeordet?</summary>
     private bool _fraVaageord;
@@ -96,19 +96,6 @@ public sealed class Dikteringsvagt : IDisposable
         _optager is not null || _arbejder || Foroptagelse is { Beholder: true };
 
     /// <summary>
-    /// Vågeordet blev hørt. Gør det samme som et hold på genvejstasten — og
-    /// slipper selv, når der bliver stille.
-    /// </summary>
-    /// <remarks>
-    /// DER EMULERES IKKE ET TASTETRYK. Det ville være at sende Ctrl+komma ud i
-    /// Windows og håbe, at appen fangede det igen — gennem den samme
-    /// registrering, der kan være taget af et andet program. I stedet kaldes
-    /// den samme kode, som tastetrykket kalder.
-    ///
-    /// STILHEDEN SLIPPER HOLDET. Der er ingen tast at give slip på, så
-    /// mikrofonens eget niveau afgør det: <see cref="Stilhed"/>.
-    /// </remarks>
-    /// <summary>
     /// Mikrofonen, der allerede er åben, mens der lyttes. Sat af skærmen.
     /// </summary>
     /// <remarks>
@@ -121,6 +108,19 @@ public sealed class Dikteringsvagt : IDisposable
     /// </remarks>
     public Foroptager? Foroptagelse { get; set; }
 
+    /// <summary>
+    /// Vågeordet blev hørt. Gør det samme som et hold på genvejstasten — og
+    /// slipper selv, når der bliver stille.
+    /// </summary>
+    /// <remarks>
+    /// DER EMULERES IKKE ET TASTETRYK. Det ville være at sende Ctrl+komma ud i
+    /// Windows og håbe, at appen fangede det igen — gennem den samme
+    /// registrering, der kan være taget af et andet program. I stedet kaldes
+    /// den samme kode, som tastetrykket kalder.
+    ///
+    /// STILHEDEN SLIPPER HOLDET. Der er ingen tast at give slip på, så
+    /// mikrofonens eget niveau afgør det: <see cref="Stilhed"/>.
+    /// </remarks>
     public void BegyndPaaVaageord()
     {
         // ============ ER LYDEN DER ALLEREDE? ============
@@ -424,7 +424,8 @@ public sealed class Dikteringsvagt : IDisposable
             //
             // Svarer ruteren falsk, var der ingen hensigt at genkende, og saa
             // gaar teksten den almindelige vej.
-            if (_fraVaageord && Ruter is { } ruter && ruter(tekst))
+            if (_fraVaageord && Ruter is { } ruter
+                && ruter(new Core.Diktatudfald(tekst, udskrift, formaal.ToString())))
             {
                 _fraVaageord = false;
                 return;
@@ -435,7 +436,7 @@ public sealed class Dikteringsvagt : IDisposable
 
             // Skaermen skal kunne tilbyde at gemme den. Teksten gives med -
             // vagten gemmer ikke selv, for det er brugerens valg.
-            Faerdig?.Invoke(tekst);
+            Faerdig?.Invoke(new Core.Diktatudfald(tekst, udskrift, formaal.ToString()));
 
             // BESKEDEN OM AFBRYDELSEN KOMMER TIL SIDST, efter teksten er i hus.
             // Kom den foerst, ville man tro, at det, man havde sagt, var tabt.
@@ -508,6 +509,7 @@ public sealed class Dikteringsvagt : IDisposable
 
     public void Dispose() => Ryd();
 }
+
 
 
 
