@@ -345,6 +345,13 @@ public sealed class Vaageordsvagt : IDisposable
 
         if (Vaageordsliste.Laes(linje) is not { } fund) return;
 
+        // ============ HVERT FUND SKRIVES NED ============
+        //
+        // «Jeg sagde Hej Pia i tyve sekunder, foer der skete noget» kan ikke
+        // efterproeves paa en paastand. Motoren fortaeller selv, hvad den
+        // hoerte og hvor sikker den var - og uden det tal er enhver
+        // forklaring paa, hvorfor den ikke svarede, et gaet.
+        //
         var ord = AppSettings.Current.Vaageord is { Count: > 0 } egne
             ? egne
             : Vaageord.Standardord;
@@ -352,7 +359,24 @@ public sealed class Vaageordsvagt : IDisposable
         // GRAENSEN ER DET, DER GOER DEN BRUGBAR. Motoren vaelger altid et
         // udtryk; det er listens laengde, der afgoer, hvornaar et valg er
         // mere end et gaet. Se Vaageordsliste.Graense.
-        if (!Vaageordsliste.Taeller(fund, ord, _antalUdtryk)) return;
+        var taeller = Vaageordsliste.Taeller(fund, ord, _antalUdtryk);
+
+        // Linjen skrives, OGSAA naar fundet ikke taeller. Det er netop de
+        // fund, der blev kasseret, der siger, om graensen sidder forkert.
+        try
+        {
+            Historik.Skriv(HaendelseType.Andet,
+                taeller ? "Vågeordet blev hørt" : "Vågeordet hørte noget andet",
+                $"«{fund.Udtryk}» · sikkerhed {fund.Sikkerhed:0.00} · "
+                + $"grænse {Vaageordsliste.Graense(_antalUdtryk):0.00}",
+                taeller ? Udfald.Fuldført : Udfald.SeEfter);
+        }
+        catch (Exception)
+        {
+            // En log, der ikke kan skrives, maa ikke stoppe lytningen.
+        }
+
+        if (!taeller) return;
 
         Hoert?.Invoke("");
     }

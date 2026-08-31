@@ -450,10 +450,11 @@ public partial class MainWindow : Window
 
             _vaageur?.Stop();
             _vaageur = new DispatcherTimer { Interval = TimeSpan.FromSeconds(30) };
-            _vaageur.Tick += (_, _) => SaetVaageord();
+            _vaageur.Tick += (_, _) => { SaetVaageord(); VisLyttestatus(); };
             _vaageur.Start();
 
             SaetVaageord();
+            VisLyttestatus();
 
             // HER LAA ET ABONNEMENT PAA «AENDRET». Registreringen kunne skifte
             // af sig selv, fordi den oenskede tast blev ledig igen - og saa
@@ -1375,6 +1376,13 @@ public partial class MainWindow : Window
         }
     }
 
+    /// <summary>Tager boblen ned. Lytter vi ikke, skal der ikke ligge noget.</summary>
+    private void SkjulBoble()
+    {
+        try { _boble?.Hide(); }
+        catch (Exception) { }
+    }
+
     /// <summary>
     /// Viser, hvad dikteringen laver — og skjuler bjælken igen bagefter.
     /// </summary>
@@ -1405,42 +1413,73 @@ public partial class MainWindow : Window
     /// En diktering, der går i gang imens, tager bjælken tilbage. Det, man
     /// selv har sat i gang, står over en statusbesked.
     /// </remarks>
+    /// <summary>
+    /// Vågeordets egne beskeder.
+    /// </summary>
+    /// <remarks>
+    /// BJÆLKEN ER ET TILSTANDSLYS OG IKKE EN BESKED.
+    ///
+    /// Den forsvandt efter fire sekunder, når vågeordet meldte sig klar. Så
+    /// stod man og skulle tale uden at vide, om det talte med — og det gør
+    /// man netop i det øjeblik, hvor man har allermest brug for at vide det.
+    /// Set 31-08-2026: brugeren sagde «Hej Pia» i tyve sekunder, og det
+    /// eneste, der nogensinde kom frem, var bjælken bagefter.
+    ///
+    /// Reglen er nu enkel nok til at kunne læses på en skærm i forbifarten:
+    ///
+    ///   BJÆLKEN ER DER   der lyttes. Enten gøres der klar, eller også er der
+    ///                    klar — og teksten siger hvilken af delene.
+    ///   BJÆLKEN ER VÆK   der lyttes ikke. Vågeordet er slået fra, maskinen er
+    ///                    låst, eller der optages.
+    ///
+    /// Ingen nedtælling, ingen beskeder der glider forbi. Det, der KAN gå
+    /// væk af sig selv, er kvitteringen efter en diktering — den hører til
+    /// <see cref="VisDiktat"/> og har sit eget ur.
+    /// </remarks>
     private void VisVaageord(string besked) => Dispatcher.BeginInvoke(() =>
     {
+        // En diktering, der er i gang, ejer bjaelken. Det, man selv har sat i
+        // gang, staar over en statusbesked.
         if (_diktat.Igang) return;
-
-        DiktatBesked.Text = besked;
-        DiktatBjaelke.Visibility = Visibility.Visible;
 
         _diktatUr?.Stop();
         _diktatUr = null;
 
-        // Ikke klar endnu: bjaelken bliver staaende. Uden ur, uden nedtaelling.
-        if (!_vaage.Klar)
+        DiktatBesked.Text = besked;
+        DiktatBjaelke.Visibility = Visibility.Visible;
+
+        // Pulserer, mens der goeres klar. Staar stille, naar der er klar -
+        // saa er forskellen til at se uden at laese.
+        VisBoble(besked, pulser: !_vaage.Klar, skjulEfter: null);
+    });
+
+    /// <summary>
+    /// Sætter bjælken efter, om der lyttes lige nu.
+    /// </summary>
+    /// <remarks>
+    /// KALDES HVER GANG LYTNINGEN KAN HAVE SKIFTET — også når den skifter af
+    /// sig selv: skærmen låses, et møde begynder, vågeordet slås fra på
+    /// fanen. Uden det ville bjælken blive stående og love en lytning, der
+    /// var holdt op.
+    /// </remarks>
+    private void VisLyttestatus()
+    {
+        // En diktering eller en kvittering ejer bjaelken imens.
+        if (_diktat.Igang || _diktatUr is not null) return;
+
+        if (!_vaage.Lytter)
         {
-            VisBoble(besked, pulser: true, skjulEfter: null);
+            DiktatBjaelke.Visibility = Visibility.Collapsed;
+            SkjulBoble();
             return;
         }
 
-        VisBoble(besked, pulser: false, skjulEfter: TimeSpan.FromSeconds(4));
+        var besked = Core.Sprog.T(_vaage.Klar ? "vaageord.klar" : "vaageord.goer_klar");
 
-        _diktatUr = new System.Windows.Threading.DispatcherTimer
-        {
-            Interval = TimeSpan.FromSeconds(4),
-        };
-
-        _diktatUr.Tick += (_, _) =>
-        {
-            _diktatUr?.Stop();
-            _diktatUr = null;
-
-            if (_diktat.Igang) return;
-
-            DiktatBjaelke.Visibility = Visibility.Collapsed;
-        };
-
-        _diktatUr.Start();
-    });
+        DiktatBesked.Text = besked;
+        DiktatBjaelke.Visibility = Visibility.Visible;
+        VisBoble(besked, pulser: !_vaage.Klar, skjulEfter: null);
+    }
 
     private void VisDiktat(string besked) => Dispatcher.BeginInvoke(() =>
     {
@@ -1486,6 +1525,11 @@ public partial class MainWindow : Window
             // Gemte man ikke, mens den stod der, var svaret nej.
             GemNoteKnap.Visibility = Visibility.Collapsed;
             _sidsteDiktat = null;
+
+            // TILBAGE TIL TILSTANDSLYSET. Lyttes der stadig, skal bjaelken
+            // sige det - ellers staar man efter en diktering og ved ikke, om
+            // vaageordet er der endnu.
+            VisLyttestatus();
         };
 
         _diktatUr.Start();

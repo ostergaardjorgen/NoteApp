@@ -1,4 +1,4 @@
-namespace NoteApp.Core;
+﻿namespace NoteApp.Core;
 
 /// <summary>Hvad det, der blev sagt, skal bruges til.</summary>
 public enum Hensigt
@@ -120,11 +120,53 @@ public static class Hensigtstolk
             if (!t.StartsWith(v, StringComparison.OrdinalIgnoreCase)) continue;
 
             // Tegnsaetningen efter ordet skal med: «Hej Pia, opret ...»
-            return t[v.Length..].TrimStart(' ', ',', '.', '!', '?', ':', ';', '-', '—');
+            return Skaer(t, v.Length);
         }
 
-        return t;
+        return UdenNavnet(t);
     }
+
+    /// <summary>
+    /// Skærer en hilsen af, der ender på navnet — uanset hvad der står før.
+    /// </summary>
+    /// <remarks>
+    /// «BYE, PIA.» STOD I SØGEFELTET. Set 31-08-2026.
+    ///
+    /// Vågeordet skæres af ved at sammenligne med de ord, appen lytter efter:
+    /// «hej pia» og «hey pia». Men det, der ender i TEKSTEN, er ikke det, der
+    /// blev lyttet efter — det er Voxtrals udskrift af den hale, der stadig
+    /// var i luften, da optagelsen begyndte. Og den udskrift er noget andet:
+    /// «Bye, Pia», «Hi Pia», «Hey Pia». Sammenligningen ramte forbi hver
+    /// gang, stavemåden ikke var præcis den, der stod på listen.
+    ///
+    /// Derfor skæres der nu efter NAVNET og ikke efter hilsenen. Står der ét
+    /// ord før «Pia» i begyndelsen af en sætning, er det en tiltale — og en
+    /// tiltale til appen hører ikke til i det, man dikterede.
+    ///
+    /// ÉT ORD, IKKE FLERE. «Pia» kan være et menneske: «Jørgen og Pia skal
+    /// mødes» må ikke blive til «skal mødes». Derfor kun allerførst, kun ét
+    /// ord foran, og kun når der står noget efter.
+    /// </remarks>
+    private static string UdenNavnet(string t)
+    {
+        const string navn = "pia";
+
+        var ord = t.Split(' ', 3, StringSplitOptions.RemoveEmptyEntries);
+        if (ord.Length < 3) return t;
+
+        var andet = ord[1].Trim(',', '.', '!', '?', ':', ';', '-', '—');
+        if (!andet.Equals(navn, StringComparison.OrdinalIgnoreCase)) return t;
+
+        // Det foerste ord skal vaere ét kort ord - en hilsen, ikke en saetning.
+        var foerste = ord[0].Trim(',', '.', '!', '?', ':', ';', '-', '—');
+        if (foerste.Length == 0 || foerste.Length > 6) return t;
+        if (!foerste.All(char.IsLetter)) return t;
+
+        return Skaer(t, t.Length - ord[2].Length);
+    }
+
+    private static string Skaer(string t, int fra) =>
+        t[fra..].TrimStart(' ', ',', '.', '!', '?', ':', ';', '-', '—');
 
     /// <summary>
     /// Læser hensigten ud af de første ord.

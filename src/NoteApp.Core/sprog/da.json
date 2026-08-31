@@ -1020,7 +1020,7 @@
     "aftale_blev_opgave": "Lagt på opgavelisten: {0} — aftaler i kalenderen kan appen ikke oprette endnu, for et tidspunkt sagt i tale skal læses rigtigt først.",
     "intet_sagt": "Der blev ikke sagt andet end vågeordet.",
     "goer_klar": "Vågeordet gør klar — modellen læses ind på grafikkortet. Det tager et par sekunder. Beskeden bliver stående, indtil «Hej Pia» virker. Genvejstasten virker imens.",
-    "klar": "Vågeordet er klar. Sig «Hej Pia»."
+    "klar": "Klar — sig «Hej Pia», og tal videre"
   },
   "noter": {
     "titel": "Noter",
