@@ -40,8 +40,13 @@
       <!-- Samme boelger som paa bjaelken. Boblen er dét, man ser, mens man
            staar i et andet program - og det er netop dér, spoergsmaalet «er
            den med nu» opstaar. Se MainWindow.SaetBoelger. -->
+      <!-- MARGENEN HOERER PAA BOELGERNE OG IKKE PAA TEKSTEN. Prikken og
+           boelgerne staar samme sted og vises skiftevis; ligger afstanden paa
+           teksten, faar den den ogsaa, naar der ikke staar noget til venstre
+           for den. De tolv er de samme som prikkens, saa teksten ikke rykker,
+           naar det ene bliver til det andet. -->
       <StackPanel x:Name="Boelger" Orientation="Horizontal" Visibility="Collapsed"
-                  VerticalAlignment="Center" Height="18">
+                  VerticalAlignment="Center" Height="18" Margin="0,0,12,0">
         <Rectangle x:Name="B0" Width="3" Height="4" RadiusX="1.5" RadiusY="1.5"
                    VerticalAlignment="Center" Fill="{DynamicResource Optager}" />
         <Rectangle x:Name="B1" Width="3" Height="4" RadiusX="1.5" RadiusY="1.5"
