@@ -110,7 +110,30 @@ public static class Vaageordsliste
     /// holder den, når nogen tilføjer et vågeord mere.
     /// </remarks>
     public static double Graense(int antalUdtryk) =>
-        antalUdtryk <= 1 ? 1.0 : Math.Min(0.9, 1.5 / antalUdtryk);
+        antalUdtryk <= 1 ? 1.0 : Math.Min(0.9, Faktor / antalUdtryk);
+
+    /// <summary>
+    /// Hvor mange gange ren gætning et fund skal være.
+    /// </summary>
+    /// <remarks>
+    /// DEN HAR VÆRET BEGGE VEJE, OG BEGGE GANGE MED EN GRUND.
+    ///
+    /// 3,0 fra begyndelsen. Sat ned til 1,5 den 31-08-2026, fordi et rigtigt
+    /// vågeord kun nåede 0,36 — men dét tal var i sig selv et symptom: motoren
+    /// bedømte otte sekunders stilhed mod to ord. Da vinduet blev sat til
+    /// 1500 ms samme dag, steg de rigtige træf til 0,12–0,37, og de fleste af
+    /// dem ligger over 0,30.
+    ///
+    /// SÅ KOM RADIOEN. Med grænsen på 0,11 begyndte appen at optage af sig
+    /// selv, mens der spillede radio i rummet. Det er ikke overraskende: der
+    /// er ingen luft mellem 0,11 og en tilfældig stemme, der siger noget, der
+    /// ligner.
+    ///
+    /// EN FALSK START ER VÆRRE END EN, DER MANGLER. Siger man «Hej Pia» igen,
+    /// koster det to sekunder. En optagelse, ingen har bedt om, sender lyd ud
+    /// af huset — og det er dét, hele resten af appen er bygget for at undgå.
+    /// </remarks>
+    public const double Faktor = 3.0;
 
     /// <summary>Er udtrykket ét af vågeordene?</summary>
     public static bool ErVaageord(string udtryk, IEnumerable<string> vaageord)

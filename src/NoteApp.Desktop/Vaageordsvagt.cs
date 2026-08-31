@@ -429,6 +429,8 @@ public sealed class Vaageordsvagt : IDisposable
         //
         // Nu skrives kun de fund, der UDLOESER noget. Et kasseret fund er ikke
         // en haendelse; det er lytningen, der goer sit arbejde.
+        Maalelinje(fund, taeller);
+
         if (taeller)
         {
             try
@@ -447,6 +449,52 @@ public sealed class Vaageordsvagt : IDisposable
         if (!taeller) return;
 
         Hoert?.Invoke("");
+    }
+
+    /// <summary>
+    /// Skriver hvert fund i en målefil — ikke i historikken.
+    /// </summary>
+    /// <remarks>
+    /// GRÆNSEN SKAL KUNNE SÆTTES UD FRA TAL OG IKKE UD FRA ET SKØN.
+    ///
+    /// Den har været 0,21 og 0,11 og er nu 0,21 igen. Hver gang blev den
+    /// flyttet, fordi noget gik galt — for høj, og et rigtigt «Hej Pia» blev
+    /// kasseret; for lav, og radioen i rummet startede en optagelse. Uden
+    /// tallene bag de kasserede fund er den næste flytning også et gæt.
+    ///
+    /// DEN LIGGER IKKE I HISTORIKKEN. Dér stod den før, og 502 gule
+    /// advarsler om noget helt normalt fyldte den skærm, hvor man leder
+    /// efter, hvad appen har gjort ved ens data. Det her er en målefil for
+    /// den, der skal justere grænsen — ikke en hændelse i appens liv.
+    ///
+    /// Filen holdes lille og overskriver sig selv. Den skal kunne læses, ikke
+    /// arkiveres.
+    /// </remarks>
+    private static void Maalelinje(Vaageordsfund fund, bool taeller)
+    {
+        try
+        {
+            var sti = Path.Combine(UserDataPaths.Root, "log", "vaageord-maaling.log");
+            Directory.CreateDirectory(Path.GetDirectoryName(sti)!);
+
+            // Ti tusinde linjer er rigeligt til en dags maaling og fylder
+            // under en megabyte. Derover begynder den forfra.
+            try
+            {
+                if (new FileInfo(sti).Length > 1_000_000) File.Delete(sti);
+            }
+            catch (Exception) { }
+
+            File.AppendAllText(sti,
+                $"{DateTime.Now:HH:mm:ss}\t{(taeller ? "JA" : "nej")}\t"
+                + fund.Sikkerhed.ToString("0.000",
+                      System.Globalization.CultureInfo.InvariantCulture)
+                + "\t" + fund.Udtryk + "\n");
+        }
+        catch (Exception)
+        {
+            // En maaling, der ikke kan skrives, maa ikke stoppe lytningen.
+        }
     }
 
     /// <summary>

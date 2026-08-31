@@ -52,10 +52,27 @@ public class VaageordslisteTest
     // ======================= graensen =======================
 
     [Fact]
-    public void Graensen_er_halvanden_gang_gaetning()
+    public void Graensen_foelger_faktoren()
     {
-        // Fjorten udtryk: gaetning er 7 %, graensen knap 11 %.
-        Assert.Equal(1.5 / 14, Vaageordsliste.Graense(14), 5);
+        Assert.Equal(Vaageordsliste.Faktor / 14, Vaageordsliste.Graense(14), 5);
+    }
+
+    /// <summary>
+    /// Graensen skal have luft til en tilfaeldig stemme i rummet.
+    /// </summary>
+    /// <remarks>
+    /// Ved 1,5 gange gaetning - 0,11 med fjorten udtryk - begyndte appen at
+    /// optage af sig selv, mens der spillede radio. Maalt 31-08-2026.
+    ///
+    /// EN FALSK START ER VAERRE END EN, DER MANGLER. Siger man «Hej Pia»
+    /// igen, koster det to sekunder. En optagelse, ingen har bedt om, sender
+    /// lyd ud af huset.
+    /// </remarks>
+    [Fact]
+    public void Graensen_har_luft_til_stoej_i_rummet()
+    {
+        Assert.True(Vaageordsliste.Graense(14) >= 0.20,
+            "Ved 0,11 startede radioen en optagelse.");
     }
 
     /// <summary>
@@ -70,9 +87,9 @@ public class VaageordslisteTest
     /// nogen ser, hvad den saa afviser.
     /// </remarks>
     [Theory]
-    [InlineData(0.36)]   // maalt: tydeligt sagt, hoert korrekt
-    [InlineData(0.20)]   // svagere - blev afvist foer
-    [InlineData(0.15)]
+    [InlineData(0.37)]   // maalt: tydeligt sagt, hoert korrekt
+    [InlineData(0.34)]
+    [InlineData(0.30)]   // de tydelige traef ligger her
     public void Et_rigtigt_vaageord_i_den_maalte_styrke_taeller(double sikkerhed)
     {
         var fund = new Vaageordsfund("hej pia", sikkerhed);
@@ -179,11 +196,11 @@ public class VaageordslisteTest
     {
         var fund = new[]
         {
-            new Vaageordsfund("hej pia", 0.09),
-            new Vaageordsfund("hey pia", 0.08),
+            new Vaageordsfund("hej pia", 0.18),
+            new Vaageordsfund("hey pia", 0.14),
         };
 
-        // Hver for sig er de under graensen paa 0,107.
+        // Hver for sig er de under graensen paa 0,214.
         Assert.False(Vaageordsliste.Taeller(fund[0], Vaageord.Standardord, 14));
         Assert.False(Vaageordsliste.Taeller(fund[1], Vaageord.Standardord, 14));
 
