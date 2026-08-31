@@ -120,7 +120,7 @@ public partial class KommandoerView : UserControl
             VaageordTil.IsChecked = v.VaageordTil;
 
             Ord.Text = string.Join(Environment.NewLine,
-                v.Vaageord is { Count: > 0 } egne ? egne : Vaageord.Standardord(AppSettings.Current.Talesprog));
+                Vaageord.Valgte(v.Vaageord, v.Talesprog));
 
             // Uden en motor kan der ikke lyttes. Det skal staa, FOER man slaar
             // noget til - ikke bagefter, naar man taler forgaeves.

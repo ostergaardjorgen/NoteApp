@@ -140,9 +140,8 @@ public sealed class Vaageordsvagt : IDisposable
                 // ingenting. Se Vaageordsliste for lokkeordene, der giver den
                 // et sted at gaa hen, naar ordet ikke blev sagt.
                 var liste = Vaageordsliste.Byg(
-                    AppSettings.Current.Vaageord is { Count: > 0 } egne
-                        ? egne
-                        : Vaageord.Standardord(AppSettings.Current.Talesprog),
+                    Vaageord.Valgte(AppSettings.Current.Vaageord,
+                                    AppSettings.Current.Talesprog),
                     AppSettings.Current.Talesprog);
 
                 _antalUdtryk = liste.Count;
@@ -388,9 +387,8 @@ public sealed class Vaageordsvagt : IDisposable
         // hoerte og hvor sikker den var - og uden det tal er enhver
         // forklaring paa, hvorfor den ikke svarede, et gaet.
         //
-        var ord = AppSettings.Current.Vaageord is { Count: > 0 } egne
-            ? egne
-            : Vaageord.Standardord(AppSettings.Current.Talesprog);
+        var ord = Vaageord.Valgte(AppSettings.Current.Vaageord,
+                                  AppSettings.Current.Talesprog);
 
         // GRAENSEN ER DET, DER GOER DEN BRUGBAR. Motoren vaelger altid et
         // udtryk; det er listens laengde, der afgoer, hvornaar et valg er

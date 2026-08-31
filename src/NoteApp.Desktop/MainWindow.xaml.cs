@@ -1074,7 +1074,7 @@ public partial class MainWindow : Window
         var tekst = udfald.Tekst;
         var ord = Core.AppSettings.Current.Vaageord is { Count: > 0 } egne
             ? egne
-            : Core.Vaageord.Standardord(Core.AppSettings.Current.Talesprog);
+            : Core.Vaageord.Valgte(null, Core.AppSettings.Current.Talesprog);
 
         // Vaageordet selv skal skaeres af. Optagelsen begynder foerst, naar
         // motoren har meldt ordet, og halen af det er stadig i luften - saa

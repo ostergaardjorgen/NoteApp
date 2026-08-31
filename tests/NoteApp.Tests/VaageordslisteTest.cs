@@ -262,4 +262,59 @@ public class VaageordslisteTest
         Assert.False(Vaageordsliste.Taeller(
             Array.Empty<Vaageordsfund>(), Vaageord.Standardord("da"), 13));
     }
+
+    // ============ DEN GEMTE LISTE ============
+
+    /// <summary>
+    /// En gemt liste magen til den gamle standard er ikke et valg.
+    /// </summary>
+    /// <remarks>
+    /// «hej pia, hey pia» stod i brugerens indstillinger, fordi det VAR
+    /// standarden dengang - ikke fordi nogen havde skrevet den. En gemt liste
+    /// vinder over standarden, saa skiftet til ét ord pr. sprog naaede aldrig
+    /// frem til den, der havde brugt appen inden.
+    ///
+    /// Og det var netop «hey pia», der udloeste hvert eneste falske udslag,
+    /// der er maalt 31-08-2026: radioen paa 0,497 og et NYS paa 0,367. Alle
+    /// de rigtige traef kom via «hej pia».
+    /// </remarks>
+    [Fact]
+    public void Den_gamle_standard_giver_plads_til_den_nye()
+    {
+        var gemt = new[] { "hej pia", "hey pia" };
+
+        Assert.Equal(new[] { "hej pia" }, Vaageord.Valgte(gemt, "da"));
+        Assert.Equal(new[] { "hey pia" }, Vaageord.Valgte(gemt, "en"));
+    }
+
+    [Fact]
+    public void Raekkefoelgen_i_den_gemte_liste_er_ligegyldig()
+    {
+        Assert.Equal(new[] { "hej pia" },
+            Vaageord.Valgte(new[] { "Hey Pia", "HEJ PIA" }, "da"));
+    }
+
+    /// <summary>
+    /// Men et rigtigt valg staar ved magt.
+    /// </summary>
+    /// <remarks>
+    /// Har man selv skrevet noget, maa appen ikke lave det om. Det er kun det
+    /// gamle standardpar, der giver plads.
+    /// </remarks>
+    [Fact]
+    public void Et_selvvalgt_ord_staar_ved_magt()
+    {
+        Assert.Equal(new[] { "goddag pia" },
+            Vaageord.Valgte(new[] { "goddag pia" }, "da"));
+
+        Assert.Equal(new[] { "hej pia", "goddag pia" },
+            Vaageord.Valgte(new[] { "hej pia", "goddag pia" }, "da"));
+    }
+
+    [Fact]
+    public void Ingen_gemt_liste_giver_sprogets_ord()
+    {
+        Assert.Equal(new[] { "hej pia" }, Vaageord.Valgte(null, "da"));
+        Assert.Equal(new[] { "hej pia" }, Vaageord.Valgte(new string[0], "da"));
+    }
 }

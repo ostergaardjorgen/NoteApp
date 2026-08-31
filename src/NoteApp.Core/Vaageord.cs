@@ -71,6 +71,48 @@ public static class Vaageord
     /// Norsk og svensk får «hej pia» med. Det er det samme ord i alle tre
     /// sprog, og h'et udtales ens.
     /// </remarks>
+    /// <summary>
+    /// Den GAMLE standard: begge stavemåder på én gang.
+    /// </summary>
+    /// <remarks>
+    /// Den blev gemt i indstillingerne, dengang den var standarden — og en
+    /// gemt liste vinder over standarden. Derfor nåede skiftet til ét ord pr.
+    /// sprog aldrig frem til den, der havde brugt appen inden: filen sagde
+    /// stadig «hej pia, hey pia», og appen adlød.
+    ///
+    /// Set 31-08-2026, efter at et NYS udløste en optagelse via «hey pia» på
+    /// 0,367.
+    /// </remarks>
+    private static readonly string[] GammelStandard = { "hej pia", "hey pia" };
+
+    /// <summary>
+    /// Ordene, der faktisk lyttes efter.
+    /// </summary>
+    /// <remarks>
+    /// EN GEMT LISTE, DER ER MAGEN TIL DEN GAMLE STANDARD, ER IKKE ET VALG.
+    ///
+    /// Den stod der, fordi den var standarden dengang, ikke fordi nogen har
+    /// skrevet den. Behandles den som et valg, kan standarden aldrig laves om
+    /// for dem, der har brugt appen før — og dét var netop det ord, der
+    /// udløste hvert eneste falske udslag, der er målt: radioen på 0,497, et
+    /// nys på 0,367. De rigtige træf kom alle via «hej pia».
+    ///
+    /// Har man selv skrevet noget andet, står det ved magt. Det er kun det
+    /// gamle standardpar, der giver plads.
+    /// </remarks>
+    public static IReadOnlyList<string> Valgte(IReadOnlyList<string>? gemt, string? sprog)
+    {
+        if (gemt is not { Count: > 0 }) return Standardord(sprog);
+
+        var rene = gemt.Select(Rens).Where(o => o.Length > 0).ToList();
+
+        if (rene.Count == GammelStandard.Length
+            && GammelStandard.All(g => rene.Contains(g, StringComparer.OrdinalIgnoreCase)))
+            return Standardord(sprog);
+
+        return rene.Count > 0 ? rene : Standardord(sprog);
+    }
+
     public static IReadOnlyList<string> Standardord(string? sprog) =>
         sprog?.Trim().ToLowerInvariant() switch
         {
