@@ -81,7 +81,9 @@ public class VaageordslisteTest
     [Fact]
     public void Graensen_foelger_faktoren()
     {
-        Assert.Equal(Vaageordsliste.Faktor / 13, Vaageordsliste.Graense(13), 5);
+        // Forholdsreglen gaelder, saa laenge den ligger inde i det maalte
+        // spring - se Vaageordsliste.Mindst og Hoejst.
+        Assert.Equal(Vaageordsliste.Faktor / 19, Vaageordsliste.Graense(19), 5);
     }
 
     /// <summary>
@@ -98,8 +100,31 @@ public class VaageordslisteTest
     [Fact]
     public void Graensen_har_luft_til_stoej_i_rummet()
     {
-        Assert.True(Vaageordsliste.Graense(13) >= 0.20,
-            "Ved 0,11 startede radioen en optagelse.");
+        // MAALT: baggrundsstoej rammer vaageordet paa 0,113-0,157. Graensen
+        // skal ligge tydeligt over det, uanset hvor lang listen er.
+        const double stoejens_top = 0.157;
+
+        foreach (var antal in new[] { 13, 19, 25, 40 })
+            Assert.True(Vaageordsliste.Graense(antal) > stoejens_top,
+                $"Med {antal} udtryk er graensen {Vaageordsliste.Graense(antal):0.000} "
+                + "- og stoejen naar 0,157.");
+    }
+
+    /// <summary>
+    /// Graensen skal ogsaa slippe de RIGTIGE traef igennem.
+    /// </summary>
+    /// <remarks>
+    /// Maalt paa brugerens maskine: 0,287, 0,308, 0,350, 0,361, 0,366, 0,497.
+    /// Springet fra stoejens 0,157 til 0,287 er dét, graensen skal ligge i.
+    /// </remarks>
+    [Fact]
+    public void Graensen_ligger_i_springet_mellem_stoej_og_traef()
+    {
+        const double svageste_rigtige_traef = 0.287;
+
+        foreach (var antal in new[] { 13, 19, 25, 40 })
+            Assert.True(Vaageordsliste.Graense(antal) < svageste_rigtige_traef,
+                $"Med {antal} udtryk afviser graensen et rigtigt vaageord.");
     }
 
     /// <summary>
@@ -114,14 +139,14 @@ public class VaageordslisteTest
     /// nogen ser, hvad den saa afviser.
     /// </remarks>
     [Theory]
-    [InlineData(0.37)]   // maalt: tydeligt sagt, hoert korrekt
-    [InlineData(0.34)]
-    [InlineData(0.30)]   // de tydelige traef ligger her
+    [InlineData(0.497)]  // maalt: de rigtige traef ligger 0,287 og opefter
+    [InlineData(0.366)]
+    [InlineData(0.287)]  // det svageste maalte rigtige traef
     public void Et_rigtigt_vaageord_i_den_maalte_styrke_taeller(double sikkerhed)
     {
         var fund = new Vaageordsfund("hej pia", sikkerhed);
 
-        Assert.True(Vaageordsliste.Taeller(fund, Vaageord.Standardord("da"), 13));
+        Assert.True(Vaageordsliste.Taeller(fund, Vaageord.Standardord("da"), 19));
     }
 
     /// <summary>
@@ -137,7 +162,7 @@ public class VaageordslisteTest
     {
         var fund = new Vaageordsfund("nej ikke lige nu", 0.54);
 
-        Assert.False(Vaageordsliste.Taeller(fund, Vaageord.Standardord("da"), 13));
+        Assert.False(Vaageordsliste.Taeller(fund, Vaageord.Standardord("da"), 19));
     }
 
     [Fact]
@@ -223,16 +248,16 @@ public class VaageordslisteTest
     {
         var fund = new[]
         {
-            new Vaageordsfund("hej pia", 0.14),
-            new Vaageordsfund("hej pia", 0.12),
+            new Vaageordsfund("hej pia", 0.13),
+            new Vaageordsfund("hej pia", 0.11),
         };
 
-        // Hver for sig er de under graensen paa 0,214.
+        // Hver for sig er de under graensen; sammen er de over.
         Assert.False(Vaageordsliste.Taeller(fund[0], Vaageord.Standardord("da"), 13));
         Assert.False(Vaageordsliste.Taeller(fund[1], Vaageord.Standardord("da"), 13));
 
         // Sammen er de over.
-        Assert.True(Vaageordsliste.Taeller(fund, Vaageord.Standardord("da"), 13));
+        Assert.True(Vaageordsliste.Taeller(fund, Vaageord.Standardord("da"), 19));
     }
 
     /// <summary>
@@ -253,7 +278,7 @@ public class VaageordslisteTest
             new Vaageordsfund("hej pia", 0.02),
         };
 
-        Assert.False(Vaageordsliste.Taeller(fund, Vaageord.Standardord("da"), 13));
+        Assert.False(Vaageordsliste.Taeller(fund, Vaageord.Standardord("da"), 19));
     }
 
     [Fact]

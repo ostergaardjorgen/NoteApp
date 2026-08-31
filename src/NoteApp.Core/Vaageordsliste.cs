@@ -132,8 +132,52 @@ public static class Vaageordsliste
     /// Grænsen følger listens længde i stedet for at være et fast tal. Så
     /// holder den, når nogen tilføjer et vågeord mere.
     /// </remarks>
-    public static double Graense(int antalUdtryk) =>
-        antalUdtryk <= 1 ? 1.0 : Math.Min(0.9, Faktor / antalUdtryk);
+    /// <summary>
+    /// Springet mellem støj og rigtige træf — målt, ikke skønnet.
+    /// </summary>
+    /// <remarks>
+    /// PÅ BRUGERENS MASKINE 31-08-2026, 141 fund:
+    ///
+    ///   baggrundsstøj på vågeordet   0,113 – 0,157
+    ///   rigtige træf                 0,287 – 0,497
+    ///
+    /// Mellem 0,157 og 0,287 ligger der ingenting. Det er dét spring,
+    /// grænsen skal ligge i, og det er en egenskab ved DEN model og DEN
+    /// mikrofon — ikke ved listens længde.
+    ///
+    /// Derfor holdes den relative regel inden for de to. Uden det kunne et
+    /// ekstra lokkeord skubbe grænsen ned i støjen, og et fjernet lokkeord
+    /// skubbe den op over de rigtige træf. Begge dele er sket i dag.
+    /// </remarks>
+    public const double Mindst = 0.18;
+
+    /// <summary>Se <see cref="Mindst"/>.</summary>
+    public const double Hoejst = 0.25;
+
+    /// <summary>
+    /// Så mange udtryk skal der til, før det målte spring gælder.
+    /// </summary>
+    /// <remarks>
+    /// MÅLINGEN ER LAVET PÅ EN RIGTIG LISTE — ét vågeord og atten lokkeord.
+    /// På en kort liste er ren gætning noget helt andet: med to udtryk er den
+    /// 50 %, og et fund på 0,58 er så godt som ingenting. Målt 30-08-2026 gav
+    /// to udtryk et «fund» hvert 60. millisekund, også når der ikke blev sagt
+    /// noget.
+    ///
+    /// Derfor gælder springet kun, når der ER lokkeord nok til, at gætning
+    /// ikke betaler sig. Derunder står den relative regel alene — og den
+    /// kræver næsten sikkerhed, hvilket er det rigtige svar.
+    /// </remarks>
+    public const int Nok = 8;
+
+    public static double Graense(int antalUdtryk)
+    {
+        if (antalUdtryk <= 1) return 1.0;
+
+        var relativ = Math.Min(0.9, Faktor / antalUdtryk);
+
+        return antalUdtryk < Nok ? relativ : Math.Clamp(relativ, Mindst, Hoejst);
+    }
 
     /// <summary>
     /// Hvor mange gange ren gætning et fund skal være.
@@ -155,8 +199,24 @@ public static class Vaageordsliste
     /// EN FALSK START ER VÆRRE END EN, DER MANGLER. Siger man «Hej Pia» igen,
     /// koster det to sekunder. En optagelse, ingen har bedt om, sender lyd ud
     /// af huset — og det er dét, hele resten af appen er bygget for at undgå.
+    ///
+    /// 3,0 BLEV TIL 4,0, DA LISTEN VOKSEDE. Grænsen følger listens længde, og
+    /// det er rigtigt — men den skal følge STØJEN, ikke bare aritmetikken.
+    ///
+    /// Da der kom seks lokkeord mere, gik listen fra tretten til nitten
+    /// udtryk, og grænsen faldt fra 0,231 til 0,158. Baggrundsstøj er målt til
+    /// at ramme vågeordet på 0,113–0,157. Der var altså ingen margen tilbage:
+    /// et enkelt uheldigt udslag fra radioen ville gå igennem.
+    ///
+    /// Med 4,0 lander grænsen på 0,211 med nitten udtryk — det samme sted som
+    /// den lå, da den blev målt god, og hvor der er et tydeligt spring op til
+    /// de rigtige træf på 0,287 og opefter.
+    ///
+    /// TALLET SKAL FØLGE MED, NÅR LISTEN ÆNDRER SIG. Lægges der flere
+    /// lokkeord til, falder grænsen igen — og så skal den holdes op mod
+    /// målefilen på ny, ikke bare regnes ud.
     /// </remarks>
-    public const double Faktor = 3.0;
+    public const double Faktor = 4.0;
 
     /// <summary>Er udtrykket ét af vågeordene?</summary>
     public static bool ErVaageord(string udtryk, IEnumerable<string> vaageord)
