@@ -1009,7 +1009,11 @@
     "lytter": "Lytter efter vågeordet",
     "stoppet": "Vågeordet er slukket",
     "ingen_motor": "Vågeordet kræver whisper-motoren. Sæt den op under AI-modeller.",
-    "gik_galt": "Vågeordet gik galt: {0}"
+    "gik_galt": "Vågeordet gik galt: {0}",
+    "blev_note": "Gemt som note: {0}",
+    "blev_opgave": "Lagt på opgavelisten: {0}",
+    "blev_soegning": "Søger efter «{0}»",
+    "aftale_blev_opgave": "Lagt på opgavelisten: {0} — aftaler i kalenderen kan appen ikke oprette endnu, for et tidspunkt sagt i tale skal læses rigtigt først."
   },
   "noter": {
     "titel": "Noter",

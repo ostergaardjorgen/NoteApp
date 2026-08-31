@@ -1009,7 +1009,11 @@
     "lytter": "Listening for the wake word",
     "stoppet": "The wake word is off",
     "ingen_motor": "The wake word needs the whisper engine. Set it up under AI models.",
-    "gik_galt": "The wake word failed: {0}"
+    "gik_galt": "The wake word failed: {0}",
+    "blev_note": "Saved as a note: {0}",
+    "blev_opgave": "Added to your tasks: {0}",
+    "blev_soegning": "Searching for «{0}»",
+    "aftale_blev_opgave": "Added to your tasks: {0} — the app cannot create calendar appointments yet, because a spoken time has to be read correctly first."
   },
   "noter": {
     "titel": "Notes",

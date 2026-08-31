@@ -50,6 +50,24 @@ public sealed class Dikteringsvagt : IDisposable
     /// </remarks>
     public event Action<string>? Faerdig;
 
+    /// <summary>
+    /// Sat, når dikteringen kom fra vågeordet. Får den færdige tekst og
+    /// svarer, om den blev sendt et sted hen.
+    /// </summary>
+    /// <remarks>
+    /// «HEJ PIA, OPRET EN OPGAVE …» ER ÉN HANDLING. Kom kaldet fra vågeordet,
+    /// er der som regel sagt HVAD det skal bruges til — og så skal teksten
+    /// ikke bare lande, hvor markøren tilfældigvis står.
+    ///
+    /// Svarer ruteren falsk, var der ingen hensigt at genkende, og så går
+    /// teksten den almindelige vej. Det er den rigtige måde at fejle på: man
+    /// får sin tekst, den havner bare et andet sted.
+    /// </remarks>
+    public Func<string, bool>? Ruter { get; set; }
+
+    /// <summary>Kom den igangværende diktering fra vågeordet?</summary>
+    private bool _fraVaageord;
+
     /// <summary>Et prøverum, der har taget dikteringen til sig.</summary>
     /// <param name="Formaal">Typen, der prøves af — ikke den, programmet lægger op til.</param>
     /// <param name="Vis">Kaldes med den rå udskrift og den pudsede tekst.</param>
@@ -87,6 +105,7 @@ public sealed class Dikteringsvagt : IDisposable
     public void BegyndPaaVaageord()
     {
         Begynd();
+        _fraVaageord = _optager is not null;
         if (_optager is null) return;
 
         var start = DateTime.UtcNow;
@@ -145,6 +164,10 @@ public sealed class Dikteringsvagt : IDisposable
     /// <summary>Tasten er holdt nede længe nok. Begynd at lytte.</summary>
     public void Begynd()
     {
+        // Et hold paa tasten er ALDRIG et vaageordskald. Blev flaget ikke
+        // nulstillet her, ville naeste diktering efter et «Hej Pia» stadig
+        // blive rutet - og teksten lande et andet sted end ved markoeren.
+        _fraVaageord = false;
 
         // ============ ET DIKTAT MAA IKKE LIGGE OVEN I ET ANDET ============
         //
@@ -326,6 +349,20 @@ public sealed class Dikteringsvagt : IDisposable
                 return;
             }
 
+            // ============ KOM DET FRA VAAGEORDET? ============
+            //
+            // Saa er der som regel sagt HVAD det skal bruges til, og teksten
+            // skal ikke bare lande, hvor markoeren tilfaeldigvis staar. Se
+            // Hensigtstolk.
+            //
+            // Svarer ruteren falsk, var der ingen hensigt at genkende, og saa
+            // gaar teksten den almindelige vej.
+            if (_fraVaageord && Ruter is { } ruter && ruter(tekst))
+            {
+                _fraVaageord = false;
+                return;
+            }
+
             var indsat = v.DikteringIndsaet && Indsaetter.Indsaet(tekst, _maal);
             if (!indsat) Indsaetter.Læg(tekst);
 
@@ -404,6 +441,7 @@ public sealed class Dikteringsvagt : IDisposable
 
     public void Dispose() => Ryd();
 }
+
 
 
 

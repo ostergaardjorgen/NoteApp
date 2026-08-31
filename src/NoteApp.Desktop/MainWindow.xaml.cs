@@ -990,10 +990,95 @@ public partial class MainWindow : Window
         return Indsaetter.Laes().Haandtag == IntPtr.Zero;
     }
 
+    /// <summary>
+    /// Sender det, der blev sagt efter vågeordet, det rigtige sted hen.
+    /// </summary>
+    /// <remarks>
+    /// «HEJ PIA, OPRET EN OPGAVE: RING TIL ANDERS» ER ÉN HANDLING.
+    ///
+    /// Vågeordet findes, for at man ikke skal røre noget. Kom der en rude op
+    /// bagefter med fire knapper, ville man skulle røre noget alligevel — og
+    /// så var man lige så godt tjent med genvejstasten.
+    ///
+    /// Hensigten læses derfor ud af sætningen selv. Den læses på den PUDSEDE
+    /// tekst fra Voxtral, ikke på vågeordsmotorens udskrift: den lille model
+    /// er god til to faste udtryk og elendig til fri tale.
+    ///
+    /// Genkendes ingen hensigt, svares der falsk, og teksten går den
+    /// almindelige vej — ned hvor markøren står. Man mister ikke det, man
+    /// sagde.
+    /// </remarks>
+    private bool RutVaageordstekst(string tekst)
+    {
+        var ord = Core.AppSettings.Current.Vaageord is { Count: > 0 } egne
+            ? egne
+            : Core.Vaageord.Standardord;
+
+        // Vaageordet selv skal skaeres af. Optagelsen begynder foerst, naar
+        // motoren har meldt ordet, og halen af det er stadig i luften - saa
+        // «Hej Pia» endte i teksten. Set 30-08-2026 i soegefeltet.
+        var sagt = Core.Hensigtstolk.UdenVaageord(tekst, ord);
+        var fund = Core.Hensigtstolk.Tolk(sagt);
+
+        if (fund.Tekst.Length == 0) return false;
+
+        switch (fund.Hvad)
+        {
+            case Core.Hensigt.Note:
+                Core.Diktatnoter.Tilfoej(fund.Tekst);
+                Diktering.NoterView.Aendret?.Invoke();
+                VisDiktat(Core.Sprog.T("vaageord.blev_note", Core.Opgave.Kort(fund.Tekst)));
+                return true;
+
+            case Core.Hensigt.Opgave:
+                Core.Opgavelager.Gem(new Core.Opgave
+                {
+                    Navn = Core.Opgave.Kort(fund.Tekst),
+                    Tekst = fund.Tekst,
+                });
+                VisDiktat(Core.Sprog.T("vaageord.blev_opgave", Core.Opgave.Kort(fund.Tekst)));
+                return true;
+
+            case Core.Hensigt.Soegning:
+                App.HentFrem(this);
+                GaaTilSoeg(fund.Tekst);
+                VisDiktat(Core.Sprog.T("vaageord.blev_soegning", fund.Tekst));
+                return true;
+
+            case Core.Hensigt.Aftale:
+                // ============ AFTALEN ER IKKE FAERDIG ============
+                //
+                // En aftale kraever et tidspunkt, og et tidspunkt sagt i tale
+                // - «paa fredag», «i morgen klokken ti» - skal laeses rigtigt,
+                // foer den maa lande i kalenderen. En aftale paa det forkerte
+                // tidspunkt er vaerre end ingen aftale.
+                //
+                // Indtil da bliver det en opgave med det, der blev sagt. Man
+                // mister ikke sin besked; den ligger bare paa listen frem for
+                // i kalenderen, og det staar der.
+                Core.Opgavelager.Gem(new Core.Opgave
+                {
+                    Navn = Core.Opgave.Kort(fund.Tekst),
+                    Tekst = fund.Tekst,
+                });
+                VisDiktat(Core.Sprog.T("vaageord.aftale_blev_opgave", Core.Opgave.Kort(fund.Tekst)));
+                return true;
+
+            default:
+                return false;
+        }
+    }
+
     private void VaageordHoert(string efter) => Dispatcher.BeginInvoke(() =>
     {
         _diktat.Melder -= VisDiktat;
         _diktat.Melder += VisDiktat;
+        _diktat.Faerdig -= DiktatFaerdig;
+        _diktat.Faerdig += DiktatFaerdig;
+
+        // Ruteren skal ogsaa vaere sat, naar kaldet kommer fra vaageordet -
+        // det er netop dér, den bruges.
+        _diktat.Ruter = RutVaageordstekst;
 
         // ============ VAR DET EN KOMMANDO? ============
         //
@@ -1117,6 +1202,7 @@ public partial class MainWindow : Window
         _diktat.Melder += VisDiktat;
         _diktat.Faerdig -= DiktatFaerdig;
         _diktat.Faerdig += DiktatFaerdig;
+        _diktat.Ruter = RutVaageordstekst;
         _diktat.Begynd();
     }
 
