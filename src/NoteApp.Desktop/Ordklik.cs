@@ -86,10 +86,22 @@ public static class Ordklik
         var link = new Hyperlink(new Run(stykke))
         {
             TextDecorations = null,
-            Foreground = null,
             Cursor = System.Windows.Input.Cursors.Hand,
             ToolTip = Core.Sprog.T("noter.ret_ordet_hjaelp", rent),
         };
+
+        // ============ FARVEN SKAL SAETTES, IKKE FJERNES ============
+        //
+        // HER STOD «Foreground = null», OG SAA FORSVANDT HELE NOTEN.
+        //
+        // Tanken var at slette Hyperlinks blaa farve, saa ordene ser ud som
+        // almindelig tekst. Men null er ikke «arv farven fra teksten
+        // udenom» - det er «ingen farve at tegne med», og saa staar der
+        // ingenting. Noterne var tomme kort. Set 31-08-2026.
+        //
+        // Temaets egen tekstfarve saettes i stedet, og som DynamicResource:
+        // skifter man mellem lyst og moerkt, skal ordene skifte med.
+        link.SetResourceReference(TextElement.ForegroundProperty, "Tekst");
 
         link.Click += (_, _) => Klikket?.Invoke(rent);
 
