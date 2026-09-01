@@ -418,7 +418,10 @@ public sealed class Dikteringsvagt : IDisposable
 
             var raa = lokalt
                 ? new Dikteringsresultat(
-                      await Lokaludskrift.SkrivUdAsync(klip, v.Talesprog), v.Talesprog, sekunder)
+                      await Lokaludskrift.SkrivUdAsync(
+                          klip, v.Talesprog,
+                          ordbog.Count > 0 ? Ordbibliotek.TilAfsendelse(ordbog) : null),
+                      v.Talesprog, sekunder)
                 : await klient.SkrivUdAsync(
                       klip,
                       ordbog.Count > 0 ? Ordbibliotek.TilAfsendelse(ordbog) : null,

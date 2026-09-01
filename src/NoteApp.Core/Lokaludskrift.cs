@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Text;
 
 namespace NoteApp.Core;
@@ -80,8 +80,13 @@ public static class Lokaludskrift
     /// Sproget, der TALES. Sendes som «-l». Det er hele grunden til, at den
     /// her vej findes, så den må ikke kunne blive tom.
     /// </param>
+    /// <param name="fagord">
+    /// Ordene fra ordbogen. Sendes som ledetråd, så navne og fagudtryk kan
+    /// rammes.
+    /// </param>
     public static async Task<string> SkrivUdAsync(
-        string lydfil, string sprog, CancellationToken ct = default)
+        string lydfil, string sprog, IEnumerable<string>? fagord = null,
+        CancellationToken ct = default)
     {
         if (!File.Exists(lydfil))
             throw new FileNotFoundException("Der er ingen lydfil at skrive ud.", lydfil);
@@ -96,9 +101,26 @@ public static class Lokaludskrift
 
         // -nt: ingen tidsstempler. Det er en diktering, ikke et moede - og et
         // tidsstempel foran hver linje skal alligevel skaeres vaek bagefter.
+        // ============ ORDBOGEN SKAL MED HER OGSAA ============
+        //
+        // DEN BLEV TABT, DA DIKTERINGEN FLYTTEDE HJEM. Skyen fik ordlisten
+        // som ledetråd; den lokale vej fik kun lyden og sproget. Brugerens
+        // ordbog stod fyldt med fagord, som appen ikke længere fortalte nogen
+        // om.
+        //
+        // Målt 31-08-2026: «Omada IBM StorageTek NetIQ» kom tilbage som «IBM,
+        // StargeTech, NetIQ» - det første ord helt væk og StorageTek forkert,
+        // selv om begge stod i ordbogen.
+        //
+        // whisper tager imod «--prompt» som forhåndsviden. Det er den samme
+        // mekanisme som i skyen: ordene er ikke en facitliste, men en
+        // forventning, der trækker udskriften mod de rigtige stavemåder.
+        var ledetraad = Ledetraad(fagord);
+        var prompt = ledetraad.Length > 0 ? $" --prompt \"{ledetraad}\"" : "";
+
         var start = new ProcessStartInfo(motor)
         {
-            Arguments = $"-m \"{model}\" -l {rent} -t 4 -nt -f \"{lydfil}\"",
+            Arguments = $"-m \"{model}\" -l {rent} -t 4 -nt{prompt} -f \"{lydfil}\"",
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             UseShellExecute = false,
@@ -122,6 +144,33 @@ public static class Lokaludskrift
         await fejl;
 
         return Rens(tekst);
+    }
+
+    /// <summary>
+    /// Bygger ledetråden af ordbogens ord.
+    /// </summary>
+    /// <remarks>
+    /// ANFØRSELSTEGN SKAL VÆK. Ledetråden sættes ind i en kommandolinje i
+    /// anførselstegn; står der et i selve teksten, brækker resten af linjen
+    /// af, og motoren får noget helt andet at vide, end der stod.
+    ///
+    /// Der er også et loft. whisper tager imod højst det halve af sin
+    /// tekstkontekst, og en ordbog, der vokser år efter år, ville før eller
+    /// siden løbe over. Firs ord er rigeligt til en ledetråd og langt under
+    /// grænsen.
+    /// </remarks>
+    public static string Ledetraad(IEnumerable<string>? fagord)
+    {
+        if (fagord is null) return "";
+
+        var rene = fagord
+            .Where(o => !string.IsNullOrWhiteSpace(o))
+            .Select(o => o.Replace("\"", "").Trim())
+            .Where(o => o.Length > 0)
+            .Take(80)
+            .ToList();
+
+        return rene.Count == 0 ? "" : string.Join(", ", rene) + ".";
     }
 
     /// <summary>
