@@ -84,7 +84,11 @@ public class DikteringsbeskedTest
         var t = Sprog.T("vaageord.klar");
 
         Assert.Contains("Hej Pia", t);
-        Assert.Contains("tal videre", t);
+
+        // Den skal sige, at der SKAL ventes. Uden det staar man og taler,
+        // foer appen er med - se Vaageord.Kommandovindue for hvorfor
+        // ventetiden er der.
+        Assert.Contains("vent", t, System.StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>

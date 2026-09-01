@@ -1043,7 +1043,7 @@
     "aftale_blev_opgave": "Added to your tasks: {0} — the app cannot create calendar appointments yet, because a spoken time has to be read correctly first.",
     "intet_sagt": "Nothing was said beyond the wake word.",
     "goer_klar": "Getting ready — «Hej Pia» works in a moment",
-    "klar": "Ready — say «Hej Pia» and keep talking"
+    "klar": "Say «Hej Pia» and wait for the recording to start"
   },
   "noter": {
     "titel": "Notes",
