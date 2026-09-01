@@ -139,11 +139,33 @@ public static class Vaageord
     /// på listen i stedet. Vinduet var både for langt at vente på og for
     /// langt til at ramme rigtigt.
     ///
-    /// Halvandet sekund er dét, vågeordet fylder. Bliver vågeordet en dag
-    /// længere, skal tallet med op: et vindue, der er kortere end det, der
-    /// skal siges, klipper ordet midt over.
+    /// HALVANDET SEKUND VAR FOR LIDT, OG GRUNDEN ER IKKE ORDETS LÆNGDE.
+    ///
+    /// Motoren bedømmer først, når den mener, man er holdt op med at tale —
+    /// og «holdt op» betyder cirka 1000 millisekunders ro. Vinduet regnes
+    /// BAGUD fra det øjeblik. De sidste 1000 ms af det er altså selve
+    /// stilheden, der udløste bedømmelsen.
+    ///
+    /// Med et vindue på 1500 ms var der 500 ms tilbage til ordet. «Hej Pia»
+    /// tager omkring 900 ms at sige. Ordet blev klippet midt over, og
+    /// modellen skulle genkende to ord ud fra den sidste halvdel af det ene.
+    ///
+    /// DET FORKLARER DE SVAGE TAL. Målt 31-08-2026 blev brugerens «Hej Pia»
+    /// bedømt til 0,109 og 0,141 — under grænsen, så der skete ingenting —
+    /// mens de gange, det ramte, lå på 0,287 og opefter. Forskellen er, hvor
+    /// meget af ordet der nåede med ind i vinduet.
+    ///
+    /// 2500 ms rummer stilheden på 1000 OG hele ordet, med plads foran. Det
+    /// koster ingen ventetid: vinduet er lyd, der ligger BAG os, ikke noget,
+    /// der skal ventes på. Modellens egen beregning er målt til 45 ms med
+    /// whisper-bench, så længden af vinduet mærkes ikke.
+    ///
+    /// OG DET MÅ IKKE BLIVE FOR STORT. Ved 8000 — motorens standard — skulle
+    /// to ord forklare syv sekunders stilhed, og så vandt det mest
+    /// almindelige udtryk på listen hver gang. Vinduet skal rumme ordet og
+    /// stilheden, og ikke mere end det.
     /// </remarks>
-    public const int Kommandovindue = 1500;
+    public const int Kommandovindue = 2500;
 
     /// <summary>
     /// Hvor let motoren afgør, at du er holdt op med at tale. 0–1.

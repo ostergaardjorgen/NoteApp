@@ -26,6 +26,16 @@ public class KommandovindueTest
     /// <summary>Saa lang tid tager det at sige «Hej Pia», rundt regnet.</summary>
     private const int VaageordetsLaengdeMs = 900;
 
+    /// <summary>
+    /// Saa meget ro skal der til, foer motoren mener, man er holdt op.
+    /// </summary>
+    /// <remarks>
+    /// Vinduet regnes BAGUD fra det oejeblik, motoren bedoemmer. De sidste
+    /// 1000 ms af det er altsaa selve stilheden, der udloeste bedoemmelsen -
+    /// ikke ord.
+    /// </remarks>
+    private const int StilhedenMs = 1000;
+
     [Fact]
     public void Vinduet_er_kortere_end_motorens_standard()
     {
@@ -36,22 +46,45 @@ public class KommandovindueTest
             + "sekunders stilhed mod listen, og lokkeordene vinder.");
     }
 
+    /// <summary>
+    /// Vinduet skal rumme stilheden OG hele ordet.
+    /// </summary>
+    /// <remarks>
+    /// Med 1500 ms var der 500 ms tilbage til ordet, naar stilhedens 1000 var
+    /// trukket fra. «Hej Pia» tager omkring 900 ms. Ordet blev klippet midt
+    /// over, og modellen skulle genkende to ord ud fra den sidste halvdel af
+    /// det ene.
+    ///
+    /// Maalt 31-08-2026: brugerens «Hej Pia» blev bedoemt til 0,109 og 0,141,
+    /// mens de gange det ramte laa paa 0,287 og opefter.
+    /// </remarks>
     [Fact]
-    public void Vinduet_er_langt_nok_til_at_rumme_vaageordet()
+    public void Vinduet_rummer_baade_stilheden_og_ordet()
     {
-        // Et vindue, der er kortere end det, der skal siges, klipper ordet
-        // midt over - og saa er der intet at genkende.
-        Assert.True(Vaageord.Kommandovindue >= VaageordetsLaengdeMs,
-            $"Vinduet er {Vaageord.Kommandovindue} ms, og "
-            + $"«Hej Pia» tager omkring {VaageordetsLaengdeMs} ms at sige.");
+        Assert.True(Vaageord.Kommandovindue >= StilhedenMs + VaageordetsLaengdeMs,
+            $"Vinduet er {Vaageord.Kommandovindue} ms. Traekkes stilhedens "
+            + $"{StilhedenMs} ms fra, er der kun "
+            + $"{Vaageord.Kommandovindue - StilhedenMs} ms tilbage til et ord, "
+            + $"der tager {VaageordetsLaengdeMs} ms at sige.");
     }
 
+    /// <summary>
+    /// Men det maa ikke blive saa stort, at stilheden overdoever ordet.
+    /// </summary>
+    /// <remarks>
+    /// Ved motorens standard paa 8000 skulle to ord forklare syv sekunders
+    /// stilhed, og saa vandt det mest almindelige udtryk paa listen hver gang.
+    ///
+    /// Vinduet koster ingen ventetid - det er lyd, der ligger BAG os - men
+    /// hvert millisekund stilhed mere er stoej i bedoemmelsen.
+    /// </remarks>
     [Fact]
-    public void Ventetiden_bliver_under_to_sekunder()
+    public void Ordet_fylder_mindst_en_tredjedel_af_vinduet()
     {
-        // Det er dét, hele aendringen handler om: syv sekunder er ubrugeligt,
-        // og under to er til at leve med.
-        Assert.True(Vaageord.Kommandovindue <= 2000);
+        var tilOrd = Vaageord.Kommandovindue - StilhedenMs;
+
+        Assert.True(tilOrd >= Vaageord.Kommandovindue / 3.0,
+            $"Kun {tilOrd} ms af vinduets {Vaageord.Kommandovindue} er ord.");
     }
 
     /// <summary>
