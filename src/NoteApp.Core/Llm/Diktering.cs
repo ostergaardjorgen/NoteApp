@@ -276,49 +276,37 @@ public static class Voxtral
     /// ubrugelig at sende videre.
     /// </param>
     /// <summary>
-    /// Ordbogens ord som en linje, pudsningen kan rette efter.
+    /// HER LÅ ORDBOGEN ET ØJEBLIK, OG DEN GJORDE SKADE.
     /// </summary>
     /// <remarks>
-    /// FORDI HVERKEN LEDETRÅDEN ELLER AFSTANDEN KAN NÅ DEM ALLE.
+    /// Tanken var god: ledetråden når ikke et sammensat navn, og afstanden
+    /// tør kun to bogstavfejl — men en sprogmodel kan se, at «Starz Tech» i
+    /// en række med Omada og NetIQ er StorageTek.
     ///
-    /// Fagord sendes med som forhåndsviden, når lyden skrives ud, og bagefter
-    /// retter appen ord, der ligger tæt på et fra ordbogen. Begge dele
-    /// virker — men ingen af dem er nok til et sammensat navn, modellen aldrig
-    /// har set.
+    /// MÅLT MOD DEN RIGTIGE MODEL 31-08-2026, samme input hver gang:
     ///
-    /// Målt 31-08-2026: «StorageTek» kom tilbage som «Starstake». Ordet stod i
-    /// ordbogen og var sendt med, og alligevel. Afstanden mellem de to er fem
-    /// bogstavfejl; appens rettelse tør to på et ord af den længde, og det er
-    /// den rigtige forsigtighed — fem ville rette alt muligt andet forkert.
+    ///   uden ordbog          «Omada, IBM, NetIQ, Starz Tech.»
+    ///   hele ordbogen (42)   «Omada, NetIQ»
+    ///   tre relevante ord    «Omada, StorageTek, NetIQ, Starz Tech.»
     ///
-    /// EN SPROGMODEL KAN SE DET, EN AFSTAND IKKE KAN. «Starstake» i en række
-    /// med Omada, IBM og NetIQ er genkendeligt som StorageTek for enhver, der
-    /// ved, at ordet findes. Det er dét, listen fortæller den.
+    /// Med hele ordbogen SLETTEDE den IBM og Starz Tech — begge ord, der ikke
+    /// stod på listen. Den læste ordbogen som en hvidliste og lugede resten
+    /// ud, også med «SLET ALDRIG ET ORD» stående i instruktionen.
     ///
-    /// RAMMEN ER SNÆVER MED VILJE. Der må rettes til et ord fra LISTEN og
-    /// intet andet. Uden den grænse ville en model, der er bedt om at rette
-    /// stavefejl, også rette det, den synes lyder forkert — og så er vi
-    /// tilbage ved, at den finder på.
+    /// Med tre ord INDSATTE den StorageTek som et ekstra led og lod Starz
+    /// Tech stå. Den fandt på.
+    ///
+    /// Begge udfald er værre end det, der skulle rettes. En liste af ord i en
+    /// instruktion er ikke en ordbog for en sprogmodel — det er en ramme, den
+    /// forsøger at få teksten til at passe ind i.
+    ///
+    /// Rettelse mod ordbogen hører hjemme dér, hvor den kan efterprøves: i
+    /// <c>Ordretter</c>, hvor et ord bliver til et andet efter en regel, man
+    /// kan læse. Se roadmappen for aliasser — de stavemåder, motoren FAKTISK
+    /// leverer, skrevet ned én gang.
     /// </remarks>
-    public static string Ordbogslinje(IEnumerable<string>? fagord)
-    {
-        var rene = (fagord ?? Enumerable.Empty<string>())
-            .Where(o => !string.IsNullOrWhiteSpace(o))
-            .Select(o => o.Trim())
-            .Take(80)
-            .ToList();
-
-        if (rene.Count == 0) return "";
-
-        return "Disse navne og fagord kan forekomme: " + string.Join(", ", rene) + ". "
-             + "Er et ord i udskriften tydeligvis en fejlstavning af ét af DEM, "
-             + "så ret det. Ret intet andet — et ord, der ikke står på listen, "
-             + "skal stå, som det er, også hvis du synes det lyder forkert. ";
-    }
-
-    public static string Pudseprompt(
-        Dikteringsformaal formaal, string? navn = null, IEnumerable<string>? fagord = null)
-        => Grundregel + Ordbogslinje(fagord) + (formaal switch
+    public static string Pudseprompt(Dikteringsformaal formaal, string? navn = null)
+        => Grundregel + (formaal switch
     {
         Dikteringsformaal.Note =>
             "Du er en dikteringsassistent. Ryd op i den følgende rå udskrift: "
@@ -491,7 +479,6 @@ public sealed class Dikteringsklient
         string raa,
         Dikteringsformaal formaal,
         string? instruktion = null,
-        IEnumerable<string>? fagord = null,
         CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(raa)) return "";
@@ -507,7 +494,7 @@ public sealed class Dikteringsklient
                 {
                     role = "system",
                     content = string.IsNullOrWhiteSpace(instruktion)
-                        ? Voxtral.Pudseprompt(formaal, AppSettings.Current.DitNavn, fagord)
+                        ? Voxtral.Pudseprompt(formaal, AppSettings.Current.DitNavn)
                         : instruktion.Trim(),
                 },
                 new { role = "user", content = Voxtral.Indpak(raa) },
@@ -577,7 +564,7 @@ public sealed class Dikteringsklient
         var raa = await SkrivUdAsync(lydfil, fagord, sprog, ct);
         if (raa.Raa.Length == 0) return ("", raa);
 
-        return (await PudsAsync(raa.Raa, formaal, instruktion: null, fagord: fagord, ct: ct), raa);
+        return (await PudsAsync(raa.Raa, formaal, instruktion: null, ct), raa);
     }
 
     /// <summary>

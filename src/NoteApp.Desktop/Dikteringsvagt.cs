@@ -468,14 +468,12 @@ public sealed class Dikteringsvagt : IDisposable
             if (v.DikteringPuds)
             {
                 Melder?.Invoke(Sprog.T("diktering.rydder_op"));
-                // ORDBOGEN SENDES OGSAA HER. Ledetraaden hjaelper udskriften,
-                // og afstanden retter det, der ligger taet paa - men et
-                // sammensat navn kan ligge fem bogstavfejl vaek, og saa naar
-                // ingen af dem det. En sprogmodel kan se det, en afstand ikke
-                // kan. Se Voxtral.Ordbogslinje.
+                // ORDBOGEN SENDES IKKE MED HERTIL. Den blev proevet 31-08-2026
+                // og gjorde skade: med hele ordbogen SLETTEDE modellen de ord,
+                // der ikke stod paa listen, og med faa ord INDSATTE den et ord,
+                // der ikke blev sagt. Se Voxtral-kommentaren.
                 tekst = await klient.PudsAsync(
-                    udskrift, formaal, Teksttyper.Prompt(formaal, v.Teksttyper),
-                    ordbog.Count > 0 ? Ordbibliotek.TilAfsendelse(ordbog) : null);
+                    udskrift, formaal, Teksttyper.Prompt(formaal, v.Teksttyper));
             }
 
             if (proeve is not null)

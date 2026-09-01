@@ -1,0 +1,74 @@
+using NoteApp.Core;
+using Xunit;
+
+namespace NoteApp.Tests;
+
+/// <summary>
+/// De stavemaader, motoren FAKTISK leverer for et ord.
+/// </summary>
+/// <remarks>
+/// Maalt 31-08-2026 kom «StorageTek» tilbage som «Starstake», «StargeTech» og
+/// «Starz Tech» - tre gange, tre stavemaader, alle fem-seks bogstavfejl fra
+/// det rigtige. Ordbogsrettelsen toer to paa et ord af den laengde.
+///
+/// En sprogmodel var heller ikke svaret: proevet samme dag mod den rigtige
+/// model SLETTEDE den de ord, der ikke stod paa listen, og med faa ord
+/// INDSATTE den et, der ikke blev sagt.
+/// </remarks>
+public class AliasserTest
+{
+    private static readonly string[] Fil =
+    {
+        "Omada",
+        "StorageTek = starz tech, starstake, starge tech",
+        "NetIQ",
+    };
+
+    [Fact]
+    public void Aliasserne_laeses_af_linjen()
+    {
+        var a = Ordbibliotek.Aliasser(Fil);
+
+        Assert.Equal("StorageTek", a["starz tech"]);
+        Assert.Equal("StorageTek", a["starstake"]);
+        Assert.Equal("StorageTek", a["starge tech"]);
+    }
+
+    /// <summary>
+    /// Selve ordet er dét, der staar FOER lighedstegnet.
+    /// </summary>
+    /// <remarks>
+    /// Uden det ville hele linjen staa i ordbogen som ét langt «ord» - og saa
+    /// ville den blive sendt med som forhaandsviden i den form.
+    /// </remarks>
+    [Fact]
+    public void Ordet_er_det_der_staar_foer_lighedstegnet()
+    {
+        var ord = Ordbibliotek.Ryd(Fil);
+
+        Assert.Contains("StorageTek", ord);
+        Assert.DoesNotContain(ord, o => o.Contains('='));
+        Assert.DoesNotContain(ord, o => o.Contains("starz", System.StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
+    public void En_linje_uden_lighedstegn_giver_ingen_aliasser()
+    {
+        Assert.Empty(Ordbibliotek.Aliasser(new[] { "Omada", "NetIQ" }));
+    }
+
+    [Fact]
+    public void Et_alias_der_er_ordet_selv_er_ikke_en_rettelse()
+    {
+        var a = Ordbibliotek.Aliasser(new[] { "Omada = omada, omadaa" });
+
+        Assert.False(a.ContainsKey("omada"));
+        Assert.Equal("Omada", a["omadaa"]);
+    }
+
+    [Fact]
+    public void Et_lighedstegn_uden_et_ord_foran_springes_over()
+    {
+        Assert.Empty(Ordbibliotek.Aliasser(new[] { "= noget", "   = andet" }));
+    }
+}

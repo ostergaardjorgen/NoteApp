@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 
 namespace NoteApp.Core;
 
@@ -50,12 +50,94 @@ public static class Ordbibliotek
     {
         if (ord is null) return "";
 
-        var s = ord.Replace('\t', ' ').Trim().Trim(',', ';', '.', '"', '\'').Trim();
+        // ============ ALT EFTER ET LIGHEDSTEGN ER ALIASSER ============
+        //
+        // «StorageTek = starz tech, starstake» er ÉT ord i ordbogen og to
+        // stavemaader, motoren leverer for det. Ordet er dét, der staar foer
+        // tegnet; resten hoerer til i Aliasser.
+        var raa = ord;
+        var lige = raa.IndexOf('=');
+        if (lige >= 0) raa = raa[..lige];
+
+        var s = raa.Replace('\t', ' ').Trim().Trim(',', ';', '.', '"', '\'').Trim();
 
         // Flere mellemrum bliver til eet. «Entra  ID» og «Entra ID» er samme ord.
         while (s.Contains("  ", StringComparison.Ordinal)) s = s.Replace("  ", " ");
 
         return s.Length is > 0 and <= MaksLaengde ? s : "";
+    }
+
+    /// <summary>
+    /// De stavemåder, motoren FAKTISK leverer for et ord.
+    /// </summary>
+    /// <remarks>
+    /// FORDI ET ORD KAN LIGGE FOR LANGT VÆK TIL AT BLIVE FUNDET.
+    ///
+    /// Ordbogen hjælper på to måder i forvejen: den sendes med som
+    /// forhåndsviden, før lyden skrives ud, og bagefter rettes ord, der ligger
+    /// tæt på et fra listen. Det dækker det meste. Men et navn, modellen
+    /// aldrig har set, kan komme tilbage så forvredet, at ingen af delene når
+    /// det.
+    ///
+    /// Målt 31-08-2026 kom «StorageTek» tilbage som «Starstake», «StargeTech»
+    /// og «Starz Tech» — tre gange, tre stavemåder, alle fem-seks bogstavfejl
+    /// fra det rigtige. Rettelsen tør to på et ord af den længde, og det er
+    /// den rigtige forsigtighed: flere ville rette alt muligt andet forkert.
+    ///
+    /// EN SPROGMODEL VAR HELLER IKKE SVARET. Prøvet samme dag mod den rigtige
+    /// model: med hele ordbogen i instruktionen SLETTEDE den de ord, der ikke
+    /// stod på listen; med få ord INDSATTE den et, der ikke blev sagt.
+    ///
+    /// Så skrives det ned i stedet. Ser man det samme forkerte ord et par
+    /// gange, skriver man det i ordbogen med et lighedstegn:
+    ///
+    ///   StorageTek = starz tech, starstake, starge tech
+    ///
+    /// Så er rettelsen en regel, man selv har skrevet, og som kan læses. Den
+    /// kan ikke ramme noget, den ikke er blevet bedt om.
+    /// </remarks>
+    public static IReadOnlyDictionary<string, string> Aliasser(IEnumerable<string>? linjer = null)
+    {
+        var ud = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var linje in linjer ?? Linjer())
+        {
+            if (linje is null) continue;
+
+            var lige = linje.IndexOf('=');
+            if (lige <= 0) continue;
+
+            var rigtigt = Rens(linje[..lige]);
+            if (rigtigt.Length == 0) continue;
+
+            foreach (var forkert in linje[(lige + 1)..].Split(','))
+            {
+                var f = Rens(forkert);
+
+                // Et alias, der ER det rigtige ord, er ikke en rettelse.
+                if (f.Length == 0 || f.Equals(rigtigt, StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                ud[f] = rigtigt;
+            }
+        }
+
+        return ud;
+    }
+
+    /// <summary>Filens linjer, som de står. Findes den ikke, er der ingen.</summary>
+    private static IReadOnlyList<string> Linjer()
+    {
+        try
+        {
+            return File.Exists(Sti)
+                ? File.ReadAllLines(Sti, Encoding.UTF8)
+                : Array.Empty<string>();
+        }
+        catch (IOException)
+        {
+            return Array.Empty<string>();
+        }
     }
 
     /// <summary>Læser biblioteket. Findes filen ikke, er det tomt — ikke en fejl.</summary>

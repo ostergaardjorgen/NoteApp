@@ -1065,5 +1065,8 @@
     "lytter": "Listening for «Hej Pia»",
     "luk": "Close the bubble — the green bar keeps listening",
     "hent": "Show the bubble again"
+  },
+  "ordbog": {
+    "ordbog_alias": "If a word always comes out wrong, you can write down the spellings you see: «StorageTek = starz tech, starstake». They are then corrected every time — a rule you wrote yourself, and it only touches what it was set for."
   }
 }

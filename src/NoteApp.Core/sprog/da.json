@@ -1065,5 +1065,8 @@
     "lytter": "Lytter efter «Hej Pia»",
     "luk": "Luk boblen — den grønne bjælke lytter videre",
     "hent": "Vis boblen igen"
+  },
+  "ordbog": {
+    "ordbog_alias": "Kommer et ord altid forkert ud, kan du skrive de stavemåder ned, du ser: «StorageTek = starz tech, starstake». Så rettes de hver gang — det er en regel, du selv har skrevet, og den rammer kun det, den er sat til."
   }
 }

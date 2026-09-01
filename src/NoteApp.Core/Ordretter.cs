@@ -57,6 +57,18 @@ public static class Ordretter
 
         if (string.IsNullOrEmpty(tekst)) return (tekst, rettelser);
 
+        // ============ ALIASSERNE FOERST ============
+        //
+        // De er brugerens egne, skrevet ned fordi han har SET motoren levere
+        // dem. Derfor rettes de foer alt andet og uden afstandsmaal: der er
+        // ikke noget at skoenne om, naar der staar «StorageTek = starz tech»
+        // i ordbogen.
+        //
+        // De rettes ogsaa foerst, fordi et alias kan vaere to ord - «starz
+        // tech» - og resten af den her metode arbejder ét ord ad gangen. Se
+        // Ordbibliotek.Aliasser.
+        tekst = RetAliasser(tekst, rettelser);
+
         // Kun etordstermer kan rettes. Flerordstermer staar tilbage - se
         // klassens beskrivelse.
         var kandidater = ordbog
@@ -216,4 +228,52 @@ public static class Ordretter
     private static string Bogstaver(string ord) =>
         ord.Replace("'", "", StringComparison.Ordinal)
            .Replace("’", "", StringComparison.Ordinal);
+
+    /// <summary>
+    /// Bytter de stavemåder, brugeren selv har skrevet ned.
+    /// </summary>
+    /// <remarks>
+    /// LÆNGSTE FØRST. Står der både «starz tech» og «tech» i ordbogen, skal
+    /// det lange rettes først — ellers ville det korte spise halvdelen af det
+    /// og efterlade en rest, der ikke passer på noget.
+    ///
+    /// Der rettes kun på hele ord. Uden det ville «tech» inde i «techniker»
+    /// blive byttet ud, og et alias, der er sat for at rette ét ord, ville
+    /// ødelægge et andet.
+    /// </remarks>
+    private static string RetAliasser(string tekst, List<Ordrettelse> rettelser)
+    {
+        var aliasser = Ordbibliotek.Aliasser();
+        if (aliasser.Count == 0) return tekst;
+
+        foreach (var par in aliasser.OrderByDescending(a => a.Key.Length))
+        {
+            var forkert = par.Key;
+            var rigtigt = par.Value;
+            var i = 0;
+
+            while (true)
+            {
+                var fund = tekst.IndexOf(forkert, i, StringComparison.OrdinalIgnoreCase);
+                if (fund < 0) break;
+
+                var foer = fund == 0 || !ErOrdtegn(tekst[fund - 1]);
+                var slut = fund + forkert.Length;
+                var efter = slut >= tekst.Length || !ErOrdtegn(tekst[slut]);
+
+                if (foer && efter)
+                {
+                    rettelser.Add(new Ordrettelse(tekst[fund..slut], rigtigt));
+                    tekst = tekst[..fund] + rigtigt + tekst[slut..];
+                    i = fund + rigtigt.Length;
+                }
+                else
+                {
+                    i = fund + 1;
+                }
+            }
+        }
+
+        return tekst;
+    }
 }

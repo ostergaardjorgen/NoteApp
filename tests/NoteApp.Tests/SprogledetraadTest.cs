@@ -77,53 +77,31 @@ public class SprogledetraadTest
         Assert.Equal("", Voxtral.Prompt("en", sprogetErValgt: true, null));
     }
 
-    // ============ ORDBOGEN I PUDSNINGEN ============
+    // ============ ORDBOGEN HOERER IKKE TIL I PUDSNINGEN ============
 
     /// <summary>
-    /// Et sammensat navn kan ligge for langt vaek til baade ledetraad og afstand.
-    /// </summary>
-    /// <remarks>
-    /// Maalt 31-08-2026: «StorageTek» kom tilbage som «Starstake». Ordet stod
-    /// i ordbogen og var sendt med som forhaandsviden. Afstanden mellem de to
-    /// er fem bogstavfejl; appens rettelse toer to paa et ord af den laengde.
+    /// Maalt mod den rigtige model 31-08-2026, samme input hver gang:
     ///
-    /// En sprogmodel kan se det, en afstand ikke kan: «Starstake» i en raekke
-    /// med Omada, IBM og NetIQ er genkendeligt som StorageTek.
-    /// </remarks>
-    [Fact]
-    public void Ordbogen_kommer_med_i_pudseinstruktionen()
-    {
-        var p = Voxtral.Pudseprompt(
-            Dikteringsformaal.Note, navn: null, fagord: new[] { "StorageTek", "Omada" });
-
-        Assert.Contains("StorageTek, Omada", p);
-        Assert.Contains("fejlstavning", p);
-    }
-
-    /// <summary>
-    /// Rammen er snaever med vilje.
+    ///   uden ordbog          «Omada, IBM, NetIQ, Starz Tech.»
+    ///   hele ordbogen (42)   «Omada, NetIQ»
+    ///   tre relevante ord    «Omada, StorageTek, NetIQ, Starz Tech.»
+    ///
+    /// Med hele ordbogen SLETTEDE den de ord, der ikke stod paa listen - ogsaa
+    /// med «SLET ALDRIG ET ORD» i instruktionen. Med tre ord INDSATTE den et
+    /// ord, der ikke blev sagt.
+    ///
+    /// En liste af ord i en instruktion er ikke en ordbog for en sprogmodel.
+    /// Det er en ramme, den forsoeger at faa teksten til at passe ind i.
     /// </summary>
-    /// <remarks>
-    /// Uden graensen ville en model, der er bedt om at rette stavefejl, ogsaa
-    /// rette det, den synes lyder forkert - og saa er vi tilbage ved, at den
-    /// finder paa.
-    /// </remarks>
     [Fact]
-    public void Der_maa_kun_rettes_til_ord_fra_listen()
+    public void Pudseinstruktionen_naevner_ingen_ordbog()
     {
-        var p = Voxtral.Pudseprompt(
-            Dikteringsformaal.Note, navn: null, fagord: new[] { "StorageTek" });
+        foreach (var f in Enum.GetValues<Dikteringsformaal>())
+        {
+            var p = Voxtral.Pudseprompt(f);
 
-        Assert.Contains("Ret intet andet", p);
-    }
-
-    [Fact]
-    public void Uden_ordbog_staar_instruktionen_som_foer()
-    {
-        var uden = Voxtral.Pudseprompt(Dikteringsformaal.Note);
-        var tom = Voxtral.Pudseprompt(Dikteringsformaal.Note, null, new string[0]);
-
-        Assert.Equal(uden, tom);
-        Assert.DoesNotContain("kan forekomme", uden);
+            Assert.DoesNotContain("fagord kan forekomme", p);
+            Assert.DoesNotContain("fejlstavning", p);
+        }
     }
 }
