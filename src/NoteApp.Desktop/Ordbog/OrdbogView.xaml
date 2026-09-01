@@ -72,8 +72,24 @@
     <Border Grid.Row="4" HorizontalAlignment="Left" Width="760"
             Background="{DynamicResource Panel}" CornerRadius="10"
             BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
+      <!-- ALIASSERNE STAAR VED ORDET. De findes i filen, og uden dem paa
+           skaermen er der ingen maade at opdage, at et ord allerede har faaet
+           rettelser sat op - eller at rette dem, hvis en af dem rammer
+           forkert. Pilen laeses den rigtige vej: «StorageTek <- starz tech»
+           betyder, at «starz tech» bliver til «StorageTek». -->
       <ListBox x:Name="Liste" Background="Transparent" BorderThickness="0" Padding="6"
-               ScrollViewer.VerticalScrollBarVisibility="Auto" />
+               ScrollViewer.VerticalScrollBarVisibility="Auto">
+        <ListBox.ItemTemplate>
+          <DataTemplate>
+            <StackPanel Orientation="Horizontal">
+              <TextBlock Text="{Binding Ord}" />
+              <TextBlock Text="{Binding Retter}" Visibility="{Binding RetterVis}"
+                         Margin="10,0,0,0" FontSize="11.5" VerticalAlignment="Center"
+                         Foreground="{DynamicResource TekstMeget}" />
+            </StackPanel>
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
     </Border>
 
     <Grid Grid.Row="5" Margin="0,14,0,0" HorizontalAlignment="Left" Width="760">

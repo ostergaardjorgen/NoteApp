@@ -1,4 +1,4 @@
-using NoteApp.Core;
+﻿using NoteApp.Core;
 using Xunit;
 
 namespace NoteApp.Tests;
@@ -70,5 +70,40 @@ public class AliasserTest
     public void Et_lighedstegn_uden_et_ord_foran_springes_over()
     {
         Assert.Empty(Ordbibliotek.Aliasser(new[] { "= noget", "   = andet" }));
+    }
+
+    /// <summary>
+    /// «Joern» er to bogstavfejl fra «Joergen», og appen toer én.
+    /// </summary>
+    /// <remarks>
+    /// Maalt 31-08-2026: brugeren havde «Joergen» i ordbogen, og udskriften
+    /// skrev «Joern». Afstanden er to; taersklen for et ord paa seks bogstaver
+    /// er én.
+    ///
+    /// OG DEN SKAL BLIVE VED AT VAERE ÉN. «Joern» er et rigtigt navn. Et
+    /// afstandsmaal, der retter det af sig selv, ville rette en anden persons
+    /// navn til brugerens - og dét er vaerre end en stavefejl.
+    ///
+    /// Derfor er svaret et alias: brugeren skriver ned, at netop HANS
+    /// udskrift skal rettes.
+    /// </remarks>
+    [Fact]
+    public void Et_navn_to_bogstavfejl_vaek_kraever_et_alias()
+    {
+        // Uden alias: for langt vaek til at blive rettet.
+        var (uden, _) = Ordretter.Ret("Hilsen Jørn", new[] { "Jørgen" });
+        Assert.Equal("Hilsen Jørn", uden);
+
+        // Taersklen skal blive ved at vaere én for et ord paa seks bogstaver.
+        Assert.Equal(1, Ordretter.Taerskel("Jørgen".Length));
+    }
+
+    [Fact]
+    public void Aliasser_kan_ogsaa_vaere_navne()
+    {
+        var a = Ordbibliotek.Aliasser(new[] { "Jørgen = jørn, jørgan" });
+
+        Assert.Equal("Jørgen", a["jørn"]);
+        Assert.Equal("Jørgen", a["jørgan"]);
     }
 }

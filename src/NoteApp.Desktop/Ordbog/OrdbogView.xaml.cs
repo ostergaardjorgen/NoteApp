@@ -37,6 +37,17 @@ public partial class OrdbogView : UserControl
     /// editor. En liste på skærmen, der viser noget andet end det, der bliver
     /// sendt, er værre end ingen liste.
     /// </remarks>
+    /// <summary>Ét ord i listen — og de stavemåder, der rettes til det.</summary>
+    /// <remarks>
+    /// ALIASSERNE SKAL KUNNE SES. De står i filen, og uden dem på skærmen er
+    /// der ingen måde at opdage, at et ord allerede har fået rettelser sat
+    /// op — eller at rette dem, hvis en af dem viser sig at ramme forkert.
+    ///
+    /// Pilen læses den rigtige vej: «StorageTek ← starz tech» betyder, at
+    /// «starz tech» bliver til «StorageTek».
+    /// </remarks>
+    private sealed record Ordvisning(string Ord, string Retter, Visibility RetterVis);
+
     private void Vis()
     {
         _alle = Ordbibliotek.Laes();
@@ -80,14 +91,14 @@ public partial class OrdbogView : UserControl
     {
         var soeg = (Nyt.Text ?? "").Trim();
 
+        var aliasser = Ordbibliotek.Aliasser();
+
         if (soeg.Length == 0)
         {
-            Liste.ItemsSource = _alle;
+            Liste.ItemsSource = _alle.Select(o => TilVisning(o, aliasser)).ToList();
             Ligner.Visibility = Visibility.Collapsed;
             return;
         }
-
-        var aliasser = Ordbibliotek.Aliasser();
 
         var fundne = _alle
             .Where(o => o.Contains(soeg, StringComparison.OrdinalIgnoreCase)
@@ -95,7 +106,7 @@ public partial class OrdbogView : UserControl
                                              && a.Key.Contains(soeg, StringComparison.OrdinalIgnoreCase)))
             .ToList();
 
-        Liste.ItemsSource = fundne;
+        Liste.ItemsSource = fundne.Select(o => TilVisning(o, aliasser)).ToList();
 
         // Det praecise fund siges tydeligt. «Der er fire ord, der ligner» er
         // ikke svar paa «staar det her i forvejen».
@@ -108,6 +119,20 @@ public partial class OrdbogView : UserControl
                 : Sprog.T("ordbogview.ligner", fundne.Count);
 
         Ligner.Visibility = Visibility.Visible;
+    }
+
+    private static Ordvisning TilVisning(
+        string ord, IReadOnlyDictionary<string, string> aliasser)
+    {
+        var retter = aliasser
+            .Where(a => a.Value.Equals(ord, StringComparison.OrdinalIgnoreCase))
+            .Select(a => a.Key)
+            .ToList();
+
+        return new Ordvisning(
+            ord,
+            retter.Count == 0 ? "" : "← " + string.Join(", ", retter),
+            retter.Count == 0 ? Visibility.Collapsed : Visibility.Visible);
     }
 
     private void Nyt_Skrevet(object sender, TextChangedEventArgs e) => Filtrer();
@@ -152,7 +177,12 @@ public partial class OrdbogView : UserControl
 
     private void Fjern_Klik(object sender, RoutedEventArgs e)
     {
-        if (Liste.SelectedItem is not string ord) return;
+        // Listen viser nu en Ordvisning og ikke en raa streng - selve ordet
+        // ligger indeni. Uden det her ramte «Fjern det valgte» aldrig noget,
+        // og knappen saa ud til at vaere i stykker.
+        if (Liste.SelectedItem is not Ordvisning valgt) return;
+
+        var ord = valgt.Ord;
 
         // Ingen bekraeftelse. Et ord er tilfoejet igen paa to sekunder, og en
         // dialog for hver fjernelse goer oprydning til noget, man lader vaere
