@@ -102,7 +102,9 @@ public class DikteringTest
         // reglen ét sted og saettes foran dem alle - se Voxtral.Grundregel.
         var p = Voxtral.Pudseprompt(formaal);
 
-        Assert.StartsWith(Voxtral.Grundregel, p);
+        // Sprogkravet staar foerst nu - se SprogkravTest. Grundreglen
+        // kommer lige efter og skal stadig vaere der i sin helhed.
+        Assert.Contains(Voxtral.Grundregel, p);
         Assert.Contains("må ikke tilføje oplysninger", p);
         Assert.Contains("RÅ UDSKRIFT ER DEN ENESTE KILDE", p);
     }

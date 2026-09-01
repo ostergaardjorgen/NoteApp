@@ -472,8 +472,11 @@ public sealed class Dikteringsvagt : IDisposable
                 // og gjorde skade: med hele ordbogen SLETTEDE modellen de ord,
                 // der ikke stod paa listen, og med faa ord INDSATTE den et ord,
                 // der ikke blev sagt. Se Voxtral-kommentaren.
+                // SPROGET SENDES MED. Pudsningen vidste det aldrig foer, og saa
+                // blev en skaev udskrift pudset paent paa det forkerte sprog.
                 tekst = await klient.PudsAsync(
-                    udskrift, formaal, Teksttyper.Prompt(formaal, v.Teksttyper));
+                    udskrift, formaal, Teksttyper.Prompt(formaal, v.Teksttyper),
+                    v.Talesprog);
             }
 
             if (proeve is not null)

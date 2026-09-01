@@ -1653,7 +1653,11 @@ public sealed class Opgavevisning : System.ComponentModel.INotifyPropertyChanged
 }
 
 /// <summary>Ét søgeord og hvor meget der er af det. Til den tomme skærm.</summary>
-    public sealed record Ordvisning(string Ord, string Hvor);
+    /// <param name="RetVis">
+    /// Synlig for ord, der IKKE står nogen steder. Det er dem, der som regel
+    /// er hørt forkert — se <see cref="Ret_Klik"/>.
+    /// </param>
+    public sealed record Ordvisning(string Ord, string Hvor, Visibility RetVis);
 
     /// <summary>
     /// Siger, HVORFOR der ikke er noget fund.
@@ -1673,6 +1677,11 @@ public sealed class Opgavevisning : System.ComponentModel.INotifyPropertyChanged
 
         IntetOverskrift.Text = $"Ingen fund på «{spoergsmaal}»";
         Enkeltvis.ItemsSource = null;
+
+        // En rettelsesrude, der bliver staaende paa et ord fra den forrige
+        // soegning, retter det forkerte ord.
+        Retrude.Visibility = Visibility.Collapsed;
+        _retter = null;
 
         if (ord.Count < 2)
         {
@@ -1699,8 +1708,92 @@ public sealed class Opgavevisning : System.ComponentModel.INotifyPropertyChanged
                 e.Steder == 0
                     ? "ingen steder"
                     : $"{e.Steder} {(e.Steder == 1 ? "sted" : "steder")} i {e.Kilder} " +
-                      $"{(e.Kilder == 1 ? "kilde" : "kilder")}"))
+                      $"{(e.Kilder == 1 ? "kilde" : "kilder")}",
+
+                // ============ «INGEN STEDER» ER ET FINGERPEG ============
+                //
+                // Et ord, der ikke staar ét eneste sted i alt, appen har
+                // skrevet ud, er som regel ikke et sjaeldent ord - det er et
+                // ord, der er hoert forkert. «Storistech» staar ingen steder;
+                // «StorageTek» staar tre.
+                //
+                // Derfor tilbydes rettelsen praecis dér og ikke paa alle ord.
+                // En knap ved hvert ord ville vaere stoej; en knap ved dét
+                // ord, der staar i vejen, er et svar.
+                e.Steder == 0 ? Visibility.Visible : Visibility.Collapsed))
             .ToList();
+    }
+
+    /// <summary>Det ord, der er ved at blive rettet.</summary>
+    private string? _retter;
+
+    /// <summary>
+    /// Lærer ordbogen, hvad ordet skulle have været.
+    /// </summary>
+    /// <remarks>
+    /// MAN OPDAGER FEJLEN HER, OG DET ER HER, DEN SKAL KUNNE RETTES.
+    ///
+    /// Ordbogen kunne kun læres op på sin egen skærm — man skulle huske
+    /// stavemåden, gå derhen og skrive den ind. En rettelse, der kræver, at
+    /// man forlader dét, man er i gang med, bliver ikke lavet.
+    ///
+    /// Nu står den, hvor fejlen ses: i søgefeltets opdeling, ved de ord, der
+    /// ikke findes nogen steder. Brugerens ord 31-08-2026: «man klikker på
+    /// ordet og skriver, hvad det skulle have været, og på den måde lærer man
+    /// løsningen op, mens man arbejder i den».
+    /// </remarks>
+    private void Ret_Klik(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button b || b.Tag is not string forkert) return;
+
+        _retter = forkert;
+
+        Rettitel.Text = Core.Sprog.T("searchview.ret_titel", forkert);
+        Retsvar.Text = "";
+        Retfelt.Text = "";
+        Retrude.Visibility = Visibility.Visible;
+
+        Retfelt.Focus();
+    }
+
+    private void Retfelt_Tast(object sender, System.Windows.Input.KeyEventArgs e)
+    {
+        if (e.Key != System.Windows.Input.Key.Enter) return;
+
+        GemRettelsen();
+        e.Handled = true;
+    }
+
+    private void RetGem_Klik(object sender, RoutedEventArgs e) => GemRettelsen();
+
+    /// <summary>
+    /// Skriver rettelsen i ordbogen.
+    /// </summary>
+    /// <remarks>
+    /// TO TING SKER PÅ ÉN GANG. Det rigtige ord lægges i ordbogen, hvis det
+    /// ikke står der, og det forkerte lægges som alias. Uden det første ville
+    /// aliasset pege på et ord, der ikke findes; uden det andet ville den
+    /// samme fejl komme igen i morgen.
+    /// </remarks>
+    private void GemRettelsen()
+    {
+        if (_retter is not { } forkert) return;
+
+        var rigtigt = (Retfelt.Text ?? "").Trim();
+        if (rigtigt.Length == 0) return;
+
+        try
+        {
+            Ordbibliotek.Tilfoej(rigtigt);
+
+            Retsvar.Text = Ordbibliotek.TilfoejAlias(rigtigt, forkert)
+                ? Core.Sprog.T("searchview.ret_lagt", forkert, rigtigt)
+                : Core.Sprog.T("searchview.ret_kan_ikke", forkert);
+        }
+        catch (Exception ex)
+        {
+            Retsvar.Text = Core.Sprog.T("diktering.gik_galt", ex.Message);
+        }
     }
 
     private void KunDet_Klik(object sender, RoutedEventArgs e)

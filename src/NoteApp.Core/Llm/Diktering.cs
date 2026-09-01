@@ -305,8 +305,47 @@ public static class Voxtral
     /// kan læse. Se roadmappen for aliasser — de stavemåder, motoren FAKTISK
     /// leverer, skrevet ned én gang.
     /// </remarks>
-    public static string Pudseprompt(Dikteringsformaal formaal, string? navn = null)
-        => Grundregel + (formaal switch
+    /// <summary>
+    /// Sproget, svaret SKAL være på.
+    /// </summary>
+    /// <remarks>
+    /// PUDSNINGEN VIDSTE ALDRIG, HVILKET SPROG DER BLEV TALT.
+    ///
+    /// Sproget er valgt ét sted i appen og sendes med, når lyden skrives ud.
+    /// Men pudsningen fik det aldrig at vide — den ryddede op i den tekst,
+    /// den fik, uden at være bundet til noget. Kom udskriften skæv ud, blev
+    /// den pudset pænt på det forkerte sprog.
+    ///
+    /// Set 31-08-2026: en dansk diktering kom tilbage som «Hæ, Pía. Eg kunne
+    /// godt senga» — islandsk-færøsk i formen. Udskrivningen var rettet, men
+    /// pudsningen havde ingen grund til at skrive det om, for ingen havde
+    /// sagt, at det skulle være dansk.
+    ///
+    /// Nu står det, og det står som en ORDRE og ikke som en oplysning: det
+    /// er ikke en beskrivelse af, hvad der nok bliver talt, men et krav til
+    /// svaret. Ser den rå udskrift ud som et andet sprog, er den hørt
+    /// forkert — og så skal den skrives på det sprog, der faktisk blev talt.
+    /// </remarks>
+    public static string Sprogkrav(string? sprog) => sprog?.Trim().ToLowerInvariant() switch
+    {
+        "en" => "SVAR ALTID PÅ ENGELSK. Uanset hvordan den rå udskrift ser ud, "
+              + "skal svaret være engelsk. Skriv aldrig på et andet sprog. ",
+
+        "no" => "SVAR ALTID PÅ NORSK. Uanset hvordan den rå udskrift ser ud, "
+              + "skal svaret være norsk. Skriv aldrig på et andet sprog. ",
+
+        "sv" => "SVAR ALTID PÅ SVENSK. Uanset hvordan den rå udskrift ser ud, "
+              + "skal svaret være svensk. Skriv aldrig på et andet sprog. ",
+
+        _ => "SVAR ALTID PÅ DANSK. Uanset hvordan den rå udskrift ser ud, skal "
+           + "svaret være dansk. Ser den ud som islandsk, færøsk, norsk, svensk "
+           + "eller tysk, er den hørt forkert — skriv den på dansk. Skriv aldrig "
+           + "på et andet sprog. ",
+    };
+
+    public static string Pudseprompt(
+        Dikteringsformaal formaal, string? navn = null, string? sprog = null)
+        => Sprogkrav(sprog) + Grundregel + (formaal switch
     {
         Dikteringsformaal.Note =>
             "Du er en dikteringsassistent. Ryd op i den følgende rå udskrift: "
@@ -479,6 +518,7 @@ public sealed class Dikteringsklient
         string raa,
         Dikteringsformaal formaal,
         string? instruktion = null,
+        string? sprog = null,
         CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(raa)) return "";
@@ -493,9 +533,13 @@ public sealed class Dikteringsklient
                 new
                 {
                     role = "system",
+                    // SPROGKRAVET STAAR OGSAA FORAN EN EGEN INSTRUKTION.
+                    // Brugerens egne teksttyper er skrevet om FORMEN, ikke om
+                    // sproget - og et svar paa det forkerte sprog er lige saa
+                    // ubrugeligt, uanset hvem der har skrevet instruktionen.
                     content = string.IsNullOrWhiteSpace(instruktion)
-                        ? Voxtral.Pudseprompt(formaal, AppSettings.Current.DitNavn)
-                        : instruktion.Trim(),
+                        ? Voxtral.Pudseprompt(formaal, AppSettings.Current.DitNavn, sprog)
+                        : Voxtral.Sprogkrav(sprog) + instruktion.Trim(),
                 },
                 new { role = "user", content = Voxtral.Indpak(raa) },
             },
@@ -564,7 +608,7 @@ public sealed class Dikteringsklient
         var raa = await SkrivUdAsync(lydfil, fagord, sprog, ct);
         if (raa.Raa.Length == 0) return ("", raa);
 
-        return (await PudsAsync(raa.Raa, formaal, instruktion: null, ct), raa);
+        return (await PudsAsync(raa.Raa, formaal, instruktion: null, sprog: sprog, ct: ct), raa);
     }
 
     /// <summary>

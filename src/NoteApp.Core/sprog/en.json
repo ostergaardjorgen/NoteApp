@@ -156,7 +156,12 @@
     "soeg_kun_her": "Search only here",
     "soeg_kun_i": "Search only in",
     "sorter": "Sort",
-    "til": "to"
+    "til": "to",
+    "ret_ordet": "Correct it",
+    "ret_titel": "What should «{0}» have been?",
+    "ret_gem": "Teach it",
+    "ret_lagt": "«{0}» is now corrected to «{1}» — next time too.",
+    "ret_kan_ikke": "«{0}» could not be added. Is it already there, or is it itself a word in the dictionary?"
   },
   "optagebaand": {
     "afslut_optagelsen_og_gem_den_du_navngiver": "End the recording and save it. You name the meeting afterwards.",

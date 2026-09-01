@@ -516,7 +516,12 @@
     "soeg_kun_her": "Søg kun her",
     "soeg_kun_i": "Søg kun i",
     "sorter": "Sortér",
-    "til": "til"
+    "til": "til",
+    "ret_ordet": "Ret ordet",
+    "ret_titel": "Hvad skulle «{0}» have været?",
+    "ret_gem": "Lær den det",
+    "ret_lagt": "«{0}» rettes nu til «{1}» — også næste gang.",
+    "ret_kan_ikke": "«{0}» kunne ikke lægges til. Står den der allerede, eller er den selv et ord i ordbogen?"
   },
   "settingsview": {
     "afbryd_forbindelsen": "Afbryd forbindelsen",
