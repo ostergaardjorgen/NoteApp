@@ -1,4 +1,4 @@
-namespace NoteApp.Core;
+﻿namespace NoteApp.Core;
 
 /// <summary>
 /// Klipper tavsheden af enden på en optagelse.
@@ -36,6 +36,99 @@ public static class Stilhedsklip
     private const double Tavshedsgraense = 90.0;
 
     private const int Vindue = 480;   // 30 ms ved 16 kHz
+
+    /// <summary>
+    /// Fjerner tavsheden fra BEGYNDELSEN af en wav-fil.
+    /// </summary>
+    /// <remarks>
+    /// FORDI WHISPER FINDER PÅ ORD I STILHED.
+    ///
+    /// En diktering fra vågeordet begynder ti sekunder BAGUD i tiden, så
+    /// intet af det, man sagde, kan nå at falde ud. Prisen er, at klippet
+    /// som regel begynder med flere sekunders tavshed — man sagde jo ikke
+    /// noget, før man sagde noget.
+    ///
+    /// MÅLT 31-08-2026, to dikteringer i træk med samme opsætning:
+    ///
+    ///   29 sekunder  →  «Vi vil gerne bede om at få noteret IBM, StorageTek …»
+    ///   16 sekunder  →  «Og med Ibum klokkvöls.»
+    ///
+    /// Den anden var kortere, altså mest tavshed. «klokkvöls» er ikke et ord;
+    /// det er en model, der bliver bedt om at skrive noget ud af ingenting og
+    /// gør sit bedste. Hallucination i stilhed er en kendt egenskab ved
+    /// whisper, ikke en fejl i lyden.
+    ///
+    /// Der beholdes et halvt sekund foran. Klippes der helt ind til første
+    /// lyd, ryger begyndelsen af det første ord — modellen har brug for at
+    /// høre ordet starte.
+    /// </remarks>
+    /// <returns>Hvor mange sekunder der blev klippet af. 0 hvis intet.</returns>
+    public static double KlipHovedet(string wav, double behold = 0.5)
+    {
+        if (!File.Exists(wav)) return 0;
+
+        byte[] b;
+        try { b = File.ReadAllBytes(wav); }
+        catch (IOException) { return 0; }
+
+        var data = FindData(b);
+        if (data < 0) return 0;
+
+        var lyd = b.Length - data;
+        if (lyd <= 0) return 0;
+
+        var proever = lyd / 2;
+        var vinduer = proever / Vindue;
+        if (vinduer < 2) return 0;
+
+        // Forfra: find det foerste vindue, der IKKE er tavst.
+        var foersteLyd = -1;
+
+        for (var v = 0; v < vinduer; v++)
+        {
+            if (Styrke(b, data, v) <= Tavshedsgraense) continue;
+            foersteLyd = v;
+            break;
+        }
+
+        // Var der overhovedet ingen lyd, roeres filen ikke. En tom optagelse
+        // skal kunne ses som en tom optagelse.
+        if (foersteLyd < 0) return 0;
+
+        var behold_v = (int)(behold * 1000 / 30);
+        var fra = Math.Max(0, foersteLyd - behold_v);
+
+        if (fra == 0) return 0;
+
+        var spring = fra * Vindue * 2;
+        var nyeBytes = lyd - spring;
+
+        var klippet = spring / (double)(AudioFormat.SampleRate * 2);
+
+        try
+        {
+            var midlertidig = wav + ".klippet";
+
+            using (var ud = new FileStream(midlertidig, FileMode.Create, FileAccess.Write))
+            {
+                var hoved = new byte[data];
+                Array.Copy(b, hoved, data);
+
+                Skriv32(hoved, 4, nyeBytes + data - 8);
+                Skriv32(hoved, data - 4, nyeBytes);
+
+                ud.Write(hoved, 0, data);
+                ud.Write(b, data + spring, nyeBytes);
+            }
+
+            File.Move(midlertidig, wav, overwrite: true);
+            return klippet;
+        }
+        catch (IOException)
+        {
+            return 0;
+        }
+    }
 
     /// <summary>
     /// Fjerner tavsheden fra slutningen af en wav-fil.

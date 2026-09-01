@@ -363,6 +363,30 @@ public sealed class Dikteringsvagt : IDisposable
 
             optager?.Dispose();
 
+            // ============ TAVSHEDEN SKAL VAEK, FOER DET SKRIVES UD ============
+            //
+            // WHISPER FINDER PAA ORD I STILHED.
+            //
+            // En diktering fra vaageordet begynder ti sekunder BAGUD i tiden,
+            // saa intet af det, man sagde, kan naa at falde ud. Prisen er, at
+            // klippet som regel begynder med flere sekunders tavshed - man
+            // sagde jo ikke noget, foer man sagde noget. Og til sidst ligger
+            // den pause, der fik dikteringen til at slutte.
+            //
+            // MAALT 31-08-2026, to dikteringer i traek med samme opsaetning:
+            //
+            //   29 sekunder  ->  «Vi vil gerne bede om at faa noteret IBM ...»
+            //   16 sekunder  ->  «Og med Ibum klokkvoels.»
+            //
+            // Den anden var kortere, altsaa mest tavshed. «klokkvoels» er ikke
+            // et ord; det er en model, der bliver bedt om at skrive noget ud
+            // af ingenting og goer sit bedste.
+            //
+            // Moedeoptagelserne har klippet halen af hele tiden. Dikteringen
+            // gjorde ikke - og det er dén, der har mest tavshed i sig.
+            sekunder -= Stilhedsklip.KlipHovedet(klip);
+            sekunder -= Stilhedsklip.KlipHalen(klip);
+
             // Under et halvt sekund er et fejltryk, ikke et diktat. At sende
             // det ville koste et kald og give en tom streng tilbage.
             if (sekunder < 0.5)
