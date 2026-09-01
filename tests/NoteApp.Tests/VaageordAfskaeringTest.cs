@@ -85,4 +85,49 @@ public class VaageordAfskaeringTest
     {
         Assert.Equal("", Hensigtstolk.UdenVaageord("Hej Pia.", new[] { "hej pia" }));
     }
+
+    // ============ TO MODELLER, TO STAVEMAADER ============
+
+    /// <summary>
+    /// Udskrivningen skriver «Bia», hvor lytningen siger «pia».
+    /// </summary>
+    /// <remarks>
+    /// Vaageordet hoeres af whisper-command, som faar en liste og vaelger fra
+    /// den. Selve dikteringen skrives ud af en anden model, som skriver frit.
+    ///
+    /// Maalt 31-08-2026 i brugerens egne noter: «Hej Bia. Vi proever lige med
+    /// IBM ...» og «Hae, Pia. Se er ut til ...». Vaageordet blev hoert
+    /// korrekt; det blev bare skrevet anderledes ned.
+    /// </remarks>
+    [Theory]
+    [InlineData("Hej Bia. Vi prøver lige med IBM, StorageTek.",
+                "Vi prøver lige med IBM, StorageTek.")]
+    [InlineData("Hæ, Pía. Se er út til, at den er god.",
+                "Se er út til, at den er god.")]
+    [InlineData("Hej Bía, kan du lave en note?", "kan du lave en note?")]
+    public void De_stavemaader_udskrivningen_leverer_skaeres_ogsaa_af(
+        string sagt, string vented)
+    {
+        Assert.Equal(vented, Hensigtstolk.UdenVaageord(sagt, new[] { "hej pia" }));
+    }
+
+    /// <summary>
+    /// EN AFSTAND PAA ÉT BOGSTAV VILLE VAERE FARLIG.
+    /// </summary>
+    /// <remarks>
+    /// «Mia», «Kia» og «Ria» er alle ét bogstav fra «pia», og de er navne paa
+    /// mennesker. «Hej Mia, kan du sende den?» maa ikke blive til «kan du
+    /// sende den?».
+    ///
+    /// Derfor staar der en LISTE over de stavemaader, der faktisk er set, og
+    /// ikke en regel om, hvad der kunne ligne.
+    /// </remarks>
+    [Theory]
+    [InlineData("Hej Mia, kan du sende den?")]
+    [InlineData("Hej Kia, vi ses i morgen.")]
+    [InlineData("Hej Ria, tak for i dag.")]
+    public void Et_andet_menneskes_navn_skaeres_ikke_af(string sagt)
+    {
+        Assert.Equal(sagt, Hensigtstolk.UdenVaageord(sagt, new[] { "hej pia" }));
+    }
 }

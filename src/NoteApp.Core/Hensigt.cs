@@ -147,15 +147,38 @@ public static class Hensigtstolk
     /// mødes» må ikke blive til «skal mødes». Derfor kun allerførst, kun ét
     /// ord foran, og kun når der står noget efter.
     /// </remarks>
+    /// <summary>
+    /// Navnet, som UDSKRIVNINGEN skriver det — ikke som det staves.
+    /// </summary>
+    /// <remarks>
+    /// TO MODELLER HØRER DET SAMME ORD FORSKELLIGT.
+    ///
+    /// Vågeordet høres af whisper-command, som får en liste og vælger fra
+    /// den. Selve dikteringen skrives ud af en anden model, som skriver frit
+    /// — og den skriver «Bia», hvor den første siger «pia».
+    ///
+    /// Målt 31-08-2026 i brugerens egne noter: «Hej Bia. Vi prøver lige med
+    /// IBM …» og «Hæ, Pía. Se er út til …». Vågeordet blev hørt korrekt;
+    /// det blev bare skrevet anderledes ned.
+    ///
+    /// EN AFSTAND PÅ ÉT BOGSTAV VILLE VÆRE FARLIG. «Mia», «Kia» og «Ria» er
+    /// alle ét bogstav fra «pia», og de er navne på mennesker. «Hej Mia, kan
+    /// du sende den?» må ikke blive til «kan du sende den?».
+    ///
+    /// Derfor står de stavemåder, der FAKTISK er set, og ikke en regel om,
+    /// hvad der kunne ligne. Ser man en ny, skrives den her — én linje, og
+    /// den kan læses af den næste, der undrer sig.
+    /// </remarks>
+    private static readonly string[] Navnet = { "pia", "bia", "pía", "bía", "pià" };
+
     private static string UdenNavnet(string t)
     {
-        const string navn = "pia";
 
         var ord = t.Split(' ', 3, StringSplitOptions.RemoveEmptyEntries);
         if (ord.Length < 3) return t;
 
         var andet = ord[1].Trim(',', '.', '!', '?', ':', ';', '-', '—');
-        if (!andet.Equals(navn, StringComparison.OrdinalIgnoreCase)) return t;
+        if (!Navnet.Contains(andet, StringComparer.OrdinalIgnoreCase)) return t;
 
         // Det foerste ord skal vaere ét kort ord - en hilsen, ikke en saetning.
         var foerste = ord[0].Trim(',', '.', '!', '?', ':', ';', '-', '—');
