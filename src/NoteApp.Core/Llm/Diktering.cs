@@ -275,8 +275,50 @@ public static class Voxtral
     /// underskrift; det var «[Dit navn]» dér, der gjorde en dikteret mail
     /// ubrugelig at sende videre.
     /// </param>
-    public static string Pudseprompt(Dikteringsformaal formaal, string? navn = null)
-        => Grundregel + (formaal switch
+    /// <summary>
+    /// Ordbogens ord som en linje, pudsningen kan rette efter.
+    /// </summary>
+    /// <remarks>
+    /// FORDI HVERKEN LEDETRÅDEN ELLER AFSTANDEN KAN NÅ DEM ALLE.
+    ///
+    /// Fagord sendes med som forhåndsviden, når lyden skrives ud, og bagefter
+    /// retter appen ord, der ligger tæt på et fra ordbogen. Begge dele
+    /// virker — men ingen af dem er nok til et sammensat navn, modellen aldrig
+    /// har set.
+    ///
+    /// Målt 31-08-2026: «StorageTek» kom tilbage som «Starstake». Ordet stod i
+    /// ordbogen og var sendt med, og alligevel. Afstanden mellem de to er fem
+    /// bogstavfejl; appens rettelse tør to på et ord af den længde, og det er
+    /// den rigtige forsigtighed — fem ville rette alt muligt andet forkert.
+    ///
+    /// EN SPROGMODEL KAN SE DET, EN AFSTAND IKKE KAN. «Starstake» i en række
+    /// med Omada, IBM og NetIQ er genkendeligt som StorageTek for enhver, der
+    /// ved, at ordet findes. Det er dét, listen fortæller den.
+    ///
+    /// RAMMEN ER SNÆVER MED VILJE. Der må rettes til et ord fra LISTEN og
+    /// intet andet. Uden den grænse ville en model, der er bedt om at rette
+    /// stavefejl, også rette det, den synes lyder forkert — og så er vi
+    /// tilbage ved, at den finder på.
+    /// </remarks>
+    public static string Ordbogslinje(IEnumerable<string>? fagord)
+    {
+        var rene = (fagord ?? Enumerable.Empty<string>())
+            .Where(o => !string.IsNullOrWhiteSpace(o))
+            .Select(o => o.Trim())
+            .Take(80)
+            .ToList();
+
+        if (rene.Count == 0) return "";
+
+        return "Disse navne og fagord kan forekomme: " + string.Join(", ", rene) + ". "
+             + "Er et ord i udskriften tydeligvis en fejlstavning af ét af DEM, "
+             + "så ret det. Ret intet andet — et ord, der ikke står på listen, "
+             + "skal stå, som det er, også hvis du synes det lyder forkert. ";
+    }
+
+    public static string Pudseprompt(
+        Dikteringsformaal formaal, string? navn = null, IEnumerable<string>? fagord = null)
+        => Grundregel + Ordbogslinje(fagord) + (formaal switch
     {
         Dikteringsformaal.Note =>
             "Du er en dikteringsassistent. Ryd op i den følgende rå udskrift: "
@@ -449,6 +491,7 @@ public sealed class Dikteringsklient
         string raa,
         Dikteringsformaal formaal,
         string? instruktion = null,
+        IEnumerable<string>? fagord = null,
         CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(raa)) return "";
@@ -464,7 +507,7 @@ public sealed class Dikteringsklient
                 {
                     role = "system",
                     content = string.IsNullOrWhiteSpace(instruktion)
-                        ? Voxtral.Pudseprompt(formaal, AppSettings.Current.DitNavn)
+                        ? Voxtral.Pudseprompt(formaal, AppSettings.Current.DitNavn, fagord)
                         : instruktion.Trim(),
                 },
                 new { role = "user", content = Voxtral.Indpak(raa) },
@@ -534,7 +577,7 @@ public sealed class Dikteringsklient
         var raa = await SkrivUdAsync(lydfil, fagord, sprog, ct);
         if (raa.Raa.Length == 0) return ("", raa);
 
-        return (await PudsAsync(raa.Raa, formaal, instruktion: null, ct), raa);
+        return (await PudsAsync(raa.Raa, formaal, instruktion: null, fagord: fagord, ct: ct), raa);
     }
 
     /// <summary>

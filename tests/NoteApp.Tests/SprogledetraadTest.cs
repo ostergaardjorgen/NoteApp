@@ -1,4 +1,4 @@
-using NoteApp.Core.Llm;
+﻿using NoteApp.Core.Llm;
 using Xunit;
 
 namespace NoteApp.Tests;
@@ -75,5 +75,55 @@ public class SprogledetraadTest
     public void Uden_noget_som_helst_er_prompten_tom()
     {
         Assert.Equal("", Voxtral.Prompt("en", sprogetErValgt: true, null));
+    }
+
+    // ============ ORDBOGEN I PUDSNINGEN ============
+
+    /// <summary>
+    /// Et sammensat navn kan ligge for langt vaek til baade ledetraad og afstand.
+    /// </summary>
+    /// <remarks>
+    /// Maalt 31-08-2026: «StorageTek» kom tilbage som «Starstake». Ordet stod
+    /// i ordbogen og var sendt med som forhaandsviden. Afstanden mellem de to
+    /// er fem bogstavfejl; appens rettelse toer to paa et ord af den laengde.
+    ///
+    /// En sprogmodel kan se det, en afstand ikke kan: «Starstake» i en raekke
+    /// med Omada, IBM og NetIQ er genkendeligt som StorageTek.
+    /// </remarks>
+    [Fact]
+    public void Ordbogen_kommer_med_i_pudseinstruktionen()
+    {
+        var p = Voxtral.Pudseprompt(
+            Dikteringsformaal.Note, navn: null, fagord: new[] { "StorageTek", "Omada" });
+
+        Assert.Contains("StorageTek, Omada", p);
+        Assert.Contains("fejlstavning", p);
+    }
+
+    /// <summary>
+    /// Rammen er snaever med vilje.
+    /// </summary>
+    /// <remarks>
+    /// Uden graensen ville en model, der er bedt om at rette stavefejl, ogsaa
+    /// rette det, den synes lyder forkert - og saa er vi tilbage ved, at den
+    /// finder paa.
+    /// </remarks>
+    [Fact]
+    public void Der_maa_kun_rettes_til_ord_fra_listen()
+    {
+        var p = Voxtral.Pudseprompt(
+            Dikteringsformaal.Note, navn: null, fagord: new[] { "StorageTek" });
+
+        Assert.Contains("Ret intet andet", p);
+    }
+
+    [Fact]
+    public void Uden_ordbog_staar_instruktionen_som_foer()
+    {
+        var uden = Voxtral.Pudseprompt(Dikteringsformaal.Note);
+        var tom = Voxtral.Pudseprompt(Dikteringsformaal.Note, null, new string[0]);
+
+        Assert.Equal(uden, tom);
+        Assert.DoesNotContain("kan forekomme", uden);
     }
 }
