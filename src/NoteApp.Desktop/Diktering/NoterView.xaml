@@ -15,6 +15,7 @@
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
       <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
       <RowDefinition Height="*" />
     </Grid.RowDefinitions>
 
@@ -40,7 +41,33 @@
       </StackPanel>
     </Border>
 
-    <Border Grid.Row="2" Background="{DynamicResource Panel}" CornerRadius="10"
+    <!-- ============ RET ET ORD, DÉR HVOR DET STAAR ============
+         Ruden kommer frem, naar man klikker paa et ord i en note. Den staar
+         over listen og ikke inde i den enkelte note: rettelsen gaelder
+         ordbogen og ikke den note, man tilfaeldigvis kiggede paa. -->
+    <Border x:Name="Retrude" Grid.Row="2" Visibility="Collapsed" Margin="0,0,0,12"
+            Background="{DynamicResource Panel}" CornerRadius="10" Padding="16,12"
+            BorderBrush="{DynamicResource Accent}" BorderThickness="1">
+      <StackPanel>
+        <TextBlock x:Name="Rettitel" FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap" />
+        <Grid Margin="0,8,0,0">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" />
+          </Grid.ColumnDefinitions>
+          <TextBox x:Name="Retfelt" Padding="9,6" KeyDown="Retfelt_Tast" />
+          <Button Grid.Column="1" Margin="8,0,0,0" Padding="14,6" Click="RetGem_Klik"
+                  Content="{i18n:Oversat searchview.ret_gem}" />
+          <Button Grid.Column="2" Margin="6,0,0,0" Padding="12,6" Click="RetLuk_Klik"
+                  Content="{i18n:Oversat faelles.fortryd}" />
+        </Grid>
+        <TextBlock x:Name="Retsvar" Margin="0,8,0,0" FontSize="12" TextWrapping="Wrap"
+                   Foreground="{DynamicResource TekstSvag}" />
+      </StackPanel>
+    </Border>
+
+    <Border Grid.Row="3" Background="{DynamicResource Panel}" CornerRadius="10"
             BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
       <Grid>
         <Grid.RowDefinitions>
@@ -98,8 +125,12 @@
                       </StackPanel>
                     </Grid>
 
-                    <TextBlock Text="{Binding Tekst}" FontSize="13" TextWrapping="Wrap"
-                               LineHeight="20" Margin="0,9,0,0" />
+                    <!-- HVERT ORD KAN KLIKKES. Man opdager et forkert hoert ord
+                         dér, hvor det staar - i noten, lige efter man har
+                         dikteret. Skal man huske stavemaaden, gaa til ordbogen
+                         og skrive den ind, bliver det ikke gjort. Se Ordklik. -->
+                    <TextBlock i18n:Ordklik.Tekst="{Binding Tekst}" FontSize="13"
+                               TextWrapping="Wrap" LineHeight="20" Margin="0,9,0,0" />
 
                     <!-- ============ DEN SAMME TALE, EN ANDEN FORM ============
 

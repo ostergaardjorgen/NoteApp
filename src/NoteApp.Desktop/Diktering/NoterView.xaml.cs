@@ -47,6 +47,12 @@ public partial class NoterView : UserControl
 
         Loaded += (_, _) => Vis();
         Unloaded += (_, _) => Aendret = null;
+
+        // KLIKKET HOERER TIL DEN SKAERM, MAN STAAR PAA. Bliver det staaende,
+        // naar man klikker vaek, ville et klik i en anden note aabne ruden
+        // paa en skaerm, ingen kigger paa.
+        IsVisibleChanged += (_, _) =>
+            Ordklik.Klikket = IsVisible ? Ordvalgt : null;
     }
 
     private void Vis()
@@ -175,5 +181,82 @@ public partial class NoterView : UserControl
         Diktatnoter.Ryd();
         Vis();
     }
-}
 
+    // ==================== RET ET ORD ====================
+
+    /// <summary>Det ord, der er klikket paa.</summary>
+    private string? _retter;
+
+    /// <summary>
+    /// Åbner rettelsen for det ord, der blev klikket på.
+    /// </summary>
+    /// <remarks>
+    /// MAN OPDAGER FEJLEN HER. Et forkert hørt ord ses dér, hvor det står — i
+    /// noten, lige efter man har dikteret. Skal man huske stavemåden, gå til
+    /// ordbogen og skrive den ind, bliver det ikke gjort.
+    ///
+    /// Brugerens ord 31-08-2026: «jeg burde kunne klikke på Storistech og
+    /// tilføje det til StorageTek».
+    /// </remarks>
+    private void Ordvalgt(string ord)
+    {
+        _retter = ord;
+
+        Rettitel.Text = Sprog.T("searchview.ret_titel", ord);
+        Retsvar.Text = "";
+        Retfelt.Text = "";
+        Retrude.Visibility = Visibility.Visible;
+
+        Retfelt.Focus();
+    }
+
+    private void Retfelt_Tast(object sender, System.Windows.Input.KeyEventArgs e)
+    {
+        if (e.Key != System.Windows.Input.Key.Enter) return;
+
+        GemRettelsen();
+        e.Handled = true;
+    }
+
+    private void RetGem_Klik(object sender, RoutedEventArgs e) => GemRettelsen();
+
+    private void RetLuk_Klik(object sender, RoutedEventArgs e)
+    {
+        Retrude.Visibility = Visibility.Collapsed;
+        _retter = null;
+    }
+
+    /// <summary>
+    /// Skriver rettelsen i ordbogen.
+    /// </summary>
+    /// <remarks>
+    /// TO TING SKER PÅ ÉN GANG. Det rigtige ord lægges i ordbogen, hvis det
+    /// ikke står der, og det forkerte lægges som alias. Uden det første ville
+    /// aliasset pege på et ord, der ikke findes; uden det andet ville den
+    /// samme fejl komme igen i morgen.
+    ///
+    /// NOTEN SELV RETTES IKKE. Den er en gengivelse af det, der blev sagt,
+    /// og den skal blive ved at være dét. Rettelsen gælder fremover — det er
+    /// ordbogen, der lærer noget, ikke historikken, der bliver lavet om.
+    /// </remarks>
+    private void GemRettelsen()
+    {
+        if (_retter is not { } forkert) return;
+
+        var rigtigt = (Retfelt.Text ?? "").Trim();
+        if (rigtigt.Length == 0) return;
+
+        try
+        {
+            Ordbibliotek.Tilfoej(rigtigt);
+
+            Retsvar.Text = Ordbibliotek.TilfoejAlias(rigtigt, forkert)
+                ? Sprog.T("searchview.ret_lagt", forkert, rigtigt)
+                : Sprog.T("searchview.ret_kan_ikke", forkert);
+        }
+        catch (Exception ex)
+        {
+            Retsvar.Text = Sprog.T("diktering.gik_galt", ex.Message);
+        }
+    }
+}

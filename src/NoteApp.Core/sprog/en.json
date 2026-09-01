@@ -1068,7 +1068,8 @@
     "type_note": "Note",
     "type_mail": "Email",
     "type_prompt": "Prompt",
-    "type_opgave": "Task"
+    "type_opgave": "Task",
+    "ret_ordet_hjaelp": "Click to correct «{0}» in the dictionary"
   },
   "lytteboble": {
     "pause": "Pause the listening",

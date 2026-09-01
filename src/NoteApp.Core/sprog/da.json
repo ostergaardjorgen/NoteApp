@@ -1068,7 +1068,8 @@
     "type_note": "Note",
     "type_mail": "Mail",
     "type_prompt": "Prompt",
-    "type_opgave": "Opgave"
+    "type_opgave": "Opgave",
+    "ret_ordet_hjaelp": "Klik for at rette «{0}» i ordbogen"
   },
   "lytteboble": {
     "pause": "Sæt lytningen på pause",
