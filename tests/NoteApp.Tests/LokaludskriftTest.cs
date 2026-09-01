@@ -82,12 +82,53 @@ public class LokaludskriftTest
     /// StargeTech, NetIQ» - det foerste ord helt vaek og StorageTek forkert,
     /// selv om begge stod i ordbogen.
     /// </remarks>
+    /// <summary>
+    /// Listen skal staa i en dansk saetning - ogsaa lokalt.
+    /// </summary>
+    /// <remarks>
+    /// Whispers «--prompt» er ikke en instruktion. Den saettes ind som
+    /// TIDLIGERE TEKST, og modellen skriver videre i den stil, den finder. En
+    /// raekke fagord uden sammenhaeng er ikke dansk prosa.
+    ///
+    /// MAALT 31-08-2026: en dansk diktering kom tilbage som «Hae, Pia. Fett,
+    /// er du klar? Eg kunne godt senga» - islandsk-faeroesk i formen, selv om
+    /// motoren koerte med «-l da». Sproget var valgt; det var ledetraaden, der
+    /// traak.
+    ///
+    /// Den samme fejl blev rettet i skyen samme dag og ikke her.
+    /// </remarks>
     [Fact]
-    public void Fagordene_bliver_til_en_ledetraad()
+    public void Fagordene_staar_inde_i_en_dansk_saetning()
     {
-        var t = Lokaludskrift.Ledetraad(new[] { "Omada", "StorageTek", "NetIQ" });
+        var t = Lokaludskrift.Ledetraad(new[] { "Omada", "StorageTek", "NetIQ" }, "da");
 
-        Assert.Equal("Omada, StorageTek, NetIQ.", t);
+        Assert.Contains("diktering på dansk", t);
+        Assert.Contains("Omada, StorageTek, NetIQ", t);
+    }
+
+    /// <summary>
+    /// Og sproget skal staa til SIDST ogsaa.
+    /// </summary>
+    /// <remarks>
+    /// Det sidste, modellen laeser foer lyden, er dét, der vejer tungest. Er
+    /// det «SSO, MFA, PIM», skriver den videre paa engelsk.
+    /// </remarks>
+    [Fact]
+    public void Ledetraaden_slutter_ikke_paa_et_fagord()
+    {
+        var t = Lokaludskrift.Ledetraad(new[] { "SSO", "MFA", "PIM" }, "da");
+
+        Assert.False(t.TrimEnd('.', ' ').EndsWith("PIM"),
+            "Ledetraaden slutter paa et engelsk fagord.");
+    }
+
+    [Theory]
+    [InlineData("en", "dictation in English")]
+    [InlineData("no", "diktat på norsk")]
+    [InlineData(null, "diktering på dansk")]
+    public void Ledetraaden_foelger_sproget(string? sprog, string vented)
+    {
+        Assert.Contains(vented, Lokaludskrift.Ledetraad(new[] { "Omada" }, sprog));
     }
 
     /// <summary>
@@ -101,7 +142,7 @@ public class LokaludskriftTest
     [Fact]
     public void Anfoerselstegn_i_et_fagord_braekker_ikke_kommandolinjen()
     {
-        var t = Lokaludskrift.Ledetraad(new[] { "Om\"ada", "NetIQ" });
+        var t = Lokaludskrift.Ledetraad(new[] { "Om\"ada", "NetIQ" }, "da");
 
         Assert.DoesNotContain("\"", t);
         Assert.Contains("Omada", t);
@@ -112,9 +153,10 @@ public class LokaludskriftTest
     {
         var mange = Enumerable.Range(1, 500).Select(n => "ord" + n);
 
-        var t = Lokaludskrift.Ledetraad(mange);
+        var t = Lokaludskrift.Ledetraad(mange, "da");
 
-        Assert.Equal(80, t.TrimEnd('.').Split(", ").Length);
+        Assert.Contains("ord80", t);
+        Assert.DoesNotContain("ord81", t);
     }
 
     [Fact]

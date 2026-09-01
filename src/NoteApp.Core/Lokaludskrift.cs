@@ -115,7 +115,7 @@ public static class Lokaludskrift
         // whisper tager imod «--prompt» som forhåndsviden. Det er den samme
         // mekanisme som i skyen: ordene er ikke en facitliste, men en
         // forventning, der trækker udskriften mod de rigtige stavemåder.
-        var ledetraad = Ledetraad(fagord);
+        var ledetraad = Ledetraad(fagord, rent);
         var prompt = ledetraad.Length > 0 ? $" --prompt \"{ledetraad}\"" : "";
 
         var start = new ProcessStartInfo(motor)
@@ -159,19 +159,50 @@ public static class Lokaludskrift
     /// siden løbe over. Firs ord er rigeligt til en ledetråd og langt under
     /// grænsen.
     /// </remarks>
-    public static string Ledetraad(IEnumerable<string>? fagord)
+    /// <param name="sprog">
+    /// Sproget, der tales. Ledetråden skrives i det, så listen ikke trækker
+    /// udskriften et andet sted hen.
+    /// </param>
+    public static string Ledetraad(IEnumerable<string>? fagord, string? sprog = null)
     {
-        if (fagord is null) return "";
-
-        var rene = fagord
+        var rene = (fagord ?? Enumerable.Empty<string>())
             .Where(o => !string.IsNullOrWhiteSpace(o))
             .Select(o => o.Replace("\"", "").Trim())
             .Where(o => o.Length > 0)
             .Take(80)
             .ToList();
 
-        return rene.Count == 0 ? "" : string.Join(", ", rene) + ".";
+        if (rene.Count == 0) return "";
+
+        // ============ LISTEN SKAL STAA I EN DANSK SAETNING ============
+        //
+        // Whispers «--prompt» er ikke en instruktion. Den saettes ind som
+        // TIDLIGERE TEKST, og modellen skriver videre i den stil, den finder.
+        // En raekke fagord uden sammenhaeng - «IAM, SCIM, SSO, PIM» - er ikke
+        // dansk prosa, og udskriften driver med.
+        //
+        // MAALT 31-08-2026: en dansk diktering kom tilbage som «Hae, Pia.
+        // Fett, er du klar? Eg kunne godt senga» - islandsk-faeroesk i
+        // formen, selv om motoren koerte med «-l da». Sproget var altsaa
+        // valgt; det var ledetraaden, der traak.
+        //
+        // DEN SAMME FEJL BLEV RETTET I SKYEN SAMME DAG og ikke her. Se
+        // Voxtral.Prompt: sproget staar i begge ender, og listen staar inde i
+        // en saetning, saa det sidste modellen laeser foer lyden, er dansk.
+        var indledning = Sprogindledning(sprog);
+
+        return indledning + " " + string.Join(", ", rene) + ". " + indledning;
     }
+
+    /// <summary>Sætningen, listen pakkes ind i — på det talte sprog.</summary>
+    private static string Sprogindledning(string? sprog) =>
+        sprog?.Trim().ToLowerInvariant() switch
+        {
+            "no" => "Det følgende er en diktat på norsk. Disse ordene kan forekomme:",
+            "sv" => "Det följande är en diktering på svenska. Dessa ord kan förekomma:",
+            "en" => "The following is a dictation in English. These words may occur:",
+            _ => "Det følgende er en diktering på dansk. Disse ord kan forekomme:",
+        };
 
     /// <summary>
     /// Piller udskriften ud af whispers udskrift.
