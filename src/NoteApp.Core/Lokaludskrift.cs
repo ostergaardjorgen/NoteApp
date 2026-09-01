@@ -165,43 +165,53 @@ public static class Lokaludskrift
     /// </param>
     public static string Ledetraad(IEnumerable<string>? fagord, string? sprog = null)
     {
-        var rene = (fagord ?? Enumerable.Empty<string>())
-            .Where(o => !string.IsNullOrWhiteSpace(o))
-            .Select(o => o.Replace("\"", "").Trim())
-            .Where(o => o.Length > 0)
-            .Take(80)
-            .ToList();
-
-        if (rene.Count == 0) return "";
-
-        // ============ LISTEN SKAL STAA I EN DANSK SAETNING ============
+        // ============ ORDLISTEN ER TAGET UD IGEN ============
+        //
+        // OBSERVERET TO GANGE 31-08-2026, begge med «-l da» sat:
+        //
+        //   «Hae, Pia. Fett, er du klar? Eg kunne godt senga.»
+        //   «Hae, Pia. Se er ut til, at den er ved at vaere gott nu ...»
+        //
+        // Islandsk-faeroesk i formen. Sproget VAR valgt - historikken viser,
+        // at lyden blev skrevet ud lokalt - saa det var ikke et gaet.
         //
         // Whispers «--prompt» er ikke en instruktion. Den saettes ind som
         // TIDLIGERE TEKST, og modellen skriver videre i den stil, den finder.
-        // En raekke fagord uden sammenhaeng - «IAM, SCIM, SSO, PIM» - er ikke
-        // dansk prosa, og udskriften driver med.
+        // Fyrre fagord med accenter og forkortelser - «IAM, SCIM, ISO 27001,
+        // Joergen» - er ikke dansk prosa, og udskriften driver med.
         //
-        // MAALT 31-08-2026: en dansk diktering kom tilbage som «Hae, Pia.
-        // Fett, er du klar? Eg kunne godt senga» - islandsk-faeroesk i
-        // formen, selv om motoren koerte med «-l da». Sproget var altsaa
-        // valgt; det var ledetraaden, der traak.
+        // Foerste forsoeg var at pakke listen ind i en dansk saetning, som det
+        // blev gjort i skyen. Det raakkede ikke: det andet udfald ovenfor kom
+        // EFTER den rettelse.
         //
-        // DEN SAMME FEJL BLEV RETTET I SKYEN SAMME DAG og ikke her. Se
-        // Voxtral.Prompt: sproget staar i begge ender, og listen staar inde i
-        // en saetning, saa det sidste modellen laeser foer lyden, er dansk.
-        var indledning = Sprogindledning(sprog);
-
-        return indledning + " " + string.Join(", ", rene) + ". " + indledning;
+        // BYTTET ER DAARLIGT. Listen gav ét ord mere rigtigt - «Omada» - og
+        // kostede hele saetningens sprog. Et forkert egennavn kan rettes med
+        // et alias, og det er ordret og sikkert. En saetning paa islandsk kan
+        // ingenting redde.
+        //
+        // Saa staar der nu kun én dansk saetning. Den kan ikke traekke
+        // udskriften noget forkert sted hen, for den ER det sprog, der tales.
+        //
+        // IKKE MAALT, MEN SET TO GANGE. En dansk lydproeve kunne ikke laves:
+        // maskinen har ingen dansk talestemme, og leverandoerens tale-model
+        // har kun engelsk. Kommer det islandske igen UDEN listen, ligger
+        // fejlen et andet sted, og saa skal den findes dér.
+        return Sprogindledning(sprog);
     }
 
-    /// <summary>Sætningen, listen pakkes ind i — på det talte sprog.</summary>
+    /// <summary>Den ene sætning, der sendes med som ledetråd.</summary>
+    /// <remarks>
+    /// Den er på det sprog, der tales, og siger ikke andet. En ledetråd, der
+    /// er dansk prosa, kan kun trække udskriften mod dansk — og det er
+    /// præcis, hvad den skal.
+    /// </remarks>
     private static string Sprogindledning(string? sprog) =>
         sprog?.Trim().ToLowerInvariant() switch
         {
-            "no" => "Det følgende er en diktat på norsk. Disse ordene kan forekomme:",
-            "sv" => "Det följande är en diktering på svenska. Dessa ord kan förekomma:",
-            "en" => "The following is a dictation in English. These words may occur:",
-            _ => "Det følgende er en diktering på dansk. Disse ord kan forekomme:",
+            "no" => "Det følgende er en diktat på norsk.",
+            "sv" => "Det följande är en diktering på svenska.",
+            "en" => "The following is a dictation in English.",
+            _ => "Det følgende er en diktering på dansk.",
         };
 
     /// <summary>

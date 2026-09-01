@@ -83,43 +83,33 @@ public class LokaludskriftTest
     /// selv om begge stod i ordbogen.
     /// </remarks>
     /// <summary>
-    /// Listen skal staa i en dansk saetning - ogsaa lokalt.
+    /// Ordlisten hoerer IKKE til i whispers ledetraad.
     /// </summary>
     /// <remarks>
-    /// Whispers «--prompt» er ikke en instruktion. Den saettes ind som
-    /// TIDLIGERE TEKST, og modellen skriver videre i den stil, den finder. En
-    /// raekke fagord uden sammenhaeng er ikke dansk prosa.
+    /// OBSERVERET TO GANGE 31-08-2026, begge med «-l da» sat:
     ///
-    /// MAALT 31-08-2026: en dansk diktering kom tilbage som «Hae, Pia. Fett,
-    /// er du klar? Eg kunne godt senga» - islandsk-faeroesk i formen, selv om
-    /// motoren koerte med «-l da». Sproget var valgt; det var ledetraaden, der
-    /// traak.
+    ///   «Hae, Pia. Fett, er du klar? Eg kunne godt senga.»
+    ///   «Hae, Pia. Se er ut til, at den er ved at vaere gott nu ...»
     ///
-    /// Den samme fejl blev rettet i skyen samme dag og ikke her.
+    /// Islandsk-faeroesk i formen, selv om sproget var VALGT.
+    ///
+    /// Whispers «--prompt» er ikke en instruktion; den saettes ind som
+    /// TIDLIGERE TEKST, og modellen skriver videre i den stil, den finder.
+    /// Fyrre fagord er ikke dansk prosa.
+    ///
+    /// At pakke listen ind i en dansk saetning raakkede ikke - det andet
+    /// udfald kom EFTER den rettelse. Listen gav ét ord mere rigtigt og
+    /// kostede hele saetningens sprog. Et forkert egennavn kan rettes med et
+    /// alias; en saetning paa islandsk kan ingenting redde.
     /// </remarks>
     [Fact]
-    public void Fagordene_staar_inde_i_en_dansk_saetning()
+    public void Ledetraaden_er_kun_en_dansk_saetning()
     {
-        var t = Lokaludskrift.Ledetraad(new[] { "Omada", "StorageTek", "NetIQ" }, "da");
+        var t = Lokaludskrift.Ledetraad(new[] { "Omada", "SCIM", "SSO", "ISO 27001" }, "da");
 
         Assert.Contains("diktering på dansk", t);
-        Assert.Contains("Omada, StorageTek, NetIQ", t);
-    }
-
-    /// <summary>
-    /// Og sproget skal staa til SIDST ogsaa.
-    /// </summary>
-    /// <remarks>
-    /// Det sidste, modellen laeser foer lyden, er dét, der vejer tungest. Er
-    /// det «SSO, MFA, PIM», skriver den videre paa engelsk.
-    /// </remarks>
-    [Fact]
-    public void Ledetraaden_slutter_ikke_paa_et_fagord()
-    {
-        var t = Lokaludskrift.Ledetraad(new[] { "SSO", "MFA", "PIM" }, "da");
-
-        Assert.False(t.TrimEnd('.', ' ').EndsWith("PIM"),
-            "Ledetraaden slutter paa et engelsk fagord.");
+        Assert.DoesNotContain("Omada", t);
+        Assert.DoesNotContain("SCIM", t);
     }
 
     [Theory]
@@ -128,42 +118,16 @@ public class LokaludskriftTest
     [InlineData(null, "diktering på dansk")]
     public void Ledetraaden_foelger_sproget(string? sprog, string vented)
     {
-        Assert.Contains(vented, Lokaludskrift.Ledetraad(new[] { "Omada" }, sprog));
+        Assert.Contains(vented, Lokaludskrift.Ledetraad(null, sprog));
     }
 
     /// <summary>
-    /// Anfoerselstegn skal vaek.
+    /// Og den maa ikke vaere tom - saa er der intet, der traekker mod dansk.
     /// </summary>
-    /// <remarks>
-    /// Ledetraaden saettes ind i en kommandolinje i anfoerselstegn. Staar der
-    /// et i selve teksten, braekker resten af linjen af, og motoren faar noget
-    /// helt andet at vide, end der stod.
-    /// </remarks>
     [Fact]
-    public void Anfoerselstegn_i_et_fagord_braekker_ikke_kommandolinjen()
+    public void Der_er_altid_en_ledetraad()
     {
-        var t = Lokaludskrift.Ledetraad(new[] { "Om\"ada", "NetIQ" }, "da");
-
-        Assert.DoesNotContain("\"", t);
-        Assert.Contains("Omada", t);
-    }
-
-    [Fact]
-    public void En_ordbog_der_vokser_loeber_ikke_over()
-    {
-        var mange = Enumerable.Range(1, 500).Select(n => "ord" + n);
-
-        var t = Lokaludskrift.Ledetraad(mange, "da");
-
-        Assert.Contains("ord80", t);
-        Assert.DoesNotContain("ord81", t);
-    }
-
-    [Fact]
-    public void Ingen_ordbog_giver_ingen_ledetraad()
-    {
-        Assert.Equal("", Lokaludskrift.Ledetraad(null));
-        Assert.Equal("", Lokaludskrift.Ledetraad(new string[0]));
-        Assert.Equal("", Lokaludskrift.Ledetraad(new[] { "  ", "" }));
+        Assert.NotEmpty(Lokaludskrift.Ledetraad(null, "da"));
+        Assert.NotEmpty(Lokaludskrift.Ledetraad(new string[0], "da"));
     }
 }
