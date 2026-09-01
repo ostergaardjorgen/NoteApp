@@ -20,6 +20,7 @@
       <RowDefinition Height="Auto" />
       <RowDefinition Height="Auto" />
       <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
       <RowDefinition Height="*" />
       <RowDefinition Height="Auto" />
     </Grid.RowDefinitions>
@@ -40,7 +41,7 @@
                  Text="{i18n:Oversat ordbogview.advarsel}" />
     </Border>
 
-    <Grid Grid.Row="2" Margin="0,0,0,12" HorizontalAlignment="Left" Width="760">
+    <Grid Grid.Row="2" Margin="0,0,0,0" HorizontalAlignment="Left" Width="760">
       <Grid.ColumnDefinitions>
         <ColumnDefinition Width="*" />
         <ColumnDefinition Width="Auto" />
@@ -49,7 +50,10 @@
       <StackPanel Grid.Column="0">
         <TextBlock Style="{StaticResource Underskrift}" Margin="0,0,0,4"
                    Text="{i18n:Oversat ordbogview.nyt}" />
-        <TextBox x:Name="Nyt" Padding="10,8" KeyDown="Nyt_Tast" />
+        <!-- LISTEN FOELGER MED, MENS MAN SKRIVER. Ordbogen vokser, og man kan
+             ikke huske, hvad der staar. Uden det faar man foerst at vide, at
+             ordet allerede findes, EFTER man har trykket Tilfoej. -->
+        <TextBox x:Name="Nyt" Padding="10,8" KeyDown="Nyt_Tast" TextChanged="Nyt_Skrevet" />
       </StackPanel>
 
       <Button x:Name="Tilfoej" Grid.Column="1" Margin="10,0,0,0" Padding="18,9"
@@ -58,14 +62,21 @@
               Content="{i18n:Oversat ordbogview.tilfoej}" />
     </Grid>
 
-    <Border Grid.Row="3" HorizontalAlignment="Left" Width="760"
+    <!-- SVARET STAAR, MENS MAN SKRIVER, og ikke foerst naar man har trykket.
+         Uden det opdager man foerst, at ordet allerede findes, bagefter. -->
+    <TextBlock x:Name="Ligner" Grid.Row="3" Visibility="Collapsed"
+               HorizontalAlignment="Left" MaxWidth="760" Margin="0,8,0,12"
+               FontSize="12.5" TextWrapping="Wrap"
+               Foreground="{DynamicResource TekstSvag}" />
+
+    <Border Grid.Row="4" HorizontalAlignment="Left" Width="760"
             Background="{DynamicResource Panel}" CornerRadius="10"
             BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
       <ListBox x:Name="Liste" Background="Transparent" BorderThickness="0" Padding="6"
                ScrollViewer.VerticalScrollBarVisibility="Auto" />
     </Border>
 
-    <Grid Grid.Row="4" Margin="0,14,0,0" HorizontalAlignment="Left" Width="760">
+    <Grid Grid.Row="5" Margin="0,14,0,0" HorizontalAlignment="Left" Width="760">
       <Grid.ColumnDefinitions>
         <ColumnDefinition Width="Auto" />
         <ColumnDefinition Width="*" />

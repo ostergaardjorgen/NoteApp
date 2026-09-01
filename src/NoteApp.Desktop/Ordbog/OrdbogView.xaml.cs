@@ -1,4 +1,4 @@
-using System.IO;
+﻿using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -39,9 +39,10 @@ public partial class OrdbogView : UserControl
     /// </remarks>
     private void Vis()
     {
-        var ord = Ordbibliotek.Laes();
+        _alle = Ordbibliotek.Laes();
+        var ord = _alle;
 
-        Liste.ItemsSource = ord;
+        Filtrer();
 
         Antal.Text = ord.Count == 0
             ? Sprog.T("ordbogview.tom")
@@ -49,6 +50,67 @@ public partial class OrdbogView : UserControl
                 ? Sprog.T("ordbogview.antal", ord.Count, Ordbibliotek.MaksSendte)
                 : Sprog.T("ordbogview.antal_alle", ord.Count);
     }
+
+    /// <summary>Ordbogen som den står på disken. Listen på skærmen er et udsnit.</summary>
+    private List<string> _alle = new();
+
+    /// <summary>
+    /// Viser de ord, der ligner det, man er ved at skrive.
+    /// </summary>
+    /// <remarks>
+    /// FORDI MAN IKKE KAN HUSKE, HVAD DER STÅR I FORVEJEN.
+    ///
+    /// Ordbogen vokser, og listen er lang. Skriver man «IAM» ind, og ordet
+    /// står der allerede, får man beskeden først EFTER at have trykket
+    /// Tilføj — og så har man brugt tid på at finde ud af noget, listen
+    /// kunne have vist med det samme.
+    ///
+    /// Der søges i hele ordet og ikke kun forfra: «tek» skal finde
+    /// «StorageTek». Man leder efter et ord, man ikke kan huske stavemåden
+    /// på, og så er begyndelsen dét, man er mest i tvivl om.
+    ///
+    /// ALIASSERNE TÆLLER MED. Står der «StorageTek = starz tech», skal man
+    /// kunne finde linjen ved at skrive «starz» — det er jo dét, man har set
+    /// på skærmen.
+    ///
+    /// Er feltet tomt, vises hele ordbogen. Et filter, der skjuler noget uden
+    /// at nogen har bedt om det, er en liste, man ikke kan stole på.
+    /// </remarks>
+    private void Filtrer()
+    {
+        var soeg = (Nyt.Text ?? "").Trim();
+
+        if (soeg.Length == 0)
+        {
+            Liste.ItemsSource = _alle;
+            Ligner.Visibility = Visibility.Collapsed;
+            return;
+        }
+
+        var aliasser = Ordbibliotek.Aliasser();
+
+        var fundne = _alle
+            .Where(o => o.Contains(soeg, StringComparison.OrdinalIgnoreCase)
+                        || aliasser.Any(a => a.Value.Equals(o, StringComparison.OrdinalIgnoreCase)
+                                             && a.Key.Contains(soeg, StringComparison.OrdinalIgnoreCase)))
+            .ToList();
+
+        Liste.ItemsSource = fundne;
+
+        // Det praecise fund siges tydeligt. «Der er fire ord, der ligner» er
+        // ikke svar paa «staar det her i forvejen».
+        var praecis = _alle.FirstOrDefault(o => o.Equals(soeg, StringComparison.OrdinalIgnoreCase));
+
+        Ligner.Text = praecis is not null
+            ? Sprog.T("ordbogview.staar_allerede", praecis)
+            : fundne.Count == 0
+                ? Sprog.T("ordbogview.ingen_ligner")
+                : Sprog.T("ordbogview.ligner", fundne.Count);
+
+        Ligner.Visibility = Visibility.Visible;
+    }
+
+    private void Nyt_Skrevet(object sender, TextChangedEventArgs e) => Filtrer();
 
     private void Tilfoej_Klik(object sender, RoutedEventArgs e) => TilfoejOrd();
 

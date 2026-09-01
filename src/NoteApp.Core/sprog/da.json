@@ -957,7 +957,10 @@
     "findes": "«{0}» står der allerede.",
     "hentet": "Hentet {0} nye ord ind.",
     "gemt": "{0} ord gemt i {1}",
-    "filter": "Tekstfil (*.txt)|*.txt|Alle filer (*.*)|*.*"
+    "filter": "Tekstfil (*.txt)|*.txt|Alle filer (*.*)|*.*",
+    "staar_allerede": "«{0}» står der allerede.",
+    "ligner": "{0} ord ligner det, du skriver.",
+    "ingen_ligner": "Ingen ord ligner det endnu — det er nyt."
   },
   "teksttyper": {
     "note": "Note",

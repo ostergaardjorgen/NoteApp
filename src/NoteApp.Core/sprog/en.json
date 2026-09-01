@@ -957,7 +957,10 @@
     "findes": "«{0}» is already there.",
     "hentet": "Loaded {0} new words.",
     "gemt": "{0} words saved to {1}",
-    "filter": "Text file (*.txt)|*.txt|All files (*.*)|*.*"
+    "filter": "Text file (*.txt)|*.txt|All files (*.*)|*.*",
+    "staar_allerede": "«{0}» is already there.",
+    "ligner": "{0} words match what you are typing.",
+    "ingen_ligner": "No words match yet — this one is new."
   },
   "teksttyper": {
     "note": "Note",
