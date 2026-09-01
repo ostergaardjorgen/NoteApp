@@ -960,7 +960,13 @@
     "filter": "Tekstfil (*.txt)|*.txt|Alle filer (*.*)|*.*",
     "staar_allerede": "«{0}» står der allerede.",
     "ligner": "{0} ord ligner det, du skriver.",
-    "ingen_ligner": "Ingen ord ligner det endnu — det er nyt."
+    "ingen_ligner": "Ingen ord ligner det endnu — det er nyt.",
+    "alias_overskrift": "Ret også fra en anden stavemåde",
+    "alias_under": "Vælg et ord i listen ovenfor, og skriv den stavemåde, du så i udskriften. Så rettes den til ordet hver gang — også når den ligger for langt fra til, at appen selv tør.",
+    "alias_knap": "Ret til det valgte",
+    "alias_vaelg": "Vælg først et ord i listen.",
+    "alias_lagt": "«{0}» rettes nu til «{1}».",
+    "alias_kan_ikke": "Den kunne ikke lægges til. Står den der allerede, eller er den selv et ord i ordbogen?"
   },
   "teksttyper": {
     "note": "Note",

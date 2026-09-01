@@ -238,4 +238,63 @@ public partial class OrdbogView : UserControl
             Antal.Text = ex.Message;
         }
     }
+
+    // ==================== ALIASSER ====================
+
+    /// <summary>
+    /// Feltet virker kun, når der er valgt et ord.
+    /// </summary>
+    /// <remarks>
+    /// En stavemåde skal rettes TIL noget. Uden et valgt ord er der ingen at
+    /// rette til, og en knap, der ikke kan gøre noget, skal ikke kunne
+    /// trykkes.
+    /// </remarks>
+    private void Liste_Valgt(object sender, SelectionChangedEventArgs e)
+    {
+        var valgt = Liste.SelectedItem is Ordvisning v;
+
+        Aliasfelt.IsEnabled = valgt;
+        Aliasknap.IsEnabled = valgt;
+
+        if (!valgt) Aliassvar.Text = "";
+    }
+
+    private void Alias_Tast(object sender, KeyEventArgs e)
+    {
+        if (e.Key != Key.Enter) return;
+
+        TilfoejAlias();
+        e.Handled = true;
+    }
+
+    private void Alias_Klik(object sender, RoutedEventArgs e) => TilfoejAlias();
+
+    private void TilfoejAlias()
+    {
+        if (Liste.SelectedItem is not Ordvisning valgt)
+        {
+            Aliassvar.Text = Sprog.T("ordbogview.alias_vaelg");
+            return;
+        }
+
+        var forkert = (Aliasfelt.Text ?? "").Trim();
+        if (forkert.Length == 0) return;
+
+        if (!Ordbibliotek.TilfoejAlias(valgt.Ord, forkert))
+        {
+            Aliassvar.Text = Sprog.T("ordbogview.alias_kan_ikke");
+            return;
+        }
+
+        Aliassvar.Text = Sprog.T("ordbogview.alias_lagt", forkert, valgt.Ord);
+        Aliasfelt.Text = "";
+
+        // Listen skal vise den nye pil med det samme - ellers ved man ikke, om
+        // det gik igennem.
+        var ord = valgt.Ord;
+        Vis();
+
+        Liste.SelectedItem = (Liste.ItemsSource as IEnumerable<Ordvisning>)?
+            .FirstOrDefault(o => o.Ord == ord);
+    }
 }

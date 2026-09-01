@@ -125,6 +125,69 @@ public static class Ordbibliotek
         return ud;
     }
 
+    /// <summary>
+    /// Skriver en stavemåde ned, som skal rettes til et ord, der findes.
+    /// </summary>
+    /// <remarks>
+    /// FORDI FILEN IKKE ER STEDET, MAN RETTER DEN SLAGS.
+    ///
+    /// Aliasserne kunne kun skrives ved at åbne ordliste.txt i en editor. Det
+    /// virker, og filen skal blive ved at kunne åbnes — men man opdager
+    /// stavemåden PÅ SKÆRMEN, lige efter en diktering, og skal kunne skrive
+    /// den ned dér og da. En rettelse, der kræver et andet program, bliver
+    /// ikke lavet.
+    ///
+    /// Sandt: linjen for ordet får den nye stavemåde tilføjet; findes ordet
+    /// ikke, eller står stavemåden der i forvejen, sker der ingenting.
+    /// </remarks>
+    public static bool TilfoejAlias(string? rigtigt, string? forkert)
+    {
+        var ord = Rens(rigtigt);
+        var alias = Rens(forkert);
+
+        if (ord.Length == 0 || alias.Length == 0) return false;
+
+        // Et alias, der ER ordet, retter ingenting.
+        if (alias.Equals(ord, StringComparison.OrdinalIgnoreCase)) return false;
+
+        // Og et alias, der er et ANDET ord i ordbogen, ville rette et rigtigt
+        // ord til et forkert. Det er den ene fejl, der er svær at opdage.
+        if (Laes().Any(o => o.Equals(alias, StringComparison.OrdinalIgnoreCase))) return false;
+
+        var linjer = Linjer().ToList();
+        var rettet = false;
+
+        for (var i = 0; i < linjer.Count; i++)
+        {
+            var lige = linjer[i].IndexOf('=');
+            var navn = Rens(lige >= 0 ? linjer[i][..lige] : linjer[i]);
+
+            if (!navn.Equals(ord, StringComparison.OrdinalIgnoreCase)) continue;
+
+            var haves = Aliasser(new[] { linjer[i] });
+            if (haves.ContainsKey(alias)) return false;
+
+            linjer[i] = lige >= 0
+                ? linjer[i].TrimEnd() + ", " + alias
+                : navn + " = " + alias;
+
+            rettet = true;
+            break;
+        }
+
+        if (!rettet) return false;
+
+        try
+        {
+            File.WriteAllLines(Sti, linjer, Encoding.UTF8);
+            return true;
+        }
+        catch (IOException)
+        {
+            return false;
+        }
+    }
+
     /// <summary>Filens linjer, som de står. Findes den ikke, er der ingen.</summary>
     private static IReadOnlyList<string> Linjer()
     {

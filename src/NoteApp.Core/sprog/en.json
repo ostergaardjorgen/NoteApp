@@ -960,7 +960,13 @@
     "filter": "Text file (*.txt)|*.txt|All files (*.*)|*.*",
     "staar_allerede": "«{0}» is already there.",
     "ligner": "{0} words match what you are typing.",
-    "ingen_ligner": "No words match yet — this one is new."
+    "ingen_ligner": "No words match yet — this one is new.",
+    "alias_overskrift": "Also correct from another spelling",
+    "alias_under": "Pick a word in the list above and type the spelling you saw in the transcript. It is then corrected to that word every time — also when it is too far off for the app to dare on its own.",
+    "alias_knap": "Correct to the selected",
+    "alias_vaelg": "Pick a word in the list first.",
+    "alias_lagt": "«{0}» is now corrected to «{1}».",
+    "alias_kan_ikke": "It could not be added. Is it already there, or is it itself a word in the dictionary?"
   },
   "teksttyper": {
     "note": "Note",

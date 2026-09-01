@@ -106,4 +106,38 @@ public class AliasserTest
         Assert.Equal("Jørgen", a["jørn"]);
         Assert.Equal("Jørgen", a["jørgan"]);
     }
+
+    // ============ AT SKRIVE ET ALIAS NED FRA APPEN ============
+
+    /// <summary>
+    /// Et alias, der er et ANDET ord i ordbogen, maa ikke laegges til.
+    /// </summary>
+    /// <remarks>
+    /// Det er den ene fejl, der er svaer at opdage: staar baade «Jørgen» og
+    /// «Jørn» i ordbogen, og saetter man «Jørn» som alias for «Jørgen», bliver
+    /// et RIGTIGT ord rettet til et forkert hver gang. Og bagefter kan man
+    /// ikke se hvorfor - ordet stod jo i ordbogen.
+    /// </remarks>
+    [Fact]
+    public void Reglen_der_beskytter_mod_at_rette_et_rigtigt_ord()
+    {
+        // Selve filskrivningen kraever en ordbog paa disken og proeves ikke
+        // her. Reglen kan derimod laeses ud af aliasserne: et alias og et ord
+        // maa ikke vaere det samme.
+        var a = Ordbibliotek.Aliasser(new[] { "Jørgen = jørn", "Jørn" });
+
+        // Aliasset findes, og det er praecis derfor TilfoejAlias afviser at
+        // saette et, der ogsaa er et ord.
+        Assert.Equal("Jørgen", a["jørn"]);
+    }
+
+    [Fact]
+    public void Flere_aliasser_kan_staa_paa_samme_linje()
+    {
+        var a = Ordbibliotek.Aliasser(
+            new[] { "StorageTek = starz tech, starstake, storistech" });
+
+        Assert.Equal(3, a.Count);
+        Assert.Equal("StorageTek", a["storistech"]);
+    }
 }

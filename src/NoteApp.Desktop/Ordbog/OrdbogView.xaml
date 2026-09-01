@@ -23,6 +23,7 @@
       <RowDefinition Height="Auto" />
       <RowDefinition Height="*" />
       <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
     </Grid.RowDefinitions>
 
     <StackPanel Grid.Row="0" Margin="0,0,0,12">
@@ -78,6 +79,7 @@
            forkert. Pilen laeses den rigtige vej: «StorageTek <- starz tech»
            betyder, at «starz tech» bliver til «StorageTek». -->
       <ListBox x:Name="Liste" Background="Transparent" BorderThickness="0" Padding="6"
+               SelectionChanged="Liste_Valgt"
                ScrollViewer.VerticalScrollBarVisibility="Auto">
         <ListBox.ItemTemplate>
           <DataTemplate>
@@ -92,7 +94,41 @@
       </ListBox>
     </Border>
 
-    <Grid Grid.Row="5" Margin="0,14,0,0" HorizontalAlignment="Left" Width="760">
+    <!-- ============ SKRIV STAVEMAADEN NED, DU SAA ============
+
+         Man opdager den PAA SKAERMEN, lige efter en diktering. En rettelse,
+         der kraever, at man aabner en tekstfil i et andet program, bliver
+         ikke lavet.
+
+         Feltet virker kun, naar der er valgt et ord i listen: en stavemaade
+         skal rettes TIL noget, og det noget er ordet ovenfor. -->
+    <Border Grid.Row="5" Background="{DynamicResource Panel}" CornerRadius="10" Padding="16,12"
+            Margin="0,12,0,0" HorizontalAlignment="Left" Width="760"
+            BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
+      <StackPanel>
+        <TextBlock Text="{i18n:Oversat ordbogview.alias_overskrift}" FontWeight="SemiBold" />
+        <TextBlock Style="{StaticResource Underskrift}" Margin="0,6,0,10" TextWrapping="Wrap"
+                   Text="{i18n:Oversat ordbogview.alias_under}" />
+
+        <Grid>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+          </Grid.ColumnDefinitions>
+
+          <TextBox x:Name="Aliasfelt" Padding="10,8" IsEnabled="False"
+                   KeyDown="Alias_Tast" />
+          <Button x:Name="Aliasknap" Grid.Column="1" Margin="10,0,0,0" Padding="18,9"
+                  Click="Alias_Klik" IsEnabled="False"
+                  Content="{i18n:Oversat ordbogview.alias_knap}" />
+        </Grid>
+
+        <TextBlock x:Name="Aliassvar" Margin="0,8,0,0" FontSize="12.5" TextWrapping="Wrap"
+                   Foreground="{DynamicResource TekstSvag}" />
+      </StackPanel>
+    </Border>
+
+    <Grid Grid.Row="6" Margin="0,14,0,0" HorizontalAlignment="Left" Width="760">
       <Grid.ColumnDefinitions>
         <ColumnDefinition Width="Auto" />
         <ColumnDefinition Width="*" />

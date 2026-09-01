@@ -318,10 +318,26 @@ public static class Stilhed
 {
     /// <summary>Hvor længe der skal være stille, før dikteringen slutter.</summary>
     /// <remarks>
-    /// Halvandet sekund. En tænkepause midt i en sætning er kortere; en pause
-    /// efter en færdig sætning er længere.
+    /// TO ET HALVT SEKUND. Her stod halvandet, ud fra at en tænkepause midt i
+    /// en sætning er kortere end en pause efter en færdig sætning.
+    ///
+    /// Det holdt ikke i praksis. Man dikterer ikke en færdig tekst — man
+    /// tænker undervejs, og pausen mellem to sætninger er tit længere end
+    /// pausen inde i én. Brugerens ord 31-08-2026: «den tid skal være
+    /// længere, så man lige kan nå at tænke mellem sætninger og ord».
+    ///
+    /// Og noget gjorde det værre samme dag: «stille» måles nu i forhold til
+    /// rummets eget niveau i stedet for et fast tal. Det var nødvendigt —
+    /// ellers sluttede dikteringen aldrig med en radio kørende — men det
+    /// betyder også, at et lavmælt øjeblik registreres som stilhed hurtigere
+    /// end før. De halvandet sekund blev altså i praksis kortere, uden at
+    /// tallet var rørt.
+    ///
+    /// PRISEN FOR AT VENTE ER LILLE. Venter appen for længe, får man sin
+    /// tekst et sekund senere. Stopper den for tidligt, mister man resten af
+    /// det, man ville sige — og skal begynde forfra.
     /// </remarks>
-    public static readonly TimeSpan Taalmodighed = TimeSpan.FromMilliseconds(1500);
+    public static readonly TimeSpan Taalmodighed = TimeSpan.FromMilliseconds(2500);
 
     /// <summary>Under dette niveau regnes der ikke for at blive talt.</summary>
     /// <remarks>
