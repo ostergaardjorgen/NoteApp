@@ -1739,6 +1739,29 @@ public partial class TranscribeView : UserControl
 
     private async void Koer_Click(object sender, RoutedEventArgs e)
     {
+        // ============ ET SPOR HELT FOERST ============
+        //
+        // Der er brugt tre runder paa at finde ud af, OM klikket overhovedet
+        // naar herind. Skaermen viste ingenting, historikken var tom, og der
+        // laa ingen dialog bag vinduet - og saa kan man ikke skelne «knappen
+        // er slaaet fra» fra «forloebet stoppede indeni».
+        //
+        // Linjen her er billig og staar foer enhver betingelse. Den svarer paa
+        // det spoergsmaal én gang for alle, ogsaa naeste gang noget ikke gaar
+        // i gang.
+        try
+        {
+            Historik.Skriv(HaendelseType.Andet, "Der blev trykket paa «Opret transskription»",
+                Valgt is null
+                    ? "Ingen optagelse var valgt."
+                    : $"«{Valgt.Titel}» · lyd: {Valgt.HarLyd} · {Valgt.Mappe}",
+                Udfald.Fuldført);
+        }
+        catch (Exception)
+        {
+            // En log, der ikke kan skrives, maa ikke stoppe et klik.
+        }
+
         // ============ ET KLIK MAA ALDRIG GAA STILLE UD ============
         //
         // HER STOD «if (Valgt is null) return;» OG INTET ANDET.
