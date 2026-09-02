@@ -1727,8 +1727,48 @@ public partial class TranscribeView : UserControl
     /// Den var før en klik-handler alene, og så kunne den kun sættes i gang
     /// af et menneske. Nu er handleren en linje, og selve arbejdet står her.
     /// </summary>
+    /// <summary>Tager fremdriften ned igen, naar der alligevel ikke koeres.</summary>
+    /// <remarks>
+    /// Beskeden saettes, FOER der slaas op, om der er en motor og en model -
+    /// og foer der spoerges om sproget. Svarer man nej, eller mangler der
+    /// noget, skal bjaelken vaek igen. En fremdrift for noget, der ikke
+    /// koerer, er vaerre end ingen fremdrift.
+    /// </remarks>
+    private void Ryd_Fremdrift()
+    {
+        Fremdriftsrude.Visibility = Visibility.Collapsed;
+        Fremdrift.IsIndeterminate = false;
+        Fremdriftstal.Text = "";
+    }
+
     private async Task Koer(OptagelseVisning valgt, bool spoergOmSprog = false)
     {
+        // ============ BESKEDEN KOMMER FOERST ============
+        //
+        // HER STOD DEN 250 LINJER LAENGERE NEDE, og imellem ligger et opslag
+        // af motoren, et spoergsmaal om sproget og en gennemgang af filerne.
+        // Trykkede man paa knappen, skete der ingenting paa skaermen - men
+        // blaeseren gik i gang, saa der SKETE noget.
+        //
+        // Brugerens ord 02-09-2026: «jeg kan hoere blaeseren larmer mere, men
+        // jeg faar ingen info paa skaermen. Foerste prioritet er altid info
+        // til brugeren om hvad der foregaar, og det skal ske med det samme,
+        // man aktiverer en proces.»
+        //
+        // Beskeden staar derfor foer det foerste opslag. Den bliver skiftet ud
+        // med noget mere praecist laengere nede - «Indlaeser modellen ...» -
+        // men indtil da skal der staa noget frem for ingenting.
+        Fremdriftsrude.Visibility = Visibility.Visible;
+        Fremdrift.IsIndeterminate = true;
+        Fremdrift.Value = 0;
+        Fremdriftstal.Text = "";
+        Status.Text = Sprog.T("transcribeview.gaar_i_gang");
+
+        // Skaermen skal naa at TEGNE den, foer der arbejdes videre. Uden det
+        // staar beskeden i hukommelsen, mens traaden er optaget af at slaa
+        // motoren op - og saa naar den aldrig ud paa skaermen.
+        await System.Windows.Threading.Dispatcher.Yield(
+            System.Windows.Threading.DispatcherPriority.Render);
 
         var install = WhisperInstall.Locate(AppSettings.Current.PreferredModel);
         if (!install.IsComplete)
@@ -1736,6 +1776,8 @@ public partial class TranscribeView : UserControl
             Dialogs.AppDialog.Vis(Window.GetWindow(this), "Mangler motor eller model", install.WhisperCli is null
                     ? "Whisper-motoren er ikke installeret endnu."
                     : "Der er ingen model hentet endnu.\n\nGå til Motor og model og hent en.", Dialogs.Slags.Valg);
+            // Beskeden fra oeverst skal vaek igen - der koerer ikke noget.
+            Ryd_Fremdrift();
             return;
         }
 
@@ -1946,6 +1988,8 @@ public partial class TranscribeView : UserControl
                 "Begge spor er allerede skrevet ud på de sprog, du valgte, og lyden er ikke ændret siden. " +
                 "Vil du gøre det om alligevel, så vælg et andet sprog — eller slet transkriptionerne i mappen.",
                 Dialogs.Slags.Valg);
+            // Beskeden fra oeverst skal vaek igen - der koerer ikke noget.
+            Ryd_Fremdrift();
             return;
         }
 
