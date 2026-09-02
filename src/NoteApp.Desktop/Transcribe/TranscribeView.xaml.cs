@@ -1970,7 +1970,12 @@ public partial class TranscribeView : UserControl
                 slags: Dialogs.Slags.Pas_paa,
                 godkendErStandard: false);
 
-            if (!fortsaet) return;
+            if (!fortsaet)
+            {
+                // Se ovenfor: bjaelken skal vaek, naar der ikke koeres.
+                Ryd_Fremdrift();
+                return;
+            }
         }
 
         // Det huskede sprog for HOVEDSPORET. Paa et webinar er hovedsporet
@@ -1999,11 +2004,26 @@ public partial class TranscribeView : UserControl
         }
         else
         {
+            // ============ SIG DET, FOER VINDUET AABNER ============
+            //
+            // Sprogvinduet er modalt. Aabner det bag hovedvinduet - eller
+            // lukker man det uden at vaelge - staar bjaelken tilbage med
+            // «Gaar i gang» og et ur, der taeller, mens der ikke sker noget.
+            //
+            // Set 02-09-2026: uret stod paa 58 sekunder, og der var ingen
+            // udskrift i gang. Nu siger linjen, hvad der ventes paa.
+            Status.Text = Sprog.T("transcribeview.venter_paa_sprog");
+
             var sprogvalg = new SprogvalgWindow(toSpor,
                 sidsteHovedsprog, gemtMeta?.ValgtSprogLoop, valgt.Titel, kunLoop)
             { Owner = Window.GetWindow(this) };
 
-            if (sprogvalg.ShowDialog() != true) return;
+            if (sprogvalg.ShowDialog() != true)
+            {
+                // Se ovenfor: bjaelken skal vaek, naar der ikke koeres.
+                Ryd_Fremdrift();
+                return;
+            }
 
             mitSprog = sprogvalg.MitSprog;
             deresSprog = sprogvalg.DeresSprog ?? mitSprog;
@@ -2066,6 +2086,12 @@ public partial class TranscribeView : UserControl
         // udskrivningen var allerede gaaet i gang paa hele filen.
         //
         // Er der ingen medskrivning i gang, kommer den tilbage med det samme.
+        // HVER ETAPE SIGER SIT NAVN. Der gaar tid med at se efter, om lyden
+        // er skrevet ud foer, og med at vente paa medskrivningen fra moedet.
+        // Uden en linje pr. etape staar der «Gaar i gang» i et minut, og saa
+        // ved man hverken om det gaar godt eller skidt.
+        Status.Text = Sprog.T("transcribeview.ser_efter_tidligere");
+
         await Jobs.Medskrivning.Vent(valgt.Mappe, _afbryd?.Token ?? default);
 
         bool KanGenbruges(string udbase, string lyd, string? sidst, string nu)

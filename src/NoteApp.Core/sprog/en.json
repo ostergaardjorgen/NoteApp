@@ -389,7 +389,9 @@
     "var_moedet_online_blev_der_optaget_to_spor": "If the meeting was online, two tracks were recorded — your microphone and what the others said. Both are transcribed, so it takes about twice as long. In return both sides of the meeting are there, and each line shows which side was speaking.",
     "gaar_i_gang": "Starting …",
     "vaelg_foerst": "Pick a recording in the tree on the left first.",
-    "ingen_lyd_at_skrive_ud": "That recording has no audio to write out."
+    "ingen_lyd_at_skrive_ud": "That recording has no audio to write out.",
+    "venter_paa_sprog": "Waiting for you to pick the language …",
+    "ser_efter_tidligere": "Checking whether the audio was written out before …"
   },
   "udskriftview": {
     "begyndte": "STARTED",

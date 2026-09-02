@@ -830,7 +830,9 @@
     "var_moedet_online_blev_der_optaget_to_spor": "Var mødet online, blev der optaget to spor — din mikrofon og det, de andre sagde. Begge skrives ud, så det tager omtrent dobbelt så lang tid. Til gengæld er begge sider af mødet med, og det kan ses på hver replik, hvilken side der talte.",
     "gaar_i_gang": "Går i gang …",
     "vaelg_foerst": "Vælg først en optagelse i træet til venstre.",
-    "ingen_lyd_at_skrive_ud": "Der er ingen lyd i den optagelse at skrive ud."
+    "ingen_lyd_at_skrive_ud": "Der er ingen lyd i den optagelse at skrive ud.",
+    "venter_paa_sprog": "Venter på, at du vælger sproget …",
+    "ser_efter_tidligere": "Ser efter, om lyden er skrevet ud før …"
   },
   "udskriftview": {
     "begyndte": "BEGYNDTE",
