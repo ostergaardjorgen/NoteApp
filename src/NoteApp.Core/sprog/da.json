@@ -828,7 +828,9 @@
     "traek_en_optagelse_hen_paa_en_mappe_for_at": "Træk en optagelse hen på en mappe for at flytte den.",
     "vaelg_en_optagelse_i_traeet_og_skriv_den_u": "Vælg en optagelse i træet, og skriv den ud til tekst. Det sker på denne pc — ingen lyd forlader maskinen.",
     "var_moedet_online_blev_der_optaget_to_spor": "Var mødet online, blev der optaget to spor — din mikrofon og det, de andre sagde. Begge skrives ud, så det tager omtrent dobbelt så lang tid. Til gengæld er begge sider af mødet med, og det kan ses på hver replik, hvilken side der talte.",
-    "gaar_i_gang": "Går i gang …"
+    "gaar_i_gang": "Går i gang …",
+    "vaelg_foerst": "Vælg først en optagelse i træet til venstre.",
+    "ingen_lyd_at_skrive_ud": "Der er ingen lyd i den optagelse at skrive ud."
   },
   "udskriftview": {
     "begyndte": "BEGYNDTE",

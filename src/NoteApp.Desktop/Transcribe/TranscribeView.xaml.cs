@@ -1709,9 +1709,65 @@ public partial class TranscribeView : UserControl
             ? Directory.GetFiles(mappe, "*.txt").OrderByDescending(File.GetLastWriteTime).FirstOrDefault()
             : null;
 
+    /// <summary>
+    /// Siger hvorfor der ikke sker noget — på skærmen OG i historikken.
+    /// </summary>
+    /// <remarks>
+    /// EN DIALOG FORSVINDER, NÅR MAN TRYKKER OK. Historikken er dér, hvor man
+    /// leder bagefter, og en knap, der ikke gjorde noget, skal kunne findes
+    /// dér — ellers står man med «jeg trykkede jo» og ingen måde at vise det.
+    /// </remarks>
+    private void Sig_Kan_Ikke(string paaSkaermen, string iHistorikken)
+    {
+        Status.Text = paaSkaermen;
+        Fremdriftsrude.Visibility = Visibility.Visible;
+        Fremdrift.IsIndeterminate = false;
+        Fremdrift.Value = 0;
+        Fremdriftstal.Text = "";
+
+        try
+        {
+            Historik.Skriv(HaendelseType.Andet, "Transskription blev ikke sat i gang",
+                iHistorikken, Udfald.SeEfter);
+        }
+        catch (Exception)
+        {
+            // Kan historikken ikke skrives, staar beskeden stadig paa skaermen.
+        }
+    }
+
+
     private async void Koer_Click(object sender, RoutedEventArgs e)
     {
-        if (Valgt is not { } valgt) return;
+        // ============ ET KLIK MAA ALDRIG GAA STILLE UD ============
+        //
+        // HER STOD «if (Valgt is null) return;» OG INTET ANDET.
+        //
+        // Er der ikke valgt en optagelse, skete der bogstaveligt talt
+        // ingenting: ingen besked, ingen bjaelke, ingen linje i historikken.
+        // Man trykker igen, og igen, og maa selv gaette paa, om appen er
+        // gaaet i staa.
+        //
+        // Set 02-09-2026: brugeren proevede flere gange at skrive et moede paa
+        // en time ud og fik intet at vide. Der laa hverken en fejl eller en
+        // udskrift - forloebet var stoppet paa foerste linje.
+        //
+        // EN TOM UDGANG SKAL OGSAA SIGE NOGET. Det gaelder alle steder, hvor
+        // en knap ikke kan goere sit arbejde: sig hvorfor, i stedet for at
+        // lade som om der ikke blev trykket.
+        if (Valgt is not { } valgt)
+        {
+            Sig_Kan_Ikke(Sprog.T("transcribeview.vaelg_foerst"),
+                "Der var ikke valgt en optagelse, da der blev trykket.");
+            return;
+        }
+
+        if (valgt.HarLyd != true)
+        {
+            Sig_Kan_Ikke(Sprog.T("transcribeview.ingen_lyd_at_skrive_ud"),
+                $"«{valgt.Titel}» har ingen lyd at skrive ud.");
+            return;
+        }
 
         // KNAPPEN SPOERGER ALTID OM SPROGET.
         //
@@ -1831,6 +1887,15 @@ public partial class TranscribeView : UserControl
         var install = WhisperInstall.Locate(AppSettings.Current.PreferredModel);
         if (!install.IsComplete)
         {
+            // DET SKAL OGSAA STAA I HISTORIKKEN. En dialog forsvinder, naar
+            // man trykker OK, og saa er der intet spor af, hvorfor det ikke
+            // gik i gang.
+            Historik.Skriv(HaendelseType.Andet, "Transskription blev ikke sat i gang",
+                install.WhisperCli is null
+                    ? "Whisper-motoren blev ikke fundet."
+                    : $"Der blev ikke fundet en model. Valgt: «{AppSettings.Current.PreferredModel}».",
+                Udfald.SeEfter);
+
             Dialogs.AppDialog.Vis(Window.GetWindow(this), "Mangler motor eller model", install.WhisperCli is null
                     ? "Whisper-motoren er ikke installeret endnu."
                     : "Der er ingen model hentet endnu.\n\nGå til Motor og model og hent en.", Dialogs.Slags.Valg);
