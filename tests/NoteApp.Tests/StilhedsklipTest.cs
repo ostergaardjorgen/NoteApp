@@ -1,4 +1,4 @@
-using System.IO;
+﻿using System.IO;
 using NAudio.Wave;
 using NoteApp.Core;
 using Xunit;
@@ -27,21 +27,22 @@ public class StilhedsklipTest
     private const int Frekvens = 16000;
 
     /// <summary>Laver en wav med stilhed, saa lyd, saa stilhed.</summary>
-    private static string Klip(double stilhedFoer, double lyd, double stilhedEfter)
+    private static string Klip(double stilhedFoer, double lyd, double stilhedEfter,
+                               int frekvens = Frekvens)
     {
         var sti = Path.Combine(Path.GetTempPath(), "proeve-" + Guid.NewGuid().ToString("N")[..8] + ".wav");
 
-        var ialt = (int)((stilhedFoer + lyd + stilhedEfter) * Frekvens);
+        var ialt = (int)((stilhedFoer + lyd + stilhedEfter) * frekvens);
         var proever = new short[ialt];
 
-        var fra = (int)(stilhedFoer * Frekvens);
-        var til = fra + (int)(lyd * Frekvens);
+        var fra = (int)(stilhedFoer * frekvens);
+        var til = fra + (int)(lyd * frekvens);
 
         // En tone, der er tydeligt over tavshedsgraensen.
         for (var i = fra; i < til && i < proever.Length; i++)
             proever[i] = (short)(8000 * Math.Sin(i * 0.05));
 
-        using (var w = new WaveFileWriter(sti, new WaveFormat(Frekvens, 16, 1)))
+        using (var w = new WaveFileWriter(sti, new WaveFormat(frekvens, 16, 1)))
         {
             var bytes = new byte[proever.Length * 2];
             Buffer.BlockCopy(proever, 0, bytes, 0, bytes.Length);
@@ -139,6 +140,81 @@ public class StilhedsklipTest
 
             // To sekunders tale plus det, der beholdes i hver ende.
             Assert.True(Sekunder(sti) < 5, $"Klippet er stadig {Sekunder(sti):0.0} sek af fjorten.");
+        }
+        finally { File.Delete(sti); }
+    }
+
+    // ============ FREKVENSEN ============
+
+    /// <summary>
+    /// En diktering optages i MIKROFONENS frekvens, ikke appens.
+    /// </summary>
+    /// <remarks>
+    /// Moederne optages i 16 kHz, som appen selv vaelger. En diktering fra
+    /// vaageordet optages i det, enheden leverer - typisk 48 kHz.
+    ///
+    /// Klipperne regnede sekunder ud fra en FAST frekvens paa 16 kHz. Paa et
+    /// 48 kHz-klip blev hvert klippet sekund derfor talt tre gange, og en
+    /// saetning paa fem sekunder endte under et halvt og blev afvist med «for
+    /// kort til et diktat». Maalt 31-08-2026.
+    /// </remarks>
+    [Theory]
+    [InlineData(16000)]
+    [InlineData(44100)]
+    [InlineData(48000)]
+    public void Det_klippede_maales_i_filens_egen_frekvens(int frekvens)
+    {
+        var sti = Klip(stilhedFoer: 6, lyd: 2, stilhedEfter: 0.2, frekvens: frekvens);
+
+        try
+        {
+            var klippet = Stilhedsklip.KlipHovedet(sti);
+
+            // Der blev klippet cirka 5,5 sekunder, uanset frekvensen.
+            Assert.InRange(klippet, 5.0, 6.0);
+        }
+        finally { File.Delete(sti); }
+    }
+
+    /// <summary>
+    /// Laengden laeses af filen og regnes ikke ud.
+    /// </summary>
+    /// <remarks>
+    /// Filen ved, hvor lang den er, og den kan ikke tage fejl af sig selv.
+    /// </remarks>
+    [Theory]
+    [InlineData(16000)]
+    [InlineData(48000)]
+    public void Laengden_laeses_af_filen(int frekvens)
+    {
+        var sti = Klip(stilhedFoer: 1, lyd: 3, stilhedEfter: 1, frekvens: frekvens);
+
+        try
+        {
+            Assert.InRange(Stilhedsklip.Sekunder(sti), 4.9, 5.1);
+        }
+        finally { File.Delete(sti); }
+    }
+
+    /// <summary>
+    /// Og efter klipningen er der stadig noget tilbage at skrive ud.
+    /// </summary>
+    /// <remarks>
+    /// Det var dét, der gik galt: en rigtig saetning blev afvist som «for kort
+    /// til et diktat», fordi der blev trukket tre gange for meget fra.
+    /// </remarks>
+    [Fact]
+    public void En_rigtig_saetning_overlever_klipningen()
+    {
+        var sti = Klip(stilhedFoer: 9, lyd: 5, stilhedEfter: 3, frekvens: 48000);
+
+        try
+        {
+            Stilhedsklip.KlipHovedet(sti);
+            Stilhedsklip.KlipHalen(sti);
+
+            Assert.True(Stilhedsklip.Sekunder(sti) > 0.5,
+                $"Klippet er {Stilhedsklip.Sekunder(sti):0.00} sek - det ville blive afvist.");
         }
         finally { File.Delete(sti); }
     }

@@ -384,8 +384,16 @@ public sealed class Dikteringsvagt : IDisposable
             //
             // Moedeoptagelserne har klippet halen af hele tiden. Dikteringen
             // gjorde ikke - og det er dén, der har mest tavshed i sig.
-            sekunder -= Stilhedsklip.KlipHovedet(klip);
-            sekunder -= Stilhedsklip.KlipHalen(klip);
+            Stilhedsklip.KlipHovedet(klip);
+            Stilhedsklip.KlipHalen(klip);
+
+            // LAENGDEN LAESES AF FILEN, ikke regnet ud af det, der blev
+            // klippet. Foroptageren optager i MIKROFONENS frekvens - typisk
+            // 48 kHz - mens moederne bruger appens egne 16. Blev der trukket
+            // et tal fra, der var regnet paa den forkerte frekvens, endte en
+            // saetning paa fem sekunder under et halvt og blev afvist med
+            // «for kort til et diktat». Maalt 31-08-2026.
+            sekunder = Stilhedsklip.Sekunder(klip);
 
             // Under et halvt sekund er et fejltryk, ikke et diktat. At sende
             // det ville koste et kald og give en tom streng tilbage.

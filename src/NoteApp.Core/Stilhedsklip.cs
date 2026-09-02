@@ -38,6 +38,38 @@ public static class Stilhedsklip
     private const int Vindue = 480;   // 30 ms ved 16 kHz
 
     /// <summary>
+    /// Klippets længde i sekunder, læst af filen selv.
+    /// </summary>
+    /// <remarks>
+    /// FORDI KLIPPENE IKKE ALLE HAR DEN SAMME FREKVENS.
+    ///
+    /// Møderne optages i 16 kHz, som appen selv vælger. En diktering fra
+    /// vågeordet optages derimod i MIKROFONENS egen frekvens — typisk 48 kHz
+    /// — fordi føroptageren tager, hvad enheden leverer.
+    ///
+    /// Klipperne herunder regnede sekunder ud fra en fast frekvens på 16 kHz.
+    /// På et 48 kHz-klip blev hvert klippet sekund derfor talt TRE gange, og
+    /// dikteringen fik trukket tre gange for meget fra sin længde. En sætning
+    /// på fem sekunder endte under et halvt og blev afvist med «for kort til
+    /// et diktat» — selv om den var der hele vejen. Målt 31-08-2026.
+    ///
+    /// Her læses længden af filen, som den faktisk er. Det er sikrere end at
+    /// regne den ud: filen ved det, og den kan ikke tage fejl af sig selv.
+    /// </remarks>
+    public static double Sekunder(string wav)
+    {
+        try
+        {
+            using var r = new NAudio.Wave.WaveFileReader(wav);
+            return r.TotalTime.TotalSeconds;
+        }
+        catch (Exception)
+        {
+            return 0;
+        }
+    }
+
+    /// <summary>
     /// Fjerner tavsheden fra BEGYNDELSEN af en wav-fil.
     /// </summary>
     /// <remarks>
@@ -103,7 +135,9 @@ public static class Stilhedsklip
         var spring = fra * Vindue * 2;
         var nyeBytes = lyd - spring;
 
-        var klippet = spring / (double)(AudioFormat.SampleRate * 2);
+        // Tallet er kun til at melde tilbage med. Den laengde, der regnes
+        // videre paa, laeses af filen bagefter - se Sekunder.
+        var klippet = spring / (double)(Frekvensen(b) * 2);
 
         try
         {
@@ -178,7 +212,7 @@ public static class Stilhedsklip
 
         if (nyeBytes >= lyd) return 0;
 
-        var klippet = (lyd - nyeBytes) / (double)(AudioFormat.SampleRate * 2);
+        var klippet = (lyd - nyeBytes) / (double)(Frekvensen(b) * 2);
 
         try
         {
@@ -256,5 +290,21 @@ public static class Stilhedsklip
     {
         if (ved < 0 || ved + 4 > b.Length) return;
         BitConverter.GetBytes(vaerdi).CopyTo(b, ved);
+    }
+
+    /// <summary>
+    /// Filens egen frekvens, læst af dens fmt-blok.
+    /// </summary>
+    /// <remarks>
+    /// Den står på byte 24 i en almindelig wav. Kan den ikke læses, bruges
+    /// appens egen — det er bedre end at regne med nul.
+    /// </remarks>
+    private static int Frekvensen(byte[] b)
+    {
+        if (b.Length < 28) return AudioFormat.SampleRate;
+
+        var hz = BitConverter.ToInt32(b, 24);
+
+        return hz is > 0 and <= 192000 ? hz : AudioFormat.SampleRate;
     }
 }
