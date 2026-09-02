@@ -845,10 +845,27 @@ public partial class MeetingView : UserControl
         if (kasseret) Kasser(mappe);
         else
         {
+            // ============ BRUGERENS NAVN VINDER ============
+            //
+            // HER STOD «kun hvis titlen er tom», OG SAA BLEV NAVNET ALDRIG
+            // GEMT.
+            //
+            // Optagelsen faar et foreslaaet navn - «Moede 2. september» - i det
+            // oejeblik den begynder, saa den kan findes, mens den koerer. Naar
+            // moedet er slut, spoerges der om et rigtigt navn. Men titlen var
+            // jo ikke tom laengere, saa svaret blev kasseret, og forslaget
+            // blev staaende.
+            //
+            // Set 02-09-2026: brugeren skrev «Moede med Ibrar den 2.
+            // september» og fik «Moede 2. september».
+            //
+            // DER SPOERGES KUN, FORDI SVARET SKAL BRUGES. Et spoergsmaal, hvis
+            // svar bliver smidt vaek, er vaerre end intet spoergsmaal - man
+            // opdager det foerst, naar man leder efter moedet i morgen.
             var meta = MeetingStore.Load(mappe);
-            if (meta is not null && string.IsNullOrWhiteSpace(meta.Title))
+            if (meta is not null && !string.IsNullOrWhiteSpace(titel))
             {
-                meta.Title = titel;
+                meta.Title = titel.Trim();
                 MeetingStore.Save(mappe, meta);
             }
         }
@@ -950,10 +967,39 @@ public partial class MeetingView : UserControl
             var meta = MeetingStore.Load(_session.SessionDir);
             if (meta is null) return;
 
+            // ============ ET TOMT SPROG ER IKKE ET FRAVALG ============
+            //
+            // MEDSKRIVNINGEN KOERTE ALDRIG, OG DET KOSTEDE EN HEL TIME.
+            //
+            // Den starter kun for et spor, der har et sprog. Blev der ikke
+            // valgt et, da moedet begyndte, stod der en TOM streng i
+            // moedefilen - ikke null, ikke «auto», bare tom - og saa sprang
+            // den over. Begge spor.
+            //
+            // Maalt 02-09-2026 paa et moede paa 62 minutter: ValgtSprogMik og
+            // ValgtSprogLoop stod begge tomme, mappen «segmenter» var tom, og
+            // moedet stod som «ikke skrevet ud». Lyden var der - to spor, 119
+            // MB hver, med tale paa begge - men intet var skrevet ned undervejs.
+            //
+            // Det er den SAMME faelde som i dikteringen samme dag: «MitSprog
+            // ?? "da"» fangede kun null, og en tom streng slap igennem.
+            //
+            // Nu falder begge spor tilbage paa indstillingerne, hvor dansk er
+            // standarden. Et sprog, der ikke er valgt, er ikke et fravalg -
+            // det er et sprog, ingen har taget stilling til.
+            var v = AppSettings.Current;
+
             var sprog = new Dictionary<string, string?>
             {
-                ["mikrofon"] = _erWebinar ? null : meta.ValgtSprogMik,
-                ["loopback"] = meta.ValgtSprogLoop
+                ["mikrofon"] = _erWebinar
+                    ? null
+                    : string.IsNullOrWhiteSpace(meta.ValgtSprogMik)
+                        ? v.Talesprog
+                        : meta.ValgtSprogMik,
+
+                ["loopback"] = string.IsNullOrWhiteSpace(meta.ValgtSprogLoop)
+                    ? v.Deresprog
+                    : meta.ValgtSprogLoop,
             };
 
             foreach (var (spor, kode) in sprog)

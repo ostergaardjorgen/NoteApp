@@ -176,6 +176,20 @@ public sealed class AppSettings
     public string? DeresSprog { get; set; }
 
     /// <summary>
+    /// Sproget, de øvrige taler — altid et rigtigt svar.
+    /// </summary>
+    /// <remarks>
+    /// SAMME FÆLDE SOM <see cref="Talesprog"/>: null OG tom betyder «ikke
+    /// valgt», og de skal begge give det samme svar. «Null betyder samme som
+    /// mit» stod der, og det er stadig reglen — men en tom streng er ikke
+    /// null, og den slap igennem.
+    ///
+    /// Det kostede en hel times møde. Se MeetingView.StartMedskrivning.
+    /// </remarks>
+    public string Deresprog =>
+        string.IsNullOrWhiteSpace(DeresSprog) ? Talesprog : DeresSprog.Trim();
+
+    /// <summary>
     /// Skift afsnit automatisk under oplæsning. Kræver en lille model ved
     /// siden af den store — se LiveListener. Slået fra som standard: den
     /// koster GPU-tid, og en fejltolkning midt i en oplæsning er irriterende.
