@@ -1797,7 +1797,37 @@ public partial class TranscribeView : UserControl
         // Trykker man selv paa den, er det tit netop fordi sproget var
         // forkert - og saa ville et huskeet svar give den samme fejl igen.
         // Den automatiske start spoerger derimod kun, naar svaret er ukendt.
-        await Koer(valgt, spoergOmSprog: true);
+        // ============ EN FEJL I EN async void FORSVINDER ============
+        //
+        // Kastes der noget herinde, er der ingen, der griber det: en async
+        // void-metode har ikke en opgave, nogen venter paa. Fejlen ryger op i
+        // appens faelles haandtering, og hvis den ikke naar frem, er der
+        // ingenting - hverken paa skaermen eller i historikken.
+        //
+        // Det er praecis det billede, der er set 02-09-2026: bjaelken kommer,
+        // sprogvinduet kommer, man trykker OK - og saa forsvinder bjaelken, og
+        // der sker ikke mere. Uden det her kan man ikke se forskel paa «den
+        // stoppede med vilje» og «den braekkede».
+        try
+        {
+            await Koer(valgt, spoergOmSprog: true);
+        }
+        catch (Exception ex)
+        {
+            Ryd_Fremdrift();
+
+            Status.Text = Sprog.T("diktering.gik_galt", ex.Message);
+
+            try
+            {
+                Historik.Skriv(HaendelseType.Andet, "Transskriptionen braekkede",
+                    $"{ex.GetType().Name}: {ex.Message}", Udfald.SeEfter);
+            }
+            catch (Exception)
+            {
+                // Kan historikken ikke skrives, staar beskeden paa skaermen.
+            }
+        }
     }
 
     /// <summary>
@@ -1995,8 +2025,15 @@ public partial class TranscribeView : UserControl
 
             if (!fortsaet)
             {
-                // Se ovenfor: bjaelken skal vaek, naar der ikke koeres.
+                // Se ovenfor: bjaelken skal vaek, naar der ikke koeres - og
+                // det skal staa i historikken, hvorfor. En udgang, der kun
+                // slukker lyset, er lige saa tavs som den, der ikke gjorde
+                // noget.
                 Ryd_Fremdrift();
+
+                Historik.Skriv(HaendelseType.Andet, "Transskription blev afbrudt",
+                    "Der blev svaret nej i et spoergsmaal undervejs.", Udfald.Afbrudt);
+
                 return;
             }
         }
@@ -2043,8 +2080,15 @@ public partial class TranscribeView : UserControl
 
             if (sprogvalg.ShowDialog() != true)
             {
-                // Se ovenfor: bjaelken skal vaek, naar der ikke koeres.
+                // Se ovenfor: bjaelken skal vaek, naar der ikke koeres - og
+                // det skal staa i historikken, hvorfor. En udgang, der kun
+                // slukker lyset, er lige saa tavs som den, der ikke gjorde
+                // noget.
                 Ryd_Fremdrift();
+
+                Historik.Skriv(HaendelseType.Andet, "Transskription blev afbrudt",
+                    "Der blev svaret nej i et spoergsmaal undervejs.", Udfald.Afbrudt);
+
                 return;
             }
 
@@ -2114,6 +2158,15 @@ public partial class TranscribeView : UserControl
         // Uden en linje pr. etape staar der «Gaar i gang» i et minut, og saa
         // ved man hverken om det gaar godt eller skidt.
         Status.Text = Sprog.T("transcribeview.ser_efter_tidligere");
+
+        // SPORET FORTSAETTER. Naar sproget er valgt, er den svaere del af
+        // forloebet ovre - og det skal kunne ses, at den kom saa langt.
+        try
+        {
+            Historik.Skriv(HaendelseType.Andet, "Transskription: sproget er valgt",
+                $"Mit: «{mitSprog}» · deres: «{deresSprog}»", Udfald.Fuldført);
+        }
+        catch (Exception) { }
 
         await Jobs.Medskrivning.Vent(valgt.Mappe, _afbryd?.Token ?? default);
 
