@@ -1727,6 +1727,61 @@ public partial class TranscribeView : UserControl
     /// Den var før en klik-handler alene, og så kunne den kun sættes i gang
     /// af et menneske. Nu er handleren en linje, og selve arbejdet står her.
     /// </summary>
+    /// <summary>Uret, der viser, at der stadig sker noget.</summary>
+    private System.Windows.Threading.DispatcherTimer? _arbejdsur;
+
+    private DateTime _arbejdetSiden;
+
+    /// <summary>
+    /// Sætter et ur på arbejdet, så man kan se, at det skrider frem.
+    /// </summary>
+    /// <remarks>
+    /// EN LINJE, DER STÅR STILLE, SIGER IKKE, AT DER SKER NOGET.
+    ///
+    /// Modellen fylder op mod tre gigabyte og skal læses ind, før whisper
+    /// melder sin første procent. I det halve minut står der den samme
+    /// sætning, og bjælken glider frem og tilbage uden at betyde noget. Man
+    /// kan høre blæseren, men skærmen ser død ud.
+    ///
+    /// Brugerens ord 02-09-2026: «der skal stå hvad den laver, så man kan
+    /// følge med og se ny status, når den ændrer sig».
+    ///
+    /// Uret er det mindste, der altid kan siges: hvor længe der er arbejdet.
+    /// Det er sandt hvert sekund, det kræver ingen viden om, hvad motoren
+    /// laver indeni, og det er dét, der gør forskellen på «den hænger» og
+    /// «den er i gang».
+    ///
+    /// NÅR PROCENTEN KOMMER, VINDER DEN. Så er der et bedre tal at se på, og
+    /// tiden ville bare tage pladsen fra det.
+    /// </remarks>
+    private void StartArbejdsur()
+    {
+        _arbejdetSiden = DateTime.UtcNow;
+
+        _arbejdsur?.Stop();
+        _arbejdsur = new System.Windows.Threading.DispatcherTimer
+        {
+            Interval = TimeSpan.FromSeconds(1),
+        };
+
+        _arbejdsur.Tick += (_, _) =>
+        {
+            // Er der en procent, staar den i feltet, og saa skal uret tie.
+            if (!Fremdrift.IsIndeterminate) return;
+
+            var gaaet = DateTime.UtcNow - _arbejdetSiden;
+                Fremdriftstal.Text = $"{gaaet:mm\\:ss}";
+        };
+
+        _arbejdsur.Start();
+    }
+
+    private void StopArbejdsur()
+    {
+        _arbejdsur?.Stop();
+        _arbejdsur = null;
+    }
+
     /// <summary>Tager fremdriften ned igen, naar der alligevel ikke koeres.</summary>
     /// <remarks>
     /// Beskeden saettes, FOER der slaas op, om der er en motor og en model -
@@ -1736,6 +1791,8 @@ public partial class TranscribeView : UserControl
     /// </remarks>
     private void Ryd_Fremdrift()
     {
+        StopArbejdsur();
+
         Fremdriftsrude.Visibility = Visibility.Collapsed;
         Fremdrift.IsIndeterminate = false;
         Fremdriftstal.Text = "";
@@ -1763,6 +1820,7 @@ public partial class TranscribeView : UserControl
         Fremdrift.Value = 0;
         Fremdriftstal.Text = "";
         Status.Text = Sprog.T("transcribeview.gaar_i_gang");
+        StartArbejdsur();
 
         // Skaermen skal naa at TEGNE den, foer der arbejdes videre. Uden det
         // staar beskeden i hukommelsen, mens traaden er optaget af at slaa
@@ -2021,9 +2079,16 @@ public partial class TranscribeView : UserControl
         Fremdrift.IsIndeterminate = true;
         Fremdrift.Value = 0;
         Fremdriftstal.Text = "";
+        // MODELLENS NAVN MED. «Indlaeser modellen» siger ikke, hvor laenge
+        // det tager - en model paa knap tre gigabyte er noget andet end en
+        // paa fem hundrede megabyte, og uret ved siden af bliver til at
+        // forstaa, naar man ved hvad der laeses ind.
+        var navn = Path.GetFileNameWithoutExtension(install.ModelPath ?? "")
+            .Replace("ggml-", "", StringComparison.OrdinalIgnoreCase);
+
         Status.Text = kunStemmer
             ? "Finder stemmerne i optagelsen …"
-            : "Indlæser modellen … det tager typisk et halvt minut første gang";
+            : $"Indlæser modellen «{navn}» … det tager typisk et halvt minut første gang";
 
         // VAGTEN SKAL VIDE DET, saa bjaelken oeverst kan staa paa ALLE
         // skaerme. Fremdriften stod foer kun her, og skiftede man skaerm, var
@@ -2356,6 +2421,7 @@ public partial class TranscribeView : UserControl
         finally
         {
             Jobs.Udskriftsvagt.Slut();
+            StopArbejdsur();
 
             Fremdriftsrude.Visibility = Visibility.Collapsed;
             Fremdrift.IsIndeterminate = false;

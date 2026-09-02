@@ -138,4 +138,25 @@ public class DikteringsbeskedTest
                 $"«{noegle}» er {t.Length} tegn: «{t}»");
         }
     }
+
+    /// <summary>
+    /// Beskeden, der kommer i det oejeblik man trykker, skal findes.
+    /// </summary>
+    /// <remarks>
+    /// En manglende noegle giver en tom linje paa skaermen - og saa staar
+    /// bjaelken og arbejder uden at sige hvad den laver. Det er praecis dét,
+    /// den her besked er sat i verden for at undgaa.
+    /// </remarks>
+    [Theory]
+    [InlineData("da")]
+    [InlineData("en")]
+    public void Beskeden_naar_man_trykker_findes(string sprog)
+    {
+        Sprog.Skift(sprog);
+
+        var t = Sprog.T("transcribeview.gaar_i_gang");
+
+        Assert.NotEmpty(t);
+        Assert.NotEqual("transcribeview.gaar_i_gang", t);
+    }
 }
