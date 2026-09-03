@@ -2078,7 +2078,25 @@ public partial class TranscribeView : UserControl
                 sidsteHovedsprog, gemtMeta?.ValgtSprogLoop, valgt.Titel, kunLoop)
             { Owner = Window.GetWindow(this) };
 
-            if (sprogvalg.ShowDialog() != true)
+            // ============ HVAD SVAREDE VINDUET FAKTISK? ============
+            //
+            // Knappen inde i vinduet skriver, at den satte svaret til ja - og
+            // her blev det alligevel laest som et nej. De to kan ikke begge
+            // passe, saa svaret skal skrives ned, som det er, i stedet for at
+            // blive gaettet paa.
+            //
+            // Set 03-09-2026: «Sprogvinduet: der blev trykket «Skriv ud» ·
+            // Mit: «da» · deres: «da»» ét sekund foer «Sprogvinduet blev
+            // lukket uden at der blev valgt et sprog».
+            var svar = sprogvalg.ShowDialog();
+
+            Historik.Skriv(HaendelseType.Andet, "Sprogvinduet svarede",
+                $"ShowDialog: {(svar is null ? "null" : svar.ToString())} · "
+                + $"vinduets DialogResult: {(sprogvalg.DialogResult is null ? "null" : sprogvalg.DialogResult.ToString())} · "
+                + $"mit: «{sprogvalg.MitSprog}» · deres: «{sprogvalg.DeresSprog}»",
+                Udfald.Fuldført);
+
+            if (svar != true)
             {
                 // Se ovenfor: bjaelken skal vaek, naar der ikke koeres - og
                 // det skal staa i historikken, hvorfor. En udgang, der kun
