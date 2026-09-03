@@ -2032,7 +2032,7 @@ public partial class TranscribeView : UserControl
                 Ryd_Fremdrift();
 
                 Historik.Skriv(HaendelseType.Andet, "Transskription blev afbrudt",
-                    "Der blev svaret nej i et spoergsmaal undervejs.", Udfald.Afbrudt);
+                    "Der blev svaret nej til at skrive ud igen oven i rettelser.", Udfald.Afbrudt);
 
                 return;
             }
@@ -2087,7 +2087,7 @@ public partial class TranscribeView : UserControl
                 Ryd_Fremdrift();
 
                 Historik.Skriv(HaendelseType.Andet, "Transskription blev afbrudt",
-                    "Der blev svaret nej i et spoergsmaal undervejs.", Udfald.Afbrudt);
+                    "Sprogvinduet blev lukket uden at der blev valgt et sprog.", Udfald.Afbrudt);
 
                 return;
             }

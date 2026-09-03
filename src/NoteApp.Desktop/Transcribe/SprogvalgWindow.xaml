@@ -63,6 +63,10 @@
                  Foreground="{DynamicResource TekstMeget}" TextWrapping="Wrap" MaxWidth="300"
                  HorizontalAlignment="Left" />
       <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+        <!-- ENTER OG ESC VAR ALLEREDE PAA PLADS. Proevet tilfoejet igen
+             02-09-2026 og rullet tilbage: begge knapper havde dem, og
+             oversaetteren afviste dubletten. Vinduet er altsaa ikke aarsagen
+             til, at et klik paa «Skriv ud» ikke foerer videre. -->
         <Button Content="{i18n:Oversat faelles.annuller}" Click="Annuller_Click" Padding="18,9" Margin="0,0,10,0"
                 IsCancel="True" />
         <Button Content="{i18n:Oversat sprogvalgwindow.skriv_ud}" Click="Ok_Click" Padding="22,9" MinWidth="130"
