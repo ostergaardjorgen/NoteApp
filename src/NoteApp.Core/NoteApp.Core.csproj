@@ -51,6 +51,12 @@
          og laegges i datamappen ved foerste brug, saa teksterne kan
          rettes uden at bygge noget. Se Hjaelp.cs. -->
     <EmbeddedResource Include="hjaelp\**\*.md" />
+
+    <!-- KONTROLSUMMERNE FOR ALT, DER HENTES NED.
+         Indlejret og ikke kopieret ved siden af exe'en: en fil, brugeren kan
+         rette, er ikke en kontrol - saa ville den, der ville lukke en anden
+         model ind, bare rette summen foerst. Se Komponentmanifest.cs. -->
+    <EmbeddedResource Include="manifest\komponenter.json" />
   </ItemGroup>
 
 </Project>

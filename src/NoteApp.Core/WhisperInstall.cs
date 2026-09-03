@@ -439,6 +439,18 @@ public static class WhisperInstall
     }
 
     /// <summary>
+    /// Den sum, stemmevagtens fil skal have. Kommer fra manifestet.
+    /// </summary>
+    /// <remarks>
+    /// DEN HER ER SKOLEEKSEMPLET PÅ, HVORFOR STØRRELSE IKKE ER NOK.
+    /// <c>ggml-silero-v5.1.2.bin</c> og <c>ggml-silero-v6.2.0.bin</c> er
+    /// begge på nøjagtig 885.098 byte og er to forskellige modeller (slået op
+    /// hos Hugging Face 03-09-2026). Kontrollen herunder hed indtil da
+    /// <c>data.Length != VadStoerrelse</c> og kunne ikke se forskel.
+    /// </remarks>
+    public static string? VadSum => Komponentmanifest.For(VadFilnavn)?.Sha256;
+
+    /// <summary>
     /// Henter stilhedsmodellen, hvis den mangler. Gør intet, hvis den er der.
     /// </summary>
     /// <remarks>
@@ -459,6 +471,28 @@ public static class WhisperInstall
     /// ligner en model og ikke er det — og så ville motoren fejle ved hver
     /// transskription, indtil nogen slettede den i hånden.
     /// </remarks>
+    /// <summary>
+    /// Er de hentede bytes den model, de skal være? Både størrelse og sum.
+    /// </summary>
+    /// <remarks>
+    /// BÅDE OG, ikke enten eller: en hentning er først fuldført, når begge
+    /// passer. Er summen ukendt — manifestet kunne ikke læses — bliver
+    /// størrelsen tilbage som det eneste, og så siges der nej. Modellen er
+    /// et tilvalg, transskriptionen kører uden den, og at køre videre på en
+    /// fil, der ikke kunne efterprøves, er den forkerte vej at tage fejl.
+    /// </remarks>
+    public static bool VadPasser(byte[] data)
+    {
+        if (data.Length != VadStoerrelse) return false;
+
+        if (VadSum is not { } forventet) return false;
+
+        var fundet = Convert.ToHexString(
+            System.Security.Cryptography.SHA256.HashData(data)).ToLowerInvariant();
+
+        return fundet == forventet;
+    }
+
     public static async Task HentVadAsync(CancellationToken ct = default)
     {
         if (VadModel() is not null) return;
@@ -473,7 +507,7 @@ public static class WhisperInstall
             using var http = new HttpClient { Timeout = TimeSpan.FromMinutes(5) };
             var data = await http.GetByteArrayAsync(VadKilde, ct);
 
-            if (data.Length != VadStoerrelse) return;
+            if (!VadPasser(data)) return;
 
             await File.WriteAllBytesAsync(delvis, data, ct);
             File.Move(delvis, maal, overwrite: true);

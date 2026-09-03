@@ -52,6 +52,7 @@ public partial class ComplianceView : UserControl
         VisGoogletilstand();
         VisKvitteringer();
         VisAttest();
+        VisSummer();
 
         var whisper = WhisperInstall.Standard;
 
@@ -247,6 +248,44 @@ public partial class ComplianceView : UserControl
             Fejl = k.Fejl,
             FejlSynlig = k.Fejl.Length > 0 ? Visibility.Visible : Visibility.Collapsed
         }).ToList();
+    }
+
+    /// <summary>
+    /// Kontrolsummerne for alt, appen henter ned.
+    /// </summary>
+    /// <remarks>
+    /// SUMMEN STÅR HELT UD. Det er samme valg som ved kvitteringerne og af
+    /// samme grund: en forkortet sum kan ikke sammenlignes med noget, og så
+    /// er den pynt frem for en oplysning.
+    ///
+    /// Listen kommer fra manifestet i koden — ikke fra filerne på maskinen.
+    /// En liste, der læste de faktiske filer, ville vise, hvad der ER hentet;
+    /// det, der skal kunne svares på her, er, hvad appen kræver af det.
+    /// </remarks>
+    private void VisSummer()
+    {
+        Summer.ItemsSource = Komponentmanifest.Alle.Select(k => new
+        {
+            k.Filnavn,
+            k.Rolle,
+
+            Stoerrelse = k.Bytes >= 1_000_000_000
+                ? $"{k.Bytes / 1024.0 / 1024.0 / 1024.0:0.0} GB"
+                : $"{k.Bytes / 1024.0 / 1024.0:0} MB",
+
+            Sum = "SHA-256: " + k.Sha256,
+
+            Herfra = $"Filen: {k.Kilde}  ·  Summen: {k.Sumkilde}  ·  {k.Bekraeftelse}"
+        }).ToList();
+
+        // TALERADSKILLELSEN FOELGER MED APPEN OG HENTES IKKE, og derfor staar
+        // den ikke i manifestet. Den skal alligevel naevnes her: en laeser,
+        // der ser en liste over hentede komponenter, spoerger med det samme,
+        // hvor resten blev af.
+        Medfoelgende.Text =
+            "sherpa-onnx, pyannote-segmenteringen og NVIDIA TitaNet hentes ikke — de følger med "
+            + "installationspakken og er derfor dækket af pakkens egen kontrol, ikke af en "
+            + "kontrolsum her.";
     }
 
     /// <summary>

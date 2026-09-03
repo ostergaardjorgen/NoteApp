@@ -360,8 +360,14 @@ public partial class SetupWindow : Window
         {
             HentFremdrift.Value = p.Percent;
             var tilbage = p.Remaining is null ? "" : $" · {p.Remaining.Value:mm\\:ss} tilbage";
-            HentStatus.Text = $"{p.BytesDone / 1024.0 / 1024.0:0} af {p.BytesTotal / 1024.0 / 1024.0:0} MB" +
-                              $" · {p.BytesPerSecond / 1024.0 / 1024.0:0.0} MB/s{tilbage}";
+            // Kontrollen af summen bruger den samme bjaelke som hentningen.
+            // Teksten skal foelge med, ellers staar der en hastighed for
+            // noget, der ikke hentes.
+            HentStatus.Text = p.Kontrollerer
+                ? $"Kontrollerer kontrolsummen: {p.BytesDone / 1024.0 / 1024.0:0} af "
+                  + $"{p.BytesTotal / 1024.0 / 1024.0:0} MB"
+                : $"{p.BytesDone / 1024.0 / 1024.0:0} af {p.BytesTotal / 1024.0 / 1024.0:0} MB"
+                  + $" · {p.BytesPerSecond / 1024.0 / 1024.0:0.0} MB/s{tilbage}";
         });
 
         try

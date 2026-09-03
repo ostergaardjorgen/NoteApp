@@ -1,0 +1,120 @@
+{
+  "_om": [
+    "FORVENTEDE KONTROLSUMMER FOR ALT, APPEN HENTER NED.",
+    "",
+    "Filstoerrelse alene er ikke integritetskontrol. Det er ikke en teoretisk",
+    "indvending: ggml-silero-v5.1.2.bin og ggml-silero-v6.2.0.bin er BEGGE",
+    "paa noejagtig 885.098 byte og er to forskellige modeller. En kontrol paa",
+    "stoerrelse ville ikke kunne se forskel paa dem.",
+    "",
+    "Summerne er LEVERANDOERENS EGNE, ikke noget, der er regnet ud paa en",
+    "maskine her. For Hugging Face er de LFS-oid'et, som ER filens SHA-256, slaaet",
+    "op paa deres API. For GitHub er det 'digest'-feltet paa udgivelsens aktiver.",
+    "",
+    "De fem modelfiler er DESUDEN efterproevet mod de filer, der laa i",
+    "datamappen 03-09-2026. Alle fem stemte. Motorens zip-filer laa ikke paa",
+    "maskinen og er derfor kun bekraeftet af GitHub selv - det staar i",
+    "'bekraeftelse' paa hver linje, saa forskellen ikke gaar tabt.",
+    "",
+    "Filen er versioneret i repoet med vilje. En sum, der HENTES samme sted",
+    "som filen, beskytter mod en afbrudt hentning og mod ingenting andet: den,",
+    "der kan aendre filen, kan aendre summen. Det er kun en sum, der ligger",
+    "her, der kan sige, at filen er den samme som den, der blev maalt paa.",
+    "",
+    "SKAL DER TILFOEJES EN KOMPONENT: slaa summen op HOS LEVERANDOEREN, skriv",
+    "hvor den kom fra, og saet datoen. Regn den aldrig ud af den fil, appen",
+    "lige har hentet - saa verificerer den kun sig selv."
+  ],
+  "komponenter": [
+    {
+      "filnavn": "ggml-large-v3.bin",
+      "rolle": "Whisper-model — standardvalget",
+      "bytes": 3095033483,
+      "sha256": "64d182b440b98d5203c4f9bd541544d84c605196c4f7b845dfa11fb23594d1e2",
+      "kilde": "huggingface.co/ggerganov/whisper.cpp",
+      "sumkilde": "Hugging Face LFS-oid (SHA-256), slået op på deres API",
+      "bekraeftelse": "Efterprøvet mod filen i datamappen 03-09-2026",
+      "efterproevet": "2026-09-03"
+    },
+    {
+      "filnavn": "ggml-large-v3-turbo.bin",
+      "rolle": "Whisper-model — ikke i kataloget, men kan ligge fra en tidligere udgave",
+      "bytes": 1624555275,
+      "sha256": "1fc70f774d38eb169993ac391eea357ef47c88757ef72ee5943879b7e8e2bc69",
+      "kilde": "huggingface.co/ggerganov/whisper.cpp",
+      "sumkilde": "Hugging Face LFS-oid (SHA-256), slået op på deres API",
+      "bekraeftelse": "Efterprøvet mod filen i datamappen 03-09-2026",
+      "efterproevet": "2026-09-03"
+    },
+    {
+      "filnavn": "ggml-medium.bin",
+      "rolle": "Whisper-model — ikke i kataloget, men kan ligge fra en tidligere udgave",
+      "bytes": 1533763059,
+      "sha256": "6c14d5adee5f86394037b4e4e8b59f1673b6cee10e3cf0b11bbdbee79c156208",
+      "kilde": "huggingface.co/ggerganov/whisper.cpp",
+      "sumkilde": "Hugging Face LFS-oid (SHA-256), slået op på deres API",
+      "bekraeftelse": "Efterprøvet mod filen i datamappen 03-09-2026",
+      "efterproevet": "2026-09-03"
+    },
+    {
+      "filnavn": "ggml-small.bin",
+      "rolle": "Whisper-model — bruges af vågeordet, som lytter med den mindste hentede model",
+      "bytes": 487601967,
+      "sha256": "1be3a9b2063867b937e64e2ec7483364a79917e157fa98c5d94b5c1fffea987b",
+      "kilde": "huggingface.co/ggerganov/whisper.cpp",
+      "sumkilde": "Hugging Face LFS-oid (SHA-256), slået op på deres API",
+      "bekraeftelse": "Efterprøvet mod filen i datamappen 03-09-2026",
+      "efterproevet": "2026-09-03"
+    },
+    {
+      "filnavn": "ggml-silero-v5.1.2.bin",
+      "rolle": "Stemmevagt (VAD) — afgør, om der overhovedet tales",
+      "bytes": 885098,
+      "sha256": "29940d98d42b91fbd05ce489f3ecf7c72f0a42f027e4875919a28fb4c04ea2cf",
+      "kilde": "huggingface.co/ggml-org/whisper-vad",
+      "sumkilde": "Hugging Face LFS-oid (SHA-256), slået op på deres API",
+      "bekraeftelse": "Efterprøvet mod filen i datamappen 03-09-2026. Bemærk: v6.2.0 har nøjagtig samme størrelse og en anden sum",
+      "efterproevet": "2026-09-03"
+    },
+    {
+      "filnavn": "whisper-cublas-12.4.0-bin-x64.zip",
+      "rolle": "Whisper-motoren, NVIDIA (CUDA 12) — v1.9.2",
+      "bytes": 670611449,
+      "sha256": "443110ddaad70d4290ab2e77179e31cf712035bbc4fad56bb4519a90c917b39c",
+      "kilde": "github.com/ggerganov/whisper.cpp, udgivelse v1.9.2",
+      "sumkilde": "GitHubs «digest» på udgivelsens aktiv",
+      "bekraeftelse": "Kun bekræftet af GitHub selv — lå ikke på maskinen 03-09-2026",
+      "efterproevet": "2026-09-03"
+    },
+    {
+      "filnavn": "whisper-cublas-11.8.0-bin-x64.zip",
+      "rolle": "Whisper-motoren, NVIDIA (CUDA 11) — v1.9.2",
+      "bytes": 269446789,
+      "sha256": "1776668730f5594a0b15f930225779e863dd8280397f9ee7c6e47ccf82bbb203",
+      "kilde": "github.com/ggerganov/whisper.cpp, udgivelse v1.9.2",
+      "sumkilde": "GitHubs «digest» på udgivelsens aktiv",
+      "bekraeftelse": "Kun bekræftet af GitHub selv — lå ikke på maskinen 03-09-2026",
+      "efterproevet": "2026-09-03"
+    },
+    {
+      "filnavn": "whisper-blas-bin-x64.zip",
+      "rolle": "Whisper-motoren, CPU med BLAS — v1.9.2",
+      "bytes": 20981386,
+      "sha256": "ffe5b47ca8e53a7677949f23a9c4641bbec4eee8a5714c3d14b67bb8d7b24a78",
+      "kilde": "github.com/ggerganov/whisper.cpp, udgivelse v1.9.2",
+      "sumkilde": "GitHubs «digest» på udgivelsens aktiv",
+      "bekraeftelse": "Kun bekræftet af GitHub selv — lå ikke på maskinen 03-09-2026",
+      "efterproevet": "2026-09-03"
+    },
+    {
+      "filnavn": "whisper-bin-x64.zip",
+      "rolle": "Whisper-motoren, ren CPU — v1.9.2",
+      "bytes": 8194445,
+      "sha256": "49dcc16de826f20bd53d44f947a1ae49dfa81f86cad67a64d80820cb192d674a",
+      "kilde": "github.com/ggerganov/whisper.cpp, udgivelse v1.9.2",
+      "sumkilde": "GitHubs «digest» på udgivelsens aktiv",
+      "bekraeftelse": "Kun bekræftet af GitHub selv — lå ikke på maskinen 03-09-2026",
+      "efterproevet": "2026-09-03"
+    }
+  ]
+}

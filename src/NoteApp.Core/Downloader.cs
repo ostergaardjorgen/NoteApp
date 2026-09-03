@@ -3,7 +3,19 @@ using System.Security.Cryptography;
 
 namespace NoteApp.Core;
 
-public sealed record DownloadProgress(long BytesDone, long BytesTotal, double BytesPerSecond)
+/// <summary>
+/// Hvor langt en hentning er. <paramref name="Kontrollerer"/> er sat, mens
+/// kontrolsummen regnes ud i stedet for, mens der hentes.
+/// </summary>
+/// <remarks>
+/// FELTET FINDES, FORDI TEKSTEN ELLERS LYVER. Bjælken bruges til begge dele
+/// — kontrollen af en fil på 2,9 GB tager sekunder nok til, at en skærm uden
+/// bevægelse ligner en app, der er gået i stå. Men står der «Henter …», mens
+/// der ikke hentes noget, er det en forkert oplysning, og de er værre end
+/// ingen. Skærmen kan se forskel på det her felt.
+/// </remarks>
+public sealed record DownloadProgress(
+    long BytesDone, long BytesTotal, double BytesPerSecond, bool Kontrollerer = false)
 {
     public double Percent => BytesTotal <= 0 ? 0 : BytesDone * 100.0 / BytesTotal;
 
@@ -64,15 +76,53 @@ public sealed class Downloader
         string destination,
         long? expectedBytes = null,
         IProgress<DownloadProgress>? progress = null,
-        CancellationToken ct = default)
+        CancellationToken ct = default,
+        string? forventetSum = null)
     {
         Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
+
+        // ============ HVOR SUMMEN KOMMER FRA ============
+        //
+        // Manifestet slaas op HER og ikke ved kaldstederne. Et nyt kaldsted
+        // kan glemme en kontrol; det kan ikke undgaa den her. Samme opbygning
+        // som SkyKatalog.KraevEuropa, og af samme grund.
+        //
+        // Kalderen kan sende en sum med - det goer proeverne - men kan ikke
+        // slaa manifestets fra. Findes der en kendt sum for filnavnet,
+        // gaelder den.
+        var sum = (Komponentmanifest.For(destination)?.Sha256 ?? forventetSum)?.ToLowerInvariant();
 
         if (File.Exists(destination))
         {
             var findes = new FileInfo(destination).Length;
-            if (expectedBytes is null || findes == expectedBytes) return destination;
-            File.Delete(destination);   // halv fil fra en tidligere kørsel
+
+            // STOERRELSEN ER IKKE NOK, OG DET ER MAALT.
+            //
+            // ggml-silero-v5.1.2.bin og ggml-silero-v6.2.0.bin er BEGGE paa
+            // noejagtig 885.098 byte og er to forskellige modeller. Indtil
+            // 03-09-2026 stod der kun en stoerrelseskontrol her, og den kunne
+            // ikke se forskel paa dem.
+            var stoerrelsenPasser = expectedBytes is null || findes == expectedBytes;
+
+            if (stoerrelsenPasser && sum is not null)
+            {
+                var fundet = await Sha256Async(destination, progress, ct);
+
+                if (fundet == sum) return destination;
+
+                // EN OEDELAGT FIL, DER ALLEREDE LIGGER DER, SKAL VAEK.
+                // Bliver den staaende, koerer motoren videre paa den og giver
+                // volapyk - en fejl, der viser sig langt fra sin aarsag.
+                File.Delete(destination);
+            }
+            else if (stoerrelsenPasser)
+            {
+                return destination;
+            }
+            else
+            {
+                File.Delete(destination);   // halv fil fra en tidligere kørsel
+            }
         }
 
         var midlertidig = destination + ".delvis";
@@ -88,7 +138,7 @@ public sealed class Downloader
         if (svar.StatusCode == System.Net.HttpStatusCode.RequestedRangeNotSatisfiable)
         {
             File.Delete(midlertidig);
-            return await DownloadAsync(url, destination, expectedBytes, progress, ct);
+            return await DownloadAsync(url, destination, expectedBytes, progress, ct, forventetSum);
         }
 
         svar.EnsureSuccessStatusCode();
@@ -151,6 +201,35 @@ public sealed class Downloader
                 $"{endelig:N0} af {total:N0} byte. Det hentede er gemt, så næste " +
                 "forsøg fortsætter, hvor dette slap.");
 
+        // ============ KONTROLSUMMEN, FOER OMDOEBNINGEN ============
+        //
+        // Stoerrelsen ovenfor siger, at hentningen ikke blev afbrudt. Den
+        // siger ikke, at det er den rigtige fil. To forskellige modeller kan
+        // have samme stoerrelse - stemmevagtens v5.1.2 og v6.2.0 er begge
+        // paa 885.098 byte.
+        //
+        // .DELVIS SLETTES VED FORKERT SUM, og det er en anden beslutning end
+        // ved en afbrudt hentning. Der beholdes filen, saa naeste forsoeg kan
+        // fortsaette. Her ville det vaere det forkerte: en fortsaettelse paa
+        // en forkert fil giver en forkert fil igen, hver gang, indtil nogen
+        // sletter den i haanden.
+        if (sum is not null)
+        {
+            var fundet = await Sha256Async(midlertidig, progress, ct);
+
+            if (fundet != sum)
+            {
+                try { File.Delete(midlertidig); } catch (IOException) { }
+
+                throw new IOException(
+                    $"{Path.GetFileName(destination)} er ikke den fil, den skulle være.\n\n" +
+                    $"Forventet SHA-256: {sum}\n" +
+                    $"Hentet:            {fundet}\n\n" +
+                    "Filen er slettet og bliver ikke brugt. Prøv igen — sker det samme, " +
+                    "er filen hos leverandøren en anden end den, appen er efterprøvet mod.");
+            }
+        }
+
         // Omdøbningen er det, der gør filen "rigtig". Sker den ikke, findes
         // der kun en .delvis, som næste kørsel fortsætter på.
         File.Move(midlertidig, destination, overwrite: true);
@@ -178,10 +257,50 @@ public sealed class Downloader
     /// det, der var meningen — en afbrudt eller ombyttet modelfil giver
     /// ellers volapyk-transskriptioner, som er svære at spore tilbage hertil.
     /// </summary>
-    public static async Task<string> Sha256Async(string path, CancellationToken ct = default)
+    public static async Task<string> Sha256Async(string path, CancellationToken ct = default) =>
+        await Sha256Async(path, null, ct);
+
+    /// <summary>
+    /// SHA-256 med fremdrift undervejs.
+    /// </summary>
+    /// <remarks>
+    /// FREMDRIFTEN ER IKKE PYNT. large-v3 fylder 2,9 GB, og at laese den
+    /// igennem tager sekunder nok til, at en skaerm uden nogen bevaegelse
+    /// ligner en app, der er gaaet i staa. Uden det ville kontrollen blive
+    /// oplevet som en fejl, den foerste gang nogen saa den.
+    ///
+    /// Der meldes med det samme tal, hentningen bruger, saa bjaelken bare
+    /// koerer forbi en gang mere. Et andet fremdriftsbegreb ville kraeve en
+    /// anden bjaelke.
+    /// </remarks>
+    public static async Task<string> Sha256Async(
+        string path, IProgress<DownloadProgress>? progress, CancellationToken ct = default)
     {
         await using var fil = File.OpenRead(path);
-        var hash = await SHA256.HashDataAsync(fil, ct);
-        return Convert.ToHexString(hash).ToLowerInvariant();
+
+        using var sha = SHA256.Create();
+        var buffer = new byte[1 << 20];   // 1 MB, som i hentningen
+        long laest = 0;
+        var ur = System.Diagnostics.Stopwatch.StartNew();
+        var sidsteMelding = TimeSpan.Zero;
+
+        int n;
+        while ((n = await fil.ReadAsync(buffer, ct)) > 0)
+        {
+            sha.TransformBlock(buffer, 0, n, null, 0);
+            laest += n;
+
+            if (progress is not null && ur.Elapsed - sidsteMelding > TimeSpan.FromMilliseconds(250))
+            {
+                sidsteMelding = ur.Elapsed;
+                progress.Report(new DownloadProgress(
+                    laest, fil.Length, laest / Math.Max(0.001, ur.Elapsed.TotalSeconds),
+                    Kontrollerer: true));
+            }
+        }
+
+        sha.TransformFinalBlock(Array.Empty<byte>(), 0, 0);
+
+        return Convert.ToHexString(sha.Hash!).ToLowerInvariant();
     }
 }

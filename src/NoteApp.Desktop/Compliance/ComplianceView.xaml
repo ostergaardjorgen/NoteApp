@@ -914,6 +914,75 @@
                 </ItemsControl>
               </StackPanel>
             </Border>
+
+            <!-- ==================== KONTROLSUMMER ====================
+
+                 FILSTOERRELSE ALENE ER IKKE INTEGRITETSKONTROL, og det er
+                 maalt: ggml-silero-v5.1.2.bin og ggml-silero-v6.2.0.bin er
+                 BEGGE paa noejagtig 885.098 byte og er to forskellige
+                 modeller. Indtil 03-09-2026 kontrollerede appen kun
+                 stoerrelsen og kunne ikke se forskel paa dem.
+
+                 Summerne staar HELT ud. En forkortet sum kan ikke
+                 sammenlignes med noget - samme grund som ved
+                 kvitteringernes SHA-256. -->
+            <Border Background="{DynamicResource Panel}" CornerRadius="10" Padding="20,16"
+                    BorderBrush="{DynamicResource PanelKant}" BorderThickness="1" Margin="0,0,0,14">
+              <StackPanel>
+                <TextBlock Text="{i18n:Oversat complianceview.kontrolsummer_for_det_der_hentes_ned}"
+                           FontSize="10.5" FontWeight="SemiBold"
+                           Foreground="{DynamicResource TekstMeget}" Margin="0,0,0,6" />
+
+                <TextBlock FontSize="12" LineHeight="20" TextWrapping="Wrap" Margin="0,0,0,4"
+                           Foreground="{DynamicResource TekstMeget}"
+                           Text="{i18n:Oversat complianceview.en_hentning_er_foerst_fuldfoert_naar_baade}" />
+
+                <TextBlock FontSize="12" LineHeight="20" TextWrapping="Wrap" Margin="0,0,0,12"
+                           Foreground="{DynamicResource TekstMeget}"
+                           Text="{i18n:Oversat complianceview.summerne_er_leverandoerens_egne_ikke_regne}" />
+
+                <ItemsControl x:Name="Summer">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                      <Border Background="{DynamicResource Trykket}" CornerRadius="8" Padding="16,12" Margin="0,0,0,7"
+                              BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
+                        <StackPanel>
+                          <Grid>
+                            <TextBlock Text="{Binding Filnavn}" FontSize="12.5" FontWeight="SemiBold"
+                                       FontFamily="Consolas" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding Stoerrelse}" FontSize="11.5" HorizontalAlignment="Right"
+                                       VerticalAlignment="Center" Foreground="{DynamicResource TekstMeget}" />
+                          </Grid>
+                          <TextBlock Text="{Binding Rolle}" FontSize="12" LineHeight="19" Margin="0,6,0,0"
+                                     TextWrapping="Wrap" Foreground="{DynamicResource TekstSvag}" />
+                          <TextBlock Text="{Binding Sum}" FontSize="11" Margin="0,6,0,0"
+                                     FontFamily="Consolas" TextWrapping="Wrap"
+                                     Foreground="{DynamicResource TekstMeget}" />
+                          <TextBlock Text="{Binding Herfra}" FontSize="11" LineHeight="18" Margin="0,4,0,0"
+                                     TextWrapping="Wrap" Foreground="{DynamicResource TekstMeget}" />
+                        </StackPanel>
+                      </Border>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <!-- DET, DER IKKE ER DAEKKET, SKAL STAA HER OGSAA.
+                     En liste over det verificerede laeses som «alt er
+                     verificeret», hvis der ikke staar, hvad der ikke er. -->
+                <Border Background="{DynamicResource Trykket}" BorderBrush="{DynamicResource Advarsel}"
+                        BorderThickness="1" CornerRadius="8" Padding="14,11" Margin="0,6,0,0">
+                  <StackPanel>
+                    <TextBlock Text="{i18n:Oversat complianceview.det_der_ikke_er_daekket}"
+                               FontSize="12.5" FontWeight="SemiBold" />
+                    <TextBlock FontSize="12" LineHeight="19" Margin="0,5,0,0" TextWrapping="Wrap"
+                               Foreground="{DynamicResource TekstMeget}"
+                               Text="{i18n:Oversat complianceview.henter_appen_en_fil_manifestet_ikke_kender}" />
+                    <TextBlock x:Name="Medfoelgende" FontSize="12" LineHeight="19" Margin="0,6,0,0"
+                               TextWrapping="Wrap" Foreground="{DynamicResource TekstMeget}" />
+                  </StackPanel>
+                </Border>
+              </StackPanel>
+            </Border>
           </StackPanel>
         </ScrollViewer>
       </TabItem>

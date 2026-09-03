@@ -507,7 +507,13 @@ public partial class EngineView : System.Windows.Controls.UserControl
             var ialt = p.BytesTotal / 1024.0 / 1024.0;
             var fart = p.BytesPerSecond / 1024.0 / 1024.0;
             var tilbage = p.Remaining is null ? "" : $" · {p.Remaining.Value:mm\\:ss} tilbage";
-            Status.Text = $"Henter {model.Id}: {mb:0} af {ialt:0} MB · {fart:0.0} MB/s{tilbage}";
+
+            // «Henter», mens der kontrolleres, ville vaere en forkert
+            // oplysning. Kontrollen af large-v3 laeser 2,9 GB igennem, saa den
+            // varer laenge nok til at blive set.
+            Status.Text = p.Kontrollerer
+                ? $"Kontrollerer kontrolsummen på {model.Id}: {mb:0} af {ialt:0} MB"
+                : $"Henter {model.Id}: {mb:0} af {ialt:0} MB · {fart:0.0} MB/s{tilbage}";
         });
 
         try
