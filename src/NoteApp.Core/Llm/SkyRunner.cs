@@ -405,6 +405,17 @@ public sealed class SkyRunner
             var svarKrop = await svar.Content.ReadAsStringAsync(ct);
             ur.Stop();
 
+            // ID'ET LAESES FOER FEJLKONTROLLEN.
+            //
+            // En afvist anmodning er den, der oftest skal foelges op hos
+            // leverandoeren - og det er praecis dér, id'et er noget vaerd.
+            // Laestes det efter kastet, ville kvitteringen for en fejlet
+            // afsendelse vaere den eneste uden.
+            kvittering = kvittering with
+            {
+                Anmodningsid = Kvitteringer.LaesAnmodningsid(svar.Headers)
+            };
+
             if (!svar.IsSuccessStatusCode) throw Fejl(svar.StatusCode, svarKrop);
 
             using var doc = JsonDocument.Parse(svarKrop);

@@ -36,6 +36,26 @@ public sealed record Kvittering
     /// </summary>
     public string Sum { get; init; } = "";
 
+    /// <summary>
+    /// Leverandørens eget id for anmodningen, læst af svarets headere. Tom,
+    /// når der ikke kom et.
+    /// </summary>
+    /// <remarks>
+    /// DET ER DEN ENESTE HALVDEL, KVITTERINGEN IKKE SELV KAN SKRIVE.
+    ///
+    /// Kontrolsummen beviser, hvad DENNE maskine sendte. Skal en hændelse
+    /// følges op hos leverandøren — «hvad skete der med den anmodning, og
+    /// blev den gemt?» — skal der være et id, begge parter kan slå op på.
+    /// Uden det er svaret en dato og et klokkeslæt, og det er ikke nok til at
+    /// pege på én anmodning ud af mange.
+    ///
+    /// Den kan være tom, og så står den tom. Mistral dokumenterer ikke
+    /// headeren, og der blev set både <c>x-kong-request-id</c> og intet
+    /// (efterprøvet mod api.eu.mistral.ai 03-09-2026). Et id, appen selv
+    /// fandt på, ville kunne slås op nul steder og ligne noget, det ikke er.
+    /// </remarks>
+    public string Anmodningsid { get; init; } = "";
+
     public int TokensInd { get; init; }
     public int TokensUd { get; init; }
     /// <summary>
@@ -105,6 +125,49 @@ public static class Kvitteringer
         WriteIndented = false,
         Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
     };
+
+    /// <summary>
+    /// De headere, et anmodnings-id kan komme i — i den rækkefølge, de
+    /// foretrækkes.
+    /// </summary>
+    /// <remarks>
+    /// LISTEN ER OBSERVERET, IKKE SLÅET OP I EN SPECIFIKATION. Mistral
+    /// dokumenterer ikke headeren. Set 03-09-2026 mod api.eu.mistral.ai kom
+    /// id'et som <c>x-kong-request-id</c> — de øvrige står med, fordi de er
+    /// de gængse navne hos leverandører bag samme slags gateway, og fordi et
+    /// navn, der skifter, ikke må gøre feltet tomt uden at nogen ser det.
+    /// </remarks>
+    private static readonly string[] Idheadere =
+    {
+        "x-kong-request-id", "x-request-id", "request-id", "x-amzn-requestid", "cf-ray"
+    };
+
+    /// <summary>
+    /// Anmodnings-id'et fra svarets headere, eller tom streng.
+    /// </summary>
+    /// <remarks>
+    /// Den tager headerne frem for svaret selv, så den kan prøves uden et
+    /// netværk. Værdien skæres ved 120 tegn: en header er leverandørens, og
+    /// den skal ikke kunne vokse en kvitteringsfil ud af proportioner.
+    /// </remarks>
+    public static string LaesAnmodningsid(
+        IEnumerable<KeyValuePair<string, IEnumerable<string>>> headere)
+    {
+        var opslag = headere.ToDictionary(
+            h => h.Key, h => h.Value, StringComparer.OrdinalIgnoreCase);
+
+        foreach (var navn in Idheadere)
+        {
+            if (!opslag.TryGetValue(navn, out var vaerdier)) continue;
+
+            var vaerdi = vaerdier.FirstOrDefault(v => !string.IsNullOrWhiteSpace(v))?.Trim();
+            if (vaerdi is null or "") continue;
+
+            return vaerdi.Length > 120 ? vaerdi[..120] : vaerdi;
+        }
+
+        return "";
+    }
 
     /// <summary>Kontrolsummen af det, der bliver sendt.</summary>
     public static string Kontrolsum(string krop) =>

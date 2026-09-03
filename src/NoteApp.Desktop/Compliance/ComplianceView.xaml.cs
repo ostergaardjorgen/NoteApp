@@ -47,9 +47,11 @@ public partial class ComplianceView : UserControl
             : "Ikke sat op endnu — intet sendes";
 
         Endepunkt.Text = SkyKatalog.Endpoint;
+        EuVaert.Text = $"Eneste tilladte vært: {SkyKatalog.TilladtVaert}";
 
         VisGoogletilstand();
         VisKvitteringer();
+        VisAttest();
 
         var whisper = WhisperInstall.Standard;
 
@@ -234,11 +236,89 @@ public partial class ComplianceView : UserControl
             // til et bevis - en forkortet sum kan ikke sammenlignes med noget.
             Sum = "SHA-256: " + k.Sum,
 
+            // Kvitteringer skrevet foer 03-09-2026 har ikke feltet. De skal
+            // vise INTET frem for en tom etiket: linjen findes ikke, fordi
+            // id'et ikke blev gemt dengang - ikke fordi leverandoeren undlod
+            // at sende det.
+            Anmodningsid = "Anmodnings-id: " + k.Anmodningsid,
+            AnmodningsidSynlig = k.Anmodningsid.Length > 0 ? Visibility.Visible : Visibility.Collapsed,
+
             Kant = (System.Windows.Media.Brush)FindResource(k.Lykkedes ? "PanelKant" : "FejlTekst"),
             Fejl = k.Fejl,
             FejlSynlig = k.Fejl.Length > 0 ? Visibility.Visible : Visibility.Collapsed
         }).ToList();
     }
+
+    /// <summary>
+    /// Attesten for de to kontoindstillinger, appen ikke kan sætte.
+    /// </summary>
+    /// <remarks>
+    /// TILSTANDEN SIGER «REGISTRERET», IKKE «SLÅET TIL». Forskellen er hele
+    /// pointen: appen har ikke set indstillingen hos leverandøren og må ikke
+    /// skrive, at den har. Se <see cref="Kontoattester"/>.
+    /// </remarks>
+    private void VisAttest()
+    {
+        var a = Kontoattester.Hent();
+
+        Saet(a.Zdr, ZdrDato, ZdrAnsvarlig, ZdrReference, ZdrTilstand);
+        Saet(a.Traening, TraeningDato, TraeningAnsvarlig, TraeningReference, TraeningTilstand);
+    }
+
+    private void Saet(Attest attest, DatePicker dato, TextBox ansvarlig,
+                      TextBox reference, TextBlock tilstand)
+    {
+        // Datoen staar som ISO i filen, saa den kan laeses af et menneske og
+        // af et script uden at gaette paa raekkefoelgen af dag og maaned.
+        // Vaelgeren arbejder med DateTime, og oversaettelsen sker her.
+        dato.SelectedDate = DateTime.TryParse(
+            attest.Dato, System.Globalization.CultureInfo.InvariantCulture,
+            System.Globalization.DateTimeStyles.None, out var d) ? d : null;
+
+        ansvarlig.Text = attest.Ansvarlig;
+        reference.Text = attest.Reference;
+
+        tilstand.Text = attest.ErRegistreret ? "REGISTRERET" : "IKKE REGISTRERET";
+
+        // Gul, ikke groen. En registrering er en attest fra brugeren, ikke en
+        // verifikation - og groen ville laeses som det sidste.
+        tilstand.Foreground = (Brush)FindResource(
+            attest.ErRegistreret ? "Advarsel" : "TekstMeget");
+    }
+
+    private void GemAttest_Klik(object sender, RoutedEventArgs e)
+    {
+        var ny = new Kontoattest
+        {
+            Zdr = Laes(ZdrDato, ZdrAnsvarlig, ZdrReference),
+            Traening = Laes(TraeningDato, TraeningAnsvarlig, TraeningReference)
+        };
+
+        try
+        {
+            Kontoattester.Gem(ny);
+
+            AttestBesked.Text = "Registreringen er gemt.";
+            AttestBesked.Foreground = (Brush)FindResource("Godkendt");
+
+            VisAttest();
+        }
+        catch (Exception ex)
+        {
+            // BESKEDEN STAAR VED KNAPPEN OG IKKE I EN DIALOG. Fejlen handler
+            // om det, der staar i felterne, og de skal kunne ses, mens den
+            // laeses - en dialog ville daekke dem.
+            AttestBesked.Text = ex.Message;
+            AttestBesked.Foreground = (Brush)FindResource("FejlTekst");
+        }
+    }
+
+    private static Attest Laes(DatePicker dato, TextBox ansvarlig, TextBox reference) => new()
+    {
+        Dato = dato.SelectedDate?.ToString("yyyy-MM-dd") ?? "",
+        Ansvarlig = ansvarlig.Text.Trim(),
+        Reference = reference.Text.Trim()
+    };
 
     private void Kvitteringer_Klik(object sender, RoutedEventArgs e)
     {

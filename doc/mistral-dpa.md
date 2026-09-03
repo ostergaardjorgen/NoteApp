@@ -275,3 +275,19 @@ og The Constant Company/Vultr hører alle til **Vibe Code Web**.
 
 Get Lago (Irland), Stripe (**USA**), Twilio (**USA**), Resend (Irland) og
 Intercom (Irland).
+
+---
+
+## De to indstillinger, appen ikke kan sætte — 03-09-2026
+
+Zero Data Retention og fravalget af modeltræning står beskrevet ovenfor som
+noget, der «slås fra på din konto». Det er stadig rigtigt, og appen kan
+fortsat ikke gøre det for brugeren.
+
+Det, der er nyt, er at påstanden kan gøres revisionsklar: Compliance-skærmen
+har en fane «Kontrolpunkter», hvor de to indstillinger står med dato,
+ansvarlig og en henvisning til brugerens egne bilag — som en attest, ikke som
+en verifikation. Sammen med dem står EU-linjen, som appen *kan* efterprøve.
+
+Forbeholdet om kontrolplan, kontoadministration og driftsmetadata står samme
+sted. Se `doc/kontoattest.md`.

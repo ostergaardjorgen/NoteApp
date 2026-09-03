@@ -406,6 +406,174 @@
         </ScrollViewer>
       </TabItem>
 
+      <!-- ==================== KONTROLPUNKTER ====================
+
+           HVORFOR DEN HER FANE IKKE BARE SIGER "JA".
+
+           Tre ting afgoer, om bearbejdningen hos leverandoeren holder det,
+           produktet lover. Appen kan efterproeve DEN ENE af dem: adressen,
+           den sender til. De to andre - Zero Data Retention og fravalg af
+           modeltraening - er kontoindstillinger hos Mistral. De saettes under
+           Workspace i deres konsol, og der findes intet endepunkt, appen kan
+           spoerge. Appen kan hverken slaa dem til eller laese, om de er slaaet
+           til.
+
+           En skaerm, der satte tre groenne flueben, ville altsaa lyve om to
+           af dem - og det er praecis den slags, en indkoeber laeser og regner
+           med. Derfor staar grundlaget ved siden af hver linje, og de to
+           manuelle kan kun blive til en ATTEST: en dato, et navn og en
+           henvisning til brugerens egne bilag. Ikke en verifikation.
+
+           Grundlaget staar i Kontoattester.Kontrolpunkter og er praevet.
+           Visker nogen forskellen ud, falder KontoattestTest. -->
+      <TabItem Header="{i18n:Oversat complianceview.kontrolpunkter}" Style="{StaticResource Fane}">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+          <StackPanel>
+
+            <StackPanel Margin="0,0,0,14">
+              <TextBlock Text="{i18n:Oversat complianceview.tre_ting_afgoer_om_bearbejdningen_holder}"
+                         FontSize="15" FontWeight="SemiBold" />
+              <TextBlock FontSize="12.5" LineHeight="21" Margin="0,6,0,0" TextWrapping="Wrap"
+                         Foreground="{DynamicResource TekstSvag}"
+                         Text="{i18n:Oversat complianceview.appen_efterproever_den_foerste_selv_de_to}" />
+            </StackPanel>
+
+            <!-- ============ LINJE 1: EU-REGIONAL INFERENS ============ -->
+            <Border Background="{DynamicResource Panel}" CornerRadius="10" Padding="20,16"
+                    BorderBrush="{DynamicResource PanelKant}" BorderThickness="1" Margin="0,0,0,10">
+              <StackPanel>
+                <Grid>
+                  <TextBlock Text="{i18n:Oversat complianceview.eu_regional_inferens}" FontSize="13.5"
+                             FontWeight="SemiBold" VerticalAlignment="Center" />
+                  <TextBlock Text="{i18n:Oversat complianceview.verificeret_af_endepunktet}" FontSize="10.5"
+                             FontWeight="SemiBold" HorizontalAlignment="Right" VerticalAlignment="Center"
+                             Foreground="{DynamicResource Godkendt}" />
+                </Grid>
+                <TextBlock FontSize="12.5" LineHeight="20" Margin="0,8,0,0" TextWrapping="Wrap"
+                           Foreground="{DynamicResource TekstSvag}"
+                           Text="{i18n:Oversat complianceview.hver_afsendelse_kontrolleres_mod_vaerten_o}" />
+                <TextBlock x:Name="EuVaert" FontSize="12" Margin="0,6,0,0"
+                           FontFamily="Consolas" Foreground="{DynamicResource TekstMeget}" />
+              </StackPanel>
+            </Border>
+
+            <!-- ============ LINJE 2: ZERO DATA RETENTION ============ -->
+            <Border Background="{DynamicResource Panel}" CornerRadius="10" Padding="20,16"
+                    BorderBrush="{DynamicResource PanelKant}" BorderThickness="1" Margin="0,0,0,10">
+              <StackPanel>
+                <Grid>
+                  <TextBlock Text="{i18n:Oversat complianceview.zero_data_retention}" FontSize="13.5"
+                             FontWeight="SemiBold" VerticalAlignment="Center" />
+                  <TextBlock x:Name="ZdrTilstand" FontSize="10.5" FontWeight="SemiBold"
+                             HorizontalAlignment="Right" VerticalAlignment="Center" />
+                </Grid>
+                <TextBlock FontSize="12.5" LineHeight="20" Margin="0,8,0,0" TextWrapping="Wrap"
+                           Foreground="{DynamicResource TekstSvag}"
+                           Text="{i18n:Oversat complianceview.slaas_til_paa_kontoen_hos_mistral_under_wo}" />
+
+                <Grid Margin="0,12,0,0">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                  </Grid.ColumnDefinitions>
+                  <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                  </Grid.RowDefinitions>
+
+                  <TextBlock Grid.Row="0" Grid.Column="0" Text="{i18n:Oversat complianceview.dato}"
+                             FontSize="10.5" FontWeight="SemiBold" Margin="0,0,10,4"
+                             Foreground="{DynamicResource TekstMeget}" />
+                  <TextBlock Grid.Row="0" Grid.Column="1" Text="{i18n:Oversat complianceview.ansvarlig}"
+                             FontSize="10.5" FontWeight="SemiBold" Margin="0,0,10,4"
+                             Foreground="{DynamicResource TekstMeget}" />
+                  <TextBlock Grid.Row="0" Grid.Column="2" Text="{i18n:Oversat complianceview.dokumentationsreference}"
+                             FontSize="10.5" FontWeight="SemiBold" Margin="0,0,0,4"
+                             Foreground="{DynamicResource TekstMeget}" />
+
+                  <DatePicker Grid.Row="1" Grid.Column="0" x:Name="ZdrDato" Width="132" Margin="0,0,10,0" />
+                  <TextBox Grid.Row="1" Grid.Column="1" x:Name="ZdrAnsvarlig" Width="180" Margin="0,0,10,0" />
+                  <TextBox Grid.Row="1" Grid.Column="2" x:Name="ZdrReference" />
+                </Grid>
+              </StackPanel>
+            </Border>
+
+            <!-- ============ LINJE 3: FRAVALG AF MODELTRAENING ============ -->
+            <Border Background="{DynamicResource Panel}" CornerRadius="10" Padding="20,16"
+                    BorderBrush="{DynamicResource PanelKant}" BorderThickness="1" Margin="0,0,0,10">
+              <StackPanel>
+                <Grid>
+                  <TextBlock Text="{i18n:Oversat complianceview.fravalg_af_modeltraening}" FontSize="13.5"
+                             FontWeight="SemiBold" VerticalAlignment="Center" />
+                  <TextBlock x:Name="TraeningTilstand" FontSize="10.5" FontWeight="SemiBold"
+                             HorizontalAlignment="Right" VerticalAlignment="Center" />
+                </Grid>
+                <TextBlock FontSize="12.5" LineHeight="20" Margin="0,8,0,0" TextWrapping="Wrap"
+                           Foreground="{DynamicResource TekstSvag}"
+                           Text="{i18n:Oversat complianceview.aftalen_giver_mistral_lov_til_at_traene_pa}" />
+
+                <Grid Margin="0,12,0,0">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                  </Grid.ColumnDefinitions>
+                  <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                  </Grid.RowDefinitions>
+
+                  <TextBlock Grid.Row="0" Grid.Column="0" Text="{i18n:Oversat complianceview.dato}"
+                             FontSize="10.5" FontWeight="SemiBold" Margin="0,0,10,4"
+                             Foreground="{DynamicResource TekstMeget}" />
+                  <TextBlock Grid.Row="0" Grid.Column="1" Text="{i18n:Oversat complianceview.ansvarlig}"
+                             FontSize="10.5" FontWeight="SemiBold" Margin="0,0,10,4"
+                             Foreground="{DynamicResource TekstMeget}" />
+                  <TextBlock Grid.Row="0" Grid.Column="2" Text="{i18n:Oversat complianceview.dokumentationsreference}"
+                             FontSize="10.5" FontWeight="SemiBold" Margin="0,0,0,4"
+                             Foreground="{DynamicResource TekstMeget}" />
+
+                  <DatePicker Grid.Row="1" Grid.Column="0" x:Name="TraeningDato" Width="132" Margin="0,0,10,0" />
+                  <TextBox Grid.Row="1" Grid.Column="1" x:Name="TraeningAnsvarlig" Width="180" Margin="0,0,10,0" />
+                  <TextBox Grid.Row="1" Grid.Column="2" x:Name="TraeningReference" />
+                </Grid>
+              </StackPanel>
+            </Border>
+
+            <StackPanel Orientation="Horizontal" Margin="0,4,0,14" VerticalAlignment="Center">
+              <Button Content="{i18n:Oversat complianceview.gem_registreringen}" Click="GemAttest_Klik"
+                      Padding="14,7" Margin="0,0,8,0"
+                      ToolTip="{i18n:Oversat complianceview.gemmer_dato_ansvarlig_og_reference_lokalt}" />
+              <Button Content="{i18n:Oversat complianceview.din_konto}" Click="Konsol_Klik" Padding="14,7" Margin="0,0,12,0"
+                      ToolTip="{i18n:Oversat complianceview.aabner_console_mistral_ai_hvor_du_slaar_tr}" />
+              <TextBlock x:Name="AttestBesked" FontSize="12" VerticalAlignment="Center" TextWrapping="Wrap" />
+            </StackPanel>
+
+            <!-- ============ FORBEHOLDET, DER IKKE MAA MANGLE ============
+
+                 EU-endepunktet styrer, hvor SELVE BEARBEJDNINGEN sker. Det
+                 er ikke det samme som, at alt hos leverandoeren ligger i
+                 Europa. Skrev skaermen "alt bliver i EU", ville den love
+                 noget, endepunktet ikke kan holde. -->
+            <Border Background="{DynamicResource Trykket}" BorderBrush="{DynamicResource PanelKant}"
+                    BorderThickness="1" CornerRadius="8" Padding="16,13" Margin="0,0,0,10">
+              <StackPanel>
+                <TextBlock Text="{i18n:Oversat complianceview.hvad_endepunktet_ikke_daekker}"
+                           FontSize="12.5" FontWeight="SemiBold" />
+                <TextBlock FontSize="12" LineHeight="19" Margin="0,5,0,0" TextWrapping="Wrap"
+                           Foreground="{DynamicResource TekstMeget}"
+                           Text="{i18n:Oversat complianceview.eu_endepunktet_afgoer_hvor_selve_bearbejd}" />
+                <TextBlock FontSize="12" LineHeight="19" Margin="0,6,0,0" TextWrapping="Wrap"
+                           Foreground="{DynamicResource TekstMeget}"
+                           Text="{i18n:Oversat complianceview.en_registrering_her_er_ikke_en_verifikatio}" />
+              </StackPanel>
+            </Border>
+
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
       <TabItem Header="{i18n:Oversat complianceview.underdatabehandlere}" Style="{StaticResource Fane}">
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
           <StackPanel>
@@ -858,6 +1026,17 @@
 
                         <TextBlock Text="{Binding Sum}" FontSize="11" Margin="0,5,0,0"
                                    FontFamily="Consolas" TextWrapping="Wrap"
+                                   Foreground="{DynamicResource TekstMeget}" />
+
+                        <!-- LEVERANDOERENS EGET ID. Kontrolsummen ovenfor
+                             beviser, hvad DENNE maskine sendte; id'et er det,
+                             begge parter kan slaa op paa, hvis en anmodning
+                             skal foelges op hos Mistral. Kom der ikke et, staar
+                             linjen slet ikke - en tom etiket ville ligne en
+                             oplysning, der mangler. -->
+                        <TextBlock Text="{Binding Anmodningsid}" FontSize="11" Margin="0,3,0,0"
+                                   FontFamily="Consolas" TextWrapping="Wrap"
+                                   Visibility="{Binding AnmodningsidSynlig}"
                                    Foreground="{DynamicResource TekstMeget}" />
 
                         <TextBlock Text="{Binding Fejl}" FontSize="12" Margin="0,5,0,0"
