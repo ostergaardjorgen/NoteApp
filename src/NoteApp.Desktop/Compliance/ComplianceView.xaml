@@ -912,6 +912,36 @@
                     </DataTemplate>
                   </ItemsControl.ItemTemplate>
                 </ItemsControl>
+
+                <!-- ============ LICENSNOTITSERNE, DER FAKTISK FOELGER MED ============
+
+                     Her stod «licensteksten foelger med - den ligger i
+                     installationsmappen». Det passede ikke: der laa ingen
+                     licensfiler nogen steder i repoet 03-09-2026, hverken i
+                     app-mappen eller i pakken.
+
+                     En app, der paastaar at overholde en attributionsbetingelse
+                     uden at goere det, er ikke bare uryddelig - det er et brud
+                     paa den licens, komponenten er brugt under.
+
+                     Knappen aabner mappen, saa paastanden kan efterproeves
+                     frem for troes. Kan mappen ikke findes, siger teksten det
+                     - den maa ikke love noget, der ikke er der. -->
+                <Border Background="{DynamicResource Trykket}" BorderBrush="{DynamicResource PanelKant}"
+                        BorderThickness="1" CornerRadius="8" Padding="16,13" Margin="0,6,0,0">
+                  <StackPanel>
+                    <TextBlock Text="{i18n:Oversat complianceview.licensnotitserne_der_foelger_med}"
+                               FontSize="12.5" FontWeight="SemiBold" />
+                    <TextBlock FontSize="12" LineHeight="19" Margin="0,5,0,0" TextWrapping="Wrap"
+                               Foreground="{DynamicResource TekstMeget}"
+                               Text="{i18n:Oversat complianceview.licensteksterne_er_ophavsmaendenes_egne_og}" />
+                    <TextBlock x:Name="Licenstilstand" FontSize="12" LineHeight="19" Margin="0,6,0,0"
+                               TextWrapping="Wrap" />
+                    <Button x:Name="LicensKnap" Content="{i18n:Oversat complianceview.aabn_licensmappen}"
+                            Click="Licenser_Klik" Padding="14,7" Margin="0,10,0,0"
+                            HorizontalAlignment="Left" />
+                  </StackPanel>
+                </Border>
               </StackPanel>
             </Border>
 

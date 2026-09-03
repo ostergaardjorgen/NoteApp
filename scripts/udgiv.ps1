@@ -239,17 +239,10 @@ if (Test-Path $talerKilde) {
     $talerMaal = Join-Path $udgivTil 'talere'
     Copy-Item $talerKilde $udgivTil -Recurse -Force
 
-    $noedvendige = @(
-        'bin\sherpa-onnx-offline-speaker-diarization.exe',
-        'bin\onnxruntime.dll',
-        'segmentering.onnx',
-        'stemmer.onnx'
-    )
-    $glemt = $noedvendige | Where-Object { -not (Test-Path (Join-Path $talerMaal $_)) }
-    if ($glemt) {
-        throw ("Talergenkendelsen mangler: $($glemt -join ', ').`n" +
-               "Appen ville koere videre uden navne paa talerne, uden at sige det.")
-    }
+    # LISTEN OVER DE NOEDVENDIGE FILER STOD HER FOER, og en kopi af den stod i
+    # byg-installer.ps1. To lister om det samme driver fra hinanden. Nu staar
+    # den ét sted - i tjek-licenser.ps1 - og gaten laengere nede kontrollerer
+    # baade den og licensnotitserne.
 
     $mb = [math]::Round(((Get-ChildItem $talerMaal -Recurse -File | Measure-Object Length -Sum).Sum / 1MB), 1)
     Write-Host "Talergenkendelsen kopieret med ($mb MB)"
@@ -257,6 +250,39 @@ if (Test-Path $talerKilde) {
 else {
     Write-Warning ("Mappen $talerKilde findes ikke. Appen udgives UDEN " +
                    "talergenkendelse — udskrifter faar ingen navne paa talerne.")
+}
+
+# --- LICENSNOTITSERNE FOELGER MED ---------------------------------------
+#
+# Compliance-skaermen lovede allerede, at licensteksten "ligger i
+# installationsmappen" - for sherpa-onnx (Apache-2.0) og for krediteringen af
+# NVIDIA (CC-BY-4.0). Det passede ikke: der laa ingen licensfiler nogen
+# steder i repoet 03-09-2026.
+#
+# En app, der paastaar at overholde en attributionsbetingelse uden at goere
+# det, er ikke bare uryddelig - det er et brud paa den licens, komponenten er
+# brugt under. Nu kopieres notitserne med, og gaten nedenfor fejler, hvis de
+# ikke er der.
+$licensKilde = Join-Path $Rod 'licenser'
+if (Test-Path $licensKilde) {
+    Copy-Item $licensKilde $udgivTil -Recurse -Force
+    $antal = (Get-ChildItem (Join-Path $udgivTil 'licenser') -Recurse -File).Count
+    Write-Host "Licensnotitser kopieret med ($antal filer)"
+}
+else {
+    throw ("Mappen $licensKilde findes ikke. Appen maa ikke udgives uden " +
+           "licensnotitser - Compliance-skaermen lover, at de ligger i " +
+           "installationsmappen.")
+}
+
+# --- SPAERRE: LICENSNOTITSER OG TALERADSKILLELSE -------------------------
+#
+# Listen staar i tjek-licenser.ps1 og kun dér. To lister driver fra hinanden -
+# det skete for taleradskillelsen, som havde sin egen kopi baade her og i
+# byg-installer.ps1.
+& powershell -NoProfile -File (Join-Path $PSScriptRoot 'tjek-licenser.ps1') -Mappe $udgivTil
+if ($LASTEXITCODE -ne 0) {
+    throw "Licenstjekket fejlede. Se linjerne ovenfor."
 }
 
 # --- Googles klient-id -----------------------------------------------------

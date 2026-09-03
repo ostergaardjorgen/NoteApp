@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -53,6 +54,7 @@ public partial class ComplianceView : UserControl
         VisKvitteringer();
         VisAttest();
         VisSummer();
+        VisLicensmappe();
 
         var whisper = WhisperInstall.Standard;
 
@@ -93,7 +95,8 @@ public partial class ComplianceView : UserControl
                 "Apache-2.0",
                 "Kører lokalt",
                 "Programmet, der skiller stemmerne fra hinanden i en optagelse. Følger med appen og hentes ikke.",
-                "Apache-2.0 er fri at sælge med. Betingelsen er, at licensteksten følger med — den ligger i installationsmappen."),
+                "Apache-2.0 er fri at sælge med. Betingelsen er, at licensteksten følger med — den ligger i "
+                + @"programmappen under licenser\tekster\sherpa-onnx-Apache-2.0.txt."),
 
             new Komponent(
                 "pyannote segmentation 3.0",
@@ -107,7 +110,9 @@ public partial class ComplianceView : UserControl
                 "CC-BY-4.0",
                 "Kører lokalt",
                 "Modellen, der afgør, om to stykker tale kommer fra den samme stemme. Vægtene er NVIDIA's.",
-                "CC-BY-4.0 tillader kommerciel brug og videredistribution. Betingelsen er kreditering: NVIDIA skal nævnes som ophav, og det sker her og i installationsmappen."),
+                "CC-BY-4.0 tillader kommerciel brug og videredistribution. Betingelsen er kreditering: NVIDIA "
+                + "nævnes som ophav her, og krediteringen står sammen med den fulde licenstekst i programmappen "
+                + @"under licenser\NOTICE.md. Modellen er ikke ændret."),
 
             // HER STOD QWEN3 (4B) - sprogmodellen til den korte opsummering.
             //
@@ -248,6 +253,73 @@ public partial class ComplianceView : UserControl
             Fejl = k.Fejl,
             FejlSynlig = k.Fejl.Length > 0 ? Visibility.Visible : Visibility.Collapsed
         }).ToList();
+    }
+
+    /// <summary>
+    /// Hvor licensnotitserne ligger — eller at de ikke gør.
+    /// </summary>
+    /// <remarks>
+    /// SKÆRMEN LOVEDE DEM, FØR DE FANDTES. Der stod «licensteksten følger med
+    /// — den ligger i installationsmappen» ved sherpa-onnx og NVIDIA, og der
+    /// lå ingen licensfiler nogen steder 03-09-2026.
+    ///
+    /// Nu kopieres de med af <c>udgiv.ps1</c>, og <c>tjek-licenser.ps1</c>
+    /// fejler bygget, hvis de mangler. Her siges det, der ER — inklusive det
+    /// tilfælde, hvor mappen ikke kan findes. En påstand, der ikke kan
+    /// efterprøves, hører ikke til på den her skærm.
+    /// </remarks>
+    private void VisLicensmappe()
+    {
+        _licensmappe = Licensmappe();
+
+        if (_licensmappe is not null)
+        {
+            Licenstilstand.Text = $"Ligger i {_licensmappe}";
+            Licenstilstand.Foreground = (Brush)FindResource("TekstMeget");
+        }
+        else
+        {
+            Licenstilstand.Text =
+                "Mappen blev ikke fundet her. Kører appen fra en udviklingsbuild, følger "
+                + "notitserne først med ved udgivelsen — i en installeret udgave er de der.";
+            Licenstilstand.Foreground = (Brush)FindResource("Advarsel");
+            LicensKnap.IsEnabled = false;
+        }
+    }
+
+    private string? _licensmappe;
+
+    /// <summary>
+    /// Mappen med notitserne — ved siden af programmet, eller i repoet, når
+    /// appen kører fra en build-mappe.
+    /// </summary>
+    private static string? Licensmappe()
+    {
+        var udgivet = Path.Combine(AppContext.BaseDirectory, "licenser");
+        if (System.IO.Directory.Exists(udgivet)) return udgivet;
+
+        // I en build-mappe ligger de ikke ved siden af exe'en. Repoet soeges
+        // paa NOTICE.md - samme fremgangsmaade som resten af appen, se
+        // RepoFiles, og af samme grund: afstanden op til roden er forskellig
+        // fra en build-mappe og fra den udgivne app.
+        return RepoFiles.Find("licenser", "NOTICE.md") is { } fil
+            ? Path.GetDirectoryName(fil)
+            : null;
+    }
+
+    private void Licenser_Klik(object sender, RoutedEventArgs e)
+    {
+        if (_licensmappe is null) return;
+
+        try
+        {
+            Process.Start(new ProcessStartInfo(_licensmappe) { UseShellExecute = true });
+        }
+        catch (Exception ex)
+        {
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Kunne ikke åbne mappen",
+                ex.Message, Dialogs.Slags.Pas_paa);
+        }
     }
 
     /// <summary>

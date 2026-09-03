@@ -85,22 +85,17 @@ Write-Host ""
 Write-Host "Programfiler : $($filer.Count) filer, $mb MB"
 Write-Host "Version      : $version"
 
-# --- SPAERRE: TALERGENKENDELSEN SKAL VAERE I PAKKEN ----------------------
+# --- SPAERRE: LICENSNOTITSER OG TALERGENKENDELSE I APP-MAPPEN ------------
 #
-# Den ligger i app\talere\ og samles op af "..\app\**" i HeyPia.wxs. Mangler
-# den, bygger pakken uden fejl og installerer en app, der stiltiende holder op
-# med at kunne skille stemmer ad.
-$talerFiler = @(
-    'talere\bin\sherpa-onnx-offline-speaker-diarization.exe',
-    'talere\bin\onnxruntime.dll',
-    'talere\segmentering.onnx',
-    'talere\stemmer.onnx'
-)
-$manglerTalere = $talerFiler | Where-Object { -not (Test-Path (Join-Path $app $_)) }
-if ($manglerTalere) {
-    throw ("Talergenkendelsen mangler i app-mappen: $($manglerTalere -join ', ').`n" +
-           "Pakken ville installere en app uden navne paa talere.")
-}
+# Begge dele ligger i app\ og samles op af "..\app\**" i HeyPia.wxs. Mangler
+# de, bygger pakken uden fejl og installerer en app, der stiltiende holder op
+# med at kunne skille stemmer ad - eller som lover licensnotitser, der ikke er
+# der.
+#
+# LISTEN STOD HER FOER, og en kopi af den stod i udgiv.ps1. To lister om det
+# samme driver fra hinanden. Nu staar den ét sted.
+& powershell -NoProfile -File (Join-Path $PSScriptRoot 'tjek-licenser.ps1') -Mappe $app
+if ($LASTEXITCODE -ne 0) { throw "Licenstjekket paa app-mappen fejlede." }
 
 # --- SPAERRE: WPF'S NATIVE DLL'ER SKAL VAERE DER -------------------------
 #
@@ -179,6 +174,18 @@ if (($setupVersion -split '\.')[0..2] -join '.' -ne $msiVersion) {
     throw ("HeyPia-setup.exe er version $setupVersion, men der blev bygget $msiVersion. " +
            "Bundle-trinnet er fejlet, og den gamle fil ligger der stadig. Koer scriptet igen.")
 }
+
+# --- SPAERRE: ER DET OGSAA I PAKKEN? -------------------------------------
+#
+# App-mappen blev kontrolleret ovenfor. Det er IKKE det samme spoergsmaal.
+# "..\app\**" i HeyPia.wxs samler op, men en Exclude-regel, en tom mappe
+# eller en fil, wix springer over, ville give en pakke, der mangler noget -
+# uden at bygningen fejler.
+#
+# Her laeses pakkens eget fil-katalog, altsaa noejagtig den liste,
+# installationen kommer til at laegge paa disken.
+& powershell -NoProfile -File (Join-Path $PSScriptRoot 'tjek-licenser.ps1') -Msi $msi
+if ($LASTEXITCODE -ne 0) { throw "Licenstjekket paa den byggede pakke fejlede." }
 
 Write-Host ""
 Write-Host "Færdig." -ForegroundColor Green

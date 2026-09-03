@@ -150,6 +150,7 @@
     "titel_tidspunkt_og_sted_sendes_op_moedetyp": "Titel, tidspunkt og sted sendes op. Mødetype, mappe og sprog bliver her — og lyd, transkriptioner og noter sendes aldrig."
   },
   "complianceview": {
+    "aabn_licensmappen": "Åbn licensmappen",
     "aabner_console_mistral_ai_hvor_du_slaar_tr": "Åbner console.mistral.ai, hvor du slår træning fra",
     "aabner_legal_mistral_ai_hvor_databehandler": "Åbner legal.mistral.ai, hvor databehandleraftalen står",
     "aabner_trust_mistral_ai_med_certificeringe": "Åbner trust.mistral.ai med certificeringer og listen over underdatabehandlere",
@@ -249,6 +250,8 @@
     "leverandoeren": "Leverandøren",
     "leverandoeren_er_europaeisk_det_er_ikke_de": "Leverandøren er europæisk. Det er ikke det samme som, at databehandlingen er efterprøvet europæisk.",
     "leverandoeren_mistral_ai": "LEVERANDØREN — MISTRAL AI",
+    "licensnotitserne_der_foelger_med": "Licensnotitserne, der følger med",
+    "licensteksterne_er_ophavsmaendenes_egne_og": "Licensteksterne er ophavsmændenes egne og ligger i programmappen. De installeres sammen med appen, og bygget fejler, hvis en af dem mangler i pakken. Krediteringen af NVIDIA, som CC-BY-4.0 kræver, står i NOTICE.md sammen med den fulde licenstekst.",
     "listen_i_trust_center_er_gennemgaaet_navn": "Listen i Trust Center er gennemgået navn for navn 18-08-2026. Den opdeler efter PRODUKT — Vibe, Studio/API, Vibe Code Web — og det kan bruges: ni af de femogtyve hører til Vibe eller Vibe Code Web og er ude af billedet, fordi appen kun kalder API'et. Fem mere rører kun konto og betaling, ikke mødeindhold.",
     "listen_over_underdatabehandlere_kan_aendre": "Listen over underdatabehandlere kan ændre sig. Mistral varsler ændringer med ti dages indsigelsesfrist, og der kan abonneres på varsler i Trust Center — det bør nogen gøre.",
     "lyd_og_transkription": "Lyd og transkription",

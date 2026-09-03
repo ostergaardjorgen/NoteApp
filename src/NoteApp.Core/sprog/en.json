@@ -727,6 +727,7 @@
     "diktering_sprog_hvorfor": "If it guesses wrong, every single word is wrong — not just one. Measured 30-08-2026: «hallo, hallo, hallo» spoken in Danish came back as «Alors, alors, alors ?». French. It hits hardest what dictation is used for most: short sentences, where there is almost nothing to guess from."
   },
   "complianceview": {
+    "aabn_licensmappen": "Open the licence folder",
     "aabner_console_mistral_ai_hvor_du_slaar_tr": "Opens console.mistral.ai, where you turn training off",
     "aabner_legal_mistral_ai_hvor_databehandler": "Opens legal.mistral.ai, where the data processing agreement is",
     "aabner_trust_mistral_ai_med_certificeringe": "Opens trust.mistral.ai with certifications and the list of sub-processors",
@@ -826,6 +827,8 @@
     "leverandoeren": "The supplier",
     "leverandoeren_er_europaeisk_det_er_ikke_de": "The supplier is European. That is not the same as the processing having been verified as European.",
     "leverandoeren_mistral_ai": "THE SUPPLIER — MISTRAL AI",
+    "licensnotitserne_der_foelger_med": "The licence notices included",
+    "licensteksterne_er_ophavsmaendenes_egne_og": "The licence texts are the copyright holders' own and sit in the program folder. They are installed together with the app, and the build fails if one of them is missing from the package. The NVIDIA attribution required by CC-BY-4.0 is in NOTICE.md together with the full licence text.",
     "listen_i_trust_center_er_gennemgaaet_navn": "The list in the Trust Center was reviewed name by name on 18-08-2026. It is broken down by PRODUCT — Vibe, Studio/API, Vibe Code Web — and that can be used: nine of the twenty-five belong to Vibe or Vibe Code Web and are out of the picture, because the app only calls the API. Five more touch only account and payment, not meeting content.",
     "listen_over_underdatabehandlere_kan_aendre": "The list of sub-processors can change. Mistral gives notice of changes with a ten-day objection period, and notifications can be subscribed to in the Trust Center — someone ought to.",
     "lyd_og_transkription": "Audio and transcript",

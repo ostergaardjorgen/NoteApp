@@ -20,11 +20,11 @@ powershell -File C:\NoteApp\scripts\byg-installer.ps1
 
 Der kommer to filer i `C:\NoteApp\installer\`:
 
-- **HeyPia-setup.exe** (ca. 53 MB) — den, der skal sendes eller
+- **HeyPia-setup.exe** (ca. 109 MB) — den, der skal sendes eller
   dobbeltklikkes. Beder selv om administratorrettigheder undervejs.
-- **HeyPia.msi** (ca. 52 MB) — nyttelasten, til automatisk udrulning.
+- **HeyPia.msi** (ca. 107 MB) — nyttelasten, til automatisk udrulning.
 
-Efter installation ligger programmet i `C:\Program Files\NoteApp` (ca. 160 MB),
+Efter installation ligger programmet i `C:\Program Files\HeyPia` (ca. 233 MB),
 med genveje i Startmenuen og på skrivebordet, og en post under **Tilføj/fjern
 programmer**.
 
@@ -38,8 +38,8 @@ frem for af et byggescript.
 
 | | Sti | Bruges til |
 |---|---|---|
-| Udvikling | `C:\NoteApp\app\NoteApp.exe` | Køres direkte, mens der bygges og prøves af |
-| Installation | `C:\Program Files\NoteApp\NoteApp.exe` | Den rigtige installation |
+| Udvikling | `C:\NoteApp\app\HeyPia.exe` | Køres direkte, mens der bygges og prøves af |
+| Installation | `C:\Program Files\HeyPia\HeyPia.exe` | Den rigtige installation |
 
 Begge læser den **samme datamappe**. Det er med vilje: optagelser, dokumenter
 og indstillinger skal være de samme, uanset hvilken kopi der startes.
@@ -221,6 +221,38 @@ versionsstyring — flere GB binærer hører ikke i et git-repo.
 **Læg ikke modellerne på et netværksdrev.** Målt på denne maskine tog
 indlæsning af `ggml-large-v3.bin` **248 sekunder over SMB mod 4,9 sekunder fra
 lokal SSD** — og den omkostning betales, hver eneste gang en udskrift starter.
+
+## Licensnotitser
+
+Programmappen indeholder `licenser\`, og den installeres sammen med appen:
+
+- `licenser\NOTICE.md` — hvilke tredjepartskomponenter der indgår, under
+  hvilke licenser, og den kreditering, nogle af dem kræver.
+- `licenser\tekster\` — de fulde licenstekster. De er ophavsmændenes egne,
+  hentet fra deres projekter 03-09-2026, og de er ikke omskrevet.
+
+**Krediteringen er ikke en høflighed.** sherpa-onnx og SQLitePCLRaw er
+Apache-2.0, og NVIDIA NeMo TitaNet er CC-BY-4.0. Begge licenser kræver, at
+teksten følger med — og CC-BY-4.0 kræver desuden, at NVIDIA nævnes som ophav.
+Uden det er komponenterne ikke lovligt redistribueret.
+
+Bygget håndhæver det:
+
+```powershell
+powershell -File C:\NoteApp\scripts\tjek-licenser.ps1
+```
+
+Gaten køres automatisk to steder — af `udgiv.ps1` mod den udgivne app-mappe,
+og af `byg-installer.ps1` mod **både** app-mappen og den byggede `.msi`. De to
+er ikke det samme spørgsmål: en fil kan ligge i app-mappen og alligevel ikke
+komme med i pakken. Mangler noget, fejler bygget frem for at sende en pakke ud
+med et løfte, den ikke holder.
+
+Listen over krævede filer står ét sted, i `tjek-licenser.ps1`, og
+`LicensgateTest` fjerner hver fil i den ét ad gangen og kontrollerer, at gaten
+faktisk siger nej. En gate, ingen har set fejle, er ikke en gate.
+
+Se `doc\licenser.md` for kortlægningen komponent for komponent.
 
 ## Juridisk note
 
