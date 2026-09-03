@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 using System.Text.Json;
 
 namespace NoteApp.Core;
@@ -147,9 +147,27 @@ public static class Integrationsfiler
             var sti = Fil(id);
 
             if (File.Exists(sti))
-                return JsonSerializer.Deserialize<Integrationsopsaetning>(
-                           File.ReadAllText(sti, Encoding.UTF8))
-                       ?? new Integrationsopsaetning();
+            {
+                var o = JsonSerializer.Deserialize<Integrationsopsaetning>(
+                            File.ReadAllText(sti, Encoding.UTF8))
+                        ?? new Integrationsopsaetning();
+
+                // ============ OPDATERINGSNOEGLEN LIGGER BESKYTTET ============
+                //
+                // Den er hele adgangen til brugerens kalender og opgaver, og
+                // den udloeber ikke af sig selv. Laa den i klartekst, kunne
+                // enhver proces - eller enhver, der fik fat i en
+                // sikkerhedskopi af mappen - bruge den til at laese og skrive
+                // i Google-kontoen, uden at nogen blev spurgt.
+                //
+                // Nu bindes den til Windows-brugerens egen noegle. Resten af
+                // filen - hvornaar der sidst blev hentet, hvor mange, den
+                // sidste fejl - staar som foer: det er ikke hemmeligt, og det
+                // skal kunne laeses, ogsaa naar noeglen ikke kan.
+                o.Opdateringsnoegle = Hemmelighed.Aabnfelt(o.Opdateringsnoegle);
+
+                return o;
+            }
         }
         catch (Exception)
         {
@@ -160,10 +178,36 @@ public static class Integrationsfiler
         return new Integrationsopsaetning();
     }
 
+    /// <summary>
+    /// Gemmer opsætningen. Opdateringsnøglen beskyttes; resten står som før.
+    /// </summary>
+    /// <remarks>
+    /// ATOMISK. Går strømmen midt i en skrivning, skal der stå enten den
+    /// gamle eller den nye opsætning — ikke en halv fil. En ødelagt fil
+    /// betyder «ikke sat op», og så skal brugeren forbinde Google igen.
+    /// </remarks>
     public static void Gem(string id, Integrationsopsaetning o)
     {
         Directory.CreateDirectory(UserDataPaths.Root);
-        File.WriteAllText(Fil(id), JsonSerializer.Serialize(o, Format), new UTF8Encoding(false));
+
+        // Der gemmes en KOPI med noeglen laast. Objektet, kalderen sidder med,
+        // skal blive ved at have den brugbare noegle - ellers ville en
+        // gemning midt i et forloeb tage adgangen fra resten af det.
+        var udgave = new Integrationsopsaetning
+        {
+            Opdateringsnoegle = Hemmelighed.Lukfelt(o.Opdateringsnoegle),
+            SidstHentet = o.SidstHentet,
+            SidsteAntal = o.SidsteAntal,
+            SidsteFejl = o.SidsteFejl,
+        };
+
+        var sti = Fil(id);
+        var kladde = sti + ".kladde";
+
+        File.WriteAllText(kladde, JsonSerializer.Serialize(udgave, Format), new UTF8Encoding(false));
+
+        if (File.Exists(sti)) File.Replace(kladde, sti, null);
+        else File.Move(kladde, sti);
     }
 
     /// <summary>
@@ -176,7 +220,10 @@ public static class Integrationsfiler
     /// </summary>
     public static void Glem(string id, Kalenderkilde kilde)
     {
-        try { if (File.Exists(Fil(id))) File.Delete(Fil(id)); } catch (IOException) { }
+        // NOEGLEN OVERSKRIVES, ikke bare slettes. En fil, der slettes, ligger
+        // stadig paa disken, til pladsen bruges igen - og en adgangsnoegle til
+        // en Google-konto, der kan graves op, er ikke vaek.
+        Hemmelighed.Slet(Fil(id));
 
         // OPGAVEINTEGRATIONEN RØRER IKKE KALENDEREN, OG OMVENDT.
         //

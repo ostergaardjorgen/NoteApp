@@ -11,6 +11,34 @@ public partial class App : Application
     {
         base.OnStartup(e);
 
+        // ============ HEMMELIGHEDERNE BESKYTTES FOERSTE GANG ============
+        //
+        // Mistral-noeglen og Googles opdateringsnoegle laa som ren tekst i
+        // datamappen. Filerne ligger uden for git og uden for OneDrive - det
+        // beskytter mod at DELE dem ved et uheld, ikke mod at nogen laeser
+        // dem. Enhver proces, der koerer som brugeren, kunne aabne dem; det
+        // samme kunne enhver, der fik fat i en sikkerhedskopi af mappen.
+        //
+        // De bindes nu til Windows-brugerens egen noegle. Skiftet sker HER,
+        // ved opstart, og kun én gang: brugeren har sat noeglen ind og
+        // forbundet Google én gang og skal ikke goere det igen, fordi
+        // lagringen blev bedre.
+        //
+        // DEN NYE FIL SKRIVES, FOER DEN GAMLE ER VAEK. En migrering, der
+        // fejler halvvejs, maa aldrig koste adgangen - saa ville en app, der
+        // ville beskytte noget, i stedet have taget det.
+        try
+        {
+            Core.Opstartsbeskyttelse.Koer();
+        }
+        catch (Exception)
+        {
+            // Kan hemmelighederne ikke skiftes over, koerer appen videre paa
+            // de gamle filer. Beskyttelsen er en forbedring, ikke en
+            // betingelse for at komme i gang.
+        }
+
+
         // KUN EEN AD GANGEN MOD SAMME DATAMAPPE.
         //
         // Skal staa foer alt andet: kommer vi hertil som nummer to, skal der

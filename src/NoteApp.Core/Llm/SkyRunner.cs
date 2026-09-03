@@ -201,21 +201,20 @@ public static class SkyNoegle
         var fraMiljoe = Environment.GetEnvironmentVariable(Miljoevariabel);
         if (!string.IsNullOrWhiteSpace(fraMiljoe)) return fraMiljoe.Trim();
 
-        try
-        {
-            if (File.Exists(Fil))
-            {
-                var fraFil = File.ReadAllText(Fil, Encoding.UTF8).Trim();
-                if (fraFil.Length > 0) return fraFil;
-            }
-        }
-        catch (IOException)
-        {
-            // En ulaeselig noeglefil maa ikke vaelte noget. Kalderen faar null
-            // og siger det samme, som hvis der slet ingen noegle var.
-        }
-
-        return null;
+        // ============ NOEGLEN LIGGER BESKYTTET ============
+        //
+        // Den laa som ren tekst. Filen ligger uden for git og uden for
+        // OneDrive - det beskytter mod at DELE den ved et uheld, ikke mod at
+        // nogen laeser den. Enhver proces, der koerer som brugeren, kunne
+        // aabne den; det samme kunne enhver, der fik fat i en sikkerhedskopi.
+        //
+        // Nu bindes den til Windows-brugerens egen noegle. Se Hemmelighed for
+        // hvad det daekker, og hvad det ikke goer.
+        //
+        // EN GAMMEL KLARTEKSTFIL LAESES STADIG. Brugeren har sat noeglen ind
+        // én gang og skal ikke goere det igen, fordi lagringen blev bedre -
+        // se Skift, der bytter den over foerste gang appen starter.
+        return Hemmelighed.Laes(Fil);
     }
 
     /// <summary>
@@ -225,16 +224,32 @@ public static class SkyNoegle
     /// <see cref="UserDataPaths"/>. Der findes ingen .gitignore-fejl, der kan
     /// lække den, fordi den ikke er inde i arbejdstræet til at begynde med.
     /// </summary>
-    public static void Gem(string noegle)
-    {
-        Directory.CreateDirectory(UserDataPaths.Root);
-        File.WriteAllText(Fil, noegle.Trim(), new UTF8Encoding(false));
-    }
+    public static void Gem(string noegle) => Hemmelighed.Skriv(Fil, noegle);
 
-    public static void Slet()
-    {
-        try { if (File.Exists(Fil)) File.Delete(Fil); } catch (IOException) { }
-    }
+    /// <summary>
+    /// Sletter nøglen — og skriver hen over det, der stod.
+    /// </summary>
+    /// <remarks>
+    /// EN SLETTET FIL LIGGER STADIG PÅ DISKEN, til pladsen bruges igen. En
+    /// API-nøgle, der kan graves op af et frigivet område, er ikke væk. Se
+    /// <see cref="Hemmelighed.Slet"/>.
+    /// </remarks>
+    public static void Slet() => Hemmelighed.Slet(Fil);
+
+    /// <summary>
+    /// Skifter en gammel klartekstnøgle over til beskyttet form.
+    /// </summary>
+    /// <remarks>
+    /// KALDES VED OPSTART. Brugeren har sat nøglen ind én gang og skal ikke
+    /// gøre det igen, fordi lagringen blev bedre. Den nye fil skrives, før
+    /// den gamle er væk — en migrering må aldrig kunne koste adgangen.
+    ///
+    /// Svarer sandt, hvis der faktisk blev skiftet noget.
+    /// </remarks>
+    public static bool Beskyt() => Hemmelighed.Skift(Fil);
+
+    /// <summary>Nøglen, som den må stå på skærmen eller i en log.</summary>
+    public static string Maskeret() => Hemmelighed.Maskeret(Hent());
 
     /// <summary>Beskeden, når der ikke er nogen nøgle. Skal kunne handles på.</summary>
     public static string Vejledning =>
