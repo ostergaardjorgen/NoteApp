@@ -113,15 +113,60 @@ public partial class SprogvalgWindow : Window
         return n < 0 ? 0 : n;
     }
 
+    /// <summary>
+    /// «Skriv ud» — gemmer valget og lukker vinduet med et ja.
+    /// </summary>
+    /// <remarks>
+    /// SPORET STAAR HER, FORDI FEJLEN IKKE KUNNE SES UDEFRA.
+    ///
+    /// Set 02-09 og 03-09-2026: brugeren vaelger dansk paa begge spor, trykker
+    /// «Skriv ud», vinduet lukker - og transskriptionen bliver afbrudt med
+    /// «sprogvinduet blev lukket uden at der blev valgt et sprog». Altsaa
+    /// svarede ShowDialog IKKE true, selv om knappen blev trykket.
+    ///
+    /// Der er kun to maader: enten naaede linjen med DialogResult aldrig at
+    /// blive koert, eller ogsaa kastede noget foer den. En fejl i en
+    /// klik-haandtering inde i et modalt vindue ryger op i appens faelles
+    /// haandtering og kan lukke vinduet med et tomt svar - og saa ser det
+    /// ud, som om brugeren fortroed.
+    ///
+    /// Linjerne herunder svarer paa hvilken af delene. De bliver staaende:
+    /// et vindue, der lukker uden at sige hvorfor, er den slags fejl, der
+    /// koster en hel dag at finde.
+    /// </remarks>
     private void Ok_Click(object sender, RoutedEventArgs e)
     {
-        MitSprog = Sprog[Math.Max(0, Mit.SelectedIndex)].Kode;
+        try
+        {
+            MitSprog = Sprog[Math.Max(0, Mit.SelectedIndex)].Kode;
 
-        DeresSprog = DeresPanel.Visibility == Visibility.Visible
-            ? Sprog[Math.Max(0, Deres.SelectedIndex)].Kode
-            : null;
+            DeresSprog = DeresPanel.Visibility == Visibility.Visible
+                ? Sprog[Math.Max(0, Deres.SelectedIndex)].Kode
+                : null;
 
-        DialogResult = true;
+            Core.Historik.Skriv(Core.HaendelseType.Andet, "Sprogvinduet: der blev trykket «Skriv ud»",
+                $"Mit: «{MitSprog}» · deres: «{DeresSprog}» · "
+                + $"valgt nr {Mit.SelectedIndex}/{Deres.SelectedIndex}",
+                Core.Udfald.Fuldført);
+
+            DialogResult = true;
+        }
+        catch (Exception ex)
+        {
+            try
+            {
+                Core.Historik.Skriv(Core.HaendelseType.Andet, "Sprogvinduet braekkede",
+                    $"{ex.GetType().Name}: {ex.Message}", Core.Udfald.SeEfter);
+            }
+            catch (Exception)
+            {
+                // Kan historikken ikke skrives, er der ikke mere at goere her.
+            }
+
+            // Vinduet skal IKKE blive staaende med en fejl, ingen kan se.
+            // Et nej er et aerligt svar; en laast dialog er ikke.
+            DialogResult = false;
+        }
     }
 
     private void Annuller_Click(object sender, RoutedEventArgs e) => DialogResult = false;
