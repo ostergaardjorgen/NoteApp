@@ -144,6 +144,22 @@ public partial class SprogvalgWindow : Window
                 ? Sprog[Math.Max(0, Deres.SelectedIndex)].Kode
                 : null;
 
+            // ============ VINDUET SVARER MED SIT EGET FLAG ============
+            //
+            // DialogResult ER IKKE TIL AT STOLE PAA HER.
+            //
+            // Maalt 03-09-2026: knappen satte det til true - linjen herunder
+            // blev skrevet - og ét sekund senere laeste kaldet «ShowDialog:
+            // False · vinduets DialogResult: False». Noget saetter det om
+            // undervejs i lukningen, og hverken en Closing-haandtering, en
+            // Close(), en IsCancel i knapstilen eller en fejl i den her metode
+            // kunne findes. Alle fire er efterproevet.
+            //
+            // Saa holdes svaret et sted, WPF ikke roerer. Et felt, der saettes
+            // ét sted og laeses ét sted, kan ikke aendre sig bag om nogen -
+            // og det er billigere end at blive ved med at jage aarsagen.
+            Godkendt = true;
+
             Core.Historik.Skriv(Core.HaendelseType.Andet, "Sprogvinduet: der blev trykket «Skriv ud»",
                 $"Mit: «{MitSprog}» · deres: «{DeresSprog}» · "
                 + $"valgt nr {Mit.SelectedIndex}/{Deres.SelectedIndex}",
@@ -169,5 +185,19 @@ public partial class SprogvalgWindow : Window
         }
     }
 
-    private void Annuller_Click(object sender, RoutedEventArgs e) => DialogResult = false;
+    private void Annuller_Click(object sender, RoutedEventArgs e)
+    {
+        Godkendt = false;
+        DialogResult = false;
+    }
+
+    /// <summary>
+    /// Blev der trykket «Skriv ud»? Vinduets eget svar.
+    /// </summary>
+    /// <remarks>
+    /// Se Ok_Click: DialogResult skiftede fra true til false undervejs i
+    /// lukningen, og det kostede en dags fejlsoegning. Det her felt saettes
+    /// ét sted og laeses ét sted.
+    /// </remarks>
+    public bool Godkendt { get; private set; }
 }

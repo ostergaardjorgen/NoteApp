@@ -2091,12 +2091,16 @@ public partial class TranscribeView : UserControl
             var svar = sprogvalg.ShowDialog();
 
             Historik.Skriv(HaendelseType.Andet, "Sprogvinduet svarede",
-                $"ShowDialog: {(svar is null ? "null" : svar.ToString())} · "
-                + $"vinduets DialogResult: {(sprogvalg.DialogResult is null ? "null" : sprogvalg.DialogResult.ToString())} · "
+                $"Godkendt: {sprogvalg.Godkendt} · ShowDialog: {(svar is null ? "null" : svar.ToString())} · "
                 + $"mit: «{sprogvalg.MitSprog}» · deres: «{sprogvalg.DeresSprog}»",
                 Udfald.Fuldført);
 
-            if (svar != true)
+            // DER LAESES PAA VINDUETS EGET FLAG og ikke paa DialogResult. Se
+            // SprogvalgWindow.Ok_Click: DialogResult skiftede fra true til
+            // false undervejs i lukningen, og en hel dags fejlsoegning gik med
+            // at lede efter hvem. Et felt, der saettes ét sted og laeses ét
+            // sted, kan ikke aendre sig bag om nogen.
+            if (!sprogvalg.Godkendt)
             {
                 // Se ovenfor: bjaelken skal vaek, naar der ikke koeres - og
                 // det skal staa i historikken, hvorfor. En udgang, der kun
