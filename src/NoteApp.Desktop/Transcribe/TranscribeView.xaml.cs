@@ -234,6 +234,16 @@ public partial class TranscribeView : UserControl
         Jobs.Udskriftsvagt.Aendret += Foelgmed;
         Unloaded += (_, _) => Jobs.Udskriftsvagt.Aendret -= Foelgmed;
 
+        // ET DOKUMENT BLIVER FAERDIGT ET ANDET STED, END MAN STAAR.
+        //
+        // Det laves i baggrunden, mens man laeser udskriften. Uden det her
+        // ville fanen blive ved at sige «Dokumenter» uden tal, indtil man
+        // skiftede optagelse - og saa ville man tro, det ikke lykkedes.
+        void Dokumentfaerdigt(string _) => Dispatcher.Invoke(OpdaterDokumentfane);
+
+        Jobs.BackgroundJobs.DokumentFærdigt += Dokumentfaerdigt;
+        Unloaded += (_, _) => Jobs.BackgroundJobs.DokumentFærdigt -= Dokumentfaerdigt;
+
         if (aabnMappe is null) return;
 
         VaelgOptagelse(AlleKnuder()
@@ -1345,10 +1355,54 @@ public partial class TranscribeView : UserControl
             : "Fremdriften står nederst i ruden. Teksten dukker op her, når den er færdig, og bliver gemt automatisk.";
     }
 
+    /// <summary>
+    /// Dokumentfanen: dokumenterne fra den optagelse, der er valgt NU.
+    /// </summary>
+    /// <remarks>
+    /// DEN KALDES FRA <see cref="OpdaterValg"/> og ikke fra fanevalget.
+    ///
+    /// Fanen skal være rigtig, FØR nogen klikker på den — ellers stod tallet
+    /// på fanen for den forrige optagelse, indtil man gik derind. Et tal, der
+    /// først bliver rigtigt, når man kigger, er værre end intet tal: man
+    /// bruger det til at lade være med at kigge.
+    /// </remarks>
+    private void OpdaterDokumentfane()
+    {
+        var valgt = Valgt;
+
+        var meta = valgt is null ? null : MeetingStore.Load(valgt.Mappe);
+
+        Dokumentrude.Vis(meta?.Id.ToString(), valgt?.Mappe, valgt?.Titel);
+
+        FaneDokumenter.Content = Dokumentrude.Antal == 0
+            ? "Dokumenter"
+            : $"Dokumenter · {Dokumentrude.Antal}";
+    }
+
+    /// <summary>Skifter mellem udskriften og dokumenterne. Samme optagelse begge steder.</summary>
+    private void Fane_Skiftet(object sender, RoutedEventArgs e)
+    {
+        // Konstruktoeren koerer foer felterne er sat op; RadioButton.Checked
+        // fyrer under InitializeComponent. Samme faelde som i MainWindow.
+        if (Udskriftsfane is null || Dokumentrude is null) return;
+
+        var dokumenter = FaneDokumenter.IsChecked == true;
+
+        Udskriftsfane.Visibility = dokumenter ? Visibility.Collapsed : Visibility.Visible;
+        Dokumentrude.Visibility = dokumenter ? Visibility.Visible : Visibility.Collapsed;
+
+        // LAESES FORFRA, HVER GANG MAN GAAR IND. Et dokument kan vaere blevet
+        // faerdigt i baggrunden, siden man saa fanen sidst - jobbet koerer
+        // videre, mens man laeser udskriften.
+        if (dokumenter) OpdaterDokumentfane();
+    }
+
     private void OpdaterValg()
     {
         var valgt = Valgt;
         KoerKnap.IsEnabled = valgt?.HarLyd == true && _afbryd is null;
+
+        OpdaterDokumentfane();
 
         // «Ryd lyden» kraever BEGGE dele: en lydfil at slette og en udskrift
         // at beholde. Uden teksten er det ikke oprydning - saa er moedet vaek.
@@ -1640,20 +1694,25 @@ public partial class TranscribeView : UserControl
 
         // DOKUMENTET LAVES ET ANDET STED, END MAN STAAR.
         //
-        // Koerslen lander under «Dokumenter», og fremdriften vises dér. Stod
-        // der kun en linje her, ville man blive staaende og vente paa en
-        // skaerm, hvor der ikke sker mere - og saa tror man, det gik i staa.
+        // HER STOD «Gaa til Dokumenter», og det pegede paa et MENUPUNKT.
+        // Menupunktet er vaek: dokumenterne staar nu som en fane paa den
+        // optagelse, de er lavet af. Teksten fulgte med i samme ombaering -
+        // en henvisning til en skaerm, der ikke laengere findes i menuen, er
+        // praecis den slags fejl, der bliver troet.
+        //
+        // Det er samtidig blevet et mindre skridt: fanen er her paa skaermen,
+        // saa man behoever ikke gaa nogen steder for at se resultatet.
         var gaa = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
             $"«{dialog.Titel}» er sat i gang",
             "Dokumentet laves nu i Europa. Det tager typisk under et minut.\n\n" +
-            "Fremdriften vises under «Dokumenter», og klokken øverst giver besked, " +
-            "når det er klar. Du kan roligt lave noget andet imens.",
-            godkend: "Gå til Dokumenter",
+            "Det dukker op under fanen «Dokumenter» her ved optagelsen, og klokken " +
+            "øverst giver besked, når det er klar. Du kan roligt lave noget andet imens.",
+            godkend: "Vis fanen",
             annuller: "Bliv her");
 
-        if (gaa) (Application.Current.MainWindow as MainWindow)?.GaaTilDokumenter(info.Id);
+        if (gaa) FaneDokumenter.IsChecked = true;
 
-        Status.Text = "Dokumentet laves — fremdriften står under «Dokumenter».";
+        Status.Text = "Dokumentet laves — det dukker op under fanen «Dokumenter».";
     }
 
     /// <summary>Noterne fra mødet som ren tekst, så de kan gå med til modellen.</summary>

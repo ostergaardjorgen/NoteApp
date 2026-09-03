@@ -1,0 +1,147 @@
+﻿using System.Diagnostics;
+using System.IO;
+using System.Windows;
+using System.Windows.Controls;
+using NoteApp.Core.Documents;
+
+namespace NoteApp.Desktop.Transcribe;
+
+/// <summary>
+/// Dokumenterne, der er lavet ud af ÉN optagelse.
+/// </summary>
+/// <remarks>
+/// Optagelsen og dokumentet er den samme sag set fra to sider, og de lå på
+/// hver sin skærm. Ville man vide, hvad der var lavet ud af et møde, skulle
+/// man gå til «Dokumenter» og læse «Fra optagelse» på hver enkelt.
+/// Sammenhængen var der i data — den var bare ikke noget, man kunne se.
+///
+/// Opslaget står i <see cref="DocumentStore.ForMoede"/>, så det kan prøves
+/// uden en skærm. Se <c>DokumentsammenhaengTest</c>.
+/// </remarks>
+public partial class Dokumentrude : UserControl
+{
+    private IReadOnlyList<DocumentInfo> _dokumenter = Array.Empty<DocumentInfo>();
+
+    public Dokumentrude()
+    {
+        InitializeComponent();
+        Vis(null, null, null);
+    }
+
+    /// <summary>Hvor mange dokumenter der er lavet ud af den viste optagelse.</summary>
+    public int Antal => _dokumenter.Count;
+
+    /// <summary>
+    /// Viser dokumenterne for én optagelse.
+    /// </summary>
+    /// <remarks>
+    /// DER LÆSES FRA DISKEN HVER GANG. En kopi, der kan blive uenig med
+    /// virkeligheden, er værre end en langsom læsning — og et dokument, der
+    /// lige er blevet færdigt i baggrunden, skal stå her uden en genstart.
+    /// Samme valg som i kvitteringerne og i søgningen, og af samme grund.
+    /// </remarks>
+    public void Vis(string? moedeId, string? mappe, string? titel)
+    {
+        _dokumenter = DocumentStore.ForMoede(moedeId, mappe);
+
+        if (mappe is null && moedeId is null)
+        {
+            Overskrift.Text = "Dokumenter";
+            Underskrift.Text =
+                "Vælg en optagelse i træet til venstre. Her står de dokumenter, der er lavet "
+                + "ud af netop den — referater, notater og alt andet, mødetyperne kan lave.";
+
+            Liste.ItemsSource = null;
+            return;
+        }
+
+        var navn = string.IsNullOrWhiteSpace(titel) ? "optagelsen" : $"«{titel}»";
+
+        if (_dokumenter.Count == 0)
+        {
+            Overskrift.Text = "Ingen dokumenter endnu";
+
+            // TEKSTEN SIGER, HVAD MAN GOER - ikke bare at der ikke er noget.
+            // En tom skaerm, der kun konstaterer, er en blindgyde.
+            Underskrift.Text =
+                $"Der er ikke lavet dokumenter ud af {navn} endnu. Skriv optagelsen ud, "
+                + "og tryk så «Opret dokument» øverst — så laves et referat eller et andet "
+                + "dokument ud fra den mødetype, du vælger.";
+
+            Liste.ItemsSource = null;
+            return;
+        }
+
+        Overskrift.Text = _dokumenter.Count == 1
+            ? "Ét dokument fra denne optagelse"
+            : $"{_dokumenter.Count} dokumenter fra denne optagelse";
+
+        Underskrift.Text = $"Lavet ud af {navn}. Nyeste først.";
+
+        Liste.ItemsSource = _dokumenter.Select(d =>
+        {
+            var findes = File.Exists(DocumentStore.Path_(d));
+
+            return new
+            {
+                d.Id,
+
+                Titel = d.Title.Length > 0 ? d.Title : d.FileName,
+
+                Linje = string.Join("  ·  ", new[]
+                {
+                    d.Created.LocalDateTime.ToString("dd-MM-yyyy HH:mm"),
+                    d.Template,
+                    d.Model
+                }.Where(s => !string.IsNullOrWhiteSpace(s))),
+
+                Beskrivelse = d.Description,
+                BeskrivelseSynlig = d.Description.Length > 0 ? Visibility.Visible : Visibility.Collapsed,
+
+                Findes = findes,
+                ManglerSynlig = findes ? Visibility.Collapsed : Visibility.Visible
+            };
+        }).ToList();
+    }
+
+    private DocumentInfo? Fra(object sender) =>
+        sender is Button { Tag: string id }
+            ? _dokumenter.FirstOrDefault(d => d.Id == id)
+            : null;
+
+    private void Aabn_Klik(object sender, RoutedEventArgs e)
+    {
+        if (Fra(sender) is not { } d) return;
+
+        var fil = DocumentStore.Path_(d);
+
+        if (!File.Exists(fil))
+        {
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Kan ikke åbne",
+                "Filen findes ikke længere.", Dialogs.Slags.Valg);
+            return;
+        }
+
+        try
+        {
+            Process.Start(new ProcessStartInfo(fil) { UseShellExecute = true });
+        }
+        catch (Exception ex)
+        {
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Kunne ikke åbne",
+                $"Dokumentet kunne ikke åbnes.\n\n{ex.Message}\n\n"
+                + "Er der ikke noget program til .docx-filer, kan de åbnes i Word, "
+                + "LibreOffice eller Google Docs.", Dialogs.Slags.Valg);
+        }
+    }
+
+    private void Arkiv_Klik(object sender, RoutedEventArgs e)
+    {
+        if (Fra(sender) is not { } d) return;
+
+        (Application.Current.MainWindow as MainWindow)?.GaaTilDokumenter(d.Id);
+    }
+
+    private void AlleKlik(object sender, RoutedEventArgs e) =>
+        (Application.Current.MainWindow as MainWindow)?.GaaTilDokumenter();
+}

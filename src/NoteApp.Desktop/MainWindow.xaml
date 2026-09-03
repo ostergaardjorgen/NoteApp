@@ -104,8 +104,31 @@
           <RadioButton x:Name="NavTransskriber" Tag="&#xE8F1;" GroupName="nav" Content="{i18n:Oversat nav.optagelser}"
                        Checked="Nav_Changed"
                        Style="{StaticResource NavKnap}" />
+          <!-- ============ «DOKUMENTER» STÅR IKKE LÆNGERE I MENUEN ============
+
+               Optagelsen og dokumentet er den samme sag set fra to sider, og
+               de havde hvert sit menupunkt. Sammenhaengen var der i data -
+               hvert dokument baerer optagelsens id - men den var ikke noget,
+               man kunne SE. Ville man vide, hvad der var lavet ud af et moede,
+               skulle man gaa til «Dokumenter» og laese «Fra optagelse» paa
+               hver enkelt.
+
+               Dokumenterne staar nu som en FANE inde paa optagelsen, ved
+               siden af udskriften. Samme moede, to faner.
+
+               KNAPPEN BLIVER STAAENDE - SKJULT - OG DET ER MED VILJE.
+
+               Skaermen findes uaendret; den er bare ikke et sted, man gaar hen
+               fra menuen. Alt, der peger paa den, peger stadig rigtigt:
+               GaaTilDokumenter fra dokumentfanen, notifikationen naar et
+               dokument er faerdigt, soegningen, og talekommandoen «gaa til
+               dokumenter» gennem GaaTilSkaerm. En skjult RadioButton kan
+               stadig saettes, og Nav_Changed fyrer som foer.
+
+               Fjernede man knappen, skulle fire steder finde en anden vej -
+               og saa ville et af dem gaa i stykker uden at nogen saa det. -->
           <RadioButton x:Name="NavDokumenter" Tag="&#xE8A5;" GroupName="nav" Content="{i18n:Oversat nav.dokumenter}"
-                       Checked="Nav_Changed"
+                       Checked="Nav_Changed" Visibility="Collapsed"
                        Style="{StaticResource NavKnap}" />
           <!-- MØDETYPER, IKKE SKABELONER.
                «Skabelon» er et ord fra tekstbehandling. Det tvinger læseren

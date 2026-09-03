@@ -188,6 +188,64 @@ public static class DocumentStore
         return liste.OrderByDescending(d => d.Created).ToList();
     }
 
+    /// <summary>
+    /// Dokumenterne, der er lavet ud af ÉN optagelse. Nyeste først.
+    /// </summary>
+    /// <remarks>
+    /// HVORFOR DEN FINDES
+    ///
+    /// Optagelsen og dokumentet er den samme sag set fra to sider, men de lå
+    /// på hver sin skærm. Ville man vide, hvad der var lavet ud af et møde,
+    /// skulle man gå til «Dokumenter» og læse «Fra optagelse» på hver enkelt.
+    /// Sammenhængen var der i data; den var bare ikke noget, man kunne se.
+    ///
+    /// DER SLÅS OP PÅ ID, OG PÅ STI SOM RESERVE.
+    ///
+    /// Id'et er den holdbare forbindelse: stien kan flyttes, og titlen kan
+    /// omdøbes — begge dele er sket, og begge dele rev forbindelsen over.
+    ///
+    /// Men <see cref="DocumentInfo.SourceMeetingId"/> kan være TOM. Den
+    /// skrives af <c>meta?.Id.ToString() ?? ""</c>, så et dokument lavet af en
+    /// optagelse uden læsbar <c>meeting.json</c> har ingen. For dem er stien
+    /// det eneste spor, der er tilbage, og et dokument, der ikke kan findes
+    /// frem, er i praksis væk. Derfor begge veje — og id'et først, så en
+    /// flyttet optagelse stadig rammer rigtigt.
+    /// </remarks>
+    public static IReadOnlyList<DocumentInfo> ForMoede(string? moedeId, string? mappe)
+    {
+        var id = (moedeId ?? "").Trim();
+        var sti = Normaliser(mappe);
+
+        if (id.Length == 0 && sti.Length == 0) return Array.Empty<DocumentInfo>();
+
+        return LoadAll().Where(d => Hoerer(d, id, sti)).ToList();
+    }
+
+    private static bool Hoerer(DocumentInfo d, string id, string sti)
+    {
+        // ID'ET FOERST. Har begge et id, er det svaret - ogsaa naar de er
+        // uenige. To dokumenter med hver sit id hoerer til hver sin optagelse,
+        // uanset at de ligger i den samme mappe i dag.
+        if (id.Length > 0 && d.SourceMeetingId.Length > 0)
+            return string.Equals(d.SourceMeetingId, id, StringComparison.OrdinalIgnoreCase);
+
+        return sti.Length > 0 && Normaliser(d.SourceRecording) == sti;
+    }
+
+    /// <summary>
+    /// En sti, to skrivemåder af den samme mappe kan sammenlignes på.
+    /// </summary>
+    /// <remarks>
+    /// Windows skelner ikke mellem store og små bogstaver, og en afsluttende
+    /// backslash er ikke en forskel. Uden det her ville
+    /// <c>C:\AppNoter\Optagelser\moede\</c> og <c>c:\appnoter\optagelser\moede</c>
+    /// vaere to forskellige optagelser.
+    /// </remarks>
+    private static string Normaliser(string? sti) =>
+        string.IsNullOrWhiteSpace(sti)
+            ? ""
+            : sti.Trim().TrimEnd('\\', '/').ToLowerInvariant();
+
     /// <summary>Sletter både dokumentet og dets metadata.</summary>
     public static void Delete(DocumentInfo info)
     {

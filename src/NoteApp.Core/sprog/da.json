@@ -852,6 +852,7 @@
     "teksten_bliver_ikke_perfekt_navne_og_fagor": "Teksten bliver ikke perfekt. Navne og fagord er det, der oftest rammes forkert. Du kan rette den selv: klik i en replik og skriv. Rettelsen gemmes for sig, så den, maskinen hørte, ikke går tabt — og det er den rettede tekst, dokumenter og søgning bruger.",
     "teksten_staar_her": "Teksten står her",
     "traek_en_optagelse_hen_paa_en_mappe_for_at": "Træk en optagelse hen på en mappe for at flytte den.",
+    "udskrift": "Udskrift",
     "vaelg_en_optagelse_i_traeet_og_skriv_den_u": "Vælg en optagelse i træet, og skriv den ud til tekst. Det sker på denne pc — ingen lyd forlader maskinen.",
     "var_moedet_online_blev_der_optaget_to_spor": "Var mødet online, blev der optaget to spor — din mikrofon og det, de andre sagde. Begge skrives ud, så det tager omtrent dobbelt så lang tid. Til gengæld er begge sider af mødet med, og det kan ses på hver replik, hvilken side der talte.",
     "gaar_i_gang": "Går i gang …",
@@ -1114,5 +1115,13 @@
   },
   "ordbog": {
     "ordbog_alias": "Kommer et ord altid forkert ud, kan du skrive de stavemåder ned, du ser: «StorageTek = starz tech, starstake». Så rettes de hver gang — det er en regel, du selv har skrevet, og den rammer kun det, den er sat til."
+  },
+  "dokumentrude": {
+    "aabner_dokumentarkivet_med_alle_dokumenter": "Åbner dokumentarkivet med alle dokumenter, også dem fra andre optagelser",
+    "aabner_dokumentet_i_det_program_der_haandt": "Åbner dokumentet i det program, der håndterer .docx — typisk Word",
+    "alle_dokumenter": "Alle dokumenter",
+    "filen_findes_ikke_laengere_paa_disken": "Filen findes ikke længere på disken.",
+    "gaar_til_dokumentarkivet_med_dokumentet_va": "Går til dokumentarkivet med dokumentet valgt, hvor det kan flyttes, omdøbes eller slettes",
+    "vis_i_arkivet": "Vis i arkivet"
   }
 }

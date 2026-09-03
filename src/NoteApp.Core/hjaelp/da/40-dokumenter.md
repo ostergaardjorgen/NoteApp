@@ -1,9 +1,23 @@
-# Dokumenter og mødetyper
+﻿# Dokumenter og mødetyper
 
 *Referatet, opgavelisten — og hvordan du selv bestemmer, hvad der står i dem*
 
 Vælg en optagelse, der er skrevet ud, og tryk **Opret dokument**. Så vælger du
 en mødetype, og dokumentet gemmes som en Word-fil.
+
+## Dokumenterne står ved den optagelse, de kom fra
+
+På **Optagelser** har indholdsruden to faner: **Udskrift** og **Dokumenter**.
+Den anden viser de dokumenter, der er lavet ud af netop den optagelse, du har
+valgt — med dato, mødetype og sprogmodel. Tallet på fanen siger, hvor mange
+der er, så du kan se det uden at klikke.
+
+Herfra kan du åbne et dokument i Word. Skal det flyttes, omdøbes eller
+slettes, fører **Alle dokumenter** nederst til arkivet, hvor alle dokumenter
+står samlet — også dem fra andre optagelser.
+
+Forbindelsen holder, selv om du omdøber optagelsen eller flytter den til en
+anden mappe. Den går på mødets id, ikke på navnet.
 
 ## Mødetypen bestemmer indholdet
 

@@ -101,8 +101,7 @@ et referat.
 
 | Skærm | Hvad den er til |
 |---|---|
-| **Optagelser** | Optagelserne i et træ. Vælg én, og skriv den ud til tekst |
-| **Dokumenter** | De færdige tekster, gemt som Word-dokumenter (.docx) |
+| **Optagelser** | Optagelserne i et træ. Vælg én, og skriv den ud til tekst. To faner: **Udskrift** og **Dokumenter** — de færdige Word-dokumenter (.docx), der er lavet ud af netop den optagelse |
 | **Skabeloner** | Hvad der skal laves ud af en optagelse |
 | **AI-modeller** | Whisper-motor og -model, og API-nøglen til sprogmodellen |
 | **Compliance** | Hvor data går hen, leverandøren, underdatabehandlere, forbehold |

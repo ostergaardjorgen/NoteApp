@@ -91,7 +91,10 @@ public static class BackgroundJobs
 
         var startet = DateTime.Now;
         _detaljer = $"«{skabelonInfo.Title}» · {model.Navn} i {model.Hjemland} · " +
-                    $"startet {startet:HH:mm} · lander under «Dokumenter»";
+                    // «lander under «Dokumenter»» pegede paa et MENUPUNKT, der
+                    // ikke findes mere: dokumenterne staar nu som en fane paa
+                    // den optagelse, de er lavet af.
+                    $"startet {startet:HH:mm} · lander på optagelsens dokumentfane";
 
         // GEOGRAFIEN STAAR IKKE HER.
         //

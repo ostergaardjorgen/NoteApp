@@ -369,16 +369,45 @@
               BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
         <Grid>
           <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
           </Grid.RowDefinitions>
+
+          <!-- ============ UDSKRIFT OG DOKUMENTER, SAMME OPTAGELSE ============
+
+               HER LAA INTET. Udskriften stod her, og dokumenterne stod paa et
+               MENUPUNKT FOR SIG. To indgange til det samme moede.
+
+               Sammenhaengen var der i data hele tiden - hvert dokument baerer
+               optagelsens id - men den var ikke noget, man kunne SE. Ville man
+               vide, hvad der var lavet ud af et moede, skulle man gaa til
+               «Dokumenter» og laese «Fra optagelse» paa hver enkelt.
+
+               Nu er det to faner om den samme optagelse. Vaelger man en anden
+               i traeet, foelger begge med.
+
+               TALLET STAAR PAA FANEN. En fane, der bare hedder «Dokumenter»,
+               siger ikke, om der er noget derinde - og saa skal man klikke for
+               at finde ud af, at der ikke er. -->
+          <Border Grid.Row="0" BorderBrush="{DynamicResource PanelKant}" BorderThickness="0,0,0,1"
+                  Padding="20,12">
+            <StackPanel Orientation="Horizontal">
+              <RadioButton x:Name="FaneUdskrift" GroupName="indholdsfane" IsChecked="True"
+                           Checked="Fane_Skiftet" Style="{StaticResource Fanevalg}"
+                           Content="{i18n:Oversat transcribeview.udskrift}" Margin="0,0,8,0" />
+
+              <RadioButton x:Name="FaneDokumenter" GroupName="indholdsfane"
+                           Checked="Fane_Skiftet" Style="{StaticResource Fanevalg}" />
+            </StackPanel>
+          </Border>
 
           <!-- FREMDRIFTEN NEDERST I INDHOLDSRUDEN.
                Den staar under den tekst, der forklarer hvad der sker, og den
                er kun fremme, mens der koeres. Baade transskription og
                dokumenter melder hertil, saa bjaelken ikke flytter sig alt
                efter, hvad man venter paa. -->
-          <Border x:Name="Fremdriftsrude" Grid.Row="1" Visibility="Collapsed"
+          <Border x:Name="Fremdriftsrude" Grid.Row="2" Visibility="Collapsed"
                   Background="{DynamicResource Valgt}" BorderBrush="{DynamicResource Accent}"
                   BorderThickness="0,1,0,0" CornerRadius="0,0,10,10" Padding="20,12">
             <StackPanel>
@@ -394,12 +423,21 @@
             </StackPanel>
           </Border>
 
+          <!-- ============ UDSKRIFTSFANEN SOM EEN BEHOLDER ============
+
+               Forklaringen og resultatet skiftes ud efter, om optagelsen er
+               skrevet ud - den logik ligger fem steder i kodebagsiden og er
+               ikke roert. Fanevalget skjuler BEHOLDEREN, ikke de to hver for
+               sig; ellers skulle hvert af de fem steder ogsaa kende fanen, og
+               saa ville et af dem foer eller siden glemme den. -->
+          <Grid x:Name="Udskriftsfane" Grid.Row="1">
+
           <!-- HorizontalScrollBarVisibility="Disabled" er ikke pynt: uden den
                maaler ScrollViewer sit indhold med UENDELIG bredde, og saa
                ombrydes teksten slet ikke. Foer holdt en MaxWidth paa 620
                teksten i en smal soejle og skjulte det - da den blev fjernet,
                saa man fejlen. -->
-          <ScrollViewer x:Name="Forklaring" Grid.Row="0" Padding="26,20,26,18"
+          <ScrollViewer x:Name="Forklaring" Padding="26,20,26,18"
                         VerticalScrollBarVisibility="Auto"
                         HorizontalScrollBarVisibility="Disabled">
             <!-- Ingen MaxWidth. Der stod 620, og saa blev teksten staaende i
@@ -490,7 +528,12 @@
                kan man tit noejes med at kopiere det, man skal bruge - uden at
                bede en sprogmodel om noget, og dermed uden at sende noget ud af
                maskinen overhovedet. -->
-          <local:UdskriftView x:Name="Resultat" Grid.Row="0" Visibility="Collapsed" />
+          <local:UdskriftView x:Name="Resultat" Visibility="Collapsed" />
+          </Grid>
+
+          <!-- Dokumenterne fra den samme optagelse. Bygget een gang og
+               fyldt op ved hvert skift af optagelse - se Vis(). -->
+          <local:Dokumentrude x:Name="Dokumentrude" Grid.Row="1" Visibility="Collapsed" />
         </Grid>
       </Border>
 

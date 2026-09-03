@@ -1,9 +1,23 @@
-# Documents and meeting types
+﻿# Documents and meeting types
 
 *The minutes, the task list — and how you decide what goes in them*
 
 Select a recording that has been transcribed and press **Create document**.
 Then you choose a meeting type, and the document is saved as a Word file.
+
+## The documents sit with the recording they came from
+
+On **Recordings** the content pane has two tabs: **Transcript** and
+**Documents**. The second one shows the documents made from the recording you
+have selected — with date, meeting type and language model. The number on the
+tab says how many there are, so you can see it without clicking.
+
+From here you can open a document in Word. To move, rename or delete one,
+**All documents** at the bottom leads to the archive, where every document is
+gathered — including those from other recordings.
+
+The link holds even if you rename the recording or move it to another folder.
+It goes by the meeting's id, not by its name.
 
 ## The meeting type decides the content
 

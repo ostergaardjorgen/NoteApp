@@ -385,6 +385,7 @@
     "teksten_bliver_ikke_perfekt_navne_og_fagor": "The text will not be perfect. Names and technical terms are what most often come out wrong. You can correct it yourself: click into a line and type. The correction is stored separately, so what the machine heard is not lost — and it is the corrected text that documents and search use.",
     "teksten_staar_her": "The text appears here",
     "traek_en_optagelse_hen_paa_en_mappe_for_at": "Drag a recording onto a folder to move it.",
+    "udskrift": "Transcript",
     "vaelg_en_optagelse_i_traeet_og_skriv_den_u": "Select a recording in the tree and transcribe it to text. It happens on this PC — no audio leaves the machine.",
     "var_moedet_online_blev_der_optaget_to_spor": "If the meeting was online, two tracks were recorded — your microphone and what the others said. Both are transcribed, so it takes about twice as long. In return both sides of the meeting are there, and each line shows which side was speaking.",
     "gaar_i_gang": "Starting …",
@@ -1114,5 +1115,13 @@
   },
   "ordbog": {
     "ordbog_alias": "If a word always comes out wrong, you can write down the spellings you see: «StorageTek = starz tech, starstake». They are then corrected every time — a rule you wrote yourself, and it only touches what it was set for."
+  },
+  "dokumentrude": {
+    "aabner_dokumentarkivet_med_alle_dokumenter": "Opens the document archive with all documents, including those from other recordings",
+    "aabner_dokumentet_i_det_program_der_haandt": "Opens the document in whatever program handles .docx — usually Word",
+    "alle_dokumenter": "All documents",
+    "filen_findes_ikke_laengere_paa_disken": "The file no longer exists on disk.",
+    "gaar_til_dokumentarkivet_med_dokumentet_va": "Goes to the document archive with the document selected, where it can be moved, renamed or deleted",
+    "vis_i_arkivet": "Show in archive"
   }
 }

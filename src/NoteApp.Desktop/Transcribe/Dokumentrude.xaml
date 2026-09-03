@@ -1,0 +1,104 @@
+﻿<UserControl x:Class="NoteApp.Desktop.Transcribe.Dokumentrude"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:i18n="clr-namespace:NoteApp.Desktop">
+
+  <!-- ==================== HVORFOR RUDEN FINDES ====================
+
+       Optagelsen og dokumentet er den samme sag set fra to sider, og de laa
+       paa hver sin skaerm. Ville man vide, hvad der var lavet ud af et moede,
+       skulle man gaa til «Dokumenter» og laese «Fra optagelse» paa hver
+       enkelt. Sammenhaengen var der i data - den var bare ikke noget, man
+       kunne se.
+
+       Her staar den ved siden af udskriften: samme optagelse, to faner.
+
+       RUDEN ER TIL AT SE OG AABNE, IKKE TIL AT RYDDE OP.
+
+       Flyt, omdoeb, slet og beskrivelse hoerer i dokumentarkivet, hvor man
+       arbejder med dokumenter som dokumenter. Her staar man ved en optagelse
+       og vil videre - saa er «aabn» den handling, der er brug for. Knappen
+       nederst foerer til arkivet for resten.
+
+       Det er ogsaa derfor knapperne ikke er gentaget: to steder at slette det
+       samme er to steder at goere det ved et uheld. -->
+
+  <Grid>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="*" />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+
+    <ScrollViewer Grid.Row="0" Padding="26,20,26,10"
+                  VerticalScrollBarVisibility="Auto"
+                  HorizontalScrollBarVisibility="Disabled">
+      <StackPanel HorizontalAlignment="Stretch">
+
+        <TextBlock x:Name="Overskrift" FontSize="19" FontWeight="SemiBold" TextWrapping="Wrap" />
+
+        <TextBlock x:Name="Underskrift" FontSize="13.5" LineHeight="22" Margin="0,10,0,0"
+                   TextWrapping="Wrap" Foreground="{DynamicResource TekstSvag}" />
+
+        <ItemsControl x:Name="Liste" Margin="0,18,0,0">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate>
+              <Border Background="{DynamicResource Trykket}" CornerRadius="8" Padding="16,13"
+                      Margin="0,0,0,8" BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
+                <Grid>
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                  </Grid.ColumnDefinitions>
+
+                  <StackPanel Grid.Column="0" Margin="0,0,14,0">
+                    <TextBlock Text="{Binding Titel}" FontSize="14" FontWeight="SemiBold"
+                               TextWrapping="Wrap" />
+
+                    <TextBlock Text="{Binding Linje}" FontSize="12" LineHeight="19" Margin="0,5,0,0"
+                               TextWrapping="Wrap" Foreground="{DynamicResource TekstMeget}" />
+
+                    <TextBlock Text="{Binding Beskrivelse}" FontSize="12.5" LineHeight="20"
+                               Margin="0,6,0,0" TextWrapping="Wrap"
+                               Visibility="{Binding BeskrivelseSynlig}"
+                               Foreground="{DynamicResource TekstSvag}" />
+
+                    <!-- MANGLER FILEN, SKAL DET STAA VED DOKUMENTET.
+                         En knap, der aabner ingenting, er vaerre end en, der
+                         ikke er der: man tror, noget gik galt lige nu. -->
+                    <TextBlock Text="{i18n:Oversat dokumentrude.filen_findes_ikke_laengere_paa_disken}"
+                               FontSize="12" Margin="0,6,0,0" TextWrapping="Wrap"
+                               Visibility="{Binding ManglerSynlig}"
+                               Foreground="{DynamicResource Advarsel}" />
+                  </StackPanel>
+
+                  <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <Button Content="{i18n:Oversat faelles.aabn}" Tag="{Binding Id}"
+                            Click="Aabn_Klik" Padding="14,7" MinWidth="92"
+                            IsEnabled="{Binding Findes}"
+                            ToolTip="{i18n:Oversat dokumentrude.aabner_dokumentet_i_det_program_der_haandt}" />
+
+                    <Button Content="{i18n:Oversat dokumentrude.vis_i_arkivet}" Tag="{Binding Id}"
+                            Click="Arkiv_Klik" Padding="14,7" MinWidth="92" Margin="0,6,0,0"
+                            ToolTip="{i18n:Oversat dokumentrude.gaar_til_dokumentarkivet_med_dokumentet_va}" />
+                  </StackPanel>
+                </Grid>
+              </Border>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+      </StackPanel>
+    </ScrollViewer>
+
+    <!-- ARKIVET ER STADIG DER, OG DET SKAL KUNNE NAAS.
+         Menupunktet «Dokumenter» er vaek - to indgange til det samme var
+         netop det, der skjulte sammenhaengen. Skaermen findes uaendret, og
+         den ligger et skridt herfra, hvor man staar med dokumenterne. -->
+    <Border Grid.Row="1" BorderBrush="{DynamicResource PanelKant}" BorderThickness="0,1,0,0"
+            Padding="26,12">
+      <Button x:Name="ArkivKnap" Content="{i18n:Oversat dokumentrude.alle_dokumenter}"
+              Click="AlleKlik" Padding="14,7" HorizontalAlignment="Left"
+              ToolTip="{i18n:Oversat dokumentrude.aabner_dokumentarkivet_med_alle_dokumenter}" />
+    </Border>
+  </Grid>
+</UserControl>
