@@ -2558,44 +2558,28 @@ public partial class TranscribeView : UserControl
             Jobs.Udskriftsvagt.Slut();
             VisSeneste();
 
-            if (SkyNoegle.Hent() is not null)
-            {
-                var gennemgaa = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
-                    $"«{valgt.Titel}» er skrevet ud",
-                    "Læs transkriptionen igennem, før der laves et dokument. To ting betaler " +
-                    "sig især: at rette navne og fagord, maskinen har hørt forkert, og at " +
-                    "give de to spor rigtige navne i stedet for «Mig» og «Gæster».\n\n" +
-                    "Dokumentet bliver lavet af den rettede transkription, med navnene på — " +
-                    "så det, der står rigtigt her, står også rigtigt i referatet.\n\n" +
-                    "Knappen «Opret dokument» står klar bagefter.",
-                    godkend: "Gennemgå transkriptionen",
-                    annuller: "Lav et dokument nu",
-                    slags: Dialogs.Slags.Godt);
+            // ============ INGEN DIALOG BAGEFTER ============
+            //
+            // HER STOD ET SPOERGSMAAL: «gennemgaa transkriptionen» eller «lav
+            // et dokument nu». Det er fjernet 03-09-2026 paa brugerens ord:
+            // «den skal bare gaa til transkriptionen uden dialog, saa kan man
+            // selv vaelge at lave et dokument, naar man har rettet det, man
+            // vil».
+            //
+            // Han har ret, og spoergsmaalet var i forvejen skaevt: den ene
+            // mulighed - laes teksten igennem - er dét, alle skal goere. Den
+            // anden springer over. Et spoergsmaal, hvor det ene svar altid er
+            // det rigtige, er ikke et valg; det er en forhindring med to
+            // knapper.
+            //
+            // Der gaas nu direkte til teksten. «Opret dokument» staar i
+            // vaerktoejslinjen og venter, til man selv er klar.
+            var id = MeetingStore.Load(valgt.Mappe)?.Id.ToString();
 
-                if (gennemgaa)
-                {
-                    // «GENNEMGAA» SKAL FOERE HEN TIL TEKSTEN - ogsaa naar man
-                    // ikke staar paa skaermen laengere.
-                    //
-                    // Her stod «udskriften er allerede paa skaermen, saa
-                    // Gennemgaa er at blive staaende». Det holdt, dengang man
-                    // var noedt til at blive. Nu kan man forlade skaermen,
-                    // mens der skrives ud - det er hele pointen med bjaelken -
-                    // og saa landede man paa en tom Optagelser-skaerm uden
-                    // noget valgt. Knappen lovede noget, den ikke gjorde.
-                    var id = MeetingStore.Load(valgt.Mappe)?.Id.ToString();
+            if (Window.GetWindow(this) is MainWindow hoved && id is { Length: > 0 })
+                hoved.GaaTilOptagelse(id);
 
-                    if (Window.GetWindow(this) is MainWindow hoved
-                        && id is { Length: > 0 })
-                    {
-                        hoved.GaaTilOptagelse(id);
-                    }
-                }
-                else
-                {
-                    Referat_Click(this, new RoutedEventArgs());
-                }
-            }
+
             _sidsteMappe = valgt.Mappe;
         }
         catch (OperationCanceledException)

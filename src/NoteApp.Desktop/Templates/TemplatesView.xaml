@@ -109,7 +109,11 @@
                        markeringen - i temaets egne farver. -->
                   <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="Transparent" />
                   <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="Transparent" />
-                  <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="{Binding Color, Source={DynamicResource Tekst}}" />
+                  <!-- MARKERINGSFARVEN SAETTES I TEMAET, ikke her. Der stod
+                       «Color="{Binding Color, Source={DynamicResource Tekst}}"»,
+                       og det er ulovligt: Source paa en Binding er ikke en
+                       afhaengighedsegenskab. Det kastede foerst, naar
+                       skabelonen skulle tegnes. Se Temaskift. -->
                 </Style.Resources>
                 <Setter Property="Padding" Value="2,1" />
                 <Setter Property="Foreground" Value="{DynamicResource TekstSvag}" />

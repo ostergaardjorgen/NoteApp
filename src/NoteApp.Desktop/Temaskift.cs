@@ -125,6 +125,32 @@ public static class Temaskift
                 (Color)ColorConverter.ConvertFromString(farve));
         }
 
+        // ============ WINDOWS' EGEN MARKERINGSFARVE ============
+        //
+        // Naar en linje er markeret i en liste, tegner WPF teksten med
+        // SystemColors.HighlightTextBrush - Windows' farve, ikke appens. I et
+        // moerkt tema bliver den markerede linje derfor ulaeselig.
+        //
+        // TRE SKAERME PROEVEDE AT LOESE DET I XAML:
+        //
+        //   Color="{Binding Color, Source={DynamicResource Tekst}}"
+        //
+        // Det er ulovligt. «Source» paa en Binding er en almindelig
+        // egenskab, ikke en afhaengighedsegenskab, og DynamicResource virker
+        // kun paa de sidste. Linjen oversaettes uden brok og kaster foerst,
+        // naar netop den skabelon skal tegnes - saa den kunne staa i tre
+        // filer i lang tid uden at nogen opdagede det.
+        //
+        // Set 03-09-2026: en optagelse blev flyttet fra Webinarer til Moeder,
+        // flytningen lykkedes, og bagefter kom «A DynamicResourceExtension
+        // cannot be set on the Source property of type Binding».
+        //
+        // Den hoerer hjemme HER. Temaet udskifter alligevel penslerne ved
+        // hvert skift, saa markeringsfarven foelger med af sig selv - og
+        // skaermene behoever ikke vide, at Windows har en mening om det.
+        if (app.Resources["Tekst"] is SolidColorBrush tekst)
+            app.Resources[SystemColors.HighlightTextBrushKey] = tekst;
+
         // DEN SKAL SIGE TIL. Foerste udgave sprang tavst over det, den ikke
         // kunne skifte - og saa blev HELE appen staaende lys, mens den mente,
         // den var moerk. Der gik en halv time med at lede efter en fejl, som
