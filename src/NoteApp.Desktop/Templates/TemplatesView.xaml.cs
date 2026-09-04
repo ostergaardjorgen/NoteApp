@@ -46,7 +46,12 @@ public partial class TemplatesView : UserControl
         // forsvandt uden en lyd. Knappen til det staar paa Instruktion.
         Felter.ItemsSource = PromptTemplate.Fields
             .Where(f => f.Key != Deltagerregler.Felt)
-            .Select(f => new { Felt = "{{" + f.Key + "}}", Forklaring = f.Value })
+            .Select(f => new
+            {
+                Navn = Feltnavn(f.Key),
+                Felt = "{{" + f.Key + "}}",
+                Forklaring = f.Value + "\n\nSættes ind som {{" + f.Key + "}}"
+            })
             .ToList();
 
         // De indbyggede skabeloner lægges i datamappen, hvis de ikke er der.
@@ -56,6 +61,94 @@ public partial class TemplatesView : UserControl
         try { DraftStore.SeedTemplates(); } catch (Exception) { /* vises som tom liste */ }
         Indlæs();
     }
+
+    /// <summary>
+    /// Feltets navn på almindeligt dansk.
+    /// </summary>
+    /// <remarks>
+    /// KNAPPERNE HED «{{transskription}}». Det er appens eget sprog, ikke
+    /// brugerens — og skærmen skal kunne bruges af en, der bare vil optage sit
+    /// møde og have et referat ud af det. Pladsholderen bliver stadig sat ind i
+    /// teksten; den står nu i hjælpeteksten frem for på knappen.
+    ///
+    /// Er feltet ikke i tabellen, står nøglen som før. Så bliver et nyt felt
+    /// synligt frem for at forsvinde.
+    /// </remarks>
+    private static string Feltnavn(string noegle) => noegle switch
+    {
+        "transskription" => "Mødets tekst",
+        "titel" => "Mødets titel",
+        "dato" => "Dato og tid",
+        "varighed" => "Mødets længde",
+        "noter" => "Dine noter",
+        "sprog" => "Sprog",
+        "kilde" => "Link til webinaret",
+        "ordbog" => "Ordliste",
+        "sprogregler" => "Dokumentets sprog",
+        _ => noegle
+    };
+
+    /// <summary>
+    /// Tokens for den valgte længde.
+    /// </summary>
+    /// <remarks>
+    /// Sat af <see cref="Indlaes"/> til det, der STÅR i filen — ikke til det
+    /// punkt, der blev markeret. En gammel skabelon med 2.048 skal ikke blive
+    /// til 2.500, fordi nogen kiggede på skærmen. Først når man selv vælger et
+    /// punkt, skifter tallet.
+    /// </remarks>
+    private int _valgtLaengde;
+
+    private void Laengde_Valgt(object sender, SelectionChangedEventArgs e)
+    {
+        if (_indlæser) return;
+        if (FeltLaengde.SelectedItem is not Laengdepunkt l) return;
+
+        _valgtLaengde = l.Tokens;
+
+        GemKnap.IsEnabled = true;
+    }
+
+    /// <summary>Et valg i «Hvor langt må dokumentet blive?».</summary>
+    public sealed record Laengdepunkt(string Navn, int Tokens);
+
+    /// <summary>
+    /// Længderne, oversat fra tokens til sider.
+    /// </summary>
+    /// <remarks>
+    /// HER STOD ET FELT MED «32000» I. Hjælpeteksten forklarede, at der er
+    /// cirka tre tegn pr. token — altså skulle man selv gange sig frem til,
+    /// hvor langt et referat blev. Det kan man ikke svare på uden at vide,
+    /// hvad en sprogmodel er.
+    ///
+    /// Regnestykket: cirka 3 tegn pr. token, og en almindelig A4-side med
+    /// tekst er cirka 2.500 tegn — altså rundt regnet 800 tokens pr. side.
+    /// Tallene herunder er rundet op til pæne tal, fordi de er et LOFT og ikke
+    /// et mål: er mødet kort, bliver dokumentet kort uanset hvad.
+    ///
+    /// Det er de samme tal, der gemmes i filen som før. Kun spørgsmålet er
+    /// skiftet.
+    /// </remarks>
+    private static readonly Laengdepunkt[] Laengder =
+    {
+        new("Kort — cirka 1 side", 800),
+        new("Almindelig — cirka 2-3 sider", 2500),
+        new("Lang — cirka 5 sider", 4500),
+        new("Meget lang — cirka 10 sider", 9000),
+        new("Så langt som nødvendigt", 32000)
+    };
+
+    /// <summary>
+    /// Det valg, der passer bedst til det tal, der står i filen.
+    /// </summary>
+    /// <remarks>
+    /// EN GAMMEL SKABELON HAR ET VILKÅRLIGT TAL — 2048, 32000, hvad som helst.
+    /// Den skal ikke rettes bag om ryggen på nogen, så der vælges det
+    /// nærmeste punkt, og tallet i filen bliver stående, indtil man selv
+    /// vælger noget andet. Se Gem_Click.
+    /// </remarks>
+    private static Laengdepunkt Naermeste(int tokens) =>
+        Laengder.OrderBy(l => Math.Abs(l.Tokens - tokens)).First();
 
     // ------------------------------------------------------------- modeller
 
@@ -295,8 +388,11 @@ public partial class TemplatesView : UserControl
         // har lavet.
         FyldMapper(t.Mappe);
         FeltBeskrivelse.Text = t.Description ?? "";
-        FeltTemperatur.Text = t.Temperature.ToString("0.##", CultureInfo.CurrentCulture);
-        FeltMaksTokens.Text = t.MaxTokens.ToString();
+        // TEMPERATUREN VISES IKKE LAENGERE. Den staar stadig i filen og bruges
+        // uaendret - se kommentaren i TemplatesView.xaml.
+        FeltLaengde.ItemsSource = Laengder;
+        FeltLaengde.SelectedItem = Naermeste(t.MaxTokens);
+        _valgtLaengde = t.MaxTokens;
         FeltSystem.Text = t.SystemPrompt;
         FeltBruger.Text = t.UserPrompt;
 
@@ -471,20 +567,10 @@ public partial class TemplatesView : UserControl
             return;
         }
 
-        // Tallene kontrolleres FOER der gemmes. En skabelon med en ulaeselig
-        // temperatur ville blive gemt fint og foerst fejle den dag, den skulle
-        // bruges — og saa staar man med et moede, der skal skrives i haanden.
-        if (!TryTal(FeltTemperatur.Text, out var temp) || temp < 0 || temp > 2)
-        {
-            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Temperaturen kan ikke bruges", "Temperatur skal være et tal mellem 0 og 2. Til referater er 0,2 et fornuftigt sted.", Dialogs.Slags.Pas_paa);
-            return;
-        }
-
-        if (!int.TryParse(FeltMaksTokens.Text, out var maks) || maks < 128 || maks > 32768)
-        {
-            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Længden kan ikke bruges", "Maks. længde skal være et helt tal mellem 128 og 32768. 2048 rækker til et fyldigt referat.", Dialogs.Slags.Pas_paa);
-            return;
-        }
+        // HER LAA TO KONTROLLER AF INDTASTEDE TAL - temperatur og maks. tokens.
+        // Begge felter er vaek: temperaturen spoerges der ikke om laengere, og
+        // laengden er en liste, man vaelger i. Et valg i en liste kan ikke vaere
+        // ulaeseligt, saa der er ikke noget at kontrollere.
 
         if (string.IsNullOrWhiteSpace(FeltSystem.Text))
         {
@@ -509,8 +595,8 @@ public partial class TemplatesView : UserControl
         _valgt.Name = FeltNavn.Text.Trim();
         _valgt.Description = string.IsNullOrWhiteSpace(FeltBeskrivelse.Text) ? null : FeltBeskrivelse.Text.Trim();
         _valgt.Mappe = (FeltMappe.SelectedItem as Mappepunkt)?.Sti;
-        _valgt.Temperature = temp;
-        _valgt.MaxTokens = maks;
+        // Temperaturen roeres ikke - den staar, som den stod i filen.
+        _valgt.MaxTokens = _valgtLaengde;
         _valgt.SystemPrompt = FeltSystem.Text.Trim();
         _valgt.UserPrompt = FeltBruger.Text.Trim();
 

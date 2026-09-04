@@ -177,53 +177,41 @@
              opslagslisten over felter. -->
         <TabControl x:Name="Detaljer" Style="{StaticResource Fanerude}" Margin="22,16,22,18">
 
-          <TabItem Header="{i18n:Oversat faelles.indstillinger}" Style="{StaticResource Fane}">
+          <TabItem Header="{i18n:Oversat templatesview.fanen_navn_og_mappe}" Style="{StaticResource Fane}">
             <StackPanel>
 
-              <!-- De tre korte felter paa een raekke. Beskrivelsen fik foer
-                   halvdelen af bredden og een linje - og den er den eneste
-                   af dem, der kan blive lang. Nu staar de smaa sammen
-                   foroven, og beskrivelsen faar hele bredden og plads til
-                   flere linjer. -->
-              <Grid>
-                <Grid.ColumnDefinitions>
-                  <ColumnDefinition Width="2*" />
-                  <ColumnDefinition Width="*" />
-                  <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
+              <!-- ============ HER STOD «TEMPERATUR» OG «MAKS. LAENGDE (TOKENS)» ============
 
-                <StackPanel Grid.Column="0" Margin="0,0,10,0">
-                  <TextBlock Text="{i18n:Oversat templatesview.navn}" Style="{StaticResource Underskrift}" />
-                  <TextBox x:Name="FeltNavn" Margin="0,4,0,0" TextChanged="Aendret" />
-                </StackPanel>
+                   Begge var modellens sprog, ikke brugerens. «Temperatur 0,2»
+                   og «32000 tokens - cirka 3 tegn pr. token» kan man kun svare
+                   paa, hvis man ved hvad en sprogmodel er. Skaermen skal kunne
+                   bruges af en, der bare vil optage sit moede og faa et referat.
 
-                <StackPanel Grid.Column="1" Margin="0,0,10,0">
-                  <TextBlock Text="{i18n:Oversat templatesview.temperatur}" Style="{StaticResource Underskrift}" />
-                  <TextBox x:Name="FeltTemperatur" Margin="0,4,0,0" TextChanged="Aendret" />
-                </StackPanel>
+                   TEMPERATUREN VISES SLET IKKE. Den staar stadig i filen og
+                   bliver brugt uaendret - vi lader bare vaere med at spoerge om
+                   den. Det rigtige svar er 0,2 til alt, hvad appen laver; et
+                   felt, hvor der kun er eet fornuftigt svar, er ikke et valg.
 
-                <StackPanel Grid.Column="2">
-                  <TextBlock Text="{i18n:Oversat templatesview.maks_laengde_tokens}" Style="{StaticResource Underskrift}" />
-                  <TextBox x:Name="FeltMaksTokens" Margin="0,4,0,0" TextChanged="Aendret" />
-                </StackPanel>
-              </Grid>
+                   LAENGDEN ER OVERSAT TIL SIDER. Det er det samme tal bagved -
+                   se Laengder i TemplatesView.xaml.cs - men spurgt paa en maade,
+                   man kan svare paa uden at kende til tokens. -->
+              <TextBlock Text="{i18n:Oversat templatesview.navn}" Style="{StaticResource Underskrift}" />
+              <TextBox x:Name="FeltNavn" Margin="0,4,0,0" TextChanged="Aendret" />
+              <TextBlock FontSize="11.5" Margin="2,6,0,0" TextWrapping="Wrap"
+                         Foreground="{DynamicResource TekstMeget}"
+                         Text="{i18n:Oversat templatesview.staar_paa_knappen_naar_du_vaelger_moedetyp}" />
 
-              <Grid Margin="0,6,0,0">
-                <Grid.ColumnDefinitions>
-                  <ColumnDefinition Width="2*" />
-                  <ColumnDefinition Width="*" />
-                  <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" FontSize="11.5" TextWrapping="Wrap" Margin="2,0,10,0"
-                           Foreground="{DynamicResource TekstMeget}"
-                           Text="{i18n:Oversat templatesview.staar_paa_knappen_naar_du_vaelger_moedetyp}" />
-                <TextBlock Grid.Column="1" FontSize="11.5" TextWrapping="Wrap" Margin="2,0,10,0"
-                           Foreground="{DynamicResource TekstMeget}"
-                           Text="{i18n:Oversat templatesview.0_0_holder_sig_taet_paa_transkriptionen_ov}" />
-                <TextBlock Grid.Column="2" FontSize="11.5" TextWrapping="Wrap" Margin="2,0,0,0"
-                           Foreground="{DynamicResource TekstMeget}"
-                           Text="{i18n:Oversat templatesview.loftet_over_svaret_cirka_3_tegn_pr_token}" />
-              </Grid>
+              <TextBlock Text="{i18n:Oversat templatesview.hvor_langt_maa_dokumentet_blive}"
+                         Style="{StaticResource Underskrift}" Margin="0,20,0,0" />
+              <ComboBox x:Name="FeltLaengde" Margin="0,4,0,0" IsEditable="False"
+                        SelectionChanged="Laengde_Valgt">
+                <ComboBox.ItemTemplate>
+                  <DataTemplate><TextBlock Text="{Binding Navn}" /></DataTemplate>
+                </ComboBox.ItemTemplate>
+              </ComboBox>
+              <TextBlock FontSize="11.5" Margin="2,6,0,0" TextWrapping="Wrap"
+                         Foreground="{DynamicResource TekstMeget}"
+                         Text="{i18n:Oversat templatesview.et_loft_ikke_et_maal_bliver_moedet_kort}" />
 
               <!-- ============ MAPPEN ============
                    Et webinar hoerer i «Webinarer». Hver gang. Saa skal man
@@ -246,7 +234,7 @@
             </StackPanel>
           </TabItem>
 
-          <TabItem Header="{i18n:Oversat templatesview.instruktion}" Style="{StaticResource Fane}">
+          <TabItem Header="{i18n:Oversat templatesview.fanen_saadan_skal_det_skrives}" Style="{StaticResource Fane}">
             <DockPanel>
               <TextBlock DockPanel.Dock="Top" FontSize="11.5" Margin="2,0,0,8" TextWrapping="Wrap"
                          Foreground="{DynamicResource TekstMeget}"
@@ -268,15 +256,19 @@
                              Text="{i18n:Oversat templatesview.reglerne_for_hvem_der_kommer_paa_deltagerl}" />
                   <!-- {} foerst: ellers laeser XAML den kroellede parentes som en
                        markup-extension og vil ikke bygge. -->
-                  <Button Content="{}{{deltagerregler}}" Tag="{}{{deltagerregler}}" Click="Systemfelt_Klik"
-                          HorizontalAlignment="Left" Padding="10,5" FontFamily="Consolas" FontSize="12"
+                  <Button Content="{i18n:Oversat templatesview.saet_deltagerreglerne_ind}" Tag="{}{{deltagerregler}}"
+                          Click="Systemfelt_Klik"
+                          HorizontalAlignment="Left" Padding="10,5" FontSize="12"
                           ToolTip="{i18n:Oversat templatesview.saetter_de_faelles_deltagerregler_ind_hvor}" />
                 </StackPanel>
               </Border>
 
+              <!-- ALMINDELIG SKRIFT, IKKE CONSOLAS. Monospace siger «det her
+                   er kode» - og det er det ikke: det er saetninger paa dansk om,
+                   hvordan referatet skal skrives. -->
               <TextBox x:Name="FeltSystem" AcceptsReturn="True" TextWrapping="Wrap"
                        VerticalScrollBarVisibility="Auto" AcceptsTab="True"
-                       FontFamily="Consolas" FontSize="12.5" TextChanged="Aendret" />
+                       FontSize="13" TextChanged="Aendret" />
             </DockPanel>
           </TabItem>
 
@@ -285,7 +277,7 @@
                overhovedet naar frem til modellen: staar {{noter}} ikke her,
                bliver dine noter aldrig sendt. Det er et roer, ikke en
                indstilling - og navnet skal sige det. -->
-          <TabItem x:Name="MaterialeFane" Header="{i18n:Oversat templatesview.hvad_modellen_faar}" Style="{StaticResource Fane}">
+          <TabItem x:Name="MaterialeFane" Header="{i18n:Oversat templatesview.fanen_hvad_der_kommer_med}" Style="{StaticResource Fane}">
             <DockPanel>
               <StackPanel DockPanel.Dock="Top" Margin="2,0,0,8">
                 <TextBlock FontSize="11.5" TextWrapping="Wrap" LineHeight="18"
@@ -317,11 +309,11 @@
                       BorderBrush="{DynamicResource PanelKant}" BorderThickness="1"
                       Padding="14,11" Margin="0,10,0,0">
                 <StackPanel>
-                  <TextBlock Text="{i18n:Oversat templatesview.saet_et_felt_ind_hvor_markoeren_staar}" FontSize="12.5"
+                  <TextBlock Text="{i18n:Oversat templatesview.det_der_kan_komme_med_fra_moedet}" FontSize="12.5"
                              FontWeight="SemiBold" />
                   <TextBlock FontSize="11.5" Margin="0,4,0,8" TextWrapping="Wrap" LineHeight="18"
                              Foreground="{DynamicResource TekstMeget}"
-                             Text="{i18n:Oversat templatesview.klik_paa_et_felt_for_at_saette_det_ind_i_t}" />
+                             Text="{i18n:Oversat templatesview.klik_et_af_dem_ind_hvor_markoeren_staar}" />
                   <ItemsControl x:Name="Felter">
                     <ItemsControl.ItemsPanel>
                       <ItemsPanelTemplate>
@@ -330,9 +322,14 @@
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
                       <DataTemplate>
-                        <Button Content="{Binding Felt}" Tag="{Binding Felt}" Click="Felt_Klik"
+                        <!-- KNAPPEN HED «{{transskription}}». Det er appens eget
+                             sprog. Nu staar der «Mødets tekst», og de kroellede
+                             parenteser bliver sat ind i teksten, hvor de hoerer
+                             til - i hjaelpeteksten staar baade forklaringen og
+                             pladsholderen, for den, der vil vide det. -->
+                        <Button Content="{Binding Navn}" Tag="{Binding Felt}" Click="Felt_Klik"
                                 ToolTip="{Binding Forklaring}" Margin="0,0,6,6"
-                                Padding="10,5" FontFamily="Consolas" FontSize="12" />
+                                Padding="10,5" FontSize="12" />
                       </DataTemplate>
                     </ItemsControl.ItemTemplate>
                   </ItemsControl>
@@ -341,11 +338,11 @@
 
               <TextBox x:Name="FeltBruger" AcceptsReturn="True" TextWrapping="Wrap"
                        VerticalScrollBarVisibility="Auto" AcceptsTab="True"
-                       FontFamily="Consolas" FontSize="12.5" TextChanged="Aendret" />
+                       FontSize="13" TextChanged="Aendret" />
             </DockPanel>
           </TabItem>
 
-          <TabItem x:Name="AgendaFane" Header="{i18n:Oversat templatesview.agenda}" Style="{StaticResource Fane}">
+          <TabItem x:Name="AgendaFane" Header="{i18n:Oversat templatesview.fanen_dagsorden}" Style="{StaticResource Fane}">
             <DockPanel>
               <StackPanel DockPanel.Dock="Top" Margin="0,0,0,10">
                 <TextBlock x:Name="AgendaOverskrift" FontSize="13.5" FontWeight="SemiBold"
@@ -384,7 +381,7 @@
 
               <TextBox x:Name="FeltAgenda" IsReadOnly="True" AcceptsReturn="True"
                        TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"
-                       FontFamily="Consolas" FontSize="12.5" />
+                       FontSize="13" />
             </DockPanel>
           </TabItem>
 
