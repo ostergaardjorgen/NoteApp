@@ -1120,6 +1120,7 @@
     "filen_findes_ikke_laengere_paa_disken": "The file no longer exists on disk.",
     "gaar_til_dokumentarkivet_med_dokumentet_va": "Goes to the document archive with the document selected, where it can be moved, renamed or deleted",
     "lav_et_referat_eller_et_andet_dokument_ud": "Create a summary or another document from the selected recording",
+    "sletter_det_valgte_dokument": "Deletes the selected document. The recording and transcript stay",
     "soeg_i_dokumenterne": "Search the documents",
     "vis_i_arkivet": "Show in archive"
   }

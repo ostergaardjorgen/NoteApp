@@ -219,10 +219,24 @@ public partial class TranscribeView : UserControl
     /// bare optagelsen». Kommer fra søgningen, hvor man klikkede på ét
     /// bestemt sted i teksten.
     /// </param>
-    public TranscribeView(string? aabnMappe, bool spoerg, int position)
+    /// <param name="aabnDokument">
+    /// Dokumentet, dokumentfanen skal stå på. Sat, når man kommer fra
+    /// historikken, en søgning eller «Vis dokumentet» på jobbjælken —
+    /// dokumentarkivet er væk, og det er hertil, de veje fører nu. Se
+    /// <c>MainWindow.GaaTilDokumenter</c>.
+    /// </param>
+    /// <param name="dokumentposition">
+    /// Tegnnummeret i DOKUMENTETS tekst, der skal springes til. Ikke det samme
+    /// som <paramref name="position"/>, som gælder udskriften.
+    /// </param>
+    public TranscribeView(string? aabnMappe, bool spoerg, int position,
+                          string? aabnDokument = null, int dokumentposition = 0)
     {
         InitializeComponent();
         LytEfterFund();
+
+        _aabnDokument = aabnDokument;
+        _aabnDokumentposition = dokumentposition;
 
         // «Opret dokument» sidder i udskriftsruden, ved den tekst det laves
         // af. Ruden kender teksten og ikke optagelsen - hvor lyden ligger,
@@ -237,6 +251,17 @@ public partial class TranscribeView : UserControl
 
         IndlaesOptagelser();
         VisSeneste();
+
+        // KOMMER MAN EFTER ET DOKUMENT, SKAL FANEN VAERE FREMME MED DET SAMME.
+        // IndlaesOptagelser har allerede tegnet dokumentfanen med det valgte
+        // dokument - se OpdaterDokumentfane - saa her mangler kun at skifte
+        // fane. Uden det landede man paa udskriften og skulle selv finde ud
+        // af, at dokumentet laa ved siden af.
+        if (aabnDokument is { Length: > 0 })
+        {
+            _holdDokumentvalg = true;
+            FaneDokumenter.IsChecked = true;
+        }
 
         // Panelet til hoejre skal foelge med, mens der skrives ud - ellers
         // staar der «ikke skrevet ud» paa den optagelse, motoren arbejder paa.
@@ -1390,13 +1415,37 @@ public partial class TranscribeView : UserControl
     /// først bliver rigtigt, når man kigger, er værre end intet tal: man
     /// bruger det til at lade være med at kigge.
     /// </remarks>
+    /// <summary>Dokumentet, fanen skal åbne på. Gælder ÉN tegning — se nedenfor.</summary>
+    private string? _aabnDokument;
+    private int _aabnDokumentposition;
+
     private void OpdaterDokumentfane()
     {
         var valgt = Valgt;
 
         var meta = valgt is null ? null : MeetingStore.Load(valgt.Mappe);
 
-        Dokumentrude.Vis(meta?.Id.ToString(), valgt?.Mappe, valgt?.Titel);
+        // ØNSKET GÆLDER ÉN GANG. OpdaterDokumentfane kaldes igen ved hvert tik
+        // fra en kørsel i baggrunden; blev id'et ved med at staa, ville ruden
+        // hoppe tilbage til dét dokument, hver gang - ogsaa efter at brugeren
+        // havde klikket sig over paa et andet.
+        //
+        // MEN DET BRUGES FOERST, NAAR DER ER EN OPTAGELSE. Metoden her kaldes
+        // ogsaa undervejs i IndlaesOptagelser, FOER traeet har valgt den mappe,
+        // skaermen blev aabnet paa - og dér er der ingen dokumenter at vaelge
+        // imellem. Blev oensket brugt op dér, var det vaek, naar optagelsen
+        // endelig stod klar, og man landede paa det nyeste i stedet for paa
+        // det dokument, man kom efter. Fanget af en proeve 04-09-2026.
+        var aabn = _aabnDokument;
+        var sted = _aabnDokumentposition;
+
+        if (valgt is not null)
+        {
+            _aabnDokument = null;
+            _aabnDokumentposition = 0;
+        }
+
+        Dokumentrude.Vis(meta?.Id.ToString(), valgt?.Mappe, valgt?.Titel, aabn, sted);
 
         // ============ HER STOD «Dokumenter · laver …» ============
         //
@@ -1469,8 +1518,30 @@ public partial class TranscribeView : UserControl
         // LAESES FORFRA, HVER GANG MAN GAAR IND. Et dokument kan vaere blevet
         // faerdigt i baggrunden, siden man saa fanen sidst - jobbet koerer
         // videre, mens man laeser udskriften.
-        if (dokumenter) OpdaterDokumentfane();
+        if (!dokumenter) return;
+
+        OpdaterDokumentfane();
+
+        // ============ MAN LANDER PAA DET NYESTE ============
+        //
+        // Det er dét, man er ude efter, naar man gaar over paa fanen - og et
+        // valg fra sidste besoeg er ikke noget, man kan huske.
+        //
+        // Ruden holder ellers fast i det, der er valgt, og med vilje: Vis
+        // kaldes igen ved hvert tik fra en koersel i baggrunden, og et
+        // dokument, man laeser i, maa ikke skifte under haanden hvert sekund.
+        // Nulstillingen hoerer derfor til HER, hvor fanen bliver valgt, og
+        // ikke i ruden selv.
+        //
+        // Undtagelsen er det foerste skift, naar man kommer efter ET bestemt
+        // dokument - fra en soegning, historikken eller «Vis dokumentet».
+        if (_holdDokumentvalg) { _holdDokumentvalg = false; return; }
+
+        Dokumentrude.VaelgNyeste();
     }
+
+    /// <summary>Sat, når skærmen åbnes på ét bestemt dokument. Gælder ÉT fanevalg.</summary>
+    private bool _holdDokumentvalg;
 
     private void OpdaterValg()
     {

@@ -1120,6 +1120,7 @@
     "filen_findes_ikke_laengere_paa_disken": "Filen findes ikke længere på disken.",
     "gaar_til_dokumentarkivet_med_dokumentet_va": "Går til dokumentarkivet med dokumentet valgt, hvor det kan flyttes, omdøbes eller slettes",
     "lav_et_referat_eller_et_andet_dokument_ud": "Lav et referat eller et andet dokument ud af den valgte optagelse",
+    "sletter_det_valgte_dokument": "Sletter det valgte dokument. Optagelsen og transkriptionen bliver liggende",
     "soeg_i_dokumenterne": "Søg i dokumenterne",
     "vis_i_arkivet": "Vis i arkivet"
   }

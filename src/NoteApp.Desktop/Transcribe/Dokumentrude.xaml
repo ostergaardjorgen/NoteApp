@@ -5,40 +5,26 @@
 
   <!-- ==================== HVORFOR RUDEN FINDES ====================
 
-       Optagelsen og dokumentet er den samme sag set fra to sider, og de laa
-       paa hver sin skaerm. Ville man vide, hvad der var lavet ud af et moede,
-       skulle man gaa til «Dokumenter» og laese «Fra optagelse» paa hver
-       enkelt. Sammenhaengen var der i data - den var bare ikke noget, man
-       kunne se.
+       Et dokument findes ikke uden en optagelse. Det er skrevet ud af et
+       moede eller et webinar, og der er ingen anden vej til at lave et. Derfor
+       er DET her den eneste indgang: dokumentarkivet som selvstaendig skaerm er
+       fjernet 04-09-2026, og alt der foer pegede derhen - historikken,
+       soegningen, beskeden om at et dokument er faerdigt - lander nu paa den
+       optagelse, dokumentet er lavet af, med dokumentet valgt.
 
-       Her staar den ved siden af udskriften: samme optagelse, to faner.
-
-       RUDEN ER TIL AT SE OG AABNE, IKKE TIL AT RYDDE OP.
-
-       Flyt, omdoeb, slet og beskrivelse hoerer i dokumentarkivet, hvor man
-       arbejder med dokumenter som dokumenter. Her staar man ved en optagelse
-       og vil videre - saa er «aabn» den handling, der er brug for.
-
-       Det er ogsaa derfor knapperne ikke er gentaget: to steder at slette det
-       samme er to steder at goere det ved et uheld. -->
+       DEN SER UD SOM UDSKRIFTSFANEN. Vaerktoejslinjen oeverst, soegefeltet
+       yderst til venstre, og en raekke at vaelge i under den. To faner ved
+       siden af hinanden med samme slags indhold skal ikke vaere bygget paa
+       hver sin maade. -->
 
   <Grid>
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
       <RowDefinition Height="*" />
     </Grid.RowDefinitions>
 
-    <!-- ===================== Vaerktoejslinjen =====================
-
-         DEN SER UD SOM UDSKRIFTENS, OG DET ER MENINGEN.
-         Knapperne stod i en linje NEDERST, mens udskriftsfanen har sine
-         oeverst. To faner ved siden af hinanden, samme slags indhold, og
-         handlingerne to forskellige steder - saa leder man efter dem hver
-         gang, man skifter fane.
-
-         SOEGEFELTET YDERST TIL VENSTRE, praecis som i udskriften. Det soeger
-         i dokumenternes TEKST, ikke kun i titlerne: pointen er at kunne finde
-         det, der blev sagt, uden at aabne noget i Word foerst. -->
+    <!-- ===================== Vaerktoejslinjen ===================== -->
     <Border x:Name="Hoved" Grid.Row="0" Background="{DynamicResource Trykket}"
             BorderBrush="{DynamicResource PanelKant}" BorderThickness="0,0,0,1"
             Padding="16,10">
@@ -90,13 +76,18 @@
         </Border>
 
         <StackPanel Grid.Column="2" Orientation="Horizontal">
-          <!-- ARKIVET ER STADIG DER, OG DET SKAL KUNNE NAAS. Menupunktet
-               «Dokumenter» er vaek - to indgange til det samme var netop det,
-               der skjulte sammenhaengen. Skaermen findes uaendret, og den
-               ligger et skridt herfra, hvor man staar med dokumenterne. -->
-          <Button x:Name="ArkivKnap" Content="{i18n:Oversat dokumentrude.alle_dokumenter}"
-                  Click="AlleKlik" Padding="12,6" FontSize="12.5"
-                  ToolTip="{i18n:Oversat dokumentrude.aabner_dokumentarkivet_med_alle_dokumenter}" />
+          <!-- SLETNINGEN HAR IKKE ANDRE STEDER AT VAERE.
+               Den laa i dokumentarkivet, og arkivet er vaek. Uden den her kunne
+               et dokument aldrig fjernes igen. Den staar yderst til venstre i
+               gruppen og er ikke standardknappen - se dialogen, hvor «Behold
+               det» er forvalgt. -->
+          <Button x:Name="SletKnap" Content="{i18n:Oversat faelles.slet}"
+                  Click="Slet_Klik" Padding="12,6" FontSize="12.5"
+                  ToolTip="{i18n:Oversat dokumentrude.sletter_det_valgte_dokument}" />
+
+          <Button x:Name="AabnKnap" Content="{i18n:Oversat faelles.aabn}"
+                  Click="Aabn_Klik" Padding="12,6" FontSize="12.5" Margin="8,0,0,0"
+                  ToolTip="{i18n:Oversat dokumentrude.aabner_dokumentet_i_det_program_der_haandt}" />
 
           <Button x:Name="OpretKnap" Content="{i18n:Oversat faelles.opret_dokument}"
                   Click="OpretKlik" Padding="12,6" FontSize="12.5" Margin="8,0,0,0"
@@ -105,85 +96,56 @@
       </Grid>
     </Border>
 
-    <ScrollViewer x:Name="Rulle" Grid.Row="1" Padding="26,20,26,20"
+    <!-- ============ ET VALG PR. DOKUMENT, NYESTE FOERST ============
+
+         Dokumenterne laa under hinanden som kort, og med tre-fire af dem var
+         teksten paa det foerste alt, man saa. Nu vaelger man eet ad gangen -
+         samme greb som fanerne ovenfor, saa der ikke er en tredje maade at
+         skifte indhold paa.
+
+         Raekken bygges i kode og ikke i XAML: hvilke der er, og hvad de
+         hedder, afhaenger af de dokumenter der findes. Se Byg_Raekke. -->
+    <Border x:Name="Raekkeramme" Grid.Row="1" BorderBrush="{DynamicResource PanelKant}"
+            BorderThickness="0,0,0,1" Padding="20,10" Visibility="Collapsed">
+      <WrapPanel x:Name="Dokumentraekke" Orientation="Horizontal" />
+    </Border>
+
+    <ScrollViewer x:Name="Rulle" Grid.Row="2" Padding="26,20,26,20"
                   VerticalScrollBarVisibility="Auto"
                   HorizontalScrollBarVisibility="Disabled">
-      <StackPanel HorizontalAlignment="Stretch">
+      <StackPanel x:Name="Indre" HorizontalAlignment="Stretch">
 
         <TextBlock x:Name="Overskrift" FontSize="19" FontWeight="SemiBold" TextWrapping="Wrap" />
 
         <TextBlock x:Name="Underskrift" FontSize="13.5" LineHeight="22" Margin="0,10,0,0"
                    TextWrapping="Wrap" Foreground="{DynamicResource TekstSvag}" />
 
-        <ItemsControl x:Name="Liste" Margin="0,18,0,0">
-          <ItemsControl.ItemTemplate>
-            <DataTemplate>
-              <Border Background="{DynamicResource Trykket}" CornerRadius="8" Padding="16,13"
-                      Margin="0,0,0,10" BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
-                <StackPanel>
-                  <Grid>
-                    <Grid.ColumnDefinitions>
-                      <ColumnDefinition Width="*" />
-                      <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
+        <!-- MANGLER FILEN, SKAL DET STAA VED DOKUMENTET.
+             En knap, der aabner ingenting, er vaerre end en, der ikke er der:
+             man tror, noget gik galt lige nu. -->
+        <TextBlock x:Name="Mangler" FontSize="12.5" Margin="0,10,0,0" TextWrapping="Wrap"
+                   Visibility="Collapsed" Foreground="{DynamicResource Advarsel}"
+                   Text="{i18n:Oversat dokumentrude.filen_findes_ikke_laengere_paa_disken}" />
 
-                    <StackPanel Grid.Column="0" Margin="0,0,14,0">
-                      <TextBlock Text="{Binding Titel}" FontSize="14" FontWeight="SemiBold"
-                                 TextWrapping="Wrap" />
+        <!-- ============ SELVE TEKSTEN, HER PAA SKAERMEN ============
 
-                      <TextBlock Text="{Binding Linje}" FontSize="12" LineHeight="19" Margin="0,5,0,0"
-                                 TextWrapping="Wrap" Foreground="{DynamicResource TekstMeget}" />
+             Foer stod der kun en titel og en dato. Ville man vide, hvad der
+             stod i referatet, skulle Word aabnes - og saa igen for det naeste.
 
-                      <TextBlock Text="{Binding Beskrivelse}" FontSize="12.5" LineHeight="20"
-                                 Margin="0,6,0,0" TextWrapping="Wrap"
-                                 Visibility="{Binding BeskrivelseSynlig}"
-                                 Foreground="{DynamicResource TekstSvag}" />
-
-                      <!-- MANGLER FILEN, SKAL DET STAA VED DOKUMENTET.
-                           En knap, der aabner ingenting, er vaerre end en, der
-                           ikke er der: man tror, noget gik galt lige nu. -->
-                      <TextBlock Text="{i18n:Oversat dokumentrude.filen_findes_ikke_laengere_paa_disken}"
-                                 FontSize="12" Margin="0,6,0,0" TextWrapping="Wrap"
-                                 Visibility="{Binding ManglerSynlig}"
-                                 Foreground="{DynamicResource Advarsel}" />
-                    </StackPanel>
-
-                    <StackPanel Grid.Column="1" VerticalAlignment="Top">
-                      <Button Content="{i18n:Oversat faelles.aabn}" Tag="{Binding Id}"
-                              Click="Aabn_Klik" Padding="14,7" MinWidth="92"
-                              IsEnabled="{Binding Findes}"
-                              ToolTip="{i18n:Oversat dokumentrude.aabner_dokumentet_i_det_program_der_haandt}" />
-
-                      <Button Content="{i18n:Oversat dokumentrude.vis_i_arkivet}" Tag="{Binding Id}"
-                              Click="Arkiv_Klik" Padding="14,7" MinWidth="92" Margin="0,6,0,0"
-                              ToolTip="{i18n:Oversat dokumentrude.gaar_til_dokumentarkivet_med_dokumentet_va}" />
-                    </StackPanel>
-                  </Grid>
-
-                  <!-- ============ SELVE TEKSTEN, HER PAA SKAERMEN ============
-
-                       Foer stod der kun en titel og en dato. Ville man vide,
-                       hvad der stod i referatet, skulle Word aabnes - og saa
-                       igen for det naeste dokument.
-
-                       TextBox og ikke TextBlock, samme valg som i arkivet: man
-                       kan markere og kopiere et afsnit uden at aabne noget. -->
-                  <Border Background="{DynamicResource Svaev}" BorderBrush="{DynamicResource PanelKant}"
-                          BorderThickness="1" CornerRadius="8" Padding="14,12" Margin="0,12,0,0"
-                          Visibility="{Binding IndholdSynlig}">
-                    <TextBox Text="{Binding Indhold, Mode=OneWay}" FontSize="12.5" TextWrapping="Wrap"
-                             IsReadOnly="True" BorderThickness="0" Background="Transparent"
-                             Padding="0" Foreground="{DynamicResource TekstSvag}"
-                             IsInactiveSelectionHighlightEnabled="True"
-                             VerticalScrollBarVisibility="Disabled"
-                             HorizontalScrollBarVisibility="Disabled" />
-                  </Border>
-                </StackPanel>
-              </Border>
-            </DataTemplate>
-          </ItemsControl.ItemTemplate>
-        </ItemsControl>
-
+             TextBox og ikke TextBlock. To grunde, de samme som i det gamle
+             arkiv: soegningen skal kunne springe hen til et bestemt sted, og
+             det kraever at tegnene kan slaas op paa position - og man kan
+             markere og kopiere et afsnit uden at aabne noget. -->
+        <Border x:Name="Indholdsramme" Background="{DynamicResource Trykket}"
+                BorderBrush="{DynamicResource PanelKant}" BorderThickness="1"
+                CornerRadius="8" Padding="16,13" Margin="0,16,0,0" Visibility="Collapsed">
+          <TextBox x:Name="Indhold" FontSize="12.5" TextWrapping="Wrap"
+                   IsReadOnly="True" BorderThickness="0" Background="Transparent"
+                   Padding="0" Foreground="{DynamicResource TekstSvag}"
+                   IsInactiveSelectionHighlightEnabled="True"
+                   VerticalScrollBarVisibility="Disabled"
+                   HorizontalScrollBarVisibility="Disabled" />
+        </Border>
       </StackPanel>
     </ScrollViewer>
   </Grid>

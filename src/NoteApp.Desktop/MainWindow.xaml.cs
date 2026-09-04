@@ -720,25 +720,28 @@ public partial class MainWindow : Window
     public void GaaTilHistorik() => NavHistorik.IsChecked = true;
 
     /// <summary>
-    /// Går til dokumentarkivet og markerer ét bestemt dokument.
+    /// Går til det dokument, id'et peger på — på den optagelse, det er lavet af.
     /// </summary>
     /// <remarks>
-    /// ARKIVET ER EN SKÆRM UDEN ET MENUPUNKT.
+    /// ============ DOKUMENTARKIVET ER FJERNET 04-09-2026 ============
     ///
-    /// Dokumenterne står på den optagelse, de er lavet af — som en fane ved
-    /// siden af udskriften. Arkivet er stedet, hvor de kan flyttes, omdøbes
-    /// og slettes på tværs af optagelser, og der kommer man hen FRA
-    /// dokumentfanen, fra en søgning, fra historikken eller fra beskeden om,
-    /// at et dokument er færdigt. Ikke fra menuen.
+    /// Det var en skærm uden et menupunkt, hvor dokumenterne kunne flyttes,
+    /// omdøbes og slettes på tværs af optagelser. Den er væk, fordi præmissen
+    /// var forkert: et dokument findes ikke uden en optagelse. Det skrives ud
+    /// af et møde eller et webinar, og der er ingen anden vej til at lave et.
+    /// Et arkiv ved siden af var en anden ordning af de samme filer — og to
+    /// ordninger af det samme er det, der skjulte sammenhængen til at begynde
+    /// med.
     ///
-    /// KNAPPEN STOD SKJULT I MENUEN EN OVERGANG, så de fire kaldsteder kunne
-    /// blive ved at sætte <c>IsChecked</c>. Det virkede — og det var
-    /// alligevel forkert: et menupunkt, der ikke er i menuen, er noget den
-    /// næste læser skal regne ud. Indholdet sættes nu direkte.
+    /// Dokumentfanen på optagelsen er nu den eneste indgang. Alt der pegede
+    /// på arkivet — historikken, søgningen, klokkens beskeder, «Vis
+    /// dokumentet» på jobbjælken — lander her og bliver ført det samme sted
+    /// hen: optagelsen, med dokumentet valgt.
     ///
-    /// MARKERINGEN I MENUEN RYDDES. Uden det ville det punkt, man kom fra,
-    /// blive ved at stå valgt, mens man ser på noget andet — og så peger
-    /// menuen ét sted hen og skærmen et andet.
+    /// OPTAGELSEN SLÅS OP PÅ ID'ET og ikke på den gemte sti. En optagelse kan
+    /// være flyttet eller omdøbt, siden dokumentet blev lavet, og så peger
+    /// stien på ingenting. Stien er reserven for de dokumenter, der blev lavet
+    /// før mødernes id'er fandtes.
     /// </remarks>
     /// <param name="position">
     /// Tegnnummeret i dokumentets tekst, der skal springes til. Nul betyder
@@ -747,21 +750,39 @@ public partial class MainWindow : Window
     /// </param>
     public void GaaTilDokumenter(string? dokumentId = null, int position = 0)
     {
-        _aabnDokument = dokumentId;
-        _aabnPosition = position;
-
         // Samme oprydning som i Nav_Changed: er man gaaet et andet sted hen,
         // peger tilbage-linjen paa noget, man for laengst er faerdig med.
         _soegeord = null;
         VisTilbagelinje();
 
-        RydMenuvalg();
+        var d = dokumentId is { Length: > 0 }
+            ? NoteApp.Core.Documents.DocumentStore.LoadAll().FirstOrDefault(x => x.Id == dokumentId)
+            : null;
 
-        var id = _aabnDokument;
-        _aabnDokument = null;
+        string? mappe = null;
 
-        Indhold.Content = new Documents.DocumentsView(id, Brug());
+        if (d is not null)
+        {
+            if (d.SourceMeetingId.Length > 0 && MeetingStore.FindById(d.SourceMeetingId) is { } fundet)
+                mappe = fundet.Mappe;
+            else if (d.SourceRecording.Length > 0)
+                mappe = d.SourceRecording;
+        }
+
+        _aabnOptagelse = mappe;
+        _aabnDokument = d?.Id;
+        _aabnDokumentposition = position;
+
+        // Positionen hoerer til DOKUMENTETS tekst og ikke til udskriften.
+        // Udskriftsfanen skal derfor ikke springe nogen steder hen.
+        _aabnPosition = 0;
+
+        if (NavTransskriber.IsChecked == true) Indhold.Content = NyOptagelsesskaerm();
+        else NavTransskriber.IsChecked = true;
     }
+
+    /// <summary>Tegnnummeret i dokumentets tekst, der skal springes til. Bruges ÉN gang.</summary>
+    private int _aabnDokumentposition;
 
     /// <summary>
     /// Fjerner markeringen fra alle menupunkter.
@@ -2182,11 +2203,15 @@ public partial class MainWindow : Window
     {
         var aabn = _aabnOptagelse;
         var spoerg = _spoergOmUdskrift;
+        var dokument = _aabnDokument;
+        var dokumentsted = _aabnDokumentposition;
 
         _aabnOptagelse = null;              // gælder kun dette skift
         _spoergOmUdskrift = false;
+        _aabnDokument = null;
+        _aabnDokumentposition = 0;
 
-        return new Transcribe.TranscribeView(aabn, spoerg, Brug());
+        return new Transcribe.TranscribeView(aabn, spoerg, Brug(), dokument, dokumentsted);
     }
 
     /// <summary>
