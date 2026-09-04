@@ -14,7 +14,9 @@ der er, så du kan se det uden at klikke.
 
 Herfra kan du åbne et dokument i Word. Skal det flyttes, omdøbes eller
 slettes, fører **Alle dokumenter** nederst til arkivet, hvor alle dokumenter
-står samlet — også dem fra andre optagelser.
+står samlet — også dem fra andre optagelser. Arkivet har ikke sit eget
+menupunkt: du kommer derhen herfra, fra en søgning, fra historikken eller fra
+beskeden om, at et dokument er færdigt.
 
 Forbindelsen holder, selv om du omdøber optagelsen eller flytter den til en
 anden mappe. Den går på mødets id, ikke på navnet.

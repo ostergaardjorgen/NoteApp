@@ -14,7 +14,9 @@ tab says how many there are, so you can see it without clicking.
 
 From here you can open a document in Word. To move, rename or delete one,
 **All documents** at the bottom leads to the archive, where every document is
-gathered — including those from other recordings.
+gathered — including those from other recordings. The archive has no menu
+entry of its own: you get there from here, from a search, from the history or
+from the notice that a document is ready.
 
 The link holds even if you rename the recording or move it to another folder.
 It goes by the meeting's id, not by its name.

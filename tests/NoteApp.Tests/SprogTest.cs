@@ -135,7 +135,12 @@ public class SprogTest
         Sprog.Skift("de");
 
         Assert.Equal("Aufnahmen", Sprog.T("nav.optagelser"));
-        Assert.Equal("Dokumenter", Sprog.T("nav.dokumenter"));
+
+        // HER STOD «nav.dokumenter». Den noegle findes ikke mere: menupunktet
+        // «Dokumenter» blev fjernet 04-09-2026, og dokumenterne staar nu som
+        // en fane paa optagelsen. Proeven handler om TILBAGEFALDET og ikke om
+        // dokumenter - den skal bare bruge en noegle, der ikke er oversat.
+        Assert.Equal("Historik", Sprog.T("nav.historik"));
         Assert.Equal("Compliance", Sprog.T("nav.compliance"));
     }
 

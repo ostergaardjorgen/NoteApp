@@ -104,7 +104,7 @@
           <RadioButton x:Name="NavTransskriber" Tag="&#xE8F1;" GroupName="nav" Content="{i18n:Oversat nav.optagelser}"
                        Checked="Nav_Changed"
                        Style="{StaticResource NavKnap}" />
-          <!-- ============ «DOKUMENTER» STÅR IKKE LÆNGERE I MENUEN ============
+          <!-- ============ HER LÅ «DOKUMENTER» ============
 
                Optagelsen og dokumentet er den samme sag set fra to sider, og
                de havde hvert sit menupunkt. Sammenhaengen var der i data -
@@ -116,20 +116,14 @@
                Dokumenterne staar nu som en FANE inde paa optagelsen, ved
                siden af udskriften. Samme moede, to faner.
 
-               KNAPPEN BLIVER STAAENDE - SKJULT - OG DET ER MED VILJE.
-
-               Skaermen findes uaendret; den er bare ikke et sted, man gaar hen
-               fra menuen. Alt, der peger paa den, peger stadig rigtigt:
-               GaaTilDokumenter fra dokumentfanen, notifikationen naar et
-               dokument er faerdigt, soegningen, og talekommandoen «gaa til
-               dokumenter» gennem GaaTilSkaerm. En skjult RadioButton kan
-               stadig saettes, og Nav_Changed fyrer som foer.
-
-               Fjernede man knappen, skulle fire steder finde en anden vej -
-               og saa ville et af dem gaa i stykker uden at nogen saa det. -->
-          <RadioButton x:Name="NavDokumenter" Tag="&#xE8A5;" GroupName="nav" Content="{i18n:Oversat nav.dokumenter}"
-                       Checked="Nav_Changed" Visibility="Collapsed"
-                       Style="{StaticResource NavKnap}" />
+               KNAPPEN STOD HER SKJULT I EN MELLEMPERIODE, saa de fire steder,
+               der peger paa dokumentarkivet, kunne blive ved at saette
+               IsChecked. Det virkede, og det var alligevel forkert: en knap i
+               menuen, der ikke er i menuen, er noget den naeste laeser skal
+               regne ud. Arkivet er nu en skaerm UDEN et menupunkt - se
+               MainWindow.GaaTilDokumenter, som saetter indholdet direkte og
+               rydder markeringen i menuen, saa intet punkt staar valgt paa en
+               skaerm, der ikke hoerer til det. -->
           <!-- MØDETYPER, IKKE SKABELONER.
                «Skabelon» er et ord fra tekstbehandling. Det tvinger læseren
                til at tænke i dokumenter på et tidspunkt, hvor der ikke er

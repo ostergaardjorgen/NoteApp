@@ -50,6 +50,11 @@ public partial class MainWindow : Window
     {
         Dispatcher.Invoke(() =>
         {
+            // EN NY KOERSEL RYDDER DEN FORRIGES KVITTERING. Uden det ville
+            // «Vis» blive staaende og aabne det FORRIGE dokument, mens et nyt
+            // blev lavet - og det er den slags, man klikker paa uden at se.
+            if (s.Kører) _færdigtDokument = null;
+
             JobBjaelke.Visibility = Visibility.Visible;
             JobHvad.Text = s.Kører ? $"{s.Hvad} laves …" : s.Hvad + " færdigt";
             JobBesked.Text = s.Besked;
@@ -130,13 +135,20 @@ public partial class MainWindow : Window
         });
     }
 
+    /// <summary>
+    /// Et dokument blev færdigt: husk hvilket, og tænd «Vis» på bjælken.
+    /// </summary>
+    private void Dokumentfaerdigt(string id) => Dispatcher.Invoke(() =>
+    {
+        _færdigtDokument = id;
+        JobVisKnap.Visibility = Visibility.Visible;
+    });
+
     private void JobVis_Click(object sender, RoutedEventArgs e)
     {
-        _aabnDokument = _færdigtDokument;
         JobBjaelke.Visibility = Visibility.Collapsed;
 
-        if (NavDokumenter.IsChecked == true) Nav_Changed(this, new RoutedEventArgs());
-        else NavDokumenter.IsChecked = true;
+        GaaTilDokumenter(_færdigtDokument);
     }
 
     private void JobLuk_Click(object sender, RoutedEventArgs e) =>
@@ -473,6 +485,29 @@ public partial class MainWindow : Window
             // Bjaelken skal foelge transskriptionen paa ALLE skaerme.
             Jobs.Udskriftsvagt.Aendret += VisUdskrift;
 
+            // ============ OG DOKUMENTKOERSLEN. HER STOD INGENTING. ============
+            //
+            // VisJob og _faerdigtDokument stod i filen og blev ALDRIG kaldt:
+            // ingen koblede BackgroundJobs.Aendret paa. Bjaelken viste altsaa
+            // transskriptioner og aldrig dokumenter, og «Vis»-knappen paa den
+            // kunne per konstruktion ikke dukke op - _faerdigtDokument var
+            // altid null. Compileren sagde det (CS0649); advarslen druknede
+            // blandt de oevrige.
+            //
+            // Det gjorde mindre skade, saa laenge «Dokumenter» var et
+            // menupunkt: der kunne man gaa hen og se fremdriften. Nu er
+            // arkivet ikke i menuen, og saa er bjaelken det eneste sted, en
+            // koersel kan ses, mens den staar paa. Fundet 04-09-2026.
+            Jobs.BackgroundJobs.Ændret += VisJob;
+
+            // HVILKET dokument der blev faerdigt. Det er DET, «Vis» skal aabne.
+            //
+            // Der saettes her og ikke i VisJob, fordi raekkefoelgen er den
+            // modsatte: BackgroundJobs melder «faerdigt» paa bjaelken FOER den
+            // fortaeller hvilket dokument det var. Knappen taendes derfor her,
+            // hvor svaret findes.
+            Jobs.BackgroundJobs.DokumentFærdigt += Dokumentfaerdigt;
+
             // Mapperne, brugeren har peget paa. Starter tomt og koster
             // ingenting, naar der ikke er nogen - se Mappevagt.Kig.
             Jobs.Mappevagt.Start();
@@ -685,12 +720,26 @@ public partial class MainWindow : Window
     public void GaaTilHistorik() => NavHistorik.IsChecked = true;
 
     /// <summary>
-    /// Springer til «Dokumenter» og markerer det dokument, der er sat i gang.
-    ///
-    /// Kaldes fra optagelsesskærmen, naar en koersel er startet: arbejdet
-    /// sker et andet sted, end man staar, og en besked om det uden en vej
-    /// derhen er en halv besked.
+    /// Går til dokumentarkivet og markerer ét bestemt dokument.
     /// </summary>
+    /// <remarks>
+    /// ARKIVET ER EN SKÆRM UDEN ET MENUPUNKT.
+    ///
+    /// Dokumenterne står på den optagelse, de er lavet af — som en fane ved
+    /// siden af udskriften. Arkivet er stedet, hvor de kan flyttes, omdøbes
+    /// og slettes på tværs af optagelser, og der kommer man hen FRA
+    /// dokumentfanen, fra en søgning, fra historikken eller fra beskeden om,
+    /// at et dokument er færdigt. Ikke fra menuen.
+    ///
+    /// KNAPPEN STOD SKJULT I MENUEN EN OVERGANG, så de fire kaldsteder kunne
+    /// blive ved at sætte <c>IsChecked</c>. Det virkede — og det var
+    /// alligevel forkert: et menupunkt, der ikke er i menuen, er noget den
+    /// næste læser skal regne ud. Indholdet sættes nu direkte.
+    ///
+    /// MARKERINGEN I MENUEN RYDDES. Uden det ville det punkt, man kom fra,
+    /// blive ved at stå valgt, mens man ser på noget andet — og så peger
+    /// menuen ét sted hen og skærmen et andet.
+    /// </remarks>
     /// <param name="position">
     /// Tegnnummeret i dokumentets tekst, der skal springes til. Nul betyder
     /// «vis bare dokumentet». Kommer fra en søgning, hvor man klikkede på ét
@@ -701,9 +750,32 @@ public partial class MainWindow : Window
         _aabnDokument = dokumentId;
         _aabnPosition = position;
 
-        if (NavDokumenter.IsChecked == true)
-            Indhold.Content = new Documents.DocumentsView(_aabnDokument, Brug());
-        else NavDokumenter.IsChecked = true;
+        // Samme oprydning som i Nav_Changed: er man gaaet et andet sted hen,
+        // peger tilbage-linjen paa noget, man for laengst er faerdig med.
+        _soegeord = null;
+        VisTilbagelinje();
+
+        RydMenuvalg();
+
+        var id = _aabnDokument;
+        _aabnDokument = null;
+
+        Indhold.Content = new Documents.DocumentsView(id, Brug());
+    }
+
+    /// <summary>
+    /// Fjerner markeringen fra alle menupunkter.
+    /// </summary>
+    /// <remarks>
+    /// Bruges af de skærme, der ikke HAR et menupunkt. En RadioButton i en
+    /// gruppe kan godt stå umarkeret — det er kun brugerens klik, der ikke
+    /// kan afmarkere den. Klikker man bagefter på det punkt, man kom fra,
+    /// fyrer <c>Checked</c> som normalt, fordi knappen ikke længere er
+    /// markeret.
+    /// </remarks>
+    private void RydMenuvalg()
+    {
+        foreach (var knap in Menupunkter()) knap.IsChecked = false;
     }
 
     /// <summary>Positionen, der skal springes til. Bruges ÉN gang.</summary>
@@ -1238,14 +1310,30 @@ public partial class MainWindow : Window
     }
 
     /// <summary>Går til en skærm ud fra dens navn i kommandolisten.</summary>
+    /// <remarks>
+    /// «DOKUMENTER» ER IKKE ET MENUPUNKT MERE, men det er stadig et ord,
+    /// nogen siger. Arkivet har sin egen vej ind — se
+    /// <see cref="GaaTilDokumenter"/> — og kommandoen skal blive ved at
+    /// virke, uanset at der ikke er en knap at trykke på.
+    /// </remarks>
     private void GaaTilSkaerm(string navn)
     {
-        var knap = navn.Trim().ToLowerInvariant() switch
+        var rettet = navn.Trim().ToLowerInvariant();
+
+        // «arkiv» alene staar der IKKE. Ordet betyder ogsaa mappen «Arkiv» i
+        // optagelsestraeet, og en kommando, der rammer to ting, rammer den
+        // forkerte halvdelen af gangene.
+        if (rettet is "dokumenter" or "dokumentarkiv")
+        {
+            GaaTilDokumenter();
+            return;
+        }
+
+        var knap = rettet switch
         {
             "cockpit" => NavCockpit,
             "diktering" or "ordbog" => NavDiktering,
             "optagelser" => NavTransskriber,
-            "dokumenter" => NavDokumenter,
             "moedetyper" or "mødetyper" or "skabeloner" => NavSkabeloner,
             "modeller" or "ai-modeller" => NavMotor,
             "compliance" => NavCompliance,
@@ -2009,7 +2097,7 @@ public partial class MainWindow : Window
 
     private IEnumerable<System.Windows.Controls.RadioButton> Menupunkter() => new[]
     {
-        NavCockpit, NavDiktering, NavTransskriber, NavDokumenter, NavSkabeloner,
+        NavCockpit, NavDiktering, NavTransskriber, NavSkabeloner,
         NavMotor, NavCompliance, NavHistorik, NavIndstillinger,
     };
 
@@ -2034,12 +2122,6 @@ public partial class MainWindow : Window
             // Bygges hver gang: listen over optagelser skal vise den, der
             // netop er lavet, uden at nogen skal genstarte appen.
             Indhold.Content = NyOptagelsesskaerm();
-        }
-        else if (NavDokumenter.IsChecked == true)
-        {
-            var id = _aabnDokument;
-            _aabnDokument = null;
-            Indhold.Content = new DocumentsView(id, Brug());
         }
         else if (NavCockpit.IsChecked == true)
         {

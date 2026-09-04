@@ -91,7 +91,12 @@ public class OpdateringTest
         Assert.Equal("Optagelser", Sprog.T("nav.optagelser"));
 
         // Og resten er kommet med.
-        Assert.Equal("Dokumenter", Sprog.T("nav.dokumenter"));
+        //
+        // HER STOD «nav.dokumenter». Den noegle findes ikke mere: menupunktet
+        // «Dokumenter» blev fjernet 04-09-2026. Proeven handler om, at de
+        // OEVRIGE noegler kommer med ved en opdatering - hvilken af dem der
+        // proeves paa, er ligegyldigt, saa laenge den findes.
+        Assert.Equal("Historik", Sprog.T("nav.historik"));
     }
 
     [Fact]
