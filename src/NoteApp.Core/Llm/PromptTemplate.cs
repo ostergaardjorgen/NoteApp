@@ -68,6 +68,24 @@ public sealed class PromptTemplate
     /// </remarks>
     public List<string> UdeladteAfsnit { get; set; } = new();
 
+    /// <summary>
+    /// Skal de fælles deltagerregler med i det her dokument?
+    /// </summary>
+    /// <remarks>
+    /// REGLERNE VAR ET FELT, MAN SKULLE SKRIVE. Skabelonen skrev
+    /// <c>{{deltagerregler}}</c> i teksten, og en knap satte det ind. Det er
+    /// den samme slags spørgsmål som afsnittene — «skal det med?» — men
+    /// besvaret på en helt anden måde, og den ene af dem krævede, at man
+    /// kendte til krøllede parenteser.
+    ///
+    /// Nu er det et hak. Standarden udledes af teksten, så ingen skabelon
+    /// skifter opførsel af sig selv: står feltet i teksten, er hakket sat;
+    /// står det ikke, er det ikke. Først når man selv sætter hakket, skrives
+    /// <c>deltagerregler: ja</c> i frontmatter, og reglerne lægges til sidst —
+    /// præcis som <see cref="Sprogregler"/> gør det.
+    /// </remarks>
+    public bool TagDeltagerregler { get; set; }
+
     public required string SystemPrompt { get; set; }
     public required string UserPrompt { get; set; }
 
@@ -140,6 +158,17 @@ public sealed class PromptTemplate
             UdeladteAfsnit = (Hent(felter, "udeladte_afsnit") ?? "")
                 .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
                 .ToList(),
+
+            // STANDARDEN UDLEDES AF TEKSTEN. Staar feltet i systemprompten,
+            // var reglerne med foer - og saa skal de blive ved med at vaere
+            // det. Kun et udtrykkeligt «nej» eller «ja» i frontmatter vinder
+            // over det, teksten selv siger.
+            TagDeltagerregler = Hent(felter, "deltagerregler") switch
+            {
+                "ja" => true,
+                "nej" => false,
+                _ => dele[1].Contains("{{" + Llm.Deltagerregler.Felt + "}}")
+            },
             SystemPrompt = dele[1].Trim(),
             UserPrompt = dele.Length > 2 ? dele[2].Trim() : "{{transskription}}",
             Path = path
@@ -244,13 +273,32 @@ public sealed class PromptTemplate
     /// </summary>
     public string RenderSystem(string dokumentsprog)
     {
-        var s = SystemUdenFravalgte().Replace("{{" + Deltagerregler.Felt + "}}", Deltagerregler.Tekst);
+        // ============ DELTAGERREGLERNE ============
+        //
+        // Hakket bestemmer, ikke feltet. Er det taget fra, forsvinder feltet
+        // uden at efterlade noget; er det sat, og skabelonen ikke skriver
+        // feltet, laegges reglerne til sidst - samme greb som sprogreglerne
+        // nedenfor og af samme grund: valget skal virke i ALLE skabeloner,
+        // ogsaa dem brugeren selv har skrevet.
+        var felt = "{{" + Llm.Deltagerregler.Felt + "}}";
+        var s = SystemUdenFravalgte();
 
-        var felt = "{{" + Sprogregler.Felt + "}}";
+        if (!TagDeltagerregler)
+        {
+            s = s.Replace(felt, "").TrimEnd();
+        }
+        else
+        {
+            s = s.Contains(felt)
+                ? s.Replace(felt, Llm.Deltagerregler.Tekst)
+                : s.TrimEnd() + "\n\n" + Llm.Deltagerregler.Tekst;
+        }
+
+        var sprogfelt = "{{" + Sprogregler.Felt + "}}";
         var regel = Sprogregler.Tekst(dokumentsprog);
 
-        return s.Contains(felt)
-            ? s.Replace(felt, regel)
+        return s.Contains(sprogfelt)
+            ? s.Replace(sprogfelt, regel)
             : s.TrimEnd() + "\n\n" + regel;
     }
 
@@ -282,6 +330,11 @@ public sealed class PromptTemplate
         sb.Append("maks_tokens: ").AppendLine(MaxTokens.ToString());
         if (UdeladteAfsnit.Count > 0)
             sb.Append("udeladte_afsnit: ").AppendLine(string.Join(", ", UdeladteAfsnit));
+
+        // Skrives ALTID. Uden linjen ville standarden blive udledt af teksten
+        // igen naeste gang, og et hak, man selv har taget fra, ville komme
+        // tilbage af sig selv.
+        sb.Append("deltagerregler: ").AppendLine(TagDeltagerregler ? "ja" : "nej");
         sb.AppendLine("---");
         sb.AppendLine(SystemPrompt.Trim());
         sb.AppendLine("---");

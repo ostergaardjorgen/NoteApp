@@ -281,6 +281,21 @@
                   <TextBlock FontSize="11.5" Margin="0,4,0,8" TextWrapping="Wrap" LineHeight="18"
                              Foreground="{DynamicResource TekstMeget}"
                              Text="{i18n:Oversat templatesview.tag_hakket_fra_saa_springes_afsnittet_over}" />
+                  <!-- ============ DELTAGERREGLERNE ER OGSAA ET HAK ============
+
+                       De laa i en kasse for sig NEDERST paa fanen, med en knap,
+                       der satte «{{deltagerregler}}» ind i teksten. Det er den
+                       samme slags spoergsmaal som afsnittene - «skal det med?» -
+                       men besvaret paa en helt anden maade, og den ene af dem
+                       kraevede, at man kendte til kroellede parenteser.
+
+                       Nu staar det her, sammen med det oevrige, der skal med. -->
+                  <CheckBox x:Name="HakDeltagere" Margin="0,0,0,8" FontSize="12.5"
+                            Checked="Deltagere_Aendret" Unchecked="Deltagere_Aendret"
+                            ToolTip="{i18n:Oversat templatesview.reglerne_for_hvem_der_kommer_paa_deltagerl}">
+                    <TextBlock Text="{i18n:Oversat templatesview.deltagerregler_hvem_kommer_paa_listen}" />
+                  </CheckBox>
+
                   <WrapPanel x:Name="Afsnit" Orientation="Horizontal" />
 
                   <!-- HVAD DER SKER, NAAR MAN KLIKKER. Uden den her skete der
@@ -294,28 +309,9 @@
                 </StackPanel>
               </Border>
 
-              <!-- DELTAGERREGLERNE HOERER TIL HER, IKKE PAA MATERIALEFANEN.
-                   De er en REGEL, ikke en oplysning om moedet, og de bliver
-                   kun sat ind i systemprompten. Stod feltet paa den anden
-                   fane, blev det erstattet med ingenting - reglerne forsvandt
-                   uden en lyd, og det viste sig foerst som en opfundet
-                   deltager i et referat. -->
-              <Border DockPanel.Dock="Bottom" Background="{DynamicResource Trykket}" CornerRadius="8"
-                      BorderBrush="{DynamicResource PanelKant}" BorderThickness="1"
-                      Padding="14,11" Margin="0,10,0,0">
-                <StackPanel>
-                  <TextBlock Text="{i18n:Oversat templatesview.faelles_regler_du_kan_saette_ind}" FontSize="12.5" FontWeight="SemiBold" />
-                  <TextBlock FontSize="11.5" Margin="0,4,0,8" TextWrapping="Wrap" LineHeight="18"
-                             Foreground="{DynamicResource TekstMeget}"
-                             Text="{i18n:Oversat templatesview.reglerne_for_hvem_der_kommer_paa_deltagerl}" />
-                  <!-- {} foerst: ellers laeser XAML den kroellede parentes som en
-                       markup-extension og vil ikke bygge. -->
-                  <Button Content="{i18n:Oversat templatesview.saet_deltagerreglerne_ind}" Tag="{}{{deltagerregler}}"
-                          Click="Systemfelt_Klik"
-                          HorizontalAlignment="Left" Padding="10,5" FontSize="12"
-                          ToolTip="{i18n:Oversat templatesview.saetter_de_faelles_deltagerregler_ind_hvor}" />
-                </StackPanel>
-              </Border>
+              <!-- HER LAA EN KASSE MED «Sæt deltagerreglerne ind».
+                   Den er blevet til et hak oeverst i «Hvad skal dokumentet
+                   indeholde?», hvor de oevrige valg staar. -->
 
               <!-- ALMINDELIG SKRIFT, IKKE CONSOLAS. Monospace siger «det her
                    er kode» - og det er det ikke: det er saetninger paa dansk om,

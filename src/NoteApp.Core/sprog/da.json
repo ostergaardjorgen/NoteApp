@@ -832,7 +832,8 @@
     "teksttype_rettet": "rettet",
     "vaelg_mappe": "Vælg mappe …",
     "hvad_skal_dokumentet_indeholde": "Hvad skal dokumentet indeholde?",
-    "tag_hakket_fra_saa_springes_afsnittet_over": "Tag hakket fra, så springes afsnittet over. Teksten nedenfor bliver stående, så du kan sætte hakket tilbage."
+    "tag_hakket_fra_saa_springes_afsnittet_over": "Tag hakket fra, så springes afsnittet over. Teksten nedenfor bliver stående, så du kan sætte hakket tilbage.",
+    "deltagerregler_hvem_kommer_paa_listen": "Deltagerregler — hvem kommer på deltagerlisten"
   },
   "transcribeview": {
     "aabn_mappen_paa_disken": "Åbn mappen på disken",

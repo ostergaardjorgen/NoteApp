@@ -228,15 +228,8 @@ public partial class TemplatesView : UserControl
     /// Sætter de fælles deltagerregler ind i instruktionen, hvor markøren
     /// står. Egen metode, fordi den skriver i et andet felt end Felt_Klik.
     /// </summary>
-    private void Systemfelt_Klik(object sender, RoutedEventArgs e)
-    {
-        if (sender is not Button b || b.Tag is not string felt) return;
-
-        var pos = FeltSystem.CaretIndex;
-        FeltSystem.Text = FeltSystem.Text.Insert(pos, felt);
-        FeltSystem.CaretIndex = pos + felt.Length;
-        FeltSystem.Focus();
-    }
+    // HER LAA Systemfelt_Klik - knappen «Sæt deltagerreglerne ind».
+    // Feltet skrives ikke laengere i haanden; se HakDeltagere.
 
     /// <summary>
     /// Viser den dagsorden, der hører til den valgte skabelon — eller
@@ -396,6 +389,7 @@ public partial class TemplatesView : UserControl
         FeltSystem.Text = t.SystemPrompt;
 
         _udeladte = new List<string>(t.UdeladteAfsnit);
+        HakDeltagere.IsChecked = t.TagDeltagerregler;
         Byg_Afsnit();
         FeltBruger.Text = t.UserPrompt;
 
@@ -527,6 +521,22 @@ public partial class TemplatesView : UserControl
     /// noget, der ikke virkede. Nu er den fravalgte overskrift streget over, og
     /// linjen under siger, hvad der sker, når dokumentet laves.
     /// </remarks>
+    /// <summary>
+    /// Deltagerreglerne slås til eller fra.
+    /// </summary>
+    /// <remarks>
+    /// SOM AFSNITTENE: teksten røres ikke. Står <c>{{deltagerregler}}</c> i
+    /// prompten, bliver det stående — det er hakket, der afgør, om reglerne
+    /// sendes. Se <c>PromptTemplate.RenderSystem</c>.
+    /// </remarks>
+    private void Deltagere_Aendret(object sender, RoutedEventArgs e)
+    {
+        if (_indlæser) return;
+
+        GemKnap.IsEnabled = true;
+        Vis_Fravalg();
+    }
+
     private System.Windows.Media.Brush? Pensel(string noegle) =>
         TryFindResource(noegle) as System.Windows.Media.Brush
         ?? Application.Current?.TryFindResource(noegle) as System.Windows.Media.Brush;
@@ -546,10 +556,22 @@ public partial class TemplatesView : UserControl
             if (Pensel(fra ? "Slukket" : "Tekst") is { } pensel) t.Foreground = pensel;
         }
 
+        // Deltagerreglerne er ikke et afsnit i teksten, men de er det samme
+        // slags valg - saa de skal se ud og opfoere sig ens.
+        if (HakDeltagere.Content is TextBlock d)
+        {
+            var fraD = HakDeltagere.IsChecked != true;
+
+            d.TextDecorations = fraD ? TextDecorations.Strikethrough : null;
+            if (Pensel(fraD ? "Slukket" : "Tekst") is { } p) d.Foreground = p;
+        }
+
         var ude = Afsnit.Children.OfType<CheckBox>()
             .Where(k => k.IsChecked != true)
             .Select(k => (string)k.Tag!)
             .ToList();
+
+        if (HakDeltagere.IsChecked != true) ude.Insert(0, "Deltagerregler");
 
         if (ude.Count == 0)
         {
@@ -796,6 +818,7 @@ public partial class TemplatesView : UserControl
         _valgt.MaxTokens = _valgtLaengde;
         _valgt.SystemPrompt = FeltSystem.Text.Trim();
         _valgt.UdeladteAfsnit = new List<string>(_udeladte);
+        _valgt.TagDeltagerregler = HakDeltagere.IsChecked == true;
         _valgt.UserPrompt = FeltBruger.Text.Trim();
 
         // SIDSTE SPAERRE. Knappen er graa, naar udskriften mangler, men et

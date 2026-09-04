@@ -541,7 +541,8 @@
     "teksttype_rettet": "edited",
     "vaelg_mappe": "Choose folder …",
     "hvad_skal_dokumentet_indeholde": "What should the document contain?",
-    "tag_hakket_fra_saa_springes_afsnittet_over": "Clear a box to leave that section out. The text below stays, so you can tick it again."
+    "tag_hakket_fra_saa_springes_afsnittet_over": "Clear a box to leave that section out. The text below stays, so you can tick it again.",
+    "deltagerregler_hvem_kommer_paa_listen": "Participant rules — who ends up on the list"
   },
   "engineview": {
     "1_lyd_til_tekst_her_paa_maskinen": "1 · AUDIO TO TEXT — ON THIS MACHINE",
