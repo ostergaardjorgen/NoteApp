@@ -1679,7 +1679,47 @@ public partial class TranscribeView : UserControl
     /// </summary>
     private void Referat_Click(object sender, RoutedEventArgs e)
     {
-        if (Valgt is not { } valgt) return;
+        // ============ ET KLIK MAA ALDRIG GAA STILLE UD ============
+        //
+        // Samme fejl som paa «Opret transskription», og den blev ikke rettet
+        // her, da den blev rettet dér: 04-09-2026 trykkede brugeren «Opret
+        // dokument» og fik INTET - ingen dialog, ingen bjaelke, og ingen
+        // linje i historikken. Loggen viste heller ikke et forsoeg, saa der
+        // var ingen maade at skelne «knappen svarede ikke» fra «forloebet
+        // stoppede paa foerste linje».
+        //
+        // Linjen her staar foer enhver betingelse og er billig. Naeste gang
+        // noget ikke gaar i gang, staar svaret i historikken.
+        try
+        {
+            Historik.Skriv(HaendelseType.Andet, "Der blev trykket paa «Opret dokument»",
+                Valgt is null
+                    ? "Ingen optagelse var valgt."
+                    : $"«{Valgt.Titel}» · {Valgt.Mappe}",
+                Udfald.Fuldført);
+        }
+        catch (Exception)
+        {
+            // En log, der ikke kan skrives, maa ikke stoppe et klik.
+        }
+
+        // HER STOD «if (Valgt is not { } valgt) return;» OG INTET ANDET.
+        if (Valgt is not { } valgt)
+        {
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Vælg en optagelse først",
+                "Der var ikke valgt en optagelse, da der blev trykket. Vælg den i " +
+                "træet til venstre, og tryk så «Opret dokument» igen.",
+                Dialogs.Slags.Valg);
+
+            try
+            {
+                Historik.Skriv(HaendelseType.Andet, "Dokumentet blev ikke sat i gang",
+                    "Der var ikke valgt en optagelse.", Udfald.SeEfter);
+            }
+            catch (Exception) { }
+
+            return;
+        }
 
         var tekstFil = FindTekst(valgt.Mappe);
         if (tekstFil is null)
@@ -1738,7 +1778,25 @@ public partial class TranscribeView : UserControl
                                                     meta?.Language ?? meta?.ValgtSprogLoop ?? meta?.ValgtSprogMik)
         { Owner = Window.GetWindow(this) };
 
-        if (dialog.ShowDialog() != true || dialog.Valgt is null) return;
+        // HVAD SVAREDE DIALOGEN FAKTISK? Se Glid.Vindue: svaret blev slettet
+        // af glidningen, saa et tryk paa «Opret dokument» endte her som et nej
+        // og gik stille ud. Roden er rettet; linjen bliver staaende, saa det
+        // kan ses i historikken naeste gang i stedet for at skulle gaettes.
+        var svar = dialog.ShowDialog();
+
+        if (svar != true || dialog.Valgt is null)
+        {
+            try
+            {
+                Historik.Skriv(HaendelseType.Andet, "Dokumentet blev ikke sat i gang",
+                    $"ShowDialog: {(svar is null ? "null" : svar.ToString())} · " +
+                    $"moedetype: {(dialog.Valgt is null ? "ingen valgt" : $"«{dialog.Valgt.Name}»")}",
+                    Udfald.SeEfter);
+            }
+            catch (Exception) { }
+
+            return;
+        }
 
         var skabelon = dialog.Valgt;
 

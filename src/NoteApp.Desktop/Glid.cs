@@ -250,8 +250,26 @@ public static class Glid
     ///
     /// Lukningen kræver, at der siges nej én gang: Closing er det eneste
     /// sted, man kan nå at gøre noget, og der er vinduet stadig at se på.
-    /// Bevægelsen køres, og bagefter lukkes der for alvor. DialogResult
-    /// bliver stående imens, så et ShowDialog svarer det samme som før.
+    /// Bevægelsen køres, og bagefter lukkes der for alvor.
+    ///
+    /// ============ DER STOD, AT DialogResult BLEV STÅENDE. DET GJORDE DEN IKKE.
+    ///
+    /// WPF nulstiller selv DialogResult, når en lukning bliver annulleret —
+    /// `InternalClose` sætter den til null, netop fordi et vindue, der ikke
+    /// lukkede, ikke har svaret noget. Et `DialogResult = true` inde i en
+    /// OK-knap satte altså flaget, kaldte Close, blev annulleret her af hensyn
+    /// til en optoning på 150 ms — og WPF slettede svaret bagefter. `ShowDialog`
+    /// returnerede false, og kalderen læste det som «brugeren fortrød».
+    ///
+    /// Det ramte HVERT modalt vindue i appen: glidningen sættes på alle vinduer
+    /// fra App.xaml.cs. Sprogvinduet fik 03-09-2026 sit eget `Godkendt`-flag
+    /// som lappeløsning efter en dags fejlsøgning; «Opret dokument» havde den
+    /// samme fejl og gjorde 04-09-2026 bogstaveligt talt ingenting, når man
+    /// trykkede på knappen.
+    ///
+    /// Svaret gemmes derfor FØR annulleringen og sættes igen, når bevægelsen
+    /// er kørt. At sætte DialogResult lukker selv vinduet, så anden runde går
+    /// gennem `Udgaaende` og slipper igennem med svaret i behold.
     /// </remarks>
     public static void Vindue(Window v)
     {
@@ -267,11 +285,24 @@ public static class Glid
             if (Udgaaende.TryGetValue(v, out _)) return; // anden runde: luk endelig
             if (v.Content is not FrameworkElement indhold) return;
 
+            // Læses FØR e.Cancel. Bagefter har WPF slettet det.
+            bool? svar = null;
+            try { svar = v.DialogResult; } catch (InvalidOperationException) { }
+
             e.Cancel = true;
             Udgaaende.Add(v, new object());
 
             var ud = Til(0);
-            ud.Completed += (_, _) => v.Close();
+            ud.Completed += (_, _) =>
+            {
+                if (svar is null) { v.Close(); return; }
+
+                // Sætteren lukker selv vinduet. Kan den ikke bruges — vinduet
+                // blev vist med Show og ikke ShowDialog — lukkes der som før,
+                // så en fejl her aldrig kan efterlade et vindue, der ikke går væk.
+                try { v.DialogResult = svar; }
+                catch (InvalidOperationException) { v.Close(); }
+            };
             indhold.BeginAnimation(UIElement.OpacityProperty, ud);
         };
     }

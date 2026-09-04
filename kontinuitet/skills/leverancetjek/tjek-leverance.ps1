@@ -60,10 +60,19 @@ foreach ($linje in Get-Content $TermListe -Encoding UTF8) {
     $delt = $l -split ':', 2
     $termer += [pscustomobject]@{
         Term      = $delt[0].Trim()
+        Lav       = $delt[0].Trim().ToLowerInvariant()
         Forklaring = if ($delt.Count -gt 1) { $delt[1].Trim() } else { '' }
     }
 }
 if (-not $termer) { throw "Termlisten er tom: $TermListe" }
+
+# Alle termer som ét saet argumenter til git grep: -e term1 -e term2 ...
+# Et kald pr. term gennemgik det samme materiale forfra hver gang. Maalt
+# 04-09-2026 paa HeyPia: 414 sek med seks kald mod 65 sek med ét — samme fund.
+# Prisen er, at git grep ikke siger HVILKEN term der ramte; det findes
+# bagefter i selve traeflinjen.
+$termArgs = @()
+foreach ($t in $termer) { $termArgs += '-e'; $termArgs += $t.Term }
 
 # --- Datafiler der aldrig hører i versionsstyring -------------------------
 $dataMønstre = @(
@@ -91,10 +100,13 @@ Write-Host ""
 # --- Tjek 1: forbudte termer i sporede filer ------------------------------
 Write-Host "1  Forbudte termer i sporede filer ... " -NoNewline
 if ($erGit) {
-    foreach ($t in $termer) {
-        $træf = git grep -n -i -F -- $t.Term 2>$null
-        foreach ($linje in $træf) {
-            Tilføj 'forbudt-term' $linje "$($t.Term) — $($t.Forklaring)"
+    $træf = @(git grep -n -i -F @termArgs 2>$null)
+    foreach ($linje in $træf) {
+        $lav = $linje.ToLowerInvariant()
+        foreach ($t in $termer) {
+            if ($lav.Contains($t.Lav)) {
+                Tilføj 'forbudt-term' $linje "$($t.Term) — $($t.Forklaring)"
+            }
         }
     }
 } else {
@@ -144,14 +156,31 @@ if (-not $erGit) {
 } elseif (-not $Historik) {
     Write-Host "springes over (brug -Historik)" -ForegroundColor DarkGray
 } else {
-    foreach ($t in $termer) {
-        $træf = git grep -i -F -- $t.Term $(git rev-list --all 2>$null) 2>$null | Select-Object -First 5
-        foreach ($linje in $træf) {
-            Tilføj 'historik-term' $linje "$($t.Term) — findes stadig i historikken" 'ADVARSEL'
-            $antal3++
-        }
+    $revs = @(git rev-list --all 2>$null)
+    if ($revs.Count -eq 0) {
+        Write-Host "springes over (ingen commits)" -ForegroundColor DarkGray
     }
-    Write-Host $(if ($antal3 -eq 0) { 'rent' } else { "$antal3 fund" }) -ForegroundColor $(if ($antal3 -eq 0) { 'Green' } else { 'Yellow' })
+    else {
+        # ÉT kald med alle termer. Loftet paa 1000 linjer er en sikkerhedsventil:
+        # i et staerkt forurenet repo standser den gennemgangen i stedet for at
+        # laese titusinder af traef ind, som ingen alligevel naar at se paa.
+        $træf = @(git grep -i -F @termArgs $revs 2>$null | Select-Object -First 1000)
+
+        # Hoejst 5 fund pr. term, som foer — resten er den samme historie igen.
+        $prTerm = @{}
+        foreach ($linje in $træf) {
+            $lav = $linje.ToLowerInvariant()
+            foreach ($t in $termer) {
+                if (-not $lav.Contains($t.Lav)) { continue }
+                if (-not $prTerm.ContainsKey($t.Term)) { $prTerm[$t.Term] = 0 }
+                if ($prTerm[$t.Term] -ge 5) { continue }
+                $prTerm[$t.Term]++
+                Tilføj 'historik-term' $linje "$($t.Term) — findes stadig i historikken" 'ADVARSEL'
+                $antal3++
+            }
+        }
+        Write-Host $(if ($antal3 -eq 0) { 'rent' } else { "$antal3 fund" }) -ForegroundColor $(if ($antal3 -eq 0) { 'Green' } else { 'Yellow' })
+    }
 }
 
 # --- Tjek 4: datafiler i versionsstyring ----------------------------------
