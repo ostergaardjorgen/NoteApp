@@ -116,12 +116,55 @@ public static class BackgroundJobs
         // staar i sidebjaelken. Gentaget ved hver koersel bliver det en
         // paamindelse om noget, brugeren allerede har taget stilling til -
         // og en paamindelse, ingen kan handle paa, er stoej.
-        Meld("Skriver referatet …");
+
+        // ============ URET SKAL GAA, MENS DER VENTES ============
+        //
+        // Sekunderne stod bagt ind i den enkelte melding. Modellen melder én
+        // gang - «Sender til Mistral Medium 3.5 (Frankrig) …» - og saa ikke
+        // mere, foer den er faerdig. Linjen stod derfor paa «· 0 sek» i 53
+        // sekunder og sprang saa til 53.
+        //
+        // Det er vaerre end slet ingen tid: et tal, der staar stille, siger
+        // ikke «det tager lidt», det siger «her sker ingenting». Uret gaar nu
+        // for sig selv hvert sekund, uafhaengigt af hvor tit modellen melder.
+        _sidsteBesked = "Skriver referatet …";
+        _urFaerdig = false;
+        Meld($"{_sidsteBesked} · 0 sek");
+
+        var ur = new System.Timers.Timer(1000) { AutoReset = true };
+        ur.Elapsed += (_, _) =>
+        {
+            // Laasen holder uret ude, EFTER den afsluttende melding er sendt.
+            // Uden den kunne et tik naa at overskrive «Færdigt: …» med en
+            // linje om noget, der ikke koerer laengere - og den ville blive
+            // staaende, for der kommer ikke flere meldinger.
+            lock (_urLaas)
+            {
+                if (_urFaerdig) return;
+                Meld($"{_sidsteBesked} · {(DateTime.Now - startet).TotalSeconds:0} sek");
+            }
+        };
+        ur.Start();
+
+        // Uret standses FOER hver afsluttende melding, saa den faar lov at
+        // blive staaende. Se laasen i tikket ovenfor.
+        void StopUret()
+        {
+            lock (_urLaas) { _urFaerdig = true; }
+            ur.Stop();
+        }
 
         try
         {
             var fremdrift = new Progress<LlmProgress>(p =>
-                Meld($"{p.Message} · {(DateTime.Now - startet).TotalSeconds:0} sek"));
+            {
+                lock (_urLaas)
+                {
+                    if (_urFaerdig) return;
+                    _sidsteBesked = p.Message;
+                    Meld($"{p.Message} · {(DateTime.Now - startet).TotalSeconds:0} sek");
+                }
+            });
 
             // Moedets id og titel foelger med i kvitteringen. Uden dem kan
             // en afsendelse ikke spores tilbage til, hvad den handlede om -
@@ -149,6 +192,7 @@ public static class BackgroundJobs
                 kilde: skabelonInfo.Id);
             Notifikationer.Meld();
 
+            StopUret();
             Meld($"Færdigt: {Path.GetFileName(odt)} · {r.Forloebet.TotalSeconds:0} sek", kører: false);
             DokumentFærdigt?.Invoke(skabelonInfo.Id);
         }
@@ -158,6 +202,7 @@ public static class BackgroundJobs
                 "Brugeren stoppede kørslen", Udfald.Afbrudt, model.Navn);
             Notifikationer.Meld();
 
+            StopUret();
             Meld("Afbrudt. Der blev ikke gemt noget dokument.", kører: false);
         }
         catch (Exception ex)
@@ -166,10 +211,14 @@ public static class BackgroundJobs
                 ex.Message, Udfald.Fejlet, model.Navn);
             Notifikationer.Meld();
 
+            StopUret();
             Meld($"Det gik galt: {ex.Message}", kører: false);
         }
         finally
         {
+            StopUret();
+            ur.Dispose();
+
             _afbryd?.Dispose();
             _afbryd = null;
             HvadKører = null;
@@ -201,6 +250,14 @@ public static class BackgroundJobs
     /// stiller, når man har kigget væk et stykke tid.
     /// </summary>
     private static string _detaljer = "";
+
+    /// <summary>Den seneste melding UDEN sekunder — uret saetter dem paa.</summary>
+    private static string _sidsteBesked = "";
+
+    /// <summary>Sikrer, at et tik ikke kan overskrive den afsluttende melding.</summary>
+    private static readonly object _urLaas = new();
+
+    private static bool _urFaerdig;
 
     private static void Meld(string besked, bool kører = true, double procent = -1) =>
         Ændret?.Invoke(new JobStatus("Dokument", besked, kører, procent, _detaljer));
