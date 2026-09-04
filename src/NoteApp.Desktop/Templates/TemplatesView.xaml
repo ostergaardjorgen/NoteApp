@@ -429,6 +429,15 @@
 
                      Har skabelonen ikke sin egen, staar standarden. Den kan
                      tilpasses med een knap, og den kan altid rulles tilbage. -->
+                <!-- HVAD DAGSORDENEN SKAL DAEKKE.
+                     Afsnittene bestemmer, hvad der skal SKRIVES; dagsordenen
+                     bestemmer, hvad der bliver SAGT. De to skal passe sammen,
+                     og indtil nu kunne man kun se det ene ad gangen. Se
+                     VisAgenda. -->
+                <TextBlock x:Name="Afsnitsliste" FontSize="12" LineHeight="20" Margin="0,10,0,0"
+                           TextWrapping="Wrap" Visibility="Collapsed"
+                           Foreground="{DynamicResource TekstMeget}" />
+
                 <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
                   <Button x:Name="AgendaKopierKnap" Content="{i18n:Oversat templatesview.kopier_dagsordenen}"
                           Click="KopierAgenda_Click" Padding="14,7" Margin="0,0,8,0"

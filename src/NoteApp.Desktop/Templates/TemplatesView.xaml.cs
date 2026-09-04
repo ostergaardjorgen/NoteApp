@@ -216,6 +216,36 @@ public partial class TemplatesView : UserControl
 
         AgendaNulstilKnap.Visibility = egen ? Visibility.Visible : Visibility.Collapsed;
         AgendaTilpasKnap.IsEnabled = navn is not null && SkyNoegle.Hent() is not null;
+
+        // ============ HVAD DAGSORDENEN SKAL DAEKKE ============
+        //
+        // Dagsordenen bestemmer, hvad der bliver SAGT paa moedet; afsnittene
+        // bestemmer, hvad der skal SKRIVES bagefter. De to skal passe sammen,
+        // og indtil nu kunne man kun se det ene ad gangen.
+        //
+        // Er de to i utakt - man har taget et hak fra, siden dagsordenen blev
+        // skrevet - staar det med det samme og med knappen lige ved siden af.
+        if (_valgt is null)
+        {
+            Afsnitsliste.Visibility = Visibility.Collapsed;
+            return;
+        }
+
+        var afsnit = PromptTemplate.AfsnitI(Tekst(FeltSystem))
+            .Where(a => !_udeladte.Contains(a, StringComparer.CurrentCultureIgnoreCase))
+            .ToList();
+
+        var utakt = egen && _systemVedIndlaesning is not null
+                    && _systemVedIndlaesning != _valgt.RenderSystem();
+
+        Afsnitsliste.Visibility = Visibility.Visible;
+        Afsnitsliste.Text = afsnit.Count == 0
+            ? "Mødetypen har ingen afsnit endnu — se «Sådan skal det skrives»."
+            : (utakt ? "Afsnittene er ændret, siden dagsordenen blev skrevet. Den dækker nu: "
+                     : "Dagsordenen skal sørge for, at mødet kommer omkring: ")
+              + string.Join(", ", afsnit) + ".";
+
+        if (Pensel(utakt ? "Advarsel" : "TekstMeget") is { } farve) Afsnitsliste.Foreground = farve;
     }
 
     /// <summary>
@@ -240,12 +270,19 @@ public partial class TemplatesView : UserControl
 
         try
         {
-            Agendaer.Gem(t.Name, await Dagsordensskriver.SkrivAsync(noegle, t.Name, t.SystemPrompt));
+            // ============ DEN FILTREREDE INSTRUKTION, IKKE DEN RAA ============
+            //
+            // RenderSystem() er dét, modellen faktisk faar: uden de afsnit, der
+            // er taget hakket fra, og med eller uden deltagerreglerne. Blev den
+            // RAA tekst sendt, ville dagsordenen bede moedet om at daekke
+            // afsnit, dokumentet ikke laengere har - og saa bruger man tid paa
+            // moedet paa noget, ingen skriver ned.
+            Agendaer.Gem(t.Name, await Dagsordensskriver.SkrivAsync(noegle, t.Name, t.RenderSystem()));
             VisAgenda();
 
             // Instruktionen og dagsordenen passer sammen nu. Saa skal der
             // ikke mindes om noget, foer den bliver aendret igen.
-            _systemVedIndlaesning = t.SystemPrompt;
+            _systemVedIndlaesning = t.RenderSystem();
             Status.Text = $"Dagsordenen er tilpasset «{t.Name}». Læs den igennem, før du bruger den.";
         }
         catch (Exception ex)
@@ -378,7 +415,9 @@ public partial class TemplatesView : UserControl
         VisAgenda();
 
         // Aendrer man instruktionen, passer dagsordenen maaske ikke laengere.
-        _systemVedIndlaesning = t.SystemPrompt;
+        // Den FILTREREDE tekst gemmes, saa et hak, der bliver taget fra, ogsaa
+        // taeller som en aendring - det er jo praecis et afsnit, der forsvinder.
+        _systemVedIndlaesning = t.RenderSystem();
     }
 
     /// <summary>
@@ -759,6 +798,10 @@ public partial class TemplatesView : UserControl
 
         Vis_Fravalg();
         Marker_Afsnit(navn);
+
+        // Dagsordensfanen siger, hvilke afsnit moedet skal komme omkring.
+        // Tages et hak fra, er den listen forkert, indtil den bliver tegnet om.
+        VisAgenda();
     }
 
     // ==================== TEKSTRUDERNE ====================
@@ -1078,7 +1121,7 @@ public partial class TemplatesView : UserControl
             // man et navn eller en temperatur, har dagsordenen intet med det
             // at goere.
             var instruktionAendret = _systemVedIndlaesning is not null
-                                     && _systemVedIndlaesning != _valgt.SystemPrompt;
+                                     && _systemVedIndlaesning != _valgt.RenderSystem();
 
             Status.Text = $"Gemt: {sti}";
             GemKnap.IsEnabled = false;
