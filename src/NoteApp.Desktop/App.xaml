@@ -39,7 +39,7 @@
          ikke et løfte, det er en prøve, der fejler. Se TemaTest. -->
     <SolidColorBrush x:Key="Baggrund"      Color="#FF0B1220" />
     <SolidColorBrush x:Key="Panel"         Color="#FF111C2D" />
-    <SolidColorBrush x:Key="PanelKant"     Color="#FF24354B" />
+    <SolidColorBrush x:Key="PanelKant"     Color="#FF10497F" />
 
     <!-- ============ KANTEN OM NOGET, MAN KAN SKRIVE I ============
 

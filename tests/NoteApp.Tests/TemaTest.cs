@@ -122,6 +122,30 @@ public sealed class TemaTest
 
     [Theory]
     [MemberData(nameof(Paletterne))]
+    public void Kanten_om_et_kort_kan_ses(string navn, IReadOnlyDictionary<string, string> p)
+    {
+        // EN KANT, MAN IKKE KAN SE, ER INGEN KANT.
+        //
+        // PanelKant blev daempet fra #10497F til #24354B i det moerke tema og
+        // fra #A1CBF3 til #D2DCE8 i det lyse - fra 1,70 til under 1,40 mod
+        // panelet - dengang «mindre blaat overalt» blev gennemfoert. Det var
+        // en tredjedel for meget: rammerne om kalenderens og opgavernes kort
+        // forsvandt, og posterne blev til tekst, der laa loest paa en flade.
+        // Meldt paa et skaermbillede 04-09-2026.
+        //
+        // Der er ikke noget WCAG-krav her - en kant om et kort er pynt, ikke
+        // et betjeningselement. Kravet er vores eget, og det er sat under de
+        // 1,70, de to har nu, saa der er plads til at justere uden at rammen
+        // kan naa at forsvinde igen.
+        var v = Tema.Kontrast(p["PanelKant"], p["Panel"]);
+
+        Assert.True(v >= 1.5,
+            $"{navn}/PanelKant er {v:0.00}:1 mod panelet — kravet er 1,5:1. "
+            + "En kant, man ikke kan se, er ingen kant.");
+    }
+
+    [Theory]
+    [MemberData(nameof(Paletterne))]
     public void Hvilekanten_er_daempet_i_forhold_til_fokuskanten(string navn,
         IReadOnlyDictionary<string, string> p)
     {

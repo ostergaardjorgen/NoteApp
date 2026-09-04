@@ -150,7 +150,7 @@
                        meget - og optagelsen startes nu inde i vinduet, hvor
                        man samtidig kan se, hvad der bliver optaget som. -->
                   <Border Background="{DynamicResource Trykket}" BorderBrush="{Binding Kant}"
-                          BorderThickness="3,0,0,0" CornerRadius="6"
+                          BorderThickness="3,1,1,1" CornerRadius="6"
                           Padding="11,8" Margin="0,0,0,5"
                           Opacity="{Binding Daempning}"
                           Tag="{Binding}" MouseLeftButtonUp="RetAftale_Klik"
@@ -690,7 +690,7 @@
                      De haandterer selv deres klik og markerer dem som
                      behandlede, saa de naar aldrig herud. -->
                 <Border Background="{DynamicResource Trykket}" BorderBrush="{Binding Farve}"
-                BorderThickness="3,0,0,0" CornerRadius="6"
+                BorderThickness="3,1,1,1" CornerRadius="6"
                 Padding="13,10" Margin="0,0,0,6"
                 Opacity="{Binding Daempning}"
                 Tag="{Binding}" MouseLeftButtonUp="Opgave_Aabn"

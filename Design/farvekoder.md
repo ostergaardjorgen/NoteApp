@@ -75,7 +75,7 @@ der klikkes.
 |---|---|---|---|
 | Baggrund | `#F6F8FB` | — | arbejdsfladen |
 | Panel | `#FFFFFF` | — | kort og bokse |
-| PanelKant | `#D2DCE8` | 1,3 | kant om et kort |
+| PanelKant | `#9BC0E5` | 1,8 | kant om et kort |
 | InputKant | `#7E8FA3` | 3,1 | kant om et felt i hvile |
 | InputFokusKant | `#2A6FAD` | 5,0 | kant om det felt, der skrives i |
 | Svaev | `#EDF2F8` | — | musen over |
@@ -117,7 +117,7 @@ større og kuløren roligere, så dybden gør arbejdet i stedet for kanterne.
 |---|---|---|---|
 | Baggrund | `#0B1220` | — | arbejdsfladen |
 | Panel | `#111C2D` | — | kort og bokse |
-| PanelKant | `#24354B` | 1,4 | kant om et kort |
+| PanelKant | `#10497F` | 1,9 | kant om et kort |
 | InputKant | `#556D86` | 3,2 | kant om et felt i hvile |
 | InputFokusKant | `#73C2FB` | 8,8 | kant om det felt, der skrives i |
 | Svaev | `#17283B` | — | musen over |

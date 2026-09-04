@@ -101,7 +101,23 @@ public static class Tema
         {
             ["Baggrund"]   = "#FFF6F8FB",
             ["Panel"]      = "#FFFFFFFF",
-            ["PanelKant"]  = "#FFD2DCE8",
+            // ============ KANTEN ER BLAA IGEN, OG DET ER MED VILJE ============
+            //
+            // Den laa paa #A1CBF3 og blev daempet til #D2DCE8 - fra 1,70 til
+            // 1,39 mod panelet - dengang alt det blaa skulle ned. Det var en
+            // tredjedel for meget: rammerne om kalenderens og opgavernes kort
+            // forsvandt, og posterne blev til tekst, der laa loest paa en
+            // flade.
+            //
+            // Den er nu 1,90 - altsaa STAERKERE end den nogensinde har
+            // vaeret - og tydeligt blaa. Det modsiger ikke «mindre blaat
+            // overalt»: en haarfin streg paa een pixel er ikke en flade. Det,
+            // der stoejede, var de blaa FLADER og de blaa feltkanter om
+            // hvert eneste felt, og de er der ikke mere.
+            //
+            // Modstykket i det moerke tema er maerkets #10497F, som stod der
+            // fra begyndelsen. De to har samme styrke: 1,90 og 1,86.
+            ["PanelKant"]  = "#FF9BC0E5",
 
             // ============ KANTEN OM ET SKRIVEFELT ============
             //
@@ -226,7 +242,12 @@ public static class Tema
         {
             ["Baggrund"]   = "#FF0B1220",
             ["Panel"]      = "#FF111C2D",
-            ["PanelKant"]  = "#FF24354B",
+            // DEN OPRINDELIGE. #10497F stod her fra begyndelsen og blev
+            // daempet til #24354B - fra 1,70 til 1,37 mod panelet - og saa
+            // var rammerne om kalenderens og opgavernes kort vaek. Den er
+            // tilbage, og fordi panelet samtidig er blevet moerkere, staar
+            // den nu paa 1,86.
+            ["PanelKant"]  = "#FF10497F",
 
             ["InputKant"]      = "#FF556D86",
             ["InputFokusKant"] = "#FF73C2FB",
