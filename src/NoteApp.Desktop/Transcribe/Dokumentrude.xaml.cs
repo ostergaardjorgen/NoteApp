@@ -31,42 +31,11 @@ public partial class Dokumentrude : UserControl
     /// <summary>Hvor mange dokumenter der er lavet ud af den viste optagelse.</summary>
     public int Antal => _dokumenter.Count;
 
-    /// <summary>
-    /// Viser, at et dokument er ved at blive lavet — eller skjuler linjen igen.
-    /// </summary>
-    /// <param name="moedetype">
-    /// Mødetypen, der laves: «Mødereferat», «Opgaveliste». <c>null</c> skjuler
-    /// linjen.
-    /// </param>
-    /// <param name="besked">Hvad kørslen selv melder. Tom er i orden.</param>
-    /// <remarks>
-    /// EN KØRSEL UDEN SYNLIGT SPOR LIGNER EN APP, DER ER GÅET I STÅ.
-    ///
-    /// Et dokument tager op mod et minut, og i den tid så fanen præcis ud som
-    /// før trykket: samme liste, ingen ny række, intet der bevægede sig. Så
-    /// tror man, at knappen ikke virkede — og trykker igen.
-    ///
-    /// Linjen står ØVERST og før listen, fordi spørgsmålet i det minut ikke er
-    /// «hvad har jeg lavet» men «sker der noget».
-    /// </remarks>
-    public void VisIGang(string? moedetype, string besked = "")
-    {
-        if (moedetype is null)
-        {
-            IGangBjaelke.Visibility = Visibility.Collapsed;
-            return;
-        }
-
-        IGangBjaelke.Visibility = Visibility.Visible;
-        IGangTekst.Text = $"«{moedetype}» er ved at blive oprettet …";
-
-        // MELDINGEN FRA KOERSLEN STAAR UNDER. Den skifter undervejs
-        // («Skriver referatet … · 12 sek»), og det er dét, der viser, at der
-        // sker noget - en bjaelke alene kan ligne en, der har haengt sig.
-        IGangUnder.Text = besked.Length > 0
-            ? besked
-            : "Det tager typisk under et minut. Du kan roligt lave noget andet imens.";
-    }
+    // HER LAA VisIGang - «Brainstorm er ved at blive oprettet …» oeverst i fanen.
+    //
+    // Se Dokumentrude.xaml for hvorfor den er vaek: den var den tredje visning af
+    // den samme koersel, og den blev aldrig faerdig. Jobbjaelken nederst i vinduet
+    // foelger koerslen hele vejen og staar paa alle skaerme.
 
     /// <summary>
     /// Viser dokumenterne for én optagelse.

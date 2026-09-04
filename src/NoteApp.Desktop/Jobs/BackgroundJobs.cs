@@ -46,19 +46,18 @@ public static class BackgroundJobs
     /// <summary>Hvad der kører lige nu, til advarslen ved lukning.</summary>
     public static string? HvadKører { get; private set; }
 
-    /// <summary>
-    /// Mødetypen, der bliver lavet — «Mødereferat», «Opgaveliste».
-    /// </summary>
-    /// <remarks>
-    /// DEN FINDES, FOR AT SKÆRMEN KAN SIGE HVAD DER LAVES. <see cref="HvadKører"/>
-    /// bærer dokumentets TITEL, som brugeren selv skrev; den siger ikke,
-    /// hvilken slags dokument det bliver. Dokumentfanen skal kunne skrive
-    /// «Mødereferat er ved at blive oprettet», og det er mødetypen, der
-    /// svarer på det.
-    ///
-    /// Null, når der ikke kører noget.
-    /// </remarks>
-    public static string? Moedetype { get; private set; }
+    // HER LAA Moedetype - «Moedereferat», «Opgaveliste» - saa dokumentfanen
+    // kunne skrive «Moedereferat er ved at blive oprettet».
+    //
+    // Den var IKKE til at laese rigtigt: den blev ryddet i et finally, altsaa
+    // EFTER den sidste Meld. Alt, der taendte paa den, fik en sidste besked, der
+    // sagde «i gang», og aldrig en efter den. Fanen og en bjaelke inde i ruden
+    // blev derfor haengende, mens de to andre visninger sagde «faerdigt».
+    //
+    // Begge er fjernet 04-09-2026 - de var den tredje og fjerde visning af den
+    // samme koersel - og saa var der ingen tilbage til at laese den her.
+    // Jobbjaelken nederst i vinduet melder gennem Aendret hele vejen, ogsaa
+    // afslutningen, og staar paa alle skaerme.
 
     public static void Afbryd() => _afbryd?.Cancel();
 
@@ -102,7 +101,6 @@ public static class BackgroundJobs
 
         _afbryd = new CancellationTokenSource();
         HvadKører = $"«{skabelonInfo.Title}»";
-        Moedetype = skabelon.Name;
 
         var startet = DateTime.Now;
         _detaljer = $"«{skabelonInfo.Title}» · {model.Navn} i {model.Hjemland} · " +
@@ -175,7 +173,6 @@ public static class BackgroundJobs
             _afbryd?.Dispose();
             _afbryd = null;
             HvadKører = null;
-            Moedetype = null;
         }
     }
 

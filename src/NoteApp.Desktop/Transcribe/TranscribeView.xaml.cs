@@ -1385,23 +1385,6 @@ public partial class TranscribeView : UserControl
     /// først bliver rigtigt, når man kigger, er værre end intet tal: man
     /// bruger det til at lade være med at kigge.
     /// </remarks>
-    /// <summary>
-    /// Den seneste melding fra dokumentkørslen. Tom, når intet kører.
-    /// </summary>
-    /// <remarks>
-    /// DEN LIGGER I ET FELT OG IKKE I EN PARAMETER.
-    ///
-    /// Første udgave gav beskeden med som argument. Så mistede fanen den, hver
-    /// gang den blev bygget op af noget ANDET end kørslen — og det sker
-    /// præcis, når man klikker over på den: <c>Fane_Skiftet</c> kalder
-    /// opdateringen uden en besked, og så stod der den generelle tekst i
-    /// stedet for «Skriver referatet … · 12 sek».
-    ///
-    /// Altså: man gik ind for at se, hvad der skete, og dét var netop
-    /// handlingen, der skjulte det. Fanget af en prøve 04-09-2026.
-    /// </remarks>
-    private string _dokumentbesked = "";
-
     private void OpdaterDokumentfane()
     {
         var valgt = Valgt;
@@ -1410,18 +1393,20 @@ public partial class TranscribeView : UserControl
 
         Dokumentrude.Vis(meta?.Id.ToString(), valgt?.Mappe, valgt?.Titel);
 
-        // KOERER DER ET DOKUMENT, SKAL DET STAA FOERST - baade i ruden og paa
-        // selve fanen. Tallet alene siger, hvad der ER lavet; det er ikke det
-        // spoergsmaal, man har, mens man venter.
-        var moedetype = Jobs.BackgroundJobs.Moedetype;
-
-        Dokumentrude.VisIGang(moedetype, _dokumentbesked);
-
-        FaneDokumenter.Content = moedetype is not null
-            ? "Dokumenter · laver …"
-            : Dokumentrude.Antal == 0
-                ? "Dokumenter"
-                : $"Dokumenter · {Dokumentrude.Antal}";
+        // ============ HER STOD «Dokumenter · laver …» ============
+        //
+        // Fanen og en bjaelke inde i ruden taendte begge paa
+        // BackgroundJobs.Moedetype. Den ryddes i et finally EFTER den sidste
+        // melding, saa den sidste opdatering, de fik, sagde stadig «i gang» -
+        // og der kom ingen efter den. Begge blev haengende, mens statuslinjen
+        // og jobbjaelken sagde «faerdigt».
+        //
+        // De var samtidig den tredje og fjerde visning af den samme koersel.
+        // Fjernet 04-09-2026: fanen taeller, hvad der ER lavet, og jobbjaelken
+        // nederst viser, hvad der koerer - den er synlig paa alle skaerme.
+        FaneDokumenter.Content = Dokumentrude.Antal == 0
+            ? "Dokumenter"
+            : $"Dokumenter · {Dokumentrude.Antal}";
     }
 
     /// <summary>
@@ -1433,13 +1418,11 @@ public partial class TranscribeView : UserControl
     /// Overtog dokumentet ruden, ville bjælken for den optagelse, man står i,
     /// forsvinde midt i kørslen.
     ///
-    /// Dokumentfanen opdateres altid — den hører til dokumentet, uanset hvad
-    /// ruden nedenfor viser.
+    /// Dokumentfanen opdateres altid — et dokument, der lige er blevet færdigt,
+    /// skal tælle med på fanen uden at man går derind.
     /// </remarks>
     private void Dokumentjob(Jobs.JobStatus s) => Dispatcher.Invoke(() =>
     {
-        _dokumentbesked = s.Kører ? s.Besked : "";
-
         OpdaterDokumentfane();
 
         var transskriberer = _koererPaa is not null && Valgt?.Mappe == _koererPaa;

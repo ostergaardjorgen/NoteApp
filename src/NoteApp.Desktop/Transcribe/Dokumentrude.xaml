@@ -34,30 +34,19 @@
                   HorizontalScrollBarVisibility="Disabled">
       <StackPanel HorizontalAlignment="Stretch">
 
-        <!-- ============ DET, DER ER I GANG LIGE NU ============
+        <!-- ============ HER LAA EN TREDJE FREMDRIFTSVISNING ============
 
-             Den staar OEVERST og foer listen. Et dokument tager op mod et
-             minut, og i den tid er spoergsmaalet ikke «hvad har jeg lavet» men
-             «sker der noget».
+             «Brainstorm er ved at blive oprettet …» med sin egen bjaelke, oeverst
+             i fanen. Den samme koersel blev dermed vist tre steder paa een gang:
+             her, i statuslinjen under ruden, og i jobbjaelken nederst i vinduet.
 
-             Uden den saa fanen praecis ud som foer trykket: den samme liste,
-             ingen ny raekke, intet der bevaegede sig. Saa tror man, at knappen
-             ikke virkede - og trykker igen. -->
-        <Border x:Name="IGangBjaelke" Visibility="Collapsed" Margin="0,0,0,16"
-                Background="{DynamicResource Valgt}" BorderBrush="{DynamicResource Accent}"
-                BorderThickness="3,0,0,0" CornerRadius="0,8,8,0" Padding="16,13">
-          <StackPanel>
-            <TextBlock x:Name="IGangTekst" FontSize="13.5" FontWeight="SemiBold"
-                       TextWrapping="Wrap" />
+             Og den blev aldrig faerdig. Den taendte paa BackgroundJobs.Moedetype,
+             som ryddes i et finally EFTER den sidste melding - saa den sidste
+             opdatering, fanen fik, sagde stadig «i gang», og der kom ingen efter
+             den. De to andre viste «faerdigt» imens.
 
-            <TextBlock x:Name="IGangUnder" FontSize="12" LineHeight="19" Margin="0,5,0,0"
-                       TextWrapping="Wrap" Foreground="{DynamicResource TekstMeget}" />
-
-            <ProgressBar x:Name="IGangBjaelken" Height="5" Margin="0,11,0,0" IsIndeterminate="True"
-                         Background="{DynamicResource Svaev}" Foreground="{DynamicResource Accent}"
-                         BorderThickness="0" />
-          </StackPanel>
-        </Border>
+             Fjernet 04-09-2026. Jobbjaelken nederst foelger koerslen hele vejen og
+             er synlig paa alle skaerme; det er dér, den slags hoerer hjemme. -->
 
         <TextBlock x:Name="Overskrift" FontSize="19" FontWeight="SemiBold" TextWrapping="Wrap" />
 
