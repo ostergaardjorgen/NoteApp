@@ -431,8 +431,15 @@
                            Checked="Fane_Skiftet" Style="{StaticResource Fanevalg}"
                            Content="{i18n:Oversat transcribeview.udskrift}" Margin="0,0,8,0" />
 
+              <!-- NAVNET STAAR HER OG IKKE KUN I KODEN.
+                   Tallet saettes af OpdaterDokumentfane, som foerst koerer, naar
+                   der er valgt en optagelse. Uden en tekst her stod knappen
+                   TOM, hver gang man klikkede «Optagelser» i menuen og endnu
+                   ikke havde valgt noget - en lille blank pille ved siden af
+                   «Udskrift». Set 04-09-2026. -->
               <RadioButton x:Name="FaneDokumenter" GroupName="indholdsfane"
-                           Checked="Fane_Skiftet" Style="{StaticResource Fanevalg}" />
+                           Checked="Fane_Skiftet" Style="{StaticResource Fanevalg}"
+                           Content="{i18n:Oversat transcribeview.dokumenter}" />
             </StackPanel>
           </Border>
 

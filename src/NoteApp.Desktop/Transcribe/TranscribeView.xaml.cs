@@ -1458,9 +1458,14 @@ public partial class TranscribeView : UserControl
         // De var samtidig den tredje og fjerde visning af den samme koersel.
         // Fjernet 04-09-2026: fanen taeller, hvad der ER lavet, og jobbjaelken
         // nederst viser, hvad der koerer - den er synlig paa alle skaerme.
+        // NAVNET KOMMER FRA SPROGFILEN og ikke fra en streng her. Det stod
+        // haardkodet paa dansk, saa fanen skiftede til «Dokumenter» midt i en
+        // engelsk brugerflade, saa snart der var valgt en optagelse.
+        var navn = Sprog.T("transcribeview.dokumenter");
+
         FaneDokumenter.Content = Dokumentrude.Antal == 0
-            ? "Dokumenter"
-            : $"Dokumenter · {Dokumentrude.Antal}";
+            ? navn
+            : $"{navn} · {Dokumentrude.Antal}";
     }
 
     /// <summary>
