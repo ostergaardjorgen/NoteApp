@@ -60,10 +60,12 @@
         <StackPanel x:Name="Logolinje" DockPanel.Dock="Top" Orientation="Horizontal" Margin="4,0,0,2">
           <Image Source="app.png" Width="30" Height="30" VerticalAlignment="Center"
                  RenderOptions.BitmapScalingMode="HighQuality" />
-          <!-- Fjorten og ikke ti. Navnet laa klemt op ad ikonet, og de to
-               laeses som ét rod i stedet for et maerke og et navn. -->
-          <StackPanel x:Name="Logotekst" Margin="14,0,0,0" VerticalAlignment="Center">
-            <TextBlock Text="HeyPia" FontSize="19" FontWeight="SemiBold"
+          <StackPanel x:Name="Logotekst" Margin="10,0,0,0" VerticalAlignment="Center">
+            <!-- «Hey Pia» med mellemrum, KUN her i sidebjaelken. Det er
+                 maerket, som det siges - og det er ogsaa vaageordet. Alt
+                 andet - vinduets titel, programfilen, mapperne - hedder
+                 fortsat HeyPia i ét ord. -->
+            <TextBlock Text="Hey Pia" FontSize="19" FontWeight="SemiBold"
                        Foreground="{DynamicResource PaaNavigation}" />
             <TextBlock x:Name="Version" Style="{StaticResource Underskrift}"
                        Foreground="{DynamicResource PaaNavigationSvag}" />

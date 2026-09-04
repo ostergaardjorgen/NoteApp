@@ -48,7 +48,10 @@ public class OversaettelseTest
         // Appens navn og produktnavne, der ikke oversættes.
         string[] navne =
         {
-            "HeyPia", "HeyPia optager", "Google", "Google Kalender", "Google Tasks", "Microsoft",
+            // «Hey Pia» med mellemrum staar i sidebjaelken - maerket, som det
+            // siges, og det samme som vaageordet. Det er stadig appens navn,
+            // ikke en tekst, der skal oversaettes.
+            "HeyPia", "Hey Pia", "HeyPia optager", "Google", "Google Kalender", "Google Tasks", "Microsoft",
             "Microsoft 365", "Mistral", "whisper.cpp", "Qwen3", "sherpa-onnx",
             "NVIDIA", "OpenAI", "Windows", "Segoe MDL2 Assets", "Consolas",
             "Teams", "Zoom", "iCloud", "OneDrive", "Dropbox", "Nextcloud"
