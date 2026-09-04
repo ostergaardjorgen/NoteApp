@@ -51,7 +51,7 @@
         <Button DockPanel.Dock="Left" x:Name="NyKnap" Style="{StaticResource IkonKnap}"
                 Click="Ny_Click" AutomationProperties.Name="{i18n:Oversat faelles.ny_moedetype}"
                 ToolTip="{i18n:Oversat templatesview.ny_moedetype_start_fra_en_tom_og_skriv_din}">
-          <TextBlock Text="&#xE710;" FontFamily="Segoe MDL2 Assets" />
+          <TextBlock Text="&#xE710;" Style="{StaticResource Ikonglyf}" />
         </Button>
 
         <Border DockPanel.Dock="Left" Width="1" Margin="6,4,8,4"
@@ -60,7 +60,7 @@
         <Button DockPanel.Dock="Left" x:Name="MappeKnap" Style="{StaticResource IkonKnap}"
                 Click="Mappe_Click" AutomationProperties.Name="{i18n:Oversat templatesview.aabn_mappen_med_moedetyper}"
                 ToolTip="{i18n:Oversat templatesview.aabn_mappen_med_moedetyper_paa_disken}">
-          <TextBlock Text="&#xE838;" FontFamily="Segoe MDL2 Assets" />
+          <TextBlock Text="&#xE838;" Style="{StaticResource Ikonglyf}" />
         </Button>
 
         <Border DockPanel.Dock="Left" Width="1" Margin="6,4,8,4"
@@ -69,7 +69,7 @@
         <Button DockPanel.Dock="Left" x:Name="SletKnap" Style="{StaticResource IkonKnapFare}"
                 Click="Slet_Click" IsEnabled="False" AutomationProperties.Name="{i18n:Oversat templatesview.slet_moedetype}"
                 ToolTip="{i18n:Oversat templatesview.slet_den_valgte_moedetype_kan_ikke_fortryd}">
-          <TextBlock Text="&#xE74D;" FontFamily="Segoe MDL2 Assets" />
+          <TextBlock Text="&#xE74D;" Style="{StaticResource Ikonglyf}" />
         </Button>
 
         <Grid />

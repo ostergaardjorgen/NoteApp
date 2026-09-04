@@ -90,7 +90,7 @@
         <Button DockPanel.Dock="Left" x:Name="NyMappeKnap" Style="{StaticResource IkonKnap}"
                 Click="NyMappe_Click" AutomationProperties.Name="{i18n:Oversat faelles.ny_mappe}"
                 ToolTip="{i18n:Oversat faelles.ny_mappe_til_fx_en_kunde_eller_et_projekt}">
-          <TextBlock Text="&#xE8F4;" FontFamily="Segoe MDL2 Assets" />
+          <TextBlock Text="&#xE8F4;" Style="{StaticResource Ikonglyf}" />
         </Button>
 
         <!-- INDLÆS EN LYDFIL UDEFRA.
@@ -104,7 +104,7 @@
         <Button DockPanel.Dock="Left" x:Name="IndlaesKnap" Style="{StaticResource IkonKnap}"
                 Click="Indlaes_Click" AutomationProperties.Name="{i18n:Oversat transcribeview.indlaes_lydfil}"
                 ToolTip="{i18n:Oversat transcribeview.indlaes_en_lydfil_udefra_eller_traek_den_i}">
-          <TextBlock Text="&#xE898;" FontFamily="Segoe MDL2 Assets" />
+          <TextBlock Text="&#xE898;" Style="{StaticResource Ikonglyf}" />
         </Button>
 
         <Border DockPanel.Dock="Left" Width="1" Margin="6,4,8,4"
@@ -113,13 +113,13 @@
         <Button DockPanel.Dock="Left" x:Name="FlytKnap" Style="{StaticResource IkonKnap}"
                 Click="Flyt_Click" IsEnabled="False" AutomationProperties.Name="{i18n:Oversat faelles.flyt_til_mappe}"
                 ToolTip="{i18n:Oversat transcribeview.flyt_til_mappe_eller_traek_optagelsen_hen}">
-          <TextBlock Text="&#xE8DE;" FontFamily="Segoe MDL2 Assets" />
+          <TextBlock Text="&#xE8DE;" Style="{StaticResource Ikonglyf}" />
         </Button>
 
         <Button DockPanel.Dock="Left" x:Name="OmdoebKnap" Style="{StaticResource IkonKnap}"
                 Click="Omdoeb_Click" IsEnabled="False" AutomationProperties.Name="{i18n:Oversat faelles.omdoeb}"
                 ToolTip="{i18n:Oversat transcribeview.omdoeb_optagelsen}">
-          <TextBlock Text="&#xE8AC;" FontFamily="Segoe MDL2 Assets" />
+          <TextBlock Text="&#xE8AC;" Style="{StaticResource Ikonglyf}" />
         </Button>
 
         <!-- HER LAA «Arkivér».
@@ -131,7 +131,7 @@
         <Button DockPanel.Dock="Left" x:Name="AabnKnap" Style="{StaticResource IkonKnap}"
                 Click="Aabn_Click" IsEnabled="False" AutomationProperties.Name="{i18n:Oversat faelles.aabn_mappen}"
                 ToolTip="{i18n:Oversat transcribeview.aabn_mappen_paa_disken}">
-          <TextBlock Text="&#xE838;" FontFamily="Segoe MDL2 Assets" />
+          <TextBlock Text="&#xE838;" Style="{StaticResource Ikonglyf}" />
         </Button>
 
         <Border DockPanel.Dock="Left" Width="1" Margin="6,4,8,4"
@@ -146,13 +146,13 @@
                 Click="RydLyd_Click" IsEnabled="False"
                 AutomationProperties.Name="{i18n:Oversat transcribeview.ryd_lyden}"
                 ToolTip="{i18n:Oversat transcribeview.slet_lydfilerne_men_behold_transkriptionen}">
-          <TextBlock Text="&#xEC4E;" FontFamily="Segoe MDL2 Assets" />
+          <TextBlock Text="&#xEC4E;" Style="{StaticResource Ikonglyf}" />
         </Button>
 
         <Button DockPanel.Dock="Left" x:Name="SletKnap" Style="{StaticResource IkonKnapFare}"
                 Click="Slet_Click" IsEnabled="False" AutomationProperties.Name="{i18n:Oversat transcribeview.slet_optagelse}"
                 ToolTip="{i18n:Oversat transcribeview.slet_optagelsen_med_lyd_og_transkription_k}">
-          <TextBlock Text="&#xE74D;" FontFamily="Segoe MDL2 Assets" />
+          <TextBlock Text="&#xE74D;" Style="{StaticResource Ikonglyf}" />
         </Button>
 
         <Grid />

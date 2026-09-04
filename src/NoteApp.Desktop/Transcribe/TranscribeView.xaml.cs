@@ -3230,9 +3230,26 @@ public partial class TranscribeView : UserControl
 
     private void Afbryd_Click(object sender, RoutedEventArgs e) => _afbryd?.Cancel();
 
+    /// <summary>
+    /// Åbner den valgte optagelses mappe i Stifinder.
+    /// </summary>
+    /// <remarks>
+    /// HER STOD «_sidsteMappe ?? Valgt?.Mappe», altsaa den modsatte
+    /// raekkefoelge. _sidsteMappe saettes, naar en transskription bliver
+    /// faerdig, og ryddes kun ved en sletning - saa den overlevede, at man
+    /// valgte noget andet i traeet.
+    ///
+    /// Foelgen: skriv A ud, vaelg B, tryk «Åbn mappen» - og Stifinder aabnede
+    /// A. Knappen sagde eet og gjorde noget andet, og det var den slags, man
+    /// ikke opdager, fordi de to mapper ligner hinanden.
+    ///
+    /// Markeringen vinder nu. _sidsteMappe er tilbage som RESERVE til det, den
+    /// var taenkt som: lige efter en koersel, hvor der maaske ikke er valgt
+    /// noget, kan man stadig gaa til resultatet.
+    /// </remarks>
     private void Aabn_Click(object sender, RoutedEventArgs e)
     {
-        var mappe = _sidsteMappe ?? Valgt?.Mappe;
+        var mappe = Valgt?.Mappe ?? _sidsteMappe;
         if (mappe is null) return;
         Process.Start(new ProcessStartInfo("explorer.exe", $"\"{mappe}\"") { UseShellExecute = true });
     }

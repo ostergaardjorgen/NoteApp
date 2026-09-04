@@ -234,6 +234,31 @@
          Deaktiveret staar den graa og reagerer ikke paa musen. Det er hele
          pointen med at samle dem her: man kan se, hvad der kan lade sig goere
          med det, der er valgt - foer man klikker. -->
+    <!-- ============ GLYFFEN SKAL FOELGE KNAPPENS FARVE ============
+
+         Den implicitte TextBlock-stil oevre i filen saetter Foreground til
+         «Tekst». En stil-setter vinder over nedarvning - saa ikonet blev
+         tegnet naesten hvidt, uanset hvad knappen sagde. Baade den daempede
+         hvilefarve og den graa «slukket» ved IsEnabled=False var altsaa uden
+         virkning, og et ikon, der ikke kunne bruges, saa praecis ud som et,
+         der kunne. Maalt 04-09-2026: alle syv glyffer i optagelsernes
+         vaerktoejslinje stod paa #FFF0F4F8, ogsaa de fem slukkede.
+
+         Det er den SAMME faelde, kommentaren i TranscribeView.xaml beskriver
+         for FontFamily; Foreground blev overset dengang.
+
+         Den kan ikke loeses inde i knappens ControlTemplate: glyffen er
+         knappens INDHOLD, sat i XAML, og dens implicitte stil slaas op ad den
+         logiske traestruktur - ikke i skabelonens ressourcer. Derfor en
+         navngiven stil, der saettes paa hver glyf. Den binder til knappens
+         Foreground, saa svaev, tryk og slukket alle slaar igennem. -->
+    <Style x:Key="Ikonglyf" TargetType="TextBlock">
+      <Setter Property="FontFamily" Value="Segoe MDL2 Assets" />
+      <Setter Property="TextWrapping" Value="NoWrap" />
+      <Setter Property="Foreground"
+              Value="{Binding Foreground, RelativeSource={RelativeSource AncestorType={x:Type Button}}}" />
+    </Style>
+
     <Style x:Key="IkonKnap" TargetType="Button">
       <Setter Property="Width" Value="38" />
       <Setter Property="Height" Value="34" />
