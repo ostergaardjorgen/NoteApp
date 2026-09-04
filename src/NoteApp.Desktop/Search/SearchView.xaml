@@ -42,12 +42,18 @@
            er vaerre end en fast bredde: saa traekker man den samme spalte hver
            dag. Bredderne gemmes i indstillingerne, naar traekket slippes.
 
-           De to yderspalter er lige brede fra begyndelsen. Kalenderen og
-           opgaverne er lige meget vaerd - den ene er hvad, den anden er
-           hvornaar - og en smallere kalender var det, der gjorde datoen
-           ulaeselig. -->
+           KALENDEREN ER SMALLERE END OPGAVERNE. De var lige brede - 340
+           hver - men de har ikke lige meget at vise. En aftale er et
+           klokkeslaet og en titel; en opgave er en titel, en frist, en
+           prioritet og hvor den kommer fra. Kalenderen stod med tom plads
+           til hoejre for hver eneste linje.
+
+           306, altsaa ti procent smallere. Det er stadig langt over de 220,
+           der gjorde datoen ulaeselig, og de fire og tredive pixels gaar til
+           midten, hvor soegningen er. Traekker man selv i den, huskes dét
+           tal i stedet. -->
       <Grid.ColumnDefinitions>
-        <ColumnDefinition x:Name="Venstrespalte" Width="340" MinWidth="220" />
+        <ColumnDefinition x:Name="Venstrespalte" Width="306" MinWidth="220" />
         <ColumnDefinition Width="Auto" />
         <ColumnDefinition x:Name="Midterspalte" Width="*" MinWidth="300" />
         <ColumnDefinition Width="Auto" />

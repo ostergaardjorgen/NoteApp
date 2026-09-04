@@ -398,7 +398,7 @@ public partial class SearchView : UserControl
         var v = AppSettings.Current.CockpitVenstre;
         var h = AppSettings.Current.CockpitHoejre;
 
-        _venstreFuld = v > 0 ? v : 340;
+        _venstreFuld = v > 0 ? v : 306;
         _hoejreFuld = h > 0 ? h : 340;
     }
 
