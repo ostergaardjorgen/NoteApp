@@ -1,4 +1,4 @@
-using NoteApp.Core;
+﻿using NoteApp.Core;
 using Xunit;
 
 namespace NoteApp.Tests;
@@ -157,5 +157,108 @@ public class KalenderTest
         });
 
         Assert.Equal(3, n);
+    }
+
+    // ============ DEN SAMME AFTALE TO GANGE FRA KILDEN ============
+    //
+    // MAALT 04-09-2026: kalender.json havde seks aftaler, hvoraf to var den
+    // SAMME post - samme id, samme titel, samme tidspunkt. Google havde sendt
+    // den to gange i det samme svar.
+    //
+    // Resultatet var, at hver eneste hentning derefter kastede «An item with
+    // the same key has already been added», og at synkroniseringen var laast
+    // permanent. Der var ingen vej ud fra skaermen: fejlen laa i de gemte
+    // data, og det eneste, der roerte dem, var netop den hentning, der ikke
+    // kunne koere.
+    //
+    // Det er den slags fejl, der er vaerst - eet skaevt svar fra en
+    // leverandoer, og funktionen er vaek for altid.
+
+    [Fact]
+    public void Den_samme_aftale_to_gange_fra_kilden_bliver_til_een()
+    {
+        using var p = new Proevemappe();
+
+        var start = DateTimeOffset.Now.AddDays(1);
+
+        var n = Kalender.Afloes(Kalenderkilde.Google, new[]
+        {
+            Hentet("g1", "Projektledelse", start),
+            Hentet("g1", "Projektledelse", start),
+            Hentet("g2", "Noget andet", start.AddHours(2))
+        });
+
+        Assert.Equal(2, n);
+        Assert.Equal(2, Kalender.Alle().Count);
+        Assert.Single(Kalender.Alle().Where(a => a.FremmedId == "g1"));
+    }
+
+    [Fact]
+    public void En_gemt_dublet_vaelter_ikke_naeste_hentning_og_bliver_ryddet_op()
+    {
+        using var p = new Proevemappe();
+
+        var start = DateTimeOffset.Now.AddDays(1);
+
+        // Saadan SAA filen ud efter det skaeve svar. Gem(Aftale) matcher paa
+        // appens EGET id og ikke paa fremmed-id'et, saa to kald med hver sit
+        // objekt lander som to raekker med samme FremmedId - noejagtig den
+        // tilstand, der blev maalt i kalender.json.
+        Kalender.Gem(Hentet("g1", "Projektledelse", start));
+        Kalender.Gem(Hentet("g1", "Projektledelse", start));
+
+        Assert.Equal(2, Kalender.Alle().Count);
+
+        // FOER RETTELSEN KASTEDE DEN HER.
+        var n = Kalender.Afloes(Kalenderkilde.Google, new[]
+        {
+            Hentet("g1", "Projektledelse", start)
+        });
+
+        Assert.Equal(1, n);
+        Assert.Single(Kalender.Alle());
+    }
+
+    [Fact]
+    public void Brugerens_egne_felter_overlever_ogsaa_naar_der_laa_en_dublet()
+    {
+        using var p = new Proevemappe();
+
+        var start = DateTimeOffset.Now.AddDays(1);
+
+        // To gemte raekker med samme id, hvor den FOERSTE baerer hakket.
+        // Opslaget tager den foerste af en gruppe, saa hakket skal med over.
+        var med = Hentet("g1", "Projektledelse", start);
+        med.OptagAutomatisk = true;
+        med.Moedetype = "Statusmøde";
+
+        Kalender.Gem(med);
+        Kalender.Gem(Hentet("g1", "Projektledelse", start));
+
+        Kalender.Afloes(Kalenderkilde.Google, new[] { Hentet("g1", "Projektledelse", start) });
+
+        var nu = Assert.Single(Kalender.Alle());
+
+        Assert.True(nu.OptagAutomatisk);
+        Assert.Equal("Statusmøde", nu.Moedetype);
+    }
+
+    [Fact]
+    public void Aftaler_uden_fremmedid_foldes_ikke_sammen()
+    {
+        using var p = new Proevemappe();
+
+        var start = DateTimeOffset.Now.AddDays(1);
+
+        // Tom id betyder «ingen id», ikke «samme id». To saadanne er to
+        // aftaler, og en sammenfoldning ville faa den ene til at forsvinde.
+        var n = Kalender.Afloes(Kalenderkilde.Google, new[]
+        {
+            Hentet("", "En", start),
+            Hentet("", "To", start.AddHours(1))
+        });
+
+        Assert.Equal(2, n);
+        Assert.Equal(2, Kalender.Alle().Count);
     }
 }

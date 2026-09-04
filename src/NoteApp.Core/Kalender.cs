@@ -286,8 +286,25 @@ public static class Kalender
     {
         var alle = Alle();
 
-        var gamle = alle.Where(a => a.Kilde == kilde)
-                        .ToDictionary(a => a.FremmedId, a => a, StringComparer.Ordinal);
+        // ============ TO OM DET SAMME ID MAA IKKE VAELTE SYNKRONISERINGEN ============
+        //
+        // HER STOD ET RENT ToDictionary, og det kastede «An item with the same
+        // key has already been added» - hver eneste gang, for evigt. Set
+        // 04-09-2026: kalender.json havde SEKS aftaler, hvoraf to var den
+        // samme post med samme id, samme titel og samme tidspunkt. Google
+        // havde sendt den to gange i det samme svar, og loekken nedenfor
+        // gemte dem begge.
+        //
+        // Det er den slags fejl, der er vaerst: eet skaevt svar fra en
+        // leverandoer laaste synkroniseringen permanent, og der var ingen vej
+        // ud fra skaermen. Efter rettelsen rydder den foerste hentning selv op
+        // - listen for kilden bygges forfra.
+        //
+        // Opgavelager.Afloes har haft den sikre form hele tiden. Det her var
+        // den ene, der blev glemt.
+        var gamle = alle.Where(a => a.Kilde == kilde && a.FremmedId.Length > 0)
+                        .GroupBy(a => a.FremmedId, StringComparer.Ordinal)
+                        .ToDictionary(g => g.Key, g => g.First(), StringComparer.Ordinal);
 
         alle.RemoveAll(a => a.Kilde == kilde);
 
@@ -308,8 +325,21 @@ public static class Kalender
 
         var n = 0;
 
+        // OG KILDEN MAA IKKE KUNNE SENDE DEN SAMME AFTALE TO GANGE IND.
+        //
+        // Rettelsen ovenfor gjorde, at hentningen ikke laengere KASTER paa
+        // dubletter. Den her sikrer, at der heller ikke bliver gemt nogen:
+        // ellers ville den samme aftale staa to gange i listen, og
+        // moedevagten ville se den to gange.
+        //
+        // Tom id foldes ikke sammen. En aftale uden fremmed-id er ikke «den
+        // samme» som en anden uden fremmed-id.
+        var set = new HashSet<string>(StringComparer.Ordinal);
+
         foreach (var ny in hentede)
         {
+            if (ny.FremmedId.Length > 0 && !set.Add(ny.FremmedId)) continue;
+
             if (egneOppe.Contains(ny.FremmedId)) continue;
 
             if (gamle.TryGetValue(ny.FremmedId, out var gammel))
