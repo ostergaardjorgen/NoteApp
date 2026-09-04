@@ -32,8 +32,22 @@
     <!-- Sidebjælke. To punkter, fordi appen kan to ting — og fordi det er
          nemmere at tilføje et tredje senere end at fjerne fem, der ikke
          bruges. -->
-    <Border Grid.Column="0" Background="{DynamicResource Panel}"
-            BorderBrush="{DynamicResource PanelKant}" BorderThickness="0,0,1,0">
+    <!-- ============ BJAELKEN ER MOERKEBLAA I BEGGE TEMAER ============
+
+         Den hentede sin flade i «Panel» - altsaa hvid i det lyse tema. Saa
+         var skaermen hvide paneler paa en lysegraa flade med lyseblaa
+         kanter: paent, og til forveksling som enhver anden Windows-app.
+         Der var ingenting, der sagde HeyPia.
+
+         Nu staar navigationen paa maerkets egen moerkeblaa, og resten af
+         fladen er lys og rolig. Det er eet greb, og det er dét, der giver
+         appen et ansigt.
+
+         Alt herinde skal hente sin tekstfarve i PaaNavigation eller
+         PaaNavigationSvag. «Tekst» er naesten sort i det lyse tema og ville
+         forsvinde paa bjaelken. -->
+    <Border Grid.Column="0" Background="{DynamicResource NavigationFlade}"
+            BorderBrush="{DynamicResource NavigationKant}" BorderThickness="0,0,1,0">
      <Grid>
       <!-- To omraader: navigationen oeverst, oplysningen om datamappen
            nederst. Laa den lige under menupunkterne, saa den ud som endnu et
@@ -47,8 +61,10 @@
           <Image Source="app.png" Width="30" Height="30" VerticalAlignment="Center"
                  RenderOptions.BitmapScalingMode="HighQuality" />
           <StackPanel x:Name="Logotekst" Margin="10,0,0,0" VerticalAlignment="Center">
-            <TextBlock Text="HeyPia" FontSize="19" FontWeight="SemiBold" />
-            <TextBlock x:Name="Version" Style="{StaticResource Underskrift}" />
+            <TextBlock Text="HeyPia" FontSize="19" FontWeight="SemiBold"
+                       Foreground="{DynamicResource PaaNavigation}" />
+            <TextBlock x:Name="Version" Style="{StaticResource Underskrift}"
+                       Foreground="{DynamicResource PaaNavigationSvag}" />
           </StackPanel>
         </StackPanel>
         <StackPanel DockPanel.Dock="Top" Margin="0,26,0,0">
@@ -167,7 +183,9 @@
                    den globale TextBlock-stil med den normale tekstfarve. Saa
                    stod AI-modeller graat, mens resten stod hvidt - det lignede
                    en deaktiveret knap. Nu foelger den samme stil som resten. -->
-              <TextBlock Grid.Column="0" Text="{i18n:Oversat nav.modeller}" VerticalAlignment="Center" />
+              <TextBlock Grid.Column="0" Text="{i18n:Oversat nav.modeller}" VerticalAlignment="Center"
+                         Foreground="{Binding Foreground,
+                           RelativeSource={RelativeSource AncestorType={x:Type RadioButton}}}" />
               <Border Grid.Column="1" x:Name="MotorMaerkat" Visibility="Collapsed"
                       MinWidth="18" Height="18" CornerRadius="9" Margin="8,0,0,0"
                       Background="{DynamicResource Advarsel}" VerticalAlignment="Center"
@@ -197,10 +215,11 @@
         </StackPanel>
 
         <StackPanel x:Name="Datafod" DockPanel.Dock="Bottom">
-          <Border Height="1" Background="{DynamicResource PanelKant}" Margin="6,0,6,14" />
-          <TextBlock Text="{i18n:Oversat nav.dinedata}" Style="{StaticResource Underskrift}" Margin="6,0,0,3" />
+          <Border Height="1" Background="{DynamicResource NavigationKant}" Margin="6,0,6,14" />
+          <TextBlock Text="{i18n:Oversat nav.dinedata}" Style="{StaticResource Underskrift}" Margin="6,0,0,3"
+                     Foreground="{DynamicResource PaaNavigationSvag}" />
           <TextBlock x:Name="DataSti" Style="{StaticResource Underskrift}"
-                     Foreground="{DynamicResource TekstMeget}" Margin="6,0,0,10" FontSize="11" />
+                     Foreground="{DynamicResource PaaNavigationSvag}" Margin="6,0,0,10" FontSize="11" />
           <!-- HER STOD EN LINJE OM, AT OPTAGELSER BLIVER PAA PC'EN, OG
                REFERATER BEARBEJDES I EU.
                Den var sand, men overfloedig: det staar under AI-modeller,
@@ -227,17 +246,17 @@
               Background="Transparent" BorderThickness="0" Padding="0">
         <Button.Template>
           <ControlTemplate TargetType="Button">
-            <Border x:Name="flade" CornerRadius="11" Background="{DynamicResource Panel}"
-                    BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
+            <Border x:Name="flade" CornerRadius="11" Background="{DynamicResource NavigationFlade}"
+                    BorderBrush="{DynamicResource NavigationKant}" BorderThickness="1">
               <TextBlock x:Name="pil" FontFamily="Segoe MDL2 Assets" FontSize="10"
                          HorizontalAlignment="Center" VerticalAlignment="Center"
-                         Foreground="{DynamicResource TekstSvag}" />
+                         Foreground="{DynamicResource PaaNavigationSvag}" />
             </Border>
             <ControlTemplate.Triggers>
               <Trigger Property="IsMouseOver" Value="True">
-                <Setter TargetName="flade" Property="Background" Value="{DynamicResource Valgt}" />
-                <Setter TargetName="flade" Property="BorderBrush" Value="{DynamicResource Accent}" />
-                <Setter TargetName="pil" Property="Foreground" Value="{DynamicResource Tekst}" />
+                <Setter TargetName="flade" Property="Background" Value="{DynamicResource NavigationValgt}" />
+                <Setter TargetName="flade" Property="BorderBrush" Value="{DynamicResource NavigationValgt}" />
+                <Setter TargetName="pil" Property="Foreground" Value="{DynamicResource PaaNavigation}" />
               </Trigger>
             </ControlTemplate.Triggers>
           </ControlTemplate>

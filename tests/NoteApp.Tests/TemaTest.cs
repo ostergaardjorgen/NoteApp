@@ -1,4 +1,4 @@
-using NoteApp.Core;
+﻿using NoteApp.Core;
 using Xunit;
 
 namespace NoteApp.Tests;
@@ -104,14 +104,128 @@ public sealed class TemaTest
 
     [Theory]
     [MemberData(nameof(Paletterne))]
-    public void Feltkanten_kan_findes(string navn, IReadOnlyDictionary<string, string> p)
+    public void Feltkanterne_kan_findes(string navn, IReadOnlyDictionary<string, string> p)
     {
         // Kanten om et skrivefelt er det eneste, der siger, at man kan skrive
-        // der. WCAG 1.4.11 kraever 3:1 for netop den slags.
-        var vaerst = Math.Min(Tema.Kontrast(p["FeltKant"], p["Baggrund"]),
-                              Tema.Kontrast(p["FeltKant"], p["Panel"]));
+        // der. WCAG 1.4.11 kraever 3:1 for netop den slags — OGSAA hvilekanten,
+        // som er den daempede af de to. Det var hele grunden til, at der
+        // pludselig var to: én farve paa alle felter hele tiden er ingen
+        // besked, og saa kan man ikke se, hvor markoeren staar.
+        foreach (var n in new[] { "InputKant", "InputFokusKant" })
+        {
+            var vaerst = Math.Min(Tema.Kontrast(p[n], p["Baggrund"]),
+                                  Tema.Kontrast(p[n], p["Panel"]));
 
-        Assert.True(vaerst >= 3.0, $"{navn}/FeltKant er {vaerst:0.00}:1 — kravet er 3:1");
+            Assert.True(vaerst >= 3.0, $"{navn}/{n} er {vaerst:0.00}:1 — kravet er 3:1");
+        }
+    }
+
+    [Theory]
+    [MemberData(nameof(Paletterne))]
+    public void Hvilekanten_er_daempet_i_forhold_til_fokuskanten(string navn,
+        IReadOnlyDictionary<string, string> p)
+    {
+        // Pointen med to kanter er FORSKELLEN. Er de lige tydelige, er der
+        // ingen besked i, at den ene lyser op — og saa er vi tilbage ved den
+        // gamle FeltKant, der stod paa alt hele tiden.
+        Assert.NotEqual(p["InputKant"], p["InputFokusKant"]);
+    }
+
+    [Theory]
+    [MemberData(nameof(Paletterne))]
+    public void Handling_og_succes_er_ikke_den_samme_farve(string navn,
+        IReadOnlyDictionary<string, string> p)
+    {
+        // DEN HER FANDTES IKKE, OG DET KOSTEDE HELE FARVESPROGET.
+        //
+        // I det moerke tema var Accent #02C39A og Godkendt #02C59B. Groen
+        // betoed derfor paa een gang «tryk her», «du staar her», «den
+        // arbejder» og «det gik godt» — og en farve, der betyder fire ting,
+        // betyder ingenting.
+        //
+        // Kravet er ikke stort: de to skal bare kunne SES som to farver.
+        // 1,3:1 i lysstyrke er nok, naar de ogsaa har hver sin kuloer, og
+        // hoejere ville tvinge den ene til at vaere markant moerkere end den
+        // anden uden grund.
+        var v = Tema.Kontrast(p["Accent"], p["Godkendt"]);
+        var kuloer = Kulørafstand(p["Accent"], p["Godkendt"]);
+
+        Assert.True(v >= 1.3 || kuloer >= 0.20,
+            $"{navn}: Accent og Godkendt er for ens — {v:0.00}:1 i lysstyrke, "
+            + $"{kuloer:0.00} i kuloer. Accent er handling, Godkendt er succes.");
+    }
+
+    [Theory]
+    [MemberData(nameof(Paletterne))]
+    public void Teksten_paa_de_farvede_flader_kan_laeses(string navn,
+        IReadOnlyDictionary<string, string> p)
+    {
+        // En knap i accentfarve med tekst ovenpaa. Det var netop dét,
+        // regnestykket afviste, da maerkets groenne skulle have vaeret Accent
+        // i det lyse tema: hvid skrift paa 2,3:1 kan ikke laeses.
+        foreach (var (paa, flade) in new[]
+                 {
+                     ("PaaAccent", "Accent"),
+                     ("PaaOptager", "Optager"),
+                     ("PaaFremhaev", "Fremhaev")
+                 })
+        {
+            var v = Tema.Kontrast(p[paa], p[flade]);
+            Assert.True(v >= 4.5, $"{navn}: {paa} paa {flade} er {v:0.00}:1 — kravet er 4,5:1");
+        }
+    }
+
+    [Theory]
+    [MemberData(nameof(Paletterne))]
+    public void Sidebjaelken_kan_laeses(string navn, IReadOnlyDictionary<string, string> p)
+    {
+        // SIDEBJAELKEN ER MOERKEBLAA I BEGGE TEMAER, ogsaa det lyse. Derfor
+        // kan teksten derinde ikke hente sin farve i «Tekst» — den er naesten
+        // sort paa lyst og ville vaere usynlig paa bjaelken.
+        //
+        // Der maales mod BEGGE flader: bjaelken selv og det valgte punkt.
+        // Det valgte punkt er lysere, og det er dér, en for lys tekst falder
+        // igennem foerst.
+        foreach (var flade in new[] { "NavigationFlade", "NavigationValgt", "NavigationKant" })
+        {
+            var fuld = Tema.Kontrast(p["PaaNavigation"], p[flade]);
+            Assert.True(fuld >= 4.5,
+                $"{navn}: PaaNavigation paa {flade} er {fuld:0.00}:1 — kravet er 4,5:1");
+
+            var svag = Tema.Kontrast(p["PaaNavigationSvag"], p[flade]);
+            Assert.True(svag >= 4.5,
+                $"{navn}: PaaNavigationSvag paa {flade} er {svag:0.00}:1 — kravet er 4,5:1");
+        }
+    }
+
+    [Theory]
+    [MemberData(nameof(Paletterne))]
+    public void Det_valgte_menupunkt_kan_ses(string navn, IReadOnlyDictionary<string, string> p)
+    {
+        // «Hvor er jeg?» er sidebjaelkens eneste opgave. Ligner det valgte
+        // punkt bjaelken, er den opgave ikke loest.
+        Assert.NotEqual(p["NavigationFlade"], p["NavigationValgt"]);
+        Assert.NotEqual(p["NavigationValgt"], p["NavigationKant"]);
+    }
+
+    /// <summary>
+    /// Hvor langt de to farver ligger fra hinanden i kulør — 0 er samme,
+    /// 1 er modsat.
+    /// </summary>
+    /// <remarks>
+    /// Kontrast måler LYSSTYRKE og kun det. Blå og grøn kan ligge på samme
+    /// lysstyrke og stadig være to tydeligt forskellige farver, og et krav om
+    /// kontrast alene ville derfor tvinge den ene til at være mørkere end den
+    /// anden uden grund. Her måles afstanden i selve farven i stedet.
+    /// </remarks>
+    private static double Kulørafstand(string a, string b)
+    {
+        var (ar, ag, ab) = Tema.Kanaler(a);
+        var (br, bg, bb) = Tema.Kanaler(b);
+
+        return Math.Sqrt(((ar - br) * (ar - br)
+                        + (ag - bg) * (ag - bg)
+                        + (ab - bb) * (ab - bb)) / 3.0);
     }
 
     [Theory]

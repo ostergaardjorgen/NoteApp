@@ -37,30 +37,44 @@
          Farverne er efterprøvet mod WCAG 2.1: brødtekst over 7:1, dæmpet
          tekst og betydningsfarver over 4,5:1, feltkanter over 3:1. Det er
          ikke et løfte, det er en prøve, der fejler. Se TemaTest. -->
-    <SolidColorBrush x:Key="Baggrund"      Color="#FF101828" />
-    <SolidColorBrush x:Key="Panel"         Color="#FF112538" />
-    <SolidColorBrush x:Key="PanelKant"     Color="#FF10497F" />
+    <SolidColorBrush x:Key="Baggrund"      Color="#FF0B1220" />
+    <SolidColorBrush x:Key="Panel"         Color="#FF111C2D" />
+    <SolidColorBrush x:Key="PanelKant"     Color="#FF24354B" />
 
-    <!-- Kanten om noget, man kan SKRIVE i. Kraftigere end PanelKant med
-         vilje: en panelkant deler to flader og må gerne være svag, men
-         kanten om et felt er det eneste, der siger, at feltet er der.
-         WCAG 1.4.11 kræver 3:1 for netop den slags. -->
-    <SolidColorBrush x:Key="FeltKant"      Color="#FF008072" />
+    <!-- ============ KANTEN OM NOGET, MAN KAN SKRIVE I ============
+
+         TO NOEGLER, IKKE EEN. Foer hed den «FeltKant» og var EN farve: en
+         maettet blaa, som hvert eneste felt bar hele tiden. Alle felter
+         raabte lige hoejt, ogsaa de tomme, og feltet med markoeren i saa ud
+         som alle de andre.
+
+         InputKant er hvilekanten - graablaa, lige praecis synlig. WCAG
+         1.4.11 kraever 3:1 for noget, man skal kunne finde.
+         InputFokusKant er den klare blaa og staar KUN, hvor der skrives.
+         Se udloeserne paa TextBox og RichTextBox laengere nede. -->
+    <SolidColorBrush x:Key="InputKant"      Color="#FF556D86" />
+    <SolidColorBrush x:Key="InputFokusKant" Color="#FF73C2FB" />
 
     <!-- Musen over, knappen nede, raekken valgt. Se Tema.cs. -->
-    <SolidColorBrush x:Key="Svaev"         Color="#FF112D48" />
-    <SolidColorBrush x:Key="Trykket"       Color="#FF0C2134" />
-    <SolidColorBrush x:Key="Valgt"         Color="#FF095149" />
+    <SolidColorBrush x:Key="Svaev"         Color="#FF17283B" />
+    <SolidColorBrush x:Key="Trykket"       Color="#FF0E1A2B" />
+    <SolidColorBrush x:Key="Valgt"         Color="#FF1B3A5C" />
 
-    <SolidColorBrush x:Key="Tekst"         Color="#FFF0F4F8" />
+    <SolidColorBrush x:Key="Tekst"         Color="#FFEFF5FA" />
     <SolidColorBrush x:Key="TekstSvag"     Color="#FFB3C7DB" />
     <SolidColorBrush x:Key="TekstMeget"    Color="#FF8CABC9" />
 
     <!-- Tekst paa noget, der er slaaet fra. -->
     <SolidColorBrush x:Key="Slukket"       Color="#FF64788A" />
-    <SolidColorBrush x:Key="Accent"        Color="#FF02C39A" />
-    <SolidColorBrush x:Key="Optager"       Color="#FFFF676B" />
-    <SolidColorBrush x:Key="Godkendt"      Color="#FF02C59B" />
+
+    <!-- ACCENT ER HANDLING OG FOKUS - og intet andet.
+         Den var groen, og Godkendt var den SAMME groenne. Farven betoed
+         derfor «tryk her», «du staar her», «den arbejder» og «det gik godt»
+         paa een gang. Nu: blaa = handling, groen = det gik godt, koral =
+         der optages / det gik galt, gul = se lige her. -->
+    <SolidColorBrush x:Key="Accent"        Color="#FF73C2FB" />
+    <SolidColorBrush x:Key="Optager"       Color="#FFFF7770" />
+    <SolidColorBrush x:Key="Godkendt"      Color="#FF30C993" />
     <SolidColorBrush x:Key="Advarsel"      Color="#FFEFAE31" />
 
     <!-- Farven til "noget ER gaaet galt", modsat Advarsel som er "pas paa".
@@ -73,23 +87,38 @@
          paa en knap-stil laengere nede. To resurser med samme x:Key i samme
          ordbog er en fejl ved indlaesning - saa ville hele temaet vaelte i
          stedet for bare eet vindue. -->
-    <SolidColorBrush x:Key="FejlTekst"     Color="#FFFF676B" />
+    <SolidColorBrush x:Key="FejlTekst"     Color="#FFFF7770" />
 
     <!-- Tekst oven paa en farvet knap, og de fire tonede flader. Se Tema.cs. -->
-    <SolidColorBrush x:Key="PaaAccent"     Color="#FF101828" />
-    <SolidColorBrush x:Key="PaaOptager"    Color="#FF101828" />
-    <SolidColorBrush x:Key="AccentFlade"   Color="#FF08443D" />
-    <SolidColorBrush x:Key="GodkendtFlade" Color="#FF09473A" />
+    <SolidColorBrush x:Key="PaaAccent"     Color="#FF0B1220" />
+    <SolidColorBrush x:Key="PaaOptager"    Color="#FF0B1220" />
+    <SolidColorBrush x:Key="AccentFlade"   Color="#FF0F2E4A" />
+    <SolidColorBrush x:Key="GodkendtFlade" Color="#FF0B3C31" />
     <SolidColorBrush x:Key="AdvarselFlade" Color="#FF523B0F" />
-    <SolidColorBrush x:Key="FejlFlade"     Color="#FF5F0B0D" />
+    <SolidColorBrush x:Key="FejlFlade"     Color="#FF5A1512" />
 
     <!-- Fladen bag «der optages nu». Se DiktatBjaelke. -->
     <SolidColorBrush x:Key="OptagerFlade"  Color="#FF4A1416" />
 
+    <!-- ============ SIDEBJAELKEN HAR SIN EGEN FLADE ============
+
+         Den er moerkeblaa i BEGGE temaer. I det lyse er det appens ansigt -
+         uden den var skaermen hvide paneler paa lysegraat, altsaa til
+         forveksling som enhver anden Windows-app.
+
+         Derfor kan teksten derinde ikke hente sin farve i «Tekst»: den er
+         moerk paa lyst og ville vaere usynlig paa en natblaa bjaelke. To
+         egne tekstnoegler i stedet. -->
+    <SolidColorBrush x:Key="NavigationFlade"   Color="#FF0D1524" />
+    <SolidColorBrush x:Key="NavigationValgt"   Color="#FF1B3C5C" />
+    <SolidColorBrush x:Key="NavigationKant"    Color="#FF1B2A3E" />
+    <SolidColorBrush x:Key="PaaNavigation"     Color="#FFEFF5FA" />
+    <SolidColorBrush x:Key="PaaNavigationSvag" Color="#FFA9C0D6" />
+
     <!-- Dokumenter, og det, en soegning har fundet. Se Tema.cs. -->
     <SolidColorBrush x:Key="Dokument"      Color="#FFCB90F0" />
     <SolidColorBrush x:Key="Fremhaev"      Color="#FFF4CB23" />
-    <SolidColorBrush x:Key="PaaFremhaev"   Color="#FF101828" />
+    <SolidColorBrush x:Key="PaaFremhaev"   Color="#FF0B1220" />
 
     <!-- ================== MENUER ==================
          Appen havde ingen menu foer Kopier-knappen, og saa arvede den
@@ -401,9 +430,22 @@
 
     <!-- Sidebjælkens navigation. RadioButton frem for Button, fordi valget
          er gensidigt udelukkende og skal SES — man skal kunne aflæse, hvor
-         man er, uden at gætte. -->
+         man er, uden at gætte.
+
+         ============ DEN HENTER IKKE SINE FARVER I «Tekst» ============
+
+         Sidebjælken er mørkeblå i BEGGE temaer. I det lyse er «Tekst» næsten
+         sort, og et menupunkt i den farve ville være usynligt på bjælken.
+         Derfor PaaNavigation og PaaNavigationSvag, som hører til fladen og
+         ikke til appen udenom.
+
+         Det er den samme fælde som Ikonglyf længere oppe: ikonet står i
+         Tag og tegnes af skabelonen, så den arver Foreground herfra — men
+         Content er almindelig tekst, og dér ville den implicitte
+         TextBlock-stil have vundet, hvis den satte Foreground. Den gør den,
+         så Content-teksten sættes af ContentPresenter'ens TextElement. -->
     <Style x:Key="NavKnap" TargetType="RadioButton">
-      <Setter Property="Foreground" Value="{DynamicResource TekstSvag}" />
+      <Setter Property="Foreground" Value="{DynamicResource PaaNavigationSvag}" />
       <Setter Property="FontFamily" Value="Segoe UI" />
       <Setter Property="FontSize" Value="14" />
       <Setter Property="Cursor" Value="Hand" />
@@ -433,16 +475,19 @@
                            VerticalAlignment="Center" TextAlignment="Center" />
 
                 <ContentPresenter x:Name="tekst" Grid.Column="1" VerticalAlignment="Center"
-                                  Margin="12,0,0,0" />
+                                  Margin="12,0,0,0"
+                                  TextElement.Foreground="{Binding Foreground,
+                                    RelativeSource={RelativeSource AncestorType={x:Type RadioButton}}}" />
               </Grid>
             </Border>
             <ControlTemplate.Triggers>
               <Trigger Property="IsMouseOver" Value="True">
-                <Setter TargetName="kant" Property="Background" Value="{DynamicResource Svaev}" />
+                <Setter TargetName="kant" Property="Background" Value="{DynamicResource NavigationKant}" />
+                <Setter Property="Foreground" Value="{DynamicResource PaaNavigation}" />
               </Trigger>
               <Trigger Property="IsChecked" Value="True">
-                <Setter TargetName="kant" Property="Background" Value="{DynamicResource Valgt}" />
-                <Setter Property="Foreground" Value="{DynamicResource Tekst}" />
+                <Setter TargetName="kant" Property="Background" Value="{DynamicResource NavigationValgt}" />
+                <Setter Property="Foreground" Value="{DynamicResource PaaNavigation}" />
                 <Setter Property="FontWeight" Value="SemiBold" />
               </Trigger>
 
@@ -521,15 +566,33 @@
       </Setter>
     </Style>
 
+    <!-- ============ ET FELT I HVILE SKAL VAERE STILLE ============
+
+         Kanten var «FeltKant» - en maettet blaa - og den stod paa ALLE
+         felter HELE tiden. Paa en skaerm med ti felter var der altsaa ti
+         blaa rammer, ogsaa naar man ikke skrev i nogen af dem, og feltet med
+         markoeren i saa ud praecis som de ni andre.
+
+         Nu: graablaa i hvile (3:1, saa den stadig kan FINDES), og den klare
+         blaa kun paa det felt, der skrives i. To trin i stedet for eet.
+
+         IsKeyboardFocusWithin og ikke IsFocused. TextBox faar selv fokus, men
+         RichTextBox laegger det paa sin indre rude - og saa ville kanten
+         aldrig skifte dér. -->
     <Style TargetType="TextBox">
       <Setter Property="Background" Value="{DynamicResource Trykket}" />
       <Setter Property="Foreground" Value="{DynamicResource Tekst}" />
-      <Setter Property="BorderBrush" Value="{DynamicResource FeltKant}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource InputKant}" />
       <Setter Property="BorderThickness" Value="1" />
       <Setter Property="Padding" Value="8,6" />
       <Setter Property="FontFamily" Value="Segoe UI" />
       <Setter Property="FontSize" Value="13" />
       <Setter Property="CaretBrush" Value="{DynamicResource Tekst}" />
+      <Style.Triggers>
+        <Trigger Property="IsKeyboardFocusWithin" Value="True">
+          <Setter Property="BorderBrush" Value="{DynamicResource InputFokusKant}" />
+        </Trigger>
+      </Style.Triggers>
     </Style>
 
     <!-- ============ RichTextBox SKAL LIGNE EN TextBox ============
@@ -545,13 +608,18 @@
     <Style TargetType="RichTextBox">
       <Setter Property="Background" Value="{DynamicResource Trykket}" />
       <Setter Property="Foreground" Value="{DynamicResource Tekst}" />
-      <Setter Property="BorderBrush" Value="{DynamicResource FeltKant}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource InputKant}" />
       <Setter Property="BorderThickness" Value="1" />
       <Setter Property="Padding" Value="8,6" />
       <Setter Property="FontFamily" Value="Segoe UI" />
       <Setter Property="FontSize" Value="13" />
       <Setter Property="FontWeight" Value="Normal" />
       <Setter Property="CaretBrush" Value="{DynamicResource Tekst}" />
+      <Style.Triggers>
+        <Trigger Property="IsKeyboardFocusWithin" Value="True">
+          <Setter Property="BorderBrush" Value="{DynamicResource InputFokusKant}" />
+        </Trigger>
+      </Style.Triggers>
     </Style>
 
     <!-- DATOVAELGEREN ARVER HELLER IKKE TEMAET.
@@ -952,7 +1020,7 @@
       <Setter Property="CalendarStyle" Value="{StaticResource Kalenderstil}" />
       <Setter Property="Background" Value="{DynamicResource Trykket}" />
       <Setter Property="Foreground" Value="{DynamicResource Tekst}" />
-      <Setter Property="BorderBrush" Value="{DynamicResource FeltKant}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource InputKant}" />
       <Setter Property="BorderThickness" Value="1" />
       <Setter Property="FontFamily" Value="Segoe UI" />
       <Setter Property="FontSize" Value="13" />
@@ -1020,6 +1088,12 @@
                 <Setter TargetName="kant" Property="BorderBrush" Value="{DynamicResource Accent}" />
               </Trigger>
 
+              <!-- SKRIVES DER I DET, ER KANTEN BLAA. Samme regel som paa
+                   TextBox: graablaa i hvile, klar blaa hvor markoeren er. -->
+              <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                <Setter TargetName="kant" Property="BorderBrush" Value="{DynamicResource InputFokusKant}" />
+              </Trigger>
+
               <!-- LAAST BETYDER DAEMPET, IKKE HVID. Et felt, man ikke kan
                    rette, skal se ud som noget, der er laast - ikke som noget,
                    der er gaaet i stykker. -->
@@ -1045,7 +1119,7 @@
       <Setter Property="Padding" Value="8,5" />
       <Setter Property="Background" Value="{DynamicResource Trykket}" />
       <Setter Property="Foreground" Value="{DynamicResource Tekst}" />
-      <Setter Property="BorderBrush" Value="{DynamicResource FeltKant}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource InputKant}" />
       <Setter Property="Height" Value="30" />
       <Setter Property="Template">
         <Setter.Value>
@@ -1070,7 +1144,7 @@
                   <ControlTemplate TargetType="ToggleButton">
                     <Border x:Name="kant" CornerRadius="4"
                             Background="{DynamicResource Trykket}"
-                            BorderBrush="{DynamicResource FeltKant}" BorderThickness="1">
+                            BorderBrush="{DynamicResource InputKant}" BorderThickness="1">
                       <Path x:Name="pil" HorizontalAlignment="Right" VerticalAlignment="Center"
                             Margin="0,0,10,0" Data="M 0 0 L 4 4 L 8 0 Z"
                             Fill="{DynamicResource TekstSvag}" />
@@ -1078,6 +1152,11 @@
                     <ControlTemplate.Triggers>
                       <Trigger Property="IsMouseOver" Value="True">
                         <Setter TargetName="kant" Property="BorderBrush" Value="{DynamicResource Accent}" />
+                      </Trigger>
+                      <!-- Listen er foldet ud: dét er rullelistens «her
+                           skriver jeg». Samme blaa som feltkanten faar. -->
+                      <Trigger Property="IsChecked" Value="True">
+                        <Setter TargetName="kant" Property="BorderBrush" Value="{DynamicResource InputFokusKant}" />
                       </Trigger>
                     </ControlTemplate.Triggers>
                   </ControlTemplate>

@@ -231,7 +231,7 @@
               <DockPanel Margin="0,4,0,0">
                 <Button x:Name="MappeKnap2" DockPanel.Dock="Right" Content="{i18n:Oversat templatesview.vaelg_mappe}"
                         Click="VaelgMappe_Klik" Padding="14,7" Margin="8,0,0,0" />
-                <Border BorderBrush="{DynamicResource FeltKant}" BorderThickness="1" CornerRadius="6"
+                <Border BorderBrush="{DynamicResource InputKant}" BorderThickness="1" CornerRadius="6"
                         Background="{DynamicResource Trykket}" Padding="10,8">
                   <TextBlock x:Name="MappeTekst" VerticalAlignment="Center" TextWrapping="NoWrap"
                              TextTrimming="CharacterEllipsis" />

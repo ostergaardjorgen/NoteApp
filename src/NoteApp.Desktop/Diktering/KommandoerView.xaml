@@ -130,7 +130,7 @@
 
           <ListBox x:Name="Liste" MaxHeight="240" Margin="0,0,0,12"
                    Background="{DynamicResource Baggrund}"
-                   BorderBrush="{DynamicResource FeltKant}" BorderThickness="1">
+                   BorderBrush="{DynamicResource InputKant}" BorderThickness="1">
             <ListBox.ItemTemplate>
               <DataTemplate>
                 <Grid Margin="4,6">

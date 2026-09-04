@@ -54,31 +54,43 @@ public static class Tema
     /// </summary>
     public static readonly IReadOnlyList<string> Nøglerne = new[]
     {
-        "Baggrund", "Panel", "PanelKant", "FeltKant",
+        "Baggrund", "Panel", "PanelKant",
+        "InputKant", "InputFokusKant",
         "Svaev", "Trykket", "Valgt",
         "Tekst", "TekstSvag", "TekstMeget", "Slukket",
         "Accent", "Optager", "Godkendt", "Advarsel", "FejlTekst",
         "PaaAccent", "PaaOptager",
         "AccentFlade", "GodkendtFlade", "AdvarselFlade", "FejlFlade",
         "OptagerFlade",
+        "NavigationFlade", "NavigationValgt", "NavigationKant",
+        "PaaNavigation", "PaaNavigationSvag",
         "Dokument", "Fremhaev", "PaaFremhaev"
     };
 
     /// <summary>
-    /// Det lyse tema — PIA's egne farver.
+    /// Det lyse tema — «rolig, nordisk arbejdsflade».
     /// </summary>
     /// <remarks>
-    /// MÆRKETS EGNE: Baggrund er isblå #F0F4F8, Panel er ren hvid, Tekst er
-    /// natblå #101828 (17,8:1 på hvidt), og Accent er den dybe mørkeblå
-    /// #0D3B66 (11,5:1).
+    /// SÅDAN LÅ DEN FØR, OG SÅDAN LIGGER DEN NU. Baggrunden var isblå
+    /// #F0F4F8, panelkanten lyseblå #A1CBF3 og feltkanten en mættet blå
+    /// #2C8BE4. Alt var altså blåt: fladen, kanterne, felterne og knapperne.
+    /// Når ALT er brandfarve, siger brandfarven ingenting — og en blå kant om
+    /// hvert eneste felt støjer, uanset hvor pæn den er.
     ///
-    /// DEN FRISKE GRØNNE ER IKKE ACCENT HER. #02C39A ligger på 2,3:1 mod
-    /// hvidt — den kan hverken bære tekst eller en tynd streg. En knap i den
-    /// farve med hvid skrift ville være ulæselig. Den bruges derfor som
-    /// FLADE, hvor skriften er mørk, og som udgangspunkt for Godkendt, der er
-    /// mørknet til 5:1.
+    /// NU HAR BLÅ ÉN ROLLE: navigation og handling. Arbejdsfladen er en
+    /// næsten neutral #F6F8FB, panelerne er hvide, og kanterne er gråblå.
+    /// Farven bruges dér, hvor der skal klikkes.
     ///
-    /// Resten er AFLEDT: samme kulør som mærkets mørkeblå, anden lysstyrke.
+    /// SIDEBJÆLKEN ER MØRKEBLÅ, OGSÅ I DET LYSE TEMA. Det er dét ene greb,
+    /// der giver appen et ansigt: uden det var den hvide paneler på en lysegrå
+    /// flade — pænt, og til forveksling som enhver anden Windows-app. Derfor
+    /// har navigationen sine EGNE nøgler; teksten derinde er lys, mens resten
+    /// af appen er mørk på lyst, og de to må ikke blandes sammen.
+    ///
+    /// GRØN BETYDER KUN «DET GIK GODT». Den friske #02C39A ligger på 2,3:1
+    /// mod hvidt og kan hverken bære tekst eller en streg; den bruges derfor
+    /// som flade, og Godkendt er mørknet til #08765D.
+    ///
     /// Hver nøgle sigter mod sit eget tal, så der er et hierarki — første
     /// forsøg søgte bare «mindst 4,5», og så blev PanelKant, TekstSvag,
     /// TekstMeget og Slukket alle den SAMME farve. Prøven sagde ja, og der
@@ -87,18 +99,31 @@ public static class Tema
     public static readonly IReadOnlyDictionary<string, string> Lys =
         new Dictionary<string, string>
         {
-            ["Baggrund"]   = "#FFF0F4F8",
+            ["Baggrund"]   = "#FFF6F8FB",
             ["Panel"]      = "#FFFFFFFF",
-            ["PanelKant"]  = "#FFA1CBF3",
-            ["FeltKant"]   = "#FF2C8BE4",
+            ["PanelKant"]  = "#FFD2DCE8",
+
+            // ============ KANTEN OM ET SKRIVEFELT ============
+            //
+            // TO NOEGLER, IKKE EEN. Foer laa der «FeltKant» alene, og den var
+            // en maettet blaa, som ALLE felter havde HELE tiden. Et felt, man
+            // ikke har roert, raabte lige saa hoejt som det, markoeren staar
+            // i - og saa er der ingen forskel paa at vaere et sted og at vaere
+            // et andet sted.
+            //
+            // Hvilekanten er graablaa og lige praecis synlig: WCAG 1.4.11
+            // kraever 3:1 for noget, man skal kunne finde. Fokuskanten er den
+            // klare blaa, og den staar KUN paa det felt, der skrives i.
+            ["InputKant"]      = "#FF7E8FA3",
+            ["InputFokusKant"] = "#FF2A6FAD",
 
             // Musen over, knappen nede, raekken valgt. De laa hardkodet i
             // App.xaml som moerkeblaa toner - femten steder, der ikke fulgte
             // med et temaskift, og som ville have staaet som moerke pletter i
             // en lys app.
-            ["Svaev"]      = "#FFEFF5FB",
-            ["Trykket"]    = "#FFE2EEF8",
-            ["Valgt"]      = "#FFC9DEF2",
+            ["Svaev"]      = "#FFEDF2F8",
+            ["Trykket"]    = "#FFE3EAF3",
+            ["Valgt"]      = "#FFDCE9F6",
 
             ["Tekst"]      = "#FF101828",
             ["TekstSvag"]  = "#FF3E5061",
@@ -110,11 +135,15 @@ public static class Tema
             // paa - saa den holdes paa 3:1.
             ["Slukket"]    = "#FF728699",
 
+            // ACCENT ER HANDLING OG FOKUS. Ikke succes, ikke fremdrift, ikke
+            // «forbundet» - dem har Godkendt. Se noten paa den moerke palet:
+            // dér var de to naesten samme groenne, og saa betoed farven fire
+            // ting paa een gang.
             ["Accent"]     = "#FF0D3B66",
-            ["Optager"]    = "#FFC72C22",
-            ["Godkendt"]   = "#FF01775E",
+            ["Optager"]    = "#FFB83B34",
+            ["Godkendt"]   = "#FF08765D",
             ["Advarsel"]   = "#FF876208",
-            ["FejlTekst"]  = "#FFC72C22",
+            ["FejlTekst"]  = "#FFB83B34",
 
             // Tekst OVEN PAA en farvet knap. I det lyse tema er accenten
             // moerk nok til hvid skrift; i det moerke er den lys, og saa er
@@ -124,13 +153,28 @@ public static class Tema
 
             // Flader, der er tonet i betydningens farve: den groenne kasse om
             // noget, der er i orden, den roede om noget, der ikke er.
-            ["AccentFlade"]   = "#FFD5E6F5",
-            ["GodkendtFlade"] = "#FFD0F9F0",
+            ["AccentFlade"]   = "#FFDEE9F5",
+            ["GodkendtFlade"] = "#FFD6F0E7",
             ["AdvarselFlade"] = "#FFF7ECD1",
             ["FejlFlade"]     = "#FFF8E6E5",
 
             // Fladen bag «der optages nu». Se Optager.
             ["OptagerFlade"]  = "#FFFBE4E5",
+
+            // ============ SIDEBJAELKEN ============
+            //
+            // Den er MOERKEBLAA i begge temaer. I det lyse er den appens
+            // ansigt; i det moerke er den et noek moerkere end baggrunden, saa
+            // arbejdsfladen loefter sig fra den.
+            //
+            // Teksten derinde kan IKKE hente sin farve i «Tekst». Den er
+            // moerk paa lyst, og paa en natblaa bjaelke ville den vaere
+            // usynlig. Derfor to egne tekstnoegler.
+            ["NavigationFlade"]   = "#FF0D3B66",
+            ["NavigationValgt"]   = "#FF215C8C",
+            ["NavigationKant"]    = "#FF1B4E7E",
+            ["PaaNavigation"]     = "#FFF2F7FC",
+            ["PaaNavigationSvag"] = "#FFC2D6E9",
 
             // Et dokument er ikke en udskrift og ikke en note. Den lilla er
             // det eneste sted i appen, farven BETYDER noget andet end
@@ -145,35 +189,41 @@ public static class Tema
         };
 
     /// <summary>
-    /// Det mørke tema — PIA's egne farver.
+    /// Det mørke tema.
     /// </summary>
     /// <remarks>
-    /// MÆRKETS EGNE: Baggrund er natblå #101828 — mærkets egen mørke farve, så
-    /// det mørke tema står på brandets grund og ikke på en tilfældig grå.
-    /// Tekst er isblå #F0F4F8 (16,1:1), og Accent er den friske grønne
-    /// #02C39A (7,8:1). Her kan den godt bære sin rolle.
+    /// HER LÅ FEJLEN, DER VAR SVÆREST AT SE. Accent var #02C39A og Godkendt
+    /// #02C59B — to farver, der er umulige at skelne. Grøn betød derfor på én
+    /// gang «tryk her», «du står her», «den arbejder» og «det gik godt», og
+    /// en flade, hvor alt betyder noget, betyder ingenting. Accenten er nu
+    /// den lyse blå #73C2FB, og grøn er kun succes.
     ///
-    /// DEN DYBE MØRKEBLÅ KAN IKKE BRUGES HER. #0D3B66 ligger på 1,55:1 mod
-    /// natblå — de to har næsten samme lysstyrke. Den bruges derfor kun som
-    /// KULØR til de afledte farver, aldrig som en farve, noget skal ses på.
+    /// BAGGRUNDEN ER SÆNKET fra #101828 til #0B1220, og panelet fra #112538
+    /// til #111C2D. Ikke for at gøre den mørkere for mørkets skyld: de tre
+    /// flader — baggrund, panel og det hævede panel — lå tæt og var alle
+    /// stærkt blåmættede, og lange indstillingsskærme blev derfor ét fladt
+    /// stykke. Nu er trinene større og kuløren roligere, så DYBDEN gør
+    /// arbejdet i stedet for kanterne.
     ///
-    /// Panelet er natblå løftet et nøk. Første forsøg løftede det til
-    /// #205688, og det er ikke et panel, det er en knap — alt, der blev målt
-    /// mod den flade, blev vasket ud, og Advarsel endte på ren hvid.
+    /// DEN DYBE MØRKEBLÅ KAN IKKE BRUGES SOM ACCENT HER. #0D3B66 ligger på
+    /// 1,4:1 mod baggrunden — de to har næsten samme lysstyrke. Den er
+    /// derfor sidebjælkens kulør og intet andet.
     /// </remarks>
     public static readonly IReadOnlyDictionary<string, string> Moerk =
         new Dictionary<string, string>
         {
-            ["Baggrund"]   = "#FF101828",
-            ["Panel"]      = "#FF112538",
-            ["PanelKant"]  = "#FF10497F",
-            ["FeltKant"]   = "#FF008072",
+            ["Baggrund"]   = "#FF0B1220",
+            ["Panel"]      = "#FF111C2D",
+            ["PanelKant"]  = "#FF24354B",
 
-            ["Svaev"]      = "#FF112D48",
-            ["Trykket"]    = "#FF0C2134",
-            ["Valgt"]      = "#FF095149",
+            ["InputKant"]      = "#FF556D86",
+            ["InputFokusKant"] = "#FF73C2FB",
 
-            ["Tekst"]      = "#FFF0F4F8",
+            ["Svaev"]      = "#FF17283B",
+            ["Trykket"]    = "#FF0E1A2B",
+            ["Valgt"]      = "#FF1B3A5C",
+
+            ["Tekst"]      = "#FFEFF5FA",
             ["TekstSvag"]  = "#FFB3C7DB",
             ["TekstMeget"] = "#FF8CABC9",
 
@@ -181,24 +231,30 @@ public static class Tema
             // ikke laeses. Haevet til 3:1 samtidig med, at den blev en noegle.
             ["Slukket"]    = "#FF64788A",
 
-            ["Accent"]     = "#FF02C39A",
-            ["Optager"]    = "#FFFF676B",
-            ["Godkendt"]   = "#FF02C59B",
+            ["Accent"]     = "#FF73C2FB",
+            ["Optager"]    = "#FFFF7770",
+            ["Godkendt"]   = "#FF30C993",
             ["Advarsel"]   = "#FFEFAE31",
-            ["FejlTekst"]  = "#FFFF676B",
+            ["FejlTekst"]  = "#FFFF7770",
 
-            ["PaaAccent"]  = "#FF101828",
-            ["PaaOptager"] = "#FF101828",
+            ["PaaAccent"]  = "#FF0B1220",
+            ["PaaOptager"] = "#FF0B1220",
 
-            ["AccentFlade"]   = "#FF08443D",
-            ["GodkendtFlade"] = "#FF09473A",
+            ["AccentFlade"]   = "#FF0F2E4A",
+            ["GodkendtFlade"] = "#FF0B3C31",
             ["AdvarselFlade"] = "#FF523B0F",
-            ["FejlFlade"]     = "#FF5F0B0D",
+            ["FejlFlade"]     = "#FF5A1512",
             ["OptagerFlade"]  = "#FF4A1416",
+
+            ["NavigationFlade"]   = "#FF0D1524",
+            ["NavigationValgt"]   = "#FF1B3C5C",
+            ["NavigationKant"]    = "#FF1B2A3E",
+            ["PaaNavigation"]     = "#FFEFF5FA",
+            ["PaaNavigationSvag"] = "#FFA9C0D6",
 
             ["Dokument"]    = "#FFCB90F0",
             ["Fremhaev"]    = "#FFF4CB23",
-            ["PaaFremhaev"] = "#FF101828"
+            ["PaaFremhaev"] = "#FF0B1220"
         };
 
     public static IReadOnlyDictionary<string, string> Palet(bool lyst) => lyst ? Lys : Moerk;

@@ -55,7 +55,7 @@
          knapperne, saa oejet ved, hvor formularen begynder og slutter.
 
          Feltkanten hjaelper resten - se App.xaml, hvor kanten om alt, man kan
-         skrive i, blev flyttet fra PanelKant til FeltKant. -->
+         skrive i, blev flyttet fra PanelKant til InputKant. -->
     <!-- ============ DE FIRE VALG, TO OG TO ============
          HVERT VALG I SIN EGEN KASSE. Én stor kasse om det hele samlede dem,
          men den sagde ikke, hvor det ene spørgsmål slap, og det næste begyndte
