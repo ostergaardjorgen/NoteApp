@@ -1,4 +1,4 @@
-namespace NoteApp.Core.Llm;
+﻿namespace NoteApp.Core.Llm;
 
 /// <summary>
 /// Vælger formen ud fra det program, der er fremme.
@@ -66,11 +66,6 @@ public static class Programformaal
     {
         ("gmail", Dikteringsformaal.Mail),
         ("outlook", Dikteringsformaal.Mail),
-        ("claude", Dikteringsformaal.Prompt),
-        ("chatgpt", Dikteringsformaal.Prompt),
-        ("gemini", Dikteringsformaal.Prompt),
-        ("mistral", Dikteringsformaal.Prompt),
-        ("le chat", Dikteringsformaal.Prompt),
         ("google tasks", Dikteringsformaal.Opgave),
         ("todoist", Dikteringsformaal.Opgave),
         ("trello", Dikteringsformaal.Opgave),
@@ -109,7 +104,6 @@ public static class Programformaal
         }
 
         if (Post.Any(x => p.Contains(x, StringComparison.Ordinal))) return Dikteringsformaal.Mail;
-        if (Assistent.Any(x => p.Contains(x, StringComparison.Ordinal))) return Dikteringsformaal.Prompt;
         if (Opgaver.Any(x => p.Contains(x, StringComparison.Ordinal))) return Dikteringsformaal.Opgave;
 
         return null;

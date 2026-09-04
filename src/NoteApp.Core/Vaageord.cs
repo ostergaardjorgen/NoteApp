@@ -113,6 +113,52 @@ public static class Vaageord
         return rene.Count > 0 ? rene : Standardord(sprog);
     }
 
+    /// <summary>
+    /// De to udgaver, man kan vælge imellem. Der er ikke flere.
+    /// </summary>
+    /// <remarks>
+    /// DET ER ET VALG NU, IKKE ET FRIT FELT. Før stod der en flerlinjet kasse,
+    /// hvor man kunne skrive hvad som helst — og dét er en fælde, ikke en
+    /// frihed:
+    ///
+    ///   TO STAVEMÅDER AF DET SAMME ORD DELER SIKKERHEDEN. Motoren fordeler
+    ///   sin sandsynlighed mellem alle udtryk på listen, så det samme «Hej
+    ///   Pia» gav «hej pia» 0,584 og «hey pia» 0,416. Hver for sig ser de
+    ///   svage ud, og så sker der ingenting. Målt 31-08-2026.
+    ///
+    ///   ET ORD, DER IKKE ER TRÆNET, RAMMER SKÆVT. Skriver man noget selv,
+    ///   sammenligner motoren med de bogstaver — ikke med det, den hører fra
+    ///   netop din stemme.
+    ///
+    /// Derfor: to knapper med to ord, og den, man vælger, er dén, man siger
+    /// tre gange nedenunder. Så hedder ordet det samme tre steder — på
+    /// knappen, i din mund og på listen.
+    ///
+    /// Listen kan stadig indeholde flere ord bagefter: træningen lægger det,
+    /// motoren FAKTISK hørte, oveni. Det er ikke to forskellige ord, det er
+    /// det samme ord stavet, som din mikrofon hører det.
+    /// </remarks>
+    public static readonly IReadOnlyList<string> Valgene = new[] { "hej pia", "hey pia" };
+
+    /// <summary>
+    /// Hvilket af de to der er valgt, ud fra det, der står gemt.
+    /// </summary>
+    /// <remarks>
+    /// Der kigges efter «hey», ikke efter en nøjagtig streng. Efter en træning
+    /// står der dét, motoren hørte — «hey bia», «hey pia» — og det er stadig
+    /// «Hey Pia», der blev valgt.
+    /// </remarks>
+    public static string Valgt(IReadOnlyList<string>? gemt, string? sprog)
+    {
+        if (gemt is { Count: > 0 }
+            && gemt.Any(o => (o ?? "").Contains("hey", StringComparison.OrdinalIgnoreCase)))
+            return "hey pia";
+
+        if (gemt is { Count: > 0 }) return "hej pia";
+
+        return Standardord(sprog)[0];
+    }
+
     public static IReadOnlyList<string> Standardord(string? sprog) =>
         sprog?.Trim().ToLowerInvariant() switch
         {

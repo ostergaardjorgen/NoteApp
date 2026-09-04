@@ -23,8 +23,15 @@ public enum Dikteringsformaal
     /// <summary>Hel tekst med indledning og afslutning.</summary>
     Mail,
 
-    /// <summary>Instruktion til en AI. Ingen høflighed, ingen indpakning.</summary>
-    Prompt,
+    // HER LAA «Prompt» - en instruktion til en AI, uden hoeflighed og
+    // indpakning. Fjernet 04-09-2026, fordi den var daarligere end de
+    // indbyggede prompt-felter i de assistenter, den skulle skrive til: man
+    // taler til Claude eller ChatGPT, og saa er DERES felt bedre til det end
+    // en omskrivning her.
+    //
+    // Gamle noter kan stadig baere formen «Prompt» i deres data. NoterView
+    // viser navnet paa dem - det er et stykke historik, ikke et valg - men
+    // den kan ikke vaelges laengere.
 
     /// <summary>Kort, i bydeform, én linje.</summary>
     Opgave,
@@ -360,11 +367,6 @@ public static class Voxtral
             + (string.IsNullOrWhiteSpace(navn)
                 ? "Skriv ingen underskrift, og aldrig en pladsholder til et navn."
                 : $"Slut med «Med venlig hilsen» og navnet {navn.Trim()}."),
-
-        Dikteringsformaal.Prompt =>
-            "Du er en dikteringsassistent. Skriv den følgende rå udskrift om til "
-            + "en instruktion til en AI-assistent. Ingen høflighed, ingen "
-            + "indledning, ingen forklaring — kun opgaven, klart formuleret.",
 
         Dikteringsformaal.Opgave =>
             "Du er en dikteringsassistent. Skriv den følgende rå udskrift om til "

@@ -1,4 +1,4 @@
-namespace NoteApp.Core.Llm;
+﻿namespace NoteApp.Core.Llm;
 
 /// <summary>
 /// Teksttyperne: hvad det talte skal blive til.
@@ -24,7 +24,6 @@ public static class Teksttyper
     {
         Dikteringsformaal.Note,
         Dikteringsformaal.Mail,
-        Dikteringsformaal.Prompt,
         Dikteringsformaal.Opgave,
     };
 
@@ -76,7 +75,6 @@ public static class Teksttyper
     {
         Dikteringsformaal.Note => "teksttyper.note",
         Dikteringsformaal.Mail => "teksttyper.mail",
-        Dikteringsformaal.Prompt => "teksttyper.prompt",
         Dikteringsformaal.Opgave => "teksttyper.opgave",
         _ => throw new ArgumentOutOfRangeException(nameof(formaal)),
     };

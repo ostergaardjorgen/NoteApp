@@ -1,4 +1,4 @@
-using NoteApp.Core.Llm;
+﻿using NoteApp.Core.Llm;
 using Xunit;
 
 namespace NoteApp.Tests;
@@ -21,12 +21,37 @@ public class ProgramformaalTest
     [InlineData("outlook.exe", Dikteringsformaal.Mail)]
     [InlineData("olk", Dikteringsformaal.Mail)]
     [InlineData("thunderbird", Dikteringsformaal.Mail)]
-    [InlineData("claude", Dikteringsformaal.Prompt)]
-    [InlineData("Cursor", Dikteringsformaal.Prompt)]
     [InlineData("todoist", Dikteringsformaal.Opgave)]
     public void Programmet_alene_kan_afgoere_det(string proces, Dikteringsformaal ventet)
     {
         Assert.Equal(ventet, Programformaal.Gaet(proces, ""));
+    }
+
+    [Theory]
+    [InlineData("claude")]
+    [InlineData("Cursor")]
+    [InlineData("chatgpt")]
+    [InlineData("perplexity")]
+    public void En_AI_assistent_giver_ikke_laengere_et_gaet(string proces)
+    {
+        // «Prompt» var en form for sig: en instruktion til en AI, uden
+        // hoeflighed og indpakning. Den er fjernet 04-09-2026, fordi
+        // assistenternes egne felter er bedre til netop dét end en
+        // omskrivning her — og saa skal appen heller ikke gaette paa den.
+        //
+        // Det staar som en proeve og ikke bare som en sletning, fordi det er
+        // let at komme til at laegge «claude» tilbage i listen med en anden
+        // form. Der skal ikke gaettes paa et program, hvor brugeren selv
+        // sidder med det rigtige felt foran sig.
+        Assert.Null(Programformaal.Gaet(proces, ""));
+    }
+
+    [Theory]
+    [InlineData("msedge", "Claude")]
+    [InlineData("firefox", "Le Chat — Mistral AI")]
+    public void En_AI_fane_giver_heller_ikke_et_gaet(string proces, string titel)
+    {
+        Assert.Null(Programformaal.Gaet(proces, titel));
     }
 
     [Theory]
@@ -53,8 +78,6 @@ public class ProgramformaalTest
 
     [Theory]
     [InlineData("chrome", "Indbakke (12) - Gmail", Dikteringsformaal.Mail)]
-    [InlineData("msedge", "Claude", Dikteringsformaal.Prompt)]
-    [InlineData("firefox", "Le Chat — Mistral AI", Dikteringsformaal.Prompt)]
     [InlineData("chrome", "Mine opgaver - Google Tasks", Dikteringsformaal.Opgave)]
     public void I_en_browser_er_titlen_det_eneste_der_siger_noget(
         string proces, string titel, Dikteringsformaal ventet)
@@ -108,7 +131,9 @@ public class ProgramformaalTest
     {
         // Et formaal, der ikke findes i Dikteringsformaal, ville kaste inde i
         // Pudseprompt - midt i et diktat, efter lyden er sendt.
-        foreach (var proces in new[] { "outlook", "claude", "todoist" })
+        // «claude» stod her, indtil formen «Prompt» blev fjernet. Den giver
+        // ikke laengere et gaet - se En_AI_assistent_giver_ikke_laengere_et_gaet.
+        foreach (var proces in new[] { "outlook", "todoist" })
         {
             var f = Programformaal.Gaet(proces, "");
 

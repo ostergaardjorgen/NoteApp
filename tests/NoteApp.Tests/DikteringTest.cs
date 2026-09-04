@@ -89,7 +89,6 @@ public class DikteringTest
     [Theory]
     [InlineData(Dikteringsformaal.Note)]
     [InlineData(Dikteringsformaal.Mail)]
-    [InlineData(Dikteringsformaal.Prompt)]
     [InlineData(Dikteringsformaal.Opgave)]
     public void Hvert_formaal_forbyder_at_der_findes_paa(Dikteringsformaal formaal)
     {

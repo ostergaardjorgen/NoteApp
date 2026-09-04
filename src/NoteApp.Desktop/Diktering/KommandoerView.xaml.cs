@@ -120,8 +120,18 @@ public partial class KommandoerView : UserControl
 
             VaageordTil.IsChecked = v.VaageordTil;
 
-            Ord.Text = string.Join(Environment.NewLine,
-                Vaageord.Valgte(v.Vaageord, v.Talesprog));
+            // HVILKET AF DE TO. Der kigges efter «hey» og ikke efter en
+            // noejagtig streng: efter en traening staar der dét, motoren
+            // hoerte - «hey bia» - og det er stadig «Hey Pia», der er valgt.
+            OrdHej.Content = Vist(Vaageord.Valgene[0]);
+            OrdHey.Content = Vist(Vaageord.Valgene[1]);
+
+            var valgt = Vaageord.Valgt(v.Vaageord, v.Talesprog);
+
+            OrdHey.IsChecked = valgt == "hey pia";
+            OrdHej.IsChecked = valgt != "hey pia";
+
+            SaetLaerknap();
 
             // Uden en motor kan der ikke lyttes. Det skal staa, FOER man slaar
             // noget til - ikke bagefter, naar man taler forgaeves.
@@ -182,13 +192,45 @@ public partial class KommandoerView : UserControl
     private void VaageordTil_Klik(object sender, RoutedEventArgs e) => Gem();
 
     /// <summary>
-    /// Ordene gemmes, når feltet forlades — ikke ved hvert tastetryk.
+    /// Der blev valgt et andet vågeord.
     /// </summary>
     /// <remarks>
-    /// Skrev vi ved hvert tastetryk, ville et halvt ord blive gemt som et
-    /// vågeord, og vagten ville blive startet og stoppet for hvert bogstav.
+    /// DET NULSTILLER LISTEN. Har man trænet «Hej Pia» og skifter til «Hey
+    /// Pia», er de gamle stavemåder ikke bare overflødige — de er skadelige:
+    /// motoren deler sin sikkerhed mellem alt på listen, og «hej bia» ville
+    /// stjæle fra det ord, man nu faktisk siger.
+    ///
+    /// Man skal altså træne igen efter et skift. Det siger teksten under
+    /// knappen, og det er billigere end en liste, der halvt husker et ord,
+    /// man er holdt op med at bruge.
     /// </remarks>
-    private void Ord_Forladt(object sender, RoutedEventArgs e) => Gem();
+    private void Ord_Valgt(object sender, RoutedEventArgs e)
+    {
+        if (!_indlaest) return;
+
+        LaerStatus.Text = "";
+        SaetLaerknap();
+        Gem();
+    }
+
+    /// <summary>Ordet, der er valgt lige nu.</summary>
+    private string Valgtord => OrdHey.IsChecked == true ? "hey pia" : "hej pia";
+
+    /// <summary>
+    /// Knappen skal sige det ord, man skal sige.
+    /// </summary>
+    /// <remarks>
+    /// Den sagde «Sig «Hej Pia» tre gange» uanset hvad der var valgt. Vælger
+    /// man «Hey Pia» og bliver bedt om at sige «Hej Pia», er det ikke en
+    /// skønhedsfejl — så træner man det forkerte ord.
+    /// </remarks>
+    private void SaetLaerknap() =>
+        LaerKnap.Content = Sprog.T("kommandoer.laer_knap", Vist(Valgtord));
+
+    /// <summary>Ordet, som det skal SES — «Hej Pia», ikke «hej pia».</summary>
+    private static string Vist(string ord) =>
+        string.Join(" ", ord.Split(' ')
+            .Select(o => o.Length == 0 ? o : char.ToUpper(o[0]) + o[1..]));
 
     private void Gem()
     {
@@ -198,14 +240,9 @@ public partial class KommandoerView : UserControl
 
         v.VaageordTil = VaageordTil.IsChecked == true;
 
-        // Kun ord, der DUER, gemmes. Et ord paa eet ord ville udloese sig selv,
-        // hver gang nogen naevner et navn - se Vaageord.Rens.
-        v.Vaageord = Ord.Text
-            .Split('\n', '\r')
-            .Select(Vaageord.Rens)
-            .Where(o => o.Length > 0)
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .ToList();
+        // EET ORD, IKKE EN LISTE. Traeningen laegger senere det, motoren
+        // faktisk hoerte, oveni - men et skift af ord begynder forfra.
+        v.Vaageord = new List<string> { Valgtord };
 
         v.Save();
 
@@ -358,7 +395,7 @@ public partial class KommandoerView : UserControl
             for (var nr = 1; nr <= Core.Vaageordsproeve.Gange; nr++)
             {
                 LaerStatus.Text = Sprog.T("kommandoer.laer_igang",
-                    nr.ToString(), Core.Vaageordsproeve.Gange.ToString());
+                    Vist(Valgtord), nr.ToString(), Core.Vaageordsproeve.Gange.ToString());
 
                 var hoert = await EtForsoegAsync();
                 if (hoert.Length > 0)
@@ -380,11 +417,18 @@ public partial class KommandoerView : UserControl
                 return;
             }
 
-            AppSettings.Current.Vaageord = valgt.ToList();
+            // DET VALGTE ORD BLIVER PAA LISTEN. Traeningen giver de
+            // stavemaader, motoren hoerer fra netop din stemme - men siger man
+            // ordet tydeligt en dag, skal det ogsaa virke. Uden det her stod
+            // der kun «hej bia» tilbage, hvis det var dét, den hoerte tre
+            // gange i traek.
+            var liste = new List<string> { Valgtord };
+            liste.AddRange(valgt.Where(o => !liste.Contains(o, StringComparer.OrdinalIgnoreCase)));
+
+            AppSettings.Current.Vaageord = liste;
             AppSettings.Current.Save();
 
-            Ord.Text = string.Join(Environment.NewLine, valgt);
-            LaerStatus.Text = Sprog.T("kommandoer.laer_faerdig", string.Join(", ", valgt));
+            LaerStatus.Text = Sprog.T("kommandoer.laer_faerdig", string.Join(", ", liste));
         }
         catch (Exception ex)
         {

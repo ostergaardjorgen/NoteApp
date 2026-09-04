@@ -1,4 +1,4 @@
-using NoteApp.Core.Llm;
+﻿using NoteApp.Core.Llm;
 using Xunit;
 
 namespace NoteApp.Tests;
@@ -24,7 +24,6 @@ public class SprogkravTest
     [Theory]
     [InlineData(Dikteringsformaal.Note)]
     [InlineData(Dikteringsformaal.Mail)]
-    [InlineData(Dikteringsformaal.Prompt)]
     [InlineData(Dikteringsformaal.Opgave)]
     public void Hver_instruktion_begynder_med_sprogkravet(Dikteringsformaal formaal)
     {

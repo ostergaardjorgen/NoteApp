@@ -154,9 +154,6 @@
                       <Button Content="{i18n:Oversat noter.type_mail}"
                               Padding="10,4" Margin="0,0,5,0" FontSize="11.5"
                               Click="Skift_Klik" Tag="{Binding}" CommandParameter="Mail" />
-                      <Button Content="{i18n:Oversat noter.type_prompt}"
-                              Padding="10,4" Margin="0,0,5,0" FontSize="11.5"
-                              Click="Skift_Klik" Tag="{Binding}" CommandParameter="Prompt" />
                       <Button Content="{i18n:Oversat noter.type_opgave}"
                               Padding="10,4" FontSize="11.5"
                               Click="Skift_Klik" Tag="{Binding}" CommandParameter="Opgave" />

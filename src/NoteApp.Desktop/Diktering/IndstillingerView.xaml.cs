@@ -103,7 +103,6 @@ public partial class IndstillingerView : UserControl
             {
                 new Formaalsvalg(Dikteringsformaal.Note, Sprog.T("settingsview.diktering_formaal_note")),
                 new Formaalsvalg(Dikteringsformaal.Mail, Sprog.T("settingsview.diktering_formaal_mail")),
-                new Formaalsvalg(Dikteringsformaal.Prompt, Sprog.T("settingsview.diktering_formaal_prompt")),
                 new Formaalsvalg(Dikteringsformaal.Opgave, Sprog.T("settingsview.diktering_formaal_opgave")),
             };
 

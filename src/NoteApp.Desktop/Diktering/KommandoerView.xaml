@@ -45,11 +45,31 @@
                      Foreground="{DynamicResource Advarsel}" Visibility="Collapsed"
                      Text="{i18n:Oversat kommandoer.vaageord_ingen_motor}" />
 
-          <TextBlock Style="{StaticResource Underskrift}" Margin="0,16,0,4"
+          <!-- ============ TO KNAPPER, IKKE ET FRIT FELT ============
+
+               Her stod en flerlinjet kasse, man kunne skrive hvad som helst
+               i. Det lyder som frihed og er en faelde: to stavemaader af det
+               SAMME ord deler motorens sikkerhed - det samme «Hej Pia» gav
+               «hej pia» 0,584 og «hey pia» 0,416, og hver for sig ser de
+               svage ud. Maalt 31-08-2026.
+
+               Nu er der to ord at vaelge imellem, og det valgte er dét, der
+               staar paa knappen nedenunder. Saa hedder ordet det samme tre
+               steder: paa knappen, i din mund og paa listen. -->
+          <TextBlock Style="{StaticResource Underskrift}" Margin="0,16,0,8"
                      Text="{i18n:Oversat kommandoer.vaageord_ord}" />
-          <TextBox x:Name="Ord" AcceptsReturn="True" MinHeight="52" Padding="10,8"
-                   TextWrapping="NoWrap" LostFocus="Ord_Forladt" />
-          <TextBlock Style="{StaticResource Underskrift}" Margin="0,4,0,0" TextWrapping="Wrap"
+          <StackPanel Orientation="Horizontal">
+            <!-- TEKSTEN SAETTES I KODEN, ikke her. De to ord staar i
+                 Vaageord.Valgene, som ogsaa er dét, motoren sammenligner med
+                 - og en knap, der siger et andet ord end det, appen lytter
+                 efter, er vaerre end ingen knap. De oversaettes ikke: ordet
+                 er det samme, uanset hvilket sprog resten af appen taler. -->
+            <RadioButton x:Name="OrdHej" GroupName="vaageord" Style="{StaticResource Fanevalg}"
+                         Margin="0,0,8,0" Checked="Ord_Valgt" />
+            <RadioButton x:Name="OrdHey" GroupName="vaageord" Style="{StaticResource Fanevalg}"
+                         Checked="Ord_Valgt" />
+          </StackPanel>
+          <TextBlock Style="{StaticResource Underskrift}" Margin="0,8,0,0" TextWrapping="Wrap"
                      Text="{i18n:Oversat kommandoer.vaageord_ord_under}" />
 
           <!-- ============ SIG DET SELV ============

@@ -60,7 +60,9 @@
         <StackPanel x:Name="Logolinje" DockPanel.Dock="Top" Orientation="Horizontal" Margin="4,0,0,2">
           <Image Source="app.png" Width="30" Height="30" VerticalAlignment="Center"
                  RenderOptions.BitmapScalingMode="HighQuality" />
-          <StackPanel x:Name="Logotekst" Margin="10,0,0,0" VerticalAlignment="Center">
+          <!-- Fjorten og ikke ti. Navnet laa klemt op ad ikonet, og de to
+               laeses som ét rod i stedet for et maerke og et navn. -->
+          <StackPanel x:Name="Logotekst" Margin="14,0,0,0" VerticalAlignment="Center">
             <TextBlock Text="HeyPia" FontSize="19" FontWeight="SemiBold"
                        Foreground="{DynamicResource PaaNavigation}" />
             <TextBlock x:Name="Version" Style="{StaticResource Underskrift}"
