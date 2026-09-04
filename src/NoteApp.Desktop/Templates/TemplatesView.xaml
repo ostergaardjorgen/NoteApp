@@ -438,16 +438,15 @@
                            TextWrapping="Wrap" Visibility="Collapsed"
                            Foreground="{DynamicResource TekstMeget}" />
 
+                <!-- HER LAA «Tilpas til denne mødetype» og «Tilbage til
+                     standarden». Begge hoerte til en GEMT dagsorden, og den
+                     findes ikke mere: dagsordenen bygges af afsnittene, hver
+                     gang fanen tegnes. Saa er der ikke to slags at skifte
+                     imellem - og ikke en gemt tilstand, man ikke kan se. -->
                 <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
                   <Button x:Name="AgendaKopierKnap" Content="{i18n:Oversat templatesview.kopier_dagsordenen}"
-                          Click="KopierAgenda_Click" Padding="14,7" Margin="0,0,8,0"
+                          Click="KopierAgenda_Click" Padding="14,7"
                           ToolTip="{i18n:Oversat templatesview.laeg_hele_dagsordenen_i_udklipsholderen}" />
-                  <Button x:Name="AgendaTilpasKnap" Content="{i18n:Oversat templatesview.tilpas_til_denne_moedetype}"
-                          Click="TilpasAgenda_Click" Padding="14,7" Margin="0,0,8,0"
-                          ToolTip="{i18n:Oversat templatesview.lad_mistral_skrive_en_dagsorden_der_passer}" />
-                  <Button x:Name="AgendaNulstilKnap" Content="{i18n:Oversat templatesview.tilbage_til_standarden}"
-                          Click="NulstilAgenda_Click" Padding="14,7" Visibility="Collapsed"
-                          ToolTip="{i18n:Oversat templatesview.slet_moedetypens_egen_dagsorden_og_brug_de}" />
                 </StackPanel>
               </StackPanel>
 

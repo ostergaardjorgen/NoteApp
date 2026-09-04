@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -27,7 +27,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Templates\agenda.txt" />
   </ItemGroup>
 
   <ItemGroup>

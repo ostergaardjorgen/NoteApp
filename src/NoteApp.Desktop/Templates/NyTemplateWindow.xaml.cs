@@ -158,17 +158,10 @@ public partial class NyTemplateWindow : Window
             // kaldte, et nummer paa - og saa ville en Gem() her have skrevet
             // hen over dagsordenen paa den skabelon, der allerede hed det.
             // Teksten gives tilbage, og den gemmes, naar navnet ligger fast.
-            Status.Text = "Mødetypen er klar. Skriver dagsordenen til den …";
-            try
-            {
-                Dagsorden = await Dagsordensskriver.SkrivAsync(noegle, navn, Resultat.SystemPrompt);
-            }
-            catch (Exception dagsorden)
-            {
-                Advarsel = "Mødetypen blev lavet, men dagsordenen kunne ikke skrives: " +
-                           dagsorden.Message + " Standarddagsordenen gælder, indtil du " +
-                           "trykker «Tilpas til denne mødetype» på Agenda-fanen.";
-            }
+            // HER BAD GUIDEN MISTRAL OM EN DAGSORDEN og gemte den paa
+            // moedetypen. Dagsordenen bygges nu af afsnittene, hver gang fanen
+            // tegnes - saa der er ikke en at skrive og gemme, og et kald og et
+            // fejlspor mindre paa vejen til en ny moedetype.
 
             DialogResult = true;
         }

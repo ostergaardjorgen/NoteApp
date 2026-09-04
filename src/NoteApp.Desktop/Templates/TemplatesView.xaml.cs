@@ -190,7 +190,8 @@ public partial class TemplatesView : UserControl
     // Dagsordensskriver, fordi guiden til nye skabeloner skal bruge praecis
     // det samme kald - stod prompten to steder, ville de to veje langsomt
     // give hver sit resultat.
-    private static string Agenda() => Dagsordensskriver.Standard();
+    // HER LAA Agenda() - den faste standardtekst. Dagsordenen bygges nu af
+    // afsnittene; se Dagsordensskriver.Byg.
 
     // HER LAA Felt_Klik OG Systemfelt_Klik - knapperne, der satte
     // «{{titel}}» og «{{deltagerregler}}» ind, hvor markoeren stod.
@@ -206,163 +207,50 @@ public partial class TemplatesView : UserControl
     private void VisAgenda()
     {
         var navn = _valgt?.Name;
-        var egen = navn is not null && Agendaer.HarEgen(navn);
 
-        // ============ DEN BYGGES AF DE AKTIVE AFSNIT ============
+        // ============ DEN BYGGES HVER GANG ============
         //
-        // Foer var standarden en FAST tekst. Man kunne tage «Beslutninger» fra
-        // i dokumentet og stadig sende en dagsorden, der brugte fem minutter
-        // paa at samle beslutninger op. Nu haenger kaeden sammen: dagsordenen
-        // faar moedet til at sige det hoejt, transkriptionen fanger det, og
-        // dokumentet har et afsnit at skrive det i.
+        // Foer kunne en moedetype have sin EGEN gemte dagsorden, skrevet af
+        // Mistral. Den vandt over alt andet, og saa aendrede dagsordenen sig
+        // ikke, uanset hvad man klikkede til og fra - man skulle foerst vide,
+        // at der laa en gemt, og saa trykke en knap for at komme af med den.
         //
-        // Har moedetypen sin EGEN dagsorden - skrevet af Mistral eller rettet i
-        // haanden - bliver den staaende. Et valg, man har truffet med haanden,
-        // maa en automatik ikke lave om; i stedet siges det nedenfor, naar de
-        // to er kommet i utakt.
+        // Det er unoedvendig kompleksitet: to slags dagsordener, en gemt
+        // tilstand man ikke kan se, og en knap til at komme ud af den. Nu er
+        // der EEN, og den bygges af afsnittene, hver gang fanen tegnes.
         var aktive = _valgt is null
             ? Array.Empty<string>()
             : PromptTemplate.AfsnitI(Tekst(FeltSystem))
                 .Where(a => !_udeladte.Contains(a, StringComparer.CurrentCultureIgnoreCase))
                 .ToArray();
 
-        var bygget = _valgt is null ? Agenda() : Dagsordensskriver.Byg(aktive);
+        FeltAgenda.Text = Dagsordensskriver.Byg(aktive);
 
-        FeltAgenda.Text = navn is null ? bygget : Agendaer.Hent(navn, bygget);
-
-        // «Hvorfor en fast dagsorden» stod der, naar moedetypen ikke havde sin
-        // egen. Overskriften skal sige, hvad man kigger paa - ikke hvorfor det
-        // findes.
-        AgendaOverskrift.Text = egen
-            ? $"Dagsorden til «{navn}» — din egen"
+        AgendaOverskrift.Text = navn is null
+            ? "Dagsorden til mødet"
             : $"Dagsorden til «{navn}»";
 
-        AgendaNulstilKnap.Visibility = egen ? Visibility.Visible : Visibility.Collapsed;
-        AgendaTilpasKnap.IsEnabled = navn is not null && SkyNoegle.Hent() is not null;
-
-        // ============ HVAD DAGSORDENEN SKAL DAEKKE ============
-        //
-        // Dagsordenen bestemmer, hvad der bliver SAGT paa moedet; afsnittene
-        // bestemmer, hvad der skal SKRIVES bagefter. De to skal passe sammen,
-        // og indtil nu kunne man kun se det ene ad gangen.
-        //
-        // Er de to i utakt - man har taget et hak fra, siden dagsordenen blev
-        // skrevet - staar det med det samme og med knappen lige ved siden af.
         if (_valgt is null)
         {
             Afsnitsliste.Visibility = Visibility.Collapsed;
             return;
         }
 
-        var afsnit = aktive;
-
-        var utakt = egen && _systemVedIndlaesning is not null
-                    && _systemVedIndlaesning != _valgt.RenderSystem();
-
         Afsnitsliste.Visibility = Visibility.Visible;
-        Afsnitsliste.Text = afsnit.Length == 0
+        Afsnitsliste.Text = aktive.Length == 0
             ? "Mødetypen har ingen afsnit endnu — se «Sådan skal det skrives»."
-            : egen
-                ? (utakt
-                      ? "Mødetypen har sin EGEN dagsorden, og afsnittene er ændret siden. "
-                        + "Den følger ikke længere med. Afsnittene er nu: "
-                      : "Mødetypen har sin EGEN dagsorden. Den følger ikke afsnittene — "
-                        + "tryk «Byg den ud fra afsnittene», hvis den skal. Afsnittene er: ")
-                  + string.Join(", ", afsnit) + "."
-                : "Bygget af afsnittene: " + string.Join(", ", afsnit) + ". "
-                  + "Tager du et hak fra, forsvinder punktet herunder med det samme.";
+            : "Bygget af afsnittene: " + string.Join(", ", aktive) + ". "
+              + "Tager du et hak fra, forsvinder punktet herunder med det samme.";
 
-        if (Pensel(utakt || egen ? "Advarsel" : "TekstMeget") is { } farve) Afsnitsliste.Foreground = farve;
+        if (Pensel("TekstMeget") is { } farve) Afsnitsliste.Foreground = farve;
     }
 
-    /// <summary>
-    /// Beder Mistral skrive en dagsorden, der passer til netop denne
-    /// skabelon.
-    ///
-    /// Standarden gives med som udgangspunkt frem for at bede om en fra
-    /// bunden. De fem ting, den sikrer — navne, formål, beslutninger sagt
-    /// højt, det ingen ved, og hvem der følger op — gælder alle møder, og de
-    /// skal ikke kunne forsvinde, fordi en model syntes, den kunne gøre det
-    /// bedre.
-    /// </summary>
-    private async void TilpasAgenda_Click(object sender, RoutedEventArgs e)
-    {
-        if (_valgt is not { } t) return;
-
-        var noegle = SkyNoegle.Hent();
-        if (noegle is null) return;
-
-        AgendaTilpasKnap.IsEnabled = false;
-        Status.Text = "Mistral tilpasser dagsordenen …";
-
-        try
-        {
-            // ============ DEN FILTREREDE INSTRUKTION, IKKE DEN RAA ============
-            //
-            // RenderSystem() er dét, modellen faktisk faar: uden de afsnit, der
-            // er taget hakket fra, og med eller uden deltagerreglerne. Blev den
-            // RAA tekst sendt, ville dagsordenen bede moedet om at daekke
-            // afsnit, dokumentet ikke laengere har - og saa bruger man tid paa
-            // moedet paa noget, ingen skriver ned.
-            Agendaer.Gem(t.Name, await Dagsordensskriver.SkrivAsync(noegle, t.Name, t.RenderSystem()));
-            VisAgenda();
-
-            // Instruktionen og dagsordenen passer sammen nu. Saa skal der
-            // ikke mindes om noget, foer den bliver aendret igen.
-            _systemVedIndlaesning = t.RenderSystem();
-            Status.Text = $"Dagsordenen er tilpasset «{t.Name}». Læs den igennem, før du bruger den.";
-        }
-        catch (Exception ex)
-        {
-            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Kunne ikke tilpasse dagsordenen",
-                ex.Message, Dialogs.Slags.Pas_paa);
-            Status.Text = "";
-        }
-        finally
-        {
-            AgendaTilpasKnap.IsEnabled = SkyNoegle.Hent() is not null;
-        }
-    }
-
-    /// <summary>
-    /// Spørger, om dagsordenen skal følge med den ændrede instruktion.
-    ///
-    /// Det er et spørgsmål og ikke en automatik: en dagsorden, man selv har
-    /// rettet i hånden, må ikke blive skrevet over, fordi man rettede et komma
-    /// i instruktionen.
-    /// </summary>
-    private void MindOmDagsorden()
-    {
-        var navn = _valgt?.Name;
-        if (navn is null) return;
-
-        var egen = Agendaer.HarEgen(navn);
-
-        var ja = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
-            "Skal dagsordenen følge med?",
-            $"Du har ændret instruktionen til «{navn}».\n\n" +
-            "Dagsordenen bestemmer, hvad der bliver sagt på mødet. Beder den ikke om " +
-            "det, den nye instruktion har brug for, står felterne tomme i dokumentet — " +
-            "transkriptionen kan kun indeholde det, nogen sagde højt.\n\n" +
-            (egen
-                ? "Den nuværende dagsorden bliver skrevet over."
-                : "Mødetypen bruger standarddagsordenen. Den bliver liggende — der laves en egen."),
-            "Tilpas dagsordenen nu", "Ikke nu", Dialogs.Slags.Valg);
-
-        if (!ja) return;
-
-        AgendaFane.IsSelected = true;
-        TilpasAgenda_Click(this, new RoutedEventArgs());
-    }
-
-    private void NulstilAgenda_Click(object sender, RoutedEventArgs e)
-    {
-        if (_valgt is not { } t) return;
-
-        Agendaer.Slet(t.Name);
-        VisAgenda();
-        Status.Text = $"«{t.Name}» bruger standarddagsordenen igen.";
-    }
+    // HER LAA «Tilpas til denne mødetype», «Tilbage til standarden» og
+    // spoergsmaalet «Skal dagsordenen foelge med?».
+    //
+    // Alle tre hoerte til den GEMTE dagsorden, og den findes ikke mere. En
+    // dagsorden, der bygges hver gang, kan ikke komme i utakt med afsnittene -
+    // saa er der heller ikke noget at minde om, at tilpasse eller at nulstille.
 
     private void KopierAgenda_Click(object sender, RoutedEventArgs e)
     {
@@ -441,20 +329,12 @@ public partial class TemplatesView : UserControl
         // endnu.
         VisAgenda();
 
-        // Aendrer man instruktionen, passer dagsordenen maaske ikke laengere.
-        // Den FILTREREDE tekst gemmes, saa et hak, der bliver taget fra, ogsaa
-        // taeller som en aendring - det er jo praecis et afsnit, der forsvinder.
-        _systemVedIndlaesning = t.RenderSystem();
     }
 
-    /// <summary>
-    /// Instruktionen, som den saa ud da skabelonen blev aabnet.
-    ///
-    /// Bruges til at opdage, om DEN er aendret ved et gem — og kun den.
-    /// Retter man et navn eller en temperatur, har dagsordenen intet med det
-    /// at goere, og saa skal der ikke mindes om noget.
-    /// </summary>
-    private string? _systemVedIndlaesning;
+    // HER LAA _systemVedIndlaesning - instruktionen, som den saa ud, da
+    // skabelonen blev aabnet. Den fandtes for at opdage, om dagsordenen var
+    // kommet i utakt. Dagsordenen bygges nu af afsnittene hver gang, saa den
+    // kan ikke komme i utakt.
 
     /// <summary>Mappen, mødetypen peger på. Null betyder «uden mappe».</summary>
     private string? _mappe;
@@ -1151,18 +1031,12 @@ public partial class TemplatesView : UserControl
             // man den ene og glemmer den anden, beder skabelonen om noget,
             // ingen kom til at sige hoejt, og feltet staar tomt i dokumentet.
             //
-            // Der spoerges kun, naar netop instruktionen er aendret. Retter
-            // man et navn eller en temperatur, har dagsordenen intet med det
-            // at goere.
-            var instruktionAendret = _systemVedIndlaesning is not null
-                                     && _systemVedIndlaesning != _valgt.RenderSystem();
-
+            // Der spoerges ikke om noget mere: dagsordenen bygges af
+            // afsnittene, hver gang fanen tegnes, saa den KAN ikke komme i
+            // utakt med instruktionen.
             Status.Text = $"Gemt: {sti}";
             GemKnap.IsEnabled = false;
             Indlæs(_valgt.Name);
-
-            if (instruktionAendret && SkyNoegle.Hent() is not null)
-                MindOmDagsorden();
         }
         catch (Exception ex)
         {
@@ -1200,14 +1074,8 @@ public partial class TemplatesView : UserControl
 
             ny.Save();
 
-            // FOERST HER ligger navnet fast. Gemte guiden selv dagsordenen,
-            // ville et navnesammenfald have skrevet hen over dagsordenen paa
-            // den skabelon, der allerede hed det.
-            if (vindue.Dagsorden is { Length: > 0 } dagsorden)
-                Agendaer.Gem(ny.Name, dagsorden);
-
             Indlæs(ny.Name);
-            Status.Text = $"«{ny.Name}» er lavet med sin egen dagsorden. Læs begge dele igennem, og ret det, der skal rettes.";
+            Status.Text = $"«{ny.Name}» er lavet. Læs den igennem, og ret det, der skal rettes.";
 
             if (vindue.Advarsel is { } advarsel)
             {
