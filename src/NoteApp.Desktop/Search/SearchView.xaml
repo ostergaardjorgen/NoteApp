@@ -288,7 +288,18 @@
          felt blandt fire. Her er de en indsnævring af det, man lige har
          skrevet — og de er små, fordi de sjældnere bruges. -->
     <StackPanel HorizontalAlignment="Center" Margin="0,12,0,0">
-    <!-- ============ DEN SKAL KUNNE OMBRYDE ============
+    <!-- ============ SMALLE NOK TIL AT STAA PAA EEN RAEKKE ============
+
+         Bredderne var 140, 150, 150 og 130 - godt 660 pixels med etiket og
+         mellemrum, og midterspalten er omkring 630 i et vindue paa 1600. De
+         braekkede altsaa i to linjer paa en helt almindelig skaerm.
+
+         Nu 112, 118, 128 og 102: 530 i alt, og de staar samlet ned til en
+         spalte paa cirka 540. MinWidth er et gulv, ikke et loft - vaelger man
+         en mappe med et langt navn, bliver netop den rulleliste bredere af
+         sig selv.
+
+         ============ OG DE SKAL STADIG KUNNE OMBRYDE ============
 
          Her stod en vandret StackPanel. Den tager sin NATURLIGE bredde og
          bliver ved med at goere det, ogsaa naar spalten er smallere: fire
@@ -309,7 +320,7 @@
            Det er den afgrænsning, der bruges oftest — «hvad talte vi om i
            denne måned» er et almindeligt spørgsmål, «hvad står der på norsk»
            er det ikke. -->
-      <ComboBox x:Name="Periodefilter" MinWidth="140" FontSize="12" Padding="8,5"
+      <ComboBox x:Name="Periodefilter" MinWidth="112" FontSize="12" Padding="7,5"
                 Margin="0,0,8,6" SelectionChanged="Periode_Aendret"
                 ToolTip="{i18n:Oversat searchview.kun_optagelser_fra_denne_periode}">
         <ComboBox.ItemTemplate>
@@ -317,21 +328,21 @@
         </ComboBox.ItemTemplate>
       </ComboBox>
 
-      <ComboBox x:Name="Mappefilter" MinWidth="150" FontSize="12" Padding="8,5"
+      <ComboBox x:Name="Mappefilter" MinWidth="118" FontSize="12" Padding="7,5"
                 Margin="0,0,0,6" SelectionChanged="Filter_Aendret" ToolTip="{i18n:Oversat searchview.kun_optagelser_i_denne_mappe}">
         <ComboBox.ItemTemplate>
           <DataTemplate><TextBlock Text="{Binding Navn}" /></DataTemplate>
         </ComboBox.ItemTemplate>
       </ComboBox>
 
-      <ComboBox x:Name="Typefilter" MinWidth="150" FontSize="12" Padding="8,5" Margin="8,0,0,6"
+      <ComboBox x:Name="Typefilter" MinWidth="128" FontSize="12" Padding="7,5" Margin="8,0,0,6"
                 SelectionChanged="Filter_Aendret" ToolTip="{i18n:Oversat searchview.kun_optagelser_af_denne_moedetype}">
         <ComboBox.ItemTemplate>
           <DataTemplate><TextBlock Text="{Binding Navn}" /></DataTemplate>
         </ComboBox.ItemTemplate>
       </ComboBox>
 
-      <ComboBox x:Name="Sprogfilter" MinWidth="130" FontSize="12" Padding="8,5" Margin="8,0,0,6"
+      <ComboBox x:Name="Sprogfilter" MinWidth="102" FontSize="12" Padding="7,5" Margin="8,0,0,6"
                 SelectionChanged="Filter_Aendret" ToolTip="{i18n:Oversat searchview.kun_optagelser_paa_dette_sprog}">
         <ComboBox.ItemTemplate>
           <DataTemplate><TextBlock Text="{Binding Navn}" /></DataTemplate>
