@@ -3,6 +3,7 @@ using System.Globalization;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Media;
 using NoteApp.Core;
 using NoteApp.Core.Llm;
@@ -353,14 +354,14 @@ public partial class TemplatesView : UserControl
         FeltLaengde.ItemsSource = Laengder;
         FeltLaengde.SelectedItem = Naermeste(t.MaxTokens);
         _valgtLaengde = t.MaxTokens;
-        FeltSystem.Text = t.SystemPrompt;
+        SaetTekst(FeltSystem, t.SystemPrompt);
 
         _udeladte = new List<string>(t.UdeladteAfsnit);
         HakDeltagere.IsChecked = t.TagDeltagerregler;
         _udeladteFelter = new List<string>(t.UdeladteFelter);
         Byg_Afsnit();
         Byg_Felter();
-        FeltBruger.Text = t.UserPrompt;
+        SaetTekst(FeltBruger, t.UserPrompt);
 
         // HER BLEV SKABELONENS PreferredModel LAEST IND I EN COMBOBOX.
         // Feltet findes stadig i filformatet, saa gamle skabeloner kan laeses,
@@ -453,7 +454,7 @@ public partial class TemplatesView : UserControl
         // AFSNITTENE LAESES AF DET, DER STAAR I FELTET - ikke af den gemte
         // skabelon. Skriver man et nyt «## Citater», skal hakket staa med det
         // samme og ikke foerst efter et gem.
-        var fundne = PromptTemplate.AfsnitI(FeltSystem.Text);
+        var fundne = PromptTemplate.AfsnitI(Tekst(FeltSystem));
 
         // Et fravalg af et afsnit, teksten ikke har mere, skal ikke blive
         // haengende i filen og forvirre naeste laeser.
@@ -544,9 +545,17 @@ public partial class TemplatesView : UserControl
 
         if (ude.Count == 0)
         {
+            Streg_Afsnit();
             Afsnitsbesked.Visibility = Visibility.Collapsed;
             return;
         }
+
+        // ============ OG DE STREGES OVER INDE I TEKSTEN ============
+        //
+        // Hakket sagde det, og linjen her siger det - men i boksen saa alt ens
+        // ud, saa man skulle selv holde styr paa, hvilke linjer der ikke blev
+        // sendt. Nu kan man se det dér, hvor teksten staar.
+        Streg_Afsnit();
 
         Afsnitsbesked.Visibility = Visibility.Visible;
         Afsnitsbesked.Text = ude.Count == 1
@@ -567,12 +576,10 @@ public partial class TemplatesView : UserControl
     /// </remarks>
     private void Marker_Afsnit(string navn)
     {
-        var tekst = FeltSystem.Text;
-        var linjer = tekst.Replace("\r\n", "\n").Split('\n');
+        var linjer = Tekst(FeltSystem).Split('\n');
 
         var start = -1;
-        var slut = tekst.Length;
-        var plads = 0;
+        var slut = linjer.Length - 1;
 
         for (var i = 0; i < linjer.Length; i++)
         {
@@ -580,17 +587,13 @@ public partial class TemplatesView : UserControl
             var dette = erOverskrift && linjer[i].TrimStart('#').Trim()
                 .Equals(navn, StringComparison.CurrentCultureIgnoreCase);
 
-            if (dette) start = plads;
-            else if (start >= 0 && erOverskrift) { slut = plads; break; }
-
-            plads += linjer[i].Length + 1;
+            if (dette) start = i;
+            else if (start >= 0 && erOverskrift) { slut = i - 1; break; }
         }
 
         if (start < 0) return;
 
-        FeltSystem.Focus();
-        FeltSystem.Select(start, Math.Min(slut, tekst.Length) - start);
-        FeltSystem.ScrollToLine(Math.Max(0, FeltSystem.GetLineIndexFromCharacterIndex(start)));
+        Marker(FeltSystem, start, slut);
     }
 
     private bool _byggerAfsnit;
@@ -614,7 +617,7 @@ public partial class TemplatesView : UserControl
         _byggerFelter = true;
         Feltvalg.Children.Clear();
 
-        var tekst = FeltBruger.Text;
+        var tekst = Tekst(FeltBruger);
 
         foreach (var f in PromptTemplate.Fields.Keys.Where(k => k != Deltagerregler.Felt))
         {
@@ -655,7 +658,7 @@ public partial class TemplatesView : UserControl
         if (sender is not CheckBox { Tag: string felt } hak) return;
 
         var mærke = "{{" + felt + "}}";
-        var staar = FeltBruger.Text.Contains(mærke, StringComparison.CurrentCultureIgnoreCase);
+        var staar = Tekst(FeltBruger).Contains(mærke, StringComparison.CurrentCultureIgnoreCase);
 
         if (hak.IsChecked == true)
         {
@@ -667,9 +670,10 @@ public partial class TemplatesView : UserControl
                 // overskrift, saa modellen ved hvad tallet eller navnet er.
                 var linje = felt == "transskription" ? mærke : $"{Feltnavn(felt)}: {mærke}";
 
-                FeltBruger.Text = FeltBruger.Text.TrimEnd() + "\n\n" + linje;
-                FeltBruger.Select(FeltBruger.Text.Length - linje.Length, linje.Length);
-                FeltBruger.ScrollToEnd();
+                SaetTekst(FeltBruger, Tekst(FeltBruger).TrimEnd() + "\n\n" + linje);
+
+                var sidste = FeltBruger.Document.Blocks.OfType<Paragraph>().Count() - 1;
+                Marker(FeltBruger, sidste, sidste);
             }
         }
         else if (!_udeladteFelter.Contains(felt, StringComparer.CurrentCultureIgnoreCase))
@@ -699,6 +703,16 @@ public partial class TemplatesView : UserControl
             .Where(k => k.IsChecked != true)
             .Select(k => Feltnavn((string)k.Tag!))
             .ToList();
+
+        // De fravalgte LINJER streges over i teksten, saa man kan se det dér,
+        // hvor teksten staar - se Streg_Linjer.
+        var maerker = Feltvalg.Children.OfType<CheckBox>()
+            .Where(k => k.IsChecked != true)
+            .Select(k => "{{" + (string)k.Tag! + "}}")
+            .ToList();
+
+        Streg_Linjer(FeltBruger, (_, linje) =>
+            maerker.Any(m => linje.Contains(m, StringComparison.CurrentCultureIgnoreCase)));
 
         if (ude.Count == 0)
         {
@@ -747,6 +761,101 @@ public partial class TemplatesView : UserControl
         Marker_Afsnit(navn);
     }
 
+    // ==================== TEKSTRUDERNE ====================
+    //
+    // De to store felter er RichTextBox og ikke TextBox, fordi de fravalgte
+    // linjer skal kunne streges over inde i teksten. Alt herunder er det, der
+    // skal til for at bruge en RichTextBox som et almindeligt tekstfelt: eet
+    // afsnit pr. linje, og teksten laest og skrevet som ren tekst.
+
+    /// <summary>Indholdet som ren tekst — ét afsnit er én linje.</summary>
+    private static string Tekst(RichTextBox r) =>
+        string.Join("\n", r.Document.Blocks.OfType<Paragraph>()
+            .Select(a => new TextRange(a.ContentStart, a.ContentEnd).Text.TrimEnd('\r')));
+
+    /// <summary>Fylder ruden med ren tekst.</summary>
+    private void SaetTekst(RichTextBox r, string tekst)
+    {
+        var doc = new FlowDocument { PagePadding = new Thickness(0) };
+
+        foreach (var linje in tekst.Replace("\r\n", "\n").Split('\n'))
+            doc.Blocks.Add(new Paragraph(new Run(linje)) { Margin = new Thickness(0) });
+
+        r.Document = doc;
+    }
+
+    /// <summary>Sat mens ruden bliver tegnet om — ellers svarer TextChanged på os selv.</summary>
+    private bool _tegner;
+
+    /// <summary>
+    /// Streger de linjer over, der ikke bliver sendt.
+    /// </summary>
+    /// <remarks>
+    /// EN AENDRING AF FORMATERINGEN UDLØSER TextChanged i en RichTextBox. Uden
+    /// <see cref="_tegner"/> ville hver overstregning kalde os selv igen.
+    /// </remarks>
+    private void Streg_Linjer(RichTextBox r, Func<int, string, bool> udeladt)
+    {
+        if (_tegner) return;
+        _tegner = true;
+
+        var nr = 0;
+
+        foreach (var a in r.Document.Blocks.OfType<Paragraph>())
+        {
+            var linje = new TextRange(a.ContentStart, a.ContentEnd).Text.TrimEnd('\r');
+            var fra = udeladt(nr++, linje);
+
+            a.TextDecorations = fra ? TextDecorations.Strikethrough : null;
+            if (Pensel(fra ? "Slukket" : "Tekst") is { } pensel) a.Foreground = pensel;
+        }
+
+        _tegner = false;
+    }
+
+    /// <summary>
+    /// Streger de linjer over i instruktionen, der hører til et fravalgt afsnit.
+    /// </summary>
+    /// <remarks>
+    /// Et afsnit er overskriften og alt frem til den næste «## »-linje — samme
+    /// afgrænsning som <c>PromptTemplate</c> bruger, når dokumentet laves.
+    /// </remarks>
+    private void Streg_Afsnit()
+    {
+        var ude = new HashSet<string>(
+            Afsnit.Children.OfType<CheckBox>()
+                .Where(k => k.IsChecked != true)
+                .Select(k => (string)k.Tag!),
+            StringComparer.CurrentCultureIgnoreCase);
+
+        var linjer = Tekst(FeltSystem).Split('\n');
+        var fravalgt = new HashSet<int>();
+        var i_afsnit = false;
+
+        for (var i = 0; i < linjer.Length; i++)
+        {
+            var erOverskrift = linjer[i].StartsWith("##") && !linjer[i].StartsWith("###");
+
+            if (erOverskrift) i_afsnit = ude.Contains(linjer[i].TrimStart('#').Trim());
+            if (i_afsnit) fravalgt.Add(i);
+        }
+
+        Streg_Linjer(FeltSystem, (nr, _) => fravalgt.Contains(nr));
+    }
+
+    /// <summary>Markerer og ruller frem til de afsnit, der hører til ét udsnit.</summary>
+    private static void Marker(RichTextBox r, int fraLinje, int tilLinje)
+    {
+        var afsnit = r.Document.Blocks.OfType<Paragraph>().ToList();
+        if (fraLinje < 0 || fraLinje >= afsnit.Count) return;
+
+        tilLinje = Math.Min(tilLinje, afsnit.Count - 1);
+
+        r.Selection.Select(afsnit[fraLinje].ContentStart, afsnit[tilLinje].ContentEnd);
+        r.Focus();
+        afsnit[fraLinje].BringIntoView();
+    }
+
     // -------------------------------------------------------------- ændring
 
     private void Aendret(object sender, TextChangedEventArgs e)
@@ -766,7 +875,7 @@ public partial class TemplatesView : UserControl
 
     private void Foelg_Felter()
     {
-        var tekst = FeltBruger.Text;
+        var tekst = Tekst(FeltBruger);
 
         foreach (var k in Feltvalg.Children.OfType<CheckBox>())
         {
@@ -786,7 +895,7 @@ public partial class TemplatesView : UserControl
 
     private void Foelg_Afsnit()
     {
-        var nu = PromptTemplate.AfsnitI(FeltSystem.Text);
+        var nu = PromptTemplate.AfsnitI(Tekst(FeltSystem));
         var vist = Afsnit.Children.OfType<CheckBox>().Select(k => (string)k.Tag).ToList();
 
         if (nu.SequenceEqual(vist, StringComparer.CurrentCultureIgnoreCase)) return;
@@ -813,7 +922,7 @@ public partial class TemplatesView : UserControl
     /// </summary>
     private void TjekFelter()
     {
-        var tekst = FeltBruger.Text;
+        var tekst = Tekst(FeltBruger);
 
         var brugte = System.Text.RegularExpressions.Regex
             .Matches(tekst, @"\{\{\s*([a-zA-Z_æøåÆØÅ0-9]+)\s*\}\}")
@@ -903,13 +1012,13 @@ public partial class TemplatesView : UserControl
         // laengden er en liste, man vaelger i. Et valg i en liste kan ikke vaere
         // ulaeseligt, saa der er ikke noget at kontrollere.
 
-        if (string.IsNullOrWhiteSpace(FeltSystem.Text))
+        if (string.IsNullOrWhiteSpace(Tekst(FeltSystem)))
         {
             Dialogs.AppDialog.Vis(Window.GetWindow(this), "Mangler instruktion", "Instruktionen til modellen må ikke være tom — det er den, der afgør, hvad der kommer ud.", Dialogs.Slags.Pas_paa);
             return;
         }
 
-        if (!FeltBruger.Text.Contains("{{transskription}}"))
+        if (!Tekst(FeltBruger).Contains("{{transskription}}"))
         {
             var ja = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
                 "Mødet mangler i mødetypen",
@@ -928,11 +1037,11 @@ public partial class TemplatesView : UserControl
         _valgt.Mappe = _mappe;
         // Temperaturen roeres ikke - den staar, som den stod i filen.
         _valgt.MaxTokens = _valgtLaengde;
-        _valgt.SystemPrompt = FeltSystem.Text.Trim();
+        _valgt.SystemPrompt = Tekst(FeltSystem).Trim();
         _valgt.UdeladteAfsnit = new List<string>(_udeladte);
         _valgt.TagDeltagerregler = HakDeltagere.IsChecked == true;
         _valgt.UdeladteFelter = new List<string>(_udeladteFelter);
-        _valgt.UserPrompt = FeltBruger.Text.Trim();
+        _valgt.UserPrompt = Tekst(FeltBruger).Trim();
 
         // SIDSTE SPAERRE. Knappen er graa, naar udskriften mangler, men et
         // gem kan ogsaa komme herind ad andre veje. En skabelon uden

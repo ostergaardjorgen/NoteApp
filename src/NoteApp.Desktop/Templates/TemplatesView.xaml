@@ -316,9 +316,20 @@
               <!-- ALMINDELIG SKRIFT, IKKE CONSOLAS. Monospace siger «det her
                    er kode» - og det er det ikke: det er saetninger paa dansk om,
                    hvordan referatet skal skrives. -->
-              <TextBox x:Name="FeltSystem" AcceptsReturn="True" TextWrapping="Wrap"
-                       VerticalScrollBarVisibility="Auto" AcceptsTab="True"
-                       FontSize="13" TextChanged="Aendret" />
+              <!-- ============ RichTextBox OG IKKE TextBox ============
+
+                   De fravalgte afsnit og felter skal kunne STREGES OVER inde i
+                   selve teksten. Hakket sagde det, og linjen under sagde det,
+                   men i boksen saa alt ens ud - saa maatte man selv holde styr
+                   paa, hvilke linjer der ikke blev sendt.
+
+                   En TextBox kan kun have een farve og een streg for hele sit
+                   indhold. Derfor en RichTextBox med eet afsnit pr. linje; se
+                   Streg_Linjer. -->
+              <RichTextBox x:Name="FeltSystem" AcceptsReturn="True" AcceptsTab="True"
+                           VerticalScrollBarVisibility="Auto"
+                           HorizontalScrollBarVisibility="Disabled"
+                           FontSize="13" TextChanged="Aendret" />
             </DockPanel>
           </TabItem>
 
@@ -378,9 +389,10 @@
                 </StackPanel>
               </Border>
 
-              <TextBox x:Name="FeltBruger" AcceptsReturn="True" TextWrapping="Wrap"
-                       VerticalScrollBarVisibility="Auto" AcceptsTab="True"
-                       FontSize="13" TextChanged="Aendret" />
+              <RichTextBox x:Name="FeltBruger" AcceptsReturn="True" AcceptsTab="True"
+                           VerticalScrollBarVisibility="Auto"
+                           HorizontalScrollBarVisibility="Disabled"
+                           FontSize="13" TextChanged="Aendret" />
             </DockPanel>
           </TabItem>
 
