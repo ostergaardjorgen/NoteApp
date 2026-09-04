@@ -216,6 +216,10 @@
     "aabn_logfilen": "Open the log file",
     "alt_appen_har_gjort_hvornaar_med_hvilken_m": "Everything the app has done, when, with which model — and how it went.",
     "der_er_ikke_sket_noget_endnu_historikken_f": "Nothing has happened yet. The history fills up as you record meetings, transcribe them and produce documents.",
+    "soeg_i_historikken": "Search the history",
+    "ingen_poster_passer_paa_det_valgte": "No entries match the current selection. Try another period, another tab — or press «Clear».",
+    "kun_poster_fra_denne_periode": "Only entries from this period",
+    "vis_det_hele_igen": "Show everything again",
     "gaa_til_den_linjen_handler_om": "Go to the one the line is about",
     "historik": "History",
     "opdater": "Refresh"

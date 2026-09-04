@@ -412,6 +412,10 @@
     "aabn_logfilen": "Åbn logfilen",
     "alt_appen_har_gjort_hvornaar_med_hvilken_m": "Alt appen har gjort, hvornår, med hvilken model — og hvordan det gik.",
     "der_er_ikke_sket_noget_endnu_historikken_f": "Der er ikke sket noget endnu. Historikken fyldes, efterhånden som du optager møder, skriver dem ud og laver dokumenter.",
+    "soeg_i_historikken": "Søg i historikken",
+    "ingen_poster_passer_paa_det_valgte": "Ingen poster passer på det, der er valgt. Prøv en anden periode, en anden fane — eller tryk «Ryd».",
+    "kun_poster_fra_denne_periode": "Kun poster fra denne periode",
+    "vis_det_hele_igen": "Vis det hele igen",
     "gaa_til_den_linjen_handler_om": "Gå til den, linjen handler om",
     "historik": "Historik",
     "opdater": "Opdatér"

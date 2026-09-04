@@ -32,20 +32,160 @@
     <Border Grid.Row="1" Background="{DynamicResource Panel}" CornerRadius="10"
             BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
       <DockPanel>
-        <Grid DockPanel.Dock="Top" Margin="20,16,20,10">
-          <TextBlock x:Name="Antal" FontSize="13.5" FontWeight="SemiBold" VerticalAlignment="Center" />
-          <ComboBox x:Name="Filter" HorizontalAlignment="Right" Width="200"
-                    SelectionChanged="Filter_Valgt" />
+        <!-- ============ FANER I STEDET FOR EN RULLELISTE ============
+
+             Her stod en ComboBox med «Alt» i. En rulleliste skjuler sine
+             muligheder, indtil man klikker - saa man kunne ikke se, at der
+             OVERHOVEDET kunne afgraenses, og hvad man kunne afgraense paa.
+             Resten af appen skifter indhold med faner: udskrift/dokumenter paa
+             optagelsen, dokumentraekken inde i fanen. Historikken goer det nu
+             ogsaa.
+
+             Raekken bygges i kode ud fra den samme liste, som filtrerer - saa
+             en ny slags haendelse ikke kan blive en fane uden et filter eller
+             omvendt. Se Byg_Faner. -->
+        <Border DockPanel.Dock="Top" BorderBrush="{DynamicResource PanelKant}"
+                BorderThickness="0,0,0,1" Padding="20,14,20,12">
+          <WrapPanel x:Name="Faner" Orientation="Horizontal" />
+        </Border>
+
+        <!-- ============ SØGNINGEN OG PERIODEN ============
+
+             Historikken er tusinder af poster efter et par ugers brug.
+             «Hvornaar sendte vi det referat» kan ikke besvares ved at rulle.
+
+             Perioden er den samme som i Cockpit - de samme fem valg og den
+             samme «Fra og til …» med to datovaelgere - fordi det er det samme
+             spoergsmaal stillet et andet sted. To maader at afgraense en
+             periode paa i den samme app er een for mange. -->
+        <Grid DockPanel.Dock="Top" Margin="20,14,20,4">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+          </Grid.ColumnDefinitions>
+
+          <TextBlock x:Name="Antal" Grid.Column="0" FontSize="13.5" FontWeight="SemiBold"
+                     VerticalAlignment="Center" />
+
+          <StackPanel Grid.Column="2" Orientation="Horizontal">
+            <Border x:Name="Soegefelt" Background="{DynamicResource Trykket}" CornerRadius="6"
+                    BorderBrush="{DynamicResource PanelKant}" BorderThickness="1"
+                    Width="240" Padding="4" Margin="0,0,8,0">
+              <Grid>
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="*" />
+                  <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <TextBox x:Name="Soeg" Grid.Column="0" FontSize="12.5" Padding="8,4"
+                         BorderThickness="0" Background="Transparent"
+                         TextChanged="Soeg_Aendret" KeyDown="Soeg_Tast" />
+                <TextBlock x:Name="SoegPladsholder" Grid.Column="0" IsHitTestVisible="False"
+                           FontSize="12.5" Margin="10,0,0,0" VerticalAlignment="Center"
+                           Foreground="{DynamicResource TekstMeget}"
+                           Text="{i18n:Oversat historyview.soeg_i_historikken}" />
+
+                <Button x:Name="SoegRyd" Grid.Column="1" Content="✕" Click="SoegRyd_Klik"
+                        Visibility="Collapsed" Cursor="Hand" FontSize="11"
+                        Padding="0" BorderThickness="0" Background="Transparent"
+                        Width="24" Height="24" Margin="0,0,3,0"
+                        ToolTip="{i18n:Oversat faelles.ryd_soegningen_escape}">
+                  <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                      <Border x:Name="flade" CornerRadius="12" Background="Transparent">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                      </Border>
+                      <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                          <Setter TargetName="flade" Property="Background" Value="{DynamicResource Svaev}" />
+                        </Trigger>
+                      </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                  </Button.Template>
+                </Button>
+              </Grid>
+            </Border>
+
+            <ComboBox x:Name="Periodefilter" MinWidth="140" FontSize="12" Padding="8,5"
+                      SelectionChanged="Periode_Aendret"
+                      ToolTip="{i18n:Oversat historyview.kun_poster_fra_denne_periode}">
+              <ComboBox.ItemTemplate>
+                <DataTemplate><TextBlock Text="{Binding Navn}" /></DataTemplate>
+              </ComboBox.ItemTemplate>
+            </ComboBox>
+
+            <Button x:Name="RydKnap" Content="{i18n:Oversat searchview.ryd}" Click="Ryd_Klik"
+                    Margin="8,0,0,0" Padding="10,5" FontSize="11.5" Visibility="Collapsed"
+                    ToolTip="{i18n:Oversat historyview.vis_det_hele_igen}" />
+          </StackPanel>
         </Grid>
+
+        <StackPanel x:Name="Datoraekke" DockPanel.Dock="Top" Orientation="Horizontal"
+                    HorizontalAlignment="Right" Margin="20,0,20,8" Visibility="Collapsed">
+          <TextBlock Text="{i18n:Oversat searchview.fra}" FontSize="11.5" VerticalAlignment="Center"
+                     Margin="0,0,7,0" Foreground="{DynamicResource TekstMeget}" />
+          <DatePicker x:Name="FraDato" Width="135" FontSize="12" SelectedDateChanged="Dato_Aendret" />
+
+          <TextBlock Text="{i18n:Oversat searchview.til}" FontSize="11.5" VerticalAlignment="Center"
+                     Margin="10,0,7,0" Foreground="{DynamicResource TekstMeget}" />
+          <DatePicker x:Name="TilDato" Width="135" FontSize="12" SelectedDateChanged="Dato_Aendret" />
+
+          <TextBlock x:Name="Datofejl" FontSize="11.5" VerticalAlignment="Center" Margin="12,0,0,0"
+                     Foreground="{DynamicResource Advarsel}" />
+        </StackPanel>
 
         <TextBlock x:Name="TomTekst" DockPanel.Dock="Top" Margin="20,10,20,0" FontSize="13"
                    TextWrapping="Wrap" LineHeight="21" Visibility="Collapsed"
                    Foreground="{DynamicResource TekstMeget}"
                    Text="{i18n:Oversat historyview.der_er_ikke_sket_noget_endnu_historikken_f}" />
 
-        <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="8,0,8,10">
-          <ItemsControl x:Name="Liste">
-            <ItemsControl.ItemTemplate>
+        <!-- AFGRAENSET, MEN TOMT, ER IKKE DET SAMME SOM TOMT.
+             «Der er ikke sket noget endnu» ville vaere forkert, naar der ER
+             sket noget - det er soegningen eller perioden, der ikke rammer. -->
+        <TextBlock x:Name="IngenTraef" DockPanel.Dock="Top" Margin="20,10,20,0" FontSize="13"
+                   TextWrapping="Wrap" LineHeight="21" Visibility="Collapsed"
+                   Foreground="{DynamicResource TekstMeget}"
+                   Text="{i18n:Oversat historyview.ingen_poster_passer_paa_det_valgte}" />
+
+        <!-- ============ LISTEN VIRTUALISERER ============
+
+             Her stod en ItemsControl inde i en ScrollViewer. Den bygger ALLE
+             raekker med det samme - ogsaa dem, ingen kan se. Med de 500, der
+             blev laest, gik det; historikken laeses nu hel, og et par tusind
+             raekker paa een gang er et sekunds hak, hver gang man klikker en
+             fane.
+
+             En ListBox med VirtualizingStackPanel bygger kun de raekker, der
+             er i billedet, og genbruger dem under rulningen. Markeringen er
+             slaaet fra: listen er til at laese i, ikke til at vaelge i. -->
+        <ListBox x:Name="Liste" Margin="8,0,8,10" Background="Transparent"
+                 BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                 ScrollViewer.VerticalScrollBarVisibility="Auto"
+                 VirtualizingStackPanel.IsVirtualizing="True"
+                 VirtualizingStackPanel.VirtualizationMode="Recycling">
+            <ListBox.ItemsPanel>
+              <ItemsPanelTemplate>
+                <VirtualizingStackPanel />
+              </ItemsPanelTemplate>
+            </ListBox.ItemsPanel>
+
+            <ListBox.ItemContainerStyle>
+              <Style TargetType="ListBoxItem">
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                <Setter Property="Focusable" Value="False" />
+                <Setter Property="Template">
+                  <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                      <ContentPresenter />
+                    </ControlTemplate>
+                  </Setter.Value>
+                </Setter>
+              </Style>
+            </ListBox.ItemContainerStyle>
+
+            <ListBox.ItemTemplate>
               <DataTemplate>
                 <Border Background="{DynamicResource Trykket}" CornerRadius="6" Padding="14,7" Margin="12,2"
                         BorderThickness="1" BorderBrush="{Binding Kantfarve}">
@@ -119,9 +259,8 @@
                   </Grid>
                 </Border>
               </DataTemplate>
-            </ItemsControl.ItemTemplate>
-          </ItemsControl>
-        </ScrollViewer>
+            </ListBox.ItemTemplate>
+          </ListBox>
       </DockPanel>
     </Border>
 

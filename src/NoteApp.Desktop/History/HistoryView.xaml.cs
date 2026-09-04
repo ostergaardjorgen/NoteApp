@@ -7,10 +7,50 @@ using NoteApp.Core;
 
 namespace NoteApp.Desktop.History;
 
+/// <summary>
+/// Navnene på kilderne, slået op ÉN gang pr. tegning.
+/// </summary>
+/// <remarks>
+/// HER LAA ET DISKOPSLAG PR. LINJE.
+///
+/// <c>SlaaOp</c> kaldte <c>DocumentStore.LoadAll()</c> — som læser hver eneste
+/// dokument-JSON — og <c>MeetingStore.FindById</c>, som gennemgår hver eneste
+/// mødemappe. Én gang pr. historikpost, op til to gange for dokumentlinjer.
+///
+/// Med de 500, der blev læst, mærkede man det ikke. Med hele historikken tog
+/// en omtegning 331 ms på 2.054 poster — og en omtegning sker ved hvert
+/// tastetryk i søgefeltet. Nu læses de to lister én gang og slås op på et id.
+/// </remarks>
+public sealed class Kildenavne
+{
+    private readonly Dictionary<string, string> _dokumenter = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, string> _optagelser = new(StringComparer.OrdinalIgnoreCase);
+
+    public Kildenavne()
+    {
+        try
+        {
+            foreach (var d in NoteApp.Core.Documents.DocumentStore.LoadAll())
+                _dokumenter[d.Id] = d.Title;
+        }
+        catch (Exception) { /* kan listen ikke laeses, staar linjerne uden link */ }
+
+        try
+        {
+            foreach (var m in MeetingStore.Alle())
+                _optagelser[m.Id.ToString()] = m.Title;
+        }
+        catch (Exception) { }
+    }
+
+    public string? Dokument(string id) => _dokumenter.GetValueOrDefault(id);
+    public string? Optagelse(string id) => _optagelser.GetValueOrDefault(id);
+}
+
 /// <summary>En post, som listen kan vise.</summary>
 public sealed class PostVisning
 {
-    public PostVisning(Haendelse a)
+    public PostVisning(Haendelse a, Kildenavne navne)
     {
         Klokkeslet = a.Tid.ToString("HH:mm:ss");
         Dato = a.Tid.ToString("d. MMM yyyy");
@@ -43,7 +83,7 @@ public sealed class PostVisning
         // som et link. Findes den ikke, staar der, at den er slettet - og det
         // er ogsaa et svar: linjen bliver staaende som det eneste spor af, at
         // noget fandtes.
-        (LinkTekst, Findes) = SlaaOp(a);
+        (LinkTekst, Findes) = SlaaOp(a, navne);
 
         HarLink = LinkTekst.Length > 0;
         LinkFarve = Findes
@@ -57,7 +97,7 @@ public sealed class PostVisning
     /// Returnerer tom tekst for hændelser uden en kilde at gå til — en
     /// hentning, en backup, et manglende opsætningstrin.
     /// </summary>
-    private static (string Tekst, bool Findes) SlaaOp(Haendelse a)
+    private static (string Tekst, bool Findes) SlaaOp(Haendelse a, Kildenavne navne)
     {
         if (a.Kilde.Length == 0) return ("", false);
 
@@ -66,22 +106,22 @@ public sealed class PostVisning
             switch (a.Slags)
             {
                 case HaendelseType.Dokument:
-                case HaendelseType.Slettet when NoteApp.Core.Documents.DocumentStore.LoadAll().Any(d => d.Id == a.Kilde):
+                case HaendelseType.Slettet when navne.Dokument(a.Kilde) is not null:
                 case HaendelseType.Flyttet:
                 {
-                    var d = NoteApp.Core.Documents.DocumentStore.LoadAll().FirstOrDefault(x => x.Id == a.Kilde);
-                    return d is null
+                    var titel = navne.Dokument(a.Kilde);
+                    return titel is null
                         ? ("dokumentet er slettet", false)
-                        : ($"Vis «{d.Title}»", true);
+                        : ($"Vis «{titel}»", true);
                 }
 
                 case HaendelseType.Optagelse:
                 case HaendelseType.Transskription:
                 {
-                    var m = MeetingStore.FindById(a.Kilde);
-                    return m is null
+                    var titel = navne.Optagelse(a.Kilde);
+                    return titel is null
                         ? ("optagelsen er slettet", false)
-                        : ($"Vis «{m.Value.Meta.Title}»", true);
+                        : ($"Vis «{titel}»", true);
                 }
 
                 default:
@@ -145,19 +185,96 @@ public partial class HistoryView : UserControl
         ("Sikkerhedskopier", HaendelseType.Backup)
     };
 
+    /// <summary>Fanen, der er valgt. Nummer i <see cref="Filtre"/>.</summary>
+    private int _fane;
+
+    /// <summary>Stilen på fanerne — den samme som resten af appen bruger.</summary>
+    private readonly System.Windows.Style? _fanestil;
+
+    /// <summary>Sat, mens fanerækken bygges — så et Checked ikke tegner alt om midt i.</summary>
+    private bool _bygger;
+
     public HistoryView()
     {
         InitializeComponent();
 
-        Filter.ItemsSource = Filtre.Select(f => f.Navn).ToList();
-        Filter.SelectedIndex = 0;
+        _fanestil = TryFindResource("Fanevalg") as System.Windows.Style
+                    ?? Application.Current?.TryFindResource("Fanevalg") as System.Windows.Style;
+
+        Byg_Faner();
+
+        // PERIODERNE ER DE SAMME SOM I COCKPIT, og med vilje: det er det samme
+        // spoergsmaal stillet et andet sted. Se SearchView.
+        Periodefilter.ItemsSource = new List<Periodepunkt>
+        {
+            new(Sprog.T("cockpit.heletiden"), null),
+            new("I dag", "idag"),
+            new("Denne uge", "uge"),
+            new("Denne måned", "maaned"),
+            new("I år", "aar"),
+            new("Fra og til …", "valgt")
+        };
+        Periodefilter.SelectedIndex = 0;
 
         Indlæs();
     }
 
+    /// <summary>Et valg i periodelisten. Samme form som Cockpits Filterpunkt.</summary>
+    public sealed record Periodepunkt(string Navn, string? Vaerdi);
+
+    /// <summary>Én fane pr. filter — bygget af den samme liste, som filtrerer.</summary>
+    private void Byg_Faner()
+    {
+        _bygger = true;
+        Faner.Children.Clear();
+
+        for (var i = 0; i < Filtre.Length; i++)
+        {
+            var knap = new RadioButton
+            {
+                GroupName = "historikfane",
+                Style = _fanestil,
+                Content = Filtre[i].Navn,
+                Tag = i,
+                Margin = new Thickness(0, 0, 8, 4),
+                IsChecked = i == _fane
+            };
+
+            knap.Checked += Fane_Valgt;
+            Faner.Children.Add(knap);
+        }
+
+        _bygger = false;
+    }
+
+    private void Fane_Valgt(object sender, RoutedEventArgs e)
+    {
+        if (_bygger) return;
+        if (sender is not RadioButton { Tag: int nr }) return;
+
+        _fane = nr;
+        Vis();
+    }
+
     private void Indlæs()
     {
-        _alle = Historik.Laes();
+        // ============ HELE HISTORIKKEN, IKKE DE NYESTE 500 ============
+        //
+        // Laes() tog som standard de nyeste 500. Det gik, da skaermen kun
+        // kunne rulle - men nu KAN der soeges og afgraenses paa periode, og en
+        // soegning, der kun kigger i de nyeste 500, svarer forkert uden at
+        // sige det. «Findes ikke» og «findes, men uden for de 500» er to
+        // forskellige svar.
+        //
+        // Det koster ingenting. Maalt 04-09-2026 paa 2.054 poster: filen er
+        // 530 KB (264 byte pr. post), og Laes(alt) tog 9,5 ms - hverken
+        // hurtigere eller langsommere end Laes(500), fordi den alligevel
+        // laeste og fortolkede hver linje foer den skar fra. 10.000 poster er
+        // 2,5 MB og under 50 ms.
+        //
+        // Det, der IKKE kunne baere det, var listen: se HistoryView.xaml, hvor
+        // den nu virtualiserer.
+        _alle = Historik.Laes(int.MaxValue);
 
         // HER BLEV «Intet har forladt denne pc» regnet ud og skrevet.
         //
@@ -173,12 +290,40 @@ public partial class HistoryView : UserControl
         Status.Text = Historik.Path;
     }
 
+    /// <summary>
+    /// Perioden, der er valgt — som i Cockpit.
+    /// </summary>
+    /// <remarks>
+    /// Regnestykket ligger i <see cref="Soegefilter"/> og ikke her. «I år»
+    /// begyndte engang 31-12 kl. 23:00, fordi 1. januar blev bygget med
+    /// sommertidens forskel; den fejl skal rettes ét sted og ikke to.
+    /// </remarks>
+    private (DateTimeOffset? Fra, DateTimeOffset? Til) Perioden()
+    {
+        var valg = (Periodefilter.SelectedItem as Periodepunkt)?.Vaerdi;
+
+        if (valg != "valgt") return Soegefilter.Periode(valg ?? "");
+
+        return (
+            FraDato.SelectedDate is { } f ? Soegefilter.Lokal(f.Date) : null,
+            TilDato.SelectedDate is { } t ? Soegefilter.SlutAfDagen(t) : null);
+    }
+
     private void Vis()
     {
-        var valgt = Filter.SelectedIndex >= 0 ? Filtre[Filter.SelectedIndex].Slags : null;
+        var slags = Filtre[_fane].Slags;
+        var soeg = Soeg.Text.Trim();
+        var (fra, til) = Perioden();
 
-        var poster = (valgt is null ? _alle : _alle.Where(a => a.Slags == valgt))
-            .Select(a => new PostVisning(a))
+        // Navnene slaas op EEN gang for hele tegningen - se Kildenavne.
+        var navne = new Kildenavne();
+
+        var poster = _alle
+            .Where(a => slags is null || a.Slags == slags)
+            .Where(a => fra is null || a.Tid >= fra)
+            .Where(a => til is null || a.Tid <= til)
+            .Where(a => soeg.Length == 0 || Rammer(a, soeg))
+            .Select(a => new PostVisning(a, navne))
             .ToList();
 
         Liste.ItemsSource = poster;
@@ -190,12 +335,94 @@ public partial class HistoryView : UserControl
             _ => $"{poster.Count} poster"
         };
 
-        TomTekst.Visibility = poster.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+        // AFGRAENSET, MEN TOMT, ER IKKE DET SAMME SOM TOMT. Beskeden «der er
+        // ikke sket noget endnu» ville vaere forkert, naar der ER sket noget -
+        // det er soegningen eller perioden, der ikke rammer.
+        var afgraenset = slags is not null || soeg.Length > 0 || fra is not null || til is not null;
+
+        RydKnap.Visibility = afgraenset ? Visibility.Visible : Visibility.Collapsed;
+
+        TomTekst.Visibility = poster.Count == 0 && !afgraenset
+            ? Visibility.Visible : Visibility.Collapsed;
+
+        IngenTraef.Visibility = poster.Count == 0 && afgraenset
+            ? Visibility.Visible : Visibility.Collapsed;
     }
 
-    private void Filter_Valgt(object sender, SelectionChangedEventArgs e)
+    /// <summary>Rammer søgeordet posten — i overskrift, detaljer eller model?</summary>
+    private static bool Rammer(Haendelse a, string soeg) =>
+        a.Hvad.Contains(soeg, StringComparison.CurrentCultureIgnoreCase)
+        || a.Detaljer.Contains(soeg, StringComparison.CurrentCultureIgnoreCase)
+        || a.Model.Contains(soeg, StringComparison.CurrentCultureIgnoreCase);
+
+    private void Soeg_Aendret(object sender, TextChangedEventArgs e)
     {
+        SoegPladsholder.Visibility = Soeg.Text.Length == 0
+            ? Visibility.Visible : Visibility.Collapsed;
+
+        SoegRyd.Visibility = Soeg.Text.Length == 0
+            ? Visibility.Collapsed : Visibility.Visible;
+
         if (IsInitialized) Vis();
+    }
+
+    private void Soeg_Tast(object sender, System.Windows.Input.KeyEventArgs e)
+    {
+        if (e.Key != System.Windows.Input.Key.Escape || Soeg.Text.Length == 0) return;
+
+        Soeg.Clear();
+        e.Handled = true;
+    }
+
+    private void SoegRyd_Klik(object sender, RoutedEventArgs e)
+    {
+        Soeg.Clear();
+        Soeg.Focus();
+    }
+
+    private void Periode_Aendret(object sender, SelectionChangedEventArgs e)
+    {
+        if (!IsInitialized) return;
+
+        var valgt = (Periodefilter.SelectedItem as Periodepunkt)?.Vaerdi == "valgt";
+        Datoraekke.Visibility = valgt ? Visibility.Visible : Visibility.Collapsed;
+
+        // Er der ikke valgt datoer endnu, er der ingen afgraensning at vise
+        // paa - og saa skal listen ikke toemmes, mens man leder efter
+        // datovaelgeren.
+        if (valgt && FraDato.SelectedDate is null && TilDato.SelectedDate is null) return;
+
+        Vis();
+    }
+
+    private void Dato_Aendret(object sender, SelectionChangedEventArgs e)
+    {
+        if (!IsInitialized) return;
+
+        // VENDT OM ER IKKE EN FEJL, MAN SKAL GAETTE SIG TIL. Uden linjen her
+        // staar listen bare tom, og man leder efter en post, der er der.
+        Datofejl.Text = FraDato.SelectedDate is { } f && TilDato.SelectedDate is { } t && f > t
+            ? "«Fra» er efter «til»."
+            : "";
+
+        Vis();
+    }
+
+    /// <summary>Rydder alle afgrænsninger — søgeord, fane og periode.</summary>
+    private void Ryd_Klik(object sender, RoutedEventArgs e)
+    {
+        Soeg.Clear();
+
+        _fane = 0;
+        Byg_Faner();
+
+        Periodefilter.SelectedIndex = 0;
+        FraDato.SelectedDate = null;
+        TilDato.SelectedDate = null;
+        Datoraekke.Visibility = Visibility.Collapsed;
+        Datofejl.Text = "";
+
+        Vis();
     }
 
     private void Genindlaes_Click(object sender, RoutedEventArgs e) => Indlæs();
