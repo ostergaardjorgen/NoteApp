@@ -14,7 +14,7 @@
        søgning, der koster et ekstra klik, bliver til et opslag man overvejer
        frem for noget, man bare gør. -->
 
-  <Grid Margin="24,20,24,20">
+  <Grid x:Name="Rammen" Margin="24,20,24,20">
 
     <!-- ==================== TRE SPALTER ====================
 
@@ -36,7 +36,7 @@
          en kort forklaring dér i stedet. Opgaverne til hoejre bliver staaende
          begge veje: de er ikke et svar paa en soegning, de er det, der venter.
     -->
-    <Grid>
+    <Grid x:Name="Spalterne">
       <!-- SPALTERNE KAN TRAEKKES, OG BREDDEN HUSKES.
            En bredde, man selv har trukket paa plads, og som er vaek i morgen,
            er vaerre end en fast bredde: saa traekker man den samme spalte hver
@@ -49,7 +49,7 @@
       <Grid.ColumnDefinitions>
         <ColumnDefinition x:Name="Venstrespalte" Width="340" MinWidth="220" />
         <ColumnDefinition Width="Auto" />
-        <ColumnDefinition Width="*" MinWidth="320" />
+        <ColumnDefinition x:Name="Midterspalte" Width="*" MinWidth="300" />
         <ColumnDefinition Width="Auto" />
         <ColumnDefinition x:Name="Hoejrespalte" Width="340" MinWidth="220" />
       </Grid.ColumnDefinitions>
@@ -288,16 +288,29 @@
          felt blandt fire. Her er de en indsnævring af det, man lige har
          skrevet — og de er små, fordi de sjældnere bruges. -->
     <StackPanel HorizontalAlignment="Center" Margin="0,12,0,0">
-    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+    <!-- ============ DEN SKAL KUNNE OMBRYDE ============
+
+         Her stod en vandret StackPanel. Den tager sin NATURLIGE bredde og
+         bliver ved med at goere det, ogsaa naar spalten er smallere: fire
+         rullelister med MinWidth 140, 150, 150 og 130 plus etiket og
+         mellemrum er godt 700 pixels, og midterspalten er omkring 570 i et
+         vindue paa 1536. Resten laa uden for kortet og blev klippet - baade
+         til venstre og til hoejre, saa kassen saa ud til at mangle sine
+         kanter.
+
+         En WrapPanel bryder i stedet ned paa en linje mere. Bundmargenen
+         staar paa hvert barn og ikke paa panelet, saa den anden linje faar
+         luft, uden at der kommer et hul, naar der kun er én. -->
+    <WrapPanel HorizontalAlignment="Center">
       <TextBlock Text="{i18n:Oversat searchview.soeg_kun_i}" FontSize="11.5" VerticalAlignment="Center"
-                 Margin="0,0,10,0" Foreground="{DynamicResource TekstMeget}" />
+                 Margin="0,0,10,6" Foreground="{DynamicResource TekstMeget}" />
 
       <!-- PERIODEN STÅR FØRST.
            Det er den afgrænsning, der bruges oftest — «hvad talte vi om i
            denne måned» er et almindeligt spørgsmål, «hvad står der på norsk»
            er det ikke. -->
       <ComboBox x:Name="Periodefilter" MinWidth="140" FontSize="12" Padding="8,5"
-                Margin="0,0,8,0" SelectionChanged="Periode_Aendret"
+                Margin="0,0,8,6" SelectionChanged="Periode_Aendret"
                 ToolTip="{i18n:Oversat searchview.kun_optagelser_fra_denne_periode}">
         <ComboBox.ItemTemplate>
           <DataTemplate><TextBlock Text="{Binding Navn}" /></DataTemplate>
@@ -305,30 +318,30 @@
       </ComboBox>
 
       <ComboBox x:Name="Mappefilter" MinWidth="150" FontSize="12" Padding="8,5"
-                SelectionChanged="Filter_Aendret" ToolTip="{i18n:Oversat searchview.kun_optagelser_i_denne_mappe}">
+                Margin="0,0,0,6" SelectionChanged="Filter_Aendret" ToolTip="{i18n:Oversat searchview.kun_optagelser_i_denne_mappe}">
         <ComboBox.ItemTemplate>
           <DataTemplate><TextBlock Text="{Binding Navn}" /></DataTemplate>
         </ComboBox.ItemTemplate>
       </ComboBox>
 
-      <ComboBox x:Name="Typefilter" MinWidth="150" FontSize="12" Padding="8,5" Margin="8,0,0,0"
+      <ComboBox x:Name="Typefilter" MinWidth="150" FontSize="12" Padding="8,5" Margin="8,0,0,6"
                 SelectionChanged="Filter_Aendret" ToolTip="{i18n:Oversat searchview.kun_optagelser_af_denne_moedetype}">
         <ComboBox.ItemTemplate>
           <DataTemplate><TextBlock Text="{Binding Navn}" /></DataTemplate>
         </ComboBox.ItemTemplate>
       </ComboBox>
 
-      <ComboBox x:Name="Sprogfilter" MinWidth="130" FontSize="12" Padding="8,5" Margin="8,0,0,0"
+      <ComboBox x:Name="Sprogfilter" MinWidth="130" FontSize="12" Padding="8,5" Margin="8,0,0,6"
                 SelectionChanged="Filter_Aendret" ToolTip="{i18n:Oversat searchview.kun_optagelser_paa_dette_sprog}">
         <ComboBox.ItemTemplate>
           <DataTemplate><TextBlock Text="{Binding Navn}" /></DataTemplate>
         </ComboBox.ItemTemplate>
       </ComboBox>
 
-      <Button x:Name="RydFilter" Content="{i18n:Oversat searchview.ryd}" Click="RydFilter_Klik" Margin="8,0,0,0"
+      <Button x:Name="RydFilter" Content="{i18n:Oversat searchview.ryd}" Click="RydFilter_Klik" Margin="8,0,0,6"
               Padding="10,5" FontSize="11.5" Visibility="Collapsed"
               ToolTip="{i18n:Oversat searchview.soeg_i_det_hele_igen}" />
-    </StackPanel>
+    </WrapPanel>
 
     <!-- ============ DEN VALGTE PERIODE ============
          Kommer først frem, når man vælger «Fra og til» — to datovælgere, der

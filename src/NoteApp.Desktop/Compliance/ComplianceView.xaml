@@ -46,7 +46,8 @@
     <TabControl Grid.Row="1" Style="{StaticResource Fanerude}">
 
       <TabItem Header="{i18n:Oversat complianceview.overblik}" Style="{StaticResource Fane}">
-        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                      Padding="0,0,14,0">
           <StackPanel>
     <!-- ============ Det, vi ved, og det, vi ikke ved =============
                  Den staar OEVERST og ikke som en fodnote. En compliance-side, der
@@ -148,7 +149,8 @@
       </TabItem>
 
       <TabItem Header="{i18n:Oversat complianceview.hvor_data_gaar_hen_2}" Style="{StaticResource Fane}">
-        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                      Padding="0,0,14,0">
           <StackPanel>
     <!-- ==================== Datastrømmen ========================= -->
             <Border Background="{DynamicResource Panel}" CornerRadius="10" Padding="20,16"
@@ -248,7 +250,8 @@
       </TabItem>
 
       <TabItem Header="{i18n:Oversat complianceview.leverandoeren}" Style="{StaticResource Fane}">
-        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                      Padding="0,0,14,0">
           <StackPanel>
     <!-- ==================== Tastaturvagten ========================
 
@@ -427,7 +430,8 @@
            Grundlaget staar i Kontoattester.Kontrolpunkter og er praevet.
            Visker nogen forskellen ud, falder KontoattestTest. -->
       <TabItem Header="{i18n:Oversat complianceview.kontrolpunkter}" Style="{StaticResource Fane}">
-        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                      Padding="0,0,14,0">
           <StackPanel>
 
             <StackPanel Margin="0,0,0,14">
@@ -575,7 +579,8 @@
       </TabItem>
 
       <TabItem Header="{i18n:Oversat complianceview.underdatabehandlere}" Style="{StaticResource Fane}">
-        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                      Padding="0,0,14,0">
           <StackPanel>
     <!-- ============== Det, der kræver præcision ================== -->
             <Border Background="{DynamicResource Panel}" CornerRadius="10" Padding="20,16"
@@ -632,7 +637,8 @@
            samme side, laeser man den ene som den anden, og saa er begge
            forklaret forkert. -->
       <TabItem Header="{i18n:Oversat complianceview.andre_integrationer}" Style="{StaticResource Fane}">
-        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                      Padding="0,0,14,0">
           <StackPanel>
 
             <Border Background="{DynamicResource Panel}" CornerRadius="10" Padding="20,16"
@@ -866,7 +872,8 @@
       </TabItem>
 
       <TabItem Header="{i18n:Oversat complianceview.modeller_og_licenser_2}" Style="{StaticResource Fane}">
-        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                      Padding="0,0,14,0">
           <StackPanel>
     <!-- ==================== Modeller og licenser ================= -->
             <Border Background="{DynamicResource Panel}" CornerRadius="10" Padding="20,16"
@@ -1073,7 +1080,8 @@
             </Grid>
           </Border>
 
-          <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+          <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                      Padding="0,0,14,0">
             <StackPanel>
               <!-- PRISEN ER ET SKOEN, OG DET SKAL STAA.
                    Tokentallene er leverandoerens egne og er noejagtige. Det
@@ -1152,7 +1160,8 @@
       </TabItem>
 
       <TabItem Header="{i18n:Oversat complianceview.forbehold}" Style="{StaticResource Fane}">
-        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                      Padding="0,0,14,0">
           <StackPanel>
     <!-- ==================== Det uafklarede ======================= -->
             <Border Background="{DynamicResource Panel}" CornerRadius="10" Padding="20,16"

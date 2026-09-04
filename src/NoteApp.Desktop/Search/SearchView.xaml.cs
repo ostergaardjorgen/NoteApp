@@ -190,12 +190,77 @@ public partial class SearchView : UserControl
 
             if (v > 0) Venstrespalte.Width = new GridLength(v);
             if (h > 0) Hoejrespalte.Width = new GridLength(h);
+
+            // En gemt bredde kan vaere fra en stoerre skaerm end den, appen
+            // aabnes paa nu.
+            KlipSpalter();
         }
         catch (Exception)
         {
             // Kan indstillingerne ikke laeses, staar standardbredderne. En
             // spaltebredde er ikke noget at vaelte en skaerm for.
         }
+    }
+
+    /// <summary>
+    /// Sidespalterne må ikke skubbe midten ud over kanten.
+    /// </summary>
+    /// <remarks>
+    /// DE TO SIDESPALTER ER ABSOLUTTE BREDDER, og en absolut Grid-spalte
+    /// skrumper ikke, når pladsen slipper op — den bliver stående, og resten
+    /// af rækken lægger sig uden for vinduet. Målt i et vindue på appens
+    /// mindstebredde 1040: 340 + 14 + 320 + 14 + 340 er 1028, og der var 796
+    /// at gøre godt med. Hele højre spalte lå uden for kanten, og opgaverne
+    /// var klippet midt i et ord.
+    ///
+    /// Det kan ikke løses med stjernebredder: bredderne animeres, trækkes og
+    /// gemmes som tal, og en stjerne er ikke et tal. Her klippes de i stedet
+    /// til det, der er plads til — og kun dét: bliver vinduet bredt igen, står
+    /// den bredde, man selv har trukket, uændret i <c>_venstreFuld</c>.
+    ///
+    /// SKRIVER KUN, NÅR DET ÆNDRER NOGET. En bredde sat inde i SizeChanged
+    /// udløser en ny måling, og uden den her betingelse ville de to gå i ring.
+    /// </remarks>
+    private void Spalter_Maalt(object sender, SizeChangedEventArgs e) => KlipSpalter();
+
+    /// <summary>
+    /// Klipper sidespalterne til det, der er plads til.
+    /// </summary>
+    /// <remarks>
+    /// DEN SKAL KALDES BEGGE STEDER. Første forsøg hang den kun på
+    /// SizeChanged, og det virkede ikke: bredderne bliver hentet fra
+    /// indstillingerne EFTER den første måling, og at sætte en spaltebredde
+    /// ændrer ikke gitterets egen bredde — der kommer altså ingen ny måling,
+    /// og de gemte 340 blev stående. Målt: højre spalte lå stadig uden for
+    /// kanten. Derfor kaldes den også, når bredderne er hentet.
+    /// </remarks>
+    private void KlipSpalter()
+    {
+        // Mens spalterne folder sig ind, er MinWidth sat til nul med vilje.
+        // Saa er det animationen, der bestemmer, ikke den her.
+        if (Venstrespalte.MinWidth < 1) return;
+
+        // MAALT PAA RUDEN, IKKE PAA GITTERET. Gitteret med de tre spalter
+        // rapporterer sin ØNSKEDE bredde, ikke den plads det fik: 1028 i et
+        // vindue, hvor der var 780. Saa kunne det ikke selv se, at det var
+        // for stort. Ruden udenom kender den rigtige bredde.
+        var plads = ActualWidth
+                    - Rammen.Margin.Left - Rammen.Margin.Right
+                    - VenstreSplitter.Width - HoejreSplitter.Width
+                    - Midterspalte.MinWidth;
+
+        if (double.IsNaN(plads) || plads <= 0) return;
+
+        var loft = Math.Max(220, plads / 2);
+
+        Klip(Venstrespalte, loft);
+        Klip(Hoejrespalte, loft);
+    }
+
+    private static void Klip(ColumnDefinition spalte, double loft)
+    {
+        if (!spalte.Width.IsAbsolute || spalte.Width.Value <= loft) return;
+        spalte.Width = new GridLength(loft);
     }
 
     /// <summary>
@@ -419,7 +484,7 @@ public partial class SearchView : UserControl
 
         /// <summary>I dag skal skille sig ud — det er den dag, man kan nå noget på.</summary>
         public Brush Dagsfarve =>
-            _a.Start.Date == _nu.Date ? Pensel("#FFE8A33D") : Pensel("#FF9BA6B8");
+            _a.Start.Date == _nu.Date ? Pensel("Advarsel") : Pensel("TekstMeget");
 
         /// <summary>
         /// Klokkeslættet — eller «nu», når den er i gang.
@@ -465,13 +530,13 @@ public partial class SearchView : UserControl
         {
             get
             {
-                if (_a.MoedeId.Length > 0) return Pensel("#FF3DA55A");
-                if (_a.ErIGang(_nu)) return Pensel("#FFE5484D");
-                if (_a.ErOverstaaet(_nu)) return Pensel("#FF2E333D");
+                if (_a.MoedeId.Length > 0) return Pensel("Godkendt");
+                if (_a.ErIGang(_nu)) return Pensel("Optager");
+                if (_a.ErOverstaaet(_nu)) return Pensel("Slukket");
 
                 return _a.Start <= _nu.AddHours(1)
-                    ? Pensel("#FFE8A33D")
-                    : Pensel("#FF3A4150");
+                    ? Pensel("Advarsel")
+                    : Pensel("PanelKant");
             }
         }
 
@@ -492,13 +557,13 @@ public partial class SearchView : UserControl
         {
             get
             {
-                if (_a.MoedeId.Length > 0) return Pensel("#FF5FD183");
-                if (_a.ErIGang(_nu)) return Pensel("#FFFF6B70");
-                if (_a.ErOverstaaet(_nu)) return Pensel("#FF828B9C");
+                if (_a.MoedeId.Length > 0) return Pensel("Godkendt");
+                if (_a.ErIGang(_nu)) return Pensel("FejlTekst");
+                if (_a.ErOverstaaet(_nu)) return Pensel("Slukket");
 
                 return _a.Start <= _nu.AddHours(1)
-                    ? Pensel("#FFF5BE62")
-                    : Pensel("#FFAEB6C4");
+                    ? Pensel("Advarsel")
+                    : Pensel("TekstMeget");
             }
         }
 
@@ -517,7 +582,7 @@ public partial class SearchView : UserControl
         // ikke forsvinde - man spoerger ogsaa «hvad naaede jeg».
         public double Daempning => _a.ErOverstaaet(_nu) ? 0.72 : 1.0;
 
-        private static Brush Pensel(string hex) => (Brush)new BrushConverter().ConvertFrom(hex)!;
+        private static Brush Pensel(string noegle) => Temaskift.Pensel(noegle);
 
     }
 
@@ -1032,17 +1097,13 @@ public partial class SearchView : UserControl
     /// <summary>Én fane over resultatet: en slags kilde og hvor mange der er.</summary>
     public sealed record Fanevisning(string Navn, Fundtype? Slags, bool Valgt)
     {
-        public Brush Flade => Valgt
-            ? (Brush)new BrushConverter().ConvertFrom("#FF33405A")!
-            : (Brush)new BrushConverter().ConvertFrom("#FF181B22")!;
-
-        public Brush Kant => Valgt
-            ? (Brush)new BrushConverter().ConvertFrom("#FF5B9DF0")!
-            : (Brush)new BrushConverter().ConvertFrom("#FF3A4150")!;
-
-        public Brush Skrift => Valgt
-            ? (Brush)new BrushConverter().ConvertFrom("#FFF4F6FA")!
-            : (Brush)new BrushConverter().ConvertFrom("#FF9BA6B8")!;
+        // FANEN HAVDE SINE EGNE FARVER, valgt til det moerke tema. I det
+        // lyse blev den valgte fane en moerk plet paa et hvidt kort, og den
+        // fravalgte tekst laa paa 2,4:1. De hoerer til det samme sted som
+        // resten: paletten.
+        public Brush Flade => Temaskift.Pensel(Valgt ? "Valgt" : "Trykket");
+        public Brush Kant => Temaskift.Pensel(Valgt ? "Accent" : "PanelKant");
+        public Brush Skrift => Temaskift.Pensel(Valgt ? "Tekst" : "TekstMeget");
     }
 
     /// <summary>Én måde at sortere resultatet på.</summary>
@@ -1576,11 +1637,11 @@ public sealed class Opgavevisning : System.ComponentModel.INotifyPropertyChanged
     /// </summary>
     public Brush Farve => _r.Hastighed(_idag) switch
     {
-        Hastighed.Overskredet => Pensel("#FFE5484D"),
-        Hastighed.I_dag => Pensel("#FFE8A33D"),
-        Hastighed.Denne_uge => Pensel("#FFE8A33D"),
-        Hastighed.Senere => Pensel("#FF3DA55A"),
-        _ => Pensel("#FF3A4150")
+        Hastighed.Overskredet => Pensel("Optager"),
+        Hastighed.I_dag => Pensel("Advarsel"),
+        Hastighed.Denne_uge => Pensel("Advarsel"),
+        Hastighed.Senere => Pensel("Godkendt"),
+        _ => Pensel("PanelKant")
     };
 
     /// <summary>
@@ -1596,15 +1657,28 @@ public sealed class Opgavevisning : System.ComponentModel.INotifyPropertyChanged
     /// </summary>
     public Brush Fristfarve => _r.Hastighed(_idag) switch
     {
-        Hastighed.Overskredet => Pensel("#FFFF8085"),
-        Hastighed.I_dag => Pensel("#FFF7CB7A"),
-        Hastighed.Denne_uge => Pensel("#FFF7CB7A"),
-        Hastighed.Senere => Pensel("#FF7EDCA0"),
-        _ => Pensel("#FFAEB6C4")
+        Hastighed.Overskredet => Pensel("FejlTekst"),
+        Hastighed.I_dag => Pensel("Advarsel"),
+        Hastighed.Denne_uge => Pensel("Advarsel"),
+        Hastighed.Senere => Pensel("Godkendt"),
+        _ => Pensel("TekstMeget")
     };
 
-    private static Brush Pensel(string hex) =>
-        (Brush)new BrushConverter().ConvertFrom(hex)!;
+    /// <summary>
+    /// Farven fra paletten. Tog før en hex-streng.
+    /// </summary>
+    /// <remarks>
+    /// DE HEX-VÆRDIER, DER STOD HER, VAR VALGT TIL DET MØRKE TEMA ALENE. Det
+    /// stod endda i kommentarerne — «elleve pixels tekst på den mørke pille
+    /// #2C323D» — og der blev regnet omhyggeligt på kontrasten mod netop den
+    /// flade. Men en farve, der ikke kommer fra paletten, følger ikke med, når
+    /// temaet skifter: den lysegrønne #7EDCA0 lå på 1,6:1 mod et hvidt kort,
+    /// og fristen «16. september» kunne ikke læses i det lyse tema.
+    ///
+    /// Nu slås de op på navn. Så gælder <c>TemaTest</c> også dem, og de kan
+    /// ikke blive tilbage i det ene tema.
+    /// </remarks>
+    private static Brush Pensel(string noegle) => Temaskift.Pensel(noegle);
 
     public bool Faerdig
     {

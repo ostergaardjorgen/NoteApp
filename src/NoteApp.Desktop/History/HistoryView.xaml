@@ -159,7 +159,10 @@
              En ListBox med VirtualizingStackPanel bygger kun de raekker, der
              er i billedet, og genbruger dem under rulningen. Markeringen er
              slaaet fra: listen er til at laese i, ikke til at vaelge i. -->
-        <ListBox x:Name="Liste" Margin="8,0,8,10" Background="Transparent"
+        <!-- Padding og ikke Margin til hoejre: rullebjaelken ligger INDE i
+             listen, og en margen ville skubbe bjaelken med ind. Raekkerne skal
+             holde sig fri af den, bjaelken skal blive, hvor den er. -->
+        <ListBox x:Name="Liste" Margin="8,0,8,10" Padding="0,0,12,0" Background="Transparent"
                  BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                  ScrollViewer.VerticalScrollBarVisibility="Auto"
                  VirtualizingStackPanel.IsVirtualizing="True"

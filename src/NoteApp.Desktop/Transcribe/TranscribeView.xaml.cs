@@ -3307,9 +3307,11 @@ public partial class TranscribeView : UserControl
                         m.Title ?? "Uden navn",
                         under,
                         m.Id.ToString(),
-                        (System.Windows.Media.Brush)new System.Windows.Media.BrushConverter()
-                            .ConvertFrom(igang ? "#FF5B9DF0"
-                                       : skrevet ? "#FF3A4150" : "#FFE8A33D")!);
+                        // Fra paletten, ikke fra en hex. De tre farver var
+                        // valgt til det moerke tema og fulgte ikke med et
+                        // temaskift.
+                        Temaskift.Pensel(igang ? "Accent"
+                                       : skrevet ? "PanelKant" : "Advarsel"));
                 })
                 .ToList();
         }

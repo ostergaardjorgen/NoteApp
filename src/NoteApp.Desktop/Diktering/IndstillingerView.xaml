@@ -22,7 +22,8 @@
       <RowDefinition Height="Auto" />
     </Grid.RowDefinitions>
 
-    <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+    <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                      Padding="0,0,14,0">
       <StackPanel>
 
         <TextBlock Style="{StaticResource Underskrift}" TextWrapping="Wrap" MaxWidth="700"

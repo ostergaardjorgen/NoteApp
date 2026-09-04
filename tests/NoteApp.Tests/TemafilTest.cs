@@ -108,6 +108,59 @@ public sealed class TemafilTest
     }
 
     [Fact]
+    public void Koden_haardkoder_heller_ikke_farver()
+    {
+        // ============ FEJLEN, DER KUNNE GEMME SIG I ET HALVT AAR ============
+        //
+        // Proeven ovenfor laeser XAML. Farver sat i C# var derfor helt fri, og
+        // der var syvogtredive af dem — alle sammen valgt til det MOERKE tema
+        // og omhyggeligt regnet efter mod netop den flade. Kommentarerne
+        // fortalte det endda selv: «elleve pixels tekst paa den moerke pille
+        // #2C323D».
+        //
+        // I det lyse tema var de forkerte. Fristen paa en aabne opgave stod i
+        // #7EDCA0 paa et hvidt kort — 1,6:1. Datoen var der, man kunne bare
+        // ikke laese den. Fundet paa et skaermbillede 04-09-2026, ikke af en
+        // proeve.
+        //
+        // En farve i koden skal komme fra paletten: Temaskift.Pensel("Navn").
+        // Saa gaelder TemaTest ogsaa den, og den kan ikke blive tilbage i det
+        // ene tema.
+        var farve = new Regex("\"#[0-9A-Fa-f]{6,8}\"");
+
+        var galt = new List<string>();
+
+        var rod = Path.Combine(Rod(), "src");
+
+        foreach (var fil in Directory.EnumerateFiles(rod, "*.cs", SearchOption.AllDirectories))
+        {
+            var navn = Path.GetFileName(fil);
+
+            // Tema.cs ER paletten. Flagikon tegner Dannebrog, som er roedt i
+            // begge temaer.
+            if (navn is "Tema.cs" or "Flagikon.xaml.cs") continue;
+            if (fil.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}")) continue;
+
+            var nr = 0;
+            foreach (var linje in File.ReadLines(fil))
+            {
+                nr++;
+                if (!farve.IsMatch(linje)) continue;
+
+                // En skygge er sort i begge temaer.
+                if (linje.Contains("DropShadow") || linje.Contains("#FF000000")) continue;
+
+                galt.Add($"{navn}:{nr}  {linje.Trim()}");
+            }
+        }
+
+        Assert.True(galt.Count == 0,
+            "Disse steder i koden har en farve skrevet direkte. Brug "
+            + "Temaskift.Pensel(\"Noegle\") — ellers foelger de ikke med, naar "
+            + "temaet skifter:\n  " + string.Join("\n  ", galt));
+    }
+
+    [Fact]
     public void Skaermbillederne_haardkoder_ikke_farver()
     {
         // Flagene og slagskyggerne er undtaget: Dannebrog er rødt i begge

@@ -397,11 +397,14 @@ public partial class SettingsView : UserControl
             : _o.ErForbundet ? "FORBUNDET"
             : "IKKE FORBUNDET";
 
+        // FARVERNE KOMMER FRA PALETTEN. De stod som hex her, valgt til det
+        // moerke tema, og fulgte derfor ikke med et temaskift: «FORBUNDET»
+        // var lysegroen #4CBE72 og laa paa 2,1:1 mod et hvidt kort.
         public Brush Tilstandsfarve => !_i.Klar || !Googleklient.ErSatOp
-            ? (Brush)new BrushConverter().ConvertFrom("#FF9BA6B8")!
+            ? Temaskift.Pensel("Slukket")
             : _o.ErForbundet
-                ? (Brush)new BrushConverter().ConvertFrom("#FF4CBE72")!
-                : (Brush)new BrushConverter().ConvertFrom("#FFE8A33D")!;
+                ? Temaskift.Pensel("Godkendt")
+                : Temaskift.Pensel("Advarsel");
 
         /// <summary>
         /// Linjen under knapperne: hvornår der sidst blev hentet, og hvad der
@@ -645,7 +648,7 @@ public partial class SettingsView : UserControl
 
     /// <summary>Én linje i forbrugslisten.</summary>
     private sealed record Forbrugsvisning(
-        string Navn, string Hvad, string Cpu, string Hukommelse, string Kant);
+        string Navn, string Hvad, string Cpu, string Hukommelse, Brush Kant);
 
     private bool _maaler;
 
@@ -703,10 +706,10 @@ public partial class SettingsView : UserControl
     /// Farven på linjen. Rød, når ét program tager mere end en hel kerne —
     /// det er dér, man mærker det.
     /// </summary>
-    private static string Farve(Forbrugspost p) =>
-        p.Procent >= 100 || p.Megabyte >= 1500 ? "#E5484D"
-        : p.Procent >= 25 || p.Megabyte >= 500 ? "#F5A524"
-        : "#4CBE72";
+    private static Brush Farve(Forbrugspost p) => Temaskift.Pensel(
+        p.Procent >= 100 || p.Megabyte >= 1500 ? "FejlTekst"
+        : p.Procent >= 25 || p.Megabyte >= 500 ? "Advarsel"
+        : "Godkendt");
 
     private static string Varighed(TimeSpan t) =>
         t.TotalHours >= 1 ? $"{t.TotalHours:0.#} timer"
@@ -723,12 +726,12 @@ public partial class SettingsView : UserControl
             k.Hvad,
             k.Har,
             k.Hvorfor,
-            (Brush)new BrushConverter().ConvertFrom(k.Slags switch
+            Temaskift.Pensel(k.Slags switch
             {
-                Kravsvar.Opfyldt => "#FF4CBE72",
-                Kravsvar.Mangler => "#FFE8A33D",
-                _ => "#FF3A4150"
-            })!)).ToList();
+                Kravsvar.Opfyldt => "Godkendt",
+                Kravsvar.Mangler => "Advarsel",
+                _ => "Slukket"
+            }))).ToList();
     }
 
     // ---------------------------------------------- noten i indkaldelsen

@@ -121,7 +121,10 @@ public partial class NotificationPopup : UserControl
 
         var kort = new Border
         {
-            Background = (Brush)new BrushConverter().ConvertFrom(ny ? "#FF1D2530" : "#00000000")!,
+            // En ULAEST besked har en flade under sig. Farven kom fra en
+            // hex, der var valgt til det moerke tema - i det lyse var den en
+            // moerk plet paa en lys boble.
+            Background = ny ? Temaskift.Pensel("Svaev") : Brushes.Transparent,
             BorderBrush = (Brush)FindResource(farve),
             BorderThickness = new Thickness(3, 0, 0, 0),
             CornerRadius = new CornerRadius(6),
@@ -197,7 +200,7 @@ public partial class NotificationPopup : UserControl
             BorderThickness = new Thickness(0),
             Background = Brushes.Transparent,
             FontSize = 11.5,
-            Foreground = (Brush)new BrushConverter().ConvertFrom("#FF5B9DF0")!,
+            Foreground = Temaskift.Pensel("Accent"),
             Template = Linkskabelon()
         };
 

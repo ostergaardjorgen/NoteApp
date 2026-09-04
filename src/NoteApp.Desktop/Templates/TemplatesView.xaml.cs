@@ -931,8 +931,13 @@ public partial class TemplatesView : UserControl
         }
 
         Feltbesked.Text = string.Join("\n\n", linjer);
+        // FLADEN KOM FRA PALETTEN. Her stod #33E5484D - en roed tone med
+        // 20 % daekning. Den laa oven paa, hvad der nu var under den, og saa
+        // «rigtig nok ud» i begge temaer, men den var ikke en af appens egne
+        // farver, og ingen proeve kendte den. Paletten har allerede de fire
+        // tonede kasser.
         Saet(Feltkontrol, Feltbesked,
-             manglerUdskrift ? "#33E5484D" : "#33E8A33D",
+             manglerUdskrift ? "FejlFlade" : "AdvarselFlade",
              manglerUdskrift ? "FejlTekst" : "Advarsel",
              "Tekst");
 
@@ -942,11 +947,10 @@ public partial class TemplatesView : UserControl
 
     private void Saet(Border ramme, TextBlock tekst, string baggrund, string kant, string skrift)
     {
-        ramme.Background = new SolidColorBrush(
-            (Color)ColorConverter.ConvertFromString(baggrund));
         // TryFindResource og ikke FindResource: det sidste KASTER, naar ruden
         // endnu ikke er i et vindue, eller hvis en noegle mangler - og en
         // farve, der ikke kan slaas op, maa ikke vaelte en kontrol af felterne.
+        if (Pensel(baggrund) is { } b) ramme.Background = b;
         if (Pensel(kant) is { } k) ramme.BorderBrush = k;
         if (Pensel(skrift) is { } f) tekst.Foreground = f;
     }

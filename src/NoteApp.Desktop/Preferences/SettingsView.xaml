@@ -31,7 +31,8 @@
     <TabControl Grid.Row="1" Style="{StaticResource Fanerude}">
 
       <TabItem Header="{i18n:Oversat settingsview.opstart}" Style="{StaticResource Fane}">
-        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                      Padding="0,0,14,0">
           <StackPanel>
         <!-- ========================= Udseende ===============================
              Står øverst, fordi det er det eneste her, man kan se virke med
@@ -253,7 +254,8 @@
            Et roedt kryds ville sige, at noget ikke virker, og det ville vaere
            forkert. -->
       <TabItem Header="{i18n:Oversat settingsview.krav_til_maskinen}" Style="{StaticResource Fane}">
-        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                      Padding="0,0,14,0">
           <StackPanel>
 
             <!-- ==================== HVAD DEN BRUGER LIGE NU ====================
@@ -397,7 +399,8 @@
       </TabItem>
 
       <TabItem Header="{i18n:Oversat settingsview.lyd}" Style="{StaticResource Fane}">
-        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                      Padding="0,0,14,0">
           <StackPanel>
             <Grid Margin="0,0,0,14">
               <TextBlock Style="{StaticResource Underskrift}" TextWrapping="Wrap" MaxWidth="700"
@@ -609,7 +612,8 @@
            amerikansk leverandør. Det er i orden — men det skal siges, og det
            skal siges før knapperne, ikke under dem. -->
       <TabItem Header="{i18n:Oversat settingsview.integrationer}" Style="{StaticResource Fane}">
-        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                      Padding="0,0,14,0">
           <StackPanel>
 
             <Border Background="{DynamicResource Panel}" CornerRadius="10" Padding="20"
@@ -782,7 +786,8 @@
       </TabItem>
 
       <TabItem Header="{i18n:Oversat settingsview.filer}" Style="{StaticResource Fane}">
-        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                      Padding="0,0,14,0">
           <StackPanel>
         <!-- ===================== Plads og lydfiler =========================
 
@@ -1090,7 +1095,8 @@
       </TabItem>
 
       <TabItem Header="{i18n:Oversat faelles.sikkerhedskopi}" Style="{StaticResource Fane}">
-        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                      Padding="0,0,14,0">
           <StackPanel>
         <!-- ======================== Sikkerhedskopi ========================= -->
         <Border Background="{DynamicResource Panel}" CornerRadius="10" Padding="20"

@@ -15,7 +15,8 @@
        genkendes, og passer to lige godt, sker der ingenting. Se
        Kommandotolk. -->
 
-  <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+  <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                      Padding="0,0,14,0">
     <Grid Margin="24,20,24,20">
       <Grid.RowDefinitions>
         <RowDefinition Height="Auto" />
