@@ -776,7 +776,17 @@ public partial class TemplatesView : UserControl
     /// <summary>Fylder ruden med ren tekst.</summary>
     private void SaetTekst(RichTextBox r, string tekst)
     {
-        var doc = new FlowDocument { PagePadding = new Thickness(0) };
+        // SKRIFTEN SAETTES PAA DOKUMENTET. Et FlowDocument arver IKKE
+        // stoerrelse, skrift og vaegt fra den rude, det ligger i - det har sine
+        // egne standarder, og de er stoerre og federe end resten af appen.
+        var doc = new FlowDocument
+        {
+            PagePadding = new Thickness(0),
+            FontFamily = r.FontFamily,
+            FontSize = r.FontSize,
+            FontWeight = FontWeights.Normal,
+            FontStyle = FontStyles.Normal
+        };
 
         foreach (var linje in tekst.Replace("\r\n", "\n").Split('\n'))
             doc.Blocks.Add(new Paragraph(new Run(linje)) { Margin = new Thickness(0) });

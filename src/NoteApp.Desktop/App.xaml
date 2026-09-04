@@ -532,6 +532,28 @@
       <Setter Property="CaretBrush" Value="{DynamicResource Tekst}" />
     </Style>
 
+    <!-- ============ RichTextBox SKAL LIGNE EN TextBox ============
+
+         Der var ingen stil, saa den arvede systemets: hvid flade, egen skrift
+         og en anden stoerrelse. Paa moedetyperne, hvor de to store felter er
+         RichTextBox for at kunne strege linjer over, betoed det, at skriften
+         pludselig var stor og fed. Set 04-09-2026.
+
+         Setterne er de samme som paa TextBox ovenfor. Skriften saettes ogsaa
+         paa selve FlowDocument - se SaetTekst i TemplatesView: et dokument
+         arver IKKE stoerrelse og skrift fra den rude, det ligger i. -->
+    <Style TargetType="RichTextBox">
+      <Setter Property="Background" Value="{DynamicResource Trykket}" />
+      <Setter Property="Foreground" Value="{DynamicResource Tekst}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource FeltKant}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="Padding" Value="8,6" />
+      <Setter Property="FontFamily" Value="Segoe UI" />
+      <Setter Property="FontSize" Value="13" />
+      <Setter Property="FontWeight" Value="Normal" />
+      <Setter Property="CaretBrush" Value="{DynamicResource Tekst}" />
+    </Style>
+
     <!-- DATOVAELGEREN ARVER HELLER IKKE TEMAET.
          Uden den her staar den som en HVID kasse midt i en moerk skaerm - og
          vaerst naar den er laast, hvor WPF's standardchrome slaar helt
