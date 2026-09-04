@@ -963,32 +963,21 @@ public partial class TemplatesView : UserControl
 
         if (linjer.Count == 0)
         {
-            // Naar alt er i orden, staar der hvilke oplysninger der faktisk
-            // sendes. Det er svaret paa "goer den her fane en forskel?" -
-            // den goer, og det er DET her, den goer.
-            var navne = PromptTemplate.Fields.Keys
-                .Where(k => k != Deltagerregler.Felt && brugte.Contains(k, StringComparer.OrdinalIgnoreCase))
-                .ToList();
-
-            var ubrugte = PromptTemplate.Fields.Keys
-                .Where(k => k != Deltagerregler.Felt && !brugte.Contains(k, StringComparer.OrdinalIgnoreCase))
-                .ToList();
-
-            Feltbesked.Text = $"Sendes med: {string.Join(", ", navne)}." +
-                              (ubrugte.Count == 0
-                                  ? ""
-                                  : $" Sendes ikke: {string.Join(", ", ubrugte)}.");
-
-            Saet(Feltkontrol, Feltbesked, "#FF181B22", "PanelKant", "TekstMeget");
+            // HER STOD «Sendes med: transskription, titel, dato ...».
+            //
+            // Den samme liste staar nu som hak ovenfor, paa dansk og til at
+            // klikke paa. To lister over det samme er een for meget - og den
+            // her var den af dem, man ikke kunne gore noget ved.
+            Feltkontrol.Visibility = Visibility.Collapsed;
+            GemKnap.IsEnabled = GemKnap.IsEnabled && !manglerUdskrift;
+            return;
         }
-        else
-        {
-            Feltbesked.Text = string.Join("\n\n", linjer);
-            Saet(Feltkontrol, Feltbesked,
-                 manglerUdskrift ? "#33E5484D" : "#33E8A33D",
-                 manglerUdskrift ? "FejlTekst" : "Advarsel",
-                 "Tekst");
-        }
+
+        Feltbesked.Text = string.Join("\n\n", linjer);
+        Saet(Feltkontrol, Feltbesked,
+             manglerUdskrift ? "#33E5484D" : "#33E8A33D",
+             manglerUdskrift ? "FejlTekst" : "Advarsel",
+             "Tekst");
 
         Feltkontrol.Visibility = Visibility.Visible;
         GemKnap.IsEnabled = GemKnap.IsEnabled && !manglerUdskrift;

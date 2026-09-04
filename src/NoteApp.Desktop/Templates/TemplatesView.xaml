@@ -340,6 +340,14 @@
                indstilling - og navnet skal sige det. -->
           <TabItem x:Name="MaterialeFane" Header="{i18n:Oversat templatesview.fanen_hvad_der_kommer_med}" Style="{StaticResource Fane}">
             <DockPanel>
+              <!-- ============ SAMME OPBYGNING SOM DEN ANDEN FANE ============
+
+                   Hakkene laa NEDERST her og OEVERST paa «Saadan skal det
+                   skrives». To faner ved siden af hinanden, samme slags valg,
+                   og oejet skulle lede efter dem to forskellige steder.
+
+                   Raekkefoelgen er nu den samme begge steder: forklaring,
+                   hakkene, og saa teksten. -->
               <StackPanel DockPanel.Dock="Top" Margin="2,0,0,8">
                 <TextBlock FontSize="11.5" TextWrapping="Wrap" LineHeight="18"
                            Foreground="{DynamicResource TekstMeget}"
@@ -347,17 +355,6 @@
                 <TextBlock FontSize="11.5" Margin="0,5,0,0" TextWrapping="Wrap" LineHeight="18"
                            Foreground="{DynamicResource TekstMeget}"
                            Text="{i18n:Oversat templatesview.staar_et_felt_ikke_her_naar_de_oplysninger}" />
-
-                <!-- KONTROLLEN AF FELTERNE.
-                     En skabelon uden {{transskription}} beder en model om at
-                     skrive et referat af ingenting. Den fejl opdages foerst i
-                     et faerdigt dokument, man skulle bruge til noget - derfor
-                     staar den her, mens man skriver, og ikke som en
-                     overraskelse bagefter. -->
-                <Border x:Name="Feltkontrol" Visibility="Collapsed" CornerRadius="7"
-                        BorderThickness="1" Padding="12,9" Margin="0,9,0,0">
-                  <TextBlock x:Name="Feltbesked" FontSize="12" LineHeight="19" TextWrapping="Wrap" />
-                </Border>
               </StackPanel>
 
               <!-- ============ FELTERNE ER OGSAA HAK ============
@@ -366,14 +363,10 @@
                    stod. Det gav to slags fejl: man kunne saette det samme felt
                    ind to gange, og man kunne saette det ind midt i en saetning
                    uden at opdage det. Og «skal titlen med?» er et ja/nej, ikke
-                   en indsaetningsopgave.
-
-                   Nu er det samme layout som paa den anden fane: eet hak pr.
-                   felt, overstreget naar det er fra, og en linje der siger hvad
-                   der sker. Teksten roeres ikke - se PromptTemplate.Render. -->
-              <Border DockPanel.Dock="Bottom" Background="{DynamicResource Trykket}" CornerRadius="8"
+                   en indsaetningsopgave. -->
+              <Border DockPanel.Dock="Top" Background="{DynamicResource Trykket}" CornerRadius="8"
                       BorderBrush="{DynamicResource PanelKant}" BorderThickness="1"
-                      Padding="14,11" Margin="0,10,0,0">
+                      Padding="14,11" Margin="0,0,0,10">
                 <StackPanel>
                   <TextBlock Text="{i18n:Oversat templatesview.det_der_kan_komme_med_fra_moedet}" FontSize="12.5"
                              FontWeight="SemiBold" />
@@ -387,6 +380,22 @@
                              TextWrapping="Wrap" LineHeight="18" Visibility="Collapsed"
                              Foreground="{DynamicResource Advarsel}" />
                 </StackPanel>
+              </Border>
+
+              <!-- KONTROLLEN AF FELTERNE.
+                   En skabelon uden {{transskription}} beder en model om at
+                   skrive et referat af ingenting. Den fejl opdages foerst i et
+                   faerdigt dokument, man skulle bruge til noget - derfor staar
+                   den her, mens man skriver, og ikke som en overraskelse
+                   bagefter.
+
+                   DEN STAAR KUN, NAAR DER ER NOGET GALT. Foer stod der ogsaa
+                   «Sendes med: transskription, titel, dato ...», og det siger
+                   hakkene ovenfor nu - paa dansk. To lister over det samme er
+                   een for meget. -->
+              <Border x:Name="Feltkontrol" DockPanel.Dock="Top" Visibility="Collapsed" CornerRadius="7"
+                      BorderThickness="1" Padding="12,9" Margin="0,0,0,10">
+                <TextBlock x:Name="Feltbesked" FontSize="12" LineHeight="19" TextWrapping="Wrap" />
               </Border>
 
               <RichTextBox x:Name="FeltBruger" AcceptsReturn="True" AcceptsTab="True"
