@@ -51,6 +51,23 @@ public sealed class PromptTemplate
     /// <summary>Loft over svarets længde. Et referat af et langt møde skal have plads.</summary>
     public int MaxTokens { get; set; } = 2048;
 
+    /// <summary>
+    /// De afsnit, brugeren har slået FRA. Tom liste betyder «alle med».
+    /// </summary>
+    /// <remarks>
+    /// AFKRYDSNINGERNE SLETTER IKKE TEKST. Et hak, der fjernede afsnittet fra
+    /// systemprompten, ville være en sletning, man ikke kan fortryde — sætter
+    /// man hakket tilbage, var teksten væk. I stedet står de fravalgte
+    /// overskrifter her, og <see cref="RenderSystem(string)"/> springer dem
+    /// over, når dokumentet laves. Teksten i filen er urørt, og et hak kan
+    /// sættes tilbage.
+    ///
+    /// Der sammenlignes på overskriftens tekst og ikke på et nummer: står der
+    /// «Citater» i listen, ryger afsnittet «## Citater» — også hvis nogen har
+    /// flyttet rundt på rækkefølgen i en editor.
+    /// </remarks>
+    public List<string> UdeladteAfsnit { get; set; } = new();
+
     public required string SystemPrompt { get; set; }
     public required string UserPrompt { get; set; }
 
@@ -120,6 +137,9 @@ public sealed class PromptTemplate
             Mappe = Hent(felter, "mappe"),
             Temperature = temp > 0 ? temp : 0.2,
             MaxTokens = maks > 0 ? maks : 2048,
+            UdeladteAfsnit = (Hent(felter, "udeladte_afsnit") ?? "")
+                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .ToList(),
             SystemPrompt = dele[1].Trim(),
             UserPrompt = dele.Length > 2 ? dele[2].Trim() : "{{transskription}}",
             Path = path
@@ -130,20 +150,83 @@ public sealed class PromptTemplate
         d.TryGetValue(n, out var v) && v.Length > 0 ? v : null;
 
     /// <summary>
-    /// Sætter felterne ind. Et felt, der ikke er udfyldt, erstattes med tom
-    /// tekst frem for at stå tilbage som {{noget}} — modellen ville ellers
-    /// forsøge at udfylde det selv.
+    /// Overskrifterne i systemprompten — de afsnit, dokumentet kan indeholde.
     /// </summary>
+    /// <remarks>
+    /// «## Beslutninger» er et afsnit; «### Et emne» er ikke. Kun to
+    /// firkanter tæller, fordi det er dét niveau, skabelonerne bruger til
+    /// dokumentets egne afsnit — tre bruges INDE i et afsnit, fx til hvert
+    /// emne i gennemgangen.
+    /// </remarks>
+    public IReadOnlyList<string> Afsnit() => AfsnitI(SystemPrompt);
+
+    /// <summary>
+    /// Overskrifterne i en systemprompt, der ikke er gemt endnu.
+    /// </summary>
+    /// <remarks>
+    /// Skærmen skal kunne vise afkrydsningerne, MENS man skriver — ikke først
+    /// når skabelonen er gemt. Skriver man et nyt «## Citater», skal hakket
+    /// stå med det samme.
+    /// </remarks>
+    public static IReadOnlyList<string> AfsnitI(string systemPrompt)
+    {
+        var fundet = new List<string>();
+
+        foreach (var linje in Linjer(systemPrompt))
+        {
+            var m = Overskrift.Match(linje);
+            if (m.Success) fundet.Add(m.Groups[1].Value.Trim());
+        }
+
+        return fundet;
+    }
+
+    /// <summary>Teksten som linjer, uanset om filen har CRLF eller LF.</summary>
+    private static string[] Linjer(string tekst) =>
+        tekst.Replace("\r\n", "\n").Split('\n');
+
+    private static readonly Regex Overskrift = new(@"^##(?!#)\s*(.+?)\s*$", RegexOptions.Compiled);
+
+    /// <summary>
+    /// Systemprompten uden de afsnit, der er slået fra.
+    /// </summary>
+    /// <remarks>
+    /// Et afsnit er overskriften og alt frem til den næste «## »-linje. Er
+    /// listen tom, returneres teksten uændret — så koster afkrydsningerne
+    /// ingenting for de skabeloner, ingen har rørt.
+    /// </remarks>
+    private string SystemUdenFravalgte()
+    {
+        if (UdeladteAfsnit.Count == 0) return SystemPrompt;
+
+        var ud = new HashSet<string>(UdeladteAfsnit, StringComparer.CurrentCultureIgnoreCase);
+        var linjer = Linjer(SystemPrompt);
+        var sb = new StringBuilder();
+        var springer = false;
+
+        foreach (var linje in linjer)
+        {
+            var m = Overskrift.Match(linje);
+
+            if (m.Success) springer = ud.Contains(m.Groups[1].Value.Trim());
+            if (springer) continue;
+
+            sb.AppendLine(linje);
+        }
+
+        return sb.ToString().TrimEnd();
+    }
+
     /// <summary>
     /// Systemprompten med de fælles felter sat ind.
     ///
     /// Kun <c>{{deltagerregler}}</c> giver mening her — mødets egne
     /// oplysninger hører til i brugerprompten. Skriver en skabelon feltet i
-    /// systemprompten, kommer reglerne med; gør den ikke, sker der
-    /// ingenting.
+    /// systemprompten, kommer reglerne med; gør den ikke, sker der ingenting.
     ///
-    /// Alle veje til en model skal bruge DENNE frem for SystemPrompt direkte.
-    /// Ellers ville en skabelon virke ét sted og ikke et andet.
+    /// Alle veje til en model skal bruge DENNE frem for <see cref="SystemPrompt"/>
+    /// direkte. Ellers ville en skabelon virke ét sted og ikke et andet — og
+    /// de fravalgte afsnit ville komme med alligevel.
     /// </summary>
     public string RenderSystem() => RenderSystem(Sprogregler.Standard);
 
@@ -161,7 +244,7 @@ public sealed class PromptTemplate
     /// </summary>
     public string RenderSystem(string dokumentsprog)
     {
-        var s = SystemPrompt.Replace("{{" + Deltagerregler.Felt + "}}", Deltagerregler.Tekst);
+        var s = SystemUdenFravalgte().Replace("{{" + Deltagerregler.Felt + "}}", Deltagerregler.Tekst);
 
         var felt = "{{" + Sprogregler.Felt + "}}";
         var regel = Sprogregler.Tekst(dokumentsprog);
@@ -197,6 +280,8 @@ public sealed class PromptTemplate
         sb.Append("temperatur: ").AppendLine(
             Temperature.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture));
         sb.Append("maks_tokens: ").AppendLine(MaxTokens.ToString());
+        if (UdeladteAfsnit.Count > 0)
+            sb.Append("udeladte_afsnit: ").AppendLine(string.Join(", ", UdeladteAfsnit));
         sb.AppendLine("---");
         sb.AppendLine(SystemPrompt.Trim());
         sb.AppendLine("---");

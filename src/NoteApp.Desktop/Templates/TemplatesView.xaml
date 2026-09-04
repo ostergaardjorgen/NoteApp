@@ -257,6 +257,34 @@
                          Foreground="{DynamicResource TekstMeget}"
                          Text="{i18n:Oversat templatesview.reglerne_modellen_arbejder_efter_det_er_he}" />
 
+              <!-- ============ AFSNITTENE SOM AFKRYDSNING ============
+
+                   Det almindelige oenske er ikke at skrive en instruktion om -
+                   det er at faa et afsnit med eller ud. «Skal der vaere citater
+                   i referatet?» kunne man kun svare paa ved at redigere
+                   prompten, og saa lod man vaere.
+
+                   Hakkene SLETTER IKKE TEKST. Overskrifterne, man tager fra,
+                   staar i skabelonens frontmatter som «udeladte_afsnit», og
+                   afsnittet springes over, naar dokumentet laves - se
+                   PromptTemplate.RenderSystem. Teksten nedenfor er uroert, og
+                   et hak kan saettes tilbage.
+
+                   Boksen er der kun, naar skabelonen HAR afsnit. En skabelon,
+                   der ikke bruger «## »-overskrifter, faar ingen tom ramme. -->
+              <Border x:Name="Afsnitsrude" DockPanel.Dock="Top" Background="{DynamicResource Trykket}"
+                      CornerRadius="8" BorderBrush="{DynamicResource PanelKant}" BorderThickness="1"
+                      Padding="14,11" Margin="0,0,0,10" Visibility="Collapsed">
+                <StackPanel>
+                  <TextBlock Text="{i18n:Oversat templatesview.hvad_skal_dokumentet_indeholde}"
+                             FontSize="12.5" FontWeight="SemiBold" />
+                  <TextBlock FontSize="11.5" Margin="0,4,0,8" TextWrapping="Wrap" LineHeight="18"
+                             Foreground="{DynamicResource TekstMeget}"
+                             Text="{i18n:Oversat templatesview.tag_hakket_fra_saa_springes_afsnittet_over}" />
+                  <WrapPanel x:Name="Afsnit" Orientation="Horizontal" />
+                </StackPanel>
+              </Border>
+
               <!-- DELTAGERREGLERNE HOERER TIL HER, IKKE PAA MATERIALEFANEN.
                    De er en REGEL, ikke en oplysning om moedet, og de bliver
                    kun sat ind i systemprompten. Stod feltet paa den anden

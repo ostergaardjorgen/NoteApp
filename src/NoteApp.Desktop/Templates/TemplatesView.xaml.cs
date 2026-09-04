@@ -394,6 +394,9 @@ public partial class TemplatesView : UserControl
         FeltLaengde.SelectedItem = Naermeste(t.MaxTokens);
         _valgtLaengde = t.MaxTokens;
         FeltSystem.Text = t.SystemPrompt;
+
+        _udeladte = new List<string>(t.UdeladteAfsnit);
+        Byg_Afsnit();
         FeltBruger.Text = t.UserPrompt;
 
         // HER BLEV SKABELONENS PreferredModel LAEST IND I EN COMBOBOX.
@@ -464,12 +467,111 @@ public partial class TemplatesView : UserControl
         GemKnap.IsEnabled = true;
     }
 
+    /// <summary>Overskrifterne, brugeren har taget hakket fra.</summary>
+    private List<string> _udeladte = new();
+
+    /// <summary>
+    /// Én afkrydsning pr. afsnit i skabelonens tekst.
+    /// </summary>
+    /// <remarks>
+    /// AFSNITTENE LÆSES AF TEKSTEN SELV — «## Beslutninger» og de andre
+    /// overskrifter. Der er altså ikke en liste i appen, der skal holdes i
+    /// trit med skabelonerne: laver man en ny mødetype med sine egne afsnit,
+    /// står de her af sig selv.
+    ///
+    /// DET SIDSTE HAK KAN IKKE TAGES FRA. Et dokument uden et eneste afsnit er
+    /// ikke et dokument, og en skærm, der lader en gøre det, er en fælde.
+    /// </remarks>
+    private void Byg_Afsnit()
+    {
+        _byggerAfsnit = true;
+        Afsnit.Children.Clear();
+
+        // AFSNITTENE LAESES AF DET, DER STAAR I FELTET - ikke af den gemte
+        // skabelon. Skriver man et nyt «## Citater», skal hakket staa med det
+        // samme og ikke foerst efter et gem.
+        var fundne = PromptTemplate.AfsnitI(FeltSystem.Text);
+
+        // Et fravalg af et afsnit, teksten ikke har mere, skal ikke blive
+        // haengende i filen og forvirre naeste laeser.
+        _udeladte.RemoveAll(u => !fundne.Contains(u, StringComparer.CurrentCultureIgnoreCase));
+
+        foreach (var navn in fundne)
+        {
+            var hak = new CheckBox
+            {
+                Content = navn,
+                Tag = navn,
+                Margin = new Thickness(0, 0, 18, 6),
+                FontSize = 12.5,
+                IsChecked = !_udeladte.Contains(navn, StringComparer.CurrentCultureIgnoreCase)
+            };
+
+            hak.Checked += Afsnit_Aendret;
+            hak.Unchecked += Afsnit_Aendret;
+            Afsnit.Children.Add(hak);
+        }
+
+        Afsnitsrude.Visibility = fundne.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+        _byggerAfsnit = false;
+    }
+
+    private bool _byggerAfsnit;
+
+    private void Afsnit_Aendret(object sender, RoutedEventArgs e)
+    {
+        if (_byggerAfsnit || _indlæser) return;
+        if (sender is not CheckBox { Tag: string navn } hak) return;
+
+        if (hak.IsChecked == true)
+        {
+            _udeladte.RemoveAll(u => u.Equals(navn, StringComparison.CurrentCultureIgnoreCase));
+        }
+        else
+        {
+            // DET SIDSTE HAK BLIVER SIDDENDE. Se Byg_Afsnit.
+            var tilbage = Afsnit.Children.OfType<CheckBox>().Count(k => k.IsChecked == true);
+
+            if (tilbage == 0)
+            {
+                Dialogs.AppDialog.Vis(Window.GetWindow(this), "Der skal være mindst ét afsnit",
+                    "Et dokument uden et eneste afsnit ville være tomt. Sæt et andet hak først, "
+                    + "hvis du vil tage det her fra.", Dialogs.Slags.Valg);
+
+                _byggerAfsnit = true;
+                hak.IsChecked = true;
+                _byggerAfsnit = false;
+                return;
+            }
+
+            if (!_udeladte.Contains(navn, StringComparer.CurrentCultureIgnoreCase))
+                _udeladte.Add(navn);
+        }
+
+        GemKnap.IsEnabled = true;
+    }
+
     // -------------------------------------------------------------- ændring
 
     private void Aendret(object sender, TextChangedEventArgs e)
     {
         if (!_indlæser) GemKnap.IsEnabled = true;
         TjekFelter();
+
+        // Skriver man i instruktionen, kan der vaere kommet et afsnit til eller
+        // vaere forsvundet et. Raekken bygges kun om, naar den faktisk er blevet
+        // forkert - ellers ville hvert tastetryk bygge den forfra.
+        if (!_indlæser && ReferenceEquals(sender, FeltSystem)) Foelg_Afsnit();
+    }
+
+    private void Foelg_Afsnit()
+    {
+        var nu = PromptTemplate.AfsnitI(FeltSystem.Text);
+        var vist = Afsnit.Children.OfType<CheckBox>().Select(k => (string)k.Tag).ToList();
+
+        if (nu.SequenceEqual(vist, StringComparer.CurrentCultureIgnoreCase)) return;
+
+        Byg_Afsnit();
     }
 
     /// <summary>
@@ -604,6 +706,7 @@ public partial class TemplatesView : UserControl
         // Temperaturen roeres ikke - den staar, som den stod i filen.
         _valgt.MaxTokens = _valgtLaengde;
         _valgt.SystemPrompt = FeltSystem.Text.Trim();
+        _valgt.UdeladteAfsnit = new List<string>(_udeladte);
         _valgt.UserPrompt = FeltBruger.Text.Trim();
 
         // SIDSTE SPAERRE. Knappen er graa, naar udskriften mangler, men et
