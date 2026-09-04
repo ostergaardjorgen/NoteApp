@@ -85,8 +85,10 @@
 
     <Grid Grid.Row="3">
       <Grid.ColumnDefinitions>
-        <!-- Samme bredde som paa Optagelser og Moedetyper. Se TranscribeView. -->
-        <ColumnDefinition Width="225" />
+        <!-- Samme opbygning som paa Optagelser og Moedetyper. Se TranscribeView:
+             Auto med 225 som minimum og 420 som loft, saa spalten foelger
+             navnene i traeet frem for at klippe dem. -->
+        <ColumnDefinition Width="Auto" MinWidth="225" MaxWidth="420" />
         <ColumnDefinition Width="Auto" />
         <ColumnDefinition Width="*" />
         <ColumnDefinition Width="12" />
@@ -103,7 +105,12 @@
           <TextBlock DockPanel.Dock="Top" Text="{i18n:Oversat faelles.biblioteker}" FontSize="10.5" FontWeight="SemiBold"
                      Margin="16,14,16,8" Foreground="{DynamicResource TekstMeget}" />
 
+          <!-- MaxWidth ER IKKE PYNT. Spalten er Auto, og en TextBlock med
+               TextWrapping maaler sig selv som EEN lang linje under en
+               uendelig bredde. Uden loftet var det hjaelpeteksten - ikke
+               navnene i traeet - der bestemte, hvor bred ruden blev. -->
           <TextBlock DockPanel.Dock="Bottom" Margin="16,8,16,12" FontSize="11" TextWrapping="Wrap"
+                     MaxWidth="193" HorizontalAlignment="Left"
                      LineHeight="17" Foreground="{DynamicResource TekstMeget}"
                      Text="{i18n:Oversat documentsview.traek_et_dokument_hen_paa_en_mappe_for_at}" />
 

@@ -82,8 +82,10 @@
 
     <Grid Grid.Row="3">
       <Grid.ColumnDefinitions>
-        <!-- Samme bredde som paa Optagelser og Dokumenter. Se TranscribeView. -->
-        <ColumnDefinition Width="225" />
+        <!-- Samme opbygning som paa Optagelser og Dokumenter. Se TranscribeView:
+             Auto med 225 som minimum og 420 som loft, saa spalten foelger
+             navnene i traeet frem for at klippe dem. -->
+        <ColumnDefinition Width="Auto" MinWidth="225" MaxWidth="420" />
         <ColumnDefinition Width="Auto" />
         <ColumnDefinition Width="*" />
       </Grid.ColumnDefinitions>

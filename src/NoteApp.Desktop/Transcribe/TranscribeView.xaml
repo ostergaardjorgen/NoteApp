@@ -186,11 +186,32 @@
     <!-- ======================= Træ · indhold =========================== -->
     <Grid Grid.Row="3">
       <Grid.ColumnDefinitions>
-        <!-- 225 og ikke 300. Traeet indeholder navne paa optagelser, ikke
-             taekst der skal laeses - pladsen goer mere gavn til hoejre, hvor
-             udskriften staar. Samme bredde paa alle tre skaerme med et
-             bibliotekstrae. -->
-        <ColumnDefinition Width="225" />
+        <!-- ============ SPALTEN FOELGER NAVNENE ============
+
+             HER STOD 225 FAST, og navnene blev klippet: «Møde med Cloudwork…»,
+             «1. Saviynt møde med E…». Man kunne trække i skillelinjen, men
+             det skulle man gøre igen for hver mappe, man foldede ud - og et
+             navn, man ikke kan læse, er en optagelse, man ikke kan finde.
+
+             Auto måler det, der FAKTISK står i træet lige nu. Kun de
+             udfoldede rækker tælles med, så spalten følger med, når man
+             folder ud og klapper sammen igen.
+
+             225 SOM MINIMUM, saa den ikke bliver smallere end foer paa korte
+             navne. 420 SOM LOFT, fordi pladsen goer mere gavn til hoejre,
+             hvor udskriften staar - et navn, der er laengere end det, bliver
+             klippet som foer, og hele navnet staar i boblen.
+
+             Skillelinjen virker stadig. Traekker man i den, vinder det valg
+             over det automatiske - som i Stifinder.
+
+             DE OEVRIGE TEKSTER I RUDEN HAR FAAET MaxWidth. En TextBlock med
+             TextWrapping maaler sig selv som EEN lang linje, naar bredden er
+             uendelig, og saa var det hjaelpeteksten nederst - ikke navnene -
+             der bestemte spaltens bredde.
+
+             Samme opbygning paa alle tre skaerme med et bibliotekstrae. -->
+        <ColumnDefinition Width="Auto" MinWidth="225" MaxWidth="420" />
         <ColumnDefinition Width="Auto" />
         <ColumnDefinition Width="*" />
         <ColumnDefinition Width="12" />
@@ -208,7 +229,12 @@
           <TextBlock DockPanel.Dock="Top" Text="{i18n:Oversat faelles.biblioteker}" FontSize="10.5" FontWeight="SemiBold"
                      Margin="16,14,16,8" Foreground="{DynamicResource TekstMeget}" />
 
+          <!-- MaxWidth ER IKKE PYNT. Spalten er Auto, og en TextBlock med
+               TextWrapping maaler sig selv som EEN lang linje under en
+               uendelig bredde. Uden loftet var det hjaelpeteksten - ikke
+               navnene i traeet - der bestemte, hvor bred ruden blev. -->
           <TextBlock DockPanel.Dock="Bottom" Margin="16,8,16,12" FontSize="11" TextWrapping="Wrap"
+                     MaxWidth="193" HorizontalAlignment="Left"
                      LineHeight="17" Foreground="{DynamicResource TekstMeget}"
                      Text="{i18n:Oversat transcribeview.traek_en_optagelse_hen_paa_en_mappe_for_at}" />
 
@@ -224,7 +250,11 @@
                DER SPOERGES, DER TAGES IKKE. Filen bliver liggende i mappen,
                uanset hvad man svarer. "Nej tak" betyder kun, at den ikke
                bliver tilbudt igen. -->
-          <Border DockPanel.Dock="Top" x:Name="Fundbjaelke" Visibility="Collapsed"
+          <!-- MaxWidth af samme grund som ved hjaelpeteksten nedenfor:
+               bjaelkens to tekster ombryder, og de maa ikke saette
+               spaltens bredde. -->
+          <Border DockPanel.Dock="Top" x:Name="Fundbjaelke" Visibility="Collapsed" MaxWidth="209"
+                  HorizontalAlignment="Left"
                   Background="{DynamicResource AccentFlade}" CornerRadius="0,8,8,0" Margin="8,0,8,10"
                   BorderBrush="{DynamicResource Accent}" BorderThickness="3,0,0,0"
                   Padding="12,10">
