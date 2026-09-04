@@ -218,8 +218,25 @@
                    ikke vaelge det hver gang - man har allerede sagt det ved
                    at vaelge moedetypen. -->
               <TextBlock Text="{i18n:Oversat templatesview.mappe}" Style="{StaticResource Underskrift}" Margin="0,20,0,0" />
-              <ComboBox x:Name="FeltMappe" Margin="0,4,0,0" IsEditable="False"
-                        SelectionChanged="Mappe_Valgt" />
+
+              <!-- ============ HER STOD EN RULLELISTE MED FULDE STIER ============
+
+                   «Møder/Ibrar» stod som een lang linje blandt andre lange
+                   linjer, og man skulle laese sig frem til strukturen. Under
+                   «Optagelser» ser man den samme mappe i et TRAE.
+
+                   Nu aabner knappen den samme mappevaelger, som «Flyt til
+                   mappe» bruger paa optagelserne - og den viser et trae. Eet
+                   billede af mapperne i hele appen. -->
+              <DockPanel Margin="0,4,0,0">
+                <Button x:Name="MappeKnap2" DockPanel.Dock="Right" Content="{i18n:Oversat templatesview.vaelg_mappe}"
+                        Click="VaelgMappe_Klik" Padding="14,7" Margin="8,0,0,0" />
+                <Border BorderBrush="{DynamicResource FeltKant}" BorderThickness="1" CornerRadius="6"
+                        Background="{DynamicResource Trykket}" Padding="10,8">
+                  <TextBlock x:Name="MappeTekst" VerticalAlignment="Center" TextWrapping="NoWrap"
+                             TextTrimming="CharacterEllipsis" />
+                </Border>
+              </DockPanel>
               <TextBlock FontSize="11.5" Margin="2,6,0,0" TextWrapping="Wrap"
                          Foreground="{DynamicResource TekstMeget}"
                          Text="{i18n:Oversat templatesview.optagelser_med_den_her_moedetype_laegges}" />

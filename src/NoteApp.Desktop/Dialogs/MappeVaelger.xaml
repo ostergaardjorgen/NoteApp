@@ -11,15 +11,50 @@
     <TextBlock x:Name="Forklaring" Style="{StaticResource Underskrift}" Margin="0,8,0,0"
                TextWrapping="Wrap" />
 
-    <ListBox x:Name="Liste" Margin="0,16,0,0" MaxHeight="260" FontSize="14"
-             BorderBrush="{DynamicResource PanelKant}" Background="{DynamicResource Panel}"
-             MouseDoubleClick="Liste_DobbeltKlik">
-      <ListBox.ItemTemplate>
-        <DataTemplate>
-          <TextBlock Text="{Binding}" Margin="6,7" />
-        </DataTemplate>
-      </ListBox.ItemTemplate>
-    </ListBox>
+    <!-- ============ ET TRAE, IKKE EN FLAD LISTE ============
+
+         Mapper kan ligge i hinanden - «Møder/Ibrar» er en mappe i en mappe -
+         og listen viste dem som lange stier under hinanden. Man skulle laese
+         sig frem til strukturen i stedet for at se den, og det var en anden
+         maade at vise det samme paa end traeet under «Optagelser».
+
+         Nu er det det samme billede begge steder. -->
+    <Border Margin="0,16,0,0" MaxHeight="300" CornerRadius="8"
+            BorderBrush="{DynamicResource PanelKant}" BorderThickness="1"
+            Background="{DynamicResource Panel}">
+      <TreeView x:Name="Trae" Background="Transparent" BorderThickness="0" Margin="6"
+                FontSize="14" SelectedItemChanged="Trae_Valgt"
+                MouseDoubleClick="Liste_DobbeltKlik"
+                ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+        <TreeView.ItemContainerStyle>
+          <Style TargetType="TreeViewItem">
+            <Style.Resources>
+              <!-- WPF tegner sin egen markering med systemfarver: hvid tekst
+                   paa hvid flade i det moerke tema. Samme greb som i de
+                   oevrige traeer. -->
+              <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="Transparent" />
+              <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="Transparent" />
+            </Style.Resources>
+            <Setter Property="IsExpanded" Value="True" />
+            <Setter Property="Padding" Value="2,1" />
+            <Setter Property="Foreground" Value="{DynamicResource TekstSvag}" />
+          </Style>
+        </TreeView.ItemContainerStyle>
+
+        <TreeView.ItemTemplate>
+          <HierarchicalDataTemplate ItemsSource="{Binding Boern}">
+            <Border x:Name="flade" CornerRadius="5" Padding="8,6" Background="Transparent">
+              <TextBlock Text="{Binding Navn}" />
+            </Border>
+            <HierarchicalDataTemplate.Triggers>
+              <DataTrigger Binding="{Binding ErValgt}" Value="True">
+                <Setter TargetName="flade" Property="Background" Value="{DynamicResource Valgt}" />
+              </DataTrigger>
+            </HierarchicalDataTemplate.Triggers>
+          </HierarchicalDataTemplate>
+        </TreeView.ItemTemplate>
+      </TreeView>
+    </Border>
 
     <Button x:Name="NyKnap" Content="{i18n:Oversat mappevaelger.ny_mappe}" Click="Ny_Click"
             HorizontalAlignment="Left" Margin="0,10,0,0" Padding="12,6" FontSize="12" />

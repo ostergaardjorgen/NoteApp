@@ -829,7 +829,8 @@
     "nulstil": "Nulstil til standard",
     "teksttype_gemt": "Gemt.",
     "teksttype_nulstillet": "Sat tilbage til appens egen.",
-    "teksttype_rettet": "rettet"
+    "teksttype_rettet": "rettet",
+    "vaelg_mappe": "Vælg mappe …"
   },
   "transcribeview": {
     "aabn_mappen_paa_disken": "Åbn mappen på disken",

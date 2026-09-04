@@ -423,39 +423,45 @@ public partial class TemplatesView : UserControl
     /// </summary>
     private string? _systemVedIndlaesning;
 
-    /// <summary>Én mappe i rullelisten. Null betyder «ingen».</summary>
-    private sealed record Mappepunkt(string Navn, string? Sti)
-    {
-        public override string ToString() => Navn;
-    }
+    /// <summary>Mappen, mødetypen peger på. Null betyder «uden mappe».</summary>
+    private string? _mappe;
 
     /// <summary>
-    /// Fylder mapperullelisten og markerer den, mødetypen peger på.
+    /// Viser den valgte mappe.
     /// </summary>
     /// <remarks>
     /// EN MAPPE, DER ER SLETTET, SKAL STADIG KUNNE SES. Peger mødetypen på
-    /// noget, der ikke findes længere, lægges den ind alligevel og med
-    /// «(findes ikke)» efter sig. Fjernes den bare, ville feltet stå tomt, og
-    /// så ser det ud, som om der aldrig var valgt noget — og næste gang nogen
-    /// gemmer, ville det være sandt.
+    /// noget, der ikke findes længere, står stien alligevel og med
+    /// «(findes ikke)» efter sig. Stod der bare ingenting, ville det ligne, at
+    /// der aldrig var valgt noget — og næste gang nogen gemte, ville det være
+    /// sandt.
     /// </remarks>
     private void FyldMapper(string? valgt)
     {
-        var punkter = new List<Mappepunkt> { new(NoteApp.Core.Mapper.Ingen, null) };
+        _mappe = valgt;
 
-        foreach (var m in NoteApp.Core.Mapper.Alle(NoteApp.Core.Mapper.Slags.Optagelser))
-            punkter.Add(new Mappepunkt(m, m));
+        if (string.IsNullOrWhiteSpace(valgt))
+        {
+            MappeTekst.Text = NoteApp.Core.Mapper.Ingen;
+            return;
+        }
 
-        if (!string.IsNullOrWhiteSpace(valgt) && punkter.All(x => x.Sti != valgt))
-            punkter.Add(new Mappepunkt($"{valgt}  (findes ikke)", valgt));
+        var findes = NoteApp.Core.Mapper.Alle(NoteApp.Core.Mapper.Slags.Optagelser)
+            .Any(m => m.Equals(valgt, StringComparison.CurrentCultureIgnoreCase));
 
-        FeltMappe.ItemsSource = punkter;
-        FeltMappe.SelectedItem = punkter.FirstOrDefault(x => x.Sti == valgt) ?? punkter[0];
+        MappeTekst.Text = findes ? valgt : $"{valgt}  (findes ikke)";
     }
 
-    private void Mappe_Valgt(object sender, SelectionChangedEventArgs e)
+    private void VaelgMappe_Klik(object sender, RoutedEventArgs e)
     {
-        if (!_indlæser) GemKnap.IsEnabled = true;
+        var vindue = new Dialogs.MappeVaelger(
+            NoteApp.Core.Mapper.Slags.Optagelser, _mappe, "optagelser med den her mødetype")
+        { Owner = Window.GetWindow(this) };
+
+        if (vindue.ShowDialog() != true) return;
+
+        FyldMapper(vindue.Valgt);
+        GemKnap.IsEnabled = true;
     }
 
     // -------------------------------------------------------------- ændring
@@ -594,7 +600,7 @@ public partial class TemplatesView : UserControl
 
         _valgt.Name = FeltNavn.Text.Trim();
         _valgt.Description = string.IsNullOrWhiteSpace(FeltBeskrivelse.Text) ? null : FeltBeskrivelse.Text.Trim();
-        _valgt.Mappe = (FeltMappe.SelectedItem as Mappepunkt)?.Sti;
+        _valgt.Mappe = _mappe;
         // Temperaturen roeres ikke - den staar, som den stod i filen.
         _valgt.MaxTokens = _valgtLaengde;
         _valgt.SystemPrompt = FeltSystem.Text.Trim();
