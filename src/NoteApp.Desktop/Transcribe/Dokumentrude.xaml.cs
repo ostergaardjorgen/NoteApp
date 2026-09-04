@@ -48,9 +48,31 @@ public partial class Dokumentrude : UserControl
     /// </remarks>
     public void Vis(string? moedeId, string? mappe, string? titel)
     {
+        _moedeId = moedeId;
+        _mappe = mappe;
+        _titel = titel;
+
         _dokumenter = DocumentStore.ForMoede(moedeId, mappe);
 
-        if (mappe is null && moedeId is null)
+        Tegn();
+    }
+
+    private string? _moedeId;
+    private string? _mappe;
+    private string? _titel;
+
+    /// <summary>
+    /// Bygger listen op — med søgningen lagt ned over, hvis der står noget i
+    /// feltet.
+    /// </summary>
+    /// <remarks>
+    /// DEN ER SKILT UD FRA <see cref="Vis"/>, fordi søgningen skal kunne
+    /// tegne igen uden at læse fra disken. Læsningen hører til et skift af
+    /// optagelse, ikke til hvert tastetryk i søgefeltet.
+    /// </remarks>
+    private void Tegn()
+    {
+        if (_mappe is null && _moedeId is null)
         {
             Overskrift.Text = "Dokumenter";
             Underskrift.Text =
@@ -58,10 +80,13 @@ public partial class Dokumentrude : UserControl
                 + "ud af netop den — referater, notater og alt andet, mødetyperne kan lave.";
 
             Liste.ItemsSource = null;
+            Soegefelt.IsEnabled = false;
             return;
         }
 
-        var navn = string.IsNullOrWhiteSpace(titel) ? "optagelsen" : $"«{titel}»";
+        Soegefelt.IsEnabled = _dokumenter.Count > 0;
+
+        var navn = string.IsNullOrWhiteSpace(_titel) ? "optagelsen" : $"«{_titel}»";
 
         if (_dokumenter.Count == 0)
         {
@@ -72,26 +97,59 @@ public partial class Dokumentrude : UserControl
             //
             // HER STOD «tryk «Opret dokument» over udskriften». Knappen sad i
             // den ANDEN fane, saa den tomme skaerm henviste til noget, man
-            // skulle skifte fane for at finde. Nu staar knappen nedenfor, og
-            // teksten peger paa den.
+            // skulle skifte fane for at finde. Nu staar knappen oeverst, hvor
+            // udskriftsfanen ogsaa har sine.
             Underskrift.Text =
                 $"Der er ikke lavet dokumenter ud af {navn} endnu. Skriv optagelsen ud, "
-                + "og tryk så «Opret dokument» nedenfor — så laves et referat eller "
+                + "og tryk så «Opret dokument» øverst — så laves et referat eller "
                 + "et andet dokument ud fra den mødetype, du vælger.";
 
             Liste.ItemsSource = null;
             return;
         }
 
-        Overskrift.Text = _dokumenter.Count == 1
-            ? "Ét dokument fra denne optagelse"
-            : $"{_dokumenter.Count} dokumenter fra denne optagelse";
+        var soeg = Soeg.Text.Trim();
 
-        Underskrift.Text = $"Lavet ud af {navn}. Nyeste først.";
+        var vist = soeg.Length == 0
+            ? _dokumenter
+            : _dokumenter.Where(d => Rammer(d, soeg)).ToList();
 
-        Liste.ItemsSource = _dokumenter.Select(d =>
+        if (vist.Count == 0)
+        {
+            // EN TOM SOEGNING SKAL SIGE HVAD DER BLEV SOEGT I. Ellers ligner
+            // det, at dokumenterne er vaek.
+            Overskrift.Text = "Ingen træffere";
+            Underskrift.Text =
+                $"Ingen af de {_dokumenter.Count} dokumenter fra {navn} indeholder «{soeg}» — "
+                + "hverken i titlen, beskrivelsen eller teksten.";
+
+            Liste.ItemsSource = null;
+            return;
+        }
+
+        if (soeg.Length > 0)
+        {
+            Overskrift.Text = vist.Count == 1
+                ? "Ét dokument indeholder «" + soeg + "»"
+                : $"{vist.Count} dokumenter indeholder «{soeg}»";
+
+            Underskrift.Text = vist.Count == _dokumenter.Count
+                ? $"Alle dokumenter fra {navn}. Nyeste først."
+                : $"Ud af {_dokumenter.Count} dokumenter fra {navn}. Nyeste først.";
+        }
+        else
+        {
+            Overskrift.Text = _dokumenter.Count == 1
+                ? "Ét dokument fra denne optagelse"
+                : $"{_dokumenter.Count} dokumenter fra denne optagelse";
+
+            Underskrift.Text = $"Lavet ud af {navn}. Nyeste først.";
+        }
+
+        Liste.ItemsSource = vist.Select(d =>
         {
             var findes = File.Exists(DocumentStore.Path_(d));
+            var tekst = d.Markdown.Trim();
 
             return new
             {
@@ -109,10 +167,53 @@ public partial class Dokumentrude : UserControl
                 Beskrivelse = d.Description,
                 BeskrivelseSynlig = d.Description.Length > 0 ? Visibility.Visible : Visibility.Collapsed,
 
+                // TEKSTEN STAAR HER PAA SKAERMEN. Er der ingen gemt - et gammelt
+                // dokument fra foer teksten blev gemt med - staar rammen tom i
+                // stedet for at vise en tom kasse.
+                Indhold = tekst,
+                IndholdSynlig = tekst.Length > 0 ? Visibility.Visible : Visibility.Collapsed,
+
                 Findes = findes,
                 ManglerSynlig = findes ? Visibility.Collapsed : Visibility.Visible
             };
         }).ToList();
+    }
+
+    /// <summary>Rammer søgeordet dokumentet — i titel, beskrivelse, mødetype eller tekst?</summary>
+    private static bool Rammer(DocumentInfo d, string soeg) =>
+        d.Title.Contains(soeg, StringComparison.CurrentCultureIgnoreCase)
+        || d.Description.Contains(soeg, StringComparison.CurrentCultureIgnoreCase)
+        || d.Template.Contains(soeg, StringComparison.CurrentCultureIgnoreCase)
+        || d.FileName.Contains(soeg, StringComparison.CurrentCultureIgnoreCase)
+        || d.Markdown.Contains(soeg, StringComparison.CurrentCultureIgnoreCase);
+
+    private void Soeg_Aendret(object sender, TextChangedEventArgs e)
+    {
+        SoegPladsholder.Visibility = Soeg.Text.Length == 0
+            ? Visibility.Visible : Visibility.Collapsed;
+
+        SoegRyd.Visibility = Soeg.Text.Length == 0
+            ? Visibility.Collapsed : Visibility.Visible;
+
+        Tegn();
+
+        // Efter en ny soegning skal man staa i toppen af traefferne og ikke
+        // dér, hvor man tilfaeldigvis var rullet hen i den forrige.
+        Rulle.ScrollToTop();
+    }
+
+    private void Soeg_Tast(object sender, System.Windows.Input.KeyEventArgs e)
+    {
+        if (e.Key != System.Windows.Input.Key.Escape || Soeg.Text.Length == 0) return;
+
+        Soeg.Clear();
+        e.Handled = true;
+    }
+
+    private void SoegRyd_Klik(object sender, RoutedEventArgs e)
+    {
+        Soeg.Clear();
+        Soeg.Focus();
     }
 
     private DocumentInfo? Fra(object sender) =>
