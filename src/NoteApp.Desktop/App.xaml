@@ -470,14 +470,53 @@
                   <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
+                <!-- Foreground SKAL staa her. Uden den vandt den implicitte
+                     TextBlock-stils «Tekst» - og den er naesten sort i det
+                     lyse tema. Maalt: alle otte ikoner stod paa #101828 paa
+                     den natblaa bjaelke, altsaa 1,1:1. I det MOERKE tema er
+                     «Tekst» lys, saa dér saa det rigtigt ud - og fejlen
+                     kunne ligge og gemme sig. -->
                 <TextBlock x:Name="ikon" Grid.Column="0" Text="{TemplateBinding Tag}"
+                           Foreground="{TemplateBinding Foreground}"
                            FontFamily="Segoe MDL2 Assets" FontSize="15" Width="20"
                            VerticalAlignment="Center" TextAlignment="Center" />
 
+                <!-- ============ TREDJE GANG, SAMME FAELDE ============
+
+                     Her stod TextElement.Foreground paa selve
+                     ContentPresenteren, og det virkede ikke. Grunden er den
+                     samme som ved Ikonglyf oevre i filen og ved FontFamily i
+                     TranscribeView: TextElement.Foreground er en NEDARVET
+                     vaerdi, og den implicitte TextBlock-stils Foreground-
+                     setter vinder over nedarvning.
+
+                     Foelgen kunne maales: syv af de otte menupunkter stod i
+                     «Tekst» - altsaa #101828, naesten sort, paa en natblaa
+                     bjaelke. 1,05:1. Kun «AI-modeller» saa rigtigt ud, fordi
+                     dens tekst er en TextBlock skrevet i haanden med en lokal
+                     Foreground, og en lokal vaerdi slaar en stil. Derfor saa
+                     netop DEN forkert ud: den var den eneste rigtige.
+
+                     En implicit stil HER i ContentPresenterens egne resurser
+                     findes foer den i Application.Resources - opslaget gaar
+                     opad fra den TextBlock, ContentPresenteren selv laver.
+                     Saa nu gaelder den for baade de almindelige punkter og
+                     for indholdet i «AI-modeller». Eet sted, een regel. -->
                 <ContentPresenter x:Name="tekst" Grid.Column="1" VerticalAlignment="Center"
-                                  Margin="12,0,0,0"
-                                  TextElement.Foreground="{Binding Foreground,
-                                    RelativeSource={RelativeSource AncestorType={x:Type RadioButton}}}" />
+                                  Margin="12,0,0,0">
+                  <ContentPresenter.Resources>
+                    <Style TargetType="TextBlock">
+                      <Setter Property="Foreground"
+                              Value="{Binding Foreground,
+                                RelativeSource={RelativeSource AncestorType={x:Type RadioButton}}}" />
+                      <Setter Property="FontFamily" Value="Segoe UI" />
+                      <!-- Et menupunkt maa ikke ombrydes. Den globale stil
+                           saetter Wrap, og «Indstillinger» ville knaekke, naar
+                           menuen klappes. -->
+                      <Setter Property="TextWrapping" Value="NoWrap" />
+                    </Style>
+                  </ContentPresenter.Resources>
+                </ContentPresenter>
               </Grid>
             </Border>
             <ControlTemplate.Triggers>

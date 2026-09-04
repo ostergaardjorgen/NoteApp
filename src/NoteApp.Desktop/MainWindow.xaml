@@ -183,6 +183,22 @@
                    den globale TextBlock-stil med den normale tekstfarve. Saa
                    stod AI-modeller graat, mens resten stod hvidt - det lignede
                    en deaktiveret knap. Nu foelger den samme stil som resten. -->
+              <!-- ============ DEN HER SKAL HAVE FARVEN I HAANDEN ============
+
+                   De syv andre menupunkter har almindelig tekst som Content,
+                   og saa laver ContentPresenteren selv en TextBlock, som
+                   NavKnap-stilens egen implicitte stil rammer.
+
+                   Det gaelder IKKE her. Griddet er skrevet i MainWindow.xaml,
+                   og en implicit stil slaas op, dér hvor elementet BLIVER
+                   TIL - altsaa i vinduets resurser og derfra i
+                   Application.Resources, hvor Foreground staar paa «Tekst».
+                   Ikke i den ContentPresenter, det senere havner i.
+
+                   Maalt 04-09-2026: uden linjen herunder stod «AI-modeller»
+                   paa #101828 i det lyse tema - naesten sort paa natblaat,
+                   1,1:1 - mens de syv andre stod korrekt. Det var netop dét,
+                   der gjorde punktet forskelligt fra resten. -->
               <TextBlock Grid.Column="0" Text="{i18n:Oversat nav.modeller}" VerticalAlignment="Center"
                          Foreground="{Binding Foreground,
                            RelativeSource={RelativeSource AncestorType={x:Type RadioButton}}}" />

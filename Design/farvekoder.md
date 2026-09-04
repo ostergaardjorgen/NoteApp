@@ -63,6 +63,14 @@ Arbejdsfladen er neutral, panelerne hvide, kanterne gråblå — og
 Før var alt blåt: fladen, kanterne, felterne og knapperne, og når alt er
 brandfarve, siger brandfarven ingenting.
 
+**Sidebjælken er dybere end mærkets egen #0D3B66.** Målestokken er det mørke
+tema: dér står et hvilende menupunkt på 9,7:1 og et valgt på 10,3:1, og det
+er dét, der gør bjælken nem at læse. På mærkets #0D3B66 kunne den lyse palet
+ikke nå højere end 7,7 og 6,6 — det valgte punkt skal jo stå på en *lysere*
+flade, og så er der ikke plads. En dybere række giver plads til begge dele.
+Mærkets blå er stadig `Accent`; den er ikke væk, den er flyttet derhen, hvor
+der klikkes.
+
 | Nøgle | HEX | Kontrast | Rolle |
 |---|---|---|---|
 | Baggrund | `#F6F8FB` | — | arbejdsfladen |
@@ -89,11 +97,11 @@ brandfarve, siger brandfarven ingenting.
 | AdvarselFlade | `#F7ECD1` | — | tonet kasse, gul |
 | FejlFlade | `#F8E6E5` | — | tonet kasse, rød |
 | OptagerFlade | `#FBE4E5` | — | fladen bag «der optages» |
-| NavigationFlade | `#0D3B66` | — | sidebjælken — mørkeblå i BEGGE temaer |
-| NavigationValgt | `#215C8C` | 1,6 | det menupunkt, man står på |
-| NavigationKant | `#1B4E7E` | 1,3 | skillelinje og svæveflade i bjælken |
-| PaaNavigation | `#F2F7FC` | 6,6 | skrift i sidebjælken |
-| PaaNavigationSvag | `#C2D6E9` | 7,7 | version og datamappe i bjælken |
+| NavigationFlade | `#092845` | — | sidebjælken — mørkeblå i BEGGE temaer |
+| NavigationValgt | `#15476C` | 1,5 | det menupunkt, man står på |
+| NavigationKant | `#11375C` | 1,2 | skillelinje og svæveflade i bjælken |
+| PaaNavigation | `#F4F8FC` | 9,2 | skrift i sidebjælken |
+| PaaNavigationSvag | `#C7DAEC` | 10,5 | version og datamappe i bjælken |
 | Dokument | `#7A45C0` | 5,7 | dokumenter — skal kunne skelnes fra accenten |
 | Fremhaev | `#F1DFA1` | — | fundet i en søgning |
 | PaaFremhaev | `#101828` | 13,4 | skrift på det fundne |

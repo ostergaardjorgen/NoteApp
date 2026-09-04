@@ -170,11 +170,23 @@ public static class Tema
             // Teksten derinde kan IKKE hente sin farve i «Tekst». Den er
             // moerk paa lyst, og paa en natblaa bjaelke ville den vaere
             // usynlig. Derfor to egne tekstnoegler.
-            ["NavigationFlade"]   = "#FF0D3B66",
-            ["NavigationValgt"]   = "#FF215C8C",
-            ["NavigationKant"]    = "#FF1B4E7E",
-            ["PaaNavigation"]     = "#FFF2F7FC",
-            ["PaaNavigationSvag"] = "#FFC2D6E9",
+            //
+            // FARVERNE ER DYBERE END MAERKETS EGEN #0D3B66, og det er med
+            // vilje. Maalestokken er det MOERKE tema: dér staar et hvilende
+            // menupunkt paa 9,7:1 og et valgt paa 10,3:1, og det er dét, der
+            // goer bjaelken nem at laese. Paa maerkets #0D3B66 kunne den
+            // lyse palet ikke naa hoejere end 7,7 og 6,6 - det valgte punkt
+            // skal jo staa paa en LYSERE flade, og saa er der ikke plads.
+            //
+            // En dybere raekke giver plads til begge dele: 10,5 hvilende og
+            // 9,2 valgt. Maerkets egen blaa er stadig Accent - knapper,
+            // links og markering - saa den er ikke vaek, den er flyttet
+            // derhen, hvor der klikkes.
+            ["NavigationFlade"]   = "#FF092845",
+            ["NavigationValgt"]   = "#FF15476C",
+            ["NavigationKant"]    = "#FF11375C",
+            ["PaaNavigation"]     = "#FFF4F8FC",
+            ["PaaNavigationSvag"] = "#FFC7DAEC",
 
             // Et dokument er ikke en udskrift og ikke en note. Den lilla er
             // det eneste sted i appen, farven BETYDER noget andet end
