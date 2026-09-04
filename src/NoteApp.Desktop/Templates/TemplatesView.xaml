@@ -349,12 +349,17 @@
                 </Border>
               </StackPanel>
 
-              <!-- FELTERNE STAAR HER, IKKE I EN FANE FOR SIG.
-                   De var en fane med en liste, man kunne laese. Det svarede
-                   ikke paa det, man staar med: hvor skal de hen? Svaret er
-                   HER, i denne tekst - og nu kan man klikke dem ind, hvor
-                   markoeren staar, i stedet for at skrive kroellede
-                   parenteser af i haanden. -->
+              <!-- ============ FELTERNE ER OGSAA HAK ============
+
+                   De var knapper, der satte «{{titel}}» ind, hvor markoeren
+                   stod. Det gav to slags fejl: man kunne saette det samme felt
+                   ind to gange, og man kunne saette det ind midt i en saetning
+                   uden at opdage det. Og «skal titlen med?» er et ja/nej, ikke
+                   en indsaetningsopgave.
+
+                   Nu er det samme layout som paa den anden fane: eet hak pr.
+                   felt, overstreget naar det er fra, og en linje der siger hvad
+                   der sker. Teksten roeres ikke - se PromptTemplate.Render. -->
               <Border DockPanel.Dock="Bottom" Background="{DynamicResource Trykket}" CornerRadius="8"
                       BorderBrush="{DynamicResource PanelKant}" BorderThickness="1"
                       Padding="14,11" Margin="0,10,0,0">
@@ -363,26 +368,13 @@
                              FontWeight="SemiBold" />
                   <TextBlock FontSize="11.5" Margin="0,4,0,8" TextWrapping="Wrap" LineHeight="18"
                              Foreground="{DynamicResource TekstMeget}"
-                             Text="{i18n:Oversat templatesview.klik_et_af_dem_ind_hvor_markoeren_staar}" />
-                  <ItemsControl x:Name="Felter">
-                    <ItemsControl.ItemsPanel>
-                      <ItemsPanelTemplate>
-                        <WrapPanel />
-                      </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemTemplate>
-                      <DataTemplate>
-                        <!-- KNAPPEN HED «{{transskription}}». Det er appens eget
-                             sprog. Nu staar der «Mødets tekst», og de kroellede
-                             parenteser bliver sat ind i teksten, hvor de hoerer
-                             til - i hjaelpeteksten staar baade forklaringen og
-                             pladsholderen, for den, der vil vide det. -->
-                        <Button Content="{Binding Navn}" Tag="{Binding Felt}" Click="Felt_Klik"
-                                ToolTip="{Binding Forklaring}" Margin="0,0,6,6"
-                                Padding="10,5" FontSize="12" />
-                      </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                  </ItemsControl>
+                             Text="{i18n:Oversat templatesview.tag_hakket_fra_saa_sendes_linjen_ikke}" />
+
+                  <WrapPanel x:Name="Feltvalg" Orientation="Horizontal" />
+
+                  <TextBlock x:Name="Feltbesked2" FontSize="11.5" Margin="0,6,0,0"
+                             TextWrapping="Wrap" LineHeight="18" Visibility="Collapsed"
+                             Foreground="{DynamicResource Advarsel}" />
                 </StackPanel>
               </Border>
 

@@ -193,3 +193,83 @@ public class DeltagerreglerTest
         Assert.False(uden.TagDeltagerregler);
     }
 }
+
+/// <summary>
+/// Felterne på «Hvad der kommer med»: ét hak pr. oplysning fra mødet.
+/// </summary>
+/// <remarks>
+/// PRØVEN FINDES, FORDI HELE LINJEN RYGER — ikke kun feltet. «Titel:» uden en
+/// titel er værre end ingenting: det ligner en oplysning, der mangler.
+/// </remarks>
+public class FeltfravalgTest
+{
+    private static PromptTemplate Prove() => PromptTemplate.Parse(
+        "navn: Prøve\n---\nDu skriver referater.\n---\n"
+        + "Titel: {{titel}}\n"
+        + "Dato: {{dato}}\n"
+        + "\n"
+        + "Udskrift:\n"
+        + "{{transskription}}\n");
+
+    private static readonly Dictionary<string, string?> Vaerdier = new()
+    {
+        ["titel"] = "Møde 2. september",
+        ["dato"] = "4. september 2026",
+        ["transskription"] = "Hej med jer."
+    };
+
+    [Fact]
+    public void Uden_fravalg_kommer_alt_med()
+    {
+        var s = Prove().Render(Vaerdier);
+
+        Assert.Contains("Titel: Møde 2. september", s);
+        Assert.Contains("Dato: 4. september 2026", s);
+        Assert.Contains("Hej med jer.", s);
+    }
+
+    [Fact]
+    public void Et_fravalgt_felt_tager_hele_linjen_med_sig()
+    {
+        var t = Prove();
+        t.UdeladteFelter.Add("dato");
+
+        var s = t.Render(Vaerdier);
+
+        // Hverken vaerdien eller overskriften «Dato:» maa staa tilbage.
+        Assert.DoesNotContain("4. september 2026", s);
+        Assert.DoesNotContain("Dato:", s);
+
+        // Resten er uroert.
+        Assert.Contains("Titel: Møde 2. september", s);
+        Assert.Contains("Hej med jer.", s);
+    }
+
+    [Fact]
+    public void Teksten_i_filen_er_uroert()
+    {
+        var t = Prove();
+        t.UdeladteFelter.Add("dato");
+
+        Assert.Contains("Dato: {{dato}}", t.UserPrompt);
+        Assert.Contains("Dato: {{dato}}", t.ToMarkdown());
+        Assert.Contains("udeladte_felter: dato", t.ToMarkdown());
+    }
+
+    [Fact]
+    public void Fravalget_overlever_en_tur_gennem_filen()
+    {
+        var t = Prove();
+        t.UdeladteFelter.Add("dato");
+        t.UdeladteFelter.Add("titel");
+
+        var igen = PromptTemplate.Parse(t.ToMarkdown());
+
+        Assert.Equal(new[] { "dato", "titel" }, igen.UdeladteFelter);
+
+        var s = igen.Render(Vaerdier);
+        Assert.DoesNotContain("Titel:", s);
+        Assert.DoesNotContain("Dato:", s);
+        Assert.Contains("Hej med jer.", s);
+    }
+}

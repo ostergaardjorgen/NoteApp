@@ -86,6 +86,21 @@ public sealed class PromptTemplate
     /// </remarks>
     public bool TagDeltagerregler { get; set; }
 
+    /// <summary>
+    /// De felter, brugeren har slået FRA. Tom liste betyder «alt med».
+    /// </summary>
+    /// <remarks>
+    /// SAMME PRINCIP SOM AFSNITTENE: teksten røres ikke. Feltet bliver stående
+    /// i brugerprompten, og <see cref="Render"/> springer LINJEN over, når
+    /// dokumentet laves.
+    ///
+    /// Hele linjen og ikke kun feltet, fordi felterne står med deres egen
+    /// overskrift: «Titel: {{titel}}». Blev kun feltet fjernet, ville der stå
+    /// «Titel:» tilbage uden en titel — og det er værre end ingenting, for det
+    /// ligner en oplysning, der mangler.
+    /// </remarks>
+    public List<string> UdeladteFelter { get; set; } = new();
+
     public required string SystemPrompt { get; set; }
     public required string UserPrompt { get; set; }
 
@@ -163,6 +178,10 @@ public sealed class PromptTemplate
             // var reglerne med foer - og saa skal de blive ved med at vaere
             // det. Kun et udtrykkeligt «nej» eller «ja» i frontmatter vinder
             // over det, teksten selv siger.
+            UdeladteFelter = (Hent(felter, "udeladte_felter") ?? "")
+                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .ToList(),
+
             TagDeltagerregler = Hent(felter, "deltagerregler") switch
             {
                 "ja" => true,
@@ -304,7 +323,23 @@ public sealed class PromptTemplate
 
     public string Render(IReadOnlyDictionary<string, string?> values)
     {
-        var sb = new StringBuilder(UserPrompt);
+        // ============ DE FRAVALGTE FELTER ============
+        //
+        // Linjen ryger, ikke kun feltet - se UdeladteFelter. Teksten i filen er
+        // uroert; det er kun det, der SENDES, der er kortere.
+        var tekst = UserPrompt;
+
+        if (UdeladteFelter.Count > 0)
+        {
+            var ud = UdeladteFelter
+                .Select(f => "{{" + f + "}}")
+                .ToList();
+
+            tekst = string.Join("\n", Linjer(tekst)
+                .Where(l => !ud.Any(f => l.Contains(f, StringComparison.CurrentCultureIgnoreCase))));
+        }
+
+        var sb = new StringBuilder(tekst);
         foreach (var felt in Fields.Keys)
         {
             values.TryGetValue(felt, out var v);
@@ -330,6 +365,9 @@ public sealed class PromptTemplate
         sb.Append("maks_tokens: ").AppendLine(MaxTokens.ToString());
         if (UdeladteAfsnit.Count > 0)
             sb.Append("udeladte_afsnit: ").AppendLine(string.Join(", ", UdeladteAfsnit));
+
+        if (UdeladteFelter.Count > 0)
+            sb.Append("udeladte_felter: ").AppendLine(string.Join(", ", UdeladteFelter));
 
         // Skrives ALTID. Uden linjen ville standarden blive udledt af teksten
         // igen naeste gang, og et hak, man selv har taget fra, ville komme

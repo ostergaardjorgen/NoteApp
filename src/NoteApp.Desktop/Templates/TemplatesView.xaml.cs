@@ -38,21 +38,8 @@ public partial class TemplatesView : UserControl
     {
         InitializeComponent();
 
-        // Felterne er knapper, ikke en liste at laese. Forklaringen fra
-        // PromptTemplate.Fields bliver til hjaelpeteksten paa hver enkelt.
-        // DELTAGERREGLER ER IKKE MED HER.
-        // Feltet erstattes kun i systemprompten. Blev det sat ind paa
-        // materialefanen, blev det byttet ud med ingenting - reglerne
-        // forsvandt uden en lyd. Knappen til det staar paa Instruktion.
-        Felter.ItemsSource = PromptTemplate.Fields
-            .Where(f => f.Key != Deltagerregler.Felt)
-            .Select(f => new
-            {
-                Navn = Feltnavn(f.Key),
-                Felt = "{{" + f.Key + "}}",
-                Forklaring = f.Value + "\n\nSættes ind som {{" + f.Key + "}}"
-            })
-            .ToList();
+        // HER BLEV FELTKNAPPERNE FYLDT. De er blevet til hak, og de bygges
+        // pr. skabelon - se Byg_Felter.
 
         // De indbyggede skabeloner lægges i datamappen, hvis de ikke er der.
         // Uden dette står skærmen tom første gang, og så ser det ud, som om
@@ -204,32 +191,12 @@ public partial class TemplatesView : UserControl
     // give hver sit resultat.
     private static string Agenda() => Dagsordensskriver.Standard();
 
-    /// <summary>
-    /// Saetter et felt ind, hvor markoeren staar i opgaveteksten.
-    ///
-    /// Feltlisten var foer en fane for sig med en raekke navne, man kunne
-    /// laese. Den svarede ikke paa det, man staar med - hvor skal de hen? -
-    /// og man skulle skrive de kroellede parenteser af i haanden. Nu staar
-    /// listen under den tekst, felterne hoerer til, og et klik goer arbejdet.
-    /// </summary>
-    private void Felt_Klik(object sender, RoutedEventArgs e)
-    {
-        if (sender is not Button b || b.Tag is not string felt) return;
-
-        var pos = FeltBruger.CaretIndex;
-        FeltBruger.Text = FeltBruger.Text.Insert(pos, felt);
-
-        // Markoeren skal staa EFTER det indsatte, saa man kan skrive videre.
-        FeltBruger.CaretIndex = pos + felt.Length;
-        FeltBruger.Focus();
-    }
-
-    /// <summary>
-    /// Sætter de fælles deltagerregler ind i instruktionen, hvor markøren
-    /// står. Egen metode, fordi den skriver i et andet felt end Felt_Klik.
-    /// </summary>
-    // HER LAA Systemfelt_Klik - knappen «Sæt deltagerreglerne ind».
-    // Feltet skrives ikke laengere i haanden; se HakDeltagere.
+    // HER LAA Felt_Klik OG Systemfelt_Klik - knapperne, der satte
+    // «{{titel}}» og «{{deltagerregler}}» ind, hvor markoeren stod.
+    //
+    // Begge er blevet til hak. Knapperne gav to slags fejl, der var svaere at
+    // se: man kunne saette det samme felt ind to gange, og man kunne saette det
+    // ind midt i en saetning. Se Byg_Felter og HakDeltagere.
 
     /// <summary>
     /// Viser den dagsorden, der hører til den valgte skabelon — eller
@@ -390,7 +357,9 @@ public partial class TemplatesView : UserControl
 
         _udeladte = new List<string>(t.UdeladteAfsnit);
         HakDeltagere.IsChecked = t.TagDeltagerregler;
+        _udeladteFelter = new List<string>(t.UdeladteFelter);
         Byg_Afsnit();
+        Byg_Felter();
         FeltBruger.Text = t.UserPrompt;
 
         // HER BLEV SKABELONENS PreferredModel LAEST IND I EN COMBOBOX.
@@ -625,6 +594,122 @@ public partial class TemplatesView : UserControl
     }
 
     private bool _byggerAfsnit;
+    private bool _byggerFelter;
+
+    /// <summary>Felterne, brugeren har taget hakket fra.</summary>
+    private List<string> _udeladteFelter = new();
+
+    /// <summary>
+    /// Én afkrydsning pr. felt, der kan komme med fra mødet.
+    /// </summary>
+    /// <remarks>
+    /// ALLE FELTER STÅR PÅ LISTEN, også dem skabelonen ikke bruger. Ellers
+    /// kunne man ikke få dem med: det var netop dét, de gamle knapper var til,
+    /// og en liste, hvor kun det valgte står, kan man ikke vælge fra.
+    ///
+    /// Hakket er sat, når feltet står i teksten OG ikke er fravalgt.
+    /// </remarks>
+    private void Byg_Felter()
+    {
+        _byggerFelter = true;
+        Feltvalg.Children.Clear();
+
+        var tekst = FeltBruger.Text;
+
+        foreach (var f in PromptTemplate.Fields.Keys.Where(k => k != Deltagerregler.Felt))
+        {
+            var staar = tekst.Contains("{{" + f + "}}", StringComparison.CurrentCultureIgnoreCase);
+            var fravalgt = _udeladteFelter.Contains(f, StringComparer.CurrentCultureIgnoreCase);
+
+            var hak = new CheckBox
+            {
+                Content = new TextBlock { Text = Feltnavn(f) },
+                Tag = f,
+                Margin = new Thickness(0, 0, 18, 6),
+                FontSize = 12.5,
+                IsChecked = staar && !fravalgt,
+                ToolTip = PromptTemplate.Fields[f] + "\n\nStår i teksten som {{" + f + "}}"
+            };
+
+            hak.Checked += Felt_Aendret;
+            hak.Unchecked += Felt_Aendret;
+            Feltvalg.Children.Add(hak);
+        }
+
+        _byggerFelter = false;
+        Vis_Feltfravalg();
+    }
+
+    /// <summary>
+    /// Slår et felt til eller fra.
+    /// </summary>
+    /// <remarks>
+    /// FRA rører ikke teksten — feltet står, og linjen springes over, når
+    /// dokumentet laves. TIL på et felt, teksten ikke har, skriver en ny linje
+    /// til sidst; ellers ville hakket ikke kunne sættes på noget, skabelonen
+    /// aldrig har brugt.
+    /// </remarks>
+    private void Felt_Aendret(object sender, RoutedEventArgs e)
+    {
+        if (_byggerFelter || _indlæser) return;
+        if (sender is not CheckBox { Tag: string felt } hak) return;
+
+        var mærke = "{{" + felt + "}}";
+        var staar = FeltBruger.Text.Contains(mærke, StringComparison.CurrentCultureIgnoreCase);
+
+        if (hak.IsChecked == true)
+        {
+            _udeladteFelter.RemoveAll(u => u.Equals(felt, StringComparison.CurrentCultureIgnoreCase));
+
+            if (!staar)
+            {
+                // Transskriptionen staar alene; de oevrige faar deres egen
+                // overskrift, saa modellen ved hvad tallet eller navnet er.
+                var linje = felt == "transskription" ? mærke : $"{Feltnavn(felt)}: {mærke}";
+
+                FeltBruger.Text = FeltBruger.Text.TrimEnd() + "\n\n" + linje;
+                FeltBruger.Select(FeltBruger.Text.Length - linje.Length, linje.Length);
+                FeltBruger.ScrollToEnd();
+            }
+        }
+        else if (!_udeladteFelter.Contains(felt, StringComparer.CurrentCultureIgnoreCase))
+        {
+            _udeladteFelter.Add(felt);
+        }
+
+        GemKnap.IsEnabled = true;
+        Vis_Feltfravalg();
+        TjekFelter();
+    }
+
+    /// <summary>Streger de fravalgte felter over og siger hvad det betyder.</summary>
+    private void Vis_Feltfravalg()
+    {
+        foreach (var k in Feltvalg.Children.OfType<CheckBox>())
+        {
+            if (k.Content is not TextBlock t) continue;
+
+            var fra = k.IsChecked != true;
+
+            t.TextDecorations = fra ? TextDecorations.Strikethrough : null;
+            if (Pensel(fra ? "Slukket" : "Tekst") is { } p) t.Foreground = p;
+        }
+
+        var ude = Feltvalg.Children.OfType<CheckBox>()
+            .Where(k => k.IsChecked != true)
+            .Select(k => Feltnavn((string)k.Tag!))
+            .ToList();
+
+        if (ude.Count == 0)
+        {
+            Feltbesked2.Visibility = Visibility.Collapsed;
+            return;
+        }
+
+        Feltbesked2.Visibility = Visibility.Visible;
+        Feltbesked2.Text = $"Kommer ikke med: {string.Join(", ", ude)}.";
+    }
+
 
     private void Afsnit_Aendret(object sender, RoutedEventArgs e)
     {
@@ -673,6 +758,30 @@ public partial class TemplatesView : UserControl
         // vaere forsvundet et. Raekken bygges kun om, naar den faktisk er blevet
         // forkert - ellers ville hvert tastetryk bygge den forfra.
         if (!_indlæser && ReferenceEquals(sender, FeltSystem)) Foelg_Afsnit();
+
+        // Det samme paa materialefanen: skriver eller sletter man et felt i
+        // haanden, skal hakket foelge med.
+        if (!_indlæser && ReferenceEquals(sender, FeltBruger)) Foelg_Felter();
+    }
+
+    private void Foelg_Felter()
+    {
+        var tekst = FeltBruger.Text;
+
+        foreach (var k in Feltvalg.Children.OfType<CheckBox>())
+        {
+            var felt = (string)k.Tag!;
+            var staar = tekst.Contains("{{" + felt + "}}", StringComparison.CurrentCultureIgnoreCase);
+            var skal = staar && !_udeladteFelter.Contains(felt, StringComparer.CurrentCultureIgnoreCase);
+
+            if ((k.IsChecked == true) == skal) continue;
+
+            _byggerFelter = true;
+            k.IsChecked = skal;
+            _byggerFelter = false;
+        }
+
+        Vis_Feltfravalg();
     }
 
     private void Foelg_Afsnit()
@@ -770,8 +879,11 @@ public partial class TemplatesView : UserControl
     {
         ramme.Background = new SolidColorBrush(
             (Color)ColorConverter.ConvertFromString(baggrund));
-        ramme.BorderBrush = (Brush)FindResource(kant);
-        tekst.Foreground = (Brush)FindResource(skrift);
+        // TryFindResource og ikke FindResource: det sidste KASTER, naar ruden
+        // endnu ikke er i et vindue, eller hvis en noegle mangler - og en
+        // farve, der ikke kan slaas op, maa ikke vaelte en kontrol af felterne.
+        if (Pensel(kant) is { } k) ramme.BorderBrush = k;
+        if (Pensel(skrift) is { } f) tekst.Foreground = f;
     }
 
     // ---------------------------------------------------------------- gem
@@ -819,6 +931,7 @@ public partial class TemplatesView : UserControl
         _valgt.SystemPrompt = FeltSystem.Text.Trim();
         _valgt.UdeladteAfsnit = new List<string>(_udeladte);
         _valgt.TagDeltagerregler = HakDeltagere.IsChecked == true;
+        _valgt.UdeladteFelter = new List<string>(_udeladteFelter);
         _valgt.UserPrompt = FeltBruger.Text.Trim();
 
         // SIDSTE SPAERRE. Knappen er graa, naar udskriften mangler, men et
