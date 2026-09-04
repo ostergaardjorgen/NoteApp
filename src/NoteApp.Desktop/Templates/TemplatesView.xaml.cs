@@ -208,11 +208,34 @@ public partial class TemplatesView : UserControl
         var navn = _valgt?.Name;
         var egen = navn is not null && Agendaer.HarEgen(navn);
 
-        FeltAgenda.Text = navn is null ? Agenda() : Agendaer.Hent(navn, Agenda());
+        // ============ DEN BYGGES AF DE AKTIVE AFSNIT ============
+        //
+        // Foer var standarden en FAST tekst. Man kunne tage «Beslutninger» fra
+        // i dokumentet og stadig sende en dagsorden, der brugte fem minutter
+        // paa at samle beslutninger op. Nu haenger kaeden sammen: dagsordenen
+        // faar moedet til at sige det hoejt, transkriptionen fanger det, og
+        // dokumentet har et afsnit at skrive det i.
+        //
+        // Har moedetypen sin EGEN dagsorden - skrevet af Mistral eller rettet i
+        // haanden - bliver den staaende. Et valg, man har truffet med haanden,
+        // maa en automatik ikke lave om; i stedet siges det nedenfor, naar de
+        // to er kommet i utakt.
+        var aktive = _valgt is null
+            ? Array.Empty<string>()
+            : PromptTemplate.AfsnitI(Tekst(FeltSystem))
+                .Where(a => !_udeladte.Contains(a, StringComparer.CurrentCultureIgnoreCase))
+                .ToArray();
 
+        var bygget = _valgt is null ? Agenda() : Dagsordensskriver.Byg(aktive);
+
+        FeltAgenda.Text = navn is null ? bygget : Agendaer.Hent(navn, bygget);
+
+        // «Hvorfor en fast dagsorden» stod der, naar moedetypen ikke havde sin
+        // egen. Overskriften skal sige, hvad man kigger paa - ikke hvorfor det
+        // findes.
         AgendaOverskrift.Text = egen
-            ? $"Dagsorden til «{navn}»"
-            : "Hvorfor en fast dagsorden";
+            ? $"Dagsorden til «{navn}» — din egen"
+            : $"Dagsorden til «{navn}»";
 
         AgendaNulstilKnap.Visibility = egen ? Visibility.Visible : Visibility.Collapsed;
         AgendaTilpasKnap.IsEnabled = navn is not null && SkyNoegle.Hent() is not null;
@@ -231,21 +254,25 @@ public partial class TemplatesView : UserControl
             return;
         }
 
-        var afsnit = PromptTemplate.AfsnitI(Tekst(FeltSystem))
-            .Where(a => !_udeladte.Contains(a, StringComparer.CurrentCultureIgnoreCase))
-            .ToList();
+        var afsnit = aktive;
 
         var utakt = egen && _systemVedIndlaesning is not null
                     && _systemVedIndlaesning != _valgt.RenderSystem();
 
         Afsnitsliste.Visibility = Visibility.Visible;
-        Afsnitsliste.Text = afsnit.Count == 0
+        Afsnitsliste.Text = afsnit.Length == 0
             ? "Mødetypen har ingen afsnit endnu — se «Sådan skal det skrives»."
-            : (utakt ? "Afsnittene er ændret, siden dagsordenen blev skrevet. Den dækker nu: "
-                     : "Dagsordenen skal sørge for, at mødet kommer omkring: ")
-              + string.Join(", ", afsnit) + ".";
+            : egen
+                ? (utakt
+                      ? "Mødetypen har sin EGEN dagsorden, og afsnittene er ændret siden. "
+                        + "Den følger ikke længere med. Afsnittene er nu: "
+                      : "Mødetypen har sin EGEN dagsorden. Den følger ikke afsnittene — "
+                        + "tryk «Byg den ud fra afsnittene», hvis den skal. Afsnittene er: ")
+                  + string.Join(", ", afsnit) + "."
+                : "Bygget af afsnittene: " + string.Join(", ", afsnit) + ". "
+                  + "Tager du et hak fra, forsvinder punktet herunder med det samme.";
 
-        if (Pensel(utakt ? "Advarsel" : "TekstMeget") is { } farve) Afsnitsliste.Foreground = farve;
+        if (Pensel(utakt || egen ? "Advarsel" : "TekstMeget") is { } farve) Afsnitsliste.Foreground = farve;
     }
 
     /// <summary>
@@ -658,7 +685,14 @@ public partial class TemplatesView : UserControl
 
         var tekst = Tekst(FeltBruger);
 
-        foreach (var f in PromptTemplate.Fields.Keys.Where(k => k != Deltagerregler.Felt))
+        // DELTAGERREGLER OG SPROGREGLER STAAR IKKE HER.
+        //
+        // Begge er REGLER til instruktionen, ikke oplysninger fra moedet - og
+        // fanen her handler om, hvad modellen faar at arbejde med. Sproget
+        // vaelges desuden, naar dokumentet oprettes, og laegges til
+        // instruktionen af sig selv; se PromptTemplate.RenderSystem.
+        foreach (var f in PromptTemplate.Fields.Keys
+                     .Where(k => k != Deltagerregler.Felt && k != Sprogregler.Felt))
         {
             var staar = tekst.Contains("{{" + f + "}}", StringComparison.CurrentCultureIgnoreCase);
             var fravalgt = _udeladteFelter.Contains(f, StringComparer.CurrentCultureIgnoreCase);
