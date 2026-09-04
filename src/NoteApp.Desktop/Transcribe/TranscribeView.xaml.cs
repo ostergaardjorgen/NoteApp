@@ -224,6 +224,12 @@ public partial class TranscribeView : UserControl
         InitializeComponent();
         LytEfterFund();
 
+        // «Opret dokument» sidder i udskriftsruden, ved den tekst det laves
+        // af. Ruden kender teksten og ikke optagelsen - hvor lyden ligger,
+        // hvad moedet hedder, hvilken moedetype der blev valgt - og derfor
+        // gaar knappen herind, hvor de ting er kendt.
+        Resultat.OpretDokument += () => Referat_Click(this, new RoutedEventArgs());
+
         IndlaesOptagelser();
         VisSeneste();
 
@@ -1482,8 +1488,18 @@ public partial class TranscribeView : UserControl
         // vender tilbage til det moede, der bliver skrevet ud. Stod den her,
         // blev den haengende paa det forrige moedes mappe.
 
-        ReferatKnap.IsEnabled = færdig is not null && _afbryd is null;
-        KopierKnap.IsEnabled = færdig is not null;
+        // «Opret dokument» sidder i udskriftsruden nu. Betingelsen er den
+        // SAMME som da knappen stod heroppe: der skal vaere en udskrift, og
+        // der maa ikke koere noget - to jobs om det samme moede deler
+        // grafikkort og filer.
+        //
+        // Der spoerges paa FindTekst og ikke paa, om ruden kan vise teksten
+        // struktureret. De to er ikke det samme: en .txt uden maskinens
+        // json-filer kan ikke vises som replikker, men den kan godt blive til
+        // et dokument - se Udskriftstekst, der falder tilbage paa netop den
+        // fil. Stod betingelsen paa den strukturerede udskrift, ville gamle
+        // optagelser stille miste knappen.
+        Resultat.KanOpretteDokument = færdig is not null && _afbryd is null;
         OmdoebKnap.IsEnabled = (valgt is not null || mappeValgt) && _afbryd is null;
         FlytKnap.IsEnabled = valgt is not null && _afbryd is null;
 
@@ -2982,43 +2998,23 @@ public partial class TranscribeView : UserControl
         }
     }
 
-    /// <summary>
-    /// Lægger hele udskriften i udklipsholderen.
-    ///
-    /// Den findes, fordi udskriften er brugerens tekst og ikke appens. Vil
-    /// man have den over i en anden model, en mail eller et dokument, man
-    /// selv skriver, skal det ikke kræve at finde .txt-filen på disken.
-    ///
-    /// Der kopieres fra FILEN og ikke fra tekstfeltet: feltet kan være
-    /// afkortet under visning, og en halv udskrift, der ligner en hel, er
-    /// værre end ingen.
-    /// </summary>
-    private void Kopier_Click(object sender, RoutedEventArgs e)
-    {
-        if (Valgt is not { } valgt) return;
-        if (FindTekst(valgt.Mappe) is not { } fil) return;
-
-        try
-        {
-            var tekst = File.ReadAllText(fil, System.Text.Encoding.UTF8).Trim();
-            Clipboard.SetText(tekst);
-
-            var ord = tekst.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries).Length;
-            Status.Text = $"Hele transkriptionen er kopieret — {ord:N0} ord. Sæt den ind, hvor du vil bruge den.";
-            Fremdriftsrude.Visibility = Visibility.Visible;
-            Fremdrift.Visibility = Visibility.Collapsed;
-            Fremdriftstal.Text = "";
-        }
-        catch (Exception ex)
-        {
-            // Udklipsholderen kan vaere laast af et andet program. Det er
-            // ikke en fejl i appen, og det skal siges som det er.
-            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Kunne ikke kopiere",
-                $"Udklipsholderen kunne ikke skrives til:\n\n{ex.Message}\n\n" +
-                "Det sker, hvis et andet program holder den. Prøv igen om et øjeblik.",
-                Dialogs.Slags.Pas_paa);
-        }
-    }
+    // HER LAA Kopier_Click OG «Kopiér teksten».
+    //
+    // Den lagde hele udskriften i udklipsholderen ved at laese den RAA
+    // .txt-fil fra disken. Begrundelsen stod her: feltet kan vaere afkortet
+    // under visning, og en halv udskrift, der ligner en hel, er vaerre end
+    // ingen. Det argument var rigtigt om et TEKSTFELT - og udskriften er
+    // ikke et tekstfelt laengere. Den er en liste af replikker, man kan
+    // rette i, med navne paa talerne.
+    //
+    // Og saa blev filen det forkerte sted at laese: den indeholder maskinens
+    // foerste bud, uden rettelser og uden navne. Udskriftsruden har sin egen
+    // «Kopiér», der tager den tekst, man kigger paa, og kan give den med
+    // eller uden tidsstempel og taler.
+    //
+    // Knappen var altsaa ikke bare en for meget - den gav den RINGERE tekst,
+    // og det er noejagtig den fejl, dokumentvejen lavede indtil 20-08-2026.
+    // Se Udskriftstekst. Fjernet 04-09-2026.
 
     private void Afbryd_Click(object sender, RoutedEventArgs e) => _afbryd?.Cancel();
 

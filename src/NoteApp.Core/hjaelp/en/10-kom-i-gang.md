@@ -39,7 +39,8 @@ search use.
 
 ## 4. Make the document
 
-Press **Create document** and choose a meeting type: minutes, a task list, or
+Press **Create document** above the transcript and choose a meeting type:
+minutes, a task list, or
 one you have made yourself.
 
 That is the one step where the text is sent out of the house — to a language

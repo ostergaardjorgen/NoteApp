@@ -2,8 +2,8 @@
 
 *Referatet, opgavelisten — og hvordan du selv bestemmer, hvad der står i dem*
 
-Vælg en optagelse, der er skrevet ud, og tryk **Opret dokument**. Så vælger du
-en mødetype, og dokumentet gemmes som en Word-fil.
+Vælg en optagelse, der er skrevet ud, og tryk **Opret dokument** over
+udskriften. Så vælger du en mødetype, og dokumentet gemmes som en Word-fil.
 
 ## Dokumenterne står ved den optagelse, de kom fra
 

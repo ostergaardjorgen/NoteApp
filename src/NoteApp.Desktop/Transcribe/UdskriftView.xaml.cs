@@ -337,7 +337,7 @@ public partial class UdskriftView : UserControl
         {
             Liste.ItemsSource = null;
             RaaTekst.Text = "";
-            Hoved.Visibility = Visibility.Collapsed;
+            SaetVaerktoejslinje();
             Glid.LukRude(Navnerude);
             Meld("");
             VisIngenUdskrift(mappe);
@@ -370,7 +370,7 @@ public partial class UdskriftView : UserControl
         VisOpsummeringsvej();
         _kigEfter.Stop();
 
-        Hoved.Visibility = Visibility.Visible;
+        SaetVaerktoejslinje();
         Glid.LukRude(Navnerude);
 
         ByggTalervalg();
@@ -511,7 +511,8 @@ public partial class UdskriftView : UserControl
         OpsumTekst.Text = "";
         OpsumRude.Visibility = Visibility.Collapsed;
         OpsumTom.Visibility = Visibility.Visible;
-        Hoved.Visibility = Visibility.Collapsed;
+        DokumentKnap.IsEnabled = false;
+        SaetVaerktoejslinje();
         Glid.LukRude(Navnerude);
 
         // Ryd betyder «ingen optagelse valgt». Saa er der heller ikke noget at
@@ -1328,6 +1329,74 @@ public partial class UdskriftView : UserControl
         VisTal();
         PaaAendring();
     }
+
+    // -------------------------------------------------------- opret dokument
+
+    /// <summary>
+    /// «Opret dokument» blev trykket. Skærmen udenom laver dokumentet.
+    /// </summary>
+    /// <remarks>
+    /// KNAPPEN SIDDER HER, MEN ARBEJDET HØRER IKKE TIL HER.
+    ///
+    /// Udskriftsruden kender teksten og ikke optagelsen — den ved ikke, hvor
+    /// lyden ligger, hvilken mødetype der blev valgt, eller hvad mødet hedder.
+    /// Det gør <c>TranscribeView</c>, og den lytter her.
+    ///
+    /// Knappen stod før tre knapper væk fra den udskrift, den skulle lave et
+    /// dokument af. Nu står den ved teksten, og så er der ikke tvivl om
+    /// hvilken optagelse det gælder.
+    /// </remarks>
+    public event Action? OpretDokument;
+
+    /// <summary>
+    /// Må der laves et dokument lige nu? Slået fra, mens der køres.
+    /// </summary>
+    /// <remarks>
+    /// Udskriftsruden vises kun, når der ER en udskrift — så det er ikke
+    /// teksten, der mangler. Det er kørslen: to jobs om det samme møde på én
+    /// gang deler grafikkortet og hinandens filer.
+    /// </remarks>
+    public bool KanOpretteDokument
+    {
+        get => DokumentKnap.IsEnabled;
+        set
+        {
+            DokumentKnap.IsEnabled = value;
+            SaetVaerktoejslinje();
+        }
+    }
+
+    /// <summary>
+    /// Hvad der skal stå på værktøjslinjen — og om den overhovedet skal stå der.
+    /// </summary>
+    /// <remarks>
+    /// LINJEN VAR ENTEN HELT DER ELLER HELT VÆK, og det holdt ikke længere.
+    ///
+    /// Søgningen, talerfilteret og «Kopiér» kræver en STRUKTURERET udskrift —
+    /// replikker med tid og taler. «Opret dokument» gør ikke: en gammel
+    /// <c>udskrift_*.txt</c> uden maskinens json-filer kan ikke vises som
+    /// replikker, men den kan godt blive til et dokument. Se
+    /// <c>Udskriftstekst</c> i TranscribeView, der falder tilbage på netop den
+    /// fil.
+    ///
+    /// Da knappen sad på værktøjslinjen ØVERST, gjorde forskellen ingenting.
+    /// Efter flytningen ville de gamle optagelser stille have mistet den.
+    /// </remarks>
+    private void SaetVaerktoejslinje()
+    {
+        var struktureret = _udskrift is not null;
+
+        Soegefelt.Visibility = struktureret ? Visibility.Visible : Visibility.Collapsed;
+        KopierKnap.Visibility = struktureret ? Visibility.Visible : Visibility.Collapsed;
+
+        if (!struktureret) Talervalg.Visibility = Visibility.Collapsed;
+
+        Hoved.Visibility = struktureret || DokumentKnap.IsEnabled
+            ? Visibility.Visible
+            : Visibility.Collapsed;
+    }
+
+    private void Dokument_Klik(object sender, RoutedEventArgs e) => OpretDokument?.Invoke();
 
     // ------------------------------------------------------------ kopiering
 

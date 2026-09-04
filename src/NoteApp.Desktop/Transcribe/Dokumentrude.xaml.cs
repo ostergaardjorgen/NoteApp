@@ -65,8 +65,8 @@ public partial class Dokumentrude : UserControl
             // En tom skaerm, der kun konstaterer, er en blindgyde.
             Underskrift.Text =
                 $"Der er ikke lavet dokumenter ud af {navn} endnu. Skriv optagelsen ud, "
-                + "og tryk så «Opret dokument» øverst — så laves et referat eller et andet "
-                + "dokument ud fra den mødetype, du vælger.";
+                + "og tryk så «Opret dokument» over udskriften — så laves et referat eller "
+                + "et andet dokument ud fra den mødetype, du vælger.";
 
             Liste.ItemsSource = null;
             return;

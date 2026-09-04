@@ -19,11 +19,13 @@
        bred række, som øjet faldt på, og hvor fire af dem handler om at rydde
        op frem for at komme videre.
 
-       Alt ligger nu i ÉN værktøjslinje øverst: oprydningen som ikoner til
-       venstre, de to handlinger, der fører arbejdet videre, til højre. De to
-       står i den rækkefølge, arbejdet går — «Transskribér», så «Opret
-       dokument» — og den anden kan først bruges, når den første er gjort.
-       Det er hele guidningen, og den koster ikke en linje tekst.
+       De blev samlet i ÉN værktøjslinje øverst. Det var rigtigt for
+       oprydningen, som gælder OPTAGELSEN, og forkert for de to sidste:
+       «Kopiér teksten» og «Opret dokument» gælder UDSKRIFTEN, og de stod tre
+       knapper væk fra den. Begge er flyttet ned i udskriftsruden, hvor
+       teksten er — se kommentaren ved værktøjslinjen nedenfor.
+
+       Linjen øverst handler nu om ét: den optagelse, der er valgt i træet.
 
        IKONERNE SKAL HAVE FontFamily SAT LOKALT. App.xaml har en implicit stil
        for TextBlock med Segoe UI. Den slår igennem på den TextBlock, en
@@ -51,25 +53,27 @@
             BorderBrush="{DynamicResource PanelKant}" BorderThickness="1" Padding="8,6">
       <DockPanel>
 
-        <!-- Til højre: vejen videre. De to eneste handlinger, der flytter
-             arbejdet fremad, står yderst — hvor øjet ender. -->
-        <Button DockPanel.Dock="Right" x:Name="ReferatKnap" Click="Referat_Click"
-                MinWidth="150" IsEnabled="False" Padding="14,7" Content="{i18n:Oversat faelles.opret_dokument}"
-                ToolTip="{i18n:Oversat transcribeview.lav_et_referat_eller_et_andet_dokument_ud}" />
+        <!-- ============ HER LAA «KOPIÉR TEKSTEN» OG «OPRET DOKUMENT» ============
 
-        <!-- Kopiér staar FOER "Opret dokument", fordi det er den lettere vej
-             ud: hele udskriften i udklipsholderen, saa den kan sættes ind et
-             andet sted - en anden model, en mail, et dokument man selv
-             skriver. Den er graa, indtil der ER en udskrift. -->
-        <Button DockPanel.Dock="Right" x:Name="KopierKnap" Click="Kopier_Click"
-                MinWidth="130" IsEnabled="False" Padding="14,7" Margin="0,0,8,0"
-                Content="{i18n:Oversat transcribeview.kopier_teksten}"
-                ToolTip="{i18n:Oversat transcribeview.laeg_hele_transkriptionen_i_udklipsholdere}" />
+             Begge er flyttet ned i udskriftsruden, hvor teksten staar. To
+             grunde, og de er ikke den samme:
 
-        <TextBlock DockPanel.Dock="Right" Text="&#xE76C;" FontFamily="Segoe MDL2 Assets"
-                   FontSize="11" VerticalAlignment="Center" Margin="10,0"
-                   Foreground="{DynamicResource PanelKant}" />
+             «Kopiér teksten» fandtes BEGGE steder. Den her laeste den raa
+             .txt-fil fra disken - maskinens foerste bud, uden rettelser og
+             uden talernes navne. Den i udskriftsruden tager den tekst, man
+             kigger paa, og kan give den med eller uden tidsstempel og taler.
+             Den var altsaa ikke bare overfloedig; den gav den RINGERE tekst,
+             og det er den samme fejl, dokumentvejen lavede indtil 20-08-2026.
 
+             «Opret dokument» stod tre knapper vaek fra den udskrift, det
+             skulle laves af. Nu staar det ved teksten: saa er der ikke tvivl
+             om hvilken optagelse det gaelder, og der er kun moedetypen
+             tilbage at vaelge.
+
+             Tilbage staar den ene handling, der gaelder OPTAGELSEN - at skrive
+             lyden ud. Pilen imellem er ogsaa vaek; den viste raekkefoelgen
+             «transskribér, saa opret dokument», og de to trin staar ikke
+             laengere ved siden af hinanden. -->
         <Button DockPanel.Dock="Right" x:Name="AfbrydKnap" Content="{i18n:Oversat faelles.afbryd}" Click="Afbryd_Click"
                 Visibility="Collapsed" Margin="8,0,0,0" />
 

@@ -2,7 +2,8 @@
 
 *The minutes, the task list — and how you decide what goes in them*
 
-Select a recording that has been transcribed and press **Create document**.
+Select a recording that has been transcribed and press **Create document**
+above the transcript.
 Then you choose a meeting type, and the document is saved as a Word file.
 
 ## The documents sit with the recording they came from

@@ -37,8 +37,9 @@ ikke går tabt — og det er den rettede tekst, dokumenter og søgning bruger.
 
 ## 4. Lav dokumentet
 
-Tryk **Opret dokument** og vælg en mødetype: referat, opgaveliste eller en, du
-selv har lavet.
+Tryk **Opret dokument** over udskriften og vælg en mødetype: referat,
+opgaveliste eller en, du selv har lavet. Knappen sidder ved teksten, så der
+ikke er tvivl om, hvilken optagelse dokumentet laves af.
 
 Det er dét ene skridt, hvor teksten sendes ud af huset — til en sprogmodel i
 Europa. Lyden bliver liggende. Læs mere under **Hvor dine data går hen**.

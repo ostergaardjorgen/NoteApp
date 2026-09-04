@@ -34,7 +34,7 @@
           <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
 
-        <Border Grid.Column="0" Background="{DynamicResource Trykket}" CornerRadius="6"
+        <Border x:Name="Soegefelt" Grid.Column="0" Background="{DynamicResource Trykket}" CornerRadius="6"
                 BorderBrush="{DynamicResource PanelKant}" BorderThickness="1"
                 Width="240" HorizontalAlignment="Left" Padding="4">
           <Grid>
@@ -99,17 +99,42 @@
              skriver navnet dér. Rettelsen slaar igennem alle steder, den stemme
              taler. -->
 
-        <Button Grid.Column="3" Content="{i18n:Oversat udskriftview.kopier}" Click="Kopier_Klik"
-                Padding="12,6" FontSize="12.5"
-                ToolTip="{i18n:Oversat udskriftview.kopier_transkriptionen_med_eller_uden_tids}">
-          <Button.ContextMenu>
-            <ContextMenu x:Name="Kopimenu">
-              <MenuItem Header="{i18n:Oversat udskriftview.kopier_med_tidsstempel_og_taler}" Click="KopierAlt_Klik" />
-              <MenuItem Header="{i18n:Oversat udskriftview.kopier_med_tidsstempel}" Click="KopierTid_Klik" />
-              <MenuItem Header="{i18n:Oversat udskriftview.kopier_kun_teksten}" Click="KopierRen_Klik" />
-            </ContextMenu>
-          </Button.ContextMenu>
-        </Button>
+        <!-- ============ DE TO VEJE UD AF UDSKRIFTEN ============
+
+             Begge stod FOER paa vaerktoejslinjen oeverst, ved siden af
+             «Opdatér transskription». Det var det forkerte sted:
+
+             «Kopiér teksten» fandtes BEGGE steder. Den oeverste laeste den
+             raa .txt-fil fra disken - altsaa maskinens foerste bud, uden
+             rettelser og uden talernes navne. Den her tager den udskrift, man
+             kigger paa. Se Udskriftstekst i TranscribeView: dokumenterne
+             bruger ogsaa den rettede tekst, og af samme grund.
+
+             «Opret dokument» stod tre knapper vaek fra den udskrift, det
+             skulle laves af. Her staar det VED teksten, saa der ikke er
+             tvivl om hvilken optagelse det gaelder - saa er der kun
+             moedetypen tilbage at vaelge.
+
+             Den er ikke Primaer. Den groenne oeverst handler om optagelsen
+             («Opdatér transskription»); to groenne knapper paa een skaerm
+             ville skulle laeses for at skelnes. -->
+        <StackPanel Grid.Column="3" Orientation="Horizontal">
+          <Button x:Name="KopierKnap" Content="{i18n:Oversat udskriftview.kopier}" Click="Kopier_Klik"
+                  Padding="12,6" FontSize="12.5"
+                  ToolTip="{i18n:Oversat udskriftview.kopier_transkriptionen_med_eller_uden_tids}">
+            <Button.ContextMenu>
+              <ContextMenu x:Name="Kopimenu">
+                <MenuItem Header="{i18n:Oversat udskriftview.kopier_med_tidsstempel_og_taler}" Click="KopierAlt_Klik" />
+                <MenuItem Header="{i18n:Oversat udskriftview.kopier_med_tidsstempel}" Click="KopierTid_Klik" />
+                <MenuItem Header="{i18n:Oversat udskriftview.kopier_kun_teksten}" Click="KopierRen_Klik" />
+              </ContextMenu>
+            </Button.ContextMenu>
+          </Button>
+
+          <Button x:Name="DokumentKnap" Content="{i18n:Oversat faelles.opret_dokument}"
+                  Click="Dokument_Klik" Padding="12,6" FontSize="12.5" Margin="8,0,0,0"
+                  ToolTip="{i18n:Oversat udskriftview.lav_et_referat_eller_et_andet_dokument_ud}" />
+        </StackPanel>
       </Grid>
     </Border>
 
