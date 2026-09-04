@@ -230,6 +230,11 @@ public partial class TranscribeView : UserControl
         // gaar knappen herind, hvor de ting er kendt.
         Resultat.OpretDokument += () => Referat_Click(this, new RoutedEventArgs());
 
+        // OG DEN SAMME KNAP PAA DOKUMENTFANEN. Staar man dér uden dokumenter,
+        // er det praecis dét, man vil - og den tomme skaerm kunne kun henvise
+        // til en knap i den anden fane. Samme forloeb, ikke en kopi.
+        Dokumentrude.OpretDokument += () => Referat_Click(this, new RoutedEventArgs());
+
         IndlaesOptagelser();
         VisSeneste();
 

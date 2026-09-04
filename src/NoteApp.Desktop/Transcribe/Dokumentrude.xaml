@@ -107,12 +107,26 @@
     <!-- ARKIVET ER STADIG DER, OG DET SKAL KUNNE NAAS.
          Menupunktet «Dokumenter» er vaek - to indgange til det samme var
          netop det, der skjulte sammenhaengen. Skaermen findes uaendret, og
-         den ligger et skridt herfra, hvor man staar med dokumenterne. -->
+         den ligger et skridt herfra, hvor man staar med dokumenterne.
+
+         OG «OPRET DOKUMENT» STAAR HER OGSAA.
+         Den sad kun i udskriftsruden, altsaa i den ANDEN fane. Staar man paa
+         dokumentfanen og der ingen dokumenter er, er det praecis dét, man vil
+         - og den tomme skaerm kunne kun henvise til en knap, man skulle skifte
+         fane for at finde. En henvisning er ikke en knap. -->
     <Border Grid.Row="1" BorderBrush="{DynamicResource PanelKant}" BorderThickness="0,1,0,0"
             Padding="26,12">
-      <Button x:Name="ArkivKnap" Content="{i18n:Oversat dokumentrude.alle_dokumenter}"
-              Click="AlleKlik" Padding="14,7" HorizontalAlignment="Left"
-              ToolTip="{i18n:Oversat dokumentrude.aabner_dokumentarkivet_med_alle_dokumenter}" />
+      <DockPanel LastChildFill="False">
+        <Button x:Name="ArkivKnap" DockPanel.Dock="Left"
+                Content="{i18n:Oversat dokumentrude.alle_dokumenter}"
+                Click="AlleKlik" Padding="14,7"
+                ToolTip="{i18n:Oversat dokumentrude.aabner_dokumentarkivet_med_alle_dokumenter}" />
+
+        <Button x:Name="OpretKnap" DockPanel.Dock="Right"
+                Content="{i18n:Oversat faelles.opret_dokument}"
+                Click="OpretKlik" Style="{StaticResource Primaer}" Padding="14,7"
+                ToolTip="{i18n:Oversat dokumentrude.lav_et_referat_eller_et_andet_dokument_ud}" />
+      </DockPanel>
     </Border>
   </Grid>
 </UserControl>

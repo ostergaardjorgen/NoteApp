@@ -69,9 +69,14 @@ public partial class Dokumentrude : UserControl
 
             // TEKSTEN SIGER, HVAD MAN GOER - ikke bare at der ikke er noget.
             // En tom skaerm, der kun konstaterer, er en blindgyde.
+            //
+            // HER STOD «tryk «Opret dokument» over udskriften». Knappen sad i
+            // den ANDEN fane, saa den tomme skaerm henviste til noget, man
+            // skulle skifte fane for at finde. Nu staar knappen nedenfor, og
+            // teksten peger paa den.
             Underskrift.Text =
                 $"Der er ikke lavet dokumenter ud af {navn} endnu. Skriv optagelsen ud, "
-                + "og tryk så «Opret dokument» over udskriften — så laves et referat eller "
+                + "og tryk så «Opret dokument» nedenfor — så laves et referat eller "
                 + "et andet dokument ud fra den mødetype, du vælger.";
 
             Liste.ItemsSource = null;
@@ -150,4 +155,16 @@ public partial class Dokumentrude : UserControl
 
     private void AlleKlik(object sender, RoutedEventArgs e) =>
         (Application.Current.MainWindow as MainWindow)?.GaaTilDokumenter();
+
+    /// <summary>Der blev trykket «Opret dokument» her i ruden.</summary>
+    /// <remarks>
+    /// SAMME VEJ SOM KNAPPEN I UDSKRIFTSRUDEN. Ruden kender dokumenterne og
+    /// ikke optagelsen — hvor lyden ligger, hvad mødet hedder, hvilken mødetype
+    /// der blev valgt — så den siger til, og <c>TranscribeView</c> gør arbejdet.
+    /// To knapper, ét forløb: en kopi ville skride fra den anden ved første
+    /// rettelse.
+    /// </remarks>
+    public event Action? OpretDokument;
+
+    private void OpretKlik(object sender, RoutedEventArgs e) => OpretDokument?.Invoke();
 }
