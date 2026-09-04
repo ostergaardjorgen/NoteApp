@@ -500,7 +500,7 @@ public partial class TemplatesView : UserControl
         {
             var hak = new CheckBox
             {
-                Content = navn,
+                Content = new TextBlock { Text = navn },
                 Tag = navn,
                 Margin = new Thickness(0, 0, 18, 6),
                 FontSize = 12.5,
@@ -514,6 +514,92 @@ public partial class TemplatesView : UserControl
 
         Afsnitsrude.Visibility = fundne.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
         _byggerAfsnit = false;
+
+        Vis_Fravalg();
+    }
+
+    /// <summary>
+    /// Viser hvad hakkene betyder — på hakket selv og i en linje under dem.
+    /// </summary>
+    /// <remarks>
+    /// TEKSTEN BLIVER STÅENDE MED VILJE, og derfor skete der ingenting synligt,
+    /// når man tog et hak fra: skærmen så præcis ud som før, og hakket lignede
+    /// noget, der ikke virkede. Nu er den fravalgte overskrift streget over, og
+    /// linjen under siger, hvad der sker, når dokumentet laves.
+    /// </remarks>
+    private System.Windows.Media.Brush? Pensel(string noegle) =>
+        TryFindResource(noegle) as System.Windows.Media.Brush
+        ?? Application.Current?.TryFindResource(noegle) as System.Windows.Media.Brush;
+
+    private void Vis_Fravalg()
+    {
+        foreach (var k in Afsnit.Children.OfType<CheckBox>())
+        {
+            if (k.Content is not TextBlock t) continue;
+
+            var fra = k.IsChecked != true;
+
+            t.TextDecorations = fra ? TextDecorations.Strikethrough : null;
+
+            // Pensel og ikke FindResource: opslaget kaster, naar ruden endnu
+            // ikke er i et vindue - se den samme faelde i Dokumentrude.
+            if (Pensel(fra ? "Slukket" : "Tekst") is { } pensel) t.Foreground = pensel;
+        }
+
+        var ude = Afsnit.Children.OfType<CheckBox>()
+            .Where(k => k.IsChecked != true)
+            .Select(k => (string)k.Tag!)
+            .ToList();
+
+        if (ude.Count == 0)
+        {
+            Afsnitsbesked.Visibility = Visibility.Collapsed;
+            return;
+        }
+
+        Afsnitsbesked.Visibility = Visibility.Visible;
+        Afsnitsbesked.Text = ude.Count == 1
+            ? $"«{ude[0]}» springes over, når dokumentet laves. Teksten nedenfor bliver stående, "
+              + "så du kan sætte hakket tilbage."
+            : $"Disse springes over, når dokumentet laves: {string.Join(", ", ude)}. "
+              + "Teksten nedenfor bliver stående, så du kan sætte hakkene tilbage.";
+    }
+
+    /// <summary>
+    /// Markerer afsnittet i teksten, så man kan se hvad hakket handler om.
+    /// </summary>
+    /// <remarks>
+    /// Afsnittet er overskriften og alt frem til den næste «## »-linje — samme
+    /// afgrænsning som <c>PromptTemplate</c> bruger, når dokumentet laves. Er
+    /// de to uenige, er det dét, der skal rettes; markeringen er skærmens svar
+    /// på «hvad er det så, der ryger?».
+    /// </remarks>
+    private void Marker_Afsnit(string navn)
+    {
+        var tekst = FeltSystem.Text;
+        var linjer = tekst.Replace("\r\n", "\n").Split('\n');
+
+        var start = -1;
+        var slut = tekst.Length;
+        var plads = 0;
+
+        for (var i = 0; i < linjer.Length; i++)
+        {
+            var erOverskrift = linjer[i].StartsWith("##") && !linjer[i].StartsWith("###");
+            var dette = erOverskrift && linjer[i].TrimStart('#').Trim()
+                .Equals(navn, StringComparison.CurrentCultureIgnoreCase);
+
+            if (dette) start = plads;
+            else if (start >= 0 && erOverskrift) { slut = plads; break; }
+
+            plads += linjer[i].Length + 1;
+        }
+
+        if (start < 0) return;
+
+        FeltSystem.Focus();
+        FeltSystem.Select(start, Math.Min(slut, tekst.Length) - start);
+        FeltSystem.ScrollToLine(Math.Max(0, FeltSystem.GetLineIndexFromCharacterIndex(start)));
     }
 
     private bool _byggerAfsnit;
@@ -549,6 +635,9 @@ public partial class TemplatesView : UserControl
         }
 
         GemKnap.IsEnabled = true;
+
+        Vis_Fravalg();
+        Marker_Afsnit(navn);
     }
 
     // -------------------------------------------------------------- ændring

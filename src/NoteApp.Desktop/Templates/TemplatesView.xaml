@@ -282,6 +282,15 @@
                              Foreground="{DynamicResource TekstMeget}"
                              Text="{i18n:Oversat templatesview.tag_hakket_fra_saa_springes_afsnittet_over}" />
                   <WrapPanel x:Name="Afsnit" Orientation="Horizontal" />
+
+                  <!-- HVAD DER SKER, NAAR MAN KLIKKER. Uden den her skete der
+                       ingenting synligt: teksten bliver jo staaende med vilje,
+                       saa et hak, der blev taget fra, saa ud som om det ikke
+                       virkede. Linjen siger hvad hakket betyder, og selve
+                       afsnittet bliver markeret i teksten nedenfor. -->
+                  <TextBlock x:Name="Afsnitsbesked" FontSize="11.5" Margin="0,6,0,0"
+                             TextWrapping="Wrap" LineHeight="18" Visibility="Collapsed"
+                             Foreground="{DynamicResource Advarsel}" />
                 </StackPanel>
               </Border>
 
