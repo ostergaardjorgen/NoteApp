@@ -34,6 +34,31 @@
                   HorizontalScrollBarVisibility="Disabled">
       <StackPanel HorizontalAlignment="Stretch">
 
+        <!-- ============ DET, DER ER I GANG LIGE NU ============
+
+             Den staar OEVERST og foer listen. Et dokument tager op mod et
+             minut, og i den tid er spoergsmaalet ikke «hvad har jeg lavet» men
+             «sker der noget».
+
+             Uden den saa fanen praecis ud som foer trykket: den samme liste,
+             ingen ny raekke, intet der bevaegede sig. Saa tror man, at knappen
+             ikke virkede - og trykker igen. -->
+        <Border x:Name="IGangBjaelke" Visibility="Collapsed" Margin="0,0,0,16"
+                Background="{DynamicResource Valgt}" BorderBrush="{DynamicResource Accent}"
+                BorderThickness="3,0,0,0" CornerRadius="0,8,8,0" Padding="16,13">
+          <StackPanel>
+            <TextBlock x:Name="IGangTekst" FontSize="13.5" FontWeight="SemiBold"
+                       TextWrapping="Wrap" />
+
+            <TextBlock x:Name="IGangUnder" FontSize="12" LineHeight="19" Margin="0,5,0,0"
+                       TextWrapping="Wrap" Foreground="{DynamicResource TekstMeget}" />
+
+            <ProgressBar x:Name="IGangBjaelken" Height="5" Margin="0,11,0,0" IsIndeterminate="True"
+                         Background="{DynamicResource Svaev}" Foreground="{DynamicResource Accent}"
+                         BorderThickness="0" />
+          </StackPanel>
+        </Border>
+
         <TextBlock x:Name="Overskrift" FontSize="19" FontWeight="SemiBold" TextWrapping="Wrap" />
 
         <TextBlock x:Name="Underskrift" FontSize="13.5" LineHeight="22" Margin="0,10,0,0"

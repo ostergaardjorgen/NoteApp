@@ -250,6 +250,19 @@ public partial class TranscribeView : UserControl
         Jobs.BackgroundJobs.DokumentFærdigt += Dokumentfaerdigt;
         Unloaded += (_, _) => Jobs.BackgroundJobs.DokumentFærdigt -= Dokumentfaerdigt;
 
+        // ============ OG FREMDRIFTEN, MENS DET LAVES ============
+        //
+        // HER STOD INGENTING. Trykkede man «Opret dokument», satte skaermen en
+        // linje i statusfeltet og lod som ingenting derefter: ingen bjaelke,
+        // ingen bevaegelse, og dokumentfanen saa praecis ud som foer trykket.
+        // I det minut, koerslen tager, kunne man ikke se forskel paa «i gang»
+        // og «skete ikke» - og saa trykker man igen.
+        //
+        // Fremdriften laa paa dokumentskaermen, som man netop var gaaet vaek
+        // fra. Nu foelger den med hertil, hvor knappen blev trykket.
+        Jobs.BackgroundJobs.Ændret += Dokumentjob;
+        Unloaded += (_, _) => Jobs.BackgroundJobs.Ændret -= Dokumentjob;
+
         if (aabnMappe is null) return;
 
         VaelgOptagelse(AlleKnuder()
@@ -1372,6 +1385,23 @@ public partial class TranscribeView : UserControl
     /// først bliver rigtigt, når man kigger, er værre end intet tal: man
     /// bruger det til at lade være med at kigge.
     /// </remarks>
+    /// <summary>
+    /// Den seneste melding fra dokumentkørslen. Tom, når intet kører.
+    /// </summary>
+    /// <remarks>
+    /// DEN LIGGER I ET FELT OG IKKE I EN PARAMETER.
+    ///
+    /// Første udgave gav beskeden med som argument. Så mistede fanen den, hver
+    /// gang den blev bygget op af noget ANDET end kørslen — og det sker
+    /// præcis, når man klikker over på den: <c>Fane_Skiftet</c> kalder
+    /// opdateringen uden en besked, og så stod der den generelle tekst i
+    /// stedet for «Skriver referatet … · 12 sek».
+    ///
+    /// Altså: man gik ind for at se, hvad der skete, og dét var netop
+    /// handlingen, der skjulte det. Fanget af en prøve 04-09-2026.
+    /// </remarks>
+    private string _dokumentbesked = "";
+
     private void OpdaterDokumentfane()
     {
         var valgt = Valgt;
@@ -1380,10 +1410,61 @@ public partial class TranscribeView : UserControl
 
         Dokumentrude.Vis(meta?.Id.ToString(), valgt?.Mappe, valgt?.Titel);
 
-        FaneDokumenter.Content = Dokumentrude.Antal == 0
-            ? "Dokumenter"
-            : $"Dokumenter · {Dokumentrude.Antal}";
+        // KOERER DER ET DOKUMENT, SKAL DET STAA FOERST - baade i ruden og paa
+        // selve fanen. Tallet alene siger, hvad der ER lavet; det er ikke det
+        // spoergsmaal, man har, mens man venter.
+        var moedetype = Jobs.BackgroundJobs.Moedetype;
+
+        Dokumentrude.VisIGang(moedetype, _dokumentbesked);
+
+        FaneDokumenter.Content = moedetype is not null
+            ? "Dokumenter · laver …"
+            : Dokumentrude.Antal == 0
+                ? "Dokumenter"
+                : $"Dokumenter · {Dokumentrude.Antal}";
     }
+
+    /// <summary>
+    /// Fremdriften, mens et dokument bliver lavet.
+    /// </summary>
+    /// <remarks>
+    /// TRANSSKRIPTIONEN HAR FORTRINSRET TIL RUDEN NEDERST. Den handler om den
+    /// optagelse, man KIGGER på; et dokument kan være i gang på en helt anden.
+    /// Overtog dokumentet ruden, ville bjælken for den optagelse, man står i,
+    /// forsvinde midt i kørslen.
+    ///
+    /// Dokumentfanen opdateres altid — den hører til dokumentet, uanset hvad
+    /// ruden nedenfor viser.
+    /// </remarks>
+    private void Dokumentjob(Jobs.JobStatus s) => Dispatcher.Invoke(() =>
+    {
+        _dokumentbesked = s.Kører ? s.Besked : "";
+
+        OpdaterDokumentfane();
+
+        var transskriberer = _koererPaa is not null && Valgt?.Mappe == _koererPaa;
+        if (transskriberer) return;
+
+        if (s.Kører)
+        {
+            Fremdriftsrude.Visibility = Visibility.Visible;
+            Status.Text = $"{s.Hvad} laves — {s.Besked}";
+
+            Fremdrift.Visibility = Visibility.Visible;
+            Fremdrift.IsIndeterminate = s.Procent < 0;
+            if (s.Procent >= 0) Fremdrift.Value = s.Procent;
+
+            Fremdriftstal.Text = s.Procent >= 0 ? $"{s.Procent:0} %" : "";
+            return;
+        }
+
+        // FAERDIG: BJAELKEN GAAR, KVITTERINGEN BLIVER. En rude, der forsvinder
+        // i samme oejeblik, koerslen slutter, efterlader ingen besked om, at
+        // den slap godt fra det.
+        Status.Text = s.Besked;
+        Fremdrift.Visibility = Visibility.Collapsed;
+        Fremdriftstal.Text = "";
+    });
 
     /// <summary>Skifter mellem udskriften og dokumenterne. Samme optagelse begge steder.</summary>
     private void Fane_Skiftet(object sender, RoutedEventArgs e)
@@ -1721,14 +1802,23 @@ public partial class TranscribeView : UserControl
         var gaa = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
             $"«{dialog.Titel}» er sat i gang",
             "Dokumentet laves nu i Europa. Det tager typisk under et minut.\n\n" +
-            "Det dukker op under fanen «Dokumenter» her ved optagelsen, og klokken " +
-            "øverst giver besked, når det er klar. Du kan roligt lave noget andet imens.",
+            "Fremdriften står nederst i ruden og på fanen «Dokumenter» her ved " +
+            "optagelsen, og klokken øverst giver besked, når det er klar. Du kan " +
+            "roligt lave noget andet imens.",
             godkend: "Vis fanen",
             annuller: "Bliv her");
 
         if (gaa) FaneDokumenter.IsChecked = true;
 
-        Status.Text = "Dokumentet laves — det dukker op under fanen «Dokumenter».";
+        // HER STOD «Status.Text = "Dokumentet laves …"».
+        //
+        // Den overskrev den LEVENDE melding. LavDokumentISkyen melder
+        // «Skriver referatet …» FOER sin foerste await, altsaa foer dialogen
+        // ovenfor overhovedet lukkes - saa naar linjen her koerte, slettede den
+        // det, Dokumentjob lige havde skrevet, og erstattede det med en tekst,
+        // der aldrig aendrede sig igen.
+        //
+        // Statusfeltet ejes nu af Dokumentjob, som foelger koerslen hele vejen.
     }
 
     /// <summary>Noterne fra mødet som ren tekst, så de kan gå med til modellen.</summary>
