@@ -1040,26 +1040,55 @@
             <ItemsControl x:Name="Skytjenester" Margin="0,14,0,0">
               <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                  <Grid Margin="0,0,0,6">
+                  <!-- ============ EN RÆKKE, TRE HANDLINGER ============
+
+                       GENNEMSE. En sti, man skal skrive korrekt i hånden, er
+                       en sti, man skriver forkert. Vælgeren åbner dér, hvor
+                       feltet peger hen, så man kan klikke sig ned i den mappe,
+                       man faktisk vil bruge.
+
+                       GEM. Knappen hed «Opret mappen» og «Overvaag den», og
+                       ingen af delene sagde, om noget var GEMT. Nu hedder den
+                       Gem, og linjen nedenunder siger, hvad der skete.
+
+                       FJERN. Forslagene kommer fra Windows' egen liste over
+                       synkroniseringsmapper, og der var ingen vej ud af dem.
+                       Fire raekker står der også for den, der kun bruger den
+                       ene - og en raekke, man ikke kan få væk, holder man op
+                       med at læse. -->
+                  <Grid Margin="0,0,0,10">
                     <Grid.ColumnDefinitions>
                       <ColumnDefinition Width="*" />
                       <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
+
                     <StackPanel Grid.Column="0" Margin="0,0,14,0" VerticalAlignment="Center">
                       <TextBlock Text="{Binding Navn}" FontSize="12.5" FontWeight="SemiBold" />
 
                       <!-- STIEN ER ET FORSLAG, DER KAN RETTES.
                            Appen gætter «HeyPia» inde i skytjenesten, men mappen
                            er brugerens. Feltet står udfyldt, og det, der står i
-                           det, er dét, knappen bruger - ordret. Se Skyvisning. -->
+                           det, er dét, Gem bruger - ordret. Se Skyvisning. -->
                       <TextBox Text="{Binding Sti, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                FontSize="11" FontFamily="Consolas" Margin="0,3,0,0"
                                IsReadOnly="{Binding Laast}"
                                ToolTip="{i18n:Oversat settingsview.stien_er_et_forslag_ret_den_hvis_mappen_s}" />
                     </StackPanel>
-                    <Button Grid.Column="1" Content="{Binding Knap}" Click="OpretSkymappe_Click"
-                            Padding="14,6" VerticalAlignment="Center"
-                            IsEnabled="{Binding Kan}" />
+
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Bottom">
+                      <Button Content="{i18n:Oversat settingsview.gennemse}" Click="GennemseSky_Klik"
+                              Padding="12,6" Margin="0,0,8,0" IsEnabled="{Binding Kan}"
+                              ToolTip="{i18n:Oversat settingsview.find_mappen_frem_i_stedet_for_at_skrive_d}" />
+
+                      <Button Content="{i18n:Oversat settingsview.gem}" Click="OpretSkymappe_Click"
+                              Padding="16,6" Margin="0,0,8,0" IsEnabled="{Binding Kan}"
+                              Style="{StaticResource Primaer}"
+                              ToolTip="{i18n:Oversat settingsview.opretter_mappen_hvis_den_mangler_og_begyn}" />
+
+                      <Button Content="&#xE711;" Click="SkjulSky_Klik"
+                              FontFamily="Segoe MDL2 Assets" FontSize="11" Padding="9,7"
+                              ToolTip="{i18n:Oversat settingsview.fjern_raekken_skytjenesten_bliver_ikke_fo}" />
+                    </StackPanel>
                   </Grid>
                 </DataTemplate>
               </ItemsControl.ItemTemplate>
@@ -1071,9 +1100,17 @@
                 <ColumnDefinition Width="Auto" />
               </Grid.ColumnDefinitions>
 
-              <TextBlock x:Name="Bogen" Grid.Column="0" FontSize="11.5" TextWrapping="Wrap"
-                         VerticalAlignment="Center" Margin="0,0,14,0"
-                         Foreground="{DynamicResource TekstMeget}" />
+              <StackPanel Grid.Column="0" Margin="0,0,14,0" VerticalAlignment="Center">
+                <!-- KVITTERINGEN. Uden den er «Gem» en knap, man trykker paa i
+                     haabet om, at der skete noget. -->
+                <TextBlock x:Name="Mappekvittering" FontSize="11.5" TextWrapping="Wrap"
+                           Visibility="Collapsed" Margin="0,0,0,4"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource Godkendt}" />
+
+                <TextBlock x:Name="Bogen" FontSize="11.5" TextWrapping="Wrap"
+                           Foreground="{DynamicResource TekstMeget}" />
+              </StackPanel>
 
               <StackPanel Grid.Column="1" Orientation="Horizontal">
                 <Button Content="{i18n:Oversat settingsview.glem_hvad_der_er_set}" Click="GlemSete_Click" Padding="14,7"

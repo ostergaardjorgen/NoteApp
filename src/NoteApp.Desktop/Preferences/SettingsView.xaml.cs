@@ -1542,6 +1542,15 @@ public partial class SettingsView : UserControl
     {
         public required string Navn { get; init; }
 
+        /// <summary>
+        /// Skytjenestens rod. Det er DEN, der gemmes, naar raekken fjernes.
+        /// </summary>
+        /// <remarks>
+        /// Stien i feltet kan brugeren lige have rettet. Gemte vi den, ville
+        /// forslaget komme igen, saa snart nogen skrev noget andet.
+        /// </remarks>
+        public required string Rod { get; init; }
+
         /// <summary>Rettes af brugeren i feltet. Derfor ikke «init».</summary>
         public required string Sti { get; set; }
 
@@ -1566,7 +1575,14 @@ public partial class SettingsView : UserControl
         // at sidde og lede efter en knap, der ikke er der.
         var vaagne = mapper.Select(m => m.Sti).ToHashSet(StringComparer.OrdinalIgnoreCase);
 
+        // FJERNEDE FORSLAG KOMMER IKKE IGEN. Se AppSettings.SkjulteSkymapper:
+        // det er skytjenestens ROD, der gemmes, og ikke den mappe, der stod i
+        // feltet - fjerner man raekken, er det tjenesten, man ikke vil se.
+        var skjulte = Core.AppSettings.Current.SkjulteSkymapper
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
         Skytjenester.ItemsSource = Overvaagning.Synkroniseringsroedder()
+            .Where(r => !skjulte.Contains(r.Rod))
             .Select(r =>
             {
                 var mappe = Path.Combine(r.Rod, Overvaagning.Standardmappe);
@@ -1574,7 +1590,8 @@ public partial class SettingsView : UserControl
                 if (vaagne.Contains(mappe))
                     return new Skyvisning
                     {
-                        Navn = r.Navn, Sti = mappe, Knap = "Overvåges", Kan = false,
+                        Navn = r.Navn, Rod = r.Rod, Sti = mappe,
+                        Knap = "Overvåges", Kan = false,
                     };
 
                 // HELE STIEN STAAR I FELTET, ogsaa naar mappen ikke findes
@@ -1585,8 +1602,9 @@ public partial class SettingsView : UserControl
                 return new Skyvisning
                 {
                     Navn = r.Navn,
+                    Rod = r.Rod,
                     Sti = mappe,
-                    Knap = Directory.Exists(mappe) ? "Overvåg den" : "Opret mappen",
+                    Knap = "Gem",
                     Kan = true,
                 };
             })
@@ -1603,15 +1621,12 @@ public partial class SettingsView : UserControl
 
     private void TilfoejMappe_Click(object sender, RoutedEventArgs e)
     {
-        var dialog = new Microsoft.Win32.OpenFolderDialog
-        {
-            Title = "Vælg mappen, der skal holdes øje med",
-            Multiselect = false
-        };
+        // SAMME VÆLGER SOM PÅ RÆKKERNE, og den husker, hvor man var sidst.
+        // Ellers begynder man forfra i Windows' eget gæt for hver mappe.
+        var valgt = Bladr(Core.AppSettings.Current.SidsteBladremappe);
+        if (valgt is null) return;
 
-        if (dialog.ShowDialog(Window.GetWindow(this)) != true) return;
-
-        Tilfoej(dialog.FolderName, "Tilføjet af dig");
+        Tilfoej(valgt, "Tilføjet af dig");
     }
 
     private void OpretSkymappe_Click(object sender, RoutedEventArgs e)
@@ -1650,6 +1665,112 @@ public partial class SettingsView : UserControl
         Tilfoej(mappe, "Skytjeneste");
     }
 
+    /// <summary>
+    /// Finder mappen frem i stedet for at skrive den.
+    /// </summary>
+    /// <remarks>
+    /// VÆLGEREN ÅBNER, HVOR FELTET PEGER HEN. Findes mappen ikke endnu -
+    /// og det er det normale, foerste gang - aabnes den nærmeste mappe
+    /// ovenfor, som findes. Ellers begynder man i Windows' eget gæt og skal
+    /// klikke sig ned gennem det samme træ hver gang.
+    /// </remarks>
+    private void GennemseSky_Klik(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button { DataContext: Skyvisning r }) return;
+
+        var valgt = Bladr(r.Sti.Trim().Length > 0 ? r.Sti : r.Rod);
+        if (valgt is null) return;
+
+        r.Sti = valgt;
+
+        // Raekken skal vise den nye sti. Skyvisning siger ikke selv til, saa
+        // listen bygges om - der er fire raekker, og det koster ingenting.
+        VisOvervaagede();
+    }
+
+    /// <summary>
+    /// Åbner mappevælgeren dér, hvor stien peger hen.
+    /// </summary>
+    private string? Bladr(string oenske)
+    {
+        var start = Naermeste(oenske) ?? Core.AppSettings.Current.SidsteBladremappe;
+
+        var dialog = new Microsoft.Win32.OpenFolderDialog
+        {
+            Title = "Vælg mappen, der skal holdes øje med",
+            Multiselect = false,
+        };
+
+        if (!string.IsNullOrWhiteSpace(start) && Directory.Exists(start))
+            dialog.InitialDirectory = start;
+
+        if (dialog.ShowDialog(Window.GetWindow(this)) != true) return null;
+
+        Core.AppSettings.Current.SidsteBladremappe = dialog.FolderName;
+        Core.AppSettings.Current.Save();
+
+        return dialog.FolderName;
+    }
+
+    /// <summary>
+    /// Den nærmeste mappe i stien, der faktisk findes. Null hvis ingen.
+    /// </summary>
+    private static string? Naermeste(string? sti)
+    {
+        if (string.IsNullOrWhiteSpace(sti)) return null;
+
+        var p = sti.Trim();
+
+        for (var i = 0; i < 16 && p.Length > 0; i++)
+        {
+            if (Directory.Exists(p)) return p;
+
+            var op = Path.GetDirectoryName(p);
+            if (string.IsNullOrEmpty(op) || op == p) return null;
+
+            p = op;
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Fjerner en række fra forslagene.
+    /// </summary>
+    /// <remarks>
+    /// Overvåges mappen allerede, stoppes det også - ellers ville rækken
+    /// forsvinde, mens appen blev ved at kigge i mappen. En knap, der kun
+    /// skjuler noget, den ikke slukker, er den værste slags.
+    /// </remarks>
+    private void SkjulSky_Klik(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button { DataContext: Skyvisning r }) return;
+
+        var alle = Overvaagning.Mapper();
+
+        if (alle.RemoveAll(m => string.Equals(m.Sti, r.Sti, StringComparison.OrdinalIgnoreCase)) > 0)
+            Overvaagning.Gem(alle);
+
+        var skjulte = Core.AppSettings.Current.SkjulteSkymapper;
+
+        if (!skjulte.Any(s => string.Equals(s, r.Rod, StringComparison.OrdinalIgnoreCase)))
+            skjulte.Add(r.Rod);
+
+        Core.AppSettings.Current.Save();
+
+        Kvitter($"«{r.Navn}» er fjernet fra listen.");
+        VisOvervaagede();
+    }
+
+    /// <summary>
+    /// Siger, hvad der lige skete. Uden den er «Gem» et håb.
+    /// </summary>
+    private void Kvitter(string tekst)
+    {
+        Mappekvittering.Text = tekst;
+        Mappekvittering.Visibility = Visibility.Visible;
+    }
+
     private void Tilfoej(string sti, string herkomst)
     {
         var alle = Overvaagning.Mapper();
@@ -1677,6 +1798,11 @@ public partial class SettingsView : UserControl
         alle.Add(new Overvaagetmappe { Sti = sti, Herkomst = herkomst, Aktiv = true });
         Overvaagning.Gem(alle);
 
+        // GEMT SKAL KUNNE SES. Mappen rykker op i listen ovenfor, og linjen
+        // her siger det med ord - ellers trykker man paa Gem og staar tilbage
+        // med et haab om, at der skete noget.
+        Kvitter($"Gemt. «{sti}» bliver holdt øje med fra nu af.");
+
         VisOvervaagede();
     }
 
@@ -1702,6 +1828,8 @@ public partial class SettingsView : UserControl
         alle.RemoveAll(m => string.Equals(m.Sti, sti, StringComparison.OrdinalIgnoreCase));
 
         Overvaagning.Gem(alle);
+
+        Kvitter($"Gemt. Der holdes ikke længere øje med «{sti}».");
         VisOvervaagede();
     }
 

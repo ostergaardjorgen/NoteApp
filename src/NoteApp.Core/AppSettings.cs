@@ -528,6 +528,32 @@ public sealed class AppSettings
     public List<string> MoedevagtAldrig { get; set; } = new();
 
     /// <summary>
+    /// Skytjenester, brugeren har fjernet fra listen over forslag.
+    /// </summary>
+    /// <remarks>
+    /// FORSLAGENE KOM IGEN, HVER GANG. Listen bygges paa, hvad Windows selv
+    /// ved om synkroniseringsmapper, og den kan man ikke sige nej til - saa
+    /// stod der fire raekker, ogsaa for den, der kun bruger den ene. En
+    /// raekke, man ikke kan faa vaek, er en raekke, man holder op med at
+    /// laese.
+    ///
+    /// Der gemmes skytjenestens ROD og ikke den foreslaaede mappe: fjerner
+    /// man forslaget, er det tjenesten, man ikke vil se - ikke en bestemt
+    /// undermappe, man lige har skrevet i feltet.
+    /// </remarks>
+    public List<string> SkjulteSkymapper { get; set; } = new();
+
+    /// <summary>
+    /// Mappen, «Gennemse» sidst stod i. Kun en bekvemmelighed.
+    /// </summary>
+    /// <remarks>
+    /// Uden den aabner vaelgeren i Windows' eget gaet hver gang, og saa skal
+    /// man klikke sig ned gennem det samme trae igen for hver mappe, man
+    /// tilfoejer.
+    /// </remarks>
+    public string? SidsteBladremappe { get; set; }
+
+    /// <summary>
     /// Har brugeren kvitteret for at have læst, hvad en integration betyder?
     ///
     /// EN INTEGRATION KAN IKKE SLÅS TIL, FØR DEN ER SAT.
