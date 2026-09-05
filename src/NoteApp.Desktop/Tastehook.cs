@@ -236,7 +236,16 @@ public sealed class Tastehook : IDisposable
     private bool Saet()
     {
         if (_hook != IntPtr.Zero) return true;
+
         _hook = SetWindowsHookEx(WH_KEYBOARD_LL, _kald, GetModuleHandle(null), 0);
+
+        // ÉN GANG, HER. Holder man en modifikator nede i det sekund, hooken
+        // sættes ind, har den ikke set trykket. Herefter er det hookens egne
+        // hændelser, der gælder — se Behandl.
+        _ctrlNede = Nede(0x11);
+        _shiftNede = Nede(0x10);
+        _altNede = Nede(0x12);
+
         return _hook != IntPtr.Zero;
     }
 
@@ -273,6 +282,16 @@ public sealed class Tastehook : IDisposable
     /// </remarks>
     private static bool Nede(int vk) => (GetAsyncKeyState(vk) & 0x8000) != 0;
 
+    /// <summary>
+    /// Modifikatorerne, som hooken selv har set dem.
+    /// </summary>
+    /// <remarks>
+    /// SEEDES, NAAR HOOKEN SAETTES IND. Holder man allerede Ctrl nede i det
+    /// sekund, appen starter, har hooken ikke set trykket — og så ville den
+    /// første genvej blive misset. <see cref="Saet"/> spørger derfor én gang.
+    /// </remarks>
+    private bool _ctrlNede, _shiftNede, _altNede;
+
     // Er vores egen tast nede lige nu? DET ER DET ENESTE, DER HUSKES.
     private bool _nede;
     private DateTime _nedTid;
@@ -304,11 +323,39 @@ public sealed class Tastehook : IDisposable
         var erModifikator = d.vkCode is 0x10 or 0x11 or 0x12
                             or 0xA0 or 0xA1 or 0xA2 or 0xA3 or 0xA4 or 0xA5;
 
-        if (erModifikator) return CallNextHookEx(_hook, kode, wParam, lParam);
+        // ============ VI FOELGER SELV CTRL, SHIFT OG ALT ============
+        //
+        // TO FORSOEG PAA AT SPOERGE WINDOWS SLOG FEJL.
+        //
+        // GetKeyState svarer paa, hvad DEN KALDENDE TRAADS beskedkoe har set,
+        // og den opdateres kun, naar traaden selv behandler tastetryk. Stod
+        // man i Word, saa Ctrl og Shift ud til at vaere oppe, og genvejen
+        // gjorde ingenting.
+        //
+        // GetAsyncKeyState skulle laese den fysiske tilstand. Den virkede i en
+        // proeve med kunstige tastetryk og ikke paa et rigtigt tastatur - saa
+        // holdt genvejen op med at virke ogsaa INDE i appen. Meldt 05-09-2026,
+        // og det var vaerre end det, den skulle rette.
+        //
+        // Hooken ser HVERT eneste tastetryk, ogsaa modifikatorerne. Saa er der
+        // ingen grund til at spoerge nogen: vi ved det selv. Det virker ens,
+        // uanset hvem der har fokus, og uanset om trykket er fysisk eller
+        // udsendt af et program.
+        if (erModifikator)
+        {
+            // Baade den generelle kode (0x10) og de to sider (0xA0/0xA1)
+            // kan komme igennem. Der lyttes paa dem alle tre, saa hverken
+            // trykket eller slippet gaar tabt.
+            if (d.vkCode is 0x10 or 0xA0 or 0xA1) _shiftNede = ned;
+            if (d.vkCode is 0x11 or 0xA2 or 0xA3) _ctrlNede = ned;
+            if (d.vkCode is 0x12 or 0xA4 or 0xA5) _altNede = ned;
 
-        var ctrl = Nede(0x11);
-        var shift = Nede(0x10);
-        var alt = Nede(0x12);
+            return CallNextHookEx(_hook, kode, wParam, lParam);
+        }
+
+        var ctrl = _ctrlNede;
+        var shift = _shiftNede;
+        var alt = _altNede;
 
         // ============ FANGER BRUGEREN SIN EGEN TAST? ============
         if (Fanger is not null && ned)
