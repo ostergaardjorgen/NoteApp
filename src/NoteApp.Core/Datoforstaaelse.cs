@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.Text.RegularExpressions;
 
 namespace NoteApp.Core;
@@ -271,6 +271,21 @@ public static class Datoforstaaelse
     }
 
     /// <summary>Datoen skrevet, som den skal stå på skærmen.</summary>
+    /// <summary>
+    /// Månedens tre første bogstaver — «sep», «okt», «maj».
+    /// </summary>
+    /// <remarks>
+    /// MAJ, JUNI OG JULI ER I FORVEJEN KORTE. At skrive «juni» som «jun»
+    /// og «maj» som «maj» ser tilfældigt ud, når de står under hinanden.
+    /// Måneder på fire bogstaver eller færre står derfor helt.
+    /// </remarks>
+    public static string Forkort(DateOnly d)
+    {
+        var navn = d.ToString("MMMM", new CultureInfo("da-DK"));
+
+        return navn.Length <= 4 ? navn : navn[..3];
+    }
+
     public static string Skriv(DateOnly d, DateOnly idag)
     {
         var dage = d.DayNumber - idag.DayNumber;
@@ -281,7 +296,16 @@ public static class Datoforstaaelse
             1 => "i morgen",
             2 => "i overmorgen",
             > 2 and < 7 => d.ToString("dddd", new CultureInfo("da-DK")),
-            _ => d.ToString("d. MMMM", new CultureInfo("da-DK"))
+
+            // MAANEDEN FORKORTES. "16. september" er nitten tegn paa en
+            // maerkat i en spalte, der er godt tre hundrede pixels bred -
+            // og de fjorten af dem er et maanedsnavn, man kender fra de
+            // tre foerste bogstaver.
+            //
+            // "MMM" ville give "sep." med et punktum fra .NET's egen
+            // liste, og punktummet er stoej paa en maerkat. Der klippes
+            // derfor selv.
+            _ => $"{d.Day}. {Forkort(d)}"
         };
     }
 }

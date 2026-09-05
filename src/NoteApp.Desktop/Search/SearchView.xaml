@@ -881,10 +881,34 @@
                      ved klik, og Opgave_Aabn springer over klik, der kommer
                      fra en ButtonBase - se listen dér. En Border med et
                      MouseDown ville have aabnet opgaven i stedet. -->
+                <!-- ============ RINGEN AABNER EN MENU ============
+
+                     Foerste udgave taalte kun at blive trykket paa: et klik
+                     talte frem, - 1 2 3 og forfra. Det er kort at forklare og
+                     bevaerligt at bruge - staar den paa 1, og skal den paa 3,
+                     er det to klik, og undervejs staar der noget forkert.
+
+                     Nu aabner den en menu med de fire muligheder, saa man
+                     rammer den, man vil have, i eet klik. Ringen bliver:
+                     tallet skal kunne LAESES paa afstand, og en rulleliste med
+                     en pil fylder toogtres pixels om et etcifret tal.
+
+                     ContextMenu og ikke Popup: WPF lukker den selv, naar man
+                     klikker udenfor eller trykker Escape, og den tegnes med
+                     appens egen menu-stil fra App.xaml. -->
                 <Button Grid.Column="3" Margin="10,0,0,0" VerticalAlignment="Top"
                 Width="30" Height="30" Padding="0" Cursor="Hand"
                 Tag="{Binding}" Click="Prioritet_Klik"
                 ToolTip="{i18n:Oversat searchview.prioritet_1_er_vigtigst}">
+                <Button.ContextMenu>
+                <ContextMenu>
+                <MenuItem Header="{i18n:Oversat searchview.prioritet_ingen}" Tag="0"
+                Click="Prioritet_Valgt" />
+                <MenuItem Header="1" Tag="1" Click="Prioritet_Valgt" />
+                <MenuItem Header="2" Tag="2" Click="Prioritet_Valgt" />
+                <MenuItem Header="3" Tag="3" Click="Prioritet_Valgt" />
+                </ContextMenu>
+                </Button.ContextMenu>
                 <Button.Template>
                 <ControlTemplate TargetType="Button">
                 <Grid>

@@ -1179,15 +1179,50 @@ public partial class SearchView : UserControl
         }
     }
 
+    /// <summary>
+    /// Åbner prioritetsmenuen ved et almindeligt venstreklik.
+    /// </summary>
+    /// <remarks>
+    /// EN ContextMenu ÅBNER NORMALT PÅ HØJREKLIK. Den er brugt her, fordi WPF
+    /// selv lukker den ved klik udenfor og ved Escape, og fordi den tegnes med
+    /// appens egen menu-stil — men den skal åbne på venstreklik, for det er
+    /// dét, man gør ved en knap.
+    ///
+    /// PlacementTarget skal sættes i hånden. Uden den åbner menuen ved musen
+    /// og ikke ved ringen, og så lander den et andet sted, alt efter hvor i
+    /// ringen man ramte.
+    /// </remarks>
     private void Prioritet_Klik(object sender, RoutedEventArgs e)
     {
-        if (sender is not FrameworkElement { Tag: Opgavevisning v }) return;
-
-        v.NaestePrioritet();
-
-        // Listen tegnes om af _aendret inde i saetteren, saa ringen faar sit
-        // nye tal med det samme.
         e.Handled = true;
+
+        if (sender is not Button knap || knap.ContextMenu is null) return;
+
+        knap.ContextMenu.PlacementTarget = knap;
+        knap.ContextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
+        knap.ContextMenu.IsOpen = true;
+    }
+
+    /// <summary>
+    /// Der blev valgt en prioritet i menuen.
+    /// </summary>
+    /// <remarks>
+    /// OPGAVEN HENTES FRA KNAPPEN, ikke fra menupunktet. En ContextMenu ligger
+    /// i sit eget vindue og er ikke barn af knappen i den visuelle træstruktur
+    /// — DataContext arves derfor ikke. PlacementTarget er vejen tilbage til
+    /// det kort, menuen hører til.
+    /// </remarks>
+    private void Prioritet_Valgt(object sender, RoutedEventArgs e)
+    {
+        e.Handled = true;
+
+        if (sender is not MenuItem punkt) return;
+        if (punkt.Parent is not ContextMenu menu) return;
+        if (menu.PlacementTarget is not FrameworkElement { Tag: Opgavevisning v }) return;
+        if (!int.TryParse(punkt.Tag as string, out var pri)) return;
+
+        // Saetteren gemmer og tegner listen om, saa ringen faar sit nye tal.
+        v.Prioritetsvalg = pri;
     }
 
     // ==================== TRAEK EN OPGAVE PAA PLADS ====================
@@ -2031,16 +2066,7 @@ public sealed class Opgavevisning : System.ComponentModel.INotifyPropertyChanged
     public string Prioritetstekst =>
         _r.Opgave.Prioritet is >= 1 and <= 3 ? _r.Opgave.Prioritet.ToString() : "–";
 
-    /// <summary>
-    /// Tæller prioriteten frem — 1, 2, 3 og tilbage til «ikke sat».
-    /// </summary>
-    /// <remarks>
-    /// FIRE MULIGHEDER ER FOR FÅ TIL EN MENU. En rulleliste koster to klik og
-    /// toogtres pixels for et valg, man kan trykke sig igennem på ét. Og den
-    /// vej rundt kan man ikke komme til at vælge forkert uden at kunne rette
-    /// det med et klik mere.
-    /// </remarks>
-    public void NaestePrioritet() => Prioritetsvalg = (_r.Opgave.Prioritet + 1) % 4;
+
 
     public event System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
 
