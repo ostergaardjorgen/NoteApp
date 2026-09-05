@@ -1524,8 +1524,35 @@ public partial class SettingsView : UserControl
         }
     }
 
-    /// <summary>En skytjeneste på maskinen, og om HeyPia-mappen findes i den.</summary>
-    private sealed record Skyvisning(string Navn, string Sti, string Knap, bool Kan);
+    /// <summary>En skytjeneste på maskinen, og mappen, filerne skal ligge i.</summary>
+    /// <remarks>
+    /// ============ STIEN ER ET FORSLAG, IKKE EN BESLUTNING ============
+    ///
+    /// Appen gætter «HeyPia» inde i hver skytjeneste, fordi et navn, alle
+    /// bruger, er lettere at forklare end et valg, alle skal træffe. Men det
+    /// er stadig BRUGERENS mappe i BRUGERENS sky: den, der allerede har lagt
+    /// sine optagelser i «Lyd\Møder», skal ikke have en mappe mere.
+    ///
+    /// Derfor er <see cref="Sti"/> ikke låst. Feltet står udfyldt med
+    /// forslaget, og retter man i det, er det den rettede sti, knappen
+    /// bruger — ordret. Der lægges ikke «HeyPia» på enden af noget, nogen
+    /// selv har skrevet.
+    /// </remarks>
+    private sealed class Skyvisning
+    {
+        public required string Navn { get; init; }
+
+        /// <summary>Rettes af brugeren i feltet. Derfor ikke «init».</summary>
+        public required string Sti { get; set; }
+
+        public required string Knap { get; init; }
+
+        /// <summary>Falsk, når mappen allerede overvåges. Da er der intet at rette.</summary>
+        public required bool Kan { get; init; }
+
+        /// <summary>Feltet er låst, når der ikke er noget at bruge stien til.</summary>
+        public bool Laast => !Kan;
+    }
 
     private void VisOvervaagede()
     {
@@ -1545,11 +1572,23 @@ public partial class SettingsView : UserControl
                 var mappe = Path.Combine(r.Rod, Overvaagning.Standardmappe);
 
                 if (vaagne.Contains(mappe))
-                    return new Skyvisning(r.Navn, mappe, "Overvåges", false);
+                    return new Skyvisning
+                    {
+                        Navn = r.Navn, Sti = mappe, Knap = "Overvåges", Kan = false,
+                    };
 
-                return Directory.Exists(mappe)
-                    ? new Skyvisning(r.Navn, mappe, "Overvåg den", true)
-                    : new Skyvisning(r.Navn, r.Rod, "Opret HeyPia-mappen", true);
+                // HELE STIEN STAAR I FELTET, ogsaa naar mappen ikke findes
+                // endnu. Foer stod kun skytjenestens rod dér, og knappen lagde
+                // saa «HeyPia» paa enden bagefter - det kunne man ikke se, og
+                // en rettet sti ville have faaet et «\HeyPia» med, man ikke
+                // bad om.
+                return new Skyvisning
+                {
+                    Navn = r.Navn,
+                    Sti = mappe,
+                    Knap = Directory.Exists(mappe) ? "Overvåg den" : "Opret mappen",
+                    Kan = true,
+                };
             })
             .ToList();
 
@@ -1577,17 +1616,26 @@ public partial class SettingsView : UserControl
 
     private void OpretSkymappe_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is not Button { Tag: string sti }) return;
+        // STIEN LÆSES FRA RÆKKEN OG IKKE FRA KNAPPENS Tag.
+        //
+        // Feltet skriver direkte i Skyvisning.Sti, og et Tag er et øjebliksbillede
+        // fra dengang rækken blev bygget. Havde knappen sit eget eksemplar af
+        // stien, ville en rettelse i feltet blive vist og ignoreret — den værste
+        // slags: den, hvor skærmen siger ét og appen gør noget andet.
+        if (sender is not Button { DataContext: Skyvisning r }) return;
 
-        // Knappen staar med to betydninger, og Tag afgoer hvilken: findes
-        // HeyPia-mappen, er stien mappen selv; findes den ikke, er stien
-        // skytjenestens rod, og saa skal mappen oprettes foerst.
-        var navn = Path.GetFileName(sti.TrimEnd('\\'));
+        var mappe = r.Sti.Trim();
 
-        var mappe = string.Equals(navn, Overvaagning.Standardmappe, StringComparison.OrdinalIgnoreCase)
-            ? sti
-            : Path.Combine(sti, Overvaagning.Standardmappe);
+        if (mappe.Length == 0)
+        {
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Der står ingen sti",
+                "Skriv, hvor mappen skal ligge — eller lad forslaget stå.",
+                Dialogs.Slags.Pas_paa);
+            return;
+        }
 
+        // ORDRET. Der lægges ikke «HeyPia» paa enden af en sti, brugeren selv
+        // har skrevet - se Skyvisning.
         try
         {
             Directory.CreateDirectory(mappe);

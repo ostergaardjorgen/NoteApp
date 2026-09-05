@@ -650,6 +650,7 @@
     "hvert_minut_saa_laenge_appen_er_aaben_der": "•  Every minute, for as long as the app is open. It also looks when you ask it to.",
     "hvor_laenge_lyden_bliver_liggende": "How long the audio stays",
     "ingen_mapper_overvaages_tilfoej_en_eller_o": "No folders are being watched. Add one, or create the HeyPia folder in one of the cloud services found on this machine.",
+    "stien_er_et_forslag_ret_den_hvis_mappen_s": "The path is a suggestion. Change it if the folder belongs somewhere else — exactly what is written here is used.",
     "integrationer": "Integrations",
     "kalendere_fra_andre_tjenester": "Calendars from other services",
     "klar_til_naeste_moede": "Ready for the next meeting",

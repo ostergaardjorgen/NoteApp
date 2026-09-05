@@ -1047,11 +1047,18 @@
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0" Margin="0,0,14,0" VerticalAlignment="Center">
                       <TextBlock Text="{Binding Navn}" FontSize="12.5" FontWeight="SemiBold" />
-                      <TextBlock Text="{Binding Sti}" FontSize="11" FontFamily="Consolas"
-                                 TextWrapping="Wrap" Foreground="{DynamicResource TekstMeget}" />
+
+                      <!-- STIEN ER ET FORSLAG, DER KAN RETTES.
+                           Appen gætter «HeyPia» inde i skytjenesten, men mappen
+                           er brugerens. Feltet står udfyldt, og det, der står i
+                           det, er dét, knappen bruger - ordret. Se Skyvisning. -->
+                      <TextBox Text="{Binding Sti, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                               FontSize="11" FontFamily="Consolas" Margin="0,3,0,0"
+                               IsReadOnly="{Binding Laast}"
+                               ToolTip="{i18n:Oversat settingsview.stien_er_et_forslag_ret_den_hvis_mappen_s}" />
                     </StackPanel>
                     <Button Grid.Column="1" Content="{Binding Knap}" Click="OpretSkymappe_Click"
-                            Tag="{Binding Sti}" Padding="14,6" VerticalAlignment="Center"
+                            Padding="14,6" VerticalAlignment="Center"
                             IsEnabled="{Binding Kan}" />
                   </Grid>
                 </DataTemplate>
