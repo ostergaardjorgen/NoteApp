@@ -1436,14 +1436,102 @@ public partial class MainWindow : Window
         Core.Diktatnoter.Tilfoej(udfald.Tekst, udfald.Raa, udfald.Formaal);
         Diktering.NoterView.Aendret?.Invoke();
 
-        GemNoteKnap.Visibility = Visibility.Visible;
-        GemNoteKnap.IsEnabled = true;
+        VisDiktatgenveje(true);
     });
+
+    /// <summary>Tænder eller slukker de fire knapper på diktatbjælken.</summary>
+    /// <remarks>
+    /// FIRE KNAPPER OG IKKE EN. De skal tændes og slukkes sammen — de handler
+    /// alle sammen om den samme diktering — og fire linjer, der skal huskes
+    /// hvert sted, bliver før eller siden til tre.
+    /// </remarks>
+    private void VisDiktatgenveje(bool vis)
+    {
+        var v = vis ? Visibility.Visible : Visibility.Collapsed;
+
+        foreach (var k in new[]
+                 { DiktatAftaleKnap, DiktatOpgaveKnap, DiktatKopierKnap, GemNoteKnap })
+        {
+            k.Visibility = v;
+            k.IsEnabled = vis;
+        }
+    }
+
+    /// <summary>
+    /// Laver en aftale ud af den diktering, der lige er landet.
+    /// </summary>
+    /// <remarks>
+    /// DEN SAMME VEJ SOM INDE PAA NOTEN — se NoterView.TilAftale_Klik. Her er
+    /// den bare, hvor man staar, naar man lige har sagt det.
+    ///
+    /// Vinduet hentes frem foerst. Dialogen er modal, og et modalt vindue bag
+    /// et andet program er en app, der ser ud til at haenge.
+    /// </remarks>
+    private void DiktatAftale_Klik(object sender, RoutedEventArgs e)
+    {
+        if (_sidsteDiktat is not { Tekst.Length: > 0 } d) return;
+
+        App.HentFrem(this);
+
+        var aftale = new Core.Aftale { Titel = Core.Opgave.Kort(d.Tekst, 120) };
+
+        var vindue = new Meeting.AftaleWindow(aftale) { Owner = this };
+        if (vindue.ShowDialog() != true) return;
+
+        try
+        {
+            Core.Kalender.Gem(vindue.Aftalen);
+            Kvitter(Core.Sprog.T("noter.aftale_lavet"));
+        }
+        catch (Exception ex)
+        {
+            Dialogs.AppDialog.Vis(this, "Aftalen blev ikke gemt", ex.Message,
+                Dialogs.Slags.Pas_paa);
+        }
+    }
+
+    /// <summary>Laver en opgave ud af den diktering, der lige er landet.</summary>
+    private void DiktatOpgave_Klik(object sender, RoutedEventArgs e)
+    {
+        if (_sidsteDiktat is not { Tekst.Length: > 0 } d) return;
+
+        App.HentFrem(this);
+
+        var vindue = Search.OpgaveWindow.Ny(d.Tekst);
+        vindue.Owner = this;
+
+        if (vindue.ShowDialog() == true) Kvitter(Core.Sprog.T("noter.opgave_lavet"));
+    }
+
+    /// <summary>
+    /// Lægger teksten i udklipsholderen igen.
+    /// </summary>
+    /// <remarks>
+    /// DEN LIGGER DER I FORVEJEN efter hver diktering. Knappen findes, fordi
+    /// den ikke bliver liggende: kopierer man noget andet imens — en adresse,
+    /// et kodeord — er dikteringen væk, og så skal man ind på noten for at
+    /// hente den. Her er den ét klik væk, så længe bjælken står.
+    /// </remarks>
+    private void DiktatKopier_Klik(object sender, RoutedEventArgs e)
+    {
+        if (_sidsteDiktat is not { Tekst.Length: > 0 } d) return;
+
+        try
+        {
+            Clipboard.SetText(d.Tekst);
+            Kvitter(Core.Sprog.T("noter.kopieret"));
+        }
+        catch (Exception)
+        {
+            // Udklipsholderen kan vaere laast af et andet program et oejeblik.
+            Kvitter(Core.Sprog.T("noter.kopi_gik_galt"));
+        }
+    }
 
     /// <summary>Åbner Noter-fanen, hvor den lige gemte note ligger øverst.</summary>
     private void GemNote_Klik(object sender, RoutedEventArgs e)
     {
-        GemNoteKnap.Visibility = Visibility.Collapsed;
+        VisDiktatgenveje(false);
         _sidsteDiktat = null;
 
         App.HentFrem(this);
@@ -1790,7 +1878,7 @@ public partial class MainWindow : Window
         // gemme det forkerte, fordi knappen stod der endnu.
         if (_diktat.Igang)
         {
-            GemNoteKnap.Visibility = Visibility.Collapsed;
+            VisDiktatgenveje(false);
             _sidsteDiktat = null;
         }
 
@@ -1852,7 +1940,7 @@ public partial class MainWindow : Window
             _noteur = null;
 
             // Gemte man ikke, mens den stod der, var svaret nej.
-            GemNoteKnap.Visibility = Visibility.Collapsed;
+            VisDiktatgenveje(false);
             _sidsteDiktat = null;
         };
 

@@ -462,8 +462,34 @@
                   Click="HentBoble_Klik" Padding="12,6" Margin="16,0,0,0"
                   Content="{i18n:Oversat lytteboble.hent}" />
 
+          <!-- ============ GENVEJENE STAAR, HVOR MAN ER ============
+
+               De samme tre ting kan goeres inde paa noten. Men naar man lige
+               HAR sagt noget, staar man ikke inde i appen - man staar i et
+               andet program med musen et helt andet sted, og vejen til
+               «Diktering», «Noter» og den rigtige note er tre klik for noget,
+               man vidste, da man holdt op med at tale.
+
+               «Vis noten» bliver. Den er vejen til alt det andet - skifte
+               type, rette et ord, laese hele teksten - og de tre her er
+               genveje til det, man oftest vil. -->
+          <Button x:Name="DiktatAftaleKnap" Visibility="Collapsed"
+                  Click="DiktatAftale_Klik" Padding="12,6" Margin="10,0,0,0"
+                  Content="{i18n:Oversat noter.til_aftale}"
+                  ToolTip="{i18n:Oversat noter.til_aftale_hjaelp}" />
+
+          <Button x:Name="DiktatOpgaveKnap" Visibility="Collapsed"
+                  Click="DiktatOpgave_Klik" Padding="12,6" Margin="6,0,0,0"
+                  Content="{i18n:Oversat noter.til_opgave}"
+                  ToolTip="{i18n:Oversat noter.til_opgave_hjaelp}" />
+
+          <Button x:Name="DiktatKopierKnap" Visibility="Collapsed"
+                  Click="DiktatKopier_Klik" Padding="12,6" Margin="6,0,0,0"
+                  Content="{i18n:Oversat noter.kopier}"
+                  ToolTip="{i18n:Oversat noter.kopier_igen}" />
+
           <Button x:Name="GemNoteKnap" Visibility="Collapsed"
-                  Click="GemNote_Klik" Padding="14,6" Margin="10,0,0,0"
+                  Click="GemNote_Klik" Padding="14,6" Margin="6,0,0,0"
                   Content="{i18n:Oversat noter.vis_noten}" />
         </StackPanel>
       </Grid>
