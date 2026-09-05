@@ -1080,14 +1080,21 @@
                               Padding="12,6" Margin="0,0,8,0" IsEnabled="{Binding Kan}"
                               ToolTip="{i18n:Oversat settingsview.find_mappen_frem_i_stedet_for_at_skrive_d}" />
 
-                      <Button Content="{i18n:Oversat settingsview.gem}" Click="OpretSkymappe_Click"
+                      <Button Content="{i18n:Oversat faelles.gem}" Click="OpretSkymappe_Click"
                               Padding="16,6" Margin="0,0,8,0" IsEnabled="{Binding Kan}"
                               Style="{StaticResource Primaer}"
                               ToolTip="{i18n:Oversat settingsview.opretter_mappen_hvis_den_mangler_og_begyn}" />
 
-                      <Button Content="&#xE711;" Click="SkjulSky_Klik"
-                              FontFamily="Segoe MDL2 Assets" FontSize="11" Padding="9,7"
-                              ToolTip="{i18n:Oversat settingsview.fjern_raekken_skytjenesten_bliver_ikke_fo}" />
+                      <!-- GLYFFEN SKAL SIDDE PAA ET TextBlock MED Ikonglyf.
+                           FontFamily paa knappen naar ikke ind i dens
+                           ContentPresenter - den implicitte TextBlock-stil
+                           vinder, og saa staar der en tom firkant. Samme
+                           faelde som App.xaml advarer imod ved Ikonglyf. -->
+                      <Button Click="SkjulSky_Klik" Padding="9,7"
+                              ToolTip="{i18n:Oversat settingsview.fjern_raekken_skytjenesten_bliver_ikke_fo}">
+                        <TextBlock Text="&#xE711;" FontSize="11"
+                                   Style="{StaticResource Ikonglyf}" />
+                      </Button>
                     </StackPanel>
                   </Grid>
                 </DataTemplate>
