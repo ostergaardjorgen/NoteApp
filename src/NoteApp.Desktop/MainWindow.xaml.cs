@@ -1409,6 +1409,19 @@ public partial class MainWindow : Window
     /// </remarks>
     private void DiktatBegynd()
     {
+        // ============ BOBLEN SKAL ALTID FREM, NAAR MAN SELV TALER ============
+        //
+        // Krydset paa boblen slaar den fra - og det gjaldt ogsaa en
+        // DIKTERING. Havde man engang lukket boblen, fordi man ikke gad se
+        // «lytter …» hele dagen, kunne man holde tasten nede og tale ud i
+        // ingenting: teksten landede i udklipsholderen, men der var intet paa
+        // skaermen, der sagde det.
+        //
+        // Krydset hoerer til den PASSIVE lytning. En diktering er noget, man
+        // selv har sat i gang, og saa skal svaret kunne ses.
+        _bobleLukket = false;
+        HentBobleKnap.Visibility = Visibility.Collapsed;
+
         _diktat.Melder -= VisDiktat;
         _diktat.Melder += VisDiktat;
         _diktat.Faerdig -= DiktatFaerdig;

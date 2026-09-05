@@ -89,6 +89,12 @@ public sealed class Tastehook : IDisposable
     [DllImport("user32.dll")]
     private static extern short GetKeyState(int vk);
 
+    /// <summary>
+    /// Tastens FYSISKE tilstand — uafhængig af, hvem der har fokus.
+    /// </summary>
+    [DllImport("user32.dll")]
+    private static extern short GetAsyncKeyState(int vk);
+
     // Delegaten SKAL holdes i live her. Gav vi den bare med til Windows, ville
     // den blive ryddet op af sig selv, og hooken ville doe efter et stykke tid
     // uden at nogen kunne se hvorfor.
@@ -241,7 +247,31 @@ public sealed class Tastehook : IDisposable
         _hook = IntPtr.Zero;
     }
 
-    private static bool Nede(int vk) => (GetKeyState(vk) & 0x8000) != 0;
+    /// <summary>
+    /// Er tasten fysisk nede lige nu?
+    /// </summary>
+    /// <remarks>
+    /// ============ HER LÅ FEJLEN, OG DEN VAR STOR ============
+    ///
+    /// Der stod <c>GetKeyState</c>. Den svarer IKKE på, om tasten er nede —
+    /// den svarer på, hvad DEN KALDENDE TRÅDS beskedkø har set. Køen bliver
+    /// kun opdateret, når tråden selv behandler tastetryk, og det gør vores
+    /// tråd kun, når HeyPia er det forreste vindue.
+    ///
+    /// Følgen var, at genvejen KUN virkede, når man stod i appen. Stod man i
+    /// Word, kom tasten fint ind i hooken — men Ctrl og Shift så ud til at
+    /// være oppe, <c>Genvejsgreb.Passer</c> sagde nej, og der skete
+    /// ingenting. «Hold Ctrl+Shift+, nede mens du taler» virkede alle steder,
+    /// hvor man ikke havde brug for det.
+    ///
+    /// Meldt 05-09-2026: «jeg har lige stået i Word og holdt genvejstasterne
+    /// nede, og der skete ingenting».
+    ///
+    /// <c>GetAsyncKeyState</c> læser den fysiske tilstand og går ikke gennem
+    /// nogen kø. Den er det rigtige valg i en lavniveau-hook, netop fordi
+    /// hooken kaldes for tastetryk, der hører til et andet program.
+    /// </remarks>
+    private static bool Nede(int vk) => (GetAsyncKeyState(vk) & 0x8000) != 0;
 
     // Er vores egen tast nede lige nu? DET ER DET ENESTE, DER HUSKES.
     private bool _nede;
