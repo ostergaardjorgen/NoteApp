@@ -37,6 +37,19 @@
     "diktering_hold_tip": "Hold tasten nede, tal, og slip. Teksten skrives ud og lægges, hvor markøren står. Slås fra under Diktering.",
     "aabner_optagelse": "Åbner optagelse …"
   },
+  "oversigt": {
+    "alle_aftaler": "Alle aftaler",
+    "alle_aftaler_under": "Hele kalenderen, grupperet efter måned. Klik på en aftale for at åbne den.",
+    "alle_opgaver": "Alle opgaver",
+    "alle_opgaver_under": "Også dem, der er gjort. Grupperet efter frist — klik på en opgave for at åbne den.",
+    "vis_alle_aftaler": "Vis alle aftaler",
+    "vis_alle_opgaver": "Vis alle opgaver",
+    "uden_frist": "Uden frist",
+    "soeg": "Søg",
+    "intet": "Der er ikke noget, der passer på det, du har skrevet.",
+    "antal": "{0} i alt",
+    "antal_af": "{0} af {1}"
+  },
   "cockpit": {
     "titel": "Cockpit",
     "under": "Alt fra dine møder — det, der blev sagt, dine noter og dokumenterne — samles på din egen maskine. Ikke i skyen. Pia står for Personlig Informations Assistent.",

@@ -233,7 +233,17 @@ public static class Kalender
     /// tilbage, skal begge de to kunne ses — ellers ville en travl formiddag
     /// skubbe eftermiddagen ud af skærmen.
     /// </summary>
-    public static List<Aftale> Kommende(DateTimeOffset nu, int maks = 6)
+    /// <remarks>
+    /// SEKS VAR FOR FÅ, OG TALLET KUNNE IKKE SES. Listen sluttede bare, og
+    /// der stod ikke, at der var mere — så en aftale om tre uger fandtes
+    /// ikke, med mindre man gik til Google efter den. Ruden er høj nok til
+    /// omkring femten, og resten kan rulles.
+    ///
+    /// Der er stadig et loft. Ruden er en PÅMINDELSE — det, der er lige om
+    /// lidt — og en liste på to hundrede kan ikke skimmes. Hele kalenderen
+    /// står bag «Vis alle aftaler» nederst i ruden.
+    /// </remarks>
+    public static List<Aftale> Kommende(DateTimeOffset nu, int maks = 25)
     {
         var alle = Alle();
 

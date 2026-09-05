@@ -37,6 +37,19 @@
     "diktering_hold_tip": "Hold the key down, speak, and let go. The text is written out and placed where the cursor is. Switch it off under Dictation.",
     "aabner_optagelse": "Opening recording …"
   },
+  "oversigt": {
+    "alle_aftaler": "All appointments",
+    "alle_aftaler_under": "The whole calendar, grouped by month. Click an appointment to open it.",
+    "alle_opgaver": "All tasks",
+    "alle_opgaver_under": "Including the ones that are done. Grouped by deadline — click a task to open it.",
+    "vis_alle_aftaler": "Show all appointments",
+    "vis_alle_opgaver": "Show all tasks",
+    "uden_frist": "No deadline",
+    "soeg": "Search",
+    "intet": "Nothing matches what you typed.",
+    "antal": "{0} in total",
+    "antal_af": "{0} of {1}"
+  },
   "cockpit": {
     "titel": "Cockpit",
     "under": "Everything from your meetings — what was said, your notes and the documents — is gathered on your own machine. Not in the cloud. Pia stands for Personal Information Assistant.",

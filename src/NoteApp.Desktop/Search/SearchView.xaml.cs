@@ -703,6 +703,17 @@ public partial class SearchView : UserControl
     {
         if (sender is not FrameworkElement { Tag: Aftalevisning v }) return;
 
+        AabnAftale(v.Aftale);
+    }
+
+    /// <summary>
+    /// Åbner én aftale. Ét sted, fordi der er to veje ind: kortet i
+    /// Cockpittet og listen bag «Vis alle aftaler».
+    /// </summary>
+    private async void AabnAftale(Aftale aftalen)
+    {
+        var v = new Aftalevisning(aftalen, DateTimeOffset.Now);
+
         var vindue = new Meeting.AftaleWindow(v.Aftale) { Owner = Window.GetWindow(this) };
         if (vindue.ShowDialog() != true) return;
 
@@ -816,7 +827,16 @@ public partial class SearchView : UserControl
             }
         }
 
-        var vindue = new OpgaveWindow(v.Opgave) { Owner = Window.GetWindow(this) };
+        AabnOpgave(v.Opgave);
+    }
+
+    /// <summary>
+    /// Åbner én opgave. Ét sted, fordi der er to veje ind: kortet i
+    /// Cockpittet og listen bag «Vis alle opgaver».
+    /// </summary>
+    private void AabnOpgave(Registeropgave r)
+    {
+        var vindue = new OpgaveWindow(r) { Owner = Window.GetWindow(this) };
         vindue.ShowDialog();
 
         // Ogsaa naar den er slettet. Listen skal tegnes om, uanset om
@@ -1223,6 +1243,129 @@ public partial class SearchView : UserControl
 
         // Saetteren gemmer og tegner listen om, saa ringen faar sit nye tal.
         v.Prioritetsvalg = pri;
+    }
+
+    // ==================== HELE LISTEN ====================
+
+    /// <summary>Månedens navn med år — «september 2026». Til grupperingen.</summary>
+    private static string Maaned(DateTimeOffset d) =>
+        d.LocalDateTime.ToString("MMMM yyyy", new System.Globalization.CultureInfo("da-DK"));
+
+    /// <summary>
+    /// Åbner hele kalenderen.
+    /// </summary>
+    /// <remarks>
+    /// DER LÆSES FORFRA. Ruden i Cockpittet har kun de nærmeste, og vinduet
+    /// skal have dem alle — også dem, der ligger bagud.
+    /// </remarks>
+    private void AlleAftaler_Klik(object sender, RoutedEventArgs e)
+    {
+        List<Aftale> alle;
+        try { alle = Kalender.Alle(); }
+        catch (Exception) { alle = new List<Aftale>(); }
+
+        var nu = DateTimeOffset.Now;
+
+        var punkter = alle
+            .OrderBy(a => a.Start)
+            .Select(a => new Oversigtspunkt(
+                Maaned(a.Start),
+                a.Start.LocalDateTime.ToString("ddd d. HH:mm"),
+                a.Titel,
+                Aftaleunder(a),
+                $"{a.Titel}\n\n{a.Start.LocalDateTime:dddd d. MMMM yyyy 'kl.' HH:mm}",
+                Temaskift.Pensel(a.Slutter < nu ? "Slukket"
+                               : a.MoedeId.Length > 0 ? "Godkendt" : "Accent"),
+                a))
+            .ToList();
+
+        var vindue = new Oversigtsvindue(
+            Sprog.T("oversigt.alle_aftaler"),
+            Sprog.T("oversigt.alle_aftaler_under"),
+            punkter,
+            k => { if (k is Aftale a) AabnAftale(a); })
+        {
+            Owner = Window.GetWindow(this)
+        };
+
+        vindue.ShowDialog();
+    }
+
+    private static string Aftaleunder(Aftale a)
+    {
+        var dele = new List<string>();
+
+        if (a.Sted.Length > 0) dele.Add(a.Sted);
+        else if (a.Link.Length > 0) dele.Add("online");
+
+        if (a.Kilde != Kalenderkilde.Lokal) dele.Add(a.Kilde.ToString());
+        if (a.MoedeId.Length > 0) dele.Add("optaget");
+
+        return string.Join("  ·  ", dele);
+    }
+
+    /// <summary>
+    /// Åbner hele opgavelisten — også de færdige.
+    /// </summary>
+    /// <remarks>
+    /// DE FÆRDIGE ER MED HER OG IKKE I COCKPITTET. Ruden dér er «hvad skal
+    /// jeg gøre»; det her er «hvad har jeg haft». En afkrydset opgave fra i
+    /// forgårs er ikke støj, når man leder efter den — den er svaret.
+    /// </remarks>
+    private void AlleOpgaver_Klik(object sender, RoutedEventArgs e)
+    {
+        List<Registeropgave> alle;
+        try { alle = Opgaveregister.Alle(); }
+        catch (Exception) { alle = new List<Registeropgave>(); }
+
+        var idag = DateOnly.FromDateTime(DateTime.Today);
+
+        var punkter = alle
+            .OrderBy(r => r.Opgave.Deadline ?? DateTimeOffset.MaxValue)
+            .Select(r => new Oversigtspunkt(
+                r.Opgave.Deadline is { } d ? Maaned(d) : Sprog.T("oversigt.uden_frist"),
+                r.Opgave.Deadline is { } f
+                    ? f.LocalDateTime.ToString("ddd d.")
+                    : "",
+                r.Opgave.Visningsnavn,
+                Opgaveunder(r),
+                r.Opgave.HarMere ? $"{r.Opgave.Visningsnavn}\n\n{r.Opgave.Tekst.Trim()}"
+                                 : r.Opgave.Visningsnavn,
+                Temaskift.Pensel(r.Opgave.Faerdig ? "Slukket" : Hastefarve(r, idag)),
+                r))
+            .ToList();
+
+        var vindue = new Oversigtsvindue(
+            Sprog.T("oversigt.alle_opgaver"),
+            Sprog.T("oversigt.alle_opgaver_under"),
+            punkter,
+            k => { if (k is Registeropgave r) AabnOpgave(r); })
+        {
+            Owner = Window.GetWindow(this)
+        };
+
+        vindue.ShowDialog();
+    }
+
+    private static string Hastefarve(Registeropgave r, DateOnly idag) => r.Hastighed(idag) switch
+    {
+        Hastighed.Overskredet => "Optager",
+        Hastighed.I_dag => "Advarsel",
+        Hastighed.Denne_uge => "Advarsel",
+        Hastighed.Senere => "Godkendt",
+        _ => "PanelKant"
+    };
+
+    private static string Opgaveunder(Registeropgave r)
+    {
+        var dele = new List<string>();
+
+        if (r.Opgave.Faerdig) dele.Add("gjort");
+        if (r.Opgave.Prioritet is >= 1 and <= 3) dele.Add($"prioritet {r.Opgave.Prioritet}");
+        if (r.Opgave.Herkomst == Opgavekilde.Google) dele.Add("Google Tasks");
+        if (r.Moedetitel.Length > 0) dele.Add(r.Moedetitel);
+
+        return string.Join("  ·  ", dele);
     }
 
     // ==================== TRAEK EN OPGAVE PAA PLADS ====================

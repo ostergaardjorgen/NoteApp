@@ -118,6 +118,17 @@
             </StackPanel>
             </Border>
 
+            <!-- ============ VEJEN TIL RESTEN ============
+                 Ruden viser de naermeste. Knappen staar NEDERST og er fast -
+                 den ruller ikke med listen, for saa skulle man til bunden af
+                 en liste for at komme til en laengere liste. -->
+            <Border DockPanel.Dock="Bottom" BorderBrush="{DynamicResource PanelKant}"
+                    BorderThickness="0,1,0,0" Padding="14,10">
+              <Button Content="{i18n:Oversat oversigt.vis_alle_aftaler}"
+                      Click="AlleAftaler_Klik" HorizontalAlignment="Stretch"
+                      Padding="10,6" FontSize="12" />
+            </Border>
+
             <ScrollViewer VerticalScrollBarVisibility="Auto"
                           HorizontalScrollBarVisibility="Disabled">
               <StackPanel>
@@ -700,6 +711,13 @@
                          Visibility="Collapsed" TextWrapping="Wrap"
                          Foreground="{DynamicResource TekstMeget}" />
             </StackPanel>
+            </Border>
+
+            <Border DockPanel.Dock="Bottom" BorderBrush="{DynamicResource PanelKant}"
+                    BorderThickness="0,1,0,0" Padding="14,10">
+              <Button Content="{i18n:Oversat oversigt.vis_alle_opgaver}"
+                      Click="AlleOpgaver_Klik" HorizontalAlignment="Stretch"
+                      Padding="10,6" FontSize="12" />
             </Border>
 
             <ScrollViewer Padding="7,10,7,10" VerticalScrollBarVisibility="Auto"
