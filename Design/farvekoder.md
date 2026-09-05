@@ -75,11 +75,11 @@ der klikkes.
 |---|---|---|---|
 | Baggrund | `#F6F8FB` | — | arbejdsfladen |
 | Panel | `#FFFFFF` | — | kort og bokse |
-| PanelKant | `#9BC0E5` | 1,8 | kant om et kort |
+| PanelKant | `#BCD2E9` | 1,5 | kant om et kort |
 | InputKant | `#7E8FA3` | 3,1 | kant om et felt i hvile |
 | InputFokusKant | `#2A6FAD` | 5,0 | kant om det felt, der skrives i |
 | Svaev | `#EDF2F8` | — | musen over |
-| Trykket | `#E3EAF3` | — | knappen nede — og bunden i et skrivefelt |
+| Trykket | `#DFE7F1` | — | knappen nede — og bunden i et skrivefelt |
 | Valgt | `#DCE9F6` | — | valgt række |
 | Tekst | `#101828` | 16,7 | brødtekst |
 | TekstSvag | `#3E5061` | 7,8 | underoverskrifter |
@@ -117,11 +117,11 @@ større og kuløren roligere, så dybden gør arbejdet i stedet for kanterne.
 |---|---|---|---|
 | Baggrund | `#0B1220` | — | arbejdsfladen |
 | Panel | `#111C2D` | — | kort og bokse |
-| PanelKant | `#10497F` | 1,9 | kant om et kort |
+| PanelKant | `#1B3E62` | 1,6 | kant om et kort |
 | InputKant | `#556D86` | 3,2 | kant om et felt i hvile |
 | InputFokusKant | `#73C2FB` | 8,8 | kant om det felt, der skrives i |
-| Svaev | `#17283B` | — | musen over |
-| Trykket | `#0E1A2B` | — | knappen nede — og bunden i et skrivefelt |
+| Svaev | `#1E2C40` | — | musen over |
+| Trykket | `#1A2739` | — | knappen nede — og bunden i et skrivefelt |
 | Valgt | `#1B3A5C` | — | valgt række |
 | Tekst | `#EFF5FA` | 15,6 | brødtekst |
 | TekstSvag | `#B3C7DB` | 9,9 | underoverskrifter |

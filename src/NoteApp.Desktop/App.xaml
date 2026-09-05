@@ -39,7 +39,7 @@
          ikke et løfte, det er en prøve, der fejler. Se TemaTest. -->
     <SolidColorBrush x:Key="Baggrund"      Color="#FF0B1220" />
     <SolidColorBrush x:Key="Panel"         Color="#FF111C2D" />
-    <SolidColorBrush x:Key="PanelKant"     Color="#FF10497F" />
+    <SolidColorBrush x:Key="PanelKant"     Color="#FF1B3E62" />
 
     <!-- ============ KANTEN OM NOGET, MAN KAN SKRIVE I ============
 
@@ -56,8 +56,8 @@
     <SolidColorBrush x:Key="InputFokusKant" Color="#FF73C2FB" />
 
     <!-- Musen over, knappen nede, raekken valgt. Se Tema.cs. -->
-    <SolidColorBrush x:Key="Svaev"         Color="#FF17283B" />
-    <SolidColorBrush x:Key="Trykket"       Color="#FF0E1A2B" />
+    <SolidColorBrush x:Key="Svaev"         Color="#FF1E2C40" />
+    <SolidColorBrush x:Key="Trykket"       Color="#FF1A2739" />
     <SolidColorBrush x:Key="Valgt"         Color="#FF1B3A5C" />
 
     <SolidColorBrush x:Key="Tekst"         Color="#FFEFF5FA" />

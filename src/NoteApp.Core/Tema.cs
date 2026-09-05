@@ -109,15 +109,18 @@ public static class Tema
             // forsvandt, og posterne blev til tekst, der laa loest paa en
             // flade.
             //
-            // Den er nu 1,90 - altsaa STAERKERE end den nogensinde har
-            // vaeret - og tydeligt blaa. Det modsiger ikke «mindre blaat
+            // Den var kortvarigt paa 1,90 og var da for meget: kortene
+            // raabte, og opgaverne - som har flere kanter pr. kort end
+            // kalenderen - raabte hoejest. Nu 1,55 begge steder, og
+            // FLADEN goer en del af arbejdet i stedet: kortet er en anden
+            // farve end panelet, saa kanten kun skal afgraense det. Det modsiger ikke «mindre blaat
             // overalt»: en haarfin streg paa een pixel er ikke en flade. Det,
             // der stoejede, var de blaa FLADER og de blaa feltkanter om
             // hvert eneste felt, og de er der ikke mere.
             //
             // Modstykket i det moerke tema er maerkets #10497F, som stod der
             // fra begyndelsen. De to har samme styrke: 1,90 og 1,86.
-            ["PanelKant"]  = "#FF9BC0E5",
+            ["PanelKant"]  = "#FFBCD2E9",
 
             // ============ KANTEN OM ET SKRIVEFELT ============
             //
@@ -138,7 +141,7 @@ public static class Tema
             // med et temaskift, og som ville have staaet som moerke pletter i
             // en lys app.
             ["Svaev"]      = "#FFEDF2F8",
-            ["Trykket"]    = "#FFE3EAF3",
+            ["Trykket"]    = "#FFDFE7F1",
             ["Valgt"]      = "#FFDCE9F6",
 
             ["Tekst"]      = "#FF101828",
@@ -242,18 +245,17 @@ public static class Tema
         {
             ["Baggrund"]   = "#FF0B1220",
             ["Panel"]      = "#FF111C2D",
-            // DEN OPRINDELIGE. #10497F stod her fra begyndelsen og blev
-            // daempet til #24354B - fra 1,70 til 1,37 mod panelet - og saa
-            // var rammerne om kalenderens og opgavernes kort vaek. Den er
-            // tilbage, og fordi panelet samtidig er blevet moerkere, staar
-            // den nu paa 1,86.
-            ["PanelKant"]  = "#FF10497F",
+            // Maerkets #10497F stod her og laa paa 1,86 mod panelet. Det
+            // var for skarpt - se noten i den lyse palet. Nu 1,56, og
+            // kortets flade loefter sig fra panelet i stedet, saa kanten
+            // kun skal afgraense.
+            ["PanelKant"]  = "#FF1B3E62",
 
             ["InputKant"]      = "#FF556D86",
             ["InputFokusKant"] = "#FF73C2FB",
 
-            ["Svaev"]      = "#FF17283B",
-            ["Trykket"]    = "#FF0E1A2B",
+            ["Svaev"]      = "#FF1E2C40",
+            ["Trykket"]    = "#FF1A2739",
             ["Valgt"]      = "#FF1B3A5C",
 
             ["Tekst"]      = "#FFEFF5FA",
