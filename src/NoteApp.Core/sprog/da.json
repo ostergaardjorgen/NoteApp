@@ -337,7 +337,7 @@
     "tastatur_ser": "Hvad den ser",
     "tastatur_ser_under": "Hvert tastetryk passerer forbi, mens appen kører. For hvert tryk aflæses tre ting: hvor tasten sad fysisk på tastaturet, om det var et tryk eller et slip, og om Ctrl, Shift eller Alt blev holdt nede.",
     "tastatur_intet": "Hvad den IKKE gør",
-    "tastatur_intet_under": "Der slås aldrig et tegn op. Appen spørger ikke Windows, hvilket BOGSTAV en tast svarer til — kun hvor den sad. Der skrives intet ned: ingen fil, ingen liste, ingen log. Der huskes én ting mellem to tryk, og det er, om netop din genvejstast er nede lige nu. Alt andet sendes videre uændret og er glemt i samme øjeblik. Og der sendes intet nogen steder — aflæsningen sker udelukkende på din egen pc.",
+    "tastatur_intet_under": "Der slås aldrig et tegn op. Appen spørger ikke Windows, hvilket BOGSTAV en tast svarer til — kun hvor den sad. Der skrives intet ned: ingen fil, ingen liste, ingen log. Der findes ét spor til fejlfinding, og det er slået fra, med mindre nogen sætter miljøvariablen HEYPIA_TASTESPOR på maskinen. Slået til ser det KUN din egen genvejstast — det kan altså ikke skrive ned, hvad du skriver. Der huskes én ting mellem to tryk, og det er, om netop din genvejstast er nede lige nu. Alt andet sendes videre uændret og er glemt i samme øjeblik. Og der sendes intet nogen steder — aflæsningen sker udelukkende på din egen pc.",
     "tastatur_efterproev": "Sådan efterprøver du det",
     "tastatur_efterproev_under": "Påstanden står i koden og kan læses: filen hedder Tastehook.cs. Under Indstillinger → Krav til maskinen kan du desuden måle, hvad appen bruger — en aflæsning, der skrev noget ned, ville koste både tid og plads.",
     "zero_data_retention": "Zero Data Retention"

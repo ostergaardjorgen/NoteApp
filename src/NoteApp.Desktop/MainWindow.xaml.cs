@@ -1411,6 +1411,8 @@ public partial class MainWindow : Window
         var noegle = Core.Llm.SkyNoegle.Hent() is not null;
 
         _genvej.HoldGiverDiktering = til && noegle;
+
+        Tastespor.Skriv($"SAET_DIKTERING til={til} noegle={noegle}");
     }
 
     /// <summary>
@@ -1423,6 +1425,8 @@ public partial class MainWindow : Window
     /// </remarks>
     private void DiktatBegynd()
     {
+        Tastespor.Skriv("DIKTAT_BEGYND");
+
         // ============ BOBLEN SKAL ALTID FREM, NAAR MAN SELV TALER ============
         //
         // Krydset paa boblen slaar den fra - og det gjaldt ogsaa en

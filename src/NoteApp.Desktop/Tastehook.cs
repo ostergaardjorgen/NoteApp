@@ -35,7 +35,10 @@ namespace NoteApp.Desktop;
 /// keylogger bruger, og derfor står der i Compliance, hvad den gør. Her står
 /// det i koden:
 ///
-///   - Der skrives INTET ned. Ingen fil, ingen liste, ingen log.
+///   - Der skrives INTET ned. Ingen fil, ingen liste, ingen log. Der findes
+///     ét spor til fejlfinding, og det er slået fra, med mindre nogen sætter
+///     miljøvariablen HEYPIA_TASTESPOR. Selv da ser det KUN din egen
+///     genvejstast — se Tastespor.
 ///   - Der huskes intet mellem to tryk ud over ÉN ting: om vores egen tast er
 ///     nede lige nu.
 ///   - Tegn slås aldrig op. Der ses på tastens plads og på Ctrl/Shift/Alt.
@@ -85,9 +88,6 @@ public sealed class Tastehook : IDisposable
 
     [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
     private static extern IntPtr GetModuleHandle(string? navn);
-
-    [DllImport("user32.dll")]
-    private static extern short GetKeyState(int vk);
 
     /// <summary>
     /// Tastens FYSISKE tilstand — uafhængig af, hvem der har fokus.
@@ -150,6 +150,9 @@ public sealed class Tastehook : IDisposable
         // naar hooken er faldet ud, og to minutter er lang tid at staa i et
         // andet program og holde en tast nede uden at der sker noget. Prisen
         // er et SetWindowsHookEx hvert tyvende sekund, og det er ingenting.
+        //
+        // DEN SAETTER IND IGEN HVER GANG. Se Efterse: proeven, der stod her
+        // foer, kunne aldrig sige nej, og saa blev hooken aldrig sat ind igen.
         _vagt?.Stop();
         _vagt = new DispatcherTimer(DispatcherPriority.Background)
         {
@@ -161,76 +164,66 @@ public sealed class Tastehook : IDisposable
         return true;
     }
 
-    /// <summary>Hvor mange gange hooken er faldet ud og sat ind igen.</summary>
+    /// <summary>Hvor mange gange hooken er sat ind igen af vagten.</summary>
     public int Genoprettet { get; private set; }
 
     /// <summary>
-    /// Sætter hooken ind igen — og skriver det ned, hvis den var væk.
+    /// Sætter hooken ind igen. Hver gang, uden at spørge.
     /// </summary>
     /// <remarks>
-    /// FØR STOD DER BARE «Fjern(); Saet();» HVER GANG. Så blev hooken
-    /// udskiftet hvert eneste tik, uanset om der fejlede noget, og der var
-    /// ingen måde at se, om den nogensinde HAVDE fejlet. Meldingen «jeg holdt
-    /// tasten nede i Word, og der skete ingenting» kunne derfor hverken
-    /// bekræftes eller afvises.
+    /// ============ VAGTEN KUNNE ALDRIG FYRE. DET ER DEN FEJL, DER VAR ============
     ///
-    /// Nu prøves den først af: <c>GetKeyState</c> på en tast, alle tastaturer
-    /// har. Svarer hooken ikke, er den væk, og så sættes den ind igen — og
-    /// linjen i historikken siger, at det skete.
+    /// Her stod en prøve først: er hooken der stadig? Den så sådan ud:
     ///
-    /// Der skrives kun, når noget ER galt. En linje hvert tyvende sekund om,
-    /// at alt er i orden, er en logfil, ingen læser.
+    ///     try { _ = GetKeyState(0x10); return true; } catch { return false; }
+    ///
+    /// <c>GetKeyState</c> kaster ikke. Den returnerede altså ALTID sandt, og
+    /// vagten vendte om i første linje — hver eneste gang, i al den tid
+    /// appen kørte. Hooken blev aldrig sat ind igen. Vagten var død kode, der
+    /// så ud som en sikkerhed.
+    ///
+    /// MÅLT 05-09-2026. Den samme binaere fil, de samme tastetryk:
+    ///
+    ///     app startet for to timer siden   INTET. Hverken i appen eller udenfor.
+    ///     app startet for tyve sekunder    begge kommataster virker
+    ///
+    /// Det er derfor, meldingen hele tiden var «genvejstaster virker hverken
+    /// i app eller udenfor». Genvejen VIRKEDE — lige efter en start. Den døde
+    /// stille i løbet af dagen, og fire rettelser i tastematchningen kunne
+    /// ikke røre ved det, fordi de blev målt paa en hook, der lige var sat ind.
+    ///
+    /// FØR v1.3.23 STOD DER «Fjern(); Saet();» HVER GANG, hvert andet minut.
+    /// Det var groft, og det virkede. Forfinelsen var forbedringen, der tog
+    /// funktionen med sig.
+    ///
+    /// HVORFOR DER IKKE BARE MÅLES BEDRE. Der findes ingen Windows-funktion,
+    /// der kan svare paa, om en hook stadig sidder i kæden. Det eneste
+    /// rigtige svar ville være at sende et tastetryk og se, om vi selv hører
+    /// det — og et tastetryk, der slipper forbi en død hook, lander i det
+    /// program, brugeren staar i. Det er ikke en pris for en måling.
+    ///
+    /// SÅ DEN SÆTTES IND IGEN, UDEN AT SPØRGE. Et
+    /// <c>SetWindowsHookEx</c> hvert tyvende sekund koster ingenting, og
+    /// alternativet er målt: en genvej, der holder op med at virke i
+    /// stilhed.
     /// </remarks>
     private void Efterse()
     {
-        if (_hook != IntPtr.Zero && Lever()) return;
-
-        var varDer = _hook != IntPtr.Zero;
+        // IKKE MENS TASTEN ER NEDE.
+        //
+        // Mellem Fjern og Saet er der et øjeblik uden hook. Falder et SLIP i
+        // det øjeblik, ser vi det aldrig — og saa staar _nede tilbage som
+        // sand for altid: dikteringen slutter ikke, og næste tryk springes
+        // over som en gentagelse. Vagten kommer igen om tyve sekunder, og
+        // ingen holder en tast nede saa længe.
+        if (_nede) return;
 
         Fjern();
-        var kom = Saet();
+        Saet();
 
         Genoprettet++;
 
-        try
-        {
-            Historik.Skriv(HaendelseType.Andet,
-                kom ? "Tastaturvagten blev sat ind igen"
-                    : "Tastaturvagten kunne ikke saettes ind igen",
-                varDer
-                    ? "Windows havde fjernet den. Genvejen virkede ikke i mellemtiden."
-                    : "Den var ikke sat. Genvejen virkede ikke i mellemtiden.",
-                kom ? Udfald.Fuldført : Udfald.SeEfter);
-        }
-        catch (Exception)
-        {
-            // Kan historikken ikke skrives, er hooken alligevel sat ind igen.
-        }
-    }
-
-    /// <summary>
-    /// Svarer hooken stadig?
-    /// </summary>
-    /// <remarks>
-    /// Der er ingen Windows-funktion, der kan spørge om en hook stadig
-    /// sidder. <c>GetKeyState</c> er det nærmeste: den går gennem den samme
-    /// kø, og svarer den ikke, er der noget galt med tastaturvejen.
-    ///
-    /// Den kan ikke afsløre alt — en hook, der lige er faldet ud, ser fin ud
-    /// et øjeblik. Derfor er tallet i <see cref="Genoprettet"/> også med: det
-    /// siger, hvor mange gange det ER sket.
-    /// </remarks>
-    private static bool Lever()
-    {
-        try
-        {
-            _ = GetKeyState(0x10);   // Shift. Findes på alle tastaturer.
-            return true;
-        }
-        catch (Exception)
-        {
-            return false;
-        }
+        Tastespor.Skriv($"VAGT sat ind igen (nr. {Genoprettet})");
     }
 
     private bool Saet()
@@ -238,6 +231,8 @@ public sealed class Tastehook : IDisposable
         if (_hook != IntPtr.Zero) return true;
 
         _hook = SetWindowsHookEx(WH_KEYBOARD_LL, _kald, GetModuleHandle(null), 0);
+
+        Tastespor.Skriv($"HOOK SAT ind={_hook != IntPtr.Zero}");
 
         // ÉN GANG, HER. Holder man en modifikator nede i det sekund, hooken
         // sættes ind, har den ikke set trykket. Herefter er det hookens egne
@@ -355,6 +350,22 @@ public sealed class Tastehook : IDisposable
         }
 
         var greb = Greb;
+
+        // SPORET SER KUN DIN EGEN GENVEJSTAST.
+        //
+        // Det er dét, der goer sporet forsvarligt: selv slaaet til kan det
+        // ikke skrive ned, hvad du skriver. Alt andet end grebets egen tast
+        // gaar forbi uden en linje - se Tastespor.
+        if (Tastespor.Til && greb is not null
+            && (d.scanCode == greb.Scancode
+                || d.scanCode == Genvejsgreb.Tvillingen(greb.Scancode)))
+            Tastespor.Skriv(
+                $"tast scan=0x{d.scanCode:X2} vk=0x{d.vkCode:X2} {(ned ? "NED" : "OP ")} "
+                + $"udvidet={udvidet,-5} ctrl={ctrl,-5} shift={shift,-5} alt={alt,-5} "
+                + $"greb={(greb is null ? "INTET" : greb.Gem())} "
+                + $"passer={(greb is not null && greb.Passer(d.scanCode, udvidet, ctrl, shift, alt))} "
+                + $"holdGiverDiktering={HoldGiverDiktering}");
+
         if (greb is null) return CallNextHookEx(_hook, kode, wParam, lParam);
 
         // ============ SLIP ============
@@ -398,6 +409,8 @@ public sealed class Tastehook : IDisposable
         _nedTid = DateTime.UtcNow;
         _holder = false;
 
+        Tastespor.Skriv($"TRYKKET_NED holdGiverDiktering={HoldGiverDiktering}");
+
         if (!HoldGiverDiktering) return;
 
         // ÉN timer, der fyrer ÉN gang: naar graensen er naaet, og tasten
@@ -414,6 +427,7 @@ public sealed class Tastehook : IDisposable
             if (!_nede) return;
 
             _holder = true;
+            Tastespor.Skriv("HOLD_BEGYNDT");
             HoldBegyndt?.Invoke();
             StartLoft();
         };
