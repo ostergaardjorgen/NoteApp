@@ -77,6 +77,12 @@ public partial class OpgaveWindow : Window
         _r = r;
         _ny = ny;
 
+        // Se knappen i XAML: der er ikke noget at slette paa en opgave, der
+        // ikke er lavet endnu.
+        Loaded += (_, _) => SletKnap.Visibility = ny
+            ? System.Windows.Visibility.Collapsed
+            : System.Windows.Visibility.Visible;
+
         var dele = new List<string>();
 
         if (r.Opgave.Ejer.Length > 0) dele.Add(r.Opgave.Ejer);
@@ -239,6 +245,67 @@ public partial class OpgaveWindow : Window
             || Frist.SelectedDate != _r.Opgave.Deadline?.LocalDateTime.Date
             || Prioritet.SelectedIndex != (_r.Opgave.Prioritet is >= 1 and <= 3 ? _r.Opgave.Prioritet : 0)
             || (Faerdig.IsChecked == true) != _r.Opgave.Faerdig;
+    }
+
+    /// <summary>Sat, hvis brugeren valgte at slette opgaven.</summary>
+    public bool Slettet { get; private set; }
+
+    /// <summary>
+    /// Sletter opgaven — her og hos Google, hvis den kom derfra.
+    /// </summary>
+    /// <remarks>
+    /// DER SPØRGES. En opgave er en linje, nogen har sagt på et møde, og den
+    /// kan ikke laves igen ud af ingenting: teksten, fristen og vejen tilbage
+    /// til stedet i udskriften er væk med den.
+    ///
+    /// HOS GOOGLE FØRST, LOKALT BAGEFTER — samme rækkefølge som aftalerne.
+    /// Går det galt derude, står opgaven her endnu, og man kan prøve igen.
+    /// Omvendt ville den være væk på skærmen og tilbage ved næste hentning.
+    /// </remarks>
+    private async void Slet_Klik(object sender, RoutedEventArgs e)
+    {
+        var hosGoogle = _r.Opgave.Herkomst == Opgavekilde.Google
+                        && _r.Opgave.FremmedId.Length > 0;
+
+        var besked = hosGoogle
+            ? "Opgaven slettes både her og i Google Tasks. Det kan ikke fortrydes."
+            : "Opgaven slettes. Det kan ikke fortrydes.";
+
+        var ja = Dialogs.AppDialog.Spoerg(this, "Slet opgaven?", besked,
+            godkend: "Slet den", annuller: "Behold den",
+            slags: Dialogs.Slags.Pas_paa, godkendErStandard: false);
+
+        if (!ja) return;
+
+        if (hosGoogle)
+        {
+            try
+            {
+                var noegle = Integrationsfiler.Hent(Googleopgaver.Id).Opdateringsnoegle;
+
+                if (noegle.Length > 0)
+                    await Googleopgaver.SletAsync(_r.Opgave, noegle);
+            }
+            catch (Exception ex)
+            {
+                Meld("Opgaven blev ikke slettet hos Google",
+                     "Den står her endnu, så du kan prøve igen. " + ex.Message);
+                return;
+            }
+        }
+
+        try
+        {
+            Opgaveregister.Slet(_r);
+        }
+        catch (Exception ex)
+        {
+            Meld("Opgaven kunne ikke slettes", ex.Message);
+            return;
+        }
+
+        Slettet = true;
+        DialogResult = true;
     }
 
     private void Gem_Klik(object sender, RoutedEventArgs e)

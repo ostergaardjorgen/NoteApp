@@ -487,6 +487,8 @@
     "beskrivelse": "BESKRIVELSE",
     "det_der_staar_paa_listen_i_cockpittet_hold": "Det, der står på listen i Cockpittet. Hold det kort — resten hører til nedenfor.",
     "frist": "FRIST",
+    "slet": "Slet opgaven",
+    "slet_hjaelp": "Sletter opgaven her — og i Google Tasks, hvis den kom derfra.",
     "gem_og_luk": "Gem og luk",
     "ikke_sat": "Ikke sat",
     "kort_navn": "KORT NAVN",

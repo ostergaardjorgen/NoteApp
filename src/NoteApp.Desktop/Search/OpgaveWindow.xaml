@@ -166,6 +166,18 @@
                    Foreground="{DynamicResource Advarsel}" />
 
         <StackPanel Grid.Column="1" Orientation="Horizontal">
+          <!-- SLET STAAR YDERST TIL VENSTRE, VAEK FRA «Gem og luk».
+               De to er naboer i tid - man aabner opgaven, retter, og trykker
+               - og en sletteknap ved siden af den, man altid trykker paa, er
+               en fejl, der venter paa at ske. Den er roed, saa den heller
+               ikke laeses forkert.
+
+               Skjult paa en NY opgave. Der er ikke noget at slette endnu, og
+               en knap, der ikke goer noget, er stoej. -->
+          <Button x:Name="SletKnap" Content="{i18n:Oversat opgavewindow.slet}"
+                  Click="Slet_Klik" Padding="18,8" Margin="0,0,24,0"
+                  Style="{StaticResource Fare}"
+                  ToolTip="{i18n:Oversat opgavewindow.slet_hjaelp}" />
           <Button Content="{i18n:Oversat opgavewindow.luk}" Click="Luk_Klik" Padding="18,8" Margin="0,0,10,0"
                   ToolTip="{i18n:Oversat opgavewindow.lukker_uden_at_gemme}" />
           <Button Content="{i18n:Oversat opgavewindow.gem_og_luk}" Click="Gem_Klik" Padding="20,8"

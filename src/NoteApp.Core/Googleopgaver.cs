@@ -326,6 +326,40 @@ public static class Googleopgaver
                 Kort(await svar.Content.ReadAsStringAsync(ct)));
     }
 
+    /// <summary>
+    /// Sletter en opgave hos Google.
+    /// </summary>
+    /// <remarks>
+    /// Samme historie som aftalerne: afkrydsning og rettelser blev sendt
+    /// videre, men en opgave kunne slet ikke slettes i appen — kun krydses af.
+    /// Se <see cref="Googlekalender.SletAsync"/>.
+    ///
+    /// 404 og 410 tæller som succes. Den er væk, og det var dét, der blev
+    /// bedt om.
+    /// </remarks>
+    public static async Task SletAsync(Opgave o, string opdateringsnoegle,
+                                       CancellationToken ct = default)
+    {
+        if (o.FremmedId.Length == 0 || o.FremmedListe.Length == 0) return;
+
+        var noegle = await Noegle(opdateringsnoegle, ct);
+
+        var adresse = $"{Opgaver}/{Uri.EscapeDataString(o.FremmedListe)}" +
+                      $"/tasks/{Uri.EscapeDataString(o.FremmedId)}";
+
+        using var anmodning = new HttpRequestMessage(HttpMethod.Delete, adresse);
+        anmodning.Headers.Authorization = new("Bearer", noegle);
+
+        using var svar = await Http.SendAsync(anmodning, ct);
+
+        if (svar.IsSuccessStatusCode) return;
+        if (svar.StatusCode is System.Net.HttpStatusCode.NotFound
+                            or System.Net.HttpStatusCode.Gone) return;
+
+        throw new InvalidOperationException(
+            $"Google svarede {(int)svar.StatusCode} paa sletningen.");
+    }
+
     // ------------------------------------------------------------ hjaelpere
 
     private static async Task<string> Noegle(string opdateringsnoegle, CancellationToken ct) =>

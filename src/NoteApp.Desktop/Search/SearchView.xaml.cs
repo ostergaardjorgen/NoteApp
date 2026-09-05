@@ -792,7 +792,10 @@ public partial class SearchView : UserControl
         var vindue = new OpgaveWindow(v.Opgave) { Owner = Window.GetWindow(this) };
         vindue.ShowDialog();
 
-        if (vindue.Gemt) VisOpgaver();
+        // Ogsaa naar den er slettet. Listen skal tegnes om, uanset om
+        // opgaven blev rettet eller fjernet - ellers staar den, man lige har
+        // slettet, og ser ud som om den er der endnu.
+        if (vindue.Gemt || vindue.Slettet) VisOpgaver();
     }
 
     /// <summary>
@@ -1188,17 +1191,20 @@ public partial class SearchView : UserControl
     }
 
     /// <summary>
-    /// Viser, hvor den lander — over eller under det kort, musen er på.
+    /// Viser, hvor den lander — som en streg over eller under kortet.
     /// </summary>
     /// <remarks>
-    /// KANTEN GOER DET, OG IKKE EN EKSTRA STREG I SKABELONEN. Kortene bygges
-    /// af en DataTemplate, og et navngivet element derinde findes i ét
-    /// eksemplar pr. raekke — det kan ikke slaas op udefra. Kanten sidder paa
-    /// selve Border'en, som ER det, musen er over.
+    /// FOERSTE UDGAVE GJORDE KORTETS EGEN KANT TYKKERE, og det var for lidt:
+    /// kortene har allerede en kant, og tre pixels mere paa den ene side er
+    /// ikke noget, man opdager, mens man holder musen nede.
     ///
-    /// ClearValue og ikke «saet tilbage til det, den var». Kanten kommer fra
-    /// en DynamicResource, og skrev vi en farve tilbage i haanden, ville den
-    /// holde op med at foelge med, naar temaet skifter.
+    /// Nu en streg paa tvaers i accentfarven. Den siger «her lander den» og
+    /// ikke «det her kort er markeret» — og det er dét, man staar og leder
+    /// efter, mens man traekker.
+    ///
+    /// DEN NEDERSTE BRUGES KUN PAA DET SIDSTE KORT. Ellers ville to naboer
+    /// vise den samme plads to gange: bunden af den ene og toppen af den
+    /// naeste er det samme sted i listen.
     /// </remarks>
     private void Opgave_TraekkesHen(object sender, DragEventArgs e)
     {
@@ -1212,20 +1218,82 @@ public partial class SearchView : UserControl
 
         if (e.Effects == DragDropEffects.None) return;
 
-        var over = e.GetPosition(kort).Y < kort.ActualHeight / 2;
+        var under = e.GetPosition(kort).Y >= kort.ActualHeight / 2;
+        var sidste = ErSidste(kort);
 
-        kort.BorderBrush = Temaskift.Pensel("Accent");
-        kort.BorderThickness = over ? new Thickness(1, 3, 1, 1) : new Thickness(1, 1, 1, 3);
+        // Er man i den nederste halvdel af et kort, der IKKE er det sidste,
+        // er landingspladsen den samme som toppen af det naeste. Stregen
+        // vises derfor dér, saa den ikke hopper mellem to udgaver af det
+        // samme sted.
+        Vis(kort, "Indsaetfoer", !under);
+        Vis(kort, "Indsaetefter", under && sidste);
+
+        if (under && !sidste && Naboen(kort) is { } naeste)
+            Vis(naeste, "Indsaetfoer", true);
     }
 
     private void Opgave_TraekForbi(object sender, DragEventArgs e) => RydTraekkant(sender);
 
+    /// <summary>
+    /// Slukker begge streger på kortet — og på naboen, som også kan lyse.
+    /// </summary>
     private static void RydTraekkant(object sender)
     {
         if (sender is not Border kort) return;
 
-        kort.ClearValue(Border.BorderBrushProperty);
-        kort.ClearValue(Border.BorderThicknessProperty);
+        Vis(kort, "Indsaetfoer", false);
+        Vis(kort, "Indsaetefter", false);
+
+        if (Naboen(kort) is { } naeste) Vis(naeste, "Indsaetfoer", false);
+    }
+
+    /// <summary>
+    /// Tænder eller slukker en af stregerne på ét kort.
+    /// </summary>
+    /// <remarks>
+    /// Der gås gennem det TEGNEDE kort og ikke gennem FindName. En
+    /// DataTemplate laver ét sæt elementer pr. række, og et x:Name derinde
+    /// kan ikke slås op udefra — der er tyve elementer med det navn, ét pr.
+    /// opgave. Vejen er den visuelle træstruktur, hvor hvert kort kun kan se
+    /// sine egne.
+    /// </remarks>
+    private static void Vis(Border kort, string navn, bool taendt)
+    {
+        if (VisualTreeHelper.GetParent(kort) is not Grid ramme) return;
+
+        foreach (var barn in ramme.Children)
+            if (barn is Border b && b.Name == navn)
+                b.Visibility = taendt ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    /// <summary>Kortet lige under dette — eller <c>null</c>, hvis det er det sidste.</summary>
+    private static Border? Naboen(Border kort)
+    {
+        if (VisualTreeHelper.GetParent(kort) is not Grid ramme) return null;
+        if (VisualTreeHelper.GetParent(ramme) is not ContentPresenter plads) return null;
+        if (VisualTreeHelper.GetParent(plads) is not Panel stak) return null;
+
+        var nr = stak.Children.IndexOf(plads);
+        if (nr < 0 || nr + 1 >= stak.Children.Count) return null;
+
+        return Kortet(stak.Children[nr + 1]);
+    }
+
+    private static bool ErSidste(Border kort) => Naboen(kort) is null;
+
+    /// <summary>Selve kortet inde i en række — den Border, der har et Tag.</summary>
+    private static Border? Kortet(DependencyObject rod)
+    {
+        if (rod is ContentPresenter && VisualTreeHelper.GetChildrenCount(rod) == 1)
+            rod = VisualTreeHelper.GetChild(rod, 0);
+
+        if (rod is not Grid ramme) return null;
+
+        foreach (var barn in ramme.Children)
+            if (barn is Border b && b.Tag is Opgavevisning)
+                return b;
+
+        return null;
     }
 
     private void Opgave_Sluppet(object sender, DragEventArgs e)

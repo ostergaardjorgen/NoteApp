@@ -269,6 +269,8 @@
     "beskrivelse": "DESCRIPTION",
     "det_der_staar_paa_listen_i_cockpittet_hold": "What appears in the list in the Cockpit. Keep it short — the rest belongs below.",
     "frist": "DUE",
+    "slet": "Delete the task",
+    "slet_hjaelp": "Deletes the task here — and in Google Tasks, if that is where it came from.",
     "gem_og_luk": "Save and close",
     "ikke_sat": "Not set",
     "kort_navn": "SHORT NAME",

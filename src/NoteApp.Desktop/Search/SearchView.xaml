@@ -737,10 +737,40 @@
                      venstrekant tvinger resten af rammen til den samme farve.
                      Derfor er polstringen flyttet ind paa indholdet - ellers
                      ville striben stoppe, hvor polstringen begyndte. -->
-                <Border Background="{DynamicResource Trykket}"
+                <!-- ============ HVOR LANDER DEN? ============
+
+                     Foerste udgave gjorde kortets EGEN kant tykkere i toppen
+                     eller bunden. Det var for lidt: kortene har allerede en
+                     kant, og tre pixels mere paa den ene side er ikke noget,
+                     man opdager, mens man holder musen nede og kigger et
+                     andet sted hen.
+
+                     Nu en streg PAA TVAERS - i accentfarven, fire pixels, og
+                     hele kortets bredde. Den ligger dér, hvor opgaven falder
+                     ind, og ikke paa den, man svaever over. Det er forskellen
+                     paa «det her kort er markeret» og «her lander den».
+
+                     TO STREGER OG IKKE EEN. Den nederste bruges kun paa det
+                     sidste kort - ellers ville man ikke kunne laegge noget
+                     allernederst i listen.
+
+                     De findes ved at gaa ned gennem det tegnede kort. En
+                     DataTemplate laver eet saet pr. raekke, og x:Name kan
+                     derfor ikke slaas op udefra - se Indsaetlinje i koden. -->
+                <Grid Margin="0,0,0,6">
+                <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <Border x:Name="Indsaetfoer" Grid.Row="0" Height="4" CornerRadius="2"
+                Margin="0,0,0,4" Visibility="Collapsed"
+                Background="{DynamicResource Accent}" />
+
+                <Border Grid.Row="1" Background="{DynamicResource Trykket}"
                 BorderBrush="{DynamicResource PanelKant}"
                 BorderThickness="1" CornerRadius="6"
-                Margin="0,0,0,6"
                 Opacity="{Binding Daempning}"
                 Tag="{Binding}" MouseLeftButtonUp="Opgave_Aabn"
                 AllowDrop="True"
@@ -839,6 +869,11 @@
                 </Grid>
                 </Grid>
                 </Border>
+
+                <Border x:Name="Indsaetefter" Grid.Row="2" Height="4" CornerRadius="2"
+                Margin="0,4,0,0" Visibility="Collapsed"
+                Background="{DynamicResource Accent}" />
+                </Grid>
                 </DataTemplate>
                 </ItemsControl.ItemTemplate>
                 </ItemsControl>
