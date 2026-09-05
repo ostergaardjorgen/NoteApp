@@ -1133,8 +1133,21 @@ public partial class MainWindow : Window
     /// Den spørges derfor det sted, der viser den: optagebåndet. Er der ikke
     /// noget bånd, kører der ingen optagelse.
     /// </remarks>
+    /// <summary>
+    /// Er mikrofonen optaget af noget vigtigere lige nu?
+    /// </summary>
+    /// <remarks>
+    /// DER SPOERGES PAA MIKROFONEN OG IKKE PAA OPTAGELSEN. Et webinar optager
+    /// hoejttaleren og ikke din mikrofon - se MeetingView.OptagerMikrofonen -
+    /// og saa er der intet i vejen for at diktere imens.
+    ///
+    /// Det er netop dér, man har brug for det: man sidder og lytter til noget
+    /// andet, kommer i tanker om noget, og enten faar man det skrevet ned nu,
+    /// eller ogsaa er det vaek. Foer blev vaageordet slaaet fra i hele
+    /// webinaret.
+    /// </remarks>
     private bool OptagerNu() =>
-        OptagBjaelke.Content is Meeting.MeetingView m && m.OptagerNu;
+        OptagBjaelke.Content is Meeting.MeetingView m && m.OptagerMikrofonen;
 
     /// <summary>Er maskinen låst?</summary>
     private static bool Laast()

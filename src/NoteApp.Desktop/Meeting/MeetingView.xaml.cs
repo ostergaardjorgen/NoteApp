@@ -132,6 +132,22 @@ public partial class MeetingView : UserControl
     /// </remarks>
     public bool OptagerNu => UrPanel.Visibility == Visibility.Visible;
 
+    /// <summary>
+    /// Optages MIKROFONEN lige nu?
+    /// </summary>
+    /// <remarks>
+    /// ET WEBINAR OPTAGER IKKE DIN MIKROFON. Det står i Start: enheden slås
+    /// op, fordi navnet skal med i mødedataene, men den optages ikke — et
+    /// webinar er dét, de andre siger.
+    ///
+    /// Forskellen betyder noget for dikteringen. Under et møde er mikrofonen
+    /// i brug til noget vigtigere, og det, man siger, hører til referatet.
+    /// Under et webinar sidder man og lytter, og dét er netop, når man kommer
+    /// i tanker om noget, der skal skrives ned. En diktering forstyrrer
+    /// ingenting: sporet er højttalerens.
+    /// </remarks>
+    public bool OptagerMikrofonen => OptagerNu && !_erWebinar;
+
     public void VisGenvej(string? tast, string? bemærkning)
     {
         if (tast is null)

@@ -394,6 +394,14 @@ public sealed class AppSettings
     /// </remarks>
     public bool OpgaverManueltSorteret { get; set; }
 
+    /// <summary>Er tipsbåndet i Cockpittet slået fra?</summary>
+    /// <remarks>
+    /// FRA OG IKKE TIL. Standarden er, at det er der: tipsene handler om
+    /// noget, man ikke opdager ved at bruge appen, og et bånd, man selv skal
+    /// finde og tænde, bliver aldrig tændt. Slår man det fra, bliver det fra.
+    /// </remarks>
+    public bool TipsSlaaetFra { get; set; }
+
     public bool VaageordTil { get; set; }
 
     /// <summary>

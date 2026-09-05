@@ -852,6 +852,11 @@
     "deltagerregler_hvem_kommer_paa_listen": "Deltagerregler — hvem kommer på deltagerlisten",
     "tag_hakket_fra_saa_sendes_linjen_ikke": "Tag hakket fra, så sendes linjen med feltet ikke. Teksten nedenfor bliver stående, så du kan sætte hakket tilbage."
   },
+  "tips": {
+    "vidste_du": "Vidste du at",
+    "laes_mere": "L\u00e6s mere i h\u00e5ndbogen",
+    "slaa_fra": "Skjul tipsene. Du kan sl\u00e5 dem til igen under Indstillinger."
+  },
   "transcribeview": {
     "aabn_mappen_paa_disken": "Åbn mappen på disken",
     "den_gemmes_automatisk_ved_siden_af_optagel": "Den gemmes automatisk ved siden af optagelsen. Du skal ikke gemme noget selv.",

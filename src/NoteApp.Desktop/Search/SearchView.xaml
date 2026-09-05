@@ -252,6 +252,10 @@
           <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
+
+            <!-- Tipsbaandet. Auto, saa det fylder sin egen hoejde og ikke
+                 mere - og nederst, hvor der alligevel er tom plads. -->
+            <RowDefinition Height="Auto" />
           </Grid.RowDefinitions>
 
           <StackPanel Grid.Row="0">
@@ -664,6 +668,71 @@
           Text="{i18n:Oversat searchview.husk_at_et_moede_foerst_kan_soeges_naar_de}" />
           </StackPanel>
         </Grid>
+
+      <!-- ==================== VIDSTE DU AT … ====================
+
+           APPEN KAN EN DEL, MAN IKKE OPDAGER VED AT BRUGE DEN. At et webinar
+           ikke optager din mikrofon, at en diktering kan blive til en opgave,
+           at opgavelisten kan traekkes i raekkefoelge. Det staar i hjaelpen -
+           og hjaelpen laeser man den dag, noget driller, altsaa ikke den dag,
+           man kunne have haft glaede af det.
+
+           BAANDET STAAR, HVOR DER ALLIGEVEL ER TOM PLADS: nederst i
+           midterspalten. Det tager ingen plads fra noget andet.
+
+           DET SKAL IKKE VAERE IRRITERENDE. Et tip ad gangen, et skift hvert
+           tolvte sekund, og skiftet er en toning ind og ud - ingen bevaegelse,
+           der traekker oejet til sig, mens man laeser noget andet. Krydset
+           slaar det fra for altid. -->
+      <Border x:Name="Tipsbaand" Grid.Row="2" Margin="0,10,0,16"
+              Background="{DynamicResource Trykket}" CornerRadius="8"
+              BorderBrush="{DynamicResource PanelKant}" BorderThickness="1"
+              Padding="14,11">
+        <Grid>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+          </Grid.ColumnDefinitions>
+
+          <TextBlock Grid.Column="0" Text="&#xE9CE;" FontFamily="Segoe MDL2 Assets"
+                     FontSize="14" VerticalAlignment="Top" Margin="0,1,11,0"
+                     Foreground="{DynamicResource Accent}" />
+
+          <StackPanel x:Name="Tipsindhold" Grid.Column="1">
+            <TextBlock TextWrapping="Wrap" LineHeight="20">
+              <Run Text="{i18n:Oversat tips.vidste_du}" FontWeight="SemiBold" />
+              <Run x:Name="Tipstekst" />
+            </TextBlock>
+
+            <Button x:Name="Tipslink" Click="Tipslaesmere_Klik" Margin="0,6,0,0"
+                    HorizontalAlignment="Left" Padding="0" BorderThickness="0"
+                    Background="Transparent" Cursor="Hand" FontSize="12"
+                    Foreground="{DynamicResource Accent}"
+                    Content="{i18n:Oversat tips.laes_mere}">
+              <Button.Template>
+                <ControlTemplate TargetType="Button">
+                  <TextBlock Text="{TemplateBinding Content}" FontSize="12"
+                             Foreground="{TemplateBinding Foreground}" />
+                </ControlTemplate>
+              </Button.Template>
+            </Button>
+          </StackPanel>
+
+          <Button Grid.Column="2" Click="Tipsluk_Klik" VerticalAlignment="Top"
+                  Width="26" Height="26" Padding="0" Margin="10,0,0,0"
+                  Background="Transparent" BorderThickness="0" Cursor="Hand"
+                  ToolTip="{i18n:Oversat tips.slaa_fra}"
+                  AutomationProperties.Name="{i18n:Oversat tips.slaa_fra}">
+            <Grid Width="10" Height="10">
+              <Path Data="M 0,0 L 10,10" Stroke="{DynamicResource TekstMeget}"
+                    StrokeThickness="1.5" StrokeStartLineCap="Round" StrokeEndLineCap="Round" />
+              <Path Data="M 10,0 L 0,10" Stroke="{DynamicResource TekstMeget}"
+                    StrokeThickness="1.5" StrokeStartLineCap="Round" StrokeEndLineCap="Round" />
+            </Grid>
+          </Button>
+        </Grid>
+      </Border>
         </Grid>
       </Border>
 

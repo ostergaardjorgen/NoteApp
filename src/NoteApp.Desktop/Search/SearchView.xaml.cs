@@ -2,6 +2,7 @@
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Threading;
 using NoteApp.Core;
 
@@ -153,6 +154,7 @@ public partial class SearchView : UserControl
         Loaded += (_, _) =>
         {
             HentSpaltebredder();
+            StartTips();
             FyldFiltre();
             VisOpgaver();
             VisKalender();
@@ -1258,6 +1260,136 @@ public partial class SearchView : UserControl
 
         // Saetteren gemmer og tegner listen om, saa ringen faar sit nye tal.
         v.Prioritetsvalg = pri;
+    }
+
+    // ==================== VIDSTE DU AT … ====================
+
+    private DispatcherTimer? _tipsur;
+    private int _tipsnr;
+
+    /// <summary>
+    /// Starter tipsbåndet — eller lader være, hvis det er slået fra.
+    /// </summary>
+    /// <remarks>
+    /// TOLV SEKUNDER MELLEM HVERT. Kortere, og det bliver en ting, der
+    /// bevæger sig i øjenkrogen, mens man læser noget andet; længere, og man
+    /// ser det samme tip hver gang, man åbner Cockpittet.
+    ///
+    /// DER STARTES ET TILFÆLDIGT STED I LISTEN. Ellers ville det første tip
+    /// være det samme hver eneste dag, og de sidste i listen ville aldrig
+    /// blive læst.
+    /// </remarks>
+    private void StartTips()
+    {
+        if (AppSettings.Current.TipsSlaaetFra || Tips.Alle().Count == 0)
+        {
+            Tipsbaand.Visibility = Visibility.Collapsed;
+            return;
+        }
+
+        Tipsbaand.Visibility = Visibility.Visible;
+
+        _tipsnr = Random.Shared.Next(Tips.Alle().Count);
+        VisTip(toning: false);
+
+        _tipsur?.Stop();
+        _tipsur = new DispatcherTimer { Interval = TimeSpan.FromSeconds(12) };
+        _tipsur.Tick += (_, _) =>
+        {
+            _tipsnr = (_tipsnr + 1) % Tips.Alle().Count;
+            VisTip(toning: true);
+        };
+        _tipsur.Start();
+    }
+
+    /// <summary>
+    /// Skriver tippet — med en blød toning, når det er et skift.
+    /// </summary>
+    /// <remarks>
+    /// TEKSTEN SKIFTES MIDT I TONINGEN og ikke før den. Gøres det før, ser man
+    /// det nye tip springe frem i fuld styrke og derefter tone ud og ind igen
+    /// — altså det modsatte af et blødt skift.
+    ///
+    /// Første visning toner ikke. Et bånd, der toner sig selv frem, når man
+    /// åbner skærmen, er en bevægelse, ingen har bedt om.
+    /// </remarks>
+    private void VisTip(bool toning)
+    {
+        var tip = Tips.Alle()[_tipsnr];
+
+        if (!toning)
+        {
+            Saettip(tip);
+            return;
+        }
+
+        var ud = new DoubleAnimation(1, 0, TimeSpan.FromMilliseconds(400))
+        {
+            EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseInOut }
+        };
+
+        ud.Completed += (_, _) =>
+        {
+            Saettip(tip);
+
+            Tipsindhold.BeginAnimation(OpacityProperty,
+                new DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(400))
+                {
+                    EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseInOut }
+                });
+        };
+
+        Tipsindhold.BeginAnimation(OpacityProperty, ud);
+    }
+
+    private void Saettip(Tip tip)
+    {
+        Tipstekst.Text = " " + tip.Tekst;
+        Tipslink.Tag = tip.Afsnit;
+    }
+
+    /// <summary>Åbner hjælpen på det afsnit, tippet kom fra.</summary>
+    private void Tipslaesmere_Klik(object sender, RoutedEventArgs e)
+    {
+        var afsnit = (sender as FrameworkElement)?.Tag as string ?? "";
+
+        try
+        {
+            // Aabn og ikke new: haandbogen er EET vindue. Er den aabne
+            // allerede, springer den bare til afsnittet.
+            Help.HjaelpWindow.Aabn(Window.GetWindow(this), afsnit);
+        }
+        catch (Exception ex)
+        {
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Hjælpen kunne ikke åbnes",
+                ex.Message, Dialogs.Slags.Pas_paa);
+        }
+    }
+
+    /// <summary>
+    /// Slår båndet fra — for altid, indtil man selv slår det til igen.
+    /// </summary>
+    /// <remarks>
+    /// DER SPØRGES IKKE. Man trykker på et kryds for at få noget væk, ikke
+    /// for at få et spørgsmål. Hvor det tændes igen, står i beskeden.
+    /// </remarks>
+    private void Tipsluk_Klik(object sender, RoutedEventArgs e)
+    {
+        _tipsur?.Stop();
+        _tipsur = null;
+
+        Tipsbaand.Visibility = Visibility.Collapsed;
+
+        try
+        {
+            AppSettings.Current.TipsSlaaetFra = true;
+            AppSettings.Current.Save();
+        }
+        catch (Exception)
+        {
+            // Kan det ikke gemmes, er det slaaet fra resten af sessionen.
+            // Det er den mindst irriterende maade at fejle paa.
+        }
     }
 
     // ==================== HELE LISTEN ====================

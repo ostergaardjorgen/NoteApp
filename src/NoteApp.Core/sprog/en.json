@@ -371,6 +371,11 @@
     "til": "TO",
     "titel_tidspunkt_og_sted_sendes_op_moedetyp": "Title, time and place are sent up. Meeting type, folder and language stay here — and audio, transcripts and notes are never sent."
   },
+  "tips": {
+    "vidste_du": "Did you know that",
+    "laes_mere": "Read more in the handbook",
+    "slaa_fra": "Hide the tips. You can turn them back on under Settings."
+  },
   "transcribeview": {
     "aabn_mappen_paa_disken": "Open the folder on disk",
     "den_gemmes_automatisk_ved_siden_af_optagel": "It is saved automatically next to the recording. You do not have to save anything yourself.",
