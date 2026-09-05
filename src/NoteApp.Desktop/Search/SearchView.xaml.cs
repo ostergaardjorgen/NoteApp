@@ -476,7 +476,12 @@ public partial class SearchView : UserControl
         /// </summary>
         public string Dagsnavn { get; set; } = "";
 
-        /// <summary>Datoen under dagsnavnet — «24. august».</summary>
+        /// <summary>Datoen ved siden af dagsnavnet — «24. aug».</summary>
+        /// <remarks>
+        /// Måneden forkortes, som den gør på opgavernes fristmærkat. De to
+        /// står nu på samme linje, og «24. august» ville skubbe dagsnavnet
+        /// ud af en spalte, man selv kan trække smallere.
+        /// </remarks>
         public string Dagsdato { get; set; } = "";
 
         /// <summary>Er det her dagens første aftale?</summary>
@@ -484,8 +489,14 @@ public partial class SearchView : UserControl
             Dagsnavn.Length > 0 ? Visibility.Visible : Visibility.Collapsed;
 
         /// <summary>I dag skal skille sig ud — det er den dag, man kan nå noget på.</summary>
+        /// <remarks>
+        /// TEKSTSVAG OG IKKE TEKSTMEGET. Ved siden af opgavespalten, hvor alt
+        /// står i den almindelige tekstfarve, så kalenderens dagsoverskrifter
+        /// ud til at være slået fra. Et trin op er nok — de er stadig
+        /// overskrifter og skal ikke konkurrere med aftalernes titler.
+        /// </remarks>
         public Brush Dagsfarve =>
-            _a.Start.Date == _nu.Date ? Pensel("Advarsel") : Pensel("TekstMeget");
+            _a.Start.Date == _nu.Date ? Pensel("Advarsel") : Pensel("TekstSvag");
 
         /// <summary>
         /// Klokkeslættet — eller «nu», når den er i gang.
@@ -591,7 +602,7 @@ public partial class SearchView : UserControl
 
                 return _a.Start <= _nu.AddHours(1)
                     ? Pensel("Advarsel")
-                    : Pensel("TekstMeget");
+                    : Pensel("TekstSvag");
             }
         }
 
@@ -674,7 +685,10 @@ public partial class SearchView : UserControl
             // DATOFORMATET STAAR I SPROGFILEN. Dansk skriver «27. august»,
             // engelsk «27 August». Punktummet er ikke en detalje, man kan
             // regne sig frem til - det hoerer til sproget.
-            v.Dagsdato = dag.ToString(Sprog.T("kalender.datoformat"), Sprog.Kultur);
+            // Maaneden forkortes, som paa opgavernes fristmaerkat: de to
+            // staar nu paa samme linje, og «8. september» ville skubbe
+            // dagsnavnet ud af en spalte, man selv kan traekke smallere.
+            v.Dagsdato = $"{dag.Day}. {Datoforstaaelse.Forkort(DateOnly.FromDateTime(dag))}";
         }
 
         Kalenderrude.ItemsSource = visninger;

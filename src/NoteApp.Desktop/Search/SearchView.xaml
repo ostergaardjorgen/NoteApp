@@ -146,11 +146,23 @@
                        Nu staar den ét sted pr. dag, stort nok til at blive
                        set, og aftalerne under den behoever kun deres
                        klokkeslaet. «I DAG» er gult; resten er graat. -->
-                  <StackPanel Visibility="{Binding Dagsvis}" Margin="2,10,0,6">
+                  <!-- EEN LINJE OG IKKE TO. «Tirsdag» over «8. september»
+                       kostede en halv raekke hoejde pr. dag, og de to hoerer
+                       sammen: de er den samme oplysning delt i to. Datoen er
+                       forkortet - «8. sep» - saa de kan staa ved siden af
+                       hinanden i en smal spalte.
+
+                       LYSERE END FOER. Dagen stod paa TekstMeget og datoen
+                       ogsaa; ved siden af opgavespalten, hvor alt staar i den
+                       almindelige tekstfarve, saa kalenderen ud til at vaere
+                       slaaet fra. Nu TekstSvag, som er et trin op. «I dag» er
+                       stadig gult - se Dagsfarve. -->
+                  <StackPanel Orientation="Horizontal" Visibility="{Binding Dagsvis}"
+                              Margin="2,10,0,6">
                     <TextBlock Text="{Binding Dagsnavn}" FontSize="11.5"
                                FontWeight="SemiBold" Foreground="{Binding Dagsfarve}" />
-                    <TextBlock Text="{Binding Dagsdato}" FontSize="10.5" Margin="0,1,0,0"
-                               Foreground="{DynamicResource TekstMeget}" />
+                    <TextBlock Text="{Binding Dagsdato}" FontSize="11.5" Margin="6,0,0,0"
+                               Foreground="{DynamicResource TekstSvag}" />
                   </StackPanel>
 
                   <!-- Opacity og ikke en graa farve paa hvert element: den
