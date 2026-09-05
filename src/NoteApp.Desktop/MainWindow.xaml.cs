@@ -1266,6 +1266,20 @@ public partial class MainWindow : Window
         // sekunders modelindlaesning efter hver eneste brug.
         if (_diktat.Igang) return;
 
+        // ============ BOBLEN SKAL FREM IGEN ============
+        //
+        // Krydset paa boblen slog den fra for resten af sessionen - ogsaa naar
+        // man BAD om noget. Sagde man «Hej Pia», svarede appen fint, men der
+        // stod intet paa skaermen, og man stod og ventede paa noget, der
+        // allerede var sket.
+        //
+        // Krydset hoerer til den PASSIVE lytning: «jeg gider ikke se, at du
+        // staar og lytter». Et vaageord er noget, man selv siger, og saa skal
+        // svaret kunne ses. Samme regel som paa genvejstasten - se
+        // DiktatBegynd.
+        _bobleLukket = false;
+        HentBobleKnap.Visibility = Visibility.Collapsed;
+
         _diktat.Melder -= VisDiktat;
         _diktat.Melder += VisDiktat;
         _diktat.Faerdig -= DiktatFaerdig;
