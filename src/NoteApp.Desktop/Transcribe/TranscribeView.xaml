@@ -357,22 +357,20 @@
                     <TextBlock Text="{Binding Glyf}" FontFamily="Segoe MDL2 Assets" FontSize="13"
                                VerticalAlignment="Center" Margin="0,0,9,0"
                                Foreground="{DynamicResource Accent}" />
-                    <StackPanel VerticalAlignment="Center">
-                      <TextBlock Text="{Binding Visning}" FontSize="12.5"
-                                 TextTrimming="CharacterEllipsis" />
-                      <TextBlock Text="{Binding Under}" FontSize="11.5" Margin="0,1,0,0"
-                                 Foreground="{DynamicResource TekstMeget}">
-                        <TextBlock.Style>
-                          <Style TargetType="TextBlock">
-                            <Style.Triggers>
-                              <DataTrigger Binding="{Binding Under}" Value="{x:Null}">
-                                <Setter Property="Visibility" Value="Collapsed" />
-                              </DataTrigger>
-                            </Style.Triggers>
-                          </Style>
-                        </TextBlock.Style>
-                      </TextBlock>
-                    </StackPanel>
+                    <!-- ============ EEN LINJE PR. OPTAGELSE ============
+
+                         Under navnet stod «02-09 10:01 · 1:02:10». Det er
+                         rigtigt og det er sjaeldent dét, man leder efter -
+                         men det fordoblede hoejden paa hver eneste raekke, og
+                         traeet er den ene ting paa skaermen, man skal kunne
+                         overskue paa eet blik.
+
+                         Tallene staar i boblen ovenfor - samme greb som paa
+                         kalenderens og opgavernes kort, hvor herkomstlinjen
+                         ogsaa er flyttet derind. -->
+                    <TextBlock Text="{Binding Visning}" FontSize="12.5"
+                               VerticalAlignment="Center"
+                               TextTrimming="CharacterEllipsis" />
                   </StackPanel>
                 </Border>
                 <HierarchicalDataTemplate.Triggers>
@@ -424,7 +422,14 @@
                TALLET STAAR PAA FANEN. En fane, der bare hedder «Dokumenter»,
                siger ikke, om der er noget derinde - og saa skal man klikke for
                at finde ud af, at der ikke er. -->
-          <Border Grid.Row="0" BorderBrush="{DynamicResource PanelKant}" BorderThickness="0,0,0,1"
+          <!-- FANERNE ER SKJULT, INDTIL DER ER VALGT EN OPTAGELSE.
+               «Udskrift», «Dokumenter» og «Historik» handler alle sammen om
+               EEN optagelse. Uden en valgt optagelse er de tre knapper, der
+               skifter mellem tre tomme ruder - og «Historik» sagde endda
+               «Der er ikke sket noget med den her optagelse», uden at der var
+               nogen. Set 05-09-2026. -->
+          <Border x:Name="Fanebaand" Grid.Row="0" Visibility="Collapsed"
+                  BorderBrush="{DynamicResource PanelKant}" BorderThickness="0,0,0,1"
                   Padding="20,12">
             <StackPanel Orientation="Horizontal">
               <RadioButton x:Name="FaneUdskrift" GroupName="indholdsfane" IsChecked="True"

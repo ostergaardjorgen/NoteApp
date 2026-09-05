@@ -543,7 +543,22 @@ public partial class TranscribeView : UserControl
                 rod.Boern.Add(Biblioteker.Biblioteksnode.Optagelsesnode(o));
         }
 
-        Trae.ItemsSource = new[] { _rodMoeder, _rodArkiv };
+        // ============ MAPPERNE ER ROEDDER ============
+        //
+        // Traeet begyndte med «Foldere (19)», og alt laa et lag inde under
+        // den. Det kostede et helt niveau af indrykning paa en spalte, der er
+        // godt tre hundrede pixels bred - og «Foldere» svarede paa et
+        // spoergsmaal, ingen stiller: der er ALTID tale om enten et moede,
+        // et webinar eller noget arkiveret.
+        //
+        // Nu staar de oeverste mapper - «Moeder», «Webinarer» og hvad man
+        // ellers har lavet - som roedder ved siden af «Arkiv». Alt rykker et
+        // niveau ud.
+        //
+        // _rodMoeder BLIVER, den tegnes bare ikke. Den er stadig det sted,
+        // koden mener, naar den siger «ud af mappen»: se Trae_Slip, hvor et
+        // slip ved siden af traeet nu betyder netop dét.
+        Trae.ItemsSource = _rodMoeder.Boern.Concat(new[] { _rodArkiv }).ToList();
 
         // Alt starter foldet sammen. Kun det, der VAR foldet ud, foldes ud
         // igen - og foerste gang er der ingenting i den maengde.
@@ -974,8 +989,16 @@ public partial class TranscribeView : UserControl
             return;
         }
 
-        var maal = MaalUnderMusen(e);
-        if (maal is null) return;
+        // ============ SLIP VED SIDEN AF = UD AF MAPPEN ============
+        //
+        // «Foldere» var roden og dermed dropmaalet for «tag den ud af
+        // mappen». Roden tegnes ikke mere - mapperne staar selv oeverst - og
+        // saa skulle den vej findes et andet sted. Den tomme plads under
+        // traeet er det naturlige sted: man traekker den UD af det hele.
+        //
+        // Det henter samtidig ud af arkivet, praecis som et slip paa
+        // «Foldere» gjorde.
+        var maal = MaalUnderMusen(e) ?? _rodMoeder;
 
         // EN MAPPE, DER FLYTTES, TAGER ALT MED SIG.
         //
@@ -1509,6 +1532,21 @@ public partial class TranscribeView : UserControl
     });
 
     /// <summary>Skifter mellem udskriften og dokumenterne. Samme optagelse begge steder.</summary>
+    /// <summary>
+    /// Fanebåndet er der kun, når der er en optagelse at vise faner for.
+    /// </summary>
+    private void VisFanebaand()
+    {
+        if (Fanebaand is null) return;
+
+        Fanebaand.Visibility = Valgt is null ? Visibility.Collapsed : Visibility.Visible;
+
+        // STAAR MAN PAA EN ANDEN FANE, NAAR VALGET FORSVINDER, skal den
+        // tilbage til udskriften. Ellers ville naeste optagelse aabne paa en
+        // fane, man valgte til en anden.
+        if (Valgt is null && FaneUdskrift is not null) FaneUdskrift.IsChecked = true;
+    }
+
     private void Fane_Skiftet(object sender, RoutedEventArgs e)
     {
         // Konstruktoeren koerer foer felterne er sat op; RadioButton.Checked
@@ -1652,6 +1690,10 @@ public partial class TranscribeView : UserControl
         // optagelser stille miste knappen.
         Resultat.KanOpretteDokument = færdig is not null && _afbryd is null;
         OmdoebKnap.IsEnabled = (valgt is not null || mappeValgt) && _afbryd is null;
+
+        // Fanerne hoerer til EEN optagelse. Er der ikke valgt nogen, er de
+        // tre knapper, der skifter mellem tre tomme ruder.
+        VisFanebaand();
         FlytKnap.IsEnabled = valgt is not null && _afbryd is null;
 
         if (færdig is not null)
