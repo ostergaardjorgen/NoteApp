@@ -61,6 +61,43 @@ public partial class Lytteboble : Window
         };
     }
 
+    /// <summary>Der blev trykket «Aftale» i boblen.</summary>
+    public Action? Aftale;
+
+    /// <summary>Der blev trykket «Opgave» i boblen.</summary>
+    public Action? Opgave;
+
+    /// <summary>Der blev trykket «Kopiér» i boblen.</summary>
+    public Action? Kopier;
+
+    /// <summary>
+    /// Viser eller skjuler de tre genveje.
+    /// </summary>
+    /// <remarks>
+    /// DE ER DER KUN, NÅR DER ER EN TEKST. Boblen står også, mens der lyttes,
+    /// og mens der skrives ud — tre knapper til noget, der ikke findes endnu,
+    /// er tre knapper, der ikke virker.
+    ///
+    /// Boblen ændrer bredde, når de kommer og går. Den er sat til
+    /// SizeToContent, så det sker af sig selv, men den skal placeres igen:
+    /// den ligger centreret forneden, og en boble, der bliver bredere uden at
+    /// flytte sig, står ikke længere på midten.
+    /// </remarks>
+    public void VisGenveje(bool vis)
+    {
+        var nyt = vis ? Visibility.Visible : Visibility.Collapsed;
+
+        if (Genveje.Visibility == nyt) return;
+
+        Genveje.Visibility = nyt;
+
+        if (IsVisible)
+        {
+            UpdateLayout();
+            Placer();
+        }
+    }
+
     /// <summary>
     /// Viser boblen med en besked.
     /// </summary>
@@ -143,6 +180,12 @@ public partial class Lytteboble : Window
         Left = arbejde.Left + (arbejde.Width - ActualWidth) / 2;
         Top = arbejde.Bottom - ActualHeight - 48;
     }
+
+    private void Aftale_Klik(object sender, RoutedEventArgs e) => Aftale?.Invoke();
+
+    private void Opgave_Klik(object sender, RoutedEventArgs e) => Opgave?.Invoke();
+
+    private void Kopier_Klik(object sender, RoutedEventArgs e) => Kopier?.Invoke();
 
     private void Pause_Klik(object sender, RoutedEventArgs e)
     {

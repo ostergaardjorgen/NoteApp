@@ -78,6 +78,36 @@
                  Foreground="{DynamicResource Tekst}" MaxWidth="460"
                  TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" />
 
+      <!-- ============ GOER NOGET VED DET, DER LIGE BLEV SAGT ============
+
+           HELE POINTEN MED VAAGEORDET ER, AT MAN STAAR I ET ANDET PROGRAM.
+           Boblen er dét, man ser - bjaelken nederst i appens eget vindue kan
+           man netop ikke se. Laa genvejene kun dér, skulle man hente appen
+           frem for at bruge dem, og saa er man alligevel gaaet vaek fra det,
+           man lavede.
+
+           De kommer foerst frem, NAAR DER ER EN TEKST. Boblen staar ogsaa,
+           mens der lyttes og mens der skrives ud, og tre knapper til noget,
+           der ikke findes endnu, er tre knapper, der ikke virker.
+
+           SMALLE KNAPPER MED KORTE NAVNE. Boblen ligger oven paa det, man
+           sidder og laver, og hver pixel, den vokser, er taget fra noget
+           andet. -->
+      <StackPanel x:Name="Genveje" Orientation="Horizontal" Visibility="Collapsed"
+                  VerticalAlignment="Center" Margin="14,0,0,0">
+        <Button x:Name="AftaleKnap" Click="Aftale_Klik" Padding="10,5" FontSize="12"
+                Content="{i18n:Oversat noter.til_aftale}"
+                ToolTip="{i18n:Oversat noter.til_aftale_hjaelp}" />
+        <Button x:Name="OpgaveKnap" Click="Opgave_Klik" Padding="10,5" FontSize="12"
+                Margin="6,0,0,0"
+                Content="{i18n:Oversat noter.til_opgave}"
+                ToolTip="{i18n:Oversat noter.til_opgave_hjaelp}" />
+        <Button x:Name="KopierKnap" Click="Kopier_Klik" Padding="10,5" FontSize="12"
+                Margin="6,0,0,0"
+                Content="{i18n:Oversat noter.kopier}"
+                ToolTip="{i18n:Oversat noter.kopier_igen}" />
+      </StackPanel>
+
       <!-- ============ PAUSE OG START ============
 
            Herfra kan lytningen slaas fra uden at finde appen frem. Det er dét,

@@ -1455,6 +1455,11 @@ public partial class MainWindow : Window
             k.Visibility = v;
             k.IsEnabled = vis;
         }
+
+        // BOBLEN OGSAA. Den er dét, man ser, naar man staar i et andet
+        // program - og saa skal de to sige det samme.
+        try { _boble?.VisGenveje(vis); }
+        catch (Exception) { /* En boble, der ikke kan tegnes, maa ikke stoppe noget. */ }
     }
 
     /// <summary>
@@ -1607,8 +1612,16 @@ public partial class MainWindow : Window
                     : Visibility.Collapsed;
             }));
 
+            // DE SAMME TRE HANDLINGER SOM PAA BJAELKEN. Boblen er dét, man
+            // ser, naar man staar i et andet program; bjaelken kan man netop
+            // ikke se derfra.
+            _boble.Aftale = () => Dispatcher.BeginInvoke(new Action(() => DiktatAftale_Klik(this, new RoutedEventArgs())));
+            _boble.Opgave = () => Dispatcher.BeginInvoke(new Action(() => DiktatOpgave_Klik(this, new RoutedEventArgs())));
+            _boble.Kopier = () => Dispatcher.BeginInvoke(new Action(() => DiktatKopier_Klik(this, new RoutedEventArgs())));
+
             _boble.VisLytning(Core.AppSettings.Current.VaageordTil);
             _boble.Vis(besked, pulser, skjulEfter);
+            _boble.VisGenveje(_sidsteDiktat is { Tekst.Length: > 0 });
         }
         catch (Exception)
         {
