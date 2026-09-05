@@ -36,12 +36,17 @@ indeholder ingen ord at lede i.
 En optagelse kan lægges i en mappe — en kunde, et projekt. Træk den hen på
 mappen i træet, eller brug **Flyt til mappe**.
 
+Mapperne står øverst i træet, hver for sig: «Møder», «Webinarer» og dem, du
+selv har lavet. Skal en optagelse ud af sin mappe igen, så slip den ved siden
+af træet.
+
 Det er et felt, ikke en rigtig mappe på disken. Derfor kan en optagelse flyttes,
 uden at dokumenter, der peger på den, holder op med at finde den.
 
 ## Arkiv
 
-Et møde, der er helt færdigbehandlet, kan trækkes ned i **Arkiv**. Så bliver
-listen forrest ved kun at vise det, der stadig mangler noget.
+Et møde, der er helt færdigbehandlet, kan trækkes ned i **Arkiv**, som står
+nederst blandt mapperne. Så bliver listen forrest ved kun at vise det, der
+stadig mangler noget. Et slip ved siden af træet henter det frem igen.
 
 Arkivet er ikke en papirkurv. Intet slettes.

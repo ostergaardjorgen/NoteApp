@@ -47,6 +47,16 @@
                        Foreground="{DynamicResource TekstMeget}"
                        Text="{i18n:Oversat settingsview.udseende_forklaring}" />
 
+            <!-- TIPSENE HOERER TIL HER. Krydset paa baandet i Cockpittet
+                 slaar dem fra, og teksten paa krydset lover, at man kan slaa
+                 dem til igen under Indstillinger. Det loefte skal kunne
+                 holdes - ellers er baandet noget, man slaar fra een gang og
+                 aldrig faar tilbage. -->
+            <CheckBox x:Name="TipsTil" Margin="0,14,0,0" Click="Tips_Klik"
+                      Content="{i18n:Oversat settingsview.tips_til}" />
+            <TextBlock Style="{StaticResource Underskrift}" Margin="24,4,0,0" TextWrapping="Wrap"
+                       Text="{i18n:Oversat settingsview.tips_til_under}" />
+
             <StackPanel Orientation="Horizontal" Margin="0,14,0,0">
               <RadioButton x:Name="TemaFoelg" GroupName="Tema" Style="{StaticResource Fanevalg}"
                            Content="{i18n:Oversat settingsview.tema_foelg}" Checked="Tema_Valgt" />

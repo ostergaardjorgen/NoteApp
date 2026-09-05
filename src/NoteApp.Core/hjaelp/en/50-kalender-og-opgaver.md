@@ -9,6 +9,25 @@ The calendar works **without an account anywhere**. It is not a stopgap: the
 app's own calendar is the real calendar, and you can always create events
 here.
 
+## The whole list, not just the nearest ones
+
+The pane is a reminder of what is about to happen. It shows the **25 nearest**
+events, and the task pane shows the open tasks. There is still a ceiling — a
+list of two hundred cannot be skimmed.
+
+At the bottom of each pane stand **Show all events** and **Show all tasks**.
+They open a window with the whole list, grouped by month, and with a search
+field that has focus from the start. More words means they must all match:
+«meeting tina» finds the meeting with Tina and not everything called meeting.
+
+The task window **also shows the completed ones**. The pane in the Cockpit
+answers «what do I have to do»; the window answers «what have I had», and
+there a task ticked off the day before yesterday is not noise — it is the
+answer.
+
+The two buttons stay fixed at the bottom and do not scroll with the list. You
+should not have to reach the bottom of a list to get to a longer list.
+
 ## Automatic recording
 
 Open an event and tick **Start the recording automatically**. Then it begins
@@ -23,6 +42,53 @@ If the meeting moves in the calendar, the recording moves with it.
 
 You can also set meeting type, folder and language on the event. Then nothing
 has to be answered while the meeting is starting.
+
+## Your own order for the tasks
+
+To begin with, the list sorts itself: overdue first, then today, this week,
+later, and last the ones without a deadline. Within each group by priority and
+then by deadline.
+
+Drag a task up or down with the mouse, and from then on **your** order is the
+one that counts — whatever the deadline and priority say. A line across shows
+where the task will land while you drag. The ticked-off ones still stay at the
+bottom.
+
+That is the point of it: «what do I want to take first» is not a question a
+date can answer.
+
+## Priority and deadline are not the same
+
+The ring on the task card is the priority. Click it and a menu opens with the
+four options: none, 1, 2 or 3, where 1 is the most important.
+
+The deadline gives the card its colour and answers «what should I do now». The
+priority answers «what matters most when I have time for one of them». A task
+with priority 1 three weeks away is not urgent today, and a priority 3 that
+should have been done last Monday is.
+
+The priority is HeyPia's own field and is not sent to Google.
+
+The deadline is shown shortened on the card — «today», «tomorrow»,
+«Thursday», «16 Sep». The full date, the full title and the full task text are
+in the bubble when the mouse rests on the card.
+
+## Delete an event or a task
+
+Both can be deleted, and in both cases it also reaches Google.
+
+If you delete an event fetched from Google Calendar, it is deleted there too.
+Before, it only disappeared here and came back at the next fetch — and that is
+not a deletion, it is a delay. If you have recorded the meeting, the recording
+stays.
+
+A task is deleted from the button at the far left in the task window. It is
+red, it stands with «Close» between it and «Save and close», and you are asked
+first: the text, the deadline and the way back to the place in the transcript
+go with it. If the task came from Google Tasks, it is deleted there too.
+
+The deletion happens at Google first and here afterwards. If it goes wrong out
+there, it is still here, and you can try again.
 
 ## Google Calendar
 

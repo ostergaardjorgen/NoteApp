@@ -12,16 +12,24 @@ kode**, der kan sende en lydfil nogen steder hen.
 Det er et designvalg, ikke en begrænsning, der venter på at blive ophævet.
 Talegenkendelse i skyen ville være hurtigere, og det er fravalgt.
 
-## Det ene, der sendes
+## Grænsen går ved transkriptionen
 
-Skal der laves et dokument, sendes transkriptionens **tekst** til Mistral AI —
-et fransk selskab, underlagt GDPR direkte. Appen kan kun kalde det europæiske
-endepunkt; det er spærret i koden, ikke en indstilling.
+Optagelsen og udskriften sker her på maskinen. De virker uden nøgle og uden
+net. Alt derefter sker hos leverandøren: dokumenterne, den korte opsummering
+og dikteringen.
+
+Det, der sendes, er transkriptionens **tekst** — til Mistral AI, et fransk
+selskab, underlagt GDPR direkte. Appen kan kun kalde det europæiske endepunkt;
+det er spærret i koden, ikke en indstilling.
 
 Under **Compliance** står hver eneste afsendelse: tidspunkt, adresse, model,
 antal tegn, pris og en kontrolsum. Selve teksten gemmes ikke — den ligger
 allerede ved mødet, og en kopi mere ville være endnu et sted, den kunne slippe
 ud fra.
+
+Grænsen koster to ting, og de skal siges ligeud. Uden en nøgle kan appen kun
+optage og skrive ud. Og uden forbindelse — i et tog, i et mødelokale uden net
+— får du teksten og intet andet.
 
 ## Derfor betyder det noget, at lyden bliver hos dig
 
@@ -53,7 +61,10 @@ Det ændrer ikke noget for mødedeltagerne. Deres lyd bliver på maskinen, og fr
 et møde sendes der udelukkende transkription. Forskellen er, hvem der har
 valgt: du har trykket, de har ikke.
 
-Dikteringen kan slås fra under **Indstillinger → Diktering**. Er den fra,
+Det samme gælder vågeordet. Siger du «Hej Pia» og taler videre, er det din
+egen stemme og dine egne sekunder, der sendes til udskrift — ikke andres.
+
+Dikteringen kan slås fra under **Diktering → Indstillinger**. Er den fra,
 forlader ingen lyd overhovedet maskinen.
 
 ## Det, du ikke skal sige

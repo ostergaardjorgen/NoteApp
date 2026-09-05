@@ -36,12 +36,18 @@ its own holds no words to look through.
 A recording can be put in a folder — a client, a project. Drag it onto the
 folder in the tree, or use **Move to folder**.
 
+The folders stand at the top of the tree, each on its own — the one for
+meetings, the one for webinars, and any others you have made. To take a
+recording back out of its folder, drop it beside the tree.
+
 It is a field, not a real folder on disk. That is why a recording can be moved
 without documents that point to it losing track of it.
 
 ## Archive
 
-A meeting that is completely finished can be dragged down into **Archive**.
-That keeps the list at the front showing only what still needs something.
+A meeting that is completely finished can be dragged down into **Archive**,
+which sits at the bottom among the folders. That keeps the list at the front
+showing only what still needs something. A drop beside the tree brings it back
+out again.
 
 The archive is not a wastebasket. Nothing is deleted.

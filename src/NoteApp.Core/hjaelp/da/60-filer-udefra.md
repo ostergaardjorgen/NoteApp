@@ -8,8 +8,8 @@ enhver anden optagelse.
 ## To veje ind
 
 - **Knappen** ved siden af «Ny mappe» på Optagelser.
-- **Træk filen ind i listen** fra Stifinder. Slipper du den på en folder,
-  lander den i den folder.
+- **Træk filen ind i træet** fra Stifinder. Du kan slippe den hvor som helst;
+  slipper du den på en mappe, lander den i den mappe.
 
 Der læses `.m4a`, `.mp3`, `.wav`, `.aac`, `.mp4`, `.wma` og `.flac`.
 
@@ -27,7 +27,7 @@ Alt står under den samme taler, uanset hvor mange der var med, og det kan ikke
 skilles ad bagefter.
 
 Det står tre steder, så det ikke skal opdages: på optagelsen i træet, øverst
-på udskriften, og som et eget ikon i listen.
+på udskriften, og som et eget ikon i træet.
 
 ## Overvågede mapper
 

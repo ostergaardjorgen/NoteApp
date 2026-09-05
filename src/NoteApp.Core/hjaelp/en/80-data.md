@@ -12,16 +12,24 @@ The recording is made locally, and Whisper transcribes it locally. The app has
 It is a design choice, not a limitation waiting to be lifted. Speech
 recognition in the cloud would be faster, and it has been rejected.
 
-## The one thing that is sent
+## The line runs at the transcript
 
-If a document is to be made, the transcript's **text** is sent to Mistral AI —
-a French company, subject to the GDPR directly. The app can only call the
-European endpoint; that is locked in the code, not a setting.
+The recording and the transcription happen here on the machine. They work
+without a key and without a connection. Everything after that happens at the
+supplier: the documents, the short summary and the dictation.
+
+What is sent is the transcript's **text** — to Mistral AI, a French company,
+subject to the GDPR directly. The app can only call the European endpoint;
+that is locked in the code, not a setting.
 
 Under **Compliance** every single transmission is listed: time, address,
 model, number of characters, price and a checksum. The text itself is not
 stored — it already sits with the meeting, and one more copy would be one more
 place it could slip out from.
+
+The line costs two things, and they should be said plainly. Without a key the
+app can only record and transcribe. And without a connection — on a train, in
+a meeting room with no network — you get the text and nothing else.
 
 ## Why it matters that the audio stays with you
 
@@ -54,7 +62,11 @@ Nothing changes for the people in the meeting. Their audio stays on the
 machine, and from a meeting only the transcript is ever sent. The difference is
 who chose: you pressed, they did not.
 
-Dictation can be switched off under **Settings → Dictation**. With it off, no
+The same goes for the wake word. If you say «Hey Pia» and carry on speaking,
+it is your own voice and your own seconds that are sent to be written out —
+not anyone else's.
+
+Dictation can be switched off under **Dictation → Settings**. With it off, no
 audio leaves the machine at all.
 
 ## What you should not say

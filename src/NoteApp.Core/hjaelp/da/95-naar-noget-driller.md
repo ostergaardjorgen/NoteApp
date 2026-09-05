@@ -43,10 +43,41 @@ synkroniseringsikonet i kalenderens hoved.
 Står der en fejl under ikonet, er forbindelsen holdt op med at virke. Gå til
 **Indstillinger → Integrationer** og forbind igen.
 
+## Vågeordet svarer ikke
+
+Appen sammenligner det, den hører, med de bogstaver, der står på knappen. Har
+du ikke lært den din udtale, kan den ramme skævt.
+
+Gå til **Diktering → Kommandoer** og sig det valgte ord tre gange under
+knappen. Har du siden skiftet mellem «Hej Pia» og «Hey Pia», skal du træne
+igen — det gamle ord stjæler ellers sikkerhed fra det, du nu siger.
+
+Under et almindeligt møde lytter den ikke. Dér er mikrofonen i brug. Under et
+webinar gør den, for et webinar optager højttaleren og ikke din mikrofon.
+
+## En aftale længere ude står ikke i kalenderruden
+
+Ruden viser de femogtyve nærmeste. Er der mere, ligger det bag **Vis alle
+aftaler** nederst i ruden, hvor hele kalenderen står grupperet efter måned og
+kan søges igennem.
+
+## En opgave, jeg har krydset af, er væk
+
+Den er væk fra Cockpittet dagen efter — ruden svarer på, hvad du skal gøre nu.
+
+**Vis alle opgaver** nederst i ruden viser også de færdige. Dér er en afkrydset
+opgave fra i forgårs ikke støj; den er svaret.
+
+## Opgaverne sorterer ikke længere efter frist
+
+Så har du trukket en opgave op eller ned med musen. Fra første træk er det din
+rækkefølge, der gælder, uanset frist og prioritet — det er hele meningen med
+at kunne trække.
+
 ## Der kan ikke laves dokumenter
 
 API-nøglen til sprogmodellen er ikke sat op. Uden den kan appen optage og
-skrive ud, men ikke lave dokumenter.
+skrive ud, men hverken lave dokumenter, den korte opsummering eller diktere.
 
 Gå til **AI-modeller**. Der står de fem minutter, det tager.
 

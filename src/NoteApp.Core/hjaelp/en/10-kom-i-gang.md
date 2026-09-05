@@ -40,12 +40,45 @@ search use.
 ## 4. Make the document
 
 Press **Create document** above the transcript and choose a meeting type:
-minutes, a task list, or
-one you have made yourself.
+minutes, a task list, or one you have made yourself. The button sits next to
+the text, so there is no doubt which recording the document is made from.
 
-That is the one step where the text is sent out of the house — to a language
-model in Europe. The audio stays put. Read more under **Where your data
-goes**.
+That is the step where the text is sent out of the house — to a language model
+in Europe. The audio stays put. Read more under **Where your data goes**.
+
+## Speak instead of typing
+
+If you are not recording a meeting but simply want something written down,
+hold the shortcut key down and speak. Let go, and it is transcribed and placed
+where you were working.
+
+Everything you dictate is saved as a note under **Dictation → Notes**. That
+way it is not lost because you happened to copy something else afterwards. The
+notes are grouped in periods — today, this week, this month, this year —
+because you look for a dictation by «when did I say it», not by «where did I
+put it».
+
+As soon as the text is ready, three buttons appear: **Appointment**, **Task**
+and **Copy**. They are in two places — in the bar at the bottom of the app's
+own window, and in the small bubble that sits on top of the program you are
+working in. That is deliberate: the whole point of dictating is that you are
+somewhere else, and a shortcut you have to bring the app forward to use is not
+a shortcut.
+
+Say «call Paludan about the budget before Friday» and press **Task** — and it
+is on the list in the Cockpit. The window opens with the text in it, and you
+set the time, the deadline and the priority yourself. A time said out loud is
+rarely something a machine should guess at.
+
+## «Did you know that …»
+
+At the bottom of the Cockpit there is a band with one tip at a time and a link
+that opens the handbook where the matter is set out properly. It changes every
+twelve seconds.
+
+It is there because the handbook gets read on the day something goes wrong —
+that is, not on the day it would have been useful to know. The cross on the
+right removes the band.
 
 ## Always say that you are recording
 

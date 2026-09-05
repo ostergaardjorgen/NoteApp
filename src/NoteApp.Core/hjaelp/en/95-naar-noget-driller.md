@@ -43,12 +43,47 @@ press the sync icon in the calendar's header.
 If an error is shown under the icon, the connection has stopped working. Go to
 **Settings → Integrations** and connect again.
 
+## The wake word does not answer
+
+The app compares what it hears with the letters on the button. If you have not
+taught it your pronunciation, it can miss.
+
+Go to **Dictation → Commands** and say the chosen word three times below the
+button. If you have since switched between «Hej Pia» and «Hey Pia», you have
+to train again — otherwise the old word steals confidence from the one you now
+say.
+
+During an ordinary meeting it does not listen. There the microphone is in use.
+During a webinar it does, because a webinar records the speaker and not your
+microphone.
+
+## An event further out is not in the calendar pane
+
+The pane shows the twenty-five nearest ones. Anything beyond that sits behind
+**Show all events** at the bottom of the pane, where the whole calendar stands
+grouped by month and can be searched.
+
+## A task I ticked off has gone
+
+It leaves the Cockpit the next day — the pane answers what you have to do now.
+
+**Show all tasks** at the bottom of the pane also shows the completed ones.
+There a task ticked off the day before yesterday is not noise; it is the
+answer.
+
+## The tasks no longer sort by deadline
+
+Then you have dragged a task up or down with the mouse. From the first drag,
+your order is the one that counts, whatever the deadline and priority say —
+that is the whole point of being able to drag.
+
 ## Documents cannot be made
 
 The API key for the language model is not set up. Without it the app can
-record and transcribe, but not make documents.
+record and transcribe, but neither make documents, nor the short summary, nor
+dictate.
 
-Go to **AI models**. It says there how the five minutes are spent.
+Go to **AI models**. It says there how long the five minutes take.
 
 ## The transcription takes a very long time
 

@@ -8,8 +8,8 @@ treated like any other recording.
 ## Two ways in
 
 - **The button** next to «New folder» on Recordings.
-- **Drag the file into the list** from Explorer. Drop it on a folder and it
-  lands in that folder.
+- **Drag the file into the tree** from Explorer. You can drop it anywhere;
+  drop it on a folder and it lands in that folder.
 
 `.m4a`, `.mp3`, `.wav`, `.aac`, `.mp4`, `.wma` and `.flac` can be read.
 
@@ -28,7 +28,7 @@ people took part, and it cannot be separated afterwards.
 
 It is stated in three places, so it is not something to discover: on the
 recording in the tree, at the top of the transcript, and as its own icon in
-the list.
+the tree.
 
 ## Watched folders
 

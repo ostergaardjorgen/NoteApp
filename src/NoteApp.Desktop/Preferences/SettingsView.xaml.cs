@@ -216,7 +216,35 @@ public partial class SettingsView : UserControl
         TemaMoerkt.IsChecked = valg == Temavalg.Moerkt;
         TemaFoelg.IsChecked = valg == Temavalg.FoelgWindows;
 
+        TipsTil.IsChecked = !AppSettings.Current.TipsSlaaetFra;
+
         _saetterTema = false;
+    }
+
+    /// <summary>
+    /// Slår tipsbåndet i Cockpittet til eller fra.
+    /// </summary>
+    /// <remarks>
+    /// KRYDSET PÅ BÅNDET LOVEDE DET HER. Der stod «du kan slå dem til igen
+    /// under Indstillinger», og der var ingen kontakt — så båndet var noget,
+    /// man slog fra én gang og aldrig fik tilbage. Et løfte i en hjælpetekst
+    /// er lige så bindende som en knap.
+    ///
+    /// Ændringen slår igennem, næste gang Cockpittet tegnes. Båndet læser
+    /// indstillingen, når skærmen indlæses, og en skærm, man ikke står på,
+    /// skal ikke tegnes om for en hakket boks.
+    /// </remarks>
+    private void Tips_Klik(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            AppSettings.Current.TipsSlaaetFra = TipsTil.IsChecked != true;
+            AppSettings.Current.Save();
+        }
+        catch (Exception)
+        {
+            // Kan den ikke gemmes, gaelder valget resten af sessionen.
+        }
     }
 
 
