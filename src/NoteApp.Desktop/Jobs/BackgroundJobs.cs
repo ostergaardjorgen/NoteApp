@@ -190,6 +190,14 @@ public static class BackgroundJobs
                 $"{r.TokensInd} tokens sendt, {r.TokensUd} modtaget · €{r.PrisEur:0.0000}",
                 Udfald.Fuldført, model.Navn, odt, r.Forloebet.TotalSeconds,
                 kilde: skabelonInfo.Id);
+
+            // OG I OPTAGELSENS EGEN. Linjen ovenfor er driftslog - hvor lang
+            // tid det tog, hvad det kostede. Den her er sagsmappen: hvad der
+            // er sket med netop det her moede. Se Optagelseshistorik.
+            Optagelseshistorik.Skriv(mødeMappe, Optagelsesskift.Dokument,
+                $"Dokument oprettet: {skabelonInfo.Title}",
+                til: skabelon.Name);
+
             Notifikationer.Meld();
 
             StopUret();

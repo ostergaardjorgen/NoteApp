@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 using System.Text.Json;
 
 namespace NoteApp.Core;
@@ -132,17 +132,41 @@ public static class Opgavelager
 
         var n = 0;
 
-        foreach (var ny in hentede)
+        // ============ EN NY OPGAVE SKAL IKKE FORSVINDE ============
+        //
+        // Har man selv sat raekkefoelgen, har alt andet et tal fra 1 og opad.
+        // En hentet opgave uden tal ville faa nul og lande oeverst - hvilket
+        // er rigtigt, men de ville alle sammen faa nul og altsaa staa i en
+        // klump uden indbyrdes orden. Her taelles der nedad i stedet, saa
+        // den nyeste hentning staar oeverst og i den raekkefoelge, den kom.
+        var plads = AppSettings.Current.OpgaverManueltSorteret
+            ? alle.Select(o => o.Raekkefoelge).DefaultIfEmpty(1).Min() - 1
+            : 0;
+
+        foreach (var nyOpgave in hentede)
         {
-            if (gamle.TryGetValue(ny.FremmedId, out var gammel))
+            if (gamle.TryGetValue(nyOpgave.FremmedId, out var gammel))
             {
                 // Appens egne felter. De findes ikke hos Google og ville
                 // ellers blive nulstillet ved hver eneste hentning.
-                ny.Prioritet = gammel.Prioritet;
-                ny.Ejer = gammel.Ejer;
+                nyOpgave.Prioritet = gammel.Prioritet;
+                nyOpgave.Ejer = gammel.Ejer;
+
+                // ============ OGSAA PLADSEN I LISTEN ============
+                //
+                // Den stod ikke her, og foelgen var, at hver eneste hentning
+                // nulstillede den haandsatte raekkefoelge paa ALLE opgaver fra
+                // Google: de fik nul og sprang til tops. Maalt 05-09-2026 -
+                // to Google-opgaver uden frist laa oeverst over fire med
+                // frist, fordi nul er mindre end et.
+                nyOpgave.Raekkefoelge = gammel.Raekkefoelge;
+            }
+            else if (plads < 0)
+            {
+                nyOpgave.Raekkefoelge = plads--;
             }
 
-            alle.Add(ny);
+            alle.Add(nyOpgave);
             n++;
         }
 

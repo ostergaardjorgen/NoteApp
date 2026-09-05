@@ -1513,12 +1513,18 @@ public partial class TranscribeView : UserControl
     {
         // Konstruktoeren koerer foer felterne er sat op; RadioButton.Checked
         // fyrer under InitializeComponent. Samme faelde som i MainWindow.
-        if (Udskriftsfane is null || Dokumentrude is null) return;
+        if (Udskriftsfane is null || Dokumentrude is null || Historikfane is null) return;
 
         var dokumenter = FaneDokumenter.IsChecked == true;
+        var historik = FaneHistorik.IsChecked == true;
 
-        Udskriftsfane.Visibility = dokumenter ? Visibility.Collapsed : Visibility.Visible;
+        Udskriftsfane.Visibility = dokumenter || historik ? Visibility.Collapsed : Visibility.Visible;
         Dokumentrude.Visibility = dokumenter ? Visibility.Visible : Visibility.Collapsed;
+        Historikfane.Visibility = historik ? Visibility.Visible : Visibility.Collapsed;
+
+        // LAESES FORFRA HVER GANG. Et dokument kan vaere blevet faerdigt i
+        // baggrunden, mens man laeste udskriften.
+        if (historik) VisOptagelseshistorik();
 
         // LAESES FORFRA, HVER GANG MAN GAAR IND. Et dokument kan vaere blevet
         // faerdigt i baggrunden, siden man saa fanen sidst - jobbet koerer
@@ -1718,8 +1724,19 @@ public partial class TranscribeView : UserControl
             meta.Title = nyt;
             MeetingStore.Save(valgt.Mappe, meta);
 
+            Optagelseshistorik.Skriv(valgt.Mappe, Optagelsesskift.Omdoebt,
+                "Navnet blev ændret", fra: nu, til: nyt);
+
             var gemtMappe = valgt.Mappe;
             IndlaesOptagelser();
+
+            // ============ OGSAA I «SENESTE OPTAGELSER» ============
+            //
+            // Listen til hoejre laeser meeting.json forfra, men den blev ikke
+            // bedt om det. Foelgen var, at traeet sagde «Moede med Ibrar 2.
+            // sept» og listen ved siden af stadig «Moede 2. september» -
+            // samme optagelse, to navne, paa den samme skaerm. Set 05-09-2026.
+            VisSeneste();
 
             VaelgOptagelse(gemtMappe);
 
@@ -1730,6 +1747,75 @@ public partial class TranscribeView : UserControl
             Dialogs.AppDialog.Vis(Window.GetWindow(this), "Kunne ikke omdøbe", $"Navnet kunne ikke gemmes.\n\n{ex.Message}", Dialogs.Slags.Pas_paa);
         }
     }
+
+    // ==================== OPTAGELSENS EGEN HISTORIK ====================
+
+    /// <summary>Én linje i optagelsens historik, som skærmen viser den.</summary>
+    public sealed record Historikvisning(string Klokken, string Dato, string Hvad,
+                                         string Detaljer, System.Windows.Media.Brush Farve)
+    {
+        public Visibility Detaljervis =>
+            Detaljer.Length > 0 ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    /// <summary>
+    /// Fylder historikfanen — nyeste øverst.
+    /// </summary>
+    /// <remarks>
+    /// EN TOM HISTORIK ER IKKE EN FEJL. Optagelser fra før filen fandtes har
+    /// ingen linjer, og det skal der stå — ikke en tom rude, man tror er gået
+    /// i stykker.
+    /// </remarks>
+    private void VisOptagelseshistorik()
+    {
+        var liste = new List<Historikvisning>();
+
+        try
+        {
+            foreach (var s in Optagelseshistorik.Laes(Valgt?.Mappe))
+                liste.Add(new Historikvisning(
+                    s.Tid.LocalDateTime.ToString("HH:mm:ss"),
+                    s.Tid.LocalDateTime.ToString("dd-MM-yyyy"),
+                    s.Hvad,
+                    Detaljer(s),
+                    Temaskift.Pensel(Farve(s.Skift))));
+        }
+        catch (Exception)
+        {
+            // En historik, der ikke kan laeses, maa ikke tage fanen med sig.
+        }
+
+        Historikrude.ItemsSource = liste;
+
+        IngenHistorik.Visibility = liste.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    /// <summary>
+    /// Linjen under overskriften — «fra X til Y», eller bare det, der kom ud.
+    /// </summary>
+    private static string Detaljer(Optagelsesskridt s) =>
+        s.Fra.Length > 0 && s.Til.Length > 0 ? $"«{s.Fra}» → «{s.Til}»"
+        : s.Til.Length > 0 ? s.Til
+        : s.Fra;
+
+    /// <summary>
+    /// Striben i venstre kant — samme sprog som resten af appen.
+    /// </summary>
+    /// <remarks>
+    /// Blå er en handling, grøn er noget, der blev færdigt, gul er noget, man
+    /// selv har flyttet på, koral er noget, der forsvandt. Se
+    /// Design/farvekoder.md.
+    /// </remarks>
+    private static string Farve(Optagelsesskift skift) => skift switch
+    {
+        Optagelsesskift.Oprettet => "Accent",
+        Optagelsesskift.Transskriberet => "Godkendt",
+        Optagelsesskift.Dokument => "Dokument",
+        Optagelsesskift.Dokumentslettet => "Optager",
+        Optagelsesskift.Omdoebt => "Advarsel",
+        Optagelsesskift.Flyttet => "Advarsel",
+        _ => "PanelKant"
+    };
 
     // ------------------------------------------------------------- referatet
 
@@ -3043,6 +3129,12 @@ public partial class TranscribeView : UserControl
             // Moedemappen udledes af udskriftens sti - den ligger i mappen.
             // Valgt kan have skiftet, mens koerslen loeb.
             kilde: MeetingStore.Load(Path.GetDirectoryName(r.TextPath) ?? "")?.Id.ToString() ?? "");
+
+        Optagelseshistorik.Skriv(Path.GetDirectoryName(r.TextPath),
+            Optagelsesskift.Transskriberet, "Lyden blev skrevet ud som tekst",
+            til: $"{TimeSpan.FromSeconds(r.AudioSeconds):hh\\:mm\\:ss} lyd · "
+                 + Transcriber.LanguageName(r.DetectedLanguage));
+
         Notifikationer.Meld();
 
         // Den ene linje, der erstattede de fire store tal. Den siger, hvad man

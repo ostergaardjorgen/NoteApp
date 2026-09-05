@@ -165,7 +165,7 @@
                           Margin="0,0,0,5"
                           Opacity="{Binding Daempning}"
                           Tag="{Binding}" MouseLeftButtonUp="RetAftale_Klik"
-                          Cursor="Hand" ToolTip="{i18n:Oversat searchview.aabn_aftalen}">
+                          Cursor="Hand" ToolTip="{Binding Boble}">
                     <Grid>
                       <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="4" />
@@ -188,8 +188,9 @@
                       <StackPanel Grid.Column="1">
                         <TextBlock Text="{Binding Titel}" FontSize="12" TextWrapping="Wrap"
                                    Foreground="{DynamicResource Tekst}" />
-                        <TextBlock Text="{Binding Under}" FontSize="10.5" Margin="0,3,0,0"
-                                   TextWrapping="Wrap" Foreground="{DynamicResource TekstMeget}" />
+                        <!-- Kilden stod her - «Google» paa hver eneste
+                             linje. Den er den samme paa dem alle sammen, og
+                             saa siger den ingenting. Den staar i boblen. -->
                       </StackPanel>
                       </Grid>
                     </Grid>
@@ -778,7 +779,7 @@
                 PreviewMouseMove="Opgave_Musbevaegelse"
                 DragOver="Opgave_TraekkesHen" DragLeave="Opgave_TraekForbi"
                 Drop="Opgave_Sluppet"
-                Cursor="Hand" ToolTip="{i18n:Oversat searchview.aabn_opgaven}">
+                Cursor="Hand" ToolTip="{Binding Boble}">
                 <Grid>
                 <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="4" />
@@ -844,9 +845,15 @@
                 </Button.Template>
                 </Button>
 
-                <TextBlock Text="{Binding Under}" FontSize="11" TextWrapping="Wrap"
-                Visibility="{Binding Kildevis}"
-                Foreground="{DynamicResource TekstMeget}" />
+                <!-- HER STOD HERKOMSTEN SOM TEKST - «Google Tasks · Mine
+                     opgaver», «Skrevet i haanden». Det er en oplysning, man
+                     laeser een gang og aldrig igen, og den kostede en linje
+                     paa hvert eneste kort i en smal spalte. Den staar nu i
+                     boblen, naar musen hviler paa kortet.
+
+                     LINKET BLIVER. Det er ikke en oplysning - det er vejen
+                     tilbage til den saetning, opgaven kom af, og den findes
+                     ikke andre steder i appen. -->
                 </WrapPanel>
                 </StackPanel>
 
@@ -857,15 +864,45 @@
                 Foreground="{Binding Fristfarve}" />
                 </Border>
 
-                <ComboBox Grid.Column="3" x:Name="Pri" Width="62" Margin="8,0,0,0"
-                FontSize="11" VerticalAlignment="Top"
-                SelectedIndex="{Binding Prioritetsvalg, Mode=TwoWay}"
+                <!-- ============ PRIORITETEN ER EN RING, IKKE EN RULLELISTE ============
+
+                     Rullelisten var toogtres pixels bred plus en pil, og
+                     spalten er smal: den tog plads fra det, kortet handler om.
+                     Og den viste et VALG, hvor der kun er fire muligheder -
+                     en rulleliste til fire ting er en menu til noget, der
+                     kunne vaere et tryk.
+
+                     Nu en ring med tallet i. Et klik taeller frem: - 1 2 3 og
+                     forfra. Ringen har fristens farve, den samme som striben
+                     i venstre kant, saa kortet siger det samme to steder i
+                     stedet for at sige to ting.
+
+                     DEN SKAL VAERE EN KNAP. Kortet under den aabner opgaven
+                     ved klik, og Opgave_Aabn springer over klik, der kommer
+                     fra en ButtonBase - se listen dér. En Border med et
+                     MouseDown ville have aabnet opgaven i stedet. -->
+                <Button Grid.Column="3" Margin="10,0,0,0" VerticalAlignment="Top"
+                Width="30" Height="30" Padding="0" Cursor="Hand"
+                Tag="{Binding}" Click="Prioritet_Klik"
                 ToolTip="{i18n:Oversat searchview.prioritet_1_er_vigtigst}">
-                <ComboBoxItem Content="–" />
-                <ComboBoxItem Content="1" />
-                <ComboBoxItem Content="2" />
-                <ComboBoxItem Content="3" />
-                </ComboBox>
+                <Button.Template>
+                <ControlTemplate TargetType="Button">
+                <Grid>
+                <Ellipse x:Name="ring" Stroke="{Binding Farve}" StrokeThickness="2"
+                Fill="Transparent" />
+                <TextBlock Text="{Binding Prioritetstekst}" FontSize="12.5"
+                FontWeight="SemiBold" HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Foreground="{DynamicResource Tekst}" />
+                </Grid>
+                <ControlTemplate.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="ring" Property="Fill" Value="{DynamicResource Svaev}" />
+                </Trigger>
+                </ControlTemplate.Triggers>
+                </ControlTemplate>
+                </Button.Template>
+                </Button>
                 </Grid>
                 </Grid>
                 </Border>

@@ -122,9 +122,39 @@ public partial class OpgaveWindow : Window
         }
         else
         {
+            // ============ APPEN SKAL KUNNE BRUGES UDEN GOOGLE ============
+            //
+            // Hakket stod her ALTID. Var Google Tasks ikke forbundet, kunne
+            // man saette det alligevel - og saa fik man foerst besked ved
+            // «Gem og luk»: «Google Tasks er ikke forbundet. Opgaven er gemt
+            // her.» Et valg, der ikke kan lade sig goere, er ikke et valg;
+            // det er en blindgyde med en forklaring bagefter.
+            //
+            // Aftalevinduet har gjort det rigtigt hele tiden - se
+            // AftaleWindow.VisGooglehakket. Nu goer det her ogsaa: er der
+            // ikke forbundet, staar der ingenting om Google.
+            var kan = false;
+
+            try
+            {
+                kan = Googleklient.ErSatOp
+                   && Integrationsfiler.Hent(Googleopgaver.Id).ErForbundet;
+            }
+            catch (Exception)
+            {
+                // Kan opsaetningen ikke laeses, er svaret «nej». En opgave
+                // skal kunne skrives ned, ogsaa naar integrationen driller.
+            }
+
+            TilGoogle.Visibility = kan
+                ? System.Windows.Visibility.Visible
+                : System.Windows.Visibility.Collapsed;
+
             Googlenote.Text = NoteApp.Core.Sprog.T("opgavewindow.saet_hakket_hvis_ogsaa_i_google");
 
-            Googlenote.Visibility = System.Windows.Visibility.Visible;
+            Googlenote.Visibility = kan
+                ? System.Windows.Visibility.Visible
+                : System.Windows.Visibility.Collapsed;
         }
 
         if (ny)

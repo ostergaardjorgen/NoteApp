@@ -439,7 +439,23 @@
                    «Udskrift». Set 04-09-2026. -->
               <RadioButton x:Name="FaneDokumenter" GroupName="indholdsfane"
                            Checked="Fane_Skiftet" Style="{StaticResource Fanevalg}"
-                           Content="{i18n:Oversat transcribeview.dokumenter}" />
+                           Content="{i18n:Oversat transcribeview.dokumenter}" Margin="0,0,8,0" />
+
+              <!-- ============ HVAD DER ER SKET MED DEN HER ============
+
+                   Den globale historik under «Historik» i menuen er et
+                   driftslog: hvad appen har lavet, hvor laenge det tog, og om
+                   det gik galt. Den her er en sagsmappe for eet moede - hvad
+                   det hed foer, hvornaar det blev skrevet ud, hvilke
+                   dokumenter der kom ud af det.
+
+                   To spoergsmaal, to lister. Den globale kunne ikke bruges:
+                   «Dokument oprettet» peger sin sti paa DOKUMENTETS mappe og
+                   ikke paa optagelsens, og et navneskift blev slet ikke
+                   skrevet ned. Der var ingen noegle at samle paa. -->
+              <RadioButton x:Name="FaneHistorik" GroupName="indholdsfane"
+                           Checked="Fane_Skiftet" Style="{StaticResource Fanevalg}"
+                           Content="{i18n:Oversat transcribeview.historik}" />
             </StackPanel>
           </Border>
 
@@ -575,6 +591,65 @@
           <!-- Dokumenterne fra den samme optagelse. Bygget een gang og
                fyldt op ved hvert skift af optagelse - se Vis(). -->
           <local:Dokumentrude x:Name="Dokumentrude" Grid.Row="1" Visibility="Collapsed" />
+
+          <!-- ============ OPTAGELSENS EGEN HISTORIK ============
+               Nyeste oeverst. Tidspunktet staar i sin egen spalte med fast
+               bredde, saa linjerne flugter og kan skimmes lodret. -->
+          <Grid x:Name="Historikfane" Grid.Row="1" Visibility="Collapsed">
+            <ScrollViewer VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled"
+                          Padding="0,0,12,0">
+              <StackPanel Margin="20,16,20,20">
+
+                <TextBlock x:Name="IngenHistorik" Style="{StaticResource Underskrift}"
+                           TextWrapping="Wrap" LineHeight="21" Visibility="Collapsed"
+                           Text="{i18n:Oversat transcribeview.historik_tom}" />
+
+                <ItemsControl x:Name="Historikrude">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                      <Border Background="{DynamicResource Trykket}"
+                              BorderBrush="{DynamicResource PanelKant}"
+                              BorderThickness="1" CornerRadius="6" Margin="0,0,0,6">
+                        <Grid>
+                          <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="4" />
+                            <ColumnDefinition Width="*" />
+                          </Grid.ColumnDefinitions>
+
+                          <Border Grid.Column="0" Background="{Binding Farve}"
+                                  CornerRadius="5,0,0,5" />
+
+                          <Grid Grid.Column="1" Margin="14,11,14,11">
+                            <Grid.ColumnDefinitions>
+                              <ColumnDefinition Width="128" />
+                              <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0" Margin="0,0,14,0">
+                              <TextBlock Text="{Binding Klokken}" FontSize="13"
+                                         FontFamily="Consolas" FontWeight="SemiBold" />
+                              <TextBlock Text="{Binding Dato}" FontSize="11" Margin="0,2,0,0"
+                                         Foreground="{DynamicResource TekstMeget}" />
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="1">
+                              <TextBlock Text="{Binding Hvad}" FontSize="12.5"
+                                         TextWrapping="Wrap" />
+                              <TextBlock Text="{Binding Detaljer}" FontSize="11.5"
+                                         Margin="0,3,0,0" TextWrapping="Wrap"
+                                         Visibility="{Binding Detaljervis}"
+                                         Foreground="{DynamicResource TekstSvag}" />
+                            </StackPanel>
+                          </Grid>
+                        </Grid>
+                      </Border>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </StackPanel>
+            </ScrollViewer>
+          </Grid>
         </Grid>
       </Border>
 

@@ -521,6 +521,33 @@ public partial class SearchView : UserControl
         }
 
         /// <summary>
+        /// Det, der står i boblen, når musen hviler på aftalen.
+        /// </summary>
+        /// <remarks>
+        /// LINJEN UNDER TITLEN ER TAGET AF KORTET. Der stod «Google» på hver
+        /// eneste aftale — den samme tekst hele vejen ned, og en oplysning,
+        /// der er ens på alt, siger ingenting. Til gengæld står HELE titlen
+        /// her, og den er ofte klippet på kortet.
+        /// </remarks>
+        public string Boble
+        {
+            get
+            {
+                var linjer = new List<string> { _a.Titel };
+
+                var tid = _a.Start.LocalDateTime.ToString("dddd d. MMMM 'kl.' HH:mm");
+
+                var under = new List<string> { tid };
+                if (Under.Length > 0) under.Add(Under);
+
+                linjer.Add(string.Join("  ·  ", under));
+                linjer.Add("Klik for at åbne aftalen.");
+
+                return string.Join(Environment.NewLine + Environment.NewLine, linjer.Where(l => l.Length > 0));
+            }
+        }
+
+        /// <summary>
         /// Farven siger, hvor tæt den er på.
         ///
         /// Rød er i gang lige nu — det er dét, der skal handles på. Gul er
@@ -1150,6 +1177,17 @@ public partial class SearchView : UserControl
 
             return false;
         }
+    }
+
+    private void Prioritet_Klik(object sender, RoutedEventArgs e)
+    {
+        if (sender is not FrameworkElement { Tag: Opgavevisning v }) return;
+
+        v.NaestePrioritet();
+
+        // Listen tegnes om af _aendret inde i saetteren, saa ringen faar sit
+        // nye tal med det samme.
+        e.Handled = true;
     }
 
     // ==================== TRAEK EN OPGAVE PAA PLADS ====================
@@ -1952,6 +1990,57 @@ public sealed class Opgavevisning : System.ComponentModel.INotifyPropertyChanged
             _aendret();
         }
     }
+
+    /// <summary>
+    /// Det, der står i boblen, når musen hviler på kortet.
+    /// </summary>
+    /// <remarks>
+    /// KORTET VISER DET KORTE, BOBLEN DET HELE. Titlen er klippet til to
+    /// linjer på kortet, herkomsten er taget helt af, og fristen står som en
+    /// dato uden årstal. Alt det står her — sammen med det, kortet aldrig har
+    /// vist: hele opgaveteksten.
+    ///
+    /// Det er dét, en boble er til: mere om det, man peger på, uden at det
+    /// fylder, når man ikke peger.
+    /// </remarks>
+    public string Boble
+    {
+        get
+        {
+            var linjer = new List<string> { _r.Opgave.Visningsnavn };
+
+            if (_r.Opgave.HarMere) linjer.Add(_r.Opgave.Tekst.Trim());
+
+            var under = new List<string>();
+
+            if (Frist.Length > 0) under.Add(Frist);
+
+            if (_r.Opgave.Prioritet is >= 1 and <= 3)
+                under.Add($"prioritet {_r.Opgave.Prioritet}");
+
+            under.Add(Under);
+
+            linjer.Add(string.Join("  ·  ", under.Where(x => x.Length > 0)));
+            linjer.Add("Klik for at åbne opgaven. Træk for at flytte den i listen.");
+
+            return string.Join("\n\n", linjer.Where(l => l.Length > 0));
+        }
+    }
+
+    /// <summary>Tallet i ringen. Nul er «ikke sat» og vises som en tankestreg.</summary>
+    public string Prioritetstekst =>
+        _r.Opgave.Prioritet is >= 1 and <= 3 ? _r.Opgave.Prioritet.ToString() : "–";
+
+    /// <summary>
+    /// Tæller prioriteten frem — 1, 2, 3 og tilbage til «ikke sat».
+    /// </summary>
+    /// <remarks>
+    /// FIRE MULIGHEDER ER FOR FÅ TIL EN MENU. En rulleliste koster to klik og
+    /// toogtres pixels for et valg, man kan trykke sig igennem på ét. Og den
+    /// vej rundt kan man ikke komme til at vælge forkert uden at kunne rette
+    /// det med et klik mere.
+    /// </remarks>
+    public void NaestePrioritet() => Prioritetsvalg = (_r.Opgave.Prioritet + 1) % 4;
 
     public event System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
 
