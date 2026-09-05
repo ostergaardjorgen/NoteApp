@@ -1,4 +1,4 @@
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Threading;
 using NoteApp.Core;
@@ -139,15 +139,92 @@ public sealed class Tastehook : IDisposable
         // besked, og der er ingen maade at spoerge paa. Derfor saettes den ind
         // igen med jaevne mellemrum. Det koster ingenting, og alternativet er
         // en genvej, der holder op med at virke i stilhed.
+        //
+        // TYVE SEKUNDER OG IKKE TO MINUTTER. Vagten er den eneste vej tilbage,
+        // naar hooken er faldet ud, og to minutter er lang tid at staa i et
+        // andet program og holde en tast nede uden at der sker noget. Prisen
+        // er et SetWindowsHookEx hvert tyvende sekund, og det er ingenting.
         _vagt?.Stop();
         _vagt = new DispatcherTimer(DispatcherPriority.Background)
         {
-            Interval = TimeSpan.FromMinutes(2),
+            Interval = TimeSpan.FromSeconds(20),
         };
-        _vagt.Tick += (_, _) => { Fjern(); Saet(); };
+        _vagt.Tick += (_, _) => Efterse();
         _vagt.Start();
 
         return true;
+    }
+
+    /// <summary>Hvor mange gange hooken er faldet ud og sat ind igen.</summary>
+    public int Genoprettet { get; private set; }
+
+    /// <summary>
+    /// Sætter hooken ind igen — og skriver det ned, hvis den var væk.
+    /// </summary>
+    /// <remarks>
+    /// FØR STOD DER BARE «Fjern(); Saet();» HVER GANG. Så blev hooken
+    /// udskiftet hvert eneste tik, uanset om der fejlede noget, og der var
+    /// ingen måde at se, om den nogensinde HAVDE fejlet. Meldingen «jeg holdt
+    /// tasten nede i Word, og der skete ingenting» kunne derfor hverken
+    /// bekræftes eller afvises.
+    ///
+    /// Nu prøves den først af: <c>GetKeyState</c> på en tast, alle tastaturer
+    /// har. Svarer hooken ikke, er den væk, og så sættes den ind igen — og
+    /// linjen i historikken siger, at det skete.
+    ///
+    /// Der skrives kun, når noget ER galt. En linje hvert tyvende sekund om,
+    /// at alt er i orden, er en logfil, ingen læser.
+    /// </remarks>
+    private void Efterse()
+    {
+        if (_hook != IntPtr.Zero && Lever()) return;
+
+        var varDer = _hook != IntPtr.Zero;
+
+        Fjern();
+        var kom = Saet();
+
+        Genoprettet++;
+
+        try
+        {
+            Historik.Skriv(HaendelseType.Andet,
+                kom ? "Tastaturvagten blev sat ind igen"
+                    : "Tastaturvagten kunne ikke saettes ind igen",
+                varDer
+                    ? "Windows havde fjernet den. Genvejen virkede ikke i mellemtiden."
+                    : "Den var ikke sat. Genvejen virkede ikke i mellemtiden.",
+                kom ? Udfald.Fuldført : Udfald.SeEfter);
+        }
+        catch (Exception)
+        {
+            // Kan historikken ikke skrives, er hooken alligevel sat ind igen.
+        }
+    }
+
+    /// <summary>
+    /// Svarer hooken stadig?
+    /// </summary>
+    /// <remarks>
+    /// Der er ingen Windows-funktion, der kan spørge om en hook stadig
+    /// sidder. <c>GetKeyState</c> er det nærmeste: den går gennem den samme
+    /// kø, og svarer den ikke, er der noget galt med tastaturvejen.
+    ///
+    /// Den kan ikke afsløre alt — en hook, der lige er faldet ud, ser fin ud
+    /// et øjeblik. Derfor er tallet i <see cref="Genoprettet"/> også med: det
+    /// siger, hvor mange gange det ER sket.
+    /// </remarks>
+    private static bool Lever()
+    {
+        try
+        {
+            _ = GetKeyState(0x10);   // Shift. Findes på alle tastaturer.
+            return true;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
     }
 
     private bool Saet()

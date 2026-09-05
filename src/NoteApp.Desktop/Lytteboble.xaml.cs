@@ -1,4 +1,6 @@
-﻿using System.Windows;
+﻿using System.Runtime.InteropServices;
+using System.Windows;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
@@ -113,12 +115,18 @@ public partial class Lytteboble : Window
             Placer();
             Show();
         }
+        else
+        {
+            // OGSAA NAAR DEN ALLEREDE STAAR. Man kan have flyttet sig til en
+            // anden skaerm, siden den kom frem, og en boble, der bliver
+            // liggende paa den forrige, er lige saa vaek som ingen boble.
+            Placer();
+        }
 
-        // Topmost skal saettes IGEN ved hver visning. Et andet program, der
-        // ogsaa vil ligge oeverst, kan have skubbet os ned - og en boble bag
-        // et browservindue er det samme som ingen boble.
-        Topmost = false;
-        Topmost = true;
+        // Se Oeverst: et andet program, der ogsaa vil ligge oeverst, kan
+        // have skubbet os ned - og en boble bag et browservindue er det samme
+        // som ingen boble.
+        Oeverst();
 
         if (pulser) _puls?.Begin();
         else { _puls?.Stop(); Prik.Opacity = 1.0; }
@@ -171,15 +179,130 @@ public partial class Lytteboble : Window
     /// Og på musens skærm, ikke på den primære — den, der sidder med to
     /// skærme, arbejder på den ene ad gangen.
     /// </remarks>
+    /// <summary>
+    /// Lægger boblen midt for neden — på den skærm, man arbejder på.
+    /// </summary>
+    /// <remarks>
+    /// DEN LAA PAA DEN PRIMAERE SKAERM. <c>SystemParameters.WorkArea</c>
+    /// kender kun én skærm, og sad man på den anden, dukkede boblen op ovre
+    /// på den første — altså uden for det, man kiggede på. På to skærme
+    /// betød det i praksis, at der «ikke skete noget».
+    ///
+    /// Nu findes skærmen ud fra det vindue, man står i. Er der ingen — er
+    /// forgrundsvinduet lukket i samme øjeblik — bruges den primære, som før.
+    ///
+    /// Der regnes i PIXELS og tegnes i WPF-enheder. På en skærm med skalering
+    /// er de ikke det samme, og uden omregningen ville boblen ligge for langt
+    /// til højre og for langt nede, jo højere skaleringen var.
+    /// </remarks>
     private void Placer()
     {
         UpdateLayout();
 
-        var arbejde = SystemParameters.WorkArea;
+        var (venstre, top, bredde, hoejde) = Arbejdsomraade();
 
-        Left = arbejde.Left + (arbejde.Width - ActualWidth) / 2;
-        Top = arbejde.Bottom - ActualHeight - 48;
+        Left = venstre + (bredde - ActualWidth) / 2;
+        Top = top + hoejde - ActualHeight - 48;
     }
+
+    private (double Venstre, double Top, double Bredde, double Hoejde) Arbejdsomraade()
+    {
+        try
+        {
+            var vindue = GetForegroundWindow();
+            var skaerm = MonitorFromWindow(vindue, MONITOR_DEFAULTTONEAREST);
+
+            var oplysning = new MONITORINFO { cbSize = Marshal.SizeOf<MONITORINFO>() };
+
+            if (skaerm != IntPtr.Zero && GetMonitorInfo(skaerm, ref oplysning))
+            {
+                var m = PresentationSource.FromVisual(this)?.CompositionTarget?
+                    .TransformFromDevice ?? Matrix.Identity;
+
+                var oe = oplysning.rcWork;
+
+                var hjoerne = m.Transform(new Point(oe.Left, oe.Top));
+                var slut = m.Transform(new Point(oe.Right, oe.Bottom));
+
+                return (hjoerne.X, hjoerne.Y, slut.X - hjoerne.X, slut.Y - hjoerne.Y);
+            }
+        }
+        catch (Exception)
+        {
+            // Kan skaermen ikke findes, bruges den primaere. En boble det
+            // forkerte sted er bedre end ingen boble.
+        }
+
+        var a = SystemParameters.WorkArea;
+        return (a.Left, a.Top, a.Width, a.Height);
+    }
+
+    /// <summary>
+    /// Løfter boblen op over alt andet — uden at tage fokus.
+    /// </summary>
+    /// <remarks>
+    /// <c>Topmost</c> ALENE RAEKKER IKKE. Et andet program, der også ligger
+    /// øverst — en videoafspiller, et delingsværktøj, en anden boble — kan
+    /// have lagt sig oven på os, og WPF sætter kun flaget, når det ændrer
+    /// sig. At slå det fra og til igen hjælper som regel, men ikke altid.
+    ///
+    /// SetWindowPos med HWND_TOPMOST flytter os forrest i rækken af
+    /// topmost-vinduer HVER gang. SWP_NOACTIVATE er det, der gør, at
+    /// markøren bliver i det felt, man dikterer ind i — uden det ville
+    /// teksten lande et andet sted.
+    /// </remarks>
+    private void Oeverst()
+    {
+        Topmost = false;
+        Topmost = true;
+
+        try
+        {
+            var h = new WindowInteropHelper(this).Handle;
+            if (h == IntPtr.Zero) return;
+
+            SetWindowPos(h, HWND_TOPMOST, 0, 0, 0, 0,
+                SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW);
+        }
+        catch (Exception)
+        {
+            // Topmost ovenfor er sat. Resten er en ekstra sikring.
+        }
+    }
+
+    private const int MONITOR_DEFAULTTONEAREST = 2;
+
+    private static readonly IntPtr HWND_TOPMOST = new(-1);
+
+    private const uint SWP_NOSIZE = 0x0001;
+    private const uint SWP_NOMOVE = 0x0002;
+    private const uint SWP_NOACTIVATE = 0x0010;
+    private const uint SWP_SHOWWINDOW = 0x0040;
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct RECT { public int Left, Top, Right, Bottom; }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct MONITORINFO
+    {
+        public int cbSize;
+        public RECT rcMonitor;
+        public RECT rcWork;
+        public uint dwFlags;
+    }
+
+    [DllImport("user32.dll")]
+    private static extern IntPtr GetForegroundWindow();
+
+    [DllImport("user32.dll")]
+    private static extern IntPtr MonitorFromWindow(IntPtr hwnd, int flags);
+
+    [DllImport("user32.dll", CharSet = CharSet.Auto)]
+    private static extern bool GetMonitorInfo(IntPtr skaerm, ref MONITORINFO info);
+
+    [DllImport("user32.dll")]
+    private static extern bool SetWindowPos(IntPtr hwnd, IntPtr efter,
+        int x, int y, int cx, int cy, uint flag);
 
     private void Aftale_Klik(object sender, RoutedEventArgs e) => Aftale?.Invoke();
 

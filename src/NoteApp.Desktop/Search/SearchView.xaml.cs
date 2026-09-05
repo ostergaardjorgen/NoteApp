@@ -476,12 +476,7 @@ public partial class SearchView : UserControl
         /// </summary>
         public string Dagsnavn { get; set; } = "";
 
-        /// <summary>Datoen ved siden af dagsnavnet — «24. aug».</summary>
-        /// <remarks>
-        /// Måneden forkortes, som den gør på opgavernes fristmærkat. De to
-        /// står nu på samme linje, og «24. august» ville skubbe dagsnavnet
-        /// ud af en spalte, man selv kan trække smallere.
-        /// </remarks>
+        /// <summary>Datoen ved siden af dagsnavnet — «24. august».</summary>
         public string Dagsdato { get; set; } = "";
 
         /// <summary>Er det her dagens første aftale?</summary>
@@ -685,10 +680,16 @@ public partial class SearchView : UserControl
             // DATOFORMATET STAAR I SPROGFILEN. Dansk skriver «27. august»,
             // engelsk «27 August». Punktummet er ikke en detalje, man kan
             // regne sig frem til - det hoerer til sproget.
-            // Maaneden forkortes, som paa opgavernes fristmaerkat: de to
-            // staar nu paa samme linje, og «8. september» ville skubbe
-            // dagsnavnet ud af en spalte, man selv kan traekke smallere.
-            v.Dagsdato = $"{dag.Day}. {Datoforstaaelse.Forkort(DateOnly.FromDateTime(dag))}";
+            // MAANEDEN SKRIVES HELT UD. Den var kortvarigt forkortet, af
+            // frygt for at «8. september» ville skubbe dagsnavnet ud af
+            // spalten. Det gjorde den ikke: da dagen og datoen kom paa samme
+            // linje, blev der plads til overs, og «Tirsdag 8. september»
+            // fylder under det halve af spalten.
+            //
+            // Opgavernes fristmaerkat er stadig forkortet. Dér er det en
+            // maerkat mellem to andre ting paa den samme linje, og her er det
+            // en overskrift, der har linjen for sig selv.
+            v.Dagsdato = dag.ToString(Sprog.T("kalender.datoformat"), Sprog.Kultur);
         }
 
         Kalenderrude.ItemsSource = visninger;
