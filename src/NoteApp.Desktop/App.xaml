@@ -580,6 +580,47 @@
       </Setter>
     </Style>
 
+    <!-- ================= EN PERIODE I NOTELISTEN =======================
+
+         Samme rolle som NavKnap i sidebjælken — et valg, der skal kunne
+         aflæses uden at gætte — men på appens egen flade og ikke på
+         navigationens. Derfor de almindelige tekstfarver.
+
+         EN TOM PERIODE KAN IKKE VÆLGES. Den står med den slukkede farve, så
+         man kan se, at der ikke er noget, uden at klikke. -->
+    <Style x:Key="NoteperiodeStil" TargetType="RadioButton">
+      <Setter Property="Foreground" Value="{DynamicResource TekstSvag}" />
+      <Setter Property="FontFamily" Value="Segoe UI" />
+      <Setter Property="FontSize" Value="13" />
+      <Setter Property="Cursor" Value="Hand" />
+      <Setter Property="Margin" Value="0,0,0,3" />
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="RadioButton">
+            <Border x:Name="kant" CornerRadius="6" Background="Transparent" Padding="10,7">
+              <ContentPresenter VerticalAlignment="Center"
+                                TextElement.Foreground="{Binding Foreground,
+                                  RelativeSource={RelativeSource AncestorType={x:Type RadioButton}}}" />
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="kant" Property="Background" Value="{DynamicResource Svaev}" />
+              </Trigger>
+              <Trigger Property="IsChecked" Value="True">
+                <Setter TargetName="kant" Property="Background" Value="{DynamicResource Valgt}" />
+                <Setter Property="Foreground" Value="{DynamicResource Tekst}" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+              </Trigger>
+              <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Foreground" Value="{DynamicResource Slukket}" />
+                <Setter Property="Cursor" Value="Arrow" />
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
     <!-- Fanevalg: to eller tre grupper ved siden af hinanden inde på en
          skærm. Mindre og fladere end menuen i venstre side, så det er
          tydeligt, at man skifter udsnit og ikke skifter skærm. -->

@@ -55,25 +55,104 @@ public partial class NoterView : UserControl
             Ordklik.Klikket = IsVisible ? Ordvalgt : null;
     }
 
+    /// <summary>Én periode i spalten til venstre.</summary>
+    public sealed class Periodevalg
+    {
+        public required string Navn { get; init; }
+        public required int Dage { get; init; }
+        public int Antal { get; set; }
+        public bool Valgt { get; set; }
+
+        /// <summary>En tom periode kan ikke vælges.</summary>
+        public bool Kan => Antal > 0;
+    }
+
+    /// <summary>
+    /// Perioderne, man kan vælge imellem.
+    /// </summary>
+    /// <remarks>
+    /// DATOER OG IKKE MAPPER. En diktering laves i forbifarten, og man leder
+    /// efter den på «hvornår sagde jeg det» — ikke på «hvor lagde jeg den».
+    /// Der er ingen mapper at oprette og ingen at holde styr på.
+    ///
+    /// Tallet er DAGE TILBAGE og ikke kalendergrænser: «denne uge» er de
+    /// sidste syv dage og ikke «siden mandag». En note fra i søndags er
+    /// stadig fra denne uge om mandagen — kalenderugen ville smide den i
+    /// «denne måned», og så leder man forgæves.
+    /// </remarks>
+    private static IEnumerable<Periodevalg> Skabeloner() => new[]
+    {
+        new Periodevalg { Navn = Sprog.T("noter.i_dag"), Dage = 1 },
+        new Periodevalg { Navn = Sprog.T("noter.denne_uge"), Dage = 7 },
+        new Periodevalg { Navn = Sprog.T("noter.denne_maaned"), Dage = 31 },
+        new Periodevalg { Navn = Sprog.T("noter.dette_aar"), Dage = 366 },
+        new Periodevalg { Navn = Sprog.T("noter.alle"), Dage = int.MaxValue },
+    };
+
+    /// <summary>Den valgte periode i dage. Huskes mellem to tegninger.</summary>
+    private int _dage = 1;
+
     private void Vis()
     {
         var noter = Diktatnoter.Laes();
+        var nu = DateTime.Now;
 
-        Liste.ItemsSource = noter
+        // ============ PERIODERNE FOERST ============
+        //
+        // Tallene skal staa, ogsaa naar den valgte periode er tom - ellers
+        // kan man ikke se, at der ER noget under en af de andre.
+        var perioder = Skabeloner().ToList();
+
+        foreach (var p in perioder)
+            p.Antal = noter.Count(n => Indenfor(n.Tid, nu, p.Dage));
+
+        // ER DEN VALGTE PERIODE TOM, SKIFTES DER TIL DEN FOERSTE, DER IKKE ER.
+        // Ellers stod man paa «I dag» med en tom liste og en fyldt maaned ved
+        // siden af - og skulle selv gaette, hvor noterne var.
+        if (!perioder.Any(p => p.Dage == _dage && p.Antal > 0))
+            _dage = perioder.FirstOrDefault(p => p.Antal > 0)?.Dage ?? 1;
+
+        foreach (var p in perioder) p.Valgt = p.Dage == _dage;
+
+        Perioder.ItemsSource = perioder;
+
+        var vist = noter.Where(n => Indenfor(n.Tid, nu, _dage)).ToList();
+
+        Liste.ItemsSource = vist
             .Select(n => new Visning(
                 Naar(n.Tid), n.Tekst, Form(n.Formaal), n,
                 n.KanSkiftes ? Visibility.Visible : Visibility.Collapsed))
             .ToList();
 
-        Tom.Visibility = noter.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+        Tom.Visibility = vist.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
         RydKnap.Visibility = noter.Count == 0 ? Visibility.Collapsed : Visibility.Visible;
 
-        Antal.Text = noter.Count switch
+        Antal.Text = vist.Count switch
         {
             0 => "",
             1 => "1 note",
-            _ => $"{noter.Count} noter",
+            _ => $"{vist.Count} noter",
         };
+    }
+
+    /// <summary>
+    /// Ligger noten inden for de sidste <paramref name="dage"/> døgn?
+    /// </summary>
+    /// <remarks>
+    /// «I dag» er dagens dato og ikke de sidste fireogtyve timer. Klokken ni
+    /// om morgenen er en note fra i går aftes ikke fra i dag, uanset at der er
+    /// gået mindre end et døgn.
+    /// </remarks>
+    private static bool Indenfor(DateTime tid, DateTime nu, int dage) =>
+        dage == int.MaxValue || (nu.Date - tid.Date).Days < dage;
+
+    private void Periode_Valgt(object sender, RoutedEventArgs e)
+    {
+        if ((sender as FrameworkElement)?.Tag is not Periodevalg p) return;
+        if (p.Dage == _dage) return;
+
+        _dage = p.Dage;
+        Vis();
     }
 
     /// <summary>
@@ -93,6 +172,60 @@ public partial class NoterView : UserControl
             1 => $"I går {t:HH:mm}",
             _ => t.ToString("d. MMMM HH:mm"),
         };
+    }
+
+    /// <summary>
+    /// Laver en aftale ud af det, der lige er sagt.
+    /// </summary>
+    /// <remarks>
+    /// DET ER DÉT, DER GØR EN DIKTERING FÆRDIG I APPEN. En note er ellers et
+    /// stykke tekst, man selv skal gøre noget ved — kopiere et sted hen og
+    /// huske hvorhen. To af de steder kender appen i forvejen, og så skal den
+    /// også kunne lave dem.
+    ///
+    /// Vinduet åbnes med teksten som titel, og resten — tidspunkt, sted,
+    /// mødetype — sættes dér. Talen siger sjældent klokkeslættet i en form,
+    /// en maskine kan stole på, og en aftale på et gættet tidspunkt er værre
+    /// end ingen aftale.
+    /// </remarks>
+    private void TilAftale_Klik(object sender, RoutedEventArgs e)
+    {
+        if ((sender as FrameworkElement)?.Tag is not Visning v) return;
+
+        var aftale = new Aftale { Titel = Opgave.Kort(v.Tekst, 120) };
+
+        var vindue = new Meeting.AftaleWindow(aftale) { Owner = Window.GetWindow(this) };
+        if (vindue.ShowDialog() != true) return;
+
+        try
+        {
+            Kalender.Gem(vindue.Aftalen);
+            Antal.Text = Sprog.T("noter.aftale_lavet");
+        }
+        catch (Exception ex)
+        {
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Aftalen blev ikke gemt",
+                ex.Message, Dialogs.Slags.Pas_paa);
+        }
+    }
+
+    /// <summary>
+    /// Laver en opgave ud af det, der lige er sagt.
+    /// </summary>
+    /// <remarks>
+    /// HELE TEKSTEN KOMMER MED, ikke kun en overskrift. Opgavevinduet udleder
+    /// selv det korte navn af teksten — se <see cref="Opgave.Visningsnavn"/> —
+    /// så «ring til Paludan om budgettet inden fredag» bliver til et navn, man
+    /// kan skimme, og en beskrivelse, man kan læse.
+    /// </remarks>
+    private void TilOpgave_Klik(object sender, RoutedEventArgs e)
+    {
+        if ((sender as FrameworkElement)?.Tag is not Visning v) return;
+
+        var vindue = Search.OpgaveWindow.Ny(v.Tekst);
+        vindue.Owner = Window.GetWindow(this);
+
+        if (vindue.ShowDialog() == true) Antal.Text = Sprog.T("noter.opgave_lavet");
     }
 
     private void Kopier_Klik(object sender, RoutedEventArgs e)

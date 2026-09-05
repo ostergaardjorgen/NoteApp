@@ -18,8 +18,12 @@
       <RowDefinition Height="Auto" />
       <RowDefinition Height="*" />
     </Grid.RowDefinitions>
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="Auto" />
+      <ColumnDefinition Width="*" />
+    </Grid.ColumnDefinitions>
 
-    <StackPanel Grid.Row="0" Margin="0,0,0,12">
+    <StackPanel Grid.Row="0" Grid.ColumnSpan="2" Margin="0,0,0,12">
       <TextBlock Text="{i18n:Oversat noter.titel}" FontSize="19" FontWeight="SemiBold" />
       <TextBlock Style="{StaticResource Underskrift}" Margin="0,6,0,0" TextWrapping="Wrap"
                  Text="{i18n:Oversat noter.under}" />
@@ -32,7 +36,7 @@
          tastekombinationer er ikke lige gode alle steder: Ctrl+V virker de
          fleste steder, Shift+Insert virker ogsaa i terminaler og aeldre
          programmer, hvor Ctrl+V ikke goer. Derfor staar begge. -->
-    <Border Grid.Row="1" Background="{DynamicResource Trykket}" CornerRadius="8" Padding="16,12"
+    <Border Grid.Row="1" Grid.ColumnSpan="2" Background="{DynamicResource Trykket}" CornerRadius="8" Padding="16,12"
             BorderBrush="{DynamicResource PanelKant}" BorderThickness="1" Margin="0,0,0,14">
       <StackPanel>
         <TextBlock Text="{i18n:Oversat noter.indsaet}" FontWeight="SemiBold" FontSize="13" />
@@ -45,7 +49,7 @@
          Ruden kommer frem, naar man klikker paa et ord i en note. Den staar
          over listen og ikke inde i den enkelte note: rettelsen gaelder
          ordbogen og ikke den note, man tilfaeldigvis kiggede paa. -->
-    <Border x:Name="Retrude" Grid.Row="2" Visibility="Collapsed" Margin="0,0,0,12"
+    <Border x:Name="Retrude" Grid.Row="2" Grid.ColumnSpan="2" Visibility="Collapsed" Margin="0,0,0,12"
             Background="{DynamicResource Panel}" CornerRadius="10" Padding="16,12"
             BorderBrush="{DynamicResource Accent}" BorderThickness="1">
       <StackPanel>
@@ -67,7 +71,50 @@
       </StackPanel>
     </Border>
 
-    <Border Grid.Row="3" Background="{DynamicResource Panel}" CornerRadius="10"
+    <!-- ============ PERIODERNE ============
+
+         Samme greb som biblioteket under Optagelser: en smal spalte til
+         venstre, der siger HVAD man kigger paa, og indholdet til hoejre.
+
+         Grupperne er DATOER og ikke mapper. En diktering er noget, man laver
+         i forbifarten, og man leder efter den paa «hvornaar sagde jeg det»,
+         ikke paa «hvor lagde jeg den». Der er ingen mapper at lave og ingen
+         at holde styr paa.
+
+         En tom periode staar med graat og kan ikke vaelges - saa kan man se,
+         at der ikke er noget, uden at klikke. -->
+    <Border Grid.Row="3" Grid.Column="0" Width="196" Margin="0,0,12,0"
+            Background="{DynamicResource Panel}" CornerRadius="10"
+            BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
+      <StackPanel Margin="12,14,12,14">
+        <TextBlock Text="{i18n:Oversat noter.perioder}" FontSize="11" FontWeight="SemiBold"
+                   Margin="6,0,0,10" Foreground="{DynamicResource TekstMeget}" />
+
+        <ItemsControl x:Name="Perioder">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate>
+              <RadioButton GroupName="periode" Style="{StaticResource NoteperiodeStil}"
+                           IsChecked="{Binding Valgt, Mode=TwoWay}"
+                           IsEnabled="{Binding Kan}"
+                           Checked="Periode_Valgt" Tag="{Binding}">
+                <Grid>
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                  </Grid.ColumnDefinitions>
+                  <TextBlock Grid.Column="0" Text="{Binding Navn}" VerticalAlignment="Center" />
+                  <TextBlock Grid.Column="1" Text="{Binding Antal}" VerticalAlignment="Center"
+                             Margin="8,0,0,0" FontSize="11.5"
+                             Foreground="{DynamicResource TekstMeget}" />
+                </Grid>
+              </RadioButton>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </StackPanel>
+    </Border>
+
+    <Border Grid.Row="3" Grid.Column="1" Background="{DynamicResource Panel}" CornerRadius="10"
             BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
       <Grid>
         <Grid.RowDefinitions>
@@ -117,7 +164,24 @@
                         </Border>
                       </StackPanel>
 
+                      <!-- ============ DET INDTALTE SKAL KUNNE BLIVE TIL NOGET ============
+
+                           En note er et stykke tekst, man selv skal goere noget
+                           ved: kopiere det et sted hen og huske hvorhen. To af
+                           de steder kender appen i forvejen - kalenderen og
+                           opgavelisten - og saa skal den ogsaa kunne lave dem.
+
+                           Det er dét, der goer en diktering faerdig i HeyPia i
+                           stedet for i et andet program: man siger «ring til
+                           Paludan om budgettet inden fredag», trykker
+                           «Opgave», og saa staar den paa listen. -->
                       <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Content="{i18n:Oversat noter.til_aftale}" Padding="11,6" Margin="0,0,6,0"
+                                Click="TilAftale_Klik" Tag="{Binding}"
+                                ToolTip="{i18n:Oversat noter.til_aftale_hjaelp}" />
+                        <Button Content="{i18n:Oversat noter.til_opgave}" Padding="11,6" Margin="0,0,6,0"
+                                Click="TilOpgave_Klik" Tag="{Binding}"
+                                ToolTip="{i18n:Oversat noter.til_opgave_hjaelp}" />
                         <Button Content="{i18n:Oversat noter.kopier}" Padding="12,6" Margin="0,0,6,0"
                                 Click="Kopier_Klik" Tag="{Binding}" />
                         <Button Content="{i18n:Oversat faelles.slet}" Padding="12,6"

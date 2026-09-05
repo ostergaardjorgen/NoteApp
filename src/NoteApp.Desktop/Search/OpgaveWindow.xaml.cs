@@ -61,6 +61,23 @@ public partial class OpgaveWindow : Window
     /// eller dem, Google havde. Man kunne lægge en aftale ind i hånden, men
     /// ikke en opgave, og det er den samme knap, der mangler.
     /// </remarks>
+    /// <summary>
+    /// En ny opgave med en tekst i forvejen — fra en diktering.
+    /// </summary>
+    /// <remarks>
+    /// DET INDTALTE ER OPGAVEN. Man siger «ring til Paludan om budgettet
+    /// inden fredag», og så skal den linje stå i feltet, ikke i
+    /// udklipsholderen. Navnet udledes af teksten som alle andre steder —
+    /// se <see cref="Opgave.Kort"/> — så det korte navn og hele sætningen
+    /// hænger sammen fra begyndelsen.
+    /// </remarks>
+    public static OpgaveWindow Ny(string tekst) =>
+        new(new Registeropgave(new Opgave
+        {
+            Tekst = tekst.Trim(),
+            Raekkefoelge = Opgaveregister.NyestePlads()
+        }), ny: true);
+
     public static OpgaveWindow Ny() =>
         // RAEKKEFOELGEN SAETTES HER OG IKKE VED GEM. Har man selv trukket
         // listen paa plads, har alt andet et tal, og en ny opgave med nul
