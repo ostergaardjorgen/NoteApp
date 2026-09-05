@@ -413,6 +413,34 @@
          fire felter ved siden af hinanden uden afgraensning floed sammen -
          man kunne ikke se, hvor det ene spoergsmaal slap, og det naeste
          begyndte. Set paa opstartdialogen 28-08-2026. -->
+    <!-- ================= HOVEDET PAA EN RUDE =========================
+
+         Kalenderen og opgaverne staar side om side, og deres overskrifter
+         var to loese stakke oven paa panelet: samme indhold, men uden noget,
+         der samlede dem - og saa laeste de som to forskellige ting frem for
+         som overskriften paa listen nedenunder.
+
+         Baandet goer to ting. Det SAMLER overskrift, knapper og hentelinje i
+         eet stykke, og det SKILLER dem fra listen med en streg. Saa ved man,
+         hvor hovedet slutter, og indholdet begynder.
+
+         DEN ER EN STIL OG IKKE TO BORDERS. To ruder ved siden af hinanden med
+         hver sit saet maal er praecis dét, der gik galt: polstringen var
+         14,13,14,8 begge steder, og alligevel saa de forskellige ud, fordi
+         knapperne havde hver sin margen. Staar maalene eet sted, kan de ikke
+         skride fra hinanden igen.
+
+         NI OG IKKE TI I HJOERNET. Panelet udenom har CornerRadius 10 OG en
+         kant paa een pixel; et hoved med samme radius ville skaere hjoernet.
+         -->
+    <Style x:Key="Rudehoved" TargetType="Border">
+      <Setter Property="Background" Value="{DynamicResource Svaev}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource PanelKant}" />
+      <Setter Property="BorderThickness" Value="0,0,0,1" />
+      <Setter Property="CornerRadius" Value="9,9,0,0" />
+      <Setter Property="Padding" Value="14,11,14,10" />
+    </Style>
+
     <Style x:Key="Feltkasse" TargetType="Border">
       <Setter Property="Background" Value="{DynamicResource Panel}" />
       <Setter Property="BorderBrush" Value="{DynamicResource PanelKant}" />

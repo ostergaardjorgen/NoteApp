@@ -88,7 +88,8 @@
 
                  Linjen under siger, hvornaar der sidst blev hentet. Uden den
                  er ikonet en knap, man trykker paa for en sikkerheds skyld. -->
-            <StackPanel DockPanel.Dock="Top" Margin="14,13,14,8">
+            <Border DockPanel.Dock="Top" Style="{StaticResource Rudehoved}">
+            <StackPanel>
               <Grid>
                 <TextBlock x:Name="Kalenderoverskrift" FontSize="13" FontWeight="SemiBold"
                            VerticalAlignment="Center" />
@@ -99,8 +100,7 @@
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"
                             VerticalAlignment="Center">
                   <Button Content="{i18n:Oversat kalender.nyaftale}" Click="NyAftale_Klik"
-                          VerticalAlignment="Center" Padding="10,3" FontSize="11"
-                          Margin="0,0,6,0" />
+                          VerticalAlignment="Center" Padding="10,3" FontSize="11" />
                   <Button x:Name="Kalendersynk" Click="Kalendersynk_Klik"
                           Style="{StaticResource IkonKnap}"
                           Visibility="Collapsed"
@@ -112,15 +112,16 @@
                 </StackPanel>
               </Grid>
 
-              <TextBlock x:Name="Kalendersynklinje" FontSize="11" Margin="0,4,0,0"
+              <TextBlock x:Name="Kalendersynklinje" FontSize="11" Margin="0,5,0,0"
                          Visibility="Collapsed" TextWrapping="Wrap"
                          Foreground="{DynamicResource TekstMeget}" />
             </StackPanel>
+            </Border>
 
             <ScrollViewer VerticalScrollBarVisibility="Auto"
                           HorizontalScrollBarVisibility="Disabled">
               <StackPanel>
-            <ItemsControl x:Name="Kalenderrude" Margin="7,0,7,10">
+            <ItemsControl x:Name="Kalenderrude" Margin="7,10,7,10">
               <ItemsControl.ItemTemplate>
                 <DataTemplate>
                   <StackPanel>
@@ -155,13 +156,25 @@
                        goer det, kortet lige saa godt kan aabne, er et led for
                        meget - og optagelsen startes nu inde i vinduet, hvor
                        man samtidig kan se, hvad der bliver optaget som. -->
-                  <Border Background="{DynamicResource Trykket}" BorderBrush="{Binding Kant}"
-                          BorderThickness="3,1,1,1" CornerRadius="6"
-                          Padding="11,8" Margin="0,0,0,5"
+                  <!-- Samme greb som paa opgavekortet: neutral ramme paa
+                       alle poster, og betydningen i striben til venstre. Se
+                       den lange note derovre. -->
+                  <Border Background="{DynamicResource Trykket}"
+                          BorderBrush="{DynamicResource PanelKant}"
+                          BorderThickness="1" CornerRadius="6"
+                          Margin="0,0,0,5"
                           Opacity="{Binding Daempning}"
                           Tag="{Binding}" MouseLeftButtonUp="RetAftale_Klik"
                           Cursor="Hand" ToolTip="{i18n:Oversat searchview.aabn_aftalen}">
                     <Grid>
+                      <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="4" />
+                        <ColumnDefinition Width="*" />
+                      </Grid.ColumnDefinitions>
+
+                      <Border Grid.Column="0" Background="{Binding Kant}" CornerRadius="5,0,0,5" />
+
+                      <Grid Grid.Column="1" Margin="11,8,11,8">
                       <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="*" />
@@ -178,6 +191,7 @@
                         <TextBlock Text="{Binding Under}" FontSize="10.5" Margin="0,3,0,0"
                                    TextWrapping="Wrap" Foreground="{DynamicResource TekstMeget}" />
                       </StackPanel>
+                      </Grid>
                     </Grid>
                   </Border>
                   </StackPanel>
@@ -640,7 +654,8 @@
             <!-- Samme som kalenderen. Opgaverne fra Google henter sig
                  heller ikke selv, og de kommer fra en HELT anden godkendelse
                  - saa de skal kunne hentes hver for sig. -->
-            <StackPanel DockPanel.Dock="Top" Margin="14,13,14,8">
+            <Border DockPanel.Dock="Top" Style="{StaticResource Rudehoved}">
+            <StackPanel>
               <Grid>
                 <TextBlock x:Name="OpgaveOverskrift" FontSize="13" FontWeight="SemiBold"
                            VerticalAlignment="Center" />
@@ -667,11 +682,10 @@
                        til paa vej hjem og midt i en mail, og saa skal der
                        vaere et sted at skrive den. -->
                   <Button Content="{i18n:Oversat opgaver.nyopgave}" Click="NyOpgave_Klik"
-                          VerticalAlignment="Center" Padding="10,3" FontSize="11"
-                          Margin="8,0,0,0" />
+                          VerticalAlignment="Center" Padding="10,3" FontSize="11" />
 
                   <Button x:Name="Opgavesynk" Click="Opgavesynk_Klik"
-                          Style="{StaticResource IkonKnap}" Margin="6,0,0,0"
+                          Style="{StaticResource IkonKnap}"
                           Visibility="Collapsed"
                           AutomationProperties.Name="{i18n:Oversat opgaver.hentopgaver}"
                           ToolTip="{i18n:Oversat opgaver.hentopgaverhjaelp}">
@@ -681,12 +695,13 @@
                 </StackPanel>
               </Grid>
 
-              <TextBlock x:Name="Opgavesynklinje" FontSize="11" Margin="0,4,0,0"
+              <TextBlock x:Name="Opgavesynklinje" FontSize="11" Margin="0,5,0,0"
                          Visibility="Collapsed" TextWrapping="Wrap"
                          Foreground="{DynamicResource TekstMeget}" />
             </StackPanel>
+            </Border>
 
-            <ScrollViewer Padding="7,0,7,10" VerticalScrollBarVisibility="Auto"
+            <ScrollViewer Padding="7,10,7,10" VerticalScrollBarVisibility="Auto"
                           HorizontalScrollBarVisibility="Disabled">
               <StackPanel>
                 <ItemsControl x:Name="Opgaverude">
@@ -706,13 +721,43 @@
                      Fluebenet, prioriteten og herkomstlinket ligger inden i.
                      De haandterer selv deres klik og markerer dem som
                      behandlede, saa de naar aldrig herud. -->
-                <Border Background="{DynamicResource Trykket}" BorderBrush="{Binding Farve}"
-                BorderThickness="3,1,1,1" CornerRadius="6"
-                Padding="13,10" Margin="0,0,0,6"
+                <!-- ============ KANTEN ER NEUTRAL, STRIBEN ER FARVEN ============
+
+                     Kanten gik hele vejen rundt i fristens farve. Et kort med
+                     groen ramme raabte hoejere end nabokortet med graa - og
+                     forskellen betoed «senere», altsaa det MINDST vigtige.
+                     Farven fyldte omvendt af, hvad den skulle sige.
+
+                     Nu er rammen den samme paa alle kort, og betydningen
+                     ligger i striben til venstre. Den er fire pixels og har
+                     kun brug for at kunne ses ud af oejenkrogen.
+
+                     STRIBEN LIGGER INDE I RAMMEN og ikke som en tykkere kant:
+                     en Border kan kun have EEN penselfarve, saa en farvet
+                     venstrekant tvinger resten af rammen til den samme farve.
+                     Derfor er polstringen flyttet ind paa indholdet - ellers
+                     ville striben stoppe, hvor polstringen begyndte. -->
+                <Border Background="{DynamicResource Trykket}"
+                BorderBrush="{DynamicResource PanelKant}"
+                BorderThickness="1" CornerRadius="6"
+                Margin="0,0,0,6"
                 Opacity="{Binding Daempning}"
                 Tag="{Binding}" MouseLeftButtonUp="Opgave_Aabn"
+                AllowDrop="True"
+                PreviewMouseLeftButtonDown="Opgave_Museknap"
+                PreviewMouseMove="Opgave_Musbevaegelse"
+                DragOver="Opgave_TraekkesHen" DragLeave="Opgave_TraekForbi"
+                Drop="Opgave_Sluppet"
                 Cursor="Hand" ToolTip="{i18n:Oversat searchview.aabn_opgaven}">
                 <Grid>
+                <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="4" />
+                <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <Border Grid.Column="0" Background="{Binding Farve}" CornerRadius="5,0,0,5" />
+
+                <Grid Grid.Column="1" Margin="13,10,13,10">
                 <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
@@ -791,6 +836,7 @@
                 <ComboBoxItem Content="2" />
                 <ComboBoxItem Content="3" />
                 </ComboBox>
+                </Grid>
                 </Grid>
                 </Border>
                 </DataTemplate>

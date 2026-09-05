@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
 using NoteApp.Core;
@@ -680,6 +681,12 @@ public partial class SearchView : UserControl
 
         if (vindue.Slettet)
         {
+            // HOS GOOGLE FOERST, LOKALT BAGEFTER. Gaar det galt hos Google,
+            // staar aftalen her endnu, og man kan proeve igen. Omvendt ville
+            // den vaere vaek paa skaermen og tilbage ved naeste hentning -
+            // altsaa praecis den forvirring, sletningen skulle raade bod paa.
+            if (!await SletHosGoogle(v.Aftale)) return;
+
             Kalender.Slet(v.Aftale.Id);
             VisKalender();
             return;
@@ -761,7 +768,7 @@ public partial class SearchView : UserControl
     /// filopslag pr. mappe, og alternativet er en liste, der kan komme ud af
     /// trit med filerne.
     /// </summary>
-    private void Opgave_Aabn(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    private void Opgave_Aabn(object sender, MouseButtonEventArgs e)
     {
         if (sender is not FrameworkElement { Tag: Opgavevisning v }) return;
 
@@ -1104,6 +1111,161 @@ public partial class SearchView : UserControl
         public Brush Flade => Temaskift.Pensel(Valgt ? "Valgt" : "Trykket");
         public Brush Kant => Temaskift.Pensel(Valgt ? "Accent" : "PanelKant");
         public Brush Skrift => Temaskift.Pensel(Valgt ? "Tekst" : "TekstMeget");
+    }
+
+    /// <summary>
+    /// Sletter aftalen hos Google, hvis den kom derfra.
+    /// </summary>
+    /// <returns>Sandt, når der kan slettes lokalt bagefter.</returns>
+    /// <remarks>
+    /// DEN SIGER TIL, NÅR DET GÅR GALT — modsat afkrydsningen på en opgave,
+    /// som med vilje er tavs. Forskellen er, hvad brugeren kan gøre ved det:
+    /// en afkrydsning, der ikke nåede frem, retter sig selv ved næste
+    /// hentning, men en sletning gør ikke. Aftalen ville komme igen, og så
+    /// står man og sletter den samme aftale hver dag uden at forstå hvorfor.
+    ///
+    /// Er der ingen nøgle, slettes der bare lokalt. Så er integrationen ikke
+    /// sat op, og der er ikke noget derude at slette.
+    /// </remarks>
+    private async Task<bool> SletHosGoogle(Aftale aftale)
+    {
+        if (aftale.Kilde != Kalenderkilde.Google || aftale.FremmedId.Length == 0) return true;
+
+        try
+        {
+            var noegle = Integrationsfiler.Hent(Googlekalender.Id).Opdateringsnoegle;
+            if (noegle.Length == 0) return true;
+
+            await Googlekalender.SletAsync(aftale.FremmedId, noegle);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Aftalen blev ikke slettet hos Google",
+                "Den står her endnu, så du kan prøve igen. " + ex.Message,
+                Dialogs.Slags.Pas_paa);
+
+            return false;
+        }
+    }
+
+    // ==================== TRAEK EN OPGAVE PAA PLADS ====================
+
+    /// <summary>Hvor musen blev trykket ned, og på hvad.</summary>
+    /// <remarks>
+    /// DER SKAL BAADE VAERE ET STARTPUNKT OG EN AFSTAND. Hele kortet er
+    /// klikbart — et klik aabner opgaven — og uden en mindsteafstand ville
+    /// enhver lille rysten paa haanden starte et traek i stedet for at aabne.
+    /// Windows' egen graense er den rigtige at bruge; det er den, alt andet
+    /// paa maskinen bruger.
+    /// </remarks>
+    private Point _traekstart;
+    private Opgavevisning? _traekker;
+
+    private void Opgave_Museknap(object sender, MouseButtonEventArgs e)
+    {
+        _traekstart = e.GetPosition(this);
+        _traekker = (sender as FrameworkElement)?.Tag as Opgavevisning;
+    }
+
+    private void Opgave_Musbevaegelse(object sender, MouseEventArgs e)
+    {
+        if (_traekker is null || e.LeftButton != MouseButtonState.Pressed) return;
+
+        var nu = e.GetPosition(this);
+
+        if (Math.Abs(nu.X - _traekstart.X) < SystemParameters.MinimumHorizontalDragDistance
+            && Math.Abs(nu.Y - _traekstart.Y) < SystemParameters.MinimumVerticalDragDistance)
+            return;
+
+        var det = _traekker;
+        _traekker = null;
+
+        // DoDragDrop BLOKERER, indtil der slippes, og den spiser museknappen
+        // op undervejs — saa Opgave_Aabn kommer ikke bagefter.
+        DragDrop.DoDragDrop((DependencyObject)sender,
+            new DataObject(typeof(Opgavevisning), det), DragDropEffects.Move);
+    }
+
+    /// <summary>
+    /// Viser, hvor den lander — over eller under det kort, musen er på.
+    /// </summary>
+    /// <remarks>
+    /// KANTEN GOER DET, OG IKKE EN EKSTRA STREG I SKABELONEN. Kortene bygges
+    /// af en DataTemplate, og et navngivet element derinde findes i ét
+    /// eksemplar pr. raekke — det kan ikke slaas op udefra. Kanten sidder paa
+    /// selve Border'en, som ER det, musen er over.
+    ///
+    /// ClearValue og ikke «saet tilbage til det, den var». Kanten kommer fra
+    /// en DynamicResource, og skrev vi en farve tilbage i haanden, ville den
+    /// holde op med at foelge med, naar temaet skifter.
+    /// </remarks>
+    private void Opgave_TraekkesHen(object sender, DragEventArgs e)
+    {
+        if (sender is not Border kort) return;
+
+        e.Effects = e.Data.GetDataPresent(typeof(Opgavevisning))
+            ? DragDropEffects.Move
+            : DragDropEffects.None;
+
+        e.Handled = true;
+
+        if (e.Effects == DragDropEffects.None) return;
+
+        var over = e.GetPosition(kort).Y < kort.ActualHeight / 2;
+
+        kort.BorderBrush = Temaskift.Pensel("Accent");
+        kort.BorderThickness = over ? new Thickness(1, 3, 1, 1) : new Thickness(1, 1, 1, 3);
+    }
+
+    private void Opgave_TraekForbi(object sender, DragEventArgs e) => RydTraekkant(sender);
+
+    private static void RydTraekkant(object sender)
+    {
+        if (sender is not Border kort) return;
+
+        kort.ClearValue(Border.BorderBrushProperty);
+        kort.ClearValue(Border.BorderThicknessProperty);
+    }
+
+    private void Opgave_Sluppet(object sender, DragEventArgs e)
+    {
+        RydTraekkant(sender);
+        e.Handled = true;
+
+        if (sender is not Border kort) return;
+        if (e.Data.GetData(typeof(Opgavevisning)) is not Opgavevisning flyttet) return;
+        if (kort.Tag is not Opgavevisning maal || ReferenceEquals(maal, flyttet)) return;
+
+        if (Opgaverude.ItemsSource is not List<Opgavevisning> liste) return;
+
+        var raekken = liste.Select(v => v.Id).ToList();
+
+        var fra = raekken.IndexOf(flyttet.Id);
+        if (fra < 0) return;
+
+        raekken.RemoveAt(fra);
+
+        var til = raekken.IndexOf(maal.Id);
+        if (til < 0) return;
+
+        // Over eller under det kort, der blev sluppet paa. Uden den skelnen
+        // kan man ikke laegge noget nederst i listen.
+        if (e.GetPosition(kort).Y >= kort.ActualHeight / 2) til++;
+
+        raekken.Insert(til, flyttet.Id);
+
+        try
+        {
+            Opgaveregister.SaetRaekkefoelge(raekken);
+        }
+        catch (Exception ex)
+        {
+            Historik.Skriv(HaendelseType.Andet, "Rækkefølgen kunne ikke gemmes",
+                ex.Message, Udfald.SeEfter);
+        }
+
+        VisOpgaver();
     }
 
     /// <summary>Én måde at sortere resultatet på.</summary>
@@ -1508,6 +1670,9 @@ public sealed class Opgavevisning : System.ComponentModel.INotifyPropertyChanged
         _idag = idag;
         _aendret = aendret;
     }
+
+    /// <summary>Opgavens id. Til traek og slip, som flytter på id'er og ikke på kort.</summary>
+    public Guid Id => _r.Opgave.Id;
 
     public string Tekst => _r.Opgave.Tekst;
 

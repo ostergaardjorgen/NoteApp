@@ -537,10 +537,15 @@ public partial class AftaleWindow : Window
     /// </summary>
     private void Slet_Klik(object sender, RoutedEventArgs e)
     {
+        // TEKSTEN LØJ, INDTIL SLETNINGEN BLEV BYGGET. Der stod, at aftalen
+        // «kommer igen ved næste hentning», og at man skulle slette den hos
+        // Google selv. Nu slettes den begge steder, og så skal der stå dét —
+        // en advarsel, der beskriver en anden app end den, man sidder i, er
+        // værre end ingen.
         var besked = Aftalen.KanRettes
             ? "Aftalen forsvinder fra kalenderen. Har du optaget mødet, bliver optagelsen liggende."
-            : $"Aftalen kommer fra {Aftalen.Kilde} og kommer igen ved næste hentning. " +
-              "Vil du af med den for alvor, skal den slettes dér.";
+            : $"Aftalen slettes både her og hos {Aftalen.Kilde}. " +
+              "Har du optaget mødet, bliver optagelsen liggende.";
 
         var ja = Dialogs.AppDialog.Spoerg(this, "Slet aftalen?", besked,
             godkend: "Slet den", annuller: "Behold den",

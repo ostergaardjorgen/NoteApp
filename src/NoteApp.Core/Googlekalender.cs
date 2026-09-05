@@ -712,6 +712,43 @@ public static class Googlekalender
     /// et mødelink er ikke i sig selv en beslutning om at optage.
     /// </param>
     /// <param name="sprogkode">Mødets sprog — afgør, om noten er dansk eller engelsk.</param>
+    /// <summary>
+    /// Sletter en aftale hos Google.
+    /// </summary>
+    /// <remarks>
+    /// DEN FANDTES IKKE, OG DET KUNNE SES PÅ SKÆRMEN. Sletter man en hentet
+    /// aftale i appen, forsvandt den lokalt og kom tilbage ved næste
+    /// hentning. Dialogen sagde det ligeud — «vil du af med den for alvor,
+    /// skal den slettes dér» — og det er en undskyldning, ikke en løsning:
+    /// man sletter i appen, fordi det er dér, man står.
+    ///
+    /// 404 og 410 TÆLLER SOM SUCCES. Er den allerede væk hos Google — slettet
+    /// i en browser, eller slettet her og hentet igen — er resultatet præcis
+    /// det, der blev bedt om. En fejlbesked om noget, der allerede er i orden,
+    /// får folk til at holde op med at læse fejlbeskeder.
+    /// </remarks>
+    public static async Task SletAsync(string fremmedId, string opdateringsnoegle,
+                                       CancellationToken ct = default)
+    {
+        if (fremmedId.Length == 0) return;
+
+        var noegle = await FriskNoegleTil(opdateringsnoegle, ct);
+
+        using var anmodning = new HttpRequestMessage(HttpMethod.Delete,
+            $"{Aftaler}/{Uri.EscapeDataString(fremmedId)}");
+
+        anmodning.Headers.Authorization = new("Bearer", noegle);
+
+        using var svar = await Http.SendAsync(anmodning, ct);
+
+        if (svar.IsSuccessStatusCode) return;
+        if (svar.StatusCode is System.Net.HttpStatusCode.NotFound
+                            or System.Net.HttpStatusCode.Gone) return;
+
+        throw new InvalidOperationException(
+            $"Google svarede {(int)svar.StatusCode} paa sletningen.");
+    }
+
     public static async Task<string> TilfoejMeetAsync(string fremmedId, string opdateringsnoegle,
                                                       bool medNote = false,
                                                       string sprogkode = "",

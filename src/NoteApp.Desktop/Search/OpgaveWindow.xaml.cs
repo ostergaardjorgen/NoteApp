@@ -62,7 +62,13 @@ public partial class OpgaveWindow : Window
     /// ikke en opgave, og det er den samme knap, der mangler.
     /// </remarks>
     public static OpgaveWindow Ny() =>
-        new(new Registeropgave(new Opgave()), ny: true);
+        // RAEKKEFOELGEN SAETTES HER OG IKKE VED GEM. Har man selv trukket
+        // listen paa plads, har alt andet et tal, og en ny opgave med nul
+        // ville lande sammen med de andre nye. NyestePlads giver den et tal
+        // under det mindste, saa den staar oeverst - dér, hvor man leder
+        // efter det, man lige har skrevet.
+        new(new Registeropgave(new Opgave { Raekkefoelge = Opgaveregister.NyestePlads() }),
+            ny: true);
 
     private OpgaveWindow(Registeropgave r, bool ny)
     {

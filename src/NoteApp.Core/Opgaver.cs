@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 using System.Text.Json;
 
 namespace NoteApp.Core;
@@ -95,6 +95,21 @@ public sealed record Opgave
     /// mødet. Det sker, og det kan ingen model regne ud.
     /// </summary>
     public string Ejer { get; set; } = "";
+
+    /// <summary>
+    /// Hvor den står i listen, når man selv har flyttet rundt på den.
+    /// </summary>
+    /// <remarks>
+    /// NUL BETYDER «IKKE FLYTTET». Så gælder den automatiske rækkefølge —
+    /// hastighed, prioritet, frist — og det er den, der gælder, indtil man
+    /// første gang trækker i noget.
+    ///
+    /// Den er en <c>double</c> og ikke en <c>int</c>, fordi en ny opgave skal
+    /// kunne lægge sig FØR alt andet uden at hele listen skal skrives om: den
+    /// får det mindste tal minus én. Havde det været heltal, ville de før
+    /// eller siden støde sammen.
+    /// </remarks>
+    public double Raekkefoelge { get; set; }
 
     /// <summary>Senest-dato. Null betyder «ingen frist sat».</summary>
     public DateTimeOffset? Deadline { get; set; }

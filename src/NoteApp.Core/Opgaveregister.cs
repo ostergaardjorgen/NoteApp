@@ -1,4 +1,4 @@
-namespace NoteApp.Core;
+﻿namespace NoteApp.Core;
 
 /// <summary>
 /// En opgave, som listerne viser den.
@@ -98,13 +98,96 @@ public static class Opgaveregister
     /// De havner nederst af sig selv — Hastighed.Faerdig er sidste værdi i
     /// enum'en, og der sorteres på den.
     /// </remarks>
-    public static List<Registeropgave> Aabne(DateOnly idag) =>
-        Alle()
+    public static List<Registeropgave> Aabne(DateOnly idag)
+    {
+        var aabne = Alle()
             .Where(r => !r.Opgave.Faerdig || r.Opgave.FaerdigIDag(idag))
+            .ToList();
+
+        // ============ DIN EGEN RAEKKEFOELGE VINDER OVER ALT ============
+        //
+        // Ogsaa over fristen. Det er hele pointen: en liste, der bliver ved
+        // med at sortere sig selv om, er ikke din - og «hvad vil JEG tage
+        // foerst» er ikke et spoergsmaal, en dato kan svare paa.
+        //
+        // De afkrydsede er stadig nederst. En opgave, man lige har sat flueben
+        // ved, skal ikke blive staaende midt i listen resten af dagen.
+        if (AppSettings.Current.OpgaverManueltSorteret)
+            return aabne
+                .OrderBy(r => r.Opgave.Faerdig ? 1 : 0)
+                .ThenBy(r => r.Opgave.Raekkefoelge)
+                .ToList();
+
+        return aabne
             .OrderBy(r => (int)r.Hastighed(idag))
             .ThenBy(r => r.Opgave.Prioritet == 0 ? 4 : r.Opgave.Prioritet)
             .ThenBy(r => r.Opgave.Deadline ?? DateTimeOffset.MaxValue)
             .ToList();
+    }
+
+    /// <summary>
+    /// Skriver den rækkefølge ned, listen står i nu.
+    /// </summary>
+    /// <remarks>
+    /// HELE LISTEN STEMPLES, ikke kun den, der blev flyttet. Første gang der
+    /// trækkes, står der nul på dem alle sammen, og et enkelt nyt tal ville
+    /// ikke sige noget om, hvor de andre skal stå.
+    ///
+    /// Der gemmes ÉN gang. <c>Opgavelager.Gem(o)</c> læser hele filen ind for
+    /// hver opgave, og det ville være tyve læsninger og tyve skrivninger for
+    /// ét træk.
+    ///
+    /// Opgaver, der ikke er med i rækken — de færdige fra i går, dem der er
+    /// filtreret fra — beholder deres eget tal. De er ikke flyttet.
+    /// </remarks>
+    public static void SaetRaekkefoelge(IReadOnlyList<Guid> raekken)
+    {
+        if (raekken.Count == 0) return;
+
+        var alle = Opgavelager.Alle();
+
+        for (var nr = 0; nr < raekken.Count; nr++)
+        {
+            var o = alle.FirstOrDefault(x => x.Id == raekken[nr]);
+            if (o is not null) o.Raekkefoelge = nr + 1;
+        }
+
+        Opgavelager.Gem(alle);
+
+        AppSettings.Current.OpgaverManueltSorteret = true;
+        AppSettings.Current.Save();
+    }
+
+    /// <summary>
+    /// Tallet, en ny opgave skal have, så den lander øverst.
+    /// </summary>
+    /// <remarks>
+    /// EN NY OPGAVE MAA IKKE FORSVINDE NEDERST. Har man selv sat rækkefølgen,
+    /// har alt andet et tal, og en ny med nul ville lægge sig først af sig
+    /// selv — men kun indtil nogen trækker igen og stempler hele listen om.
+    /// Derfor sættes den eksplicit under den mindste, der findes.
+    ///
+    /// Er rækkefølgen ikke sat i hånden, svares nul: så bestemmer fristen,
+    /// som den altid har gjort.
+    /// </remarks>
+    public static double NyestePlads()
+    {
+        if (!AppSettings.Current.OpgaverManueltSorteret) return 0;
+
+        try
+        {
+            var mindste = Opgavelager.Alle()
+                .Select(o => o.Raekkefoelge)
+                .DefaultIfEmpty(1)
+                .Min();
+
+            return mindste - 1;
+        }
+        catch (Exception)
+        {
+            return 0;
+        }
+    }
 
     /// <summary>
     /// Gemmer en ændret opgave.

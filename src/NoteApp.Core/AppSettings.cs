@@ -380,6 +380,20 @@ public sealed class AppSettings
     /// Det skal være et valg, man har truffet, ikke noget der fulgte med en
     /// opdatering.
     /// </remarks>
+    /// <summary>
+    /// Har du selv bestemt rækkefølgen på opgaverne?
+    /// </summary>
+    /// <remarks>
+    /// DEN ER EN KONTAKT OG IKKE ET GÆT PÅ TALLENE. Uden den ville appen
+    /// skulle regne ud, om <c>Raekkefoelge</c> på tværs af opgaverne «ser
+    /// bevidst ud» — og en liste, hvor halvdelen er flyttet og halvdelen
+    /// ikke er, har ingen rigtig rækkefølge.
+    ///
+    /// Slås til, første gang der trækkes i en opgave. Fra da af er det din
+    /// rækkefølge, der gælder, uanset frist og prioritet.
+    /// </remarks>
+    public bool OpgaverManueltSorteret { get; set; }
+
     public bool VaageordTil { get; set; }
 
     /// <summary>
