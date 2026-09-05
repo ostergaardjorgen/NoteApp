@@ -1,4 +1,4 @@
-using NoteApp.Core;
+﻿using NoteApp.Core;
 using Xunit;
 
 namespace NoteApp.Tests;
@@ -44,13 +44,21 @@ public class GenvejsgrebTest
     }
 
     [Fact]
-    public void De_to_kommaer_er_ikke_den_samme_tast()
+    public void De_to_kommaer_er_den_samme_genvej()
     {
-        // Paa et dansk tastatur staar der et komma paa BEGGE. En liste kan
-        // ikke skelne dem, og det var praecis dér, det gik galt.
+        // ============ VENDT OM 05-09-2026, MED VILJE ============
+        //
+        // Her stod det modsatte: at de to kommataster var to forskellige
+        // genveje. Det er sandt om tastaturet og forkert om mennesket. Paa
+        // begge taster staar der et komma; fingeren rammer «kommaet».
+        //
+        // Foelgen var, at den gemte genvej var bundet til DEN ENE af dem.
+        // Skaermen sagde «Ctrl+Shift+,», tasten sagde komma, og der skete
+        // ingenting. Den gamle loesning registrerede tvillingen i begge grene
+        // netop derfor - se Genvejsgreb.Tvillingen.
         var greb = CtrlShift(PaaTal);
 
-        Assert.False(greb.Passer(VedM, udvidet: false, ctrl: true, shift: true, alt: false));
+        Assert.True(greb.Passer(VedM, udvidet: false, ctrl: true, shift: true, alt: false));
     }
 
     [Fact]
@@ -133,10 +141,16 @@ public class GenvejsgrebTest
     [Fact]
     public void Hvor_tasten_sidder_staar_ved_siden_af_navnet()
     {
-        // Forskellen SKAL kunne ses et sted. Bare ikke inde i navnet.
-        Assert.Contains("taltastatur", CtrlShift(PaaTal).Hvor());
-        Assert.Contains("M", CtrlShift(VedM).Hvor());
-        Assert.NotEqual(CtrlShift(PaaTal).Hvor(), CtrlShift(VedM).Hvor());
+        // BEGGE taster naevnes, og de to greb siger det samme - for de ER det
+        // samme. Foer stod her, at de skulle sige noget FORSKELLIGT, og det
+        // var netop den forskel, ingen kunne se paa skaermen.
+        foreach (var hvor in new[] { CtrlShift(PaaTal).Hvor(), CtrlShift(VedM).Hvor() })
+        {
+            Assert.Contains("taltastatur", hvor);
+            Assert.Contains("M", hvor);
+        }
+
+        Assert.Equal(CtrlShift(PaaTal).Hvor(), CtrlShift(VedM).Hvor());
     }
 
     [Fact]
@@ -149,5 +163,74 @@ public class GenvejsgrebTest
         Assert.True(s.Shift);
         Assert.False(s.Alt);
         Assert.True(s.Duer);
+    }
+
+    // ==================== TVILLINGEN ====================
+    //
+    // Et dansk tastatur har to kommataster. Den gamle loesning registrerede
+    // dem begge; da genvejen blev bygget om, fulgte tvillingen ikke med.
+
+    [Fact]
+    public void Genvej_paa_taltastaturets_komma_virker_ogsaa_paa_det_ved_siden_af_M()
+    {
+        // Det greb, der laa gemt paa maskinen 05-09-2026: «cs:53».
+        var greb = new Genvejsgreb(Genvejsgreb.Taltastaturkomma,
+                                   Udvidet: false, Ctrl: true, Shift: true, Alt: false);
+
+        Assert.True(greb.Passer(Genvejsgreb.Komma, udvidet: false,
+                                ctrl: true, shift: true, alt: false));
+    }
+
+    [Fact]
+    public void Og_den_anden_vej()
+    {
+        var greb = new Genvejsgreb(Genvejsgreb.Komma,
+                                   Udvidet: false, Ctrl: true, Shift: true, Alt: false);
+
+        Assert.True(greb.Passer(Genvejsgreb.Taltastaturkomma, udvidet: false,
+                                ctrl: true, shift: true, alt: false));
+    }
+
+    [Fact]
+    public void Delete_over_piletasterne_er_ikke_et_komma()
+    {
+        // Samme scancode som taltastaturets komma. Kun det udvidede flag
+        // skiller dem, og uden det ville genvejen udloese sig selv paa Delete.
+        var greb = new Genvejsgreb(Genvejsgreb.Taltastaturkomma,
+                                   Udvidet: false, Ctrl: true, Shift: true, Alt: false);
+
+        Assert.False(greb.Passer(Genvejsgreb.Taltastaturkomma, udvidet: true,
+                                 ctrl: true, shift: true, alt: false));
+    }
+
+    [Fact]
+    public void Punktummet_har_ingen_tvilling()
+    {
+        var greb = new Genvejsgreb(Genvejsgreb.Punktum,
+                                   Udvidet: false, Ctrl: true, Shift: true, Alt: false);
+
+        Assert.False(greb.Passer(Genvejsgreb.Komma, udvidet: false,
+                                 ctrl: true, shift: true, alt: false));
+        Assert.Equal(0u, Genvejsgreb.Tvillingen(Genvejsgreb.Punktum));
+    }
+
+    [Fact]
+    public void Holdetasterne_skal_stadig_passe_paa_tvillingen()
+    {
+        var greb = new Genvejsgreb(Genvejsgreb.Taltastaturkomma,
+                                   Udvidet: false, Ctrl: true, Shift: true, Alt: false);
+
+        Assert.False(greb.Passer(Genvejsgreb.Komma, udvidet: false,
+                                 ctrl: true, shift: false, alt: false));
+    }
+
+    [Fact]
+    public void Skaermen_siger_at_begge_kommataster_taeller()
+    {
+        var greb = new Genvejsgreb(Genvejsgreb.Taltastaturkomma,
+                                   Udvidet: false, Ctrl: true, Shift: true, Alt: false);
+
+        Assert.Contains("begge", greb.Hvor());
+        Assert.Equal("Ctrl+Shift+,", greb.Navn());
     }
 }

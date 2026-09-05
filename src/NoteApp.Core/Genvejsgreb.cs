@@ -1,4 +1,4 @@
-namespace NoteApp.Core;
+﻿namespace NoteApp.Core;
 
 /// <summary>
 /// Et greb på tastaturet: en fysisk tast plus de taster, der holdes nede.
@@ -47,6 +47,35 @@ public sealed record Genvejsgreb(
     public const uint Mellemrum = 0x39;
 
     /// <summary>
+    /// Den anden tast med det samme tegn på — eller nul, hvis der ikke er nogen.
+    /// </summary>
+    /// <remarks>
+    /// ============ TVILLINGEN. DEN VAR VÆK, OG DET KOSTEDE ============
+    ///
+    /// Et dansk tastatur har TO kommataster: den ved siden af M og den på
+    /// taltastaturet. På begge står der et komma. Fingeren rammer «kommaet»,
+    /// og for den, der trykker, er der én genvej — ikke to.
+    ///
+    /// Den gamle løsning vidste det. Den registrerede tvillingen i BEGGE
+    /// grene (v1.1.88, 30-08-2026), netop fordi genvejen ellers holdt op med
+    /// at virke, uden at der var noget at se. Da genvejen blev bygget om til
+    /// at se på tastens plads, fulgte tvillingen ikke med — og så var den
+    /// gemte genvej bundet til DEN ENE af de to kommataster.
+    ///
+    /// Skærmen sagde «Ctrl+Shift+,». Tasten sagde komma. Genvejen lyttede på
+    /// den anden komma, og der skete ingenting. Meldt 05-09-2026:
+    /// «genvejstaster virker hverken i app eller udenfor».
+    ///
+    /// Punktummet har samme tvilling-problem og får samme svar.
+    /// </remarks>
+    public static uint Tvillingen(uint scancode) => scancode switch
+    {
+        Komma => Taltastaturkomma,
+        Taltastaturkomma => Komma,
+        _ => 0,
+    };
+
+    /// <summary>
     /// Er der overhovedet en holdetast med?
     /// </summary>
     /// <remarks>
@@ -61,9 +90,18 @@ public sealed record Genvejsgreb(
     /// <remarks>
     /// Der ses IKKE på, hvilken tastkode Windows nåede frem til. Kun på hvor
     /// tasten sad, og hvad der blev holdt nede.
+    ///
+    /// TVILLINGEN TÆLLER MED. Er genvejen gemt på den ene kommatast, virker
+    /// den også på den anden — se <see cref="Tvillingen"/>. Det er ikke
+    /// slinger: for den, der trykker, findes der ét komma.
+    ///
+    /// UDVIDET SKAL STADIG PASSE. Delete over piletasterne har den SAMME
+    /// scancode som taltastaturets komma og skilles kun fra den på dét flag.
+    /// Uden kravet ville genvejen også udløse sig selv på Delete.
     /// </remarks>
     public bool Passer(uint scancode, bool udvidet, bool ctrl, bool shift, bool alt) =>
-        scancode == Scancode && udvidet == Udvidet
+        (scancode == Scancode || scancode == Tvillingen(Scancode))
+        && udvidet == Udvidet
         && ctrl == Ctrl && shift == Shift && alt == Alt;
 
     /// <summary>
@@ -101,8 +139,10 @@ public sealed record Genvejsgreb(
     /// </remarks>
     public string Hvor() => (Scancode, Udvidet) switch
     {
-        (Komma, false) => "kommaet ved siden af M",
-        (Taltastaturkomma, false) => "kommaet på taltastaturet",
+        // BEGGE KOMMATASTER TÆLLER — se Tvillingen. Før stod her, hvilken af
+        // de to der var gemt, og det lød som en begrænsning, der ikke findes.
+        (Komma, false) or (Taltastaturkomma, false) =>
+            "begge kommataster — både den ved siden af M og den på taltastaturet",
         (Punktum, false) => "punktummet ved siden af kommaet",
         _ => "",
     };
