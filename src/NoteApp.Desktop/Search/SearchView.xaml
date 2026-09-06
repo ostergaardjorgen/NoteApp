@@ -863,18 +863,42 @@
                      De findes ved at gaa ned gennem det tegnede kort. En
                      DataTemplate laver eet saet pr. raekke, og x:Name kan
                      derfor ikke slaas op udefra - se Indsaetlinje i koden. -->
+                <!-- ============ STREGEN LIGGER OVENPAA OG FYLDER INTET ============
+
+                     FOER LAA DEN I SIN EGEN RAEKKE. Fire pixels streg plus fire
+                     pixels luft, i en raekke med Height="Auto" - saa VOKSEDE
+                     kortet med otte pixels i det oejeblik, stregen kom frem, og
+                     alt nedenunder rykkede ned.
+
+                     Det er dét, der fik listen til at hoppe: kortet under musen
+                     flyttede sig, markoeren stod pludselig paa den anden halvdel
+                     eller paa naboen, DragOver fyrede igen, stregen flyttede,
+                     og layoutet rykkede tilbage. En loekke, der kun stopper,
+                     naar man holder musen helt stille.
+
+                     Nu ligger begge streger i SAMME celle som kortet, holdt op i
+                     toppen og bunden med en negativ margin, saa de tegnes i
+                     mellemrummet mellem to kort. De maaler intet, de flytter
+                     intet, og IsHitTestVisible holder dem uden for traekket -
+                     ellers kunne stregen selv blive maalet og starte det samme
+                     forfra. -->
                 <Grid Margin="0,0,0,6">
-                <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
-                <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
 
-                <Border x:Name="Indsaetfoer" Grid.Row="0" Height="4" CornerRadius="2"
-                Margin="0,0,0,4" Visibility="Collapsed"
-                Background="{DynamicResource Accent}" />
+                <Border x:Name="Indsaetfoer" Height="3" CornerRadius="2"
+                VerticalAlignment="Top"
+                Visibility="Collapsed" IsHitTestVisible="False"
+                Background="{DynamicResource Accent}" Panel.ZIndex="2">
+                <!-- FLYTTET MED EN RenderTransform OG IKKE MED EN MARGIN.
+                     En negativ margin traekkes fra i MAALINGEN: 3 px hoejde
+                     minus 5 px margin blev til nul, og stregen forsvandt
+                     helt. Maalt 05-09-2026. En RenderTransform laegges paa
+                     BAGEFTER og roerer hverken maal eller plads. -->
+                <Border.RenderTransform>
+                <TranslateTransform Y="-5" />
+                </Border.RenderTransform>
+                </Border>
 
-                <Border Grid.Row="1" Background="{DynamicResource Trykket}"
+                <Border Background="{DynamicResource Trykket}"
                 BorderBrush="{DynamicResource PanelKant}"
                 BorderThickness="1" CornerRadius="6"
                 Opacity="{Binding Daempning}"
@@ -882,7 +906,7 @@
                 AllowDrop="True"
                 PreviewMouseLeftButtonDown="Opgave_Museknap"
                 PreviewMouseMove="Opgave_Musbevaegelse"
-                DragOver="Opgave_TraekkesHen" DragLeave="Opgave_TraekForbi"
+                DragOver="Opgave_TraekkesHen"
                 Drop="Opgave_Sluppet"
                 Cursor="Hand" ToolTip="{Binding Boble}">
                 <Grid>
@@ -1036,9 +1060,14 @@
                 </Grid>
                 </Border>
 
-                <Border x:Name="Indsaetefter" Grid.Row="2" Height="4" CornerRadius="2"
-                Margin="0,4,0,0" Visibility="Collapsed"
-                Background="{DynamicResource Accent}" />
+                <Border x:Name="Indsaetefter" Height="3" CornerRadius="2"
+                VerticalAlignment="Bottom"
+                Visibility="Collapsed" IsHitTestVisible="False"
+                Background="{DynamicResource Accent}" Panel.ZIndex="2">
+                <Border.RenderTransform>
+                <TranslateTransform Y="5" />
+                </Border.RenderTransform>
+                </Border>
                 </Grid>
                 </DataTemplate>
                 </ItemsControl.ItemTemplate>

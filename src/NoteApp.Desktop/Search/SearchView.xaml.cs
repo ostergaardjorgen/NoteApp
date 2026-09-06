@@ -1551,6 +1551,11 @@ public partial class SearchView : UserControl
         // op undervejs — saa Opgave_Aabn kommer ikke bagefter.
         DragDrop.DoDragDrop((DependencyObject)sender,
             new DataObject(typeof(Opgavevisning), det), DragDropEffects.Move);
+
+        // DoDragDrop vender først tilbage, når der er sluppet eller fortrudt.
+        // Det er den ENESTE besked, der kommer i begge tilfælde — en Escape
+        // eller et slip uden for listen giver hverken Drop eller DragLeave.
+        SlukStreg();
     }
 
     /// <summary>
@@ -1588,30 +1593,56 @@ public partial class SearchView : UserControl
         // er landingspladsen den samme som toppen af det naeste. Stregen
         // vises derfor dér, saa den ikke hopper mellem to udgaver af det
         // samme sted.
-        Vis(kort, "Indsaetfoer", !under);
-        Vis(kort, "Indsaetefter", under && sidste);
+        var linje = under
+            ? sidste
+                ? Streg(kort, "Indsaetefter")
+                : Naboen(kort) is { } naeste ? Streg(naeste, "Indsaetfoer") : null
+            : Streg(kort, "Indsaetfoer");
 
-        if (under && !sidste && Naboen(kort) is { } naeste)
-            Vis(naeste, "Indsaetfoer", true);
+        Taend(linje);
     }
 
-    private void Opgave_TraekForbi(object sender, DragEventArgs e) => RydTraekkant(sender);
-
     /// <summary>
-    /// Slukker begge streger på kortet — og på naboen, som også kan lyse.
+    /// Den streg, der lyser lige nu. Højst én ad gangen.
     /// </summary>
-    private static void RydTraekkant(object sender)
+    /// <remarks>
+    /// ============ FØR SLUKKEDE NABOEN DEN, KORTET LIGE HAVDE TÆNDT ============
+    ///
+    /// Hvert kort tændte sine egne streger i DragOver og slukkede dem i
+    /// DragLeave. Men går man fra bunden af ét kort til toppen af det næste,
+    /// er det DEN SAMME streg, de to kort er enige om at vise — og
+    /// rækkefølgen af DragOver og DragLeave er ikke givet. Naboens DragLeave
+    /// kunne derfor slukke det, kortet lige havde tændt. Den blinkede.
+    ///
+    /// Nu er der ét sted, der ved, hvad der lyser. Er svaret det samme som
+    /// sidst, røres der ingenting — og så kan der ikke blinke noget.
+    /// </remarks>
+    private Border? _lysendeStreg;
+
+    private void Taend(Border? streg)
     {
-        if (sender is not Border kort) return;
+        if (ReferenceEquals(_lysendeStreg, streg)) return;
 
-        Vis(kort, "Indsaetfoer", false);
-        Vis(kort, "Indsaetefter", false);
+        if (_lysendeStreg is not null) _lysendeStreg.Visibility = Visibility.Collapsed;
 
-        if (Naboen(kort) is { } naeste) Vis(naeste, "Indsaetfoer", false);
+        _lysendeStreg = streg;
+
+        if (streg is not null) streg.Visibility = Visibility.Visible;
     }
 
     /// <summary>
-    /// Tænder eller slukker en af stregerne på ét kort.
+    /// Slukker stregen, uanset hvilket kort den sidder på.
+    /// </summary>
+    /// <remarks>
+    /// Kaldes to steder: når der SLIPPES, og når trækket er forbi — også hvis
+    /// det blev fortrudt med Escape eller sluppet uden for listen.
+    /// <c>DoDragDrop</c> vender først tilbage dér, og det er den eneste
+    /// besked, der kommer i alle tilfælde.
+    /// </remarks>
+    private void SlukStreg() => Taend(null);
+
+    /// <summary>
+    /// Finder en af stregerne på ét kort.
     /// </summary>
     /// <remarks>
     /// Der gås gennem det TEGNEDE kort og ikke gennem FindName. En
@@ -1620,13 +1651,15 @@ public partial class SearchView : UserControl
     /// opgave. Vejen er den visuelle træstruktur, hvor hvert kort kun kan se
     /// sine egne.
     /// </remarks>
-    private static void Vis(Border kort, string navn, bool taendt)
+    private static Border? Streg(Border kort, string navn)
     {
-        if (VisualTreeHelper.GetParent(kort) is not Grid ramme) return;
+        if (VisualTreeHelper.GetParent(kort) is not Grid ramme) return null;
 
         foreach (var barn in ramme.Children)
             if (barn is Border b && b.Name == navn)
-                b.Visibility = taendt ? Visibility.Visible : Visibility.Collapsed;
+                return b;
+
+        return null;
     }
 
     /// <summary>Kortet lige under dette — eller <c>null</c>, hvis det er det sidste.</summary>
@@ -1661,7 +1694,7 @@ public partial class SearchView : UserControl
 
     private void Opgave_Sluppet(object sender, DragEventArgs e)
     {
-        RydTraekkant(sender);
+        SlukStreg();
         e.Handled = true;
 
         if (sender is not Border kort) return;
