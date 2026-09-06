@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 
 namespace NoteApp.Core;
 
@@ -98,7 +98,7 @@ public static class Projektkontekst
 
             if (sb.Length >= loft) { afkortet = true; break; }
 
-            var fund = Soegning.Soeg(navn, new Soegefilter(Projekt: projekt.Id))
+            var fund = Soegning.Soeg(navn, new Soegefilter(Projekt: new[] { projekt.Id }))
                 .Where(f => f.Slags == Fundtype.Projektfil)
                 .ToList();
 

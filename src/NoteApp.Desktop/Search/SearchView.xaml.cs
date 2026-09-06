@@ -160,6 +160,7 @@ public partial class SearchView : UserControl
             HentSpaltebredder();
             StartTips();
             FyldFiltre();
+            KoblFiltre();
             VisOpgaver();
             VisKalender();
 
@@ -400,12 +401,40 @@ public partial class SearchView : UserControl
         if (_venstreFuld <= 0 || _hoejreFuld <= 0) HentBredder();
     }
 
+    /// <summary>Kalenderspaltens bredde, som den er nu.</summary>
+    public const double Kalenderbredde = 274;
+
+    /// <summary>
+    /// Bredden, kalenderen havde før 06-09-2026.
+    /// </summary>
+    /// <remarks>
+    /// ============ EN GEMT BREDDE SKAL IKKE OVERSKRIVES ============
+    ///
+    /// Har man selv trukket i spalten, er den bredde et valg, og den skal
+    /// blive stående. Har man ikke, er den bare den gamle standard — og så
+    /// ville en ny standard aldrig komme frem hos dem, der allerede har brugt
+    /// appen.
+    ///
+    /// Der ryddes derfor kun op i det, der ligger tæt på den gamle
+    /// standard: en spalte mellem 296 og 316 er ikke trukket derhen, den er
+    /// endt der. Alt andet røres ikke.
+    /// </remarks>
+    private const double Gammelbredde = 306;
+
     private void HentBredder()
     {
         var v = AppSettings.Current.CockpitVenstre;
         var h = AppSettings.Current.CockpitHoejre;
 
-        _venstreFuld = v > 0 ? v : 306;
+        // ÉN GANG: den gamle standard bliver til den nye. Se Gammelbredde.
+        if (v > 0 && Math.Abs(v - Gammelbredde) <= 10)
+        {
+            v = Kalenderbredde;
+            AppSettings.Current.CockpitVenstre = v;
+            AppSettings.Current.Save();
+        }
+
+        _venstreFuld = v > 0 ? v : Kalenderbredde;
         _hoejreFuld = h > 0 ? h : 340;
     }
 
@@ -1913,9 +1942,9 @@ public partial class SearchView : UserControl
         };
         Periodefilter.SelectedIndex = 0;
 
-        var mapper = new List<Filterpunkt> { new(Sprog.T("cockpit.allemapper"), null) };
-        var typer = new List<Filterpunkt> { new("Alle mødetyper", null) };
-        var sprog = new List<Filterpunkt> { new(Sprog.T("cockpit.allesprog"), null) };
+        var mapper = new List<(string, string?)>();
+        var typer = new List<(string, string?)>();
+        var sprog = new List<(string, string?)>();
 
         var seteMapper = new HashSet<string>(StringComparer.CurrentCultureIgnoreCase);
         var seteTyper = new HashSet<string>(StringComparer.CurrentCultureIgnoreCase);
@@ -1924,27 +1953,72 @@ public partial class SearchView : UserControl
         foreach (var m in MeetingStore.Alle())
         {
             if (!string.IsNullOrWhiteSpace(m.Mappe) && seteMapper.Add(m.Mappe))
-                mapper.Add(new Filterpunkt(m.Mappe, m.Mappe));
+                mapper.Add((m.Mappe, m.Mappe));
 
             if (!string.IsNullOrWhiteSpace(m.Moedetype) && seteTyper.Add(m.Moedetype))
-                typer.Add(new Filterpunkt(m.Moedetype, m.Moedetype));
+                typer.Add((m.Moedetype, m.Moedetype));
 
             if (Soegefilter.SprogPaa(m) is { Length: > 0 } s && seteSprog.Add(s))
-                sprog.Add(new Filterpunkt(Transcriber.LanguageName(s), s));
+                sprog.Add((Transcriber.LanguageName(s), s));
         }
 
-        Saet(Mappefilter, mapper);
-        Saet(Typefilter, typer);
-        Saet(Sprogfilter, sprog);
+        // ============ PROJEKTERNE ============
+        //
+        // KUN DE AKTIVE. Et arkiveret projekt er lagt vaek; staar det i
+        // filtret, vokser listen med noget, man er faerdig med - og det er
+        // netop dét, arkivet findes for at undgaa.
+        //
+        // OG KUN DEM, DER ER MED I SOEGNINGEN. Er hakket slaaet fra, kan
+        // projektet ikke findes, og saa er en afgraensning paa det en knap,
+        // der ikke kan give et svar.
+        var projekter = Projektlager.Alle()
+            .Where(p => p.Status == Projektstatus.Aktiv && p.MedISoegning)
+            .Select(p => (p.Navn, (string?)p.Id))
+            .ToList();
 
-        static void Saet(System.Windows.Controls.ComboBox b, List<Filterpunkt> punkter)
+        Saet(Mappefilter, mapper, Sprog.T("cockpit.allemapper"), "mapper");
+        Saet(Typefilter, typer, "Alle mødetyper", "mødetyper");
+        Saet(Projektfilter, projekter, "Alle projekter", "projekter");
+        Saet(Sprogfilter, sprog, Sprog.T("cockpit.allesprog"), "sprog");
+
+        static void Saet(Flervalg b, List<(string Navn, string? Vaerdi)> punkter,
+                         string alt, string flertal)
         {
-            // Er der kun «alle», er der intet at vaelge imellem — og en liste
-            // med ét punkt er en knap, der ikke goer noget.
-            b.ItemsSource = punkter;
-            b.SelectedIndex = 0;
-            b.IsEnabled = punkter.Count > 1;
+            b.Alt = alt;
+            b.Flertal = flertal;
+            b.Fyld(punkter);
+
+            // Er der intet at vaelge imellem, er knappen en knap, der ikke
+            // goer noget.
+            b.IsEnabled = punkter.Count > 0;
         }
+    }
+
+    /// <summary>
+    /// Kobler de fire flervalg til soegningen.
+    /// </summary>
+    /// <remarks>
+    /// EEN GANG OG IKKE VED HVER PAAFYLDNING. Fyld() kaldes, hver gang
+    /// skaermen bygges; blev haendelsen sat dér, ville den ligge oven i sig
+    /// selv, og ét hak ville soege fire gange.
+    /// </remarks>
+    private void KoblFiltre()
+    {
+        foreach (var f in new[] { Mappefilter, Typefilter, Projektfilter, Sprogfilter })
+        {
+            f.Aendret -= Flervalg_Aendret;
+            f.Aendret += Flervalg_Aendret;
+        }
+    }
+
+    private void Flervalg_Aendret()
+    {
+        if (!IsLoaded) return;
+
+        RydFilter.Visibility = Filteret().Tomt ? Visibility.Collapsed : Visibility.Visible;
+
+        _pause.Stop();
+        Soeg();
     }
 
     /// <summary>
@@ -1971,10 +2045,11 @@ public partial class SearchView : UserControl
         var (fra, til) = Perioden();
 
         return new Soegefilter(
-            Sprog: (Sprogfilter.SelectedItem as Filterpunkt)?.Vaerdi,
-            Moedetype: (Typefilter.SelectedItem as Filterpunkt)?.Vaerdi,
-            Mappe: (Mappefilter.SelectedItem as Filterpunkt)?.Vaerdi,
-            Fra: fra, Til: til);
+            Sprog: Sprogfilter.Valgte,
+            Moedetype: Typefilter.Valgte,
+            Mappe: Mappefilter.Valgte,
+            Fra: fra, Til: til,
+            Projekt: Projektfilter.Valgte);
     }
 
     private void Filter_Aendret(object sender, SelectionChangedEventArgs e)
@@ -2031,9 +2106,10 @@ public partial class SearchView : UserControl
 
     private void RydFilter_Klik(object sender, RoutedEventArgs e)
     {
-        Mappefilter.SelectedIndex = 0;
-        Typefilter.SelectedIndex = 0;
-        Sprogfilter.SelectedIndex = 0;
+        Mappefilter.Ryd();
+        Typefilter.Ryd();
+        Projektfilter.Ryd();
+        Sprogfilter.Ryd();
 
         FraDato.SelectedDate = null;
         TilDato.SelectedDate = null;

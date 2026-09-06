@@ -201,6 +201,7 @@
     "vaelg_et_projekt": "Pick a project on the left — or make a new one."
   },
   "searchview": {
+    "kun_filer_fra_disse_projekter": "Only files from these projects",
     "aabn_aftalen": "Open the event",
     "aabn_opgaven": "Open the task",
     "cockpit": "Cockpit",

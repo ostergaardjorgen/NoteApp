@@ -593,6 +593,7 @@
     "vaelg_et_projekt": "Vælg et projekt til venstre — eller lav et nyt."
   },
   "searchview": {
+    "kun_filer_fra_disse_projekter": "Kun filer fra disse projekter",
     "aabn_aftalen": "Åbn aftalen",
     "aabn_opgaven": "Åbn opgaven",
     "cockpit": "Cockpit",

@@ -1,4 +1,4 @@
-using NoteApp.Core;
+﻿using NoteApp.Core;
 using Xunit;
 
 namespace NoteApp.Tests;
@@ -78,7 +78,7 @@ public class Projektsoegningstest
 
         Assert.Equal(2, Soegning.Soeg("adgangsstyring").Count);
 
-        var kun = Soegning.Soeg("adgangsstyring", new Soegefilter(Projekt: et.Id));
+        var kun = Soegning.Soeg("adgangsstyring", new Soegefilter(Projekt: new[] { et.Id }));
 
         Assert.Contains("et.md", Assert.Single(kun).Overskrift);
     }
@@ -93,8 +93,8 @@ public class Projektsoegningstest
         // En projektfil har hverken moedetype eller sprog. Stod den paa
         // listen alligevel, ville den lade som om, den svarede paa
         // spoergsmaalet.
-        Assert.Empty(Soegning.Soeg("adgangsstyring", new Soegefilter(Moedetype: "Mødereferat")));
-        Assert.Empty(Soegning.Soeg("adgangsstyring", new Soegefilter(Mappe: "Møder")));
+        Assert.Empty(Soegning.Soeg("adgangsstyring", new Soegefilter(Moedetype: new[] { "Mødereferat" })));
+        Assert.Empty(Soegning.Soeg("adgangsstyring", new Soegefilter(Mappe: new[] { "Møder" })));
 
         Assert.NotEmpty(Soegning.Soeg("adgangsstyring", new Soegefilter()));
     }

@@ -97,10 +97,29 @@ public sealed record Fund(
 /// ti og grænsen gik ved midnat. Datovælgeren giver en dato, ikke et
 /// klokkeslæt, og så skal dagen tælle hele vejen.
 /// </param>
-public sealed record Soegefilter(string? Sprog = null, string? Moedetype = null,
-                                 string? Mappe = null,
+/// <summary>
+/// Hvad der overhovedet skal ledes i. Et tomt filter betyder alt.
+/// </summary>
+/// <remarks>
+/// ============ FLERE VÆRDIER PR. AFGRÆNSNING ============
+///
+/// Her stod én streng pr. felt: én mappe, én mødetype, ét sprog. Det svarer
+/// på «hvad står der i Møder?» og ikke på «hvad står der i Møder ELLER
+/// Webinarer?» — og det andet spørgsmål er lige så almindeligt.
+///
+/// En tom liste betyder ALT. Det er den samme regel som før, hvor en tom
+/// streng betoed alt: en afgrænsning, ingen har sat, må ikke afgrænse noget.
+///
+/// VALGENE INDEN FOR ÉT FELT ER ELLER; MELLEM FELTER ER DET OG. «Møder eller
+/// Webinarer» OG «på dansk». Det er den måde, man selv tænker et filter, og
+/// den anden vej rundt ville et ekstra hak gøre listen kortere i stedet for
+/// længere.
+/// </remarks>
+public sealed record Soegefilter(IReadOnlyList<string>? Sprog = null,
+                                 IReadOnlyList<string>? Moedetype = null,
+                                 IReadOnlyList<string>? Mappe = null,
                                  DateTimeOffset? Fra = null, DateTimeOffset? Til = null,
-                                 string? Projekt = null)
+                                 IReadOnlyList<string>? Projekt = null)
 {
     /// <summary>
     /// Skal der overhovedet ledes i projekternes filer?
@@ -113,10 +132,27 @@ public sealed record Soegefilter(string? Sprog = null, string? Moedetype = null,
     ///
     /// Datoen gælder derimod: filen har en dato, og den betyder det samme.
     /// </remarks>
-    public bool LederIProjekter =>
-        string.IsNullOrWhiteSpace(Moedetype) && string.IsNullOrWhiteSpace(Mappe);
-    private static bool Ens(string? a, string? b) =>
-        string.IsNullOrWhiteSpace(a) || (b is not null && a.Equals(b, StringComparison.CurrentCultureIgnoreCase));
+    public bool LederIProjekter => Tom(Moedetype) && Tom(Mappe);
+
+    /// <summary>En afgrænsning, ingen har sat.</summary>
+    public static bool Tom(IReadOnlyList<string>? valgte) => valgte is null || valgte.Count == 0;
+
+    /// <summary>
+    /// Passer værdien på mindst ét af de valgte?
+    /// </summary>
+    /// <remarks>
+    /// EN TOM LISTE PASSER PAA ALT. Ellers ville en skærm uden hak et sted
+    /// give nul svar, og det er ikke, hvad «alle mapper» betyder.
+    /// </remarks>
+    private static bool Ens(IReadOnlyList<string>? valgte, string? b) =>
+        Tom(valgte)
+        || (b is not null && valgte!.Any(a =>
+                a.Equals(b, StringComparison.CurrentCultureIgnoreCase)));
+
+    /// <summary>Er den her værdi valgt? Til de steder, der har et id og ikke et navn.</summary>
+    public bool Valgt(IReadOnlyList<string>? valgte, string vaerdi) =>
+        Tom(valgte)
+        || valgte!.Any(a => a.Equals(vaerdi, StringComparison.OrdinalIgnoreCase));
 
     private bool IPerioden(DateTimeOffset t) =>
         (Fra is null || t >= Fra) && (Til is null || t <= Til);
@@ -217,9 +253,7 @@ public sealed record Soegefilter(string? Sprog = null, string? Moedetype = null,
                && IPerioden(tid);
     }
 
-    public bool Tomt => string.IsNullOrWhiteSpace(Sprog)
-                        && string.IsNullOrWhiteSpace(Moedetype)
-                        && string.IsNullOrWhiteSpace(Mappe)
+    public bool Tomt => Tom(Sprog) && Tom(Moedetype) && Tom(Mappe) && Tom(Projekt)
                         && Fra is null && Til is null;
 
     /// <summary>
@@ -434,9 +468,7 @@ public static class Soegning
             {
                 ct.ThrowIfCancellationRequested();
 
-                if (filter.Projekt is { Length: > 0 } kun
-                    && !string.Equals(kun, projekt.Id, StringComparison.OrdinalIgnoreCase))
-                    continue;
+                if (!filter.Valgt(filter.Projekt, projekt.Id)) continue;
 
                 foreach (var fil in Projektkilder.Filer(projekt).Where(f => f.Laesbar))
                 {
