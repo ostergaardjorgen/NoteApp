@@ -1221,6 +1221,59 @@
          ignorerer Background. Kombineret med den globale TextBlock-stil, der
          gør tekst lys, blev resultatet lys tekst på hvid bund — altså en
          dropdown der så tom ud. -->
+    <!-- ============ FLERVALGSKNAPPEN ============
+
+         En afgraensning, hvor man kan vaelge flere. Den ER en ToggleButton, og
+         DERFOR skal den have sin egen skabelon:
+
+         Da ThemeMode blev slaaet til, kom Fluent-temaet med en implicit stil
+         for ToggleButton. Uden en skabelon her tegner den sin egen lyse kasse
+         med sin egen tekstfarve - og paa det moerke tema staar der saa hvid
+         tekst paa en lys flade. Set 06-09-2026: alle fire afgraensninger var
+         praktisk talt ulaeselige.
+
+         Det er den samme faelde, ComboBox-stilen nedenfor loeser med
+         Style="{x:Null}". Her loeses den ved at give knappen en skabelon, der
+         er vores egen hele vejen.
+
+         UDSEENDET ER RULLELISTENS. De fem afgraensninger staar ved siden af
+         hinanden, og den ene maa ikke se ud som en knap og de andre som
+         felter. Samme flade, samme kant, samme radius, samme svaev. -->
+    <Style x:Key="Flervalgsknap" TargetType="ToggleButton">
+      <Setter Property="FontFamily" Value="Segoe UI" />
+      <Setter Property="Foreground" Value="{DynamicResource Tekst}" />
+      <Setter Property="Height" Value="28" />
+      <Setter Property="Cursor" Value="Hand" />
+      <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="ToggleButton">
+            <Border x:Name="kant" CornerRadius="4"
+                    Background="{DynamicResource Trykket}"
+                    BorderBrush="{DynamicResource InputKant}" BorderThickness="1"
+                    Padding="{TemplateBinding Padding}">
+              <ContentPresenter VerticalAlignment="Center"
+                                HorizontalAlignment="Stretch"
+                                TextElement.Foreground="{TemplateBinding Foreground}" />
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="kant" Property="BorderBrush" Value="{DynamicResource Accent}" />
+              </Trigger>
+              <!-- Listen er foldet ud: samme blaa som et felt med markoeren i. -->
+              <Trigger Property="IsChecked" Value="True">
+                <Setter TargetName="kant" Property="BorderBrush" Value="{DynamicResource InputFokusKant}" />
+                <Setter TargetName="kant" Property="Background" Value="{DynamicResource Svaev}" />
+              </Trigger>
+              <Trigger Property="IsEnabled" Value="False">
+                <Setter TargetName="kant" Property="Opacity" Value="0.5" />
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
     <Style TargetType="ComboBox">
       <Setter Property="FontFamily" Value="Segoe UI" />
       <Setter Property="FontSize" Value="13" />

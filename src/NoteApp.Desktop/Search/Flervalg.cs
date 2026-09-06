@@ -1,4 +1,4 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -75,9 +75,15 @@ public sealed class Flervalg : ToggleButton
 
     public Flervalg()
     {
-        Padding = new Thickness(8, 4, 6, 4);
+        // ============ APPENS EGEN STIL, IKKE TEMAETS ============
+        //
+        // Uden den her tegner Fluent-temaets implicitte ToggleButton-stil sin
+        // egen lyse kasse, og teksten staar hvid paa lys. Se «Flervalgsknap» i
+        // App.xaml.
+        SetResourceReference(StyleProperty, "Flervalgsknap");
+
+        Padding = new Thickness(9, 3, 7, 3);
         FontSize = 11.5;
-        HorizontalContentAlignment = HorizontalAlignment.Stretch;
 
         var pil = new TextBlock
         {
@@ -147,6 +153,11 @@ public sealed class Flervalg : ToggleButton
         hak.SetBinding(ContentProperty, new Binding(nameof(Flervalgspunkt.Navn)));
         hak.SetValue(MarginProperty, new Thickness(0, 0, 0, 6));
         hak.SetValue(FontSizeProperty, 12.0);
+
+        // TEKSTFARVEN SAETTES PAA HAKKET SELV. Et hak i en popup arver ikke
+        // vinduets tekstfarve - popuppen er sit eget vindue - og saa staar
+        // der moerk tekst paa en moerk flade.
+        hak.SetResourceReference(ForegroundProperty, "Tekst");
 
         return new DataTemplate { VisualTree = hak };
     }

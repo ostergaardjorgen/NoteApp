@@ -1999,9 +1999,12 @@ public partial class SearchView : UserControl
             b.Flertal = flertal;
             b.Fyld(punkter);
 
-            // Er der intet at vaelge imellem, er knappen en knap, der ikke
-            // goer noget.
-            b.IsEnabled = punkter.Count > 0;
+            // ER DER INTET AT VAELGE IMELLEM, STAAR DEN IKKE.
+            //
+            // En afgraensning uden punkter kan aldrig aendre svaret. En graa
+            // kasse, der ikke kan trykkes, forklarer ikke noget - den tager
+            // bare den bredde, de fire andre har brug for.
+            b.Visibility = punkter.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
         }
     }
 
