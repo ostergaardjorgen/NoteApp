@@ -163,6 +163,14 @@ public partial class ProjekterView : UserControl
     /// </remarks>
     private void VisDokumentfanen(Projekt p)
     {
+        // DE INDBYGGEDE LAEGGES PAA PLADS HER OGSAA.
+        //
+        // De blev kun lagt ud, naar man aabnede Skabeloner - og en, der gaar
+        // direkte til Projekter, har aldrig vaeret der. Saa stod rullelisten
+        // tom, og Byg-knappen kunne ikke bruges til noget, uden at noget sagde
+        // hvorfor.
+        try { DraftStore.SeedTemplates(); } catch (Exception) { /* vises som tom liste */ }
+
         var skabeloner = PromptTemplate.LoadAll(Skabelonslags.Projektoutput);
 
         Skabelonvalg.ItemsSource = skabeloner;
