@@ -84,6 +84,18 @@ public static class UserDataPaths
 
             if (_cached is not null) return _cached;
 
+            // ============ DEMOEN LIGGER FOR SIG SELV ============
+            //
+            // Foran pegefilen og ikke bagved: har brugeren valgt en anden
+            // datamappe, skal demoen stadig kunne taendes - og valget skal
+            // staa uroert, naar den slukkes igen. Derfor skrives demoen ALDRIG
+            // ind i pegefilen; den er et sted, appen kigger hen imens.
+            //
+            // Efter miljoevariablen og ikke foran: en proeve, der har sat sin
+            // egen sandkasse, skal ramme den - ogsaa paa en maskine, hvor
+            // demoen tilfaeldigvis er taendt.
+            if (Demotilstand.Taendt) return _cached = Demotilstand.Rod;
+
             try
             {
                 // Det nye sted foerst, det gamle bagefter. Se PointerFile.
@@ -104,6 +116,17 @@ public static class UserDataPaths
             return _cached = DefaultRoot;
         }
     }
+
+    /// <summary>
+    /// Glemmer den huskede sti, saa den findes forfra ved naeste opslag.
+    /// </summary>
+    /// <remarks>
+    /// Roden slaas op EEN gang og huskes resten af koerslen - den kan ikke
+    /// aendre sig, mens appen koerer. Demotilstanden bryder den antagelse i det
+    /// ene oejeblik, hvor den taendes eller slukkes, og saa skal svaret findes
+    /// forfra. Se <see cref="Demotilstand"/>.
+    /// </remarks>
+    public static void Glem() => _cached = null;
 
     /// <summary>
     /// Flytter datamappen til et nyt sted. Filerne kopieres FØRST og slettes

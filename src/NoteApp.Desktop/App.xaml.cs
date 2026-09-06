@@ -55,6 +55,35 @@ public partial class App : Application
         // at fejle stille den dag en optagelse havner i et git-checkout.
         UserDataPaths.EnsureCreated();
 
+        // ============ DEMOEN BYGGES HER, OG KUN HER ============
+        //
+        // Generatoren skriver gennem appens egne lagre, og de skriver dér, hvor
+        // UserDataPaths.Root peger hen. Paa det her tidspunkt peger den paa
+        // demomappen - flaget blev sat, FOER appen genstartede - og saa kan
+        // eksemplerne ikke lande i nogens rigtige optagelser.
+        //
+        // Se Demotilstand for hele raekkefoelgen.
+        if (Demotilstand.Taendt && !Demodata.Findes)
+        {
+            try
+            {
+                Demodata.Byg();
+            }
+            catch (Exception ex)
+            {
+                // En demo, der ikke kunne bygges, maa ikke spaerre appen. Der
+                // skiftes tilbage til brugerens egne data - saa staar man ikke
+                // med en tom app og en knap, der siger «tilbage til dine data»
+                // uden at have vist noget.
+                Demotilstand.Sluk();
+
+                MessageBox.Show(
+                    "Demodataene kunne ikke bygges, saa appen aabner dine egne data.\n\n"
+                    + ex.Message,
+                    "Demotilstand", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+
         DispatcherUnhandledException += VisFejl;
 
         // ============ HJÆLPEPROGRAMMER FRA SIDST RYDDES ============

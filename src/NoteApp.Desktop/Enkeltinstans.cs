@@ -113,6 +113,36 @@ internal static class Enkeltinstans
     }
 
     /// <summary>
+    /// Slipper låsen, så en ny instans kan tage den med det samme.
+    /// </summary>
+    /// <remarks>
+    /// ============ TIL DEMOSKIFTET, OG KUN DERTIL ============
+    ///
+    /// Når appen genstarter sig selv, kører den gamle proces stadig i det
+    /// øjeblik, den nye starter. Går skiftet TILBAGE fra demoen til brugerens
+    /// egne data, peger de to på den SAMME datamappe — og så ser den nye
+    /// instans en lås, der er taget, beder den gamle komme frem og lukker
+    /// sig selv. Et øjeblik efter lukker den gamle også, fordi den var på vej
+    /// ud. Resultatet er ingen app.
+    ///
+    /// Derfor slippes låsen, FØR den nye startes. Se
+    /// <c>MainWindow.Genstart</c>.
+    /// </remarks>
+    public static void Slip()
+    {
+        try
+        {
+            _laas?.ReleaseMutex();
+            _laas?.Dispose();
+            _laas = null;
+        }
+        catch (Exception)
+        {
+            // Er den allerede sluppet, er vi netop dér, hvor vi vil hen.
+        }
+    }
+
+    /// <summary>
     /// Et navn, der er entydigt for datamappen og gyldigt som objektnavn.
     ///
     /// Stien kan ikke bruges direkte — den indeholder backslashes, som er

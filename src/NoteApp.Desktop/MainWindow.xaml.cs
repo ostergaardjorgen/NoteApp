@@ -191,6 +191,7 @@ public partial class MainWindow : Window
         var v = Assembly.GetExecutingAssembly().GetName().Version;
         Version.Text = v is null ? "v0.0.00" : $"v{v.Major}.{v.Minor}.{v.Build:00}";
         DataSti.Text = UserDataPaths.Root;
+        VisDemotilstand();
         OpdaterOpsaetningsmaerkat();
 
         // En ny installation kan optage og skrive ud, men ikke lave
@@ -2267,6 +2268,107 @@ public partial class MainWindow : Window
         NavCockpit, NavDiktering, NavTransskriber, NavProjekter, NavSkabeloner,
         NavMotor, NavCompliance, NavHistorik, NavIndstillinger,
     };
+
+    // ==================================================================== demo
+
+    /// <summary>
+    /// Sætter foden efter, om appen står i demotilstand.
+    /// </summary>
+    /// <remarks>
+    /// STILEN SÆTTES SOM RESSOURCE og ikke som farver. Så følger knappen med,
+    /// når man skifter mellem lyst og mørkt tema — en farve, sat fra koden,
+    /// bliver siddende, til nogen genstarter appen. Se Temaskift.
+    /// </remarks>
+    private void VisDemotilstand()
+    {
+        var demo = Demotilstand.Taendt;
+
+        Demoknap.SetResourceReference(StyleProperty, demo ? "DemoknapTaendt" : "Demoknap");
+
+        Demoknap.Content = Sprog.T(demo ? "nav.demodata_tilbage" : "nav.demodata");
+        Demoknap.ToolTip = Sprog.T(demo ? "nav.demodata_tilbage_hjaelp" : "nav.demodata_hjaelp");
+
+        Demolinje.Visibility = demo ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    /// <summary>
+    /// Tænder eller slukker demoen — og genstarter appen.
+    /// </summary>
+    /// <remarks>
+    /// ============ HVORFOR EN GENSTART ============
+    ///
+    /// Datamappen slås op én gang og huskes: skærme, lister, lagre og
+    /// baggrundsvagter har alle sammen taget deres stier, da appen startede.
+    /// At skifte mappen under dem ville kræve, at hver eneste af dem kunne
+    /// håndtere det — og den ene, der ikke kan, skriver i den forkerte mappe.
+    ///
+    /// En genstart tager to sekunder og er den eneste måde, der ikke kan gå
+    /// galt på en måde, der koster data.
+    /// </remarks>
+    private void Demo_Klik(object sender, RoutedEventArgs e)
+    {
+        // IKKE MENS DER OPTAGES. En genstart midt i et møde koster mødet.
+        if (OptagerNu() || _diktat.Igang)
+        {
+            Dialogs.AppDialog.Vis(this, Sprog.T("nav.demodata_ikke_nu_titel"),
+                Sprog.T("nav.demodata_ikke_nu"), Dialogs.Slags.Valg);
+            return;
+        }
+
+        var demo = Demotilstand.Taendt;
+
+        var ja = Dialogs.AppDialog.Spoerg(this,
+            Sprog.T(demo ? "nav.demodata_slut_titel" : "nav.demodata_start_titel"),
+            Sprog.T(demo ? "nav.demodata_slut" : "nav.demodata_start"),
+            godkend: Sprog.T(demo ? "nav.demodata_slut_ja" : "nav.demodata_start_ja"),
+            annuller: Sprog.T("faelles.annuller"),
+            slags: Dialogs.Slags.Valg);
+
+        if (!ja) return;
+
+        try
+        {
+            if (demo) Demotilstand.Sluk();
+            else Demotilstand.Taend();
+
+            Genstart();
+        }
+        catch (Exception ex)
+        {
+            Dialogs.AppDialog.Vis(this, Sprog.T("nav.demodata_gik_galt"),
+                ex.Message, Dialogs.Slags.Fejl);
+        }
+    }
+
+    /// <summary>Starter appen forfra og lukker den her.</summary>
+    /// <remarks>
+    /// LÅSEN SLIPPES FØRST. To instanser mod den samme datamappe må ikke
+    /// køre samtidig, og den nye ville ellers se låsen som taget — bede den
+    /// gamle komme frem og lukke sig selv, hvorefter den gamle også lukkede.
+    /// Se <see cref="Enkeltinstans.Slip"/>.
+    /// </remarks>
+    private void Genstart()
+    {
+        var exe = Environment.ProcessPath;
+
+        if (string.IsNullOrEmpty(exe))
+        {
+            // Kan vi ikke finde os selv, er skiftet stadig sket — det står i
+            // en fil. Så skal brugeren bare starte appen selv.
+            Dialogs.AppDialog.Vis(this, Sprog.T("nav.demodata_start_selv_titel"),
+                Sprog.T("nav.demodata_start_selv"), Dialogs.Slags.Valg);
+            return;
+        }
+
+        Enkeltinstans.Slip();
+
+        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(exe)
+        {
+            UseShellExecute = true,
+        });
+
+        Application.Current.Shutdown();
+    }
 
     private void Klap_Klik(object sender, RoutedEventArgs e) => SaetMenu(!MenuSammenklappet);
 

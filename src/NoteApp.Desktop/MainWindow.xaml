@@ -245,6 +245,26 @@
 
         <StackPanel x:Name="Datafod" DockPanel.Dock="Bottom">
           <Border Height="1" Background="{DynamicResource NavigationKant}" Margin="6,0,6,14" />
+
+          <!-- ================== DEMOTILSTAND ======================
+
+               Et andet datasaet, ikke en anden app. Der skiftes datamappe, og
+               appen genstarter - se Demotilstand og Demodata.
+
+               DEN STAAR HER OG IKKE UNDER INDSTILLINGER. Det er dét sted, man
+               kigger hen for at finde ud af, HVOR data ligger, og demoen er
+               netop et andet sted. De to linjer hoerer sammen: knappen skifter
+               mappen, og linjen nedenunder siger hvilken mappe det blev. -->
+          <Button x:Name="Demoknap" Click="Demo_Klik" Margin="6,0,10,12"
+                  Style="{StaticResource Demoknap}"
+                  Content="{i18n:Oversat nav.demodata}"
+                  ToolTip="{i18n:Oversat nav.demodata_hjaelp}" />
+
+          <TextBlock x:Name="Demolinje" Visibility="Collapsed" Margin="6,0,10,12"
+                     FontSize="11" TextWrapping="Wrap" LineHeight="16"
+                     Foreground="{DynamicResource Advarsel}"
+                     Text="{i18n:Oversat nav.demodata_linje}" />
+
           <TextBlock Text="{i18n:Oversat nav.dinedata}" Style="{StaticResource Underskrift}" Margin="6,0,0,3"
                      Foreground="{DynamicResource PaaNavigationSvag}" />
           <TextBlock x:Name="DataSti" Style="{StaticResource Underskrift}"

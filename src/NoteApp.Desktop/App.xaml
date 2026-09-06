@@ -244,6 +244,36 @@
       </Setter>
     </Style>
 
+    <!-- ============ DEMOKNAPPEN I SIDEBJAELKEN ============
+
+         Den staar paa navigationsfladen og ikke paa et panel, saa den skal
+         have sidebjaelkens farver - ellers ville den se ud som et fremmedlegeme
+         limet paa. Gennemsigtig bund, sidebjaelkens egen kant, og den daempede
+         tekstfarve, resten af foden bruger.
+
+         DEN SKAL KUNNE OVERSES. Det er ikke en knap, man bruger hver dag; den
+         maa ikke tage opmaerksomhed fra menuen ovenover. -->
+    <Style x:Key="Demoknap" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderBrush" Value="{DynamicResource NavigationKant}" />
+      <Setter Property="Foreground" Value="{DynamicResource PaaNavigationSvag}" />
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="Padding" Value="10,6" />
+    </Style>
+
+    <!-- ============ OG NAAR DEMOEN ER TAENDT ============
+
+         MAN SKAL IKKE KUNNE VAERE I TVIVL. En app, der viser opdigtede
+         optagelser og opdigtede opgaver, uden at det staar nogen steder, er en
+         app, man ikke kan stole paa bagefter. Advarselsfarven er den samme,
+         appen bruger alle andre steder, hvor noget ikke er, som det plejer. -->
+    <Style x:Key="DemoknapTaendt" TargetType="Button" BasedOn="{StaticResource Demoknap}">
+      <Setter Property="Background" Value="{DynamicResource AdvarselFlade}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource Advarsel}" />
+      <Setter Property="Foreground" Value="{DynamicResource Advarsel}" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
     <Style x:Key="Primaer" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
       <Setter Property="Background" Value="{DynamicResource Accent}" />
       <Setter Property="BorderBrush" Value="{DynamicResource Accent}" />
