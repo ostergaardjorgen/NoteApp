@@ -1382,6 +1382,7 @@ public partial class MainWindow : Window
             "cockpit" => NavCockpit,
             "diktering" or "ordbog" => NavDiktering,
             "optagelser" => NavTransskriber,
+            "projekter" or "projekt" => NavProjekter,
             "moedetyper" or "mødetyper" or "skabeloner" => NavSkabeloner,
             "modeller" or "ai-modeller" => NavMotor,
             "compliance" => NavCompliance,
@@ -2263,7 +2264,7 @@ public partial class MainWindow : Window
 
     private IEnumerable<System.Windows.Controls.RadioButton> Menupunkter() => new[]
     {
-        NavCockpit, NavDiktering, NavTransskriber, NavSkabeloner,
+        NavCockpit, NavDiktering, NavTransskriber, NavProjekter, NavSkabeloner,
         NavMotor, NavCompliance, NavHistorik, NavIndstillinger,
     };
 
@@ -2303,6 +2304,12 @@ public partial class MainWindow : Window
             // instruktioner staar i indstillingerne - begge kan vaere rettet
             // et andet sted siden sidst.
             Indhold.Content = new Diktering.DikteringView();
+        }
+        else if (NavProjekter.IsChecked == true)
+        {
+            // Bygges hver gang: projekternes filer ligger paa disken, og der
+            // kan vaere lagt noget i mappen siden sidst.
+            Indhold.Content = new Projekter.ProjekterView();
         }
         else if (NavSkabeloner.IsChecked == true)
         {

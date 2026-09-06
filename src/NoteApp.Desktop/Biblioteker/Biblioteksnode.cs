@@ -58,6 +58,19 @@ public sealed class Biblioteksnode : INotifyPropertyChanged
     public static Biblioteksnode Dokumentnode(NoteApp.Core.Documents.DocumentInfo d) =>
         new(Slags.Optagelse, d.Title, "\uE8A5", Transcribe.Gruppe.Moede, d.Mappe) { Emne = d };
 
+    /// <summary>
+    /// Et projekt.
+    /// </summary>
+    /// <remarks>
+    /// NAVNET OG ID'ET ER TO TING. To projekter må gerne hedde det samme —
+    /// det er id'et, der åbner det rigtige, og det ligger i
+    /// <see cref="Mappe"/>. En <see cref="Mappenode"/> kunne ikke bruges: den
+    /// viser sidste led af stien, og et projekt-id er ikke noget, nogen skal
+    /// læse.
+    /// </remarks>
+    public static Biblioteksnode Projektnode(string navn, string id) =>
+        new(Slags.Mappe, navn, "", Transcribe.Gruppe.Moede, id);
+
     /// <summary>En skabelon. Samme rolle som et dokument i træet.</summary>
     public static Biblioteksnode Skabelonnode(NoteApp.Core.Llm.PromptTemplate t) =>
         new(Slags.Optagelse, t.Name, "\uE8A5", Transcribe.Gruppe.Moede, null) { Emne = t };

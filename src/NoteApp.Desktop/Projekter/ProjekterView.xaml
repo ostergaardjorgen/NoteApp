@@ -1,0 +1,306 @@
+﻿<UserControl x:Class="NoteApp.Desktop.Projekter.ProjekterView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:i18n="clr-namespace:NoteApp.Desktop"
+             Background="{DynamicResource Baggrund}">
+
+  <!-- ======================= PROJEKTER =======================
+
+       Et projekt er et informationsfundament med en begyndelse og en ende.
+       Det PEGER paa moeder, webinarer og noter i stedet for at indeholde dem;
+       kun de dokumenter, man selv laegger ind, har projektet som hjem. Se
+       NoteApp.Core.Projekt for hvorfor.
+
+       Formen er den samme som paa Optagelser og Skabeloner: biblioteker til
+       venstre, det valgte til hoejre. Tre skaerme, der ligner hinanden, er
+       een skaerm at laere. -->
+
+  <Grid Margin="24,20,24,20">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+    </Grid.RowDefinitions>
+
+    <StackPanel Grid.Row="0" Margin="0,0,0,12">
+      <TextBlock Text="{i18n:Oversat projekterview.overskrift}" Style="{StaticResource Overskrift}" />
+      <TextBlock Style="{StaticResource Underskrift}"
+                 Text="{i18n:Oversat projekterview.underskrift}" />
+    </StackPanel>
+
+    <Border Grid.Row="1" Background="{DynamicResource Panel}" CornerRadius="8"
+            BorderBrush="{DynamicResource PanelKant}" BorderThickness="1"
+            Padding="8,6" Margin="0,0,0,12">
+      <DockPanel>
+        <Button DockPanel.Dock="Left" x:Name="NytKnap" Click="Nyt_Klik"
+                Content="{i18n:Oversat projekterview.nyt_projekt}"
+                Style="{StaticResource Primaer}" MinWidth="150" />
+
+        <TextBlock x:Name="Status" DockPanel.Dock="Left" Margin="16,0,0,0"
+                   VerticalAlignment="Center" FontSize="12.5" TextWrapping="Wrap"
+                   Foreground="{DynamicResource TekstMeget}" />
+      </DockPanel>
+    </Border>
+
+    <Grid Grid.Row="2">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="Auto" MinWidth="240" MaxWidth="420" />
+        <ColumnDefinition Width="14" />
+        <ColumnDefinition Width="*" />
+      </Grid.ColumnDefinitions>
+
+      <!-- ============ BIBLIOTEKERNE ============
+           Aktive foerst, arkivet nedenunder. Det er hele grunden til, at et
+           projekt har en status: det, man arbejder paa, skal staa foerst, og
+           det, man er faerdig med, skal kunne findes igen. -->
+      <Border Grid.Column="0" Background="{DynamicResource Panel}" CornerRadius="10"
+              BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
+        <DockPanel>
+          <TextBlock DockPanel.Dock="Top" Text="{i18n:Oversat faelles.biblioteker}"
+                     FontSize="10.5" FontWeight="SemiBold"
+                     Margin="16,14,16,8" Foreground="{DynamicResource TekstMeget}" />
+
+          <TreeView x:Name="Trae" Background="Transparent" BorderThickness="0"
+                    Margin="6,0,6,10" SelectedItemChanged="Trae_Valgt"
+                    ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+
+            <TreeView.ItemContainerStyle>
+              <Style TargetType="TreeViewItem">
+                <Style.Resources>
+                  <!-- WPF tegner sin egen markering under vores skabelon. Paa
+                       et moerkt tema bliver navnet dermed usynligt. Samme
+                       greb som paa de to andre skaerme. -->
+                  <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="Transparent" />
+                  <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="Transparent" />
+                </Style.Resources>
+                <Setter Property="Padding" Value="2,1" />
+                <Setter Property="Foreground" Value="{DynamicResource TekstSvag}" />
+                <Setter Property="IsExpanded" Value="{Binding ErUdfoldet, Mode=TwoWay}" />
+                <Setter Property="IsSelected" Value="{Binding ErValgt, Mode=TwoWay}" />
+              </Style>
+            </TreeView.ItemContainerStyle>
+
+            <TreeView.ItemTemplate>
+              <HierarchicalDataTemplate ItemsSource="{Binding Boern}">
+                <Border x:Name="rk" CornerRadius="5" Padding="6,4" Background="Transparent"
+                        AutomationProperties.Name="{Binding Visning}">
+                  <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="{Binding Glyf}" FontFamily="Segoe MDL2 Assets" FontSize="13"
+                               VerticalAlignment="Center" Margin="0,0,9,0"
+                               Foreground="{DynamicResource Accent}" />
+                    <TextBlock Text="{Binding Visning}" FontSize="12.5" VerticalAlignment="Center"
+                               TextTrimming="CharacterEllipsis" />
+                  </StackPanel>
+                </Border>
+                <HierarchicalDataTemplate.Triggers>
+                  <DataTrigger Binding="{Binding ErValgt}" Value="True">
+                    <Setter TargetName="rk" Property="Background" Value="{DynamicResource Valgt}" />
+                  </DataTrigger>
+                </HierarchicalDataTemplate.Triggers>
+              </HierarchicalDataTemplate>
+            </TreeView.ItemTemplate>
+          </TreeView>
+        </DockPanel>
+      </Border>
+
+      <!-- ============ DET VALGTE PROJEKT ============ -->
+      <Grid Grid.Column="2">
+
+        <TextBlock x:Name="Intet" VerticalAlignment="Center" HorizontalAlignment="Center"
+                   FontSize="13" TextWrapping="Wrap" MaxWidth="420" TextAlignment="Center"
+                   Foreground="{DynamicResource TekstMeget}"
+                   Text="{i18n:Oversat projekterview.vaelg_et_projekt}" />
+
+        <TabControl x:Name="Faner" Style="{StaticResource Fanerude}" Visibility="Collapsed">
+
+          <!-- ==================== FUNDAMENT ==================== -->
+          <TabItem Header="{i18n:Oversat projekterview.fundament}" Style="{StaticResource Fane}">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,0,14,0">
+              <StackPanel Margin="0,14,0,0">
+
+                <!-- Projektets egen mappe -->
+                <Border Background="{DynamicResource Panel}" CornerRadius="10" Padding="20"
+                        Margin="0,0,0,14" BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
+                  <Grid>
+                    <Grid.ColumnDefinitions>
+                      <ColumnDefinition Width="*" />
+                      <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" Margin="0,0,16,0">
+                      <TextBlock Text="{i18n:Oversat projekterview.egen_mappe}"
+                                 FontSize="13" FontWeight="SemiBold" />
+                      <TextBlock x:Name="EgenSti" FontSize="11.5" FontFamily="Consolas"
+                                 Margin="0,4,0,0" TextWrapping="Wrap"
+                                 Foreground="{DynamicResource TekstSvag}" />
+                      <TextBlock Style="{StaticResource Underskrift}" Margin="0,6,0,0"
+                                 TextWrapping="Wrap"
+                                 Text="{i18n:Oversat projekterview.egen_mappe_under}" />
+                    </StackPanel>
+
+                    <Button Grid.Column="1" VerticalAlignment="Top" Padding="16,7"
+                            Click="AabnEgen_Klik"
+                            Content="{i18n:Oversat projekterview.aabn_mappen}" />
+                  </Grid>
+                </Border>
+
+                <!-- Tilknyttede mapper -->
+                <Border Background="{DynamicResource Panel}" CornerRadius="10" Padding="20"
+                        Margin="0,0,0,14" BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
+                  <StackPanel>
+                    <Grid>
+                      <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                      </Grid.ColumnDefinitions>
+
+                      <StackPanel Grid.Column="0" Margin="0,0,16,0">
+                        <TextBlock Text="{i18n:Oversat projekterview.tilknyttede_mapper}"
+                                   FontSize="13" FontWeight="SemiBold" />
+                        <TextBlock Style="{StaticResource Underskrift}" Margin="0,4,0,0"
+                                   TextWrapping="Wrap"
+                                   Text="{i18n:Oversat projekterview.tilknyttede_mapper_under}" />
+                      </StackPanel>
+
+                      <Button Grid.Column="1" VerticalAlignment="Top" Padding="16,7"
+                              Click="TilknytMappe_Klik"
+                              Content="{i18n:Oversat projekterview.tilknyt_mappe}" />
+                    </Grid>
+
+                    <ItemsControl x:Name="Mapper" Margin="0,14,0,0">
+                      <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                          <Grid Margin="0,0,0,6">
+                            <Grid.ColumnDefinitions>
+                              <ColumnDefinition Width="*" />
+                              <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Column="0" Text="{Binding}" FontSize="11.5"
+                                       FontFamily="Consolas" TextWrapping="Wrap"
+                                       VerticalAlignment="Center" Margin="0,0,14,0"
+                                       Foreground="{DynamicResource TekstSvag}" />
+
+                            <Button Grid.Column="1" Click="FjernMappe_Klik" Tag="{Binding}"
+                                    Padding="12,5" VerticalAlignment="Center"
+                                    Content="{i18n:Oversat settingsview.fjern}" />
+                          </Grid>
+                        </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <TextBlock x:Name="IngenMapper" Style="{StaticResource Underskrift}"
+                               Margin="0,10,0,0" Visibility="Collapsed"
+                               Text="{i18n:Oversat projekterview.ingen_tilknyttede}" />
+                  </StackPanel>
+                </Border>
+
+                <!-- Filerne -->
+                <Border Background="{DynamicResource Panel}" CornerRadius="10" Padding="20"
+                        Margin="0,0,0,14" BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
+                  <StackPanel>
+                    <TextBlock Text="{i18n:Oversat projekterview.filer}"
+                               FontSize="13" FontWeight="SemiBold" />
+
+                    <ItemsControl x:Name="Filer" Margin="0,12,0,0">
+                      <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                          <Border Background="{DynamicResource Baggrund}" CornerRadius="8"
+                                  Padding="14,10" Margin="0,0,0,8"
+                                  BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
+                            <StackPanel>
+                              <TextBlock Text="{Binding Navn}" FontSize="12.5" />
+                              <TextBlock Text="{Binding Linje}" FontSize="11.5" Margin="0,4,0,0"
+                                         TextWrapping="Wrap"
+                                         Foreground="{DynamicResource TekstMeget}" />
+                              <TextBlock Text="{Binding Grund}" FontSize="11.5" Margin="0,4,0,0"
+                                         TextWrapping="Wrap"
+                                         Visibility="{Binding Advarsel}"
+                                         Foreground="{DynamicResource Advarsel}" />
+                            </StackPanel>
+                          </Border>
+                        </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <TextBlock x:Name="IngenFiler" Style="{StaticResource Underskrift}"
+                               Margin="0,10,0,0" TextWrapping="Wrap"
+                               Text="{i18n:Oversat projekterview.ingen_filer}" />
+                  </StackPanel>
+                </Border>
+              </StackPanel>
+            </ScrollViewer>
+          </TabItem>
+
+          <!-- ==================== INDSTILLINGER ==================== -->
+          <TabItem Header="{i18n:Oversat projekterview.indstillinger}" Style="{StaticResource Fane}">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,0,14,0">
+              <StackPanel Margin="0,14,0,0">
+
+                <Border Background="{DynamicResource Panel}" CornerRadius="10" Padding="20"
+                        Margin="0,0,0,14" BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
+                  <StackPanel>
+                    <TextBlock Text="{i18n:Oversat projekterview.navn}" FontSize="12.5" />
+                    <TextBox x:Name="Navn" Margin="0,4,0,0" FontSize="13"
+                             TextChanged="Rettet" />
+
+                    <TextBlock Text="{i18n:Oversat projekterview.beskrivelse}" FontSize="12.5"
+                               Margin="0,16,0,0" />
+                    <TextBox x:Name="Beskrivelse" Margin="0,4,0,0" FontSize="12.5"
+                             AcceptsReturn="True" TextWrapping="Wrap" MinHeight="70"
+                             TextChanged="Rettet" />
+                    <TextBlock Style="{StaticResource Underskrift}" Margin="0,4,0,0"
+                               Text="{i18n:Oversat projekterview.beskrivelse_under}" />
+
+                    <Button x:Name="GemKnap" Click="Gem_Klik" Margin="0,16,0,0"
+                            HorizontalAlignment="Left" Padding="18,7" IsEnabled="False"
+                            Style="{StaticResource Primaer}"
+                            Content="{i18n:Oversat faelles.gem}" />
+                  </StackPanel>
+                </Border>
+
+                <!-- ============ DE TO KONTAKTER ============
+                     Soegning er rent lokal. Kildedeling sender tekst ud af
+                     maskinen. De to maa ikke staa som ét hak. -->
+                <Border Background="{DynamicResource Panel}" CornerRadius="10" Padding="20"
+                        Margin="0,0,0,14" BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
+                  <StackPanel>
+                    <CheckBox x:Name="ISoegning" Click="Kontakt_Klik"
+                              Content="{i18n:Oversat projekterview.med_i_soegningen}" />
+                    <TextBlock Style="{StaticResource Underskrift}" Margin="24,4,0,0"
+                               TextWrapping="Wrap"
+                               Text="{i18n:Oversat projekterview.med_i_soegningen_under}" />
+
+                    <CheckBox x:Name="SomKilde" Click="Kontakt_Klik" Margin="0,16,0,0"
+                              Content="{i18n:Oversat projekterview.maa_sendes}" />
+                    <TextBlock Style="{StaticResource Underskrift}" Margin="24,4,0,0"
+                               TextWrapping="Wrap"
+                               Text="{i18n:Oversat projekterview.maa_sendes_under}" />
+                  </StackPanel>
+                </Border>
+
+                <Border Background="{DynamicResource Panel}" CornerRadius="10" Padding="20"
+                        Margin="0,0,0,14" BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
+                  <StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                      <Button x:Name="ArkivKnap" Click="Arkiv_Klik" Padding="16,7"
+                              Margin="0,0,10,0"
+                              Content="{i18n:Oversat projekterview.arkiver}" />
+
+                      <Button Click="Slet_Klik" Padding="16,7"
+                              Content="{i18n:Oversat projekterview.slet}" />
+                    </StackPanel>
+
+                    <TextBlock Style="{StaticResource Underskrift}" Margin="0,8,0,0"
+                               TextWrapping="Wrap"
+                               Text="{i18n:Oversat projekterview.arkiver_under}" />
+                  </StackPanel>
+                </Border>
+              </StackPanel>
+            </ScrollViewer>
+          </TabItem>
+        </TabControl>
+      </Grid>
+    </Grid>
+  </Grid>
+</UserControl>

@@ -158,6 +158,15 @@
                Filerne bag hedder stadig skabeloner. Det er med vilje: de er
                skabeloner, når man skriver dem, og mødetyper, når man vælger
                dem. -->
+          <!-- PROJEKTER STAAR EFTER OPTAGELSER OG FOER SKABELONER.
+               Raekkefoelgen er arbejdets: man optager, man samler det i et
+               projekt, og saa bestemmer man, hvad der skal skrives ud af det.
+               Et projekt PEGER paa optagelserne - se NoteApp.Core.Projekt -
+               og derfor staar det efter dem og ikke foer. -->
+          <RadioButton x:Name="NavProjekter" Tag="&#xE8F4;" GroupName="nav"
+                       Content="{i18n:Oversat nav.projekter}"
+                       Checked="Nav_Changed"
+                       Style="{StaticResource NavKnap}" />
           <RadioButton x:Name="NavSkabeloner" Tag="&#xE8EC;" GroupName="nav" Content="{i18n:Oversat nav.skabeloner}"
                        Checked="Nav_Changed"
                        Style="{StaticResource NavKnap}" />
