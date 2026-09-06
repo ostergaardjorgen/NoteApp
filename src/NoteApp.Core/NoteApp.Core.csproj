@@ -28,6 +28,7 @@
          ===================================================================== -->
     <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.11" />
     <PackageReference Include="PdfPig" Version="0.1.10" />
+    <PackageReference Include="PDFsharp-MigraDoc" Version="6.2.4" />
 
     <!-- Bruges kun til at spoerge Windows, om der er et NVIDIA-kort. Uden
          det svar kan appen ikke anbefale den rigtige Whisper-udgave. -->

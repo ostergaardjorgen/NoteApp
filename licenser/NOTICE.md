@@ -22,6 +22,7 @@ Disse ligger i programmappen og installeres sammen med HeyPia.
 | NAudio | MIT | Mark Heath | `tekster\naudio-MIT.txt` |
 | SQLitePCLRaw | Apache-2.0 | SourceGear, LLC | `tekster\sqlitepclraw-Apache-2.0.txt` |
 | PdfPig | Apache-2.0 | UglyToad og bidragydere | `tekster\pdfpig-Apache-2.0.txt` |
+| PDFsharp og MigraDoc | MIT | empira Software GmbH og bidragydere | `tekster\pdfsharp-migradoc-MIT.txt` |
 | SQLite | Offentligt domæne | D. Richard Hipp m.fl. | — se nedenfor |
 | .NET og WPF | MIT | .NET Foundation og bidragydere | `tekster\dotnet-og-wpf-MIT.txt` |
 

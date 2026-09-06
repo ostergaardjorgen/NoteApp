@@ -624,7 +624,9 @@ public partial class TemplatesView : UserControl
         // fanen her handler om, hvad modellen faar at arbejde med. Sproget
         // vaelges desuden, naar dokumentet oprettes, og laegges til
         // instruktionen af sig selv; se PromptTemplate.RenderSystem.
-        foreach (var f in PromptTemplate.Fields.Keys
+        // FELTERNE FØLGER SLAGSEN. En mødetype har en transskription; et
+        // projektoutput har et fundament. Se PromptTemplate.Felter.
+        foreach (var f in PromptTemplate.Felter(_valgtSlags)
                      .Where(k => k != Deltagerregler.Felt && k != Sprogregler.Felt))
         {
             var staar = tekst.Contains("{{" + f + "}}", StringComparison.CurrentCultureIgnoreCase);

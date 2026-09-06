@@ -1,4 +1,4 @@
-using System.IO.Compression;
+﻿using System.IO.Compression;
 using System.Security.Cryptography;
 using System.Text;
 using System.Xml.Linq;
@@ -170,7 +170,17 @@ public static class Dokumenttekst
 
         foreach (var side in doc.GetPages())
         {
-            sb.AppendLine(side.Text);
+            // ORD FOR ORD, IKKE side.Text.
+            //
+            // En PDF gemmer ikke mellemrum; den gemmer bogstaver med hver sin
+            // plads paa siden. side.Text limer dem sammen, og saa staar der
+            // «StudieplanProjektDatateknikeruddannelsen» - én lang streng, som
+            // ingen soegning kan finde et ord i.
+            //
+            // Maalt 06-09-2026 paa en PDF, appen selv havde skrevet: teksten
+            // var der, og den kunne ikke soeges i. GetWords grupperer
+            // bogstaverne efter deres placering, og saa er der ord igen.
+            sb.AppendLine(string.Join(' ', side.GetWords().Select(o => o.Text)));
             sider++;
         }
 

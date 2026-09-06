@@ -67,6 +67,7 @@ $Licensfiler = @(
     'licenser\tekster\naudio-MIT.txt',
     'licenser\tekster\sqlitepclraw-Apache-2.0.txt',
     'licenser\tekster\pdfpig-Apache-2.0.txt',
+    'licenser\tekster\pdfsharp-migradoc-MIT.txt',
     'licenser\tekster\dotnet-og-wpf-MIT.txt',
     'licenser\tekster\whisper.cpp-MIT.txt',
     'licenser\tekster\whisper-modeller-OpenAI-MIT.txt',

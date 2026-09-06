@@ -165,6 +165,15 @@ public sealed class PromptTemplate
     /// </summary>
     public static readonly IReadOnlyDictionary<string, string> Fields = new Dictionary<string, string>
     {
+        // ============ DE TO, DER KUN GIVER MENING I ET PROJEKT ============
+        //
+        // Et projektoutput har ikke en transskription — det har et helt
+        // fundament. Felterne står i den samme liste, fordi formatet er det
+        // samme, men <see cref="Felter"/> viser kun dem, der hører til den
+        // slags skabelon, man skriver.
+        ["kilder"] = "Materialet fra projektets fundament, med kilderne mærket",
+        ["projekt"] = "Projektets navn og beskrivelse",
+
         ["transskription"] = "Hele den udskrevne tekst fra mødet",
         ["titel"] = "Mødets titel",
         ["dato"] = "Dato og klokkeslæt",
@@ -470,6 +479,29 @@ public sealed class PromptTemplate
     /// listen, når man laver et dokument ud af en optagelse — og der er de
     /// meningsløse, for der er intet projekt at hente noget fra.
     /// </remarks>
+    /// <summary>Felterne, der hører til den slags skabelon.</summary>
+    /// <remarks>
+    /// EN MØDETYPE SKAL IKKE TILBYDE «kilder». Der er intet projekt at hente
+    /// dem fra, og et felt, der altid er tomt, er et felt, der ser ud som en
+    /// oplysning, der mangler.
+    ///
+    /// Og et projektoutput skal ikke tilbyde «transskription». Et projekt kan
+    /// pege på ti møder; der er ikke én udskrift at sætte ind.
+    /// </remarks>
+    public static IEnumerable<string> Felter(Skabelonslags slags)
+    {
+        var kunProjekt = new[] { "kilder", "projekt" };
+
+        var kunMoede = new[]
+        {
+            "transskription", "titel", "dato", "varighed", "noter", "sprog",
+        };
+
+        return Fields.Keys.Where(k => slags == Skabelonslags.Projektoutput
+            ? !kunMoede.Contains(k, StringComparer.OrdinalIgnoreCase)
+            : !kunProjekt.Contains(k, StringComparer.OrdinalIgnoreCase));
+    }
+
     public static IReadOnlyList<PromptTemplate> LoadAll() => LoadAll(Skabelonslags.Moedetype);
 
     public static IReadOnlyList<PromptTemplate> LoadAll(Skabelonslags slags)

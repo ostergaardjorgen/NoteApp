@@ -157,6 +157,16 @@
     "under": "Pick the meetings, webinars and notes that belong to the project. They stay where they are — the project points at them."
   },
   "projekterview": {
+    "byg": "Build the document",
+    "byg_et_dokument": "Build a document",
+    "byg_under": "The template decides the sections, and the sections decide what is pulled from the project's material. The sources are listed at the bottom of the document.",
+    "byggede_dokumenter": "Documents built",
+    "dokumenter": "Documents",
+    "format": "Format",
+    "ingen_byggede": "No documents have been built yet.",
+    "ingen_skabeloner": "There are no templates under «Project output» yet. Make one under Templates.",
+    "skabelon": "Template",
+    "skal_have_lov": "The project may not be used as a source for documents. Tick the box under Settings — that is where the material leaves your machine.",
     "aabn_mappen": "Open the folder",
     "arkiver": "Archive the project",
     "arkiver_under": "It is put away, but nothing is deleted — and what the project points at is left alone.",

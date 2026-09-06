@@ -3,6 +3,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using NoteApp.Core;
+using NoteApp.Core.Llm;
 
 namespace NoteApp.Desktop.Projekter;
 
@@ -145,6 +146,192 @@ public partial class ProjekterView : UserControl
 
         VisMedlemmer(p);
         VisFiler(p);
+        VisDokumentfanen(p);
+    }
+
+    // ------------------------------------------------------------ dokumenter
+
+    /// <summary>Ét bygget dokument på skærmen.</summary>
+    private sealed record Byggetvisning(string Navn, string Linje, string Sti);
+
+    /// <summary>
+    /// Fylder Dokumenter-fanen.
+    /// </summary>
+    /// <remarks>
+    /// SKABELONERNE HENTES HVER GANG. De er filer, og der kan være lavet en ny
+    /// under Skabeloner, siden man sidst stod her.
+    /// </remarks>
+    private void VisDokumentfanen(Projekt p)
+    {
+        var skabeloner = PromptTemplate.LoadAll(Skabelonslags.Projektoutput);
+
+        Skabelonvalg.ItemsSource = skabeloner;
+        Skabelonvalg.SelectedIndex = skabeloner.Count > 0 ? 0 : -1;
+
+        if (Formatvalg.Items.Count == 0)
+        {
+            // WORD FØRST. Det er det, man retter videre i; PDF er det, man
+            // sender. Den hyppigste først er ikke en holdning til formaterne,
+            // det er en holdning til, hvad man gør flest gange.
+            Formatvalg.Items.Add("Word (.docx)");
+            Formatvalg.Items.Add("PDF (.pdf)");
+            Formatvalg.SelectedIndex = 0;
+        }
+
+        Bygadvarsel.Visibility = Visibility.Collapsed;
+        Bygstatus.Visibility = Visibility.Collapsed;
+
+        if (skabeloner.Count == 0)
+        {
+            BygKnap.IsEnabled = false;
+            Advar(Sprog.T("projekterview.ingen_skabeloner"));
+        }
+        else if (!p.MaaSendesSomKilde)
+        {
+            // DET ER IKKE EN FEJL. Hakket er fra som standard med vilje, og
+            // linjen siger hvorfor - og hvor man saetter det.
+            BygKnap.IsEnabled = false;
+            Advar(Sprog.T("projekterview.skal_have_lov"));
+        }
+        else
+        {
+            BygKnap.IsEnabled = !_bygger;
+        }
+
+        VisByggede(p);
+    }
+
+    private void Advar(string tekst)
+    {
+        Bygadvarsel.Text = tekst;
+        Bygadvarsel.Visibility = Visibility.Visible;
+    }
+
+    private void VisByggede(Projekt p)
+    {
+        var ud = new List<Byggetvisning>();
+
+        try
+        {
+            if (Directory.Exists(p.Dokumentmappe))
+            {
+                foreach (var sti in Directory.EnumerateFiles(p.Dokumentmappe)
+                             .Where(f => f.EndsWith(".docx", StringComparison.OrdinalIgnoreCase)
+                                      || f.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase))
+                             .OrderByDescending(File.GetLastWriteTime))
+                {
+                    var info = new FileInfo(sti);
+
+                    ud.Add(new Byggetvisning(
+                        info.Name,
+                        info.LastWriteTime.ToString("d. MMMM yyyy \u00b7 HH:mm", Sprog.Kultur)
+                        + "  \u00b7  " + Stoerrelse(info.Length),
+                        sti));
+                }
+            }
+        }
+        catch (IOException)
+        {
+        }
+
+        Byggede.ItemsSource = ud;
+        IngenByggede.Visibility = ud.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    private bool _bygger;
+
+    /// <summary>
+    /// Bygger dokumentet.
+    /// </summary>
+    /// <remarks>
+    /// SAMTYKKET SPØRGES I KERNEN OG IKKE HER. Knappen er slået fra, når
+    /// projektet ikke må sendes — men <see cref="Projektdokument"/> kaster
+    /// alligevel, hvis nogen kalder den udenom. Et løfte, der kun holdes af en
+    /// grå knap, er ikke et løfte.
+    /// </remarks>
+    private async void Byg_Klik(object sender, RoutedEventArgs e)
+    {
+        if (_valgt is null || _bygger) return;
+        if (Skabelonvalg.SelectedItem is not PromptTemplate skabelon) return;
+
+        var noegle = Core.Llm.SkyNoegle.Hent();
+
+        if (noegle is null)
+        {
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Der mangler en n\u00f8gle",
+                Core.Llm.SkyNoegle.Vejledning, Dialogs.Slags.Valg);
+            return;
+        }
+
+        var format = Formatvalg.SelectedIndex == 1 ? Dokumentformat.Pdf : Dokumentformat.Word;
+
+        _bygger = true;
+        BygKnap.IsEnabled = false;
+        Bygadvarsel.Visibility = Visibility.Collapsed;
+
+        var start = DateTime.Now;
+
+        Bygstatus.Visibility = Visibility.Visible;
+        Bygstatus.Text = "Samler projektets materiale \u2026";
+
+        var fremdrift = new Progress<Core.Llm.LlmProgress>(f =>
+            Bygstatus.Text = $"{f.Message} \u00b7 {(DateTime.Now - start).TotalSeconds:0} sek");
+
+        try
+        {
+            var r = await Projektdokument.BygAsync(
+                _valgt, skabelon, Core.Llm.SkyKatalog.Standard, noegle,
+                format, fremdrift);
+
+            Bygstatus.Text = $"F\u00e6rdigt: {Path.GetFileName(r.Sti)} \u00b7 "
+                             + $"{r.Kontekst.Kilder.Count} kilde(r) \u00b7 "
+                             + $"{r.Forloebet.TotalSeconds:0} sek";
+
+            if (r.Kontekst.Afkortet)
+                Advar("Der var mere materiale, end der var plads til. Dokumentet "
+                      + "bygger paa et udsnit \u2014 kildelisten nederst siger hvilket.");
+
+            Vis(_valgt);
+        }
+        catch (Projektdokument.IkkeTilladt ex)
+        {
+            Bygstatus.Visibility = Visibility.Collapsed;
+            Advar(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            Bygstatus.Visibility = Visibility.Collapsed;
+
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Dokumentet blev ikke bygget",
+                ex.Message, Dialogs.Slags.Pas_paa);
+        }
+        finally
+        {
+            _bygger = false;
+            BygKnap.IsEnabled = _valgt?.MaaSendesSomKilde == true;
+        }
+    }
+
+    private void AabnBygget_Klik(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button { Tag: string sti }) return;
+
+        if (!File.Exists(sti))
+        {
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Filen findes ikke l\u00e6ngere",
+                sti, Dialogs.Slags.Valg);
+            return;
+        }
+
+        try
+        {
+            Process.Start(new ProcessStartInfo(sti) { UseShellExecute = true });
+        }
+        catch (Exception ex)
+        {
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Filen kunne ikke \u00e5bnes",
+                ex.Message, Dialogs.Slags.Pas_paa);
+        }
     }
 
     /// <summary>Ét medlemskab på skærmen.</summary>

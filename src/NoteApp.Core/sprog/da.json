@@ -549,6 +549,16 @@
     "under": "Vælg de møder, webinarer og noter, der hører til projektet. De bliver, hvor de er — projektet peger på dem."
   },
   "projekterview": {
+    "byg": "Byg dokumentet",
+    "byg_et_dokument": "Byg et dokument",
+    "byg_under": "Skabelonen bestemmer afsnittene, og afsnittene bestemmer, hvad der hentes fra projektets materiale. Kilderne står nederst i dokumentet.",
+    "byggede_dokumenter": "Byggede dokumenter",
+    "dokumenter": "Dokumenter",
+    "format": "Format",
+    "ingen_byggede": "Der er ikke bygget nogen dokumenter endnu.",
+    "ingen_skabeloner": "Der er ingen skabeloner under «Projekt output» endnu. Lav en under Skabeloner.",
+    "skabelon": "Skabelon",
+    "skal_have_lov": "Projektet må ikke bruges som kilde til dokumenter. Sæt hakket under Indstillinger — det er dér, materialet forlader din maskine.",
     "aabn_mappen": "Åbn mappen",
     "arkiver": "Arkivér projektet",
     "arkiver_under": "Det lægges væk, men intet slettes — og det, projektet peger på, røres ikke.",
