@@ -23,6 +23,18 @@ namespace NoteApp.Core.Llm;
 ///   ---
 ///   [brugerprompt med {{transskription}} og andre felter]
 /// </summary>
+/// <summary>
+/// Hvad en skabelon skriver ud af — én optagelse eller et helt projekt.
+/// </summary>
+public enum Skabelonslags
+{
+    /// <summary>Ét møde. Ligger i «skabeloner».</summary>
+    Moedetype,
+
+    /// <summary>Et helt projekt. Ligger i «skabeloner\projekt».</summary>
+    Projektoutput,
+}
+
 public sealed class PromptTemplate
 {
     public required string Name { get; set; }
@@ -107,7 +119,45 @@ public sealed class PromptTemplate
     /// <summary>Filen den kom fra. Null hvis den er indbygget.</summary>
     public string? Path { get; init; }
 
+    /// <summary>
+    /// Hvad skabelonen skriver ud af.
+    /// </summary>
+    /// <remarks>
+    /// ============ TO SLAGS, ETT BEGREB ============
+    ///
+    /// En mødetype bygger et dokument ud af ÉN optagelse: der er en
+    /// udskrift, en titel og en dato, og skabelonen bestemmer afsnittene.
+    ///
+    /// Et projektoutput bygger et dokument ud af et HELT PROJEKT: dokumenter,
+    /// møder, webinarer og noter tilsammen. Formen er den samme — afsnit, der
+    /// bestemmer indholdet — og det er derfor, de deler skaerm, editor og
+    /// filformat i stedet for at blive to systemer, der langsomt driver fra
+    /// hinanden.
+    ///
+    /// Det, der skiller dem, er hvad de kan hente ind. Se <see cref="Fields"/>.
+    /// </remarks>
+    public Skabelonslags Slags { get; set; } = Skabelonslags.Moedetype;
+
+    /// <summary>Mødetyperne. Ligger, hvor de altid har ligget.</summary>
     public static string Directory => System.IO.Path.Combine(UserDataPaths.Root, "skabeloner");
+
+    /// <summary>
+    /// Mappen for en slags skabelon.
+    /// </summary>
+    /// <remarks>
+    /// PROJEKTOUTPUT LIGGER I EN UNDERMAPPE, og mødetyperne bliver liggende
+    /// i roden. Det er med vilje: de skabeloner, brugeren allerede har, skal
+    /// ikke flyttes af en opdatering. En flytning, der går galt ét sted,
+    /// koster en skabelon, nogen har skrevet selv.
+    ///
+    /// <see cref="LoadAll()"/> læser kun roden og ikke undermapper, så de to
+    /// slags kan ikke løbe ind i hinanden.
+    /// </remarks>
+    public static string Skabelonmappe(Skabelonslags slags) => slags switch
+    {
+        Skabelonslags.Projektoutput => System.IO.Path.Combine(Directory, "projekt"),
+        _ => Directory,
+    };
 
     /// <summary>
     /// Felter, en skabelon kan bruge. Står her frem for spredt ud i teksten,
@@ -387,7 +437,7 @@ public sealed class PromptTemplate
     /// </summary>
     public string Save(string? path = null)
     {
-        var mål = path ?? Path ?? System.IO.Path.Combine(Directory, Filnavn(Name));
+        var mål = path ?? Path ?? System.IO.Path.Combine(Skabelonmappe(Slags), Filnavn(Name));
         System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(mål)!);
 
         var midlertidig = mål + ".ny";
@@ -413,14 +463,32 @@ public sealed class PromptTemplate
         return (rent.Length == 0 ? "skabelon" : rent) + ".md";
     }
 
-    public static IReadOnlyList<PromptTemplate> LoadAll()
+    /// <summary>Mødetyperne. Uaendret — og med vilje.</summary>
+    /// <remarks>
+    /// Der er kaldere nok af den her, og de mener alle sammen mødetyper.
+    /// Havde den pludselig også svaret med projektoutput, ville de dukke op i
+    /// listen, når man laver et dokument ud af en optagelse — og der er de
+    /// meningsløse, for der er intet projekt at hente noget fra.
+    /// </remarks>
+    public static IReadOnlyList<PromptTemplate> LoadAll() => LoadAll(Skabelonslags.Moedetype);
+
+    public static IReadOnlyList<PromptTemplate> LoadAll(Skabelonslags slags)
     {
         var liste = new List<PromptTemplate>();
-        if (!System.IO.Directory.Exists(Directory)) return liste;
+        var mappe = Skabelonmappe(slags);
 
-        foreach (var fil in System.IO.Directory.EnumerateFiles(Directory, "*.md"))
+        if (!System.IO.Directory.Exists(mappe)) return liste;
+
+        // KUN MAPPEN SELV. Undermapper springes over, saa projektoutput ikke
+        // lander blandt moedetyperne - se Skabelonmappe.
+        foreach (var fil in System.IO.Directory.EnumerateFiles(mappe, "*.md"))
         {
-            try { liste.Add(Parse(File.ReadAllText(fil, Encoding.UTF8), fil)); }
+            try
+            {
+                var t = Parse(File.ReadAllText(fil, Encoding.UTF8), fil);
+                t.Slags = slags;
+                liste.Add(t);
+            }
             catch (FormatException)
             {
                 // En ulaeselig skabelon maa ikke skjule de oevrige. Den springes

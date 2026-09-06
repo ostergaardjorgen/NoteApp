@@ -146,31 +146,57 @@ public partial class TemplatesView : UserControl
 
     // ------------------------------------------------------------ indlæsning
 
+    /// <summary>
+    /// Bygger træet forfra — begge biblioteker.
+    /// </summary>
+    /// <remarks>
+    /// ============ TO BIBLIOTEKER, IKKE TO SKÆRME ============
+    ///
+    /// En mødetype skriver et dokument ud af én optagelse. Et projektoutput
+    /// skriver et dokument ud af et helt projekt. Formen er den samme —
+    /// afsnit, der bestemmer indholdet — og derfor deler de skærm, editor og
+    /// filformat. To skærme ville betyde to editorer at vedligeholde og to
+    /// steder at lede efter den samme slags ting.
+    ///
+    /// Hvert bibliotek har sin egen mappe på disken; se
+    /// <see cref="PromptTemplate.Skabelonmappe"/>. Det er DEN, «Ny», «Slet» og
+    /// «Åbn mappen» retter sig efter, alt efter hvad der er valgt.
+    /// </remarks>
     private void Indlæs(string? vælgNavn = null)
     {
         _skabeloner.Clear();
-        _skabeloner.AddRange(PromptTemplate.LoadAll());
+        _skabeloner.AddRange(PromptTemplate.LoadAll(Skabelonslags.Moedetype));
 
-        // Traeet bygges forfra. Skabeloner har hverken mapper eller arkiv, saa
-        // der er eet bibliotek og ingen undermapper - formen er den samme som
-        // paa de to andre skaerme, indholdet er bare fladere.
+        _projektoutput.Clear();
+        _projektoutput.AddRange(PromptTemplate.LoadAll(Skabelonslags.Projektoutput));
+
         _byggerTrae = true;
 
         var varUdfoldet = _rod?.ErUdfoldet ?? true;
+        var varProjektUdfoldet = _projektrod?.ErUdfoldet ?? true;
 
         _rod = Biblioteker.Biblioteksnode.Bibliotek("Mødetyper", "", Transcribe.Gruppe.Moede);
         _rod.Antal = _skabeloner.Count;
         foreach (var t in _skabeloner)
             _rod.Boern.Add(Biblioteker.Biblioteksnode.Skabelonnode(t));
 
-        Trae.ItemsSource = new[] { _rod };
+        _projektrod = Biblioteker.Biblioteksnode.Bibliotek("Projekt output", "", Transcribe.Gruppe.Moede);
+        _projektrod.Antal = _projektoutput.Count;
+        foreach (var t in _projektoutput)
+            _projektrod.Boern.Add(Biblioteker.Biblioteksnode.Skabelonnode(t));
+
+        Trae.ItemsSource = new[] { _rod, _projektrod };
         _rod.ErUdfoldet = varUdfoldet;
+        _projektrod.ErUdfoldet = varProjektUdfoldet;
 
         _byggerTrae = false;
 
-        if (_skabeloner.Count == 0)
+        var knuder = _rod.Boern.Concat(_projektrod.Boern).ToList();
+
+        if (knuder.Count == 0)
         {
-            Status.Text = $"Ingen mødetyper i {PromptTemplate.Directory}. Tryk «Ny» for at lave den første.";
+            Status.Text = $"Ingen skabeloner i {PromptTemplate.Directory}. "
+                          + "Tryk «Ny» for at lave den første.";
             Detaljer.IsEnabled = false;
             SletKnap.IsEnabled = false;
             return;
@@ -178,12 +204,32 @@ public partial class TemplatesView : UserControl
 
         Detaljer.IsEnabled = true;
 
-        var valgt = _rod.Boern.FirstOrDefault(k => k.Skabelon?.Name == vælgNavn) ?? _rod.Boern[0];
+        var valgt = knuder.FirstOrDefault(k => k.Skabelon?.Name == vælgNavn) ?? knuder[0];
+
         valgt.ErValgt = true;
         Vis(valgt.Skabelon);
     }
 
     private Biblioteker.Biblioteksnode? _rod;
+    private Biblioteker.Biblioteksnode? _projektrod;
+
+    /// <summary>Skabelonerne i det andet bibliotek.</summary>
+    private readonly List<PromptTemplate> _projektoutput = new();
+
+    /// <summary>
+    /// Hvilket bibliotek er der peget på lige nu?
+    /// </summary>
+    /// <remarks>
+    /// Bruges af «Ny», «Slet» og «Åbn mappen». Står markeringen på en
+    /// skabelon, er svaret dens eget bibliotek; står den på selve
+    /// biblioteksrækken, er det den, der peges på.
+    ///
+    /// UDEN DEN VILLE «NY» ALTID LAVE EN MØDETYPE. Man ville stå i «Projekt
+    /// output», trykke Ny, og se den dukke op i den anden liste — uden en
+    /// fejl og uden en forklaring.
+    /// </remarks>
+    private Skabelonslags _valgtSlags = Skabelonslags.Moedetype;
+
     private bool _byggerTrae;
 
     // Standarddagsordenen og selve Mistral-kaldet laa her. De er flyttet til
@@ -270,6 +316,13 @@ public partial class TemplatesView : UserControl
     {
         if (_byggerTrae) return;
         if (e.NewValue is not Biblioteker.Biblioteksnode knude) return;
+
+        // BIBLIOTEKET FØLGER MED MARKERINGEN. Se _valgtSlags.
+        _valgtSlags = ReferenceEquals(knude, _projektrod)
+                      || (knude.Skabelon is { } valgtSkabelon
+                          && valgtSkabelon.Slags == Skabelonslags.Projektoutput)
+            ? Skabelonslags.Projektoutput
+            : Skabelonslags.Moedetype;
 
         Vis(knude.Skabelon);
     }
@@ -1071,9 +1124,13 @@ public partial class TemplatesView : UserControl
         {
             // Et navn, der allerede findes, ville overskrive en skabelon, man
             // stadig bruger. Der laegges et nummer paa i stedet.
+            ny.Slags = _valgtSlags;
+
+            var mappe = PromptTemplate.Skabelonmappe(_valgtSlags);
+
             var grund = ny.Name;
             var n = 2;
-            while (File.Exists(Path.Combine(PromptTemplate.Directory, PromptTemplate.Filnavn(ny.Name))))
+            while (File.Exists(Path.Combine(mappe, PromptTemplate.Filnavn(ny.Name))))
                 ny.Name = $"{grund} {n++}";
 
             ny.Save();
@@ -1126,8 +1183,13 @@ public partial class TemplatesView : UserControl
 
     private void Mappe_Click(object sender, RoutedEventArgs e)
     {
-        Directory.CreateDirectory(PromptTemplate.Directory);
-        Process.Start(new ProcessStartInfo("explorer.exe", $"\"{PromptTemplate.Directory}\"")
+        // DEN MAPPE, DER HØRER TIL DET VALGTE BIBLIOTEK. Åbnede den altid
+        // mødetypernes mappe, ville man stå i «Projekt output», trykke, og
+        // finde noget andet.
+        var mappe = PromptTemplate.Skabelonmappe(_valgtSlags);
+
+        Directory.CreateDirectory(mappe);
+        Process.Start(new ProcessStartInfo("explorer.exe", $"\"{mappe}\"")
         { UseShellExecute = true });
     }
 }
