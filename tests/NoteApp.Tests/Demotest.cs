@@ -188,6 +188,45 @@ public class Demotest
     }
 
     [Fact]
+    public void Motoren_og_modellerne_hentes_ikke_igen_til_demoen()
+    {
+        using var d = new Demomappe();
+
+        var egen = UserDataPaths.Maskinrod;
+
+        Demotilstand.Taend();
+        UserDataPaths.Glem();
+
+        // DATAMAPPEN SKIFTER. Motoren gør ikke.
+        Assert.Equal(Demotilstand.Rod, UserDataPaths.Root);
+        Assert.Equal(egen, UserDataPaths.Maskinrod);
+
+        // Motor, sprogmodeller og nøgle er maskinens — installeret én gang af
+        // den her bruger. Lå de i datamappen, ville demoen bede om at hente
+        // 3,6 GB ned én gang til.
+        Assert.StartsWith(egen, WhisperInstall.Root, StringComparison.OrdinalIgnoreCase);
+        Assert.StartsWith(egen, WhisperInstall.ModelDirectory, StringComparison.OrdinalIgnoreCase);
+        Assert.StartsWith(egen, NoteApp.Core.Llm.SkyNoegle.Fil, StringComparison.OrdinalIgnoreCase);
+
+        Assert.DoesNotContain(Demotilstand.Rod, WhisperInstall.Root, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void Demoen_beder_ikke_om_at_blive_sat_op()
+    {
+        using var d = new Demomappe();
+        Demotilstand.Taend();
+        UserDataPaths.Glem();
+
+        Byg();
+        AppSettings.Reload();
+
+        // Var den falsk, kom velkomstforloebet — med et tilbud om at hente
+        // motoren ned til en demo, der ikke skal transskribere noget.
+        Assert.True(AppSettings.Current.SetupCompleted);
+    }
+
+    [Fact]
     public void Den_bygges_ikke_igen_hver_gang()
     {
         using var d = new Demomappe();

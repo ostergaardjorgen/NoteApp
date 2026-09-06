@@ -70,8 +70,18 @@ public sealed record InstallState(
 /// </summary>
 public static class WhisperInstall
 {
-    /// <summary>Motor og model lander i datamappen — de er brugerens, ikke kodens.</summary>
-    public static string Root => Path.Combine(UserDataPaths.Root, "motor");
+    /// <summary>
+    /// Motor og model lander i datamappen — de er brugerens, ikke kodens.
+    /// </summary>
+    /// <remarks>
+    /// MASKINROD OG IKKE ROOT. Motoren og modellerne er installeret én gang på
+    /// den her computer; de hører ikke til det datasæt, man tilfældigvis står
+    /// i. Uden det her bad demotilstanden om at hente 3,6 GB ned én gang til,
+    /// fordi demoens datamappe var tom. Se <see cref="UserDataPaths.Maskinrod"/>.
+    ///
+    /// De to peger det samme sted, når demoen er slukket.
+    /// </remarks>
+    public static string Root => Path.Combine(UserDataPaths.Maskinrod, "motor");
 
     /// <summary>
     /// DET ENESTE STED, MODELLER LIGGER: {datamappe}\motor\modeller.

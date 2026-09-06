@@ -64,7 +64,8 @@ public sealed class LlmRunner
     /// </summary>
     public static string? FindCli()
     {
-        var rod = Path.Combine(UserDataPaths.Root, "motor", "llama");
+        // Maskinrod: se WhisperInstall.Root.
+        var rod = Path.Combine(UserDataPaths.Maskinrod, "motor", "llama");
         if (!Directory.Exists(rod)) return null;
 
         foreach (var navn in new[] { "llama-cli.exe", "llama-completion.exe" })
@@ -75,7 +76,8 @@ public sealed class LlmRunner
         return null;
     }
 
-    public static string ModelDirectory => Path.Combine(UserDataPaths.Root, "motor", "sprogmodeller");
+    /// <remarks>Maskinrod: modellerne er maskinens, ikke datasaettets. Se WhisperInstall.Root.</remarks>
+    public static string ModelDirectory => Path.Combine(UserDataPaths.Maskinrod, "motor", "sprogmodeller");
 
     public static IReadOnlyList<string> InstalledModels()
     {

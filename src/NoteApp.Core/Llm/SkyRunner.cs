@@ -194,7 +194,13 @@ public static class SkyNoegle
 {
     public const string Miljoevariabel = "MISTRAL_API_KEY";
 
-    public static string Fil => Path.Combine(UserDataPaths.Root, "sky-noegle.txt");
+    /// <remarks>
+    /// MASKINROD OG IKKE ROOT. Noeglen er sat een gang af den her bruger paa
+    /// den her maskine og er bundet til Windows-brugerens egen noegle - se
+    /// Opstartsbeskyttelse. Den hoerer ikke til et datasaet, og der skal ikke
+    /// ligge to kopier af den paa maskinen.
+    /// </remarks>
+    public static string Fil => Path.Combine(UserDataPaths.Maskinrod, "sky-noegle.txt");
 
     public static string? Hent()
     {

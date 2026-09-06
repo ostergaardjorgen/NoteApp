@@ -101,6 +101,31 @@ public static class UserDataPaths
     }
 
     /// <summary>
+    /// Hvor det ligger, som hører til MASKINEN og ikke til datasættet.
+    /// </summary>
+    /// <remarks>
+    /// ============ TO SLAGS TING LIGGER I DATAMAPPEN ============
+    ///
+    /// DINE DATA: optagelser, noter, dokumenter, projekter, skabeloner,
+    /// opgaver, kalender. De hører til det datasæt, man står i, og de skal
+    /// skifte med det.
+    ///
+    /// MASKINENS TING: whisper-motoren, sprogmodellerne på flere gigabyte og
+    /// API-nøglen. De er installeret én gang på den her computer af den her
+    /// bruger. De hører ikke til et datasæt, og de skal ikke hentes igen,
+    /// fordi man kigger på noget andet.
+    ///
+    /// Forskellen betød ingenting, indtil demoen kom: dér er datamappen tom,
+    /// og appen bad om at hente 3,6 GB motor og model ned én gang til — til en
+    /// demo, der ikke engang skal transskribere noget. Set 06-09-2026.
+    ///
+    /// Den peger det samme sted som <see cref="Root"/>, når demoen er slukket.
+    /// Flytter man sin datamappe, flytter motoren med, som den altid har
+    /// gjort.
+    /// </remarks>
+    public static string Maskinrod => EgenRod;
+
+    /// <summary>
     /// Brugerens EGEN datamappe — også mens demoen er tændt.
     /// </summary>
     /// <remarks>

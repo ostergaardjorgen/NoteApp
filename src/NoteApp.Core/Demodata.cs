@@ -42,7 +42,7 @@ public static class Demodata
     /// Taelles op, naar indholdet aendres. Saa bygges demoen forfra ved naeste
     /// start i stedet for at staa med gaarsdagens eksempler i en ny app.
     /// </remarks>
-    public const int Udgave = 2;
+    public const int Udgave = 3;
 
     private static string Maerkefil => Path.Combine(UserDataPaths.Root, "demodata.json");
 
@@ -90,6 +90,8 @@ public static class Demodata
 
         UserDataPaths.EnsureCreated();
 
+        Indstillingerne();
+
         var idag = DateTimeOffset.Now.Date;
 
         Mapperne();
@@ -136,6 +138,46 @@ public static class Demodata
             try { File.Delete(fil); }
             catch (IOException) { /* som ovenfor */ }
         }
+    }
+
+    // ============================================================== indstillinger
+
+    /// <summary>
+    /// Giver demoen brugerens egne indstillinger — og markerer den som sat op.
+    /// </summary>
+    /// <remarks>
+    /// ============ DEMOEN SKAL LIGNE DIN APP ============
+    ///
+    /// Indstillingerne ligger i datamappen, og demoen har sin egen. Uden det
+    /// her ville demoen åbne i det lyse tema med en anden genvejstast og en
+    /// anden mikrofon end den, man lige stod med — og så viser den ikke, hvad
+    /// den skulle vise: den samme app med noget i.
+    ///
+    /// ============ OG DEN SKAL IKKE BEDE OM AT BLIVE SAT OP ============
+    ///
+    /// <c>SetupCompleted</c> er falsk i en frisk mappe, og så kom
+    /// velkomstforløbet — med et tilbud om at hente 3,6 GB motor og model ned
+    /// til en demo, der ikke skal transskribere noget. Motoren ligger nu under
+    /// <see cref="UserDataPaths.Maskinrod"/> og er der i forvejen; det eneste,
+    /// der manglede, var at sige, at appen ER sat op. Set 06-09-2026.
+    /// </remarks>
+    private static void Indstillingerne()
+    {
+        var fra = Path.Combine(UserDataPaths.Maskinrod, "indstillinger.json");
+        var til = Path.Combine(UserDataPaths.Root, "indstillinger.json");
+
+        // Er de to den samme fil, er vi ikke i en demo - og saa skal der ikke
+        // kopieres noget oven i sig selv.
+        if (!string.Equals(fra, til, StringComparison.OrdinalIgnoreCase) && File.Exists(fra))
+        {
+            try { File.Copy(fra, til, overwrite: true); }
+            catch (IOException) { /* saa faar demoen standarden. Den virker ogsaa. */ }
+        }
+
+        AppSettings.Reload();
+
+        AppSettings.Current.SetupCompleted = true;
+        AppSettings.Current.Save();
     }
 
     // ==================================================================== mapper
