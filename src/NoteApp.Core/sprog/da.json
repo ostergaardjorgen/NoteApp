@@ -540,6 +540,14 @@
     "gem_navnet": "Gem navnet",
     "kasser_optagelsen": "Kassér optagelsen"
   },
+  "tilknytvindue": {
+    "intet_at_vaelge": "Der er ikke noget at vælge endnu.",
+    "noter": "Noter",
+    "optagelser": "Møder og webinarer",
+    "tilknyt": "Tilknyt",
+    "titel": "Tilknyt til projektet",
+    "under": "Vælg de møder, webinarer og noter, der hører til projektet. De bliver, hvor de er — projektet peger på dem."
+  },
   "projekterview": {
     "aabn_mappen": "Åbn mappen",
     "arkiver": "Arkivér projektet",

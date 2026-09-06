@@ -143,7 +143,66 @@ public partial class ProjekterView : UserControl
         Mapper.ItemsSource = p.Mapper.ToList();
         IngenMapper.Visibility = p.Mapper.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
 
+        VisMedlemmer(p);
         VisFiler(p);
+    }
+
+    /// <summary>Ét medlemskab på skærmen.</summary>
+    /// <param name="Noegle">
+    /// Slags og id sat sammen. Knappen skal kunne sige, hvad der skal fjernes,
+    /// og et id alene er ikke nok: en note og en optagelse kan i princippet
+    /// bære det samme.
+    /// </param>
+    private sealed record Medlemsvisning(string Navn, string Linje, string Noegle);
+
+    /// <summary>
+    /// Viser det, projektet peger på — og siger til, når det ikke findes mere.
+    /// </summary>
+    /// <remarks>
+    /// EN OPTAGELSE KAN VÆRE SLETTET, siden den blev tilknyttet. Medlemskabet
+    /// bliver stående, indtil nogen fjerner det: et medlemskab, appen rydder
+    /// op i af sig selv, er et, man ikke kan opdage er væk. I stedet står der,
+    /// at den ikke findes.
+    /// </remarks>
+    private void VisMedlemmer(Projekt p)
+    {
+        var moeder = MeetingStore.Alle().ToDictionary(m => m.Id.ToString("N"), m => m);
+        var noter = Diktatnoter.Laes().ToDictionary(n => n.Tid.ToString("o"), n => n);
+
+        var ud = new List<Medlemsvisning>();
+
+        foreach (var m in p.Medlemmer)
+        {
+            var noegle = $"{m.Slags}|{m.Id}";
+
+            if (m.Slags == Medlemsslags.Optagelse && moeder.TryGetValue(m.Id, out var moede))
+            {
+                ud.Add(new Medlemsvisning(
+                    string.IsNullOrWhiteSpace(moede.Title) ? "Uden navn" : moede.Title!,
+                    moede.StartedAt.ToLocalTime().ToString("d. MMMM yyyy · HH:mm", Sprog.Kultur),
+                    noegle));
+
+                continue;
+            }
+
+            if (m.Slags == Medlemsslags.Note && noter.TryGetValue(m.Id, out var note))
+            {
+                ud.Add(new Medlemsvisning(
+                    note.Overskrift,
+                    note.Tid.ToString("d. MMMM yyyy · HH:mm", Sprog.Kultur),
+                    noegle));
+
+                continue;
+            }
+
+            ud.Add(new Medlemsvisning(
+                m.Slags == Medlemsslags.Note ? "Note" : "Optagelse",
+                "Findes ikke længere. Fjern den, hvis den ikke skal stå her.",
+                noegle));
+        }
+
+        Medlemmer.ItemsSource = ud;
+        IngenMedlemmer.Visibility = ud.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
     }
 
     /// <summary>Én fil på skærmen.</summary>
@@ -306,6 +365,36 @@ public partial class ProjekterView : UserControl
         if (_valgt is null || sender is not Button { Tag: string sti }) return;
 
         _valgt.Mapper.RemoveAll(m => string.Equals(m, sti, StringComparison.OrdinalIgnoreCase));
+        Projektlager.Gem(_valgt);
+        Vis(_valgt);
+    }
+
+    private void Tilknyt_Klik(object sender, RoutedEventArgs e)
+    {
+        if (_valgt is null) return;
+
+        var vindue = new TilknytVindue(_valgt) { Owner = Window.GetWindow(this) };
+
+        if (vindue.ShowDialog() != true || vindue.Resultat is not { } valgte) return;
+
+        // HELE LISTEN ERSTATTES. Vinduet viste, hvad der var sat, og hvad der
+        // ikke var - saa er svaret hele sandheden og ikke en tilfoejelse.
+        _valgt.Medlemmer.Clear();
+        _valgt.Medlemmer.AddRange(valgte);
+
+        Projektlager.Gem(_valgt);
+        Vis(_valgt);
+    }
+
+    private void FjernMedlem_Klik(object sender, RoutedEventArgs e)
+    {
+        if (_valgt is null || sender is not Button { Tag: string noegle }) return;
+
+        var dele = noegle.Split('|', 2);
+        if (dele.Length != 2) return;
+        if (!Enum.TryParse<Medlemsslags>(dele[0], out var slags)) return;
+
+        _valgt.Fjern(slags, dele[1]);
         Projektlager.Gem(_valgt);
         Vis(_valgt);
     }

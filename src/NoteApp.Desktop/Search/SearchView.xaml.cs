@@ -86,6 +86,10 @@ public sealed class Fundvisning
         {
             Fundtype.Udskrift => ("TRANSKRIPTION", Temaskift.Pensel("Accent")),
             Fundtype.Note => ("DIN NOTE", Temaskift.Pensel("Godkendt")),
+            // SAMME FARVE SOM ET DOKUMENT. En projektfil ER et dokument -
+            // den er bare ikke lavet her. Maerkatet siger forskellen; en
+            // farve mere ville ikke.
+            Fundtype.Projektfil => ("PROJEKTFIL", Temaskift.Pensel("Dokument")),
             _ => ("DOKUMENT", Temaskift.Pensel("Dokument"))
         };
 
@@ -1755,7 +1759,8 @@ public partial class SearchView : UserControl
         {
             ("Transkriptioner", Fundtype.Udskrift),
             ("Noter", Fundtype.Note),
-            ("Dokumenter", Fundtype.Dokument)
+            ("Dokumenter", Fundtype.Dokument),
+            ("Projektfiler", Fundtype.Projektfil)
         };
 
         var findes = slags.Where(s => _fund.Any(f => f.Slags == s.Type)).ToList();
@@ -2590,6 +2595,37 @@ public sealed class Opgavevisning : System.ComponentModel.INotifyPropertyChanged
         // samme.
         var ord = Felt.Text.Trim();
         var steder = v.Fund.Traef.Count;
+
+        // ============ EN PROJEKTFIL AABNES DÉR, HVOR DEN LIGGER ============
+        //
+        // Der findes ingen skaerm i appen, der viser en PDF eller en .docx, og
+        // der skal ikke bygges en. Filen hoerer til brugerens egne programmer,
+        // og Windows ved, hvilket der aabner den.
+        if (v.Fund.Slags == Fundtype.Projektfil)
+        {
+            if (!System.IO.File.Exists(v.Fund.Kilde))
+            {
+                Dialogs.AppDialog.Vis(Window.GetWindow(this), "Filen findes ikke længere",
+                    v.Fund.Kilde + Environment.NewLine + Environment.NewLine
+                    + "Den er flyttet eller slettet, siden den blev læst.",
+                    Dialogs.Slags.Valg);
+                return;
+            }
+
+            try
+            {
+                System.Diagnostics.Process.Start(
+                    new System.Diagnostics.ProcessStartInfo(v.Fund.Kilde) { UseShellExecute = true });
+            }
+            catch (Exception ex)
+            {
+                Dialogs.AppDialog.Vis(Window.GetWindow(this), "Filen kunne ikke åbnes",
+                    ex.Message, Dialogs.Slags.Pas_paa);
+            }
+
+            hoved.HuskSoegning(ord, steder);
+            return;
+        }
 
         if (v.Fund.Slags == Fundtype.Dokument)
         {

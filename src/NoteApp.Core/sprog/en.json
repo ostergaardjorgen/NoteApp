@@ -148,6 +148,14 @@
     "skriv_en_note_her_og_tryk_enter_den_bliver": "Write a note here and press Enter — it gets a timestamp",
     "skriv_en_note_og_tryk_enter_den_bliver_tid": "Write a note and press Enter. It gets a timestamp, so it can be merged into the transcript in the right place. Ctrl+B sets a bookmark without text."
   },
+  "tilknytvindue": {
+    "intet_at_vaelge": "There is nothing to choose yet.",
+    "noter": "Notes",
+    "optagelser": "Meetings and webinars",
+    "tilknyt": "Attach",
+    "titel": "Attach to the project",
+    "under": "Pick the meetings, webinars and notes that belong to the project. They stay where they are — the project points at them."
+  },
   "projekterview": {
     "aabn_mappen": "Open the folder",
     "arkiver": "Archive the project",

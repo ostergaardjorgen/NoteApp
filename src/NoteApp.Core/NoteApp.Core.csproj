@@ -27,6 +27,7 @@
          loeft - og den loeser ikke mere end det her.
          ===================================================================== -->
     <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.11" />
+    <PackageReference Include="PdfPig" Version="0.1.10" />
 
     <!-- Bruges kun til at spoerge Windows, om der er et NVIDIA-kort. Uden
          det svar kan appen ikke anbefale den rigtige Whisper-udgave. -->

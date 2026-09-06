@@ -8,7 +8,17 @@ public enum Fundtype
 {
     Udskrift,
     Note,
-    Dokument
+    Dokument,
+
+    /// <summary>
+    /// En fil i et projekts fundament.
+    /// </summary>
+    /// <remarks>
+    /// TILFOEJET SIDST OG IKKE I MIDTEN. Vaerdierne bruges til at ordne fund
+    /// efter slags; skoed den ind foer «Dokument», ville raekkefoelgen paa
+    /// skaermen skifte for alt andet ogsaa.
+    /// </remarks>
+    Projektfil,
 }
 
 /// <summary>
@@ -89,13 +99,30 @@ public sealed record Fund(
 /// </param>
 public sealed record Soegefilter(string? Sprog = null, string? Moedetype = null,
                                  string? Mappe = null,
-                                 DateTimeOffset? Fra = null, DateTimeOffset? Til = null)
+                                 DateTimeOffset? Fra = null, DateTimeOffset? Til = null,
+                                 string? Projekt = null)
 {
+    /// <summary>
+    /// Skal der overhovedet ledes i projekternes filer?
+    /// </summary>
+    /// <remarks>
+    /// EN PROJEKTFIL HAR HVERKEN MØDETYPE ELLER SPROG. Den er ikke lavet af en
+    /// optagelse; den er noget, nogen har lagt i en mappe. Filtrerer man paa
+    /// en mødetype eller en folder, spørger man om optagelser — og saa skal
+    /// projektfilerne ikke stå imellem dem og lade som om, de svarer.
+    ///
+    /// Datoen gælder derimod: filen har en dato, og den betyder det samme.
+    /// </remarks>
+    public bool LederIProjekter =>
+        string.IsNullOrWhiteSpace(Moedetype) && string.IsNullOrWhiteSpace(Mappe);
     private static bool Ens(string? a, string? b) =>
         string.IsNullOrWhiteSpace(a) || (b is not null && a.Equals(b, StringComparison.CurrentCultureIgnoreCase));
 
     private bool IPerioden(DateTimeOffset t) =>
         (Fra is null || t >= Fra) && (Til is null || t <= Til);
+
+    /// <summary>Samme periode, men for en fil, der ikke har en optagelse bag sig.</summary>
+    public bool IProjektperioden(DateTimeOffset t) => IPerioden(t);
 
     /// <summary>
     /// De faste perioder.
@@ -390,6 +417,44 @@ public static class Soegning
                 tekst += "\n" + d.Description;
 
             Tilfoej(fund, Fundtype.Dokument, d.Id, d.Title, d.Created, tekst, ord);
+        }
+
+        // ============ PROJEKTERNES FUNDAMENT ============
+        //
+        // Teksten kommer fra Tekstcache og ikke fra filen: en PDF paa fire
+        // hundrede sider maa ikke pakkes op, hver gang nogen skriver et ord i
+        // soegefeltet. Foerste gang koster det; derefter er den gemt.
+        //
+        // KUN PROJEKTER, DER ER SAT TIL DET. Hakket «med i soegningen» er til
+        // som standard, men det er brugerens, og et projekt, der er slaaet
+        // fra, skal ikke dukke op alligevel.
+        if (filter.LederIProjekter)
+        {
+            foreach (var projekt in Projektlager.Alle().Where(p => p.MedISoegning))
+            {
+                ct.ThrowIfCancellationRequested();
+
+                if (filter.Projekt is { Length: > 0 } kun
+                    && !string.Equals(kun, projekt.Id, StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                foreach (var fil in Projektkilder.Filer(projekt).Where(f => f.Laesbar))
+                {
+                    ct.ThrowIfCancellationRequested();
+
+                    var tid = new DateTimeOffset(fil.Aendret);
+                    if (!filter.IProjektperioden(tid)) continue;
+
+                    var tekst = Tekstcache.Hent(fil.Sti).Tekst;
+                    if (tekst.Length == 0) continue;
+
+                    // KILDEN ER STIEN. En projektfil har ikke et id - den er
+                    // en fil, nogen har lagt i en mappe, og stien er det
+                    // eneste, der peger paa den.
+                    Tilfoej(fund, Fundtype.Projektfil, fil.Sti,
+                        $"{fil.Filnavn}  ·  {projekt.Navn}", tid, tekst, ord);
+                }
+            }
         }
 
         // DET BEDSTE SVAR FØRST, IKKE DET FLESTE.

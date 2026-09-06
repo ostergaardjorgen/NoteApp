@@ -195,6 +195,63 @@
                   </StackPanel>
                 </Border>
 
+                <!-- Moeder, webinarer og noter -->
+                <Border Background="{DynamicResource Panel}" CornerRadius="10" Padding="20"
+                        Margin="0,0,0,14" BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
+                  <StackPanel>
+                    <Grid>
+                      <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                      </Grid.ColumnDefinitions>
+
+                      <StackPanel Grid.Column="0" Margin="0,0,16,0">
+                        <TextBlock Text="{i18n:Oversat projekterview.moeder_og_noter}"
+                                   FontSize="13" FontWeight="SemiBold" />
+                        <TextBlock Style="{StaticResource Underskrift}" Margin="0,4,0,0"
+                                   TextWrapping="Wrap"
+                                   Text="{i18n:Oversat projekterview.moeder_og_noter_under}" />
+                      </StackPanel>
+
+                      <Button Grid.Column="1" VerticalAlignment="Top" Padding="16,7"
+                              Click="Tilknyt_Klik"
+                              Content="{i18n:Oversat projekterview.tilknyt}" />
+                    </Grid>
+
+                    <ItemsControl x:Name="Medlemmer" Margin="0,14,0,0">
+                      <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                          <Border Background="{DynamicResource Baggrund}" CornerRadius="8"
+                                  Padding="14,10" Margin="0,0,0,8"
+                                  BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
+                            <Grid>
+                              <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                              </Grid.ColumnDefinitions>
+
+                              <StackPanel Grid.Column="0" Margin="0,0,14,0">
+                                <TextBlock Text="{Binding Navn}" FontSize="12.5" TextWrapping="Wrap" />
+                                <TextBlock Text="{Binding Linje}" FontSize="11.5" Margin="0,3,0,0"
+                                           TextWrapping="Wrap"
+                                           Foreground="{DynamicResource TekstMeget}" />
+                              </StackPanel>
+
+                              <Button Grid.Column="1" Click="FjernMedlem_Klik" Tag="{Binding Noegle}"
+                                      Padding="12,5" VerticalAlignment="Center"
+                                      Content="{i18n:Oversat faelles.fjern}" />
+                            </Grid>
+                          </Border>
+                        </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <TextBlock x:Name="IngenMedlemmer" Style="{StaticResource Underskrift}"
+                               Margin="0,10,0,0"
+                               Text="{i18n:Oversat projekterview.ingen_tilknyttede_ting}" />
+                  </StackPanel>
+                </Border>
+
                 <!-- Filerne -->
                 <Border Background="{DynamicResource Panel}" CornerRadius="10" Padding="20"
                         Margin="0,0,0,14" BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">

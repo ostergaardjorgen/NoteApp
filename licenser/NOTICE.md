@@ -21,6 +21,7 @@ Disse ligger i programmappen og installeres sammen med HeyPia.
 | NVIDIA NeMo TitaNet | CC-BY-4.0 | NVIDIA Corporation | `tekster\nvidia-titanet-CC-BY-4.0.txt` |
 | NAudio | MIT | Mark Heath | `tekster\naudio-MIT.txt` |
 | SQLitePCLRaw | Apache-2.0 | SourceGear, LLC | `tekster\sqlitepclraw-Apache-2.0.txt` |
+| PdfPig | Apache-2.0 | UglyToad og bidragydere | `tekster\pdfpig-Apache-2.0.txt` |
 | SQLite | Offentligt domæne | D. Richard Hipp m.fl. | — se nedenfor |
 | .NET og WPF | MIT | .NET Foundation og bidragydere | `tekster\dotnet-og-wpf-MIT.txt` |
 
