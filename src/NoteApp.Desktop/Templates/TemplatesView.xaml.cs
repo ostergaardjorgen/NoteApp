@@ -71,6 +71,12 @@ public partial class TemplatesView : UserControl
         "noter" => "Dine noter",
         "sprog" => "Sprog",
         "kilde" => "Link til webinaret",
+
+        // PROJEKTETS TO. De stod som «kilder» og «projekt» — noegler, ikke
+        // ord. Se resten af listen her: skaermen taler dansk, filen taler
+        // kroellede parenteser.
+        "kilder" => "Projektets materiale",
+        "projekt" => "Projektets navn",
         "ordbog" => "Ordliste",
         "sprogregler" => "Dokumentets sprog",
         _ => noegle
@@ -347,6 +353,8 @@ public partial class TemplatesView : UserControl
         _indlæser = true;
         _valgt = t;
 
+        TilpasTilSlagsen();
+
         FeltNavn.Text = t.Name;
 
         // MAPPERNE HENTES HVER GANG. De aendrer sig, mens appen koerer - en
@@ -365,8 +373,14 @@ public partial class TemplatesView : UserControl
         HakDeltagere.IsChecked = t.TagDeltagerregler;
         _udeladteFelter = new List<string>(t.UdeladteFelter);
         Byg_Afsnit();
-        Byg_Felter();
+
+        // TEKSTEN FOERST, SAA HAKKENE. Byg_Felter laeser FeltBruger for at se,
+        // hvilke felter der staar i teksten - og den laeste den FORRIGE
+        // skabelons prompt, saa hvert eneste hak stod tomt paa en skabelon,
+        // der brugte alle sine felter. Set 06-09-2026 paa projektoutput,
+        // hvor det ramte hver gang, fordi ingen moedetype har {{kilder}}.
         SaetTekst(FeltBruger, t.UserPrompt);
+        Byg_Felter();
 
         // HER BLEV SKABELONENS PreferredModel LAEST IND I EN COMBOBOX.
         // Feltet findes stadig i filformatet, saa gamle skabeloner kan laeses,
@@ -382,6 +396,55 @@ public partial class TemplatesView : UserControl
         // endnu.
         VisAgenda();
 
+    }
+
+    /// <summary>
+    /// Skjuler det, der ikke giver mening for den slags skabelon, man står i.
+    /// </summary>
+    /// <remarks>
+    /// ============ TRE TING HØRER KUN TIL ET MØDE ============
+    ///
+    /// MAPPEN. Den siger, hvilken mappe optagelser af den her type lander i.
+    /// Et projektoutput laver ikke optagelser — det læser dokumenter, der
+    /// ligger i projektet i forvejen.
+    ///
+    /// DELTAGERREGLERNE. De handler om, hvem der kommer på deltagerlisten, og
+    /// hvordan man skriver om den, der sagde noget. Et projekt har ikke
+    /// deltagere; det har filer.
+    ///
+    /// DAGSORDENEN. Den er det, der skal SIGES på mødet, for at udskriften
+    /// kommer til at indeholde det, skabelonen beder om. Et projekt har ikke
+    /// et møde at holde — materialet ligger der allerede.
+    ///
+    /// De bliver SKJULT og ikke grå. En grå fane er et spørgsmål om, hvad
+    /// man har gjort forkert; en fane, der ikke er der, er et spørgsmål, der
+    /// ikke bliver stillet.
+    /// </remarks>
+    private void TilpasTilSlagsen()
+    {
+        var projekt = _valgtSlags == Skabelonslags.Projektoutput;
+        var vis = projekt ? Visibility.Collapsed : Visibility.Visible;
+
+        Mappeoverskrift.Visibility = vis;
+        Mapperaekke.Visibility = vis;
+        Mappehjaelp.Visibility = vis;
+        HakDeltagere.Visibility = vis;
+
+        // EN SKJULT FANE, MAN STAAR PAA, ER ET TOMT PANEL. Markeringen skal
+        // flyttes, foer den forsvinder.
+        if (projekt && AgendaFane.IsSelected) MaterialeFane.IsSelected = true;
+        AgendaFane.Visibility = vis;
+
+        Materialelinje1.Text = projekt
+            ? "Den anden fane er reglerne for, hvordan der skrives. Her vælger du, HVAD "
+              + "modellen får at arbejde med fra projektet."
+            : Sprog.T("templatesview.instruktion_er_reglerne_hvad_modellen_skal");
+
+        Materialelinje2.Text = projekt
+            ? "«Materialet» er projektets dokumenter, samlet og mærket med, hvilken fil "
+              + "hver stump kom fra. Er hakket taget fra, sendes linjen ikke — og så har "
+              + "modellen ingenting at skrive ud af."
+            : Sprog.T("templatesview.staar_et_felt_ikke_her_naar_de_oplysninger");
     }
 
     // HER LAA _systemVedIndlaesning - instruktionen, som den saa ud, da
@@ -952,16 +1015,30 @@ public partial class TemplatesView : UserControl
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList();
 
-        var manglerUdskrift = !brugte.Contains("transskription", StringComparer.OrdinalIgnoreCase);
+        // ============ HVAD DER IKKE MAA MANGLE, AFHAENGER AF SLAGSEN ============
+        //
+        // En moedetype uden {{transskription}} skriver et referat af
+        // ingenting. Et projektoutput uden {{kilder}} goer praecis det samme -
+        // og det er en ANDEN fejl, som den samme kontrol skal kunne se.
+        //
+        // Fejlen var her indtil 06-09-2026: skaermen forlangte
+        // {{transskription}} af hver eneste projektskabelon og naegtede at
+        // gemme, selv om feltet ville staa tomt, hvis man satte det ind.
+        var kraevet = _valgtSlags == Skabelonslags.Projektoutput ? "kilder" : "transskription";
+        var manglerUdskrift = !brugte.Contains(kraevet, StringComparer.OrdinalIgnoreCase);
         var ukendte = brugte.Where(f => !PromptTemplate.Fields.ContainsKey(f)).ToList();
         var reglerForkert = brugte.Contains(Deltagerregler.Felt, StringComparer.OrdinalIgnoreCase);
 
         var linjer = new List<string>();
 
         if (manglerUdskrift)
-            linjer.Add("{{transskription}} mangler. Uden det felt får modellen ikke selve " +
-                       "transkriptionen, og dokumentet bliver skrevet på ingenting. Der kan ikke " +
-                       "gemmes, før feltet er sat ind.");
+            linjer.Add(_valgtSlags == Skabelonslags.Projektoutput
+                ? "{{kilder}} mangler. Uden det felt får modellen ikke projektets materiale, "
+                  + "og dokumentet bliver skrevet på ingenting. Der kan ikke gemmes, før "
+                  + "feltet er sat ind."
+                : "{{transskription}} mangler. Uden det felt får modellen ikke selve "
+                  + "transkriptionen, og dokumentet bliver skrevet på ingenting. Der kan ikke "
+                  + "gemmes, før feltet er sat ind.");
 
         if (reglerForkert)
             linjer.Add("{{deltagerregler}} hører til under «Instruktion». Her bliver det byttet " +
@@ -1033,12 +1110,16 @@ public partial class TemplatesView : UserControl
             return;
         }
 
-        if (!Tekst(FeltBruger).Contains("{{transskription}}"))
+        var projektskabelon = _valgtSlags == Skabelonslags.Projektoutput;
+        var feltet = projektskabelon ? "{{kilder}}" : "{{transskription}}";
+
+        if (!Tekst(FeltBruger).Contains(feltet))
         {
             var ja = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
-                "Mødet mangler i mødetypen",
-                "Feltet {{transskription}} står ikke i teksten forneden. Uden det får modellen ikke " +
-                "selve mødet at se, og udkastet bliver skrevet ud af ingenting.",
+                projektskabelon ? "Materialet mangler i skabelonen" : "Mødet mangler i mødetypen",
+                $"Feltet {feltet} står ikke i teksten forneden. Uden det får modellen ikke "
+                + (projektskabelon ? "projektets materiale" : "selve mødet")
+                + " at se, og udkastet bliver skrevet ud af ingenting.",
                 godkend: "Gem alligevel", annuller: "Tilbage til teksten",
                 slags: Dialogs.Slags.Pas_paa, godkendErStandard: false);
 
@@ -1062,13 +1143,16 @@ public partial class TemplatesView : UserControl
         // gem kan ogsaa komme herind ad andre veje. En skabelon uden
         // {{transskription}} maa ikke naa filen - den ville producere et
         // dokument skrevet paa ingenting, og fejlen viser sig foerst dér.
-        if (!_valgt.UserPrompt.Contains("{{transskription}}", StringComparison.OrdinalIgnoreCase))
+        if (!_valgt.UserPrompt.Contains(feltet, StringComparison.OrdinalIgnoreCase))
         {
             MaterialeFane.IsSelected = true;
-            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Transkriptionen mangler",
-                "Mødetypen kan ikke gemmes uden feltet {{transskription}} under " +
-                "«Hvad modellen får». Uden det får modellen ikke selve transkriptionen af " +
-                "mødet, og dokumentet bliver skrevet på ingenting.",
+            Dialogs.AppDialog.Vis(Window.GetWindow(this),
+                projektskabelon ? "Materialet mangler" : "Transkriptionen mangler",
+                (projektskabelon ? "Skabelonen" : "Mødetypen")
+                + $" kan ikke gemmes uden feltet {feltet} under «Hvad der kommer med». Uden "
+                + "det får modellen ikke "
+                + (projektskabelon ? "projektets materiale" : "selve transkriptionen af mødet")
+                + ", og dokumentet bliver skrevet på ingenting.",
                 Dialogs.Slags.Pas_paa);
             return;
         }
@@ -1154,24 +1238,30 @@ public partial class TemplatesView : UserControl
         }
         catch (Exception ex)
         {
-            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Kunne ikke gemme mødetypen",
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), $"Kunne ikke gemme {Ordet}",
                 ex.Message, Dialogs.Slags.Pas_paa);
         }
     }
+
+    /// <summary>«mødetypen» eller «skabelonen» — efter det bibliotek, man står i.</summary>
+    private string Ordet => _valgtSlags == Skabelonslags.Projektoutput ? "skabelonen" : "mødetypen";
+
+    /// <summary>Det samme ord med stort begyndelsesbogstav.</summary>
+    private string Ordet1 => char.ToUpper(Ordet[0]) + Ordet[1..];
 
     private void Slet_Click(object sender, RoutedEventArgs e)
     {
         if (_valgt?.Path is null)
         {
-            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Kan ikke slettes", "Der er ingen fil at slette — mødetypen er indbygget.", Dialogs.Slags.Valg);
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Kan ikke slettes", $"Der er ingen fil at slette — {Ordet} er indbygget.", Dialogs.Slags.Valg);
             return;
         }
 
         var ja = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
-            $"Slet mødetypen «{_valgt.Name}»?",
+            $"Slet {Ordet} «{_valgt.Name}»?",
             $"{_valgt.Path}\n\nFilen slettes. Har du brugt den til udkast tidligere, ligger de " +
             "udkast stadig hvor de er.",
-            godkend: "Slet mødetypen", annuller: "Behold den",
+            godkend: $"Slet {Ordet}", annuller: "Behold den",
             slags: Dialogs.Slags.Pas_paa, godkendErStandard: false);
 
         if (!ja) return;
@@ -1179,12 +1269,12 @@ public partial class TemplatesView : UserControl
         try
         {
             File.Delete(_valgt.Path);
-            Status.Text = "Mødetypen er slettet.";
+            Status.Text = $"{Ordet1} er slettet.";
             Indlæs();
         }
         catch (Exception ex)
         {
-            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Kunne ikke slette", $"Mødetypen kunne ikke slettes.\n\n{ex.Message}", Dialogs.Slags.Fejl);
+            Dialogs.AppDialog.Vis(Window.GetWindow(this), "Kunne ikke slette", $"{Ordet1} kunne ikke slettes.\n\n{ex.Message}", Dialogs.Slags.Fejl);
         }
     }
 

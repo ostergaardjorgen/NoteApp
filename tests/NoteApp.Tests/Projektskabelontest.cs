@@ -1,4 +1,4 @@
-using NoteApp.Core.Llm;
+﻿using NoteApp.Core.Llm;
 using Xunit;
 
 namespace NoteApp.Tests;
@@ -99,6 +99,29 @@ public class Projektskabelontest
             Assert.Contains("{{sprogregler}}", t.SystemPrompt);
             Assert.Contains("in english", t.RenderSystem("en").ToLowerInvariant());
         }
+    }
+
+    [Fact]
+    public void Et_projektoutput_faar_ikke_moedets_felter_at_vaelge_imellem()
+    {
+        var felter = PromptTemplate.Felter(Skabelonslags.Projektoutput).ToList();
+
+        Assert.Contains("kilder", felter);
+        Assert.Contains("projekt", felter);
+
+        // «kilde» er LINKET TIL WEBINARET, ikke projektets kilder. Det ligner
+        // det rigtige felt paa navnet og ville altid staa tomt.
+        Assert.DoesNotContain("kilde", felter);
+        Assert.DoesNotContain("transskription", felter);
+        Assert.DoesNotContain("noter", felter);
+
+        // Og den anden vej: en moedetype har ingen projektfelter.
+        var moede = PromptTemplate.Felter(Skabelonslags.Moedetype).ToList();
+
+        Assert.Contains("kilde", moede);
+        Assert.Contains("transskription", moede);
+        Assert.DoesNotContain("kilder", moede);
+        Assert.DoesNotContain("projekt", moede);
     }
 
     [Fact]

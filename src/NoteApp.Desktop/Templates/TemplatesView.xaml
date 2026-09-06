@@ -217,7 +217,7 @@
                    Et webinar hoerer i «Webinarer». Hver gang. Saa skal man
                    ikke vaelge det hver gang - man har allerede sagt det ved
                    at vaelge moedetypen. -->
-              <TextBlock Text="{i18n:Oversat templatesview.mappe}" Style="{StaticResource Underskrift}" Margin="0,20,0,0" />
+              <TextBlock x:Name="Mappeoverskrift" Text="{i18n:Oversat templatesview.mappe}" Style="{StaticResource Underskrift}" Margin="0,20,0,0" />
 
               <!-- ============ HER STOD EN RULLELISTE MED FULDE STIER ============
 
@@ -228,7 +228,7 @@
                    Nu aabner knappen den samme mappevaelger, som «Flyt til
                    mappe» bruger paa optagelserne - og den viser et trae. Eet
                    billede af mapperne i hele appen. -->
-              <DockPanel Margin="0,4,0,0">
+              <DockPanel x:Name="Mapperaekke" Margin="0,4,0,0">
                 <Button x:Name="MappeKnap2" DockPanel.Dock="Right" Content="{i18n:Oversat templatesview.vaelg_mappe}"
                         Click="VaelgMappe_Klik" Padding="14,7" Margin="8,0,0,0" />
                 <Border BorderBrush="{DynamicResource InputKant}" BorderThickness="1" CornerRadius="6"
@@ -237,7 +237,7 @@
                              TextTrimming="CharacterEllipsis" />
                 </Border>
               </DockPanel>
-              <TextBlock FontSize="11.5" Margin="2,6,0,0" TextWrapping="Wrap"
+              <TextBlock x:Name="Mappehjaelp" FontSize="11.5" Margin="2,6,0,0" TextWrapping="Wrap"
                          Foreground="{DynamicResource TekstMeget}"
                          Text="{i18n:Oversat templatesview.optagelser_med_den_her_moedetype_laegges}" />
 
@@ -349,10 +349,10 @@
                    Raekkefoelgen er nu den samme begge steder: forklaring,
                    hakkene, og saa teksten. -->
               <StackPanel DockPanel.Dock="Top" Margin="2,0,0,8">
-                <TextBlock FontSize="11.5" TextWrapping="Wrap" LineHeight="18"
+                <TextBlock x:Name="Materialelinje1" FontSize="11.5" TextWrapping="Wrap" LineHeight="18"
                            Foreground="{DynamicResource TekstMeget}"
                            Text="{i18n:Oversat templatesview.instruktion_er_reglerne_hvad_modellen_skal}" />
-                <TextBlock FontSize="11.5" Margin="0,5,0,0" TextWrapping="Wrap" LineHeight="18"
+                <TextBlock x:Name="Materialelinje2" FontSize="11.5" Margin="0,5,0,0" TextWrapping="Wrap" LineHeight="18"
                            Foreground="{DynamicResource TekstMeget}"
                            Text="{i18n:Oversat templatesview.staar_et_felt_ikke_her_naar_de_oplysninger}" />
               </StackPanel>

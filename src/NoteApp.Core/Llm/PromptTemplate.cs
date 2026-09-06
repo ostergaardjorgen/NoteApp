@@ -492,9 +492,12 @@ public sealed class PromptTemplate
     {
         var kunProjekt = new[] { "kilder", "projekt" };
 
+        // «kilde» er LINKET TIL WEBINARET, ikke projektets kilder. Den stod
+        // her ikke, og saa blev «Link til webinaret» tilbudt paa en
+        // projektskabelon - et felt, der altid ville staa tomt.
         var kunMoede = new[]
         {
-            "transskription", "titel", "dato", "varighed", "noter", "sprog",
+            "transskription", "titel", "dato", "varighed", "noter", "sprog", "kilde",
         };
 
         return Fields.Keys.Where(k => slags == Skabelonslags.Projektoutput
