@@ -193,7 +193,7 @@ public partial class SearchView : UserControl
     {
         try
         {
-            var v = AppSettings.Current.CockpitVenstre;
+            var v = Ryddetbredde(AppSettings.Current.CockpitVenstre);
             var h = AppSettings.Current.CockpitHoejre;
 
             if (v > 0) Venstrespalte.Width = new GridLength(v);
@@ -421,18 +421,29 @@ public partial class SearchView : UserControl
     /// </remarks>
     private const double Gammelbredde = 306;
 
+    /// <summary>
+    /// Den gemte bredde — med den gamle standard rettet til den nye.
+    /// </summary>
+    /// <remarks>
+    /// DEN SKAL KALDES BEGGE STEDER, hvor bredden læses. Her lå den kun ét
+    /// sted, og så blev spalten sat af den anden indgang, før oprydningen
+    /// nåede at ske: bredden stod stadig på 299 efter en genstart. Målt
+    /// 06-09-2026.
+    /// </remarks>
+    private static double Ryddetbredde(double gemt)
+    {
+        if (gemt <= 0 || Math.Abs(gemt - Gammelbredde) > 10) return gemt;
+
+        AppSettings.Current.CockpitVenstre = Kalenderbredde;
+        AppSettings.Current.Save();
+
+        return Kalenderbredde;
+    }
+
     private void HentBredder()
     {
-        var v = AppSettings.Current.CockpitVenstre;
+        var v = Ryddetbredde(AppSettings.Current.CockpitVenstre);
         var h = AppSettings.Current.CockpitHoejre;
-
-        // ÉN GANG: den gamle standard bliver til den nye. Se Gammelbredde.
-        if (v > 0 && Math.Abs(v - Gammelbredde) <= 10)
-        {
-            v = Kalenderbredde;
-            AppSettings.Current.CockpitVenstre = v;
-            AppSettings.Current.Save();
-        }
 
         _venstreFuld = v > 0 ? v : Kalenderbredde;
         _hoejreFuld = h > 0 ? h : 340;
