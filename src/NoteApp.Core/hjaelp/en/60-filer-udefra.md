@@ -1,4 +1,4 @@
-# Audio files from outside
+﻿# Audio files from outside
 
 *A voice memo from the phone, a dictaphone, a file a colleague sent*
 
@@ -34,6 +34,11 @@ the tree.
 
 Point the app at a folder under **Settings → Files**. If an audio file turns
 up, it is offered at the top of Recordings.
+
+If you record on an iPhone or an Android phone, this is the route the
+recordings come in by themselves. The whole chain — from the phone through
+iCloud, OneDrive, Google Drive or Dropbox and into the app — is described in
+**Cloud service integration**.
 
 By default **nothing** is watched. In return the app finds the cloud services
 on the machine itself and offers one folder in each:

@@ -1,4 +1,4 @@
-# Lydfiler udefra
+﻿# Lydfiler udefra
 
 *En talememo fra telefonen, en diktafon, en fil en kollega sendte*
 
@@ -33,6 +33,11 @@ på udskriften, og som et eget ikon i træet.
 
 Peg appen på en mappe under **Indstillinger → Filer**. Dukker der en lydfil
 op, bliver den tilbudt øverst på Optagelser.
+
+Optager du på en iPhone eller en Android-telefon, er det den vej,
+optagelserne kommer ind af sig selv. Hele kæden — fra telefonen gennem
+iCloud, OneDrive, Google Drev eller Dropbox og ind i appen — står i
+**Integration med skytjenester**.
 
 Som standard overvåges **ingenting**. Til gengæld finder appen selv de
 skytjenester, der er på maskinen, og tilbyder én mappe i hver:

@@ -1,4 +1,4 @@
-namespace NoteApp.Core;
+﻿namespace NoteApp.Core;
 
 /// <summary>Ét tip — «Vidste du at …».</summary>
 /// <param name="Tekst">Selve sætningen. Uden «Vidste du at», som står i båndet.</param>
@@ -75,6 +75,38 @@ public static class Tips
         new("kalenderen virker uden nogen konto nogen steder. Google er noget, "
             + "du kan lægge oveni — ikke noget, appen står og falder med.",
             "50-kalender-og-opgaver"),
+
+        // ============ TELEFONEN SOM OPTAGER ============
+        //
+        // Fem vinkler paa den samme kaede, fordi den ikke opdages ved at
+        // bruge appen: den skal saettes op én gang, og foerst derefter er
+        // den usynlig. Hver vinkel er et sted, man kan komme ind fra -
+        // moedet i bilen, telefonen man har i forvejen, skytjenesten man
+        // allerede betaler for, og spoergsmaalet om, hvem der faar adgang.
+        new("du kan optage møder med din iPhone eller din Android-telefon. "
+            + "Gem optagelsen i din HeyPia-mappe i skyen, så står den klar "
+            + "her, næste gang du åbner appen.",
+            "65-skytjenester"),
+
+        new("mødet i bilen også kan blive til et referat. Optag med "
+            + "telefonens egen optager, del optagelsen til iCloud, OneDrive "
+            + "eller Google Drev — resten sker af sig selv.",
+            "65-skytjenester"),
+
+        new("HeyPia aldrig beder om adgang til din Google-, Microsoft- eller "
+            + "Apple-konto. Appen ser en mappe på din egen disk; det er "
+            + "skytjenestens eget program, der fylder den.",
+            "65-skytjenester"),
+
+        new("du kan bestemme, hvor optagelserne fra telefonen skal ligge. "
+            + "Under Indstillinger → Filer retter du stien, blader dig frem "
+            + "til mappen og gemmer — forslaget er kun et forslag.",
+            "65-skytjenester"),
+
+        new("en optagelse beholder sin egen dato. En samtale fra i tirsdags "
+            + "sorterer som i tirsdags, også selv om telefonen først når at "
+            + "sende den videre om torsdagen.",
+            "65-skytjenester"),
     };
 
     private static readonly Tip[] Engelsk =
@@ -124,6 +156,32 @@ public static class Tips
         new("the calendar works without an account anywhere. Google is something "
             + "you can add on top — not something the app stands or falls with.",
             "50-kalender-og-opgaver"),
+
+        // Se den danske liste for hvorfor der er fem af dem.
+        new("you can record meetings with your iPhone or your Android phone. "
+            + "Save the recording to your HeyPia folder in the cloud, and it "
+            + "is waiting here the next time you open the app.",
+            "65-skytjenester"),
+
+        new("the meeting in the car can become minutes too. Record with the "
+            + "phone's own recorder, share it to iCloud, OneDrive or Google "
+            + "Drive — the rest happens by itself.",
+            "65-skytjenester"),
+
+        new("HeyPia never asks for access to your Google, Microsoft or Apple "
+            + "account. The app sees a folder on your own disk; the cloud "
+            + "service's own program is what fills it.",
+            "65-skytjenester"),
+
+        new("you decide where recordings from the phone are kept. Under "
+            + "Settings → Files you can edit the path, browse to the folder "
+            + "and save — the suggestion is only a suggestion.",
+            "65-skytjenester"),
+
+        new("a recording keeps its own date. A conversation from Tuesday "
+            + "sorts as Tuesday, even if the phone only gets around to "
+            + "sending it on Thursday.",
+            "65-skytjenester"),
     };
 
     /// <summary>Tipsene på det sprog, der vises nu.</summary>
