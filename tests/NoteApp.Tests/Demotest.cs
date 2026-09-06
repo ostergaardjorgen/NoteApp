@@ -121,8 +121,15 @@ public class Demotest
         Assert.Equal(egne, UserDataPaths.Root);
     }
 
-    /// <summary>Bygger demoen i en mappe, prøven ejer.</summary>
-    private static void Byg() => Demodata.Byg();
+    /// <summary>
+    /// Bygger demoen i en mappe, prøven ejer — og UDEN at læse i brugerens
+    /// egne optagelser efter lydeksempler. Se Lydeksempeltest for dem.
+    /// </summary>
+    private static void Byg() => Byg2();
+
+    /// <summary>Det samme, men med svaret om der blev bygget.</summary>
+    private static bool Byg2(bool tvungen = false) =>
+        Demodata.Byg(tvungen, lydfra: Path.Combine(Path.GetTempPath(), "heypia-ingen-data"));
 
     [Fact]
     public void Der_er_noget_at_se_paa_i_hver_ende_af_appen()
@@ -187,13 +194,13 @@ public class Demotest
         Demotilstand.Taend();
         UserDataPaths.Glem();
 
-        Assert.True(Demodata.Byg(), "første gang skal den bygges");
-        Assert.False(Demodata.Byg(), "anden gang skal den lades i fred");
+        Assert.True(Byg2(), "første gang skal den bygges");
+        Assert.False(Byg2(), "anden gang skal den lades i fred");
 
         // EN AENDRING I DEMOEN SKAL KUNNE SES. Bygges der forfra, maa der ikke
         // ligge to af hver bagefter.
         var foer = MeetingStore.Alle().Count();
-        Assert.True(Demodata.Byg(tvungen: true));
+        Assert.True(Byg2(tvungen: true));
         Assert.Equal(foer, MeetingStore.Alle().Count());
     }
 
@@ -204,8 +211,8 @@ public class Demotest
         Demotilstand.Taend();
         UserDataPaths.Glem();
 
-        Demodata.Byg();
-        Demodata.Byg(tvungen: true);
+        Byg2();
+        Byg2(tvungen: true);
 
         // Blev flaget ryddet med resten, ville appen falde tilbage paa
         // brugerens egne data midt i, at demoen blev bygget.

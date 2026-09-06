@@ -96,6 +96,31 @@ public static class UserDataPaths
             // demoen tilfaeldigvis er taendt.
             if (Demotilstand.Taendt) return _cached = Demotilstand.Rod;
 
+            return _cached = EgenRod;
+        }
+    }
+
+    /// <summary>
+    /// Brugerens EGEN datamappe — også mens demoen er tændt.
+    /// </summary>
+    /// <remarks>
+    /// DEN FINDES FOR DEMOEN. Den, der bygger demodataene, kører i en app,
+    /// hvor <see cref="Root"/> allerede peger på demomappen — og skal alligevel
+    /// kunne finde brugerens egne webinarer at klippe et lydeksempel ud af.
+    ///
+    /// Miljøvariablen tæller med her. Sætter en prøve sin egen sandkasse, er
+    /// dét brugerens datamappe, så længe prøven kører; ellers ville en prøve
+    /// kunne komme til at læse i C:\AppNoter.
+    /// </remarks>
+    public static string EgenRod
+    {
+        get
+        {
+            var tilsidesat = Environment.GetEnvironmentVariable(OverrideVariable);
+            if (string.IsNullOrWhiteSpace(tilsidesat))
+                tilsidesat = Environment.GetEnvironmentVariable(GammelOverrideVariable);
+            if (!string.IsNullOrWhiteSpace(tilsidesat)) return Path.GetFullPath(tilsidesat);
+
             try
             {
                 // Det nye sted foerst, det gamle bagefter. Se PointerFile.
@@ -104,7 +129,7 @@ public static class UserDataPaths
                     if (!File.Exists(fil)) continue;
 
                     var valgt = File.ReadAllText(fil, Encoding.UTF8).Trim();
-                    if (!string.IsNullOrWhiteSpace(valgt)) return _cached = Path.GetFullPath(valgt);
+                    if (!string.IsNullOrWhiteSpace(valgt)) return Path.GetFullPath(valgt);
                 }
             }
             catch (IOException)
@@ -113,7 +138,7 @@ public static class UserDataPaths
                 // Standarden er altid brugbar.
             }
 
-            return _cached = DefaultRoot;
+            return DefaultRoot;
         }
     }
 

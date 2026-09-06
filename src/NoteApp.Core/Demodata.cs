@@ -22,13 +22,16 @@ namespace NoteApp.Core;
 /// kommende. En demo med faste datoer ser forladt ud et halvt år senere — og
 /// «senest ændret» er dét, listerne sorterer efter.
 ///
-/// ============ DER ER INGEN LYD ============
+/// ============ LYDEN ER RIGTIG ELLER SLET IKKE DER ============
 ///
-/// Optagelserne har udskrift, noter og dokumenter, men ingen wav-fil. To
-/// grunde: lyd fylder mange gange resten tilsammen, og der findes ikke en
-/// dansk stemme på maskinen at lave den med. Fabrikeret lyd, der ikke passer
-/// til udskriften, ville være værre end ingen — så listen siger «ingen lyd»,
-/// og demolinjen i sidebjælken siger hvorfor.
+/// De opdigtede møder har udskrift, noter og dokumenter, men ingen wav-fil.
+/// Der findes ikke en dansk stemme på maskinen at lave den med, og fabrikeret
+/// lyd, der ikke passer til udskriften, er værre end ingen.
+///
+/// I stedet klippes to korte eksempler ud af brugerens EGNE webinarer — med
+/// den udskrift, der hører til det samme stykke. Se <see cref="Lydeksempler"/>.
+/// Er der ingen webinarer på maskinen, har demoen ingen lyd, og resten virker
+/// nøjagtig som før.
 /// </remarks>
 public static class Demodata
 {
@@ -39,7 +42,7 @@ public static class Demodata
     /// Taelles op, naar indholdet aendres. Saa bygges demoen forfra ved naeste
     /// start i stedet for at staa med gaarsdagens eksempler i en ny app.
     /// </remarks>
-    public const int Udgave = 1;
+    public const int Udgave = 2;
 
     private static string Maerkefil => Path.Combine(UserDataPaths.Root, "demodata.json");
 
@@ -67,7 +70,16 @@ public static class Demodata
     /// <see cref="UserDataPaths.Root"/> peger hen — så den skal kaldes af en
     /// app, der ALLEREDE står i demotilstand.
     /// </summary>
-    public static bool Byg(bool tvungen = false)
+    /// <param name="lydfra">
+    /// Datamappen, lydeksemplerne klippes af. Null betyder brugerens egen —
+    /// se <see cref="UserDataPaths.EgenRod"/>.
+    ///
+    /// DEN ER ET ARGUMENT FOR PRØVERNES SKYLD. Uden den ville hver eneste
+    /// prøvekørsel læse i C:\AppNoter og klippe et par megabyte lyd ud af
+    /// brugerens rigtige webinarer. En prøve, der afhænger af, hvad der
+    /// tilfældigvis ligger på maskinen, er ikke en prøve.
+    /// </param>
+    public static bool Byg(bool tvungen = false, string? lydfra = null)
     {
         if (Findes && !tvungen) return false;
 
@@ -84,6 +96,8 @@ public static class Demodata
         DraftStore.SeedTemplates();
 
         var moeder = Moederne(idag);
+
+        Lydeksempler(idag, lydfra ?? UserDataPaths.EgenRod);
 
         Dokumenterne(moeder);
         Projekterne(moeder, idag);
@@ -380,6 +394,173 @@ public static class Demodata
         }
 
         File.WriteAllText(Path.Combine(mappe, "notes.jsonl"), sb.ToString(), new UTF8Encoding(false));
+    }
+
+    // ============================================================ lydeksempler
+
+    /// <summary>Så langt et lydeksempel er.</summary>
+    /// <remarks>
+    /// FEM OG HALVFJERDS SEKUNDER. Langt nok til, at man hører nogen sige
+    /// noget færdigt og kan følge med i udskriften imens; kort nok til at
+    /// fylde under to en halv megabyte. Hele demoen skal kunne ligge under ti.
+    /// </remarks>
+    private const double Klippet = 75;
+
+    /// <summary>Så mange eksempler klippes der.</summary>
+    private const int AntalKlip = 2;
+
+    /// <summary>
+    /// Klipper et par korte lydeksempler ud af brugerens egne webinarer.
+    /// </summary>
+    /// <remarks>
+    /// ============ HVORFOR NETOP WEBINARER ============
+    ///
+    /// Et webinar er envejs og som regel offentligt: en oplaegsholder, der
+    /// siger noget, nogen har meldt sig til at høre. Et kundemøde er en
+    /// samtale mellem to mennesker, og den hører ikke hjemme i noget, man
+    /// viser frem. Der køres derfor KUN på optagelser, der er mærket som
+    /// webinar eller ligger i webinarmappen.
+    ///
+    /// ============ LYDEN OG TEKSTEN FØLGES AD ============
+    ///
+    /// Udskriften til eksemplet er de linjer, der ligger i det samme vindue
+    /// som lyden — ikke den opdigtede tekst fra resten af demoen. Et klip, der
+    /// siger ét, under en udskrift, der siger noget andet, er ikke et
+    /// eksempel; det er en fejl, man ikke kan se er en fejl.
+    ///
+    /// ============ FINDES DER INGEN, ER DET IKKE EN FEJL ============
+    ///
+    /// På en frisk installation er der ingen webinarer at klippe af. Så har
+    /// demoen ingen lyd, og resten af den virker nøjagtig som før.
+    /// </remarks>
+    private static void Lydeksempler(DateTime idag, string lydfra)
+    {
+        var kilder = Webinarer(lydfra).Take(AntalKlip).ToList();
+
+        // Lagt ind mellem de opdigtede møder, saa listen ikke deler sig i
+        // «dem med lyd» og «dem uden».
+        var dage = new[] { 14, 9 };
+
+        for (var i = 0; i < kilder.Count; i++)
+        {
+            var (fra, meta, wav, model, udskrift) = kilder[i];
+
+            // BEGYND EN FJERDEDEL INDE. Begyndelsen af et webinar er
+            // velkomst og «kan I høre mig» - det er ikke dét, man vil vise.
+            var maal = udskrift.Linjer.Count == 0
+                ? 0
+                : udskrift.Linjer[udskrift.Linjer.Count / 4].FraMs;
+
+            var linjer = udskrift.Linjer
+                .Where(l => l.FraMs >= maal && l.FraMs < maal + Klippet * 1000)
+                .ToList();
+
+            if (linjer.Count == 0) continue;
+
+            var start = new DateTimeOffset(idag.AddDays(-dage[i]).AddHours(13).AddMinutes(15),
+                                           DateTimeOffset.Now.Offset);
+
+            var titel = (meta.Title ?? Path.GetFileName(fra)) + " (uddrag)";
+            var mappe = MeetingStore.CreateSessionDirectory(titel, start);
+
+            var lydnavn = Path.GetFileName(wav);
+            var sekunder = Lyduddrag.Klip(wav, Path.Combine(mappe, lydnavn), maal / 1000.0, Klippet);
+
+            if (sekunder <= 0)
+            {
+                // Kunne lyden ikke klippes, er der ikke noget eksempel. En
+                // udskrift uden sin lyd er praecis dét, klippene skulle raade
+                // bod paa.
+                try { Directory.Delete(mappe, recursive: true); } catch (IOException) { }
+                continue;
+            }
+
+            var ny = new Udskrift();
+
+            foreach (var l in linjer)
+            {
+                ny.Linjer.Add(new Udskriftslinje
+                {
+                    FraMs = l.FraMs - maal,
+                    TilMs = l.TilMs - maal,
+                    Spor = l.Spor,
+                    Tekst = l.Tekst,
+                });
+            }
+
+            var nyMeta = new MeetingMetadata
+            {
+                StartedAt = start,
+                EndedAt = start.AddSeconds(sekunder),
+                DurationSeconds = sekunder,
+                Title = titel,
+                Type = MeetingType.Webinar,
+                Mappe = "Webinarer",
+                Moedetype = "Webinar",
+                Language = meta.Language ?? "da",
+                ValgtSprogLoop = meta.ValgtSprogLoop,
+                Tracks = { ["loopback"] = lydnavn },
+            };
+
+            MeetingStore.Save(mappe, nyMeta);
+
+            ny.GemMaskin(mappe, model);
+
+            File.WriteAllText(Path.Combine(mappe, $"udskrift_{model}.txt"),
+                              ny.SomTekst(nyMeta.Talere), new UTF8Encoding(false));
+        }
+    }
+
+    /// <summary>
+    /// Brugerens egne webinarer, der HAR både lyd og en udskrift — nyeste
+    /// først.
+    /// </summary>
+    private static IEnumerable<(string Mappe, MeetingMetadata Meta, string Wav, string Model, Udskrift Udskrift)>
+        Webinarer(string lydfra)
+    {
+        // EGEN ROD OG IKKE Root. Den her kører i en app, der ALLEREDE står i
+        // demoen - Root peger paa demomappen, og dér er der ingen webinarer.
+        var rod = Path.Combine(lydfra, "Optagelser");
+        if (!Directory.Exists(rod)) yield break;
+
+        var fundne = new List<(string, MeetingMetadata, string, string, Udskrift)>();
+
+        foreach (var mappe in Directory.EnumerateDirectories(rod))
+        {
+            MeetingMetadata? meta;
+            try { meta = MeetingStore.Load(mappe); }
+            catch (Exception) { continue; }
+
+            if (meta is null) continue;
+
+            var erWebinar = meta.Type == MeetingType.Webinar
+                            || string.Equals(meta.Mappe, "Webinarer", StringComparison.OrdinalIgnoreCase);
+
+            if (!erWebinar) continue;
+
+            var wav = Directory.EnumerateFiles(mappe, "*.wav")
+                .OrderByDescending(f => new FileInfo(f).Length)
+                .FirstOrDefault();
+
+            if (wav is null) continue;
+
+            // Modellen staar i filnavnet: «udskrift_large-v3.json».
+            var json = Directory.EnumerateFiles(mappe, "udskrift_*.json").FirstOrDefault();
+            if (json is null) continue;
+
+            var model = Path.GetFileNameWithoutExtension(json)["udskrift_".Length..];
+
+            Udskrift? udskrift;
+            try { udskrift = Udskrift.HentEllerByg(mappe, model); }
+            catch (Exception) { continue; }
+
+            if (udskrift is null || udskrift.Linjer.Count < 20) continue;
+
+            fundne.Add((mappe, meta, wav, model, udskrift));
+        }
+
+        foreach (var f in fundne.OrderByDescending(f => f.Item2.StartedAt))
+            yield return f;
     }
 
     // ============================================================== dokumenter

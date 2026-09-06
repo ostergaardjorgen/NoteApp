@@ -889,7 +889,12 @@
                      intet, og IsHitTestVisible holder dem uden for traekket -
                      ellers kunne stregen selv blive maalet og starte det samme
                      forfra. -->
-                <Grid Margin="0,0,0,6">
+                <!-- FEM PIXELS MELLEM KORTENE, SOM I KALENDEREN.
+                     De to spalter staar ved siden af hinanden, og oejet
+                     sammenligner dem uden at blive bedt om det. Seks her og
+                     fem derovre er ikke til at se paa et kort, men det er til
+                     at se paa en liste med otte. -->
+                <Grid Margin="0,0,0,5">
 
                 <Border x:Name="Indsaetfoer" Height="3" CornerRadius="2"
                 VerticalAlignment="Top"
@@ -924,7 +929,11 @@
 
                 <Border Grid.Column="0" Background="{Binding Farve}" CornerRadius="5,0,0,5" />
 
-                <Grid Grid.Column="1" Margin="13,10,13,10">
+                <!-- SAMME POLSTRING SOM EN KALENDERPOST: 11,8. Her stod
+                     13,10, og opgavekortene stod dermed hoejere end aftalerne
+                     ved siden af - to lister af kort, der skulle vaere den
+                     samme slags kort. -->
+                <Grid Grid.Column="1" Margin="11,8,11,8">
                 <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
@@ -960,7 +969,13 @@
                 <!-- WrapPanel og ikke StackPanel. Spalten er smal, og
                      herkomsten kan vaere lang; med en vandret stak blev
                      «Mere» skubbet ud over kanten og var der bare ikke. -->
-                <WrapPanel Margin="0,4,0,0">
+                <!-- RAEKKEN GAAR MED, NAAR LINKET GOER.
+                     Panelet stod altid fremme med fire pixels luft over sig,
+                     ogsaa naar det eneste, det indeholder, var skjult. Fire
+                     pixels paa hvert kort er dét, der fik opgavelisten til at
+                     staa hoejere end kalenderen ved siden af. Maalt
+                     06-09-2026: 46 px mod kalenderens 40. -->
+                <WrapPanel Margin="0,4,0,0" Visibility="{Binding Linkvis}">
 
                 <!-- HERKOMSTEN ER ET LINK, NAAR DER ER NOGET AT GAA TILBAGE
                      TIL. En opgave, man selv har skrevet, har ingen replik at
@@ -993,7 +1008,7 @@
                 </WrapPanel>
                 </StackPanel>
 
-                <Border Grid.Column="2" CornerRadius="4" Padding="7,2" Margin="10,0,0,0"
+                <Border Grid.Column="2" CornerRadius="4" Padding="6,1" Margin="8,0,0,0"
                 VerticalAlignment="Top" Background="{DynamicResource Svaev}"
                 Visibility="{Binding Fristvis}">
                 <TextBlock Text="{Binding Frist}" FontSize="11.5" FontWeight="SemiBold"
@@ -1032,8 +1047,19 @@
                      ContextMenu og ikke Popup: WPF lukker den selv, naar man
                      klikker udenfor eller trykker Escape, og den tegnes med
                      appens egen menu-stil fra App.xaml. -->
-                <Button Grid.Column="3" Margin="10,0,0,0" VerticalAlignment="Top"
-                Width="30" Height="30" Padding="0" Cursor="Hand"
+                <!-- TOOGTYVE OG IKKE TREDIVE.
+                     Ringen satte hoejden paa hele kortet: tredive pixels plus
+                     otte foroven og forneden er seksogfyrre, og en opgave paa
+                     een linje behoever ikke mere end otteogtredive. Ved siden
+                     af kalenderen, hvor en post er en linje hoej, saa
+                     opgavelisten dobbelt saa luftig ud - uden at der stod mere
+                     i den.
+
+                     Tallet er etcifret. Toogtyve pixels om et etcifret tal er
+                     rigeligt til at kunne laeses; det er selve ringen, der
+                     fyldte, ikke det, den viser. -->
+                <Button Grid.Column="3" Margin="8,0,0,0" VerticalAlignment="Top"
+                Width="18" Height="18" Padding="0" Cursor="Hand"
                 Tag="{Binding}" Click="Prioritet_Klik"
                 ToolTip="{i18n:Oversat searchview.prioritet_1_er_vigtigst}">
                 <Button.ContextMenu>
@@ -1048,9 +1074,9 @@
                 <Button.Template>
                 <ControlTemplate TargetType="Button">
                 <Grid>
-                <Ellipse x:Name="ring" Stroke="{Binding Farve}" StrokeThickness="2"
+                <Ellipse x:Name="ring" Stroke="{Binding Farve}" StrokeThickness="1.5"
                 Fill="Transparent" />
-                <TextBlock Text="{Binding Prioritetstekst}" FontSize="12.5"
+                <TextBlock Text="{Binding Prioritetstekst}" FontSize="11"
                 FontWeight="SemiBold" HorizontalAlignment="Center"
                 VerticalAlignment="Center"
                 Foreground="{DynamicResource Tekst}" />
