@@ -95,7 +95,7 @@ public static class Tips
 
         new("HeyPia aldrig beder om adgang til din Google-, Microsoft- eller "
             + "Apple-konto. Appen ser en mappe på din egen disk; det er "
-            + "skytjenestens eget program, der fylder den.",
+            + "cloud servicens eget program, der fylder den.",
             "65-skytjenester"),
 
         new("du kan bestemme, hvor optagelserne fra telefonen skal ligge. "

@@ -660,7 +660,7 @@
     "gennemse": "Browse …",
     "find_mappen_frem_i_stedet_for_at_skrive_d": "Find the folder instead of typing it. The picker opens where the path points.",
     "opretter_mappen_hvis_den_mangler_og_begyn": "Creates the folder if it is missing — and starts watching it. Exactly the path in the field is used.",
-    "fjern_raekken_skytjenesten_bliver_ikke_fo": "Remove the row. The cloud service is not suggested again, and if the folder is watched, that stops.",
+    "fjern_raekken_skytjenesten_bliver_ikke_fo": "Remove the row. This cloud service is not suggested again, and if the folder is watched, that stops.",
     "laeg_ind_automatisk": "Import automatically",
     "laes_en_fast_tekst_op_i_cirka_tredive_seku": "Read a fixed text aloud for about thirty seconds. The app knows the text in advance and counts how many words it heard correctly.",
     "laes_hoejt_i_almindeligt_tempo": "Read aloud — at an ordinary pace",

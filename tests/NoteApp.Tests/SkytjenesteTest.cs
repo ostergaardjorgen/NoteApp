@@ -51,6 +51,12 @@ public class SkytjenesteTest
         "google",
         "telefon",
         "skytjeneste",
+
+        // DET ORD, FOLK FAKTISK SKRIVER. «Skytjeneste» er en korrekt
+        // oversaettelse og ikke et ord, danskere bruger - de siger cloud
+        // service. Begge skal foere til afsnittet; det gamle ord staar
+        // stadig i teksten, netop derfor.
+        "cloud",
     };
 
     [Theory]

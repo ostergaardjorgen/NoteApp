@@ -1510,7 +1510,13 @@ public partial class SettingsView : UserControl
         {
             var dele = new List<string>();
 
-            if (m.Herkomst.Length > 0) dele.Add(m.Herkomst);
+            // GAMLE MAPPER HAR DET GAMLE ORD STAAENDE. Herkomsten blev gemt
+            // i filen, dengang mappen blev tilfoejet, og den skal ikke rettes
+            // paa disken - men den skal laeses med det ord, resten af appen
+            // bruger nu. Se 65-skytjenester i haandbogen.
+            var herkomst = m.Herkomst == "Skytjeneste" ? "Cloud service" : m.Herkomst;
+
+            if (herkomst.Length > 0) dele.Add(herkomst);
             dele.Add(m.Undermapper ? "med undermapper" : "kun mappen selv");
 
             if (!Directory.Exists(m.Sti)) dele.Add("MAPPEN FINDES IKKE LÆNGERE");
@@ -1662,7 +1668,7 @@ public partial class SettingsView : UserControl
             return;
         }
 
-        Tilfoej(mappe, "Skytjeneste");
+        Tilfoej(mappe, "Cloud service");
     }
 
     /// <summary>

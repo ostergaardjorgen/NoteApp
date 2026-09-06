@@ -1,6 +1,9 @@
-﻿# Integration med skytjenester
+﻿# Integration med cloud services
 
 *OneDrive, Google Drev, iCloud, Dropbox — fra din Apple- eller Android-enhed ind i HeyPia af sig selv*
+
+Cloud services — eller skytjenester, som de også kaldes — er det, der
+binder din telefon sammen med din pc.
 
 De fleste møder holdes ikke ved skrivebordet. En samtale i bilen, en aftale
 på gangen, en gennemgang hos kunden — telefonen er optageren, og den ligger i
@@ -14,9 +17,9 @@ HeyPia, næste gang du åbner appen.
 
 1. **Du optager** på din iPhone, iPad eller Android-telefon med den optager,
    der allerede er på enheden.
-2. **Optagelsen gemmes i en skymappe** — iCloud Drive, OneDrive, Google Drev
+2. **Optagelsen gemmes i en cloud-mappe** — iCloud Drive, OneDrive, Google Drev
    eller Dropbox.
-3. **Skytjenestens program på pc'en** synkroniserer mappen ned på disken.
+3. **Cloud servicens program på pc'en** synkroniserer mappen ned på disken.
 4. **HeyPia holder øje med mappen** og tilbyder filen på Optagelser.
 
 Led 1 og 2 gør du på telefonen. Led 3 og 4 sætter du op én gang på pc'en.
@@ -46,7 +49,7 @@ Vælg den, du har i forvejen. Der er ingen fordel ved at tilføje en ny.
 | Dropbox | Begge dele | Dropbox til Windows |
 | Nextcloud, Synology Drive | Egen server eller NAS | Tjenestens eget program |
 
-## Trin 2 — installér skytjenestens program på pc'en
+## Trin 2 — installér cloud servicens program på pc'en
 
 Uden det ligger filerne kun i skyen, og så er der ingen mappe at holde øje
 med. Programmet henter du hos tjenesten selv:
@@ -62,8 +65,8 @@ kontoen, der binder de to enheder sammen.
 ## Trin 3 — peg HeyPia på mappen
 
 Åbn **Indstillinger → Filer**. Under «Overvågede mapper» finder appen selv de
-skytjenester, der er installeret, og foreslår én mappe i hver:
-`<skytjeneste>\HeyPia`.
+cloud services, der er installeret, og foreslår én mappe i hver:
+`<cloud service>\HeyPia`.
 
 For hver række kan du:
 
@@ -127,7 +130,7 @@ iCloud og OneDrive lader ofte filen blive i skyen og viser kun en pladsholder
 på disken: rigtigt navn, rigtig størrelse, intet indhold.
 
 HeyPia **læser aldrig i en fil** under scanningen — kun navn, størrelse og
-dato. Ellers ville appen hente hele skymappen ned, bare fordi den kiggede
+dato. Ellers ville appen hente hele cloud-mappen ned, bare fordi den kiggede
 efter. En pladsholder er stadig et fund; den bliver hentet, når du lægger den
 ind, og det bliver sagt.
 
@@ -143,20 +146,20 @@ hvem der sagde hvad.
 ## Hvad der ikke sker
 
 - **Din kildefil røres aldrig.** Der kopieres. Originalen bliver liggende i
-  skymappen, så telefonen beholder den.
-- **Der sendes ingenting til skytjenesten.** HeyPia læser en mappe; den
+  cloud-mappen, så telefonen beholder den.
+- **Der sendes ingenting til cloud servicen.** HeyPia læser en mappe; den
   skriver ikke i den og logger ikke på noget.
 - **Lyden forlader ikke din maskine.** Optagelsen skrives ud lokalt. Kun
   teksten sendes videre, og kun når du beder om et dokument.
 
 ## Når det ikke virker
 
-**Filen dukker ikke op.** Se efter, at skytjenestens program kører, og at
+**Filen dukker ikke op.** Se efter, at cloud servicens program kører, og at
 mappen faktisk findes på disken — åbn den i Stifinder. Står der en sky ud for
 filen, er den ikke hentet ned endnu; det er stadig et fund, men vent til
 synkroniseringen er færdig.
 
-**Mappen står ikke på listen.** Appen finder skytjenester ved at spørge
+**Mappen står ikke på listen.** Appen finder cloud services ved at spørge
 Windows om, hvor de synkroniserer hen. Er programmet lige installeret, så
 genstart HeyPia. Ellers kan du altid tilføje mappen med **Tilføj mappe**.
 
