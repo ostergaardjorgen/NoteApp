@@ -30,8 +30,8 @@
     </Grid.RowDefinitions>
 
     <StackPanel Grid.Row="0" Margin="0,0,0,14">
-      <TextBlock Text="{i18n:Oversat faelles.ny_moedetype}" FontSize="20" FontWeight="SemiBold" />
-      <TextBlock Margin="0,6,0,0" TextWrapping="Wrap" LineHeight="20"
+      <TextBlock x:Name="Overskrift" Text="{i18n:Oversat faelles.ny_moedetype}" FontSize="20" FontWeight="SemiBold" />
+      <TextBlock x:Name="Indledning" Margin="0,6,0,0" TextWrapping="Wrap" LineHeight="20"
                  Foreground="{DynamicResource TekstSvag}"
                  Text="{i18n:Oversat nytemplatewindow.svar_paa_det_du_kender_hvad_dokumentet_ska}" />
     </StackPanel>
@@ -42,7 +42,7 @@
 
         <TextBlock Text="{i18n:Oversat nytemplatewindow.hvad_skal_dokumentet_hedde}" Style="{StaticResource Underskrift}" />
         <TextBox x:Name="FeltNavn" Margin="0,4,0,0" FontSize="14" Padding="9,7" />
-        <TextBlock FontSize="11.5" Margin="2,5,0,0" Foreground="{DynamicResource TekstMeget}"
+        <TextBlock x:Name="Navnehjaelp" FontSize="11.5" Margin="2,5,0,0" Foreground="{DynamicResource TekstMeget}"
                    Text="{i18n:Oversat nytemplatewindow.fx_beslutningsnotat_kundemoede_eller_tekni}" />
 
         <TextBlock Text="{i18n:Oversat nytemplatewindow.hvad_skal_der_komme_ud_af_det}" Style="{StaticResource Underskrift}"
@@ -50,7 +50,7 @@
         <TextBox x:Name="FeltFormaal" Margin="0,4,0,0" FontSize="13" Padding="9,7"
                  AcceptsReturn="True" TextWrapping="Wrap" Height="66"
                  VerticalScrollBarVisibility="Auto" />
-        <TextBlock FontSize="11.5" Margin="2,5,0,0" TextWrapping="Wrap"
+        <TextBlock x:Name="Formaalshjaelp" FontSize="11.5" Margin="2,5,0,0" TextWrapping="Wrap"
                    Foreground="{DynamicResource TekstMeget}"
                    Text="{i18n:Oversat nytemplatewindow.skriv_det_som_du_ville_forklare_en_kollega}" />
 
@@ -60,11 +60,41 @@
                    Foreground="{DynamicResource TekstMeget}"
                    Text="{i18n:Oversat nytemplatewindow.det_afgoer_baade_laengden_og_sproget_en_ku}" />
 
-        <TextBlock Text="{i18n:Oversat nytemplatewindow.hvad_skal_altid_med}" Style="{StaticResource Underskrift}" Margin="0,18,0,0" />
+        <!-- ================== AFSNITTENE KRYDSES AF ======================
+
+             SAMME GREB SOM PAA «Hvad skal dokumentet indeholde?»-fanen, hvor
+             man tager et afsnit fra en skabelon, man allerede har. Her staar
+             det bare FOER skabelonen findes.
+
+             HVORFOR HAK OG IKKE FRITEKST. «Hvad skal med?» er et svaert
+             spoergsmaal at svare paa fra en tom side - man glemmer pris og
+             forudsaetninger, og det opdages foerst i det dokument, man skulle
+             sende. En liste at saette hak i er det samme spoergsmaal stillet
+             saadan, at man kan svare paa det ved at laese.
+
+             AFSNITTENE ER OGSAA FREMSOEGNINGSSPOERGSMAALENE. Hedder et afsnit
+             «Tidsplan», hentes de steder i projektets materiale, der handler
+             om tidsplan - se Projektkontekst. Et hak her bestemmer altsaa
+             baade hvad der skrives, og hvad der bliver LAEST. -->
+        <Border x:Name="Emnerude" Background="{DynamicResource Trykket}"
+                BorderBrush="{DynamicResource PanelKant}" BorderThickness="1"
+                CornerRadius="8" Padding="14,11" Margin="0,18,0,0"
+                Visibility="Collapsed">
+          <StackPanel>
+            <TextBlock Text="{i18n:Oversat nytemplatewindow.hvilke_afsnit_skal_med}"
+                       FontSize="12.5" FontWeight="SemiBold" />
+            <TextBlock FontSize="11.5" Margin="0,4,0,9" TextWrapping="Wrap" LineHeight="18"
+                       Foreground="{DynamicResource TekstMeget}"
+                       Text="{i18n:Oversat nytemplatewindow.saet_hak_ved_det_dokumentet_skal_indeholde}" />
+            <WrapPanel x:Name="Emner" Orientation="Horizontal" />
+          </StackPanel>
+        </Border>
+
+        <TextBlock x:Name="SkalMedOverskrift" Text="{i18n:Oversat nytemplatewindow.hvad_skal_altid_med}" Style="{StaticResource Underskrift}" Margin="0,18,0,0" />
         <TextBox x:Name="FeltSkalMed" Margin="0,4,0,0" FontSize="13" Padding="9,7"
                  AcceptsReturn="True" TextWrapping="Wrap" Height="66"
                  VerticalScrollBarVisibility="Auto" />
-        <TextBlock FontSize="11.5" Margin="2,5,0,0" TextWrapping="Wrap"
+        <TextBlock x:Name="SkalMedHjaelp" FontSize="11.5" Margin="2,5,0,0" TextWrapping="Wrap"
                    Foreground="{DynamicResource TekstMeget}"
                    Text="{i18n:Oversat nytemplatewindow.et_pr_linje_fx_beslutninger_med_begrundels}" />
 
@@ -79,7 +109,7 @@
                 CornerRadius="8" Padding="14,11" Margin="0,20,0,0">
           <StackPanel>
             <TextBlock Text="{i18n:Oversat nytemplatewindow.det_kommer_med_af_sig_selv}" FontSize="12.5" FontWeight="SemiBold" />
-            <TextBlock FontSize="12" LineHeight="19" Margin="0,5,0,0" TextWrapping="Wrap"
+            <TextBlock x:Name="Selvfoelgeligt" FontSize="12" LineHeight="19" Margin="0,5,0,0" TextWrapping="Wrap"
                        Foreground="{DynamicResource TekstMeget}"
                        Text="{i18n:Oversat nytemplatewindow.reglerne_for_hvem_der_kommer_paa_deltagerl}" />
           </StackPanel>

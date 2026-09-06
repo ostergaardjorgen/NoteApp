@@ -1,4 +1,4 @@
-using System.Reflection;
+﻿using System.Reflection;
 using System.Text;
 
 namespace NoteApp.Core.Llm;
@@ -84,17 +84,48 @@ public static class DraftStore
     /// De skal ligge som filer, brugeren kan rette — ikke inde i programmet.
     /// En skabelon, brugeren har ændret, overskrives aldrig.
     /// </summary>
+    /// <remarks>
+    /// ============ TO BIBLIOTEKER, TO MAPPER ============
+    ///
+    /// En mødetype skriver et dokument ud af én optagelse; et projektoutput
+    /// skriver et ud af et helt projekt. De to kan ikke bruges i hinandens
+    /// sted — et projektoutput beder om <c>{{kilder}}</c>, og dem er der ingen
+    /// af, når man står med en udskrift.
+    ///
+    /// Ressourcenavnet bærer mappen med: «...Llm.skabeloner.tilbud.md» er en
+    /// mødetype, «...Llm.skabeloner.projekt.tilbud.md» er et projektoutput.
+    /// Derfor deles der på den sidste punktum-adskilte del: alt før filnavnet
+    /// er mappen.
+    ///
+    /// EN NY SKABELON I EN NY UDGAVE LÆGGES OGSÅ IND. Der ses kun efter, om
+    /// filen findes — ikke om mappen er tom. Ellers ville en bruger, der har
+    /// haft appen i et halvt år, aldrig få en skabelon, der kom til
+    /// undervejs.
+    /// </remarks>
     public static int SeedTemplates()
     {
-        Directory.CreateDirectory(PromptTemplate.Directory);
-
         var antal = 0;
         var asm = Assembly.GetExecutingAssembly();
+        const string maerke = ".skabeloner.";
 
-        foreach (var res in asm.GetManifestResourceNames().Where(n => n.Contains(".skabeloner.")))
+        foreach (var res in asm.GetManifestResourceNames().Where(n => n.Contains(maerke)))
         {
-            var filnavn = res[(res.IndexOf(".skabeloner.", StringComparison.Ordinal) + ".skabeloner.".Length)..];
-            var sti = Path.Combine(PromptTemplate.Directory, filnavn);
+            var rest = res[(res.IndexOf(maerke, StringComparison.Ordinal) + maerke.Length)..];
+
+            // «tilbud.md» er en moedetype; «projekt.tilbud.md» er et
+            // projektoutput. Undermappen staar foran filnavnet.
+            var skille = rest.LastIndexOf('.', rest.LastIndexOf('.') - 1);
+
+            var mappe = skille < 0
+                ? PromptTemplate.Skabelonmappe(Skabelonslags.Moedetype)
+                : Path.Combine(PromptTemplate.Skabelonmappe(Skabelonslags.Moedetype),
+                               rest[..skille].Replace('.', Path.DirectorySeparatorChar));
+
+            var filnavn = skille < 0 ? rest : rest[(skille + 1)..];
+
+            Directory.CreateDirectory(mappe);
+
+            var sti = Path.Combine(mappe, filnavn);
             if (File.Exists(sti)) continue;
 
             using var s = asm.GetManifestResourceStream(res);

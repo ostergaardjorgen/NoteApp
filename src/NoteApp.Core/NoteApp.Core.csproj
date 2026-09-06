@@ -41,8 +41,15 @@
     <EmbeddedResource Include="..\schema\learning.sql" LogicalName="NoteApp.Core.learning.sql" />
 
     <!-- Skabelonerne indlejres, saa de kan laegges i datamappen ved foerste
-         brug. De skal LIGGE som filer, brugeren kan rette. -->
+         brug. De skal LIGGE som filer, brugeren kan rette.
+
+         TO LINJER OG IKKE EN STJERNE MERE. «projekt» er en undermappe, fordi
+         de to slags skabeloner ikke maa lande i den samme liste - se
+         PromptTemplate.Skabelonmappe. Ressourcenavnet baerer mappen med
+         («...skabeloner.projekt.tilbud.md»), og det er dét, DraftStore.
+         SeedTemplates deler paa. -->
     <EmbeddedResource Include="Llm\skabeloner\*.md" />
+    <EmbeddedResource Include="Llm\skabeloner\projekt\*.md" />
 
     <!-- Sprogfilerne. Samme princip: de foelger med appen og laegges i
          datamappen ved foerste brug, saa et nyt sprog er EEN FIL, der

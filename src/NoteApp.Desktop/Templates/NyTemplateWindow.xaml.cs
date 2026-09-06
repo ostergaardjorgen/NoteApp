@@ -1,4 +1,6 @@
 ﻿using System.Windows;
+using System.Windows.Controls;
+using NoteApp.Core;
 using NoteApp.Core.Llm;
 
 namespace NoteApp.Desktop.Templates;
@@ -28,6 +30,51 @@ public partial class NyTemplateWindow : Window
     /// <summary>Den færdige skabelon. Null hvis der blev fortrudt.</summary>
     public PromptTemplate? Resultat { get; private set; }
 
+    /// <summary>Hvilket bibliotek skabelonen skal ligge i.</summary>
+    private readonly Skabelonslags _slags;
+
+    private bool Projekt => _slags == Skabelonslags.Projektoutput;
+
+    /// <summary>
+    /// De afsnit, en projektskabelon kan indeholde — og hvilke der er sat
+    /// til at begynde med.
+    /// </summary>
+    /// <remarks>
+    /// ============ HVORFOR EN LISTE OG IKKE ET TOMT FELT ============
+    ///
+    /// «Hvad skal med?» er svært at svare på fra en tom side. Man husker
+    /// formålet og glemmer forudsætningerne — og det opdages først i det
+    /// dokument, man skulle sende. En liste at sætte hak i er det samme
+    /// spørgsmål stillet sådan, at man kan svare ved at læse.
+    ///
+    /// DE OTTE FØRSTE ER SAT. De er dem, de fire indbyggede skabeloner er
+    /// enige om; resten er dem, der giver mening for nogle dokumenter og ikke
+    /// for andre. Et hak kan både sættes og tages fra bagefter — på fanen
+    /// «Hvad skal dokumentet indeholde?», hvor de samme afsnit står.
+    ///
+    /// RÆKKEFØLGEN ER DOKUMENTETS. Listen læses oppefra og ned, og det er
+    /// den rækkefølge, afsnittene bliver bedt om i.
+    /// </remarks>
+    private static readonly (string Navn, bool Sat)[] Projektafsnit =
+    {
+        ("Kort fortalt", true),
+        ("Baggrund", true),
+        ("Formål og mål", true),
+        ("Omfang og leverancer", true),
+        ("Afgrænsning", false),
+        ("Tidsplan og milepæle", true),
+        ("Roller og ansvar", false),
+        ("Økonomi", true),
+        ("Pris", false),
+        ("Forudsætninger", false),
+        ("Risici", true),
+        ("Beslutninger", false),
+        ("Modstrid i materialet", false),
+        ("Åbne spørgsmål", true),
+        ("Næste skridt", false),
+        ("Det, der mangler", false),
+    };
+
     private static readonly (string Navn, int Tokens)[] Længder =
     {
         ("Kort — et notat på en halv side", 1024),
@@ -35,9 +82,14 @@ public partial class NyTemplateWindow : Window
         ("Udførlig — alle detaljer med, ingen øvre grænse i praksis", 32000)
     };
 
-    public NyTemplateWindow()
+    public NyTemplateWindow() : this(Skabelonslags.Moedetype) { }
+
+    public NyTemplateWindow(Skabelonslags slags)
     {
         InitializeComponent();
+
+        _slags = slags;
+        if (Projekt) Projektudgave();
 
         FeltLaengde.ItemsSource = Længder.Select(l => l.Navn).ToList();
         FeltLaengde.SelectedIndex = 1;
@@ -48,6 +100,54 @@ public partial class NyTemplateWindow : Window
 
         FeltNavn.Focus();
     }
+
+    /// <summary>
+    /// Gør guiden til en projektskabelon i stedet for en mødetype.
+    /// </summary>
+    /// <remarks>
+    /// SPØRGSMÅLENE ER DE SAMME, FORDI DE ER DE RIGTIGE. Hvad skal det hedde,
+    /// hvad skal der komme ud af det, hvem læser det, hvor langt må det være
+    /// — det er det samme, uanset om dokumentet bygges på én udskrift eller
+    /// på tredive filer.
+    ///
+    /// DET, DER ER FORSKELLIGT, ER HVAD DER BYGGES AF. En mødetype får en
+    /// udskrift og en deltagerliste; en projektskabelon får projektets
+    /// materiale og skal henvise til, hvilken fil den har det fra. Det er
+    /// derfor hjælpeteksterne, instruktionen til modellen og brugerprompten
+    /// skiftes ud — og ikke bare overskriften.
+    /// </remarks>
+    private void Projektudgave()
+    {
+        Title = Sprog.T("nytemplatewindow.ny_projektskabelon");
+        Overskrift.Text = Title;
+        Indledning.Text = Sprog.T("nytemplatewindow.projekt_indledning");
+        Navnehjaelp.Text = Sprog.T("nytemplatewindow.projekt_navnehjaelp");
+        Formaalshjaelp.Text = Sprog.T("nytemplatewindow.projekt_formaalshjaelp");
+        SkalMedOverskrift.Text = Sprog.T("nytemplatewindow.projekt_andre_afsnit");
+        SkalMedHjaelp.Text = Sprog.T("nytemplatewindow.projekt_andre_afsnit_hjaelp");
+        Selvfoelgeligt.Text = Sprog.T("nytemplatewindow.projekt_selvfoelgeligt");
+        LavKnap.Content = Sprog.T("nytemplatewindow.projekt_lav_skabelonen");
+
+        Emnerude.Visibility = Visibility.Visible;
+
+        foreach (var (navn, sat) in Projektafsnit)
+        {
+            Emner.Children.Add(new CheckBox
+            {
+                Content = new TextBlock { Text = navn },
+                Tag = navn,
+                IsChecked = sat,
+                FontSize = 12.5,
+                Margin = new Thickness(0, 0, 18, 6),
+            });
+        }
+    }
+
+    /// <summary>De afsnit, der er hak ved — i listens rækkefølge.</summary>
+    private List<string> Afkrydsede() => Emner.Children.OfType<CheckBox>()
+        .Where(k => k.IsChecked == true)
+        .Select(k => (string)k.Tag)
+        .ToList();
 
     private void Annuller_Click(object sender, RoutedEventArgs e) => DialogResult = false;
 
@@ -71,9 +171,9 @@ public partial class NyTemplateWindow : Window
         LavKnap.IsEnabled = harNoegle;
         SaetOpKnap.Visibility = harNoegle ? Visibility.Collapsed : Visibility.Visible;
 
-        Status.Text = harNoegle
-            ? ""
-            : "Mødetypen skrives af Mistral, og den er ikke sat op endnu.";
+        Status.Text = harNoegle ? "" : Sprog.T(Projekt
+            ? "nytemplatewindow.projekt_skrives_af_mistral"
+            : "nytemplatewindow.moedetypen_skrives_af_mistral");
     }
 
     /// <summary>
@@ -90,10 +190,12 @@ public partial class NyTemplateWindow : Window
 
     private async void Lav_Click(object sender, RoutedEventArgs e)
     {
+        var hvad = Projekt ? "Skabelonen" : "Mødetypen";
+
         var navn = FeltNavn.Text.Trim();
         if (navn.Length == 0)
         {
-            Vis("Mødetypen skal have et navn.");
+            Vis($"{hvad} skal have et navn.");
             FeltNavn.Focus();
             return;
         }
@@ -101,8 +203,22 @@ public partial class NyTemplateWindow : Window
         var formaal = FeltFormaal.Text.Trim();
         if (formaal.Length == 0)
         {
-            Vis("Skriv, hvad der skal komme ud af det. Det er dét, modellen bygger mødetypen på.");
+            Vis("Skriv, hvad der skal komme ud af det. Det er dét, modellen bygger "
+                + (Projekt ? "skabelonen" : "mødetypen") + " på.");
             FeltFormaal.Focus();
+            return;
+        }
+
+        // ET DOKUMENT UDEN AFSNIT ER IKKE ET DOKUMENT. Afsnittene er ogsaa
+        // dem, der henter materialet frem - uden dem faar modellen kun
+        // begyndelsen af hver fil. Se Projektkontekst.
+        var afsnit = Projekt ? Afkrydsede() : new List<string>();
+
+        if (Projekt && afsnit.Count == 0 && FeltSkalMed.Text.Trim().Length == 0)
+        {
+            Vis("Sæt hak ved mindst ét afsnit — eller skriv dine egne nedenfor. "
+                + "Afsnittene er både det, der skrives, og det, der bliver hentet frem "
+                + "af projektets materiale.");
             return;
         }
 
@@ -111,7 +227,8 @@ public partial class NyTemplateWindow : Window
 
         Fejl.Visibility = Visibility.Collapsed;
         LavKnap.IsEnabled = false;
-        Status.Text = "Mistral skriver mødetypen … det tager typisk under et minut.";
+        Status.Text = $"Mistral skriver {(Projekt ? "skabelonen" : "mødetypen")} "
+            + "… det tager typisk under et minut.";
 
         var tokens = Længder[Math.Max(0, FeltLaengde.SelectedIndex)].Tokens;
 
@@ -122,10 +239,10 @@ public partial class NyTemplateWindow : Window
             // indpakningen om det ene kald.
             var opskrift = new PromptTemplate
             {
-                Name = "Mødetypeskriver",
+                Name = "Skabelonskriver",
                 Temperature = 0.3,
                 MaxTokens = 4000,
-                SystemPrompt = Opskrift(),
+                SystemPrompt = Projekt ? ProjektOpskrift() : Opskrift(),
                 UserPrompt = ""
             };
 
@@ -133,7 +250,7 @@ public partial class NyTemplateWindow : Window
                 SkyKatalog.Standard,
                 opskrift,
                 Opgave(navn, formaal, FeltLaeser.Text.Trim(), FeltSkalMed.Text.Trim(),
-                       Længder[Math.Max(0, FeltLaengde.SelectedIndex)].Navn));
+                       Længder[Math.Max(0, FeltLaengde.SelectedIndex)].Navn, afsnit));
 
             Resultat = Byg(navn, formaal, tokens, svar.Tekst);
 
@@ -167,7 +284,7 @@ public partial class NyTemplateWindow : Window
         }
         catch (Exception ex)
         {
-            Vis($"Mødetypen kunne ikke laves: {ex.Message}\n\n" +
+            Vis($"{hvad} kunne ikke laves: {ex.Message}\n\n" +
                 "Prøv igen — det er som regel en midlertidig fejl på forbindelsen.");
             LavKnap.IsEnabled = true;
             Status.Text = "";
@@ -199,11 +316,57 @@ public partial class NyTemplateWindow : Window
         "bagefter. Skriv heller ikke et «## Deltagere»-afsnit.\n\n" +
         "Hold dig til 40-70 linjer.";
 
-    private static string Opgave(string navn, string formaal, string laeser, string skalMed, string laengde) =>
+    /// <summary>
+    /// Instruktionen til den model, der skriver en PROJEKTskabelon.
+    ///
+    /// Forskellen fra <see cref="Opskrift"/> er, hvad dokumentet bygges af:
+    /// ikke én udskrift, men et helt projekts materiale — hvor hver stump er
+    /// mærket med den fil, den kom fra. Derfor skal instruktionen bede om
+    /// kildehenvisninger, og derfor må et afsnit ikke bare forsvinde: en pris,
+    /// der ikke står noget sted, skal siges højt, ikke udelades i stilhed.
+    /// </summary>
+    private static string ProjektOpskrift() =>
+        "Du skriver systemprompter til en anden sprogmodel, som skal lave dokumenter ud fra " +
+        "MATERIALET I ET PROJEKT — dokumenter, noter og mødereferater, brugeren har samlet. " +
+        "Du skriver ALTID på dansk.\n\n" +
+        "Du skal IKKE skrive et eksempel på et dokument. Du skal skrive den INSTRUKTION, " +
+        "som en model skal følge for at lave sådan et dokument hver gang.\n\n" +
+        "Svar med instruktionen og intet andet — ingen indledning, ingen forklaring af hvad du " +
+        "har gjort, ingen markdown-kodeblok omkring.\n\n" +
+        "Instruktionen skal:\n" +
+        "· være skrevet i bydeform til modellen\n" +
+        "· forbyde at finde på tal, navne, datoer, priser og beslutninger, der ikke står i " +
+        "projektets materiale\n" +
+        "· sige, at materialet er mærket med den fil, hver stump kom fra, og at en oplysning, " +
+        "der kun står ét sted, skal have filens navn i parentes efter sig\n" +
+        "· sige, at et afsnit ALDRIG udelades: er der ikke dækning for det i materialet, skal " +
+        "overskriften blive stående med linjen «Ikke oplyst i materialet.» under sig\n" +
+        "· sige, at modstrid i materialet — to beløb, to frister — skal skrives frem med hver " +
+        "sin kilde, og at modellen ikke selv må vælge det ene\n" +
+        "· beskrive dokumentets afsnit med markdown-overskrifter (##) og sige, hvad hvert " +
+        "afsnit skal indeholde\n\n" +
+        "Skriv IKKE en regel om sproget — den lægges på automatisk. Skriv heller ikke, at " +
+        "modellen skal lave en kildeliste til sidst; den lægges også på automatisk.\n\n" +
+        "Hold dig til 40-70 linjer.";
+
+    private static string Opgave(string navn, string formaal, string laeser, string skalMed,
+                                 string laengde, IReadOnlyList<string> afsnit) =>
         $"Lav instruktionen til en skabelon, der hedder «{navn}».\n\n" +
         $"Hvad der skal komme ud af det:\n{formaal}\n\n" +
         (laeser.Length > 0 ? $"Hvem der skal læse det:\n{laeser}\n\n" : "") +
-        (skalMed.Length > 0 ? $"Det skal altid med:\n{skalMed}\n\n" : "") +
+
+        // AFSNITTENE ER VALGT MED HAANDEN, OG DE SKAL FOELGES. Uden den her
+        // linje skriver modellen sine egne - og saa svarer dokumentet paa
+        // noget andet end det, brugeren lige har krydset af.
+        (afsnit.Count > 0
+            ? "Dokumentet skal have PRÆCIS disse afsnit, i denne rækkefølge, med disse "
+              + "overskrifter:\n" + string.Join("\n", afsnit.Select(a => "## " + a)) + "\n\n"
+            : "") +
+
+        (skalMed.Length > 0
+            ? (afsnit.Count > 0 ? "Derudover skal det altid med:\n" : "Det skal altid med:\n")
+              + skalMed + "\n\n"
+            : "") +
         $"Længde: {laengde}";
 
     /// <summary>
@@ -213,7 +376,7 @@ public partial class NyTemplateWindow : Window
     /// skrev. De er fælles og skal ikke kunne glemmes af en model, der havde
     /// travlt.
     /// </summary>
-    private static PromptTemplate Byg(string navn, string formaal, int tokens, string svar)
+    private PromptTemplate Byg(string navn, string formaal, int tokens, string svar)
     {
         var system = svar.Trim();
 
@@ -227,19 +390,39 @@ public partial class NyTemplateWindow : Window
             system = system.Trim();
         }
 
+        // ============ TO SLAGS BRUGERPROMPT ============
+        //
+        // En moedetype faar EEN udskrift med en titel, en dato og et sprog.
+        // Et projektoutput faar projektets materiale, samlet af Projektkontekst
+        // og maerket med hvilken fil hver stump kom fra.
+        //
+        // De to kan ikke bruges i hinandens sted: «{{transskription}}» staar
+        // tom, naar der ikke er en optagelse, og «{{kilder}}» staar tom, naar
+        // der ikke er et projekt. Et felt, der altid er tomt, ser ud som en
+        // oplysning, der mangler.
+        //
+        // DELTAGERREGLERNE ER FRA I ET PROJEKT. De handler om, hvem der sagde
+        // hvad paa et moede; et projekt har ikke deltagere, det har filer.
         return new PromptTemplate
         {
             Name = navn,
             Description = Kort(formaal),
+            Slags = _slags,
             Temperature = 0.2,
             MaxTokens = tokens,
-            SystemPrompt = system + "\n\n{{" + Deltagerregler.Felt + "}}\n",
-            UserPrompt =
-                "Her er transkriptionen af mødet.\n\n" +
-                "Titel: {{titel}}\nDato: {{dato}}\nVarighed: {{varighed}}\n" +
-                "Mødet blev holdt på: {{sprog}}\n\n" +
-                "Mine egne noter undervejs:\n{{noter}}\n\n" +
-                "Transkription:\n{{transskription}}"
+            TagDeltagerregler = !Projekt,
+            SystemPrompt = Projekt
+                ? system
+                : system + "\n\n{{" + Deltagerregler.Felt + "}}\n",
+            UserPrompt = Projekt
+                ? "Her er projektets materiale.\n\n" +
+                  "Projekt:\n{{projekt}}\n\n" +
+                  "Materialet:\n{{kilder}}"
+                : "Her er transkriptionen af mødet.\n\n" +
+                  "Titel: {{titel}}\nDato: {{dato}}\nVarighed: {{varighed}}\n" +
+                  "Mødet blev holdt på: {{sprog}}\n\n" +
+                  "Mine egne noter undervejs:\n{{noter}}\n\n" +
+                  "Transkription:\n{{transskription}}"
         };
     }
 

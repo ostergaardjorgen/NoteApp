@@ -1119,7 +1119,12 @@ public partial class TemplatesView : UserControl
     /// </summary>
     private void Ny_Click(object sender, RoutedEventArgs e)
     {
-        var vindue = new NyTemplateWindow { Owner = Window.GetWindow(this) };
+        // GUIDEN SPOERGER OM DET BIBLIOTEK, MAN STAAR I. Uden slagsen her
+        // stillede den altid spoergsmaal om en moedetype - «Ny mødetype»,
+        // «Lav mødetypen» - ogsaa naar man stod i «Projekt output», og den
+        // skabelon, der kom ud, bad om en transskription, der ikke findes i
+        // et projekt.
+        var vindue = new NyTemplateWindow(_valgtSlags) { Owner = Window.GetWindow(this) };
         if (vindue.ShowDialog() != true || vindue.Resultat is not { } ny) return;
 
         try
