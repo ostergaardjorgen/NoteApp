@@ -994,6 +994,7 @@ public partial class SettingsView : UserControl
         MoedevagtTil.IsChecked = AppSettings.Current.MoedevagtTil;
         VisFravalgte();
         VisIntegrationer();
+        VisDeling();
 
         var mikrofoner = AudioDevices.Microphones();
         var hoejttalere = AudioDevices.Speakers();

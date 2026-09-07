@@ -1155,6 +1155,131 @@
         </ScrollViewer>
       </TabItem>
 
+      <!-- ====================== DELING MELLEM TO PC'ER ======================
+
+           En baerbar, der optager, og en stationaer, der skriver ud. De to
+           moedes i EEN faelles mappe - en postkasse, ikke en datamappe. Se
+           NoteApp.Core.Deling.Delt for hvorfor datamappen IKKE maa ligge der.
+
+           Fanen her er etape 1: maskinen, mappen og parringen. Selve
+           udvekslingen af moeder kommer i naeste etape. -->
+      <TabItem Header="{i18n:Oversat settingsview.deling}" Style="{StaticResource Fane}">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                      Padding="0,0,14,0">
+          <StackPanel>
+
+            <!-- ========================= denne pc ========================= -->
+            <Border Background="{DynamicResource Panel}" CornerRadius="10" Padding="20"
+                    BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
+              <StackPanel>
+                <TextBlock Text="{i18n:Oversat settingsview.deling_denne_pc}"
+                           FontSize="14" FontWeight="SemiBold" />
+
+                <TextBlock Text="{i18n:Oversat settingsview.deling_navn}" Style="{StaticResource Underskrift}"
+                           Margin="0,16,0,0" />
+                <TextBox x:Name="Deling_Navn" Margin="0,4,0,0" MaxWidth="340"
+                         HorizontalAlignment="Left" MinWidth="240"
+                         LostFocus="DelingNavn_Aendret" />
+                <TextBlock FontSize="11.5" Margin="2,6,0,0" TextWrapping="Wrap"
+                           Foreground="{DynamicResource TekstMeget}"
+                           Text="{i18n:Oversat settingsview.deling_navn_hjaelp}" />
+
+                <TextBlock Text="{i18n:Oversat settingsview.deling_rolle}" Style="{StaticResource Underskrift}"
+                           Margin="0,20,0,0" />
+
+                <RadioButton x:Name="Deling_Arbejdsstation" GroupName="delingsrolle" Margin="0,8,0,0"
+                             Checked="Delingsrolle_Aendret">
+                  <StackPanel>
+                    <TextBlock Text="{i18n:Oversat settingsview.deling_rolle_arbejdsstation}" FontSize="13" />
+                    <TextBlock FontSize="11.5" Margin="0,2,0,0" TextWrapping="Wrap" MaxWidth="520"
+                               HorizontalAlignment="Left"
+                               Foreground="{DynamicResource TekstMeget}"
+                               Text="{i18n:Oversat settingsview.deling_rolle_arbejdsstation_hjaelp}" />
+                  </StackPanel>
+                </RadioButton>
+
+                <RadioButton x:Name="Deling_Let" GroupName="delingsrolle" Margin="0,12,0,0"
+                             Checked="Delingsrolle_Aendret">
+                  <StackPanel>
+                    <TextBlock Text="{i18n:Oversat settingsview.deling_rolle_let}" FontSize="13" />
+                    <TextBlock FontSize="11.5" Margin="0,2,0,0" TextWrapping="Wrap" MaxWidth="520"
+                               HorizontalAlignment="Left"
+                               Foreground="{DynamicResource TekstMeget}"
+                               Text="{i18n:Oversat settingsview.deling_rolle_let_hjaelp}" />
+                  </StackPanel>
+                </RadioButton>
+              </StackPanel>
+            </Border>
+
+            <!-- ======================= faelles mappe ====================== -->
+            <Border Background="{DynamicResource Panel}" CornerRadius="10" Padding="20" Margin="0,14,0,0"
+                    BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
+              <StackPanel>
+                <TextBlock Text="{i18n:Oversat settingsview.deling_faelles_mappe}"
+                           FontSize="14" FontWeight="SemiBold" />
+                <TextBlock FontSize="11.5" Margin="0,6,0,0" TextWrapping="Wrap" LineHeight="18"
+                           Foreground="{DynamicResource TekstMeget}"
+                           Text="{i18n:Oversat settingsview.deling_faelles_mappe_hjaelp}" />
+
+                <DockPanel Margin="0,12,0,0">
+                  <Button DockPanel.Dock="Right" Content="{i18n:Oversat settingsview.deling_vaelg_mappe}"
+                          Click="DelingMappe_Klik" Padding="14,7" Margin="8,0,0,0" />
+                  <Border BorderBrush="{DynamicResource InputKant}" BorderThickness="1" CornerRadius="6"
+                          Background="{DynamicResource Trykket}" Padding="10,8">
+                    <TextBlock x:Name="Deling_Sti" VerticalAlignment="Center" TextWrapping="NoWrap"
+                               TextTrimming="CharacterEllipsis" />
+                  </Border>
+                </DockPanel>
+
+                <TextBlock x:Name="Deling_Status" FontSize="11.5" Margin="2,8,0,0" TextWrapping="Wrap"
+                           LineHeight="18" Foreground="{DynamicResource TekstMeget}" />
+
+                <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                  <Button x:Name="Deling_Aabn" Content="{i18n:Oversat faelles.aabn_mappen}"
+                          Click="DelingAabn_Klik" MinWidth="130" />
+                  <Button x:Name="Deling_Fra" Content="{i18n:Oversat settingsview.deling_slaa_fra}"
+                          Click="DelingFra_Klik" Margin="8,0,0,0" MinWidth="130" />
+                </StackPanel>
+              </StackPanel>
+            </Border>
+
+            <!-- ========================= advarslen ======================== -->
+            <Border x:Name="Deling_Advarsel" Background="{DynamicResource AdvarselFlade}" CornerRadius="10"
+                    Padding="20" Margin="0,14,0,0"
+                    BorderBrush="{DynamicResource Advarsel}" BorderThickness="1">
+              <StackPanel>
+                <TextBlock Text="{i18n:Oversat settingsview.deling_advarsel_overskrift}"
+                           FontSize="13" FontWeight="SemiBold"
+                           Foreground="{DynamicResource Advarsel}" />
+                <TextBlock FontSize="12" Margin="0,6,0,0" TextWrapping="Wrap" LineHeight="19"
+                           Foreground="{DynamicResource Tekst}"
+                           Text="{i18n:Oversat settingsview.deling_advarsel}" />
+              </StackPanel>
+            </Border>
+
+            <!-- ========================== maskiner ======================== -->
+            <Border Background="{DynamicResource Panel}" CornerRadius="10" Padding="20" Margin="0,14,0,20"
+                    BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
+              <StackPanel>
+                <DockPanel>
+                  <Button DockPanel.Dock="Right" Content="{i18n:Oversat settingsview.deling_opdater}"
+                          Click="DelingOpdater_Klik" Padding="12,6" />
+                  <TextBlock Text="{i18n:Oversat settingsview.deling_maskiner}"
+                             FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" />
+                </DockPanel>
+
+                <TextBlock x:Name="Deling_Ingen" FontSize="12" Margin="0,10,0,0" TextWrapping="Wrap"
+                           LineHeight="19" Foreground="{DynamicResource TekstMeget}"
+                           Text="{i18n:Oversat settingsview.deling_ingen_maskiner}" />
+
+                <StackPanel x:Name="Deling_Liste" Margin="0,6,0,0" />
+              </StackPanel>
+            </Border>
+
+          </StackPanel>
+        </ScrollViewer>
+      </TabItem>
+
       <TabItem Header="{i18n:Oversat faelles.sikkerhedskopi}" Style="{StaticResource Fane}">
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
                       Padding="0,0,14,0">

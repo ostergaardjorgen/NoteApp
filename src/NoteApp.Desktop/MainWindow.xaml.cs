@@ -513,6 +513,10 @@ public partial class MainWindow : Window
             // ingenting, naar der ikke er nogen - se Mappevagt.Kig.
             Jobs.Mappevagt.Start();
 
+            // Deler man med en anden computer, melder den her sig hvert femte
+            // minut. Koster ingenting, naar der ikke deles noget.
+            Jobs.Delingsvagt.Start();
+
             // Aftaler og opgaver hentes hvert kvarter - og med det samme her,
             // saa dagen er rigtig, naar man saetter sig. Koster ingenting,
             // naar ingen integration er forbundet.
