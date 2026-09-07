@@ -211,6 +211,14 @@ public static class Arkiv
     /// </remarks>
     public static IReadOnlyList<Arkivfil> Plan(bool medLyd)
     {
+        // ============ DEMOENS OPTAGELSER ARKIVERES IKKE ============
+        //
+        // Dele() laeser UserDataPaths.Root, og den peger paa demomappen, mens
+        // demoen koerer - men arkivet ligger under den RIGTIGE maskines id.
+        // Uden det her ville demoens moeder blive lagt op som brugerens egne,
+        // og den anden maskine ville hente dem hjem. Se UserDataPaths.EgneData.
+        if (!UserDataPaths.EgneData) return Array.Empty<Arkivfil>();
+
         if (Delt.Mappe is not { } delt || !Delt.Slaaet_til) return Array.Empty<Arkivfil>();
 
         var mit = Mit(delt);
@@ -417,6 +425,14 @@ public static class Arkiv
                                Action<Arkivfremdrift>? melder = null,
                                CancellationToken stop = default)
     {
+        // ============ OGSAA FOER MAERKET ============
+        //
+        // Plan() siger nej i demoen, men Gem skriver arkiv.json ogsaa naar
+        // planen er tom - og saa ville demoen oprette en arkivmappe paa det
+        // faelles drev under den rigtige maskines id. Intet farligt indhold,
+        // men en mappe, der lyver om, hvornaar der sidst blev arkiveret.
+        if (!UserDataPaths.EgneData) return Arkivtal.Intet;
+
         if (Delt.Mappe is not { } delt || !Delt.Slaaet_til) return Arkivtal.Intet;
 
         var plan = Plan(medLyd);
@@ -640,6 +656,10 @@ public static class Arkiv
     /// </remarks>
     public static IReadOnlyList<Arkivfil> Hjemplan(string maskinid, bool medLyd)
     {
+        // Og der hentes ikke hjem TIL demoen: den ville fylde demomappen med
+        // brugerens rigtige moeder, og saa er demoen ikke laengere en demo.
+        if (!UserDataPaths.EgneData) return Array.Empty<Arkivfil>();
+
         if (Delt.Mappe is not { } delt || !Delt.Slaaet_til) return Array.Empty<Arkivfil>();
         if (maskinid.Length == 0) return Array.Empty<Arkivfil>();
 

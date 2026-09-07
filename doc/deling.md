@@ -256,6 +256,31 @@ tændes — at springe dagen over er den slags, man opdager en uge senere.
 Uret slår hvert minut netop for at kunne ramme et klokkeslæt: slog det hvert
 kvarter, ville «kl. 8» blive til «engang mellem 8 og 8.15».
 
+### Demodata rejser ikke
+
+`UserDataPaths.Root` og `UserDataPaths.Maskinrod` peger hver sin vej i
+demotilstand. Root følger det datasæt, der **vises**; maskinroden følger
+**mennesket** — dens nøgle, dens parring, dens fælles mappe. Alt, der læser det
+ene og skriver til det andet, sender demodata af sted underskrevet med den
+rigtige maskines nøgle, og modtageren har ingen måde at se forskel på.
+
+**Det skete.** Fra journalen blev bygget og til den 07-09-2026 lagde
+demogeneratoren 756 aftaler på det fælles drev — 126 kørsler gange seks — og den
+anden computer lagde dem alle sammen i brugerens rigtige kalender.
+«Bakkegården — opfølgning på tilbud» findes kun i `Demodata`.
+
+Det var ikke til at opdage på afsenderen: den maskine, der sender, lægger aldrig
+noget i sin egen kalender. Det viste sig først på den anden computer.
+
+`UserDataPaths.EgneData` er nu det ene sted, spørgsmålet stilles, og både
+`Journal` og `Arkiv` spørger — **begge veje**. Læste demoen journalen, ville den
+rykke læsepositionen frem i *brugerens* maskinmappe, og den rigtige app ville
+springe de poster over for altid: en aftale, der aldrig kom frem, og ingen fejl
+at lede efter.
+
+Ryddet op med gravsten gennem journalens egen mekanisme — appended, ikke
+truncated, fordi modtageren husker sin position som et linjetal.
+
 ### Det er ikke den eneste forbindelse
 
 Delingsfanen skriver de øvrige takter op ved siden af, selvom de ikke kan

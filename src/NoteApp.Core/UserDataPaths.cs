@@ -218,6 +218,68 @@ public static class UserDataPaths
             File.Copy(fil, fil.Replace(fra, til), overwrite: true);
     }
 
+    /// <summary>
+    /// Peger appen på brugerens EGNE data lige nu?
+    /// </summary>
+    /// <remarks>
+    /// ============ DEMODATA MÅ IKKE REJSE ============
+    ///
+    /// <see cref="Root"/> kan pege et andet sted hen end <see cref="EgenRod"/>:
+    /// demotilstanden gør det, og det gør en prøve også. <see cref="Maskinrod"/>
+    /// følger derimod ALTID brugeren — maskinens identitet, dens nøgle og dens
+    /// deling hører til mennesket, ikke til det datasæt, der vises.
+    ///
+    /// De to ting tilsammen er en fælde. Alt, der læser <see cref="Root"/> og
+    /// skriver til den fælles mappe, sender demodata af sted SOM OM det var
+    /// brugerens eget — korrekt underskrevet med den rigtige maskines nøgle, så
+    /// modtageren har ingen måde at se forskel på.
+    ///
+    /// DET ER SKET. Mellem 07-09-2026 og opdagelsen samme dag lagde
+    /// demogeneratoren 756 aftaler i journalen på det fælles drev — 126 kørsler
+    /// gange seks aftaler — og den anden computer lagde dem alle sammen ind i
+    /// brugerens rigtige kalender. «Bakkegården — opfølgning på tilbud» findes
+    /// kun i <see cref="Demodata"/>.
+    ///
+    /// Derfor: alt, der SENDER noget ud af maskinen, spørger her først. Se
+    /// <see cref="Deling.Journal"/> og <see cref="Deling.Arkiv"/>.
+    ///
+    /// Og den anden vej er lige så vigtig: læser demoen den fælles journal,
+    /// rykker den læsepositionen frem i BRUGERENS maskinmappe — og så springer
+    /// den rigtige app de poster over for altid.
+    /// </remarks>
+    public static bool EgneData
+    {
+        get
+        {
+            // ============ DEMOEN SPOERGES DIREKTE ============
+            //
+            // Og ikke ved at sammenligne Root med EgenRod. De to LIGNER
+            // hinanden, men miljoevariablen taeller med i dem begge - saa naar
+            // en proeve peger datamappen ind i sin sandkasse, er de ens, ogsaa
+            // mens demoen koerer. En stisammenligning ville derfor sige «egne
+            // data» praecis dér, hvor den skulle sige fra, og prøven kunne ikke
+            // fange det.
+            //
+            // Flaget er sandt. Se Demotilstand.
+            if (Demotilstand.Taendt) return false;
+
+            try
+            {
+                return string.Equals(
+                    Path.GetFullPath(Root).TrimEnd(Path.DirectorySeparatorChar),
+                    Path.GetFullPath(EgenRod).TrimEnd(Path.DirectorySeparatorChar),
+                    StringComparison.OrdinalIgnoreCase);
+            }
+            catch (Exception)
+            {
+                // Kan de to ikke sammenlignes, sender vi ingenting. Det er den
+                // sikre vej: en manglende journalpost kan skrives igen, en
+                // demoaftale i en fremmed kalender kan ikke tages tilbage.
+                return false;
+            }
+        }
+    }
+
     /// <summary>Optagelser: lyd, noter, transskriptioner, metadata.</summary>
     public static string Meetings => Path.Combine(Root, "Optagelser");
 

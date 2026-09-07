@@ -1,4 +1,4 @@
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 
@@ -105,6 +105,14 @@ public static class Journal
     {
         if (_anvender) return;
 
+        // ============ DEMODATA REJSER IKKE ============
+        //
+        // Peger appen et andet sted hen end brugerens egen datamappe, er det
+        // ikke hans kalender, der aendrer sig - og saa har vi intet at
+        // fortaelle den anden maskine. Se UserDataPaths.EgneData for, hvad det
+        // kostede at opdage.
+        if (!UserDataPaths.EgneData) return;
+
         try
         {
             if (Delt.Mappe is not { } delt || !Delt.Er(delt)) return;
@@ -152,6 +160,14 @@ public static class Journal
     public static IReadOnlyList<Aendring> Nyt()
     {
         var ud = new List<Aendring>();
+
+        // ============ OG DEMOEN LAESER HELLER IKKE ============
+        //
+        // Laesepositionen ligger i BRUGERENS maskinmappe, ogsaa mens demoen
+        // koerer. Laeste demoen journalen, ville den rykke positionen frem for
+        // brugeren - og hans rigtige app ville springe de poster over FOR
+        // ALTID. En aftale, der aldrig kom frem, og ingen fejl at lede efter.
+        if (!UserDataPaths.EgneData) return ud;
 
         if (Delt.Mappe is not { } delt) return ud;
 
