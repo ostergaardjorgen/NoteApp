@@ -97,6 +97,17 @@ public static class Lokaludskrift
         var model = Model()
                     ?? throw new InvalidOperationException("Der er ingen model at skrive ud med.");
 
+        // ============ MICROSOFTS C++-DEL SKAL VAERE DER ============
+        //
+        // Uden den starter whisper-cli ikke. Windows svarer med sin egen
+        // fejlkasse om en DLL-fil, processen bliver staaende i den, og
+        // dikteringen "hoerte ingenting" - der kom en tom tekst tilbage, og
+        // intet blev gemt. Maalt paa en frisk Windows 07-09-2026.
+        var savnet = Cppkomponent.Mangler(Path.GetDirectoryName(motor));
+
+        if (savnet.Count > 0)
+            throw new InvalidOperationException(Cppkomponent.Besked(Path.GetDirectoryName(motor)));
+
         var rent = string.IsNullOrWhiteSpace(sprog) ? "da" : sprog.Trim().ToLowerInvariant();
 
         // -nt: ingen tidsstempler. Det er en diktering, ikke et moede - og et
@@ -141,9 +152,32 @@ public static class Lokaludskrift
         await p.WaitForExitAsync(ct);
 
         var tekst = await ud;
-        await fejl;
+        var fejltekst = await fejl;
+
+        // ============ EN MOTOR, DER DOEDE, ER IKKE «INTET HOERT» ============
+        //
+        // Her blev udfaldet ikke set efter. Gik whisper-cli ned, kom der en
+        // tom tekst tilbage, og skaermen sagde «der blev ikke hoert noget» -
+        // altsaa at brugeren havde tiet stille. Det er den vaerste slags
+        // fejlbesked: den peger paa mennesket i stedet for paa maskinen.
+        if (p.ExitCode != 0)
+        {
+            var loader = unchecked((uint)p.ExitCode) is 0xC0000135 or 0xC0000142;
+
+            throw new InvalidOperationException(loader
+                ? Cppkomponent.Besked(Path.GetDirectoryName(motor))
+                : "Motoren stoppede med kode " + p.ExitCode + ". " + Sidste(fejltekst));
+        }
 
         return Rens(tekst);
+    }
+
+    /// <summary>De sidste linjer fra motorens fejlstrøm — det, der står nærmest fejlen.</summary>
+    private static string Sidste(string fejltekst, int linjer = 3)
+    {
+        var alle = fejltekst.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+        return alle.Length == 0 ? "" : string.Join(" ", alle[Math.Max(0, alle.Length - linjer)..]);
     }
 
     /// <summary>

@@ -7,9 +7,35 @@ namespace NoteApp.Desktop;
 
 public partial class App : Application
 {
+    /// <summary>
+    /// Windows' egen fejlkasse, når et hjælpeprogram ikke kan starte.
+    /// </summary>
+    /// <remarks>
+    /// SEM_FAILCRITICALERRORS. Fejltilstanden arves af de programmer, appen
+    /// starter — whisper-cli og de andre. Uden den svarer Windows selv med en
+    /// kasse om en manglende DLL-fil, og PROCESSEN BLIVER STAAENDE I DEN,
+    /// indtil nogen trykker OK. Appen ventede imens paa et program, der ikke
+    /// var i gang med noget.
+    ///
+    /// Set 07-09-2026 paa en frisk Windows uden Microsofts C++-komponent:
+    /// «whisper-cli.exe - Systemfejl: VCOMP140.DLL blev ikke fundet», mens
+    /// appen skrev «Skriver teksten ud …» i det uendelige.
+    ///
+    /// Nu fejler programmet med det samme, og vi kan sige hvorfor med vores
+    /// egne ord — se <see cref="NoteApp.Core.Cppkomponent"/>.
+    /// </remarks>
+    [System.Runtime.InteropServices.DllImport("kernel32.dll")]
+    private static extern uint SetErrorMode(uint mode);
+
+    private const uint SEM_FAILCRITICALERRORS = 0x0001;
+    private const uint SEM_NOOPENFILEERRORBOX = 0x8000;
+
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+
+        try { SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOOPENFILEERRORBOX); }
+        catch (Exception) { /* Er den ikke der, er alt som foer. */ }
 
         // ============ HEMMELIGHEDERNE BESKYTTES FOERSTE GANG ============
         //

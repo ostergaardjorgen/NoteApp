@@ -12,7 +12,8 @@
   programmet fjernes, dine data bliver liggende.
 -->
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
-     xmlns:bal="http://wixtoolset.org/schemas/v4/wxs/bal">
+     xmlns:bal="http://wixtoolset.org/schemas/v4/wxs/bal"
+     xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util">
 
   <Bundle Name="HeyPia"
           Manufacturer="HeyPia"
@@ -37,7 +38,47 @@
          i en app, der ellers er helt paa dansk. -->
     <WixVariable Id="WixStdbaThemeWxl" Value="da-DK.wxl" />
 
+    <!-- ============ MICROSOFTS C++-KOMPONENT ============
+
+         Whisper er skrevet i C++ og bygget med Microsofts vaerktoejer.
+         Bibliotekerne foelger med «Microsoft Visual C++ Redistributable», som
+         er paa de fleste maskiner i forvejen - men ikke paa en frisk Windows.
+
+         MAALT 07-09-2026 paa en ny baerbar: appen startede, mikrofonen
+         virkede, optagelsen koerte - og i det oejeblik teksten skulle skrives
+         ud, kom Windows' egen fejlkasse: «VCOMP140.DLL blev ikke fundet».
+         Appen stod og skrev «Skriver teksten ud …» i det uendelige.
+
+         Det er ikke noget, en kunde kan gaette sig til. Derfor foelger den
+         med i installationen.
+
+         DEN INSTALLERES KUN, NAAR DEN MANGLER. Versionen slaas op i
+         registreringsdatabasen, hvor Microsofts egen pakke skriver den.
+
+         DEN FJERNES ALDRIG IGEN (Permanent). Andre programmer paa maskinen
+         bruger den samme komponent, og en afinstallation af HeyPia, der tog
+         den med sig, ville braekke dem. -->
+    <util:RegistrySearch Id="Cppudgave"
+                         Root="HKLM"
+                         Key="SOFTWARE\Microsoft\VisualStudio\14.0\VC\Runtimes\X64"
+                         Value="Version"
+                         Result="value"
+                         Variable="Cppudgave" />
+
     <Chain>
+      <ExePackage Id="Cppkomponent"
+                  SourceFile="vc_redist.x64.exe"
+                  DisplayName="Microsoft Visual C++ Redistributable (x64)"
+                  Permanent="yes"
+                  Vital="yes"
+                  DetectCondition="Cppudgave &gt;= v14.38.33130"
+                  InstallArguments="/install /quiet /norestart">
+        <!-- 1638: en NYERE udgave ligger der allerede. Det er ikke en fejl -
+             det er praecis det, vi vilde have. -->
+        <ExitCode Value="1638" Behavior="success" />
+        <ExitCode Value="3010" Behavior="success" />
+      </ExePackage>
+
       <MsiPackage SourceFile="HeyPia.msi" Vital="yes" Compressed="yes" />
     </Chain>
 

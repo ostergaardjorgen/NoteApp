@@ -153,13 +153,41 @@ try
     & $wix build 'HeyPia.wxs' -arch x64 -ext WixToolset.UI.wixext -d "Version=$msiVersion" -o 'HeyPia.msi'
     if ($LASTEXITCODE -ne 0) { throw "wix build af MSI fejlede." }
 
+    # ============ MICROSOFTS C++-KOMPONENT SKAL MED I BUNDTET ============
+    #
+    # Whisper kan ikke starte uden den, og en frisk Windows har den ikke. Se
+    # Bundle.wxs. Filen hentes fra Microsofts egen adresse og holdes uden for
+    # git - den er 25 MB og er ikke vores.
+    $cpp = Join-Path $installer 'vc_redist.x64.exe'
+
+    if (-not (Test-Path $cpp))
+    {
+        Write-Host "Henter Microsofts C++-komponent ..." -ForegroundColor Cyan
+
+        $kilde = 'https://aka.ms/vs/17/release/vc_redist.x64.exe'
+
+        try
+        {
+            Invoke-WebRequest -Uri $kilde -OutFile $cpp -UseBasicParsing
+        }
+        catch
+        {
+            throw ("Kunne ikke hente $kilde - $($_.Exception.Message). " +
+                   "Hent filen i haanden og laeg den i installer\vc_redist.x64.exe.")
+        }
+    }
+
+    $cppMb = [math]::Round((Get-Item $cpp).Length / 1MB, 1)
+    Write-Host "  C++-komponenten: $cppMb MB" -ForegroundColor DarkGray
+
     # Indpakningen: en setup.exe, der baerer MSI'en. Den beder selv om
     # administratorrettigheder, saa modtageren ikke skal vide, at en .msi skal
     # hoejreklikkes — og mange mailfiltre lukker en .exe igennem, hvor en .msi
     # bliver stoppet.
     Write-Host "Bygger setup.exe ..." -ForegroundColor Cyan
     & $wix extension add --global WixToolset.BootstrapperApplications.wixext/5.0.2
-    & $wix build 'Bundle.wxs' -ext WixToolset.BootstrapperApplications.wixext -d "Version=$msiVersion" -o 'HeyPia-setup.exe'
+    & $wix extension add --global WixToolset.Util.wixext/5.0.2
+    & $wix build 'Bundle.wxs' -ext WixToolset.BootstrapperApplications.wixext -ext WixToolset.Util.wixext -d "Version=$msiVersion" -o 'HeyPia-setup.exe'
     if ($LASTEXITCODE -ne 0) { throw "wix build af setup.exe fejlede." }
 }
 finally

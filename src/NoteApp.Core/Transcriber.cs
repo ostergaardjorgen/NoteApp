@@ -222,6 +222,18 @@ public sealed class Transcriber
             }
         };
 
+        // ============ SPOERG FOER, I STEDET FOR AT GAA I STAA ============
+        //
+        // Mangler Microsofts C++-komponent, starter whisper-cli ikke. Windows
+        // svarer med sin egen fejlkasse om en DLL-fil, og appen staar og
+        // skriver «skriver teksten ud» i det uendelige. Maalt paa en frisk
+        // Windows 07-09-2026. Her siges det i stedet med det samme, og der
+        // staar hvad man goer ved det.
+        var mangler = Cppkomponent.Mangler(Path.GetDirectoryName(_whisperCli));
+
+        if (mangler.Count > 0)
+            throw new InvalidOperationException(Cppkomponent.Besked(Path.GetDirectoryName(_whisperCli)));
+
         progress?.Report(new TranscriptionProgress(0, "Indlæser modellen …"));
 
         p.Start();
@@ -244,8 +256,17 @@ public sealed class Transcriber
         await File.WriteAllTextAsync(logPath, log.ToString(), new UTF8Encoding(false), ct);
 
         if (p.ExitCode != 0)
-            throw new InvalidOperationException(
-                $"whisper-cli afsluttede med kode {p.ExitCode}. Se loggen: {logPath}");
+        {
+            // 0xC0000135 er «en DLL blev ikke fundet», 0xC0000142 er «den
+            // kunne ikke indlaeses». Begge dele er den samme historie for
+            // brugeren: der mangler noget paa maskinen, ikke i optagelsen.
+            var loader = unchecked((uint)p.ExitCode) is 0xC0000135 or 0xC0000142;
+
+            throw new InvalidOperationException(loader
+                ? Cppkomponent.Besked(Path.GetDirectoryName(_whisperCli))
+                  + $"\n\n(whisper-cli stoppede med kode 0x{unchecked((uint)p.ExitCode):X8}.)"
+                : $"whisper-cli afsluttede med kode {p.ExitCode}. Se loggen: {logPath}");
+        }
 
         var engine = BuildEngineId(request.ModelPath, log.ToString());
         var (sprog, sikkerhed) = ReadLanguage(log.ToString(), request.Language);

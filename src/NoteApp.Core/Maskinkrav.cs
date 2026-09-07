@@ -1,4 +1,4 @@
-namespace NoteApp.Core;
+﻿namespace NoteApp.Core;
 
 /// <summary>Ét krav, og om maskinen her lever op til det.</summary>
 /// <param name="Hvad">Kravet, som brugeren skal kunne læse det.</param>
@@ -44,10 +44,42 @@ public static class Maskinkrav
             Windows(),
             Hukommelse(),
             Grafikkort(),
-            Plads()
+            Plads(),
+            Cppdelen()
         };
 
         return ud;
+    }
+
+    /// <summary>
+    /// Microsofts C++-komponent, som Whisper er bygget med.
+    /// </summary>
+    /// <remarks>
+    /// DEN HØRER TIL HER, FORDI DEN ER ET KRAV TIL MASKINEN OG IKKE EN
+    /// INDSTILLING. Den mangler kun på en ny Windows, og når den mangler,
+    /// virker udskrivningen slet ikke — det er den eneste linje på listen,
+    /// hvor «mangler» betyder «virker ikke» og ikke «bliver langsomt».
+    /// Se <see cref="Cppkomponent"/>.
+    /// </remarks>
+    private static Krav Cppdelen()
+    {
+        var mangler = Cppkomponent.Mangler(Motormappen());
+
+        return new Krav(
+            "Microsofts C++-komponent",
+            mangler.Count == 0 ? "installeret" : "mangler",
+            mangler.Count == 0 ? Kravsvar.Opfyldt : Kravsvar.Mangler,
+            mangler.Count == 0
+                ? "Den følger med de fleste programmer og er på plads her. Whisper er bygget med den."
+                : "Uden den kan Whisper ikke starte, og optagelser kan ikke skrives ud. "
+                  + $"Hent «{Cppkomponent.Navn}» hos Microsoft: {Cppkomponent.Hentesti}");
+    }
+
+    /// <summary>Mappen, whisper-cli ligger i — hvis den er hentet.</summary>
+    private static string? Motormappen()
+    {
+        try { return Path.GetDirectoryName(WhisperInstall.Locate().WhisperCli); }
+        catch (Exception) { return null; }
     }
 
     /// <summary>

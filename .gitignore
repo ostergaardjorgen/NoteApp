@@ -1,4 +1,4 @@
-# =============================================================================
+﻿# =============================================================================
 #  DINE DATA MÅ ALDRIG HAVNE HER
 # =============================================================================
 #  Den primære beskyttelse er ikke denne fil, men placeringen: alt personligt
@@ -96,3 +96,6 @@ app/google-klient.json
 # .json, og appen laeser den nu, som den hentes - uden omdoebning. Saa skal
 # det navn ogsaa vaere daekket, ellers gaar den med i naeste commit fra app/.
 client_secret*.json
+
+# Microsofts C++-komponent. Hentes af byg-installer.ps1 og er ikke vores.
+installer/vc_redist.x64.exe
