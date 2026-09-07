@@ -63,6 +63,7 @@ public partial class SettingsView
 
             VisGuide();
             VisKoe();
+            VisArkiv();
             VisMaskiner();
         }
         finally

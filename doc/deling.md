@@ -77,7 +77,22 @@ maskiner fra Google. De er i sync, fordi de henter fra det samme sted — der er
 intet at vedligeholde, og man logger ind én gang i alt.
 
 **Uden Google:** aftaler i `kalender.json` og opgaver i `Opgaver\opgaver.json`
-er lokale i datasættet. De rejser ikke endnu — se «Det, der stadig mangler».
+rejser med en journal. Samme regel som alt andet i mappen: **der skrives aldrig
+i andres filer.**
+
+```
+journal/<fra>/<til>.jsonl     kun tilføjelser, én linje pr. ændring, HMAC pr. linje
+```
+
+- **Den nyeste vinder.** `Aendret` sættes af `Kalender.Gem` og `Opgavelager.Gem`
+  — ikke af kalderen, for et felt, hver kalder skal huske, bliver glemt.
+- **Sletninger rejser som gravsten.** Uden dem dukker den slettede aftale op
+  igen, næste gang den anden maskine skriver sin journal.
+- **Intet ekko.** `Journal.Anvender` er sat, mens en fremmed ændring lægges ind,
+  så den ikke skrives tilbage. Uden den ville de to kaste den samme aftale frem
+  og tilbage, så længe de begge var tændt.
+- **Google-poster rejser ikke.** Begge maskiner henter dem selv; en aftale, der
+  kom to veje, ville blive til to.
 
 ## Etape 2 — møderne rejser
 
@@ -92,8 +107,8 @@ arbejde/<opgaveid>/
    udskrift.txt / udskrift.json
 ```
 
-**Sådan går det til.** Der trykkes på «Skriv ud på ‹navn›» ved optagelsen; der sendes
-aldrig noget af sig selv. Sproget spørges der om i det samme vindue som ved en
+**Sådan går det til.** Der trykkes på «Skriv ud på ‹navn›» ved optagelsen.
+Sproget spørges der om i det samme vindue som ved en
 lokal kørsel — vælges det forkert, er hvert eneste ord forkert, også når den
 anden maskine skriver ud. Et møde med to spor bliver til to opgaver, og de
 samles først hjemme, når begge svar er der: en udskrift af det halve møde ser
@@ -119,34 +134,102 @@ opgaven — filsystemet, ikke en aftale mellem to programmer. Går maskinen ned
 midt i arbejdet, står hjerteslaget stille, og opgaven bliver ledig igen efter en
 halv time. En bruger skal ikke vente på en slukket maskine.
 
+**Det kan sættes til at ske af sig selv** — et hak på delingsfanen, **fra som
+standard**. Lyden er det mest private, appen har, og den skal ikke begynde at
+rejse, fordi to maskiner engang blev godkendt. To grænser, og de er begge målt
+frem: kun optagelser fra **det seneste døgn** (ellers ville dagen, hakket blev
+sat, sende hele arkivet over netværket på én gang), og **kun når sproget er
+kendt** — fra optagelsen, fra aftalen eller fra indstillingerne. Et gæt, der
+ligner et resultat, er den værste slags fejl.
+
 **Lyden er ikke krypteret.** Den ligger på dit eget drev, og delingsskærmen
 siger lige ud, at den, der kan læse mappen, kan læse det, der ligger i den.
 Seglet beskytter mod at få lagt arbejde ind — ikke mod at nogen kigger med.
+
+## Arkivet — historikken, der kan hentes hjem
+
+**Bygget.** Alt det ovenfor er en postkasse: det, der ligger i den, er på vej et
+sted hen, og det ryddes, når det er kommet frem. Arkivet er det modsatte. Det
+bliver liggende.
+
+```
+arkiv/<maskinid>/
+   arkiv.json      navn, rolle, hvornår sidst, hvor mange filer, hvor meget
+   optagelser/     hele mødemappen: lyd, udskrifter, noter, segmenter
+   projekter/
+   skabeloner/
+   dokumenter/
+```
+
+En ny bærbar henter hele historikken hjem. En stationær, der brænder sammen,
+kommer tilbage. Det er dét, arkivet er til, og de to er det samme problem.
+
+**Der arkiveres efter en hvidliste** — fire mapper, nævnt ved navn. Ikke
+«datamappen minus nogle undtagelser». I datamappen ligger `deling\noegle.txt`,
+maskinens **private nøgle**, den ene ting der aldrig må forlade maskinen. En
+sortliste, der glemte den, ville lægge den et sted, alle på delingen kan læse,
+og ingen ville opdage det. En hvidliste kan glemme at tage noget **med**; det er
+den fejl, man vil have. Der er en prøve på netop den fil.
+
+Udenfor står derfor også `learning.db` (en åben SQLite-fil, der kopieres i
+stykker), `indstillinger.json` (lydenheder og stier, der hører til den maskine),
+`log\` og `motor\` (modellerne fylder gigabyte og kan hentes igen).
+
+**En sletning rejser ikke.** Sletter du en optagelse hjemme hos dig selv, bliver
+den liggende i arkivet. Journalen ovenfor gør det **modsatte** og skriver
+gravsten — og det er rigtigt hver sit sted: en aflyst aftale, der kommer
+tilbage, er en fejl; en optagelse, der stadig kan hentes hjem, er en redning. Et
+arkiv, der sletter det, du slettede, er ikke en sikkerhedskopi, det er en
+spejling.
+
+**Det lette først, lyden bagefter.** Målt 07-09-2026 på den stationære:
+
+| | Filer | Fylder |
+|---|---|---|
+| Lyd (`*.wav`) | 55 | 1.852 MB |
+| Alt det skrevne | 297 | 24,8 MB |
+
+Sendes de imellem hinanden, er man en time inde i den første kørsel, før den
+første udskrift er nået frem. Sådan her efterlader en afbrudt kørsel **alt det,
+man kan læse** — og det er den rigtige halvdel at mangle. Lyden kan slås fra
+helt; så arkiveres udskrifter, noter, referater og projekter stadig.
+
+**En optagelse, der er i gang, røres ikke.** Wav-filen vokser, mens der optages.
+En halv wav i arkivet ser hel ud — størrelsen passer med det, der blev læst — og
+den ville blive liggende sådan for evigt. Der arkiveres kun møder med et
+sluttidspunkt.
+
+**Der skrives aldrig direkte på målets navn.** Hver fil kopieres til
+`<navn>.delvis` og flyttes på plads bagefter. Falder netværket ud midt i en wav
+på 200 MB, er der ingen halv fil med det rigtige navn.
+
+**Der overskrives aldrig noget hjemme.** «Hent hjem» tager kun det, du mangler
+— også når arkivets udgave er nyere. Det lokale er det, der er i brug, og en
+gendannelse, der kan skrive hen over dagens arbejde, er en, man ikke tør trykke
+på.
+
+**Arkivet er ikke forseglet**, og grunden er ikke sjusk: en stationær, der er
+brændt sammen, tog sin private nøgle med sig. Den nye installation er en fremmed
+for det arkiv, den skal gendanne fra — den kan per definition ikke have en
+parring med en maskine, der er væk. Et segl ville gøre arkivet ubrugeligt
+præcis den dag, det skulle bruges. Det er mappens egne rettigheder, der er
+grænsen, og det står på delingsskærmen.
+
+**Vagten viger.** `Arkivvagt` ser efter hvert kvarter — ikke hvert minut: hver
+kørsel spørger filsystemet om størrelse og dato på hver eneste fil, 352 den
+07-09-2026, og de spørgsmål går over SMB. Der arkiveres ikke, mens der optages,
+og ikke, mens der kører noget tungt. Arkiveringen kan altid tages om;
+optagelsen kan ikke.
 
 ## Det, der stadig mangler
 
 **Talergenkendelsen** kører hjemme hos den, der optog. Den er tung og kunne
 sendes med som sin egen slags opgave.
 
-**Kalender og opgaver uden Google.** Aftaler i `kalender.json` og opgaver i
-`Opgaver\opgaver.json` er lokale i datasættet. Samme regel som alt andet i
-mappen: **der skrives aldrig i andres filer.** Hver maskine ejer sin egen
-ændringsjournal — én fil pr. maskine, kun tilføjelser — og den anden læser den
-og anvender ændringerne. To skrivere på den samme fil gennem en
-synkroniseringsklient bliver til en «conflicted copy», og den slags opdager
-ingen.
-
-- Hver post har et id og et tidsstempel. Er den samme post rettet begge steder,
-  vinder den nyeste.
-- Sletninger rejser som gravsten. Uden dem dukker en slettet aftale op igen,
-  næste gang den anden maskine skriver sin journal.
-- Journalen beskæres, når begge maskiner har bekræftet, at de har læst frem til
-  et punkt.
-- Opgaver, appen selv har fundet i et møde, følger mødet og ikke journalen.
-
-**At sende af sig selv.** I dag trykker man på knappen. En indstilling om at
-gøre det automatisk, når den primære er vågen, hører til — men den skal være et
-valg, ikke en standard.
+**Journalen beskæres ikke endnu.** Den vokser med én linje pr. ændring. Den
+burde kunne skæres, når begge maskiner har bekræftet, at de har læst frem til
+et punkt.
 
 **Det, der aldrig skal i mappen:** lyd under optagelse, `learning.db` og
-indstillinger. Se `Delt` og advarslen på delingsfanen om, hvem der kan læse med.
+indstillinger. Se `Delt` og `Arkiv` og advarslen på delingsfanen om, hvem der
+kan læse med.

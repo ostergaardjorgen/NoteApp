@@ -528,6 +528,18 @@ public partial class MainWindow : Window
             // naar ingen integration er forbundet.
             Jobs.Synkvagt.Start();
 
+            // ARKIVET: optagelser, projekter, skabeloner og dokumenter laegges
+            // op i den faelles mappe, saa en ny maskine kan hente historikken
+            // hjem, og en, der braender sammen, kan komme tilbage. Foerste
+            // koersel venter to minutter - se Jobs.Arkivvagt.
+            Jobs.Arkivvagt.Start();
+
+            // Fremdriften vises paa delingsfanen. Kobles her og ikke i
+            // ruden selv: vagten koerer, ogsaa naar fanen aldrig er blevet
+            // aabnet, og saa skal den sidste melding staa der, naar den bliver
+            // det.
+            Preferences.SettingsView.Arkivlyt();
+
             // STILHEDSMODELLEN HENTES, HVIS DEN MANGLER.
             //
             // 885 KB, og den er ikke et valg - den er en del af motoren. Uden

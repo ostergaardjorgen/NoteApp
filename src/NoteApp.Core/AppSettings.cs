@@ -603,6 +603,36 @@ public sealed class AppSettings
     public bool SendAutomatisk { get; set; }
 
     /// <summary>
+    /// Skal optagelser, projekter, skabeloner og dokumenter lægges op i den
+    /// fælles mappe?
+    /// </summary>
+    /// <remarks>
+    /// TIL SOM STANDARD, når der først ER en fælles mappe. Det er den eneste
+    /// indstilling her, der er slået til fra begyndelsen, og grunden er, at
+    /// den kun kan betale sig, HVIS den har kørt hele tiden. En sikkerhedskopi,
+    /// man slår til dagen efter nedbruddet, er ingen sikkerhedskopi.
+    ///
+    /// Der skal stadig vælges en fælles mappe først, og det er et bevidst
+    /// valg. Se <see cref="NoteApp.Core.Deling.Arkiv"/>.
+    /// </remarks>
+    public bool ArkiverAutomatisk { get; set; } = true;
+
+    /// <summary>
+    /// Skal lyden med i arkivet?
+    /// </summary>
+    /// <remarks>
+    /// TIL SOM STANDARD, fordi det er dét, «en sikkerhedskopi» betyder. Men
+    /// den kan slås fra, og den skal kunne det: målt 07-09-2026 er lyden
+    /// 1.852 MB mod 24,8 MB for alt det skrevne. På en bærbar på et
+    /// mobilhotspot er det forskellen på en kørsel, der er ovre inden frokost,
+    /// og en, der bliver ved.
+    ///
+    /// Slås den fra, bliver udskrifter, noter, referater og projekter stadig
+    /// arkiveret. Det er dem, man leder efter bagefter.
+    /// </remarks>
+    public bool ArkiverLyd { get; set; } = true;
+
+    /// <summary>
     /// Bredden på Cockpittets venstre spalte — kalenderen.
     ///
     /// SPALTEBREDDER ER ET VALG, DER SKAL OVERLEVE EN GENSTART. En bredde,

@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 
 namespace NoteApp.Core;
 
@@ -119,8 +119,29 @@ public sealed class RecordingSession : IDisposable
         return session;
     }
 
+    private static int _ilive;
+
+    /// <summary>Har DEN her session talt sig med? Se <see cref="NogenOptager"/>.</summary>
+    private bool _talt;
+
+    /// <summary>
+    /// Optager appen lige nu? Bruges af de vagter, der ellers ville tage
+    /// maskinen fra optagelsen.
+    /// </summary>
+    /// <remarks>
+    /// TALLET OG IKKE ET FLAG. Der kan være to sessioner i gang på én gang —
+    /// en lydprøve ved siden af et møde — og et flag ville blive slukket af
+    /// den første, der stoppede, mens den anden stadig optog.
+    ///
+    /// Optagelsen er den ene ting, der aldrig kan tages om. Alt andet kan
+    /// vente.
+    /// </remarks>
+    public static bool NogenOptager => Volatile.Read(ref _ilive) > 0;
+
     public void Start()
     {
+        if (!_talt) { Interlocked.Increment(ref _ilive); _talt = true; }
+
         _clock.Start();
         foreach (var t in _tracks) t.Start();
     }
@@ -215,6 +236,8 @@ public sealed class RecordingSession : IDisposable
                 }
             }
         }
+
+        if (_talt) { Interlocked.Decrement(ref _ilive); _talt = false; }
 
         Meta.EndedAt = DateTimeOffset.Now;
         Meta.DurationSeconds = Math.Round(_clock.Elapsed.TotalSeconds, 1);

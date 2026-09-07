@@ -1,4 +1,4 @@
-using NoteApp.Core.Deling;
+﻿using NoteApp.Core.Deling;
 using Xunit;
 
 namespace NoteApp.Tests;
@@ -16,6 +16,7 @@ namespace NoteApp.Tests;
 ///
 /// Maskinerne spilles af hver sin datamappe, nøjagtig som i Delingstest.
 /// </remarks>
+[Collection(Maskinhold.Navn)]
 public class Arbejdskoetest
 {
     /// <summary>En lydfil med indhold, så summen betyder noget.</summary>
