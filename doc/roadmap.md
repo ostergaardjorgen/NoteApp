@@ -259,7 +259,70 @@ skrevet. Det er halvdelen af arbejdet.
 | **Mål mødet, ikke modellen** | Middel | Hvor meget var uhørligt, hvor mange talte i munden på hinanden, hvem sagde aldrig sit navn |
 | **Maskering før afsendelse** | Stor | Bliver mindre presserende, hvis 1.1 betyder, at man tit slet ikke sender noget |
 | **Forbrugsloft i appen** | Lille | Mistrals API har ingen vej til kontoens loft — efterprøvet 19-08, alle betalingsstier svarer 404. Skal derfor tastes ind |
+| **Signering af installeren** | Lille kode, stor beslutning | Smart App Control blokerede 1.3.63 på den bærbare 07-09. Intet er signeret i dag. Uddybet nedenfor |
 | **Skal læseruden se anderledes ud?** | Lille/middel | Afventer, at lys/mørk er brugt i praksis. Uddybet nedenfor |
+
+### Installeren skal signeres
+*Ramt 07-09-2026*
+
+Smart App Control på den bærbare blokerede installationen af 1.3.63. Der stod,
+at Microsoft ville gennemgå appen for at bekræfte, om den er sikker.
+
+Målt samme dag: **intet i leverancen er signeret** — hverken `HeyPia-setup.exe`
+eller `HeyPia.exe`. `Get-AuthenticodeSignature` svarer `NotSigned` på begge.
+
+Den stationære har Smart App Control **slået fra**
+(`VerifiedAndReputablePolicyState = 0` under
+`HKLM\SYSTEM\CurrentControlSet\Control\CI\Policy`), og derfor har det aldrig
+vist sig før. Den bærbare er nyere og har den slået til. Det er ikke en fejl i
+appen; det er en usigneret exe på en maskine, der ikke tager imod dem.
+
+**Sådan kommer man forbi det lige nu:** Windows Sikkerhed → App- og
+browserstyring → Indstillinger for Smart App Control → Fra. Installér. Slå den
+til igen. Microsoft fjernede kravet om en ren Windows-installation for at slå
+den til igen med opdateringen i april 2026 — på et build fra før den er det
+stadig envejs, og så skal man vide det, inden man slukker.
+
+#### Det, der gør beslutningen svær
+
+**Signering fjerner det ikke med det samme.** Smart App Control kræver *både* en
+gyldig signatur *og* et omdømme i Microsofts sky. En ny fil fra en ukendt
+udgiver blokeres alligevel, indtil nok mennesker har installeret den — og med to
+maskiner sker det aldrig. Der findes ingen vej til at frikende én bestemt app.
+
+Det er værd at sige højt, fordi det er nemt at tro, at et certifikat er en knap,
+der slukker for problemet. Det er det ikke. Det er en investering i, at
+FREMTIDIGE udgivelser arver et omdømme, den forrige har optjent — og den regning
+begynder at give mening den dag, appen skal ud til andre end os selv.
+
+| Vej | Pris | Kan vi bruge den? |
+|---|---|---|
+| **Azure Artifact Signing** (før: Trusted Signing) | ~$9,99/md, Basic | **Kun som firma** for os — EU-organisationer er med. Privatpersoner: kun USA og Canada |
+| **OV-certifikat** (DigiCert, Sectigo) | $150–300/år | Ja, uanset. Kræver USB-token eller cloud-HSM siden juni 2023 |
+| **EV-certifikat** | $400+/år | Ja. Vejer tungere hos Smart App Control end OV — men er ikke længere en fribillet |
+
+**EV's øjeblikkelige SmartScreen-fritagelse blev fjernet i 2024.** Den er stadig
+skrevet ind i halvdelen af vejledningerne på nettet, og den er forkert.
+
+**Priserne er pr. udgiver, ikke pr. app.** Ét certifikat signerer alt, vi laver.
+Azure Artifact Signings kvote er 5.000 signeringer om måneden på Basic —
+signeringer, ikke applikationer — og den regnes pr. konto.
+
+#### Hvad der skal gøres, når det bliver aktuelt
+
+Selve koden er lille: signeringen hører hjemme i `scripts/byg-installer.ps1`,
+samme sted som rettighederne og C++-komponenten allerede sættes. Den skal ramme
+**både** `HeyPia.exe` og `HeyPia-setup.exe`, og den skal ligge FØR bundtet
+pakkes — en exe, der signeres efter, at den er lagt i nyttelasten, gør bundtet
+ulæseligt. Det er den samme faldgrube som med rettighederne i v1.3.60.
+
+Beslutningen, der skal træffes først: **skal det signeres under et CVR?** Er
+svaret ja, er Azure Artifact Signing til ti dollars om måneden det oplagte, og
+så er resten en dags arbejde. Er svaret nej, er det et OV-certifikat med
+hardware-token, og så er det både dyrere og mere besvær ved hvert byg.
+
+**Indtil da:** Smart App Control slås fra på de maskiner, der har den. Det er et
+rigtigt svar for to private maskiner og et forkert svar den dag, der er kunder.
 
 ### Vågeordet skal kunne høres, MENS man taler
 *Foreslået 31-08-2026*
