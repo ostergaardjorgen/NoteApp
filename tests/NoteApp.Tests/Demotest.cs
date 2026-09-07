@@ -121,15 +121,11 @@ public class Demotest
         Assert.Equal(egne, UserDataPaths.Root);
     }
 
-    /// <summary>
-    /// Bygger demoen i en mappe, prøven ejer — og UDEN at læse i brugerens
-    /// egne optagelser efter lydeksempler. Se Lydeksempeltest for dem.
-    /// </summary>
+    /// <summary>Bygger demoen i en mappe, prøven ejer.</summary>
     private static void Byg() => Byg2();
 
     /// <summary>Det samme, men med svaret om der blev bygget.</summary>
-    private static bool Byg2(bool tvungen = false) =>
-        Demodata.Byg(tvungen, lydfra: Path.Combine(Path.GetTempPath(), "heypia-ingen-data"));
+    private static bool Byg2(bool tvungen = false) => Demodata.Byg(tvungen);
 
     [Fact]
     public void Der_er_noget_at_se_paa_i_hver_ende_af_appen()
@@ -148,6 +144,31 @@ public class Demotest
         Assert.True(Diktatnoter.Laes().Count >= 3, "for få diktater");
         Assert.True(PromptTemplate.LoadAll().Count >= 3, "for få mødetyper");
         Assert.True(PromptTemplate.LoadAll(Skabelonslags.Projektoutput).Count >= 4, "for få projektskabeloner");
+    }
+
+    [Fact]
+    public void Der_er_ingen_lyd_i_demoen()
+    {
+        using var d = new Demomappe();
+        Demotilstand.Taend();
+        UserDataPaths.Glem();
+
+        Byg();
+
+        // ============ OG DET ER MED VILJE ============
+        //
+        // Her blev der klippet lydeksempler ud af brugerens egne webinarer.
+        // Det er taget ud igen: en demo er noget, man viser frem, og i det
+        // oejeblik den indeholder et stykke af en rigtig optagelse, skal den,
+        // der trykker paa knappen, taenke over, hvem der lytter med.
+        //
+        // Proeven staar her, saa ingen laegger lyd ind igen ved et uheld.
+        var lyd = Directory.EnumerateFiles(UserDataPaths.Root, "*.wav", SearchOption.AllDirectories)
+            .Concat(Directory.EnumerateFiles(UserDataPaths.Root, "*.mp3", SearchOption.AllDirectories))
+            .Concat(Directory.EnumerateFiles(UserDataPaths.Root, "*.m4a", SearchOption.AllDirectories))
+            .ToList();
+
+        Assert.True(lyd.Count == 0, "der ligger lyd i demoen: " + string.Join(", ", lyd));
     }
 
     [Fact]
