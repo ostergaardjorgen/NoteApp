@@ -144,6 +144,28 @@ public sealed class Haendelse
     public double Sekunder { get; init; }
 
     /// <summary>
+    /// Hvilken computer der gjorde det.
+    /// </summary>
+    /// <remarks>
+    /// ============ DEN FINDES, FORDI DER ER TO ============
+    ///
+    /// En bærbar, der optager, og en stationær, der skriver ud, deler et
+    /// arkiv. Uden det her felt kan historikken ikke svare på «hvem gjorde
+    /// det» — og når noget skal efterprøves, er dét det første spørgsmål.
+    ///
+    /// Det gælder også kaldene til Mistral: når to computere sender til den
+    /// samme konto, er det ikke ligegyldigt, hvilken af dem der gjorde det.
+    ///
+    /// NAVNET OG IKKE ID’ET. Historikken skal kunne læses af et menneske;
+    /// «Bærbar» siger noget, «a41f…» gør ikke. Id'et hører til i den fælles
+    /// mappe, hvor maskiner skal kunne skelnes med sikkerhed.
+    ///
+    /// GAMLE POSTER HAR DEN IKKE, og det er i orden — de er skrevet, dengang
+    /// der kun var én computer. Et tomt felt vises ikke.
+    /// </remarks>
+    public string Maskine { get; set; } = "";
+
+    /// <summary>
     /// Forlod data maskinen? Er ALTID falsk for alt andet end hentning af
     /// motor og modeller — og hentning sender intet, den modtager.
     ///
@@ -192,10 +214,29 @@ public static class Historik
     /// Skriver en post. Fejler aldrig udad: en historik, der kan vælte det,
     /// den skulle beskrive, er værre end ingen historik.
     /// </summary>
+    /// <summary>
+    /// Computerens navn, som det står i historikken.
+    /// </summary>
+    /// <remarks>
+    /// Den må ALDRIG kunne vælte en skrivning. Historikken er dét, der står
+    /// tilbage, når noget skal efterprøves; en post, der ikke blev skrevet,
+    /// fordi et navn ikke kunne læses, er værre end en post uden navn.
+    /// </remarks>
+    private static string Maskinnavn()
+    {
+        try { return Deling.Maskinid.Navn; }
+        catch (Exception) { return ""; }
+    }
+
     public static void Skriv(Haendelse post)
     {
         try
         {
+            // SAETTES HER OG KUN HER. Der er tre veje ind i historikken, og
+            // den her er den, de alle sammen gaar igennem - saa kan en ny
+            // kalder ikke komme til at glemme maskinen.
+            if (post.Maskine.Length == 0) post.Maskine = Maskinnavn();
+
             var mappe = System.IO.Path.GetDirectoryName(Path)!;
             Directory.CreateDirectory(mappe);
 

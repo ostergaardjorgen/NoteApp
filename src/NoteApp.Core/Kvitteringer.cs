@@ -78,6 +78,19 @@ public sealed record Kvittering
     public bool Lykkedes { get; init; } = true;
 
     public string Fejl { get; init; } = "";
+
+    /// <summary>
+    /// Hvilken computer der sendte det.
+    /// </summary>
+    /// <remarks>
+    /// TO COMPUTERE PAA DEN SAMME KONTO. Naar en baerbar og en stationaer
+    /// deler et arkiv og en API-noegle, er «hvem sendte det her» ikke et
+    /// spoergsmaal, kvitteringen kan lade vaere med at svare paa. Det er dét,
+    /// en revision spoerger om foerst.
+    ///
+    /// Tom paa poster fra dengang, der kun var een computer.
+    /// </remarks>
+    public string Maskine { get; set; } = "";
 }
 
 /// <summary>
@@ -182,6 +195,14 @@ public static class Kvitteringer
     /// </summary>
     public static void Skriv(Kvittering k)
     {
+        // SAETTES HER. Alle kvitteringer gaar igennem den her, saa en ny
+        // kalder kan ikke komme til at glemme maskinen.
+        if (k.Maskine.Length == 0)
+        {
+            try { k.Maskine = Deling.Maskinid.Navn; }
+            catch (Exception) { /* en kvittering uden navn er bedre end ingen */ }
+        }
+
         try
         {
             System.IO.Directory.CreateDirectory(Directory);

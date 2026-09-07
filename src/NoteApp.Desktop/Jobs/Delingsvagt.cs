@@ -1,4 +1,5 @@
-using System.Windows.Threading;
+﻿using System.Windows.Threading;
+using NoteApp.Core;
 using NoteApp.Core.Deling;
 
 namespace NoteApp.Desktop.Jobs;
@@ -58,6 +59,34 @@ public static class Delingsvagt
             if (Delt.Mappe is null) return;
 
             Delt.Meld();
+
+            // ============ LIGGER DER EN NOEGLE OG VENTER? ============
+            //
+            // Den anden computer har trykket «Send API-noeglen hertil». Den
+            // ligger krypteret i den faelles mappe og kan kun aabnes her - se
+            // Noegledeling. Den hentes af sig selv, fordi et menneske
+            // allerede har taget beslutningen paa den anden skaerm; at skulle
+            // sige ja to gange til det samme er ikke en sikkerhed, det er en
+            // forhindring.
+            switch (Noegledeling.Hent())
+            {
+                case Noegledeling.Udfald.Hentet:
+                    Historik.Skriv(HaendelseType.Andet,
+                        "API-noeglen er modtaget fra en anden computer",
+                        "Noeglen laa krypteret i den faelles mappe og er nu gemt paa den her "
+                        + "computer. Kuverten er ryddet.",
+                        Udfald.Fuldført);
+                    break;
+
+                case Noegledeling.Udfald.Afvist:
+                    Historik.Skriv(HaendelseType.Andet,
+                        "En noeglekuvert blev afvist",
+                        "Der laa en kuvert i den faelles mappe, men den kunne ikke aabnes - den "
+                        + "var udloebet, eller den kom fra en computer, der ikke er godkendt. "
+                        + "Den er ryddet.",
+                        Udfald.SeEfter);
+                    break;
+            }
         }
         catch (Exception)
         {

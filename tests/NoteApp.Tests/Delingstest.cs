@@ -392,6 +392,198 @@ public class Delingstest
         Assert.False(Parring.MaaUdveksle(den));
     }
 
+    // ================================================================ nøglen over
+
+    /// <summary>Sætter en API-nøgle på den maskine, koden står på.</summary>
+    private static void SaetNoegle(string? noegle)
+    {
+        // Miljoevariablen vinder over filen - se SkyNoegle.Hent. Proeven maa
+        // derfor tage den vaek, mens den koerer, ellers maaler den paa
+        // udviklingsmaskinens egen noegle.
+        Environment.SetEnvironmentVariable(NoteApp.Core.Llm.SkyNoegle.Miljoevariabel, null);
+
+        if (noegle is null) NoteApp.Core.Llm.SkyNoegle.Slet();
+        else NoteApp.Core.Llm.SkyNoegle.Gem(noegle);
+    }
+
+    [Fact]
+    public void Noeglen_kan_sendes_til_en_parret_computer()
+    {
+        var delt = Nydeltmappe();
+        Delt.Klargoer(delt);
+
+        using var stationaer = new Maskine("Stationær", delt);
+        using var baerbar = new Maskine("Bærbar", delt, Maskinrolle.Let);
+
+        stationaer.Tag();
+        SaetNoegle("hemmelig-noegle-1234567890");
+        Delt.Meld();
+
+        baerbar.Tag();
+        SaetNoegle(null);
+        Delt.Meld();
+
+        // Begge godkender hinanden — som når et menneske har set koden.
+        Parring.Betro(Delt.Andre().Single());
+
+        stationaer.Tag();
+        Parring.Betro(Delt.Andre().Single());
+
+        Assert.True(Noegledeling.Send(Delt.Andre().Single()));
+
+        // ============ DEN LIGGER IKKE I KLARTEKST ============
+        //
+        // Den, der kan laese den faelles mappe, skal se et tilfaeldigt tal.
+        var kuvert = Directory.EnumerateFiles(Path.Combine(delt, "noegler"), "*.json").Single();
+        var tekst = File.ReadAllText(kuvert);
+
+        Assert.DoesNotContain("hemmelig-noegle", tekst);
+
+        baerbar.Tag();
+        SaetNoegle(null);
+
+        Assert.Equal(Noegledeling.Udfald.Hentet, Noegledeling.Hent());
+        Assert.Equal("hemmelig-noegle-1234567890", NoteApp.Core.Llm.SkyNoegle.Hent());
+
+        // KUVERTEN ER RYDDET. En hemmelighed, der bliver liggende, er en
+        // hemmelighed mere, nogen skal huske at rydde op efter.
+        Assert.False(File.Exists(kuvert));
+        Assert.Equal(Noegledeling.Udfald.Ingenting, Noegledeling.Hent());
+    }
+
+    [Fact]
+    public void Der_sendes_ikke_til_en_der_ikke_er_godkendt()
+    {
+        var delt = Nydeltmappe();
+        Delt.Klargoer(delt);
+
+        using var a = new Maskine("A", delt);
+        using var b = new Maskine("B", delt);
+
+        a.Tag();
+        SaetNoegle("hemmelig-noegle-1234567890");
+        Delt.Meld();
+
+        b.Tag();
+        Delt.Meld();
+
+        a.Tag();
+
+        // PARRINGEN ER TILLADELSEN. Uden den ved vi ikke, hvis noegle vi
+        // krypterer til - og en API-noegle sendt til den forkerte kan ikke
+        // kaldes tilbage.
+        Assert.Throws<InvalidOperationException>(() => Noegledeling.Send(Delt.Andre().Single()));
+    }
+
+    [Fact]
+    public void En_tredje_computer_kan_ikke_aabne_kuverten()
+    {
+        var delt = Nydeltmappe();
+        Delt.Klargoer(delt);
+
+        using var stationaer = new Maskine("Stationær", delt);
+        using var baerbar = new Maskine("Bærbar", delt, Maskinrolle.Let);
+        using var tyv = new Maskine("Tyven", delt);
+
+        stationaer.Tag();
+        SaetNoegle("hemmelig-noegle-1234567890");
+        Delt.Meld();
+
+        baerbar.Tag();
+        SaetNoegle(null);
+        Delt.Meld();
+        Parring.Betro(Delt.Andre().Single(m => m.Navn == "Stationær"));
+
+        stationaer.Tag();
+        var tilBaerbar = Delt.Andre().Single(m => m.Navn == "Bærbar");
+        Parring.Betro(tilBaerbar);
+        Noegledeling.Send(tilBaerbar);
+
+        // Tyven doeber sin egen fil om til den baerbares id og haaber paa det
+        // bedste. Kuverten er laast med en noegle, kun de to kan regne ud.
+        tyv.Tag();
+        SaetNoegle(null);
+
+        var kuvert = Path.Combine(delt, "noegler", tilBaerbar.Id + ".json");
+        File.Copy(kuvert, Path.Combine(delt, "noegler", Maskinid.Id + ".json"));
+
+        Assert.Equal(Noegledeling.Udfald.Afvist, Noegledeling.Hent());
+        Assert.Null(NoteApp.Core.Llm.SkyNoegle.Hent());
+    }
+
+    [Fact]
+    public void En_noegle_der_allerede_findes_bliver_ikke_byttet_ud()
+    {
+        var delt = Nydeltmappe();
+        Delt.Klargoer(delt);
+
+        using var a = new Maskine("A", delt);
+        using var b = new Maskine("B", delt);
+
+        a.Tag();
+        SaetNoegle("noegle-fra-A-0123456789");
+        Delt.Meld();
+
+        b.Tag();
+        SaetNoegle("min-egen-noegle-9876543210");
+        Delt.Meld();
+        Parring.Betro(Delt.Andre().Single());
+
+        a.Tag();
+        Parring.Betro(Delt.Andre().Single());
+        Noegledeling.Send(Delt.Andre().Single());
+
+        b.Tag();
+
+        // HAR MAN SELV TASTET EN IND, ER DÉT VALGET. En kuvert fra i
+        // forgaars maa ikke stille og roligt bytte den ud.
+        Assert.Equal(Noegledeling.Udfald.Ingenting, Noegledeling.Hent());
+        Assert.Equal("min-egen-noegle-9876543210", NoteApp.Core.Llm.SkyNoegle.Hent());
+    }
+
+    // ============================================================ maskinen i loggen
+
+    [Fact]
+    public void Historikken_siger_hvilken_computer_der_gjorde_det()
+    {
+        var delt = Nydeltmappe();
+        Delt.Klargoer(delt);
+
+        using var stationaer = new Maskine("Stationær", delt);
+
+        stationaer.Tag();
+
+        Historik.Skriv(HaendelseType.Dokument, "Referat oprettet", "prøve",
+            NoteApp.Core.Udfald.Fuldført, "Mistral Medium 3.5");
+
+        var post = Historik.Laes().First();
+
+        // NAAR TO COMPUTERE SENDER TIL DEN SAMME KONTO, er «hvem gjorde det»
+        // det foerste, en revision spoerger om.
+        Assert.Equal("Stationær", post.Maskine);
+    }
+
+    [Fact]
+    public void Kvitteringen_siger_hvilken_computer_der_sendte()
+    {
+        var delt = Nydeltmappe();
+        Delt.Klargoer(delt);
+
+        using var baerbar = new Maskine("Bærbar", delt, Maskinrolle.Let);
+
+        baerbar.Tag();
+
+        Kvitteringer.Skriv(new Kvittering
+        {
+            Endepunkt = "https://api.eu.mistral.ai/v1/chat/completions",
+            Model = "mistral-medium-latest",
+            Skabelon = "Mødereferat",
+            Tegn = 1234,
+        });
+
+        Assert.Equal("Bærbar", Kvitteringer.Laes().First().Maskine);
+    }
+
     // =================================================================== demoen
 
     [Fact]

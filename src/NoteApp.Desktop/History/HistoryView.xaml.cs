@@ -50,12 +50,24 @@ public sealed class Kildenavne
 /// <summary>En post, som listen kan vise.</summary>
 public sealed class PostVisning
 {
-    public PostVisning(Haendelse a, Kildenavne navne)
+    public PostVisning(Haendelse a, Kildenavne navne, bool visMaskine = false)
     {
         Klokkeslet = a.Tid.ToString("HH:mm:ss");
         Dato = a.Tid.ToString("d. MMM yyyy");
         Hvad = a.Hvad;
-        Model = a.Model.Length > 0 ? $"Model: {a.Model}" : "";
+
+        // ============ MASKINEN VISES KUN, NAAR DER ER FLERE ============
+        //
+        // Paa een computer er «paa Stationaer» stoej paa hver eneste linje.
+        // Staar der arbejde fra to i loggen, er det derimod det foerste, man
+        // spoerger om - ogsaa om det, der blev sendt til Mistral. Se
+        // Haendelse.Maskine.
+        var dele = new List<string>();
+
+        if (a.Model.Length > 0) dele.Add($"Model: {a.Model}");
+        if (visMaskine && a.Maskine.Length > 0) dele.Add($"på {a.Maskine}");
+
+        Model = string.Join(" · ", dele);
 
         var varighed = a.Sekunder > 0
             ? $" · tog {TimeSpan.FromSeconds(a.Sekunder):mm\\:ss}"
@@ -318,12 +330,21 @@ public partial class HistoryView : UserControl
         // Navnene slaas op EEN gang for hele tegningen - se Kildenavne.
         var navne = new Kildenavne();
 
+        // Er der arbejde fra mere end een computer i loggen, skal hver linje
+        // sige hvilken. Det afgoeres af LOGGEN og ikke af indstillingerne:
+        // deler man ikke laengere, staar de gamle poster stadig med hver sin
+        // maskine, og saa skal de kunne skelnes.
+        var visMaskine = _alle.Select(a => a.Maskine)
+            .Where(m => m.Length > 0)
+            .Distinct(StringComparer.CurrentCultureIgnoreCase)
+            .Count() > 1;
+
         var poster = _alle
             .Where(a => slags is null || a.Slags == slags)
             .Where(a => fra is null || a.Tid >= fra)
             .Where(a => til is null || a.Tid <= til)
             .Where(a => soeg.Length == 0 || Rammer(a, soeg))
-            .Select(a => new PostVisning(a, navne))
+            .Select(a => new PostVisning(a, navne, visMaskine))
             .ToList();
 
         Liste.ItemsSource = poster;
@@ -353,7 +374,8 @@ public partial class HistoryView : UserControl
     private static bool Rammer(Haendelse a, string soeg) =>
         a.Hvad.Contains(soeg, StringComparison.CurrentCultureIgnoreCase)
         || a.Detaljer.Contains(soeg, StringComparison.CurrentCultureIgnoreCase)
-        || a.Model.Contains(soeg, StringComparison.CurrentCultureIgnoreCase);
+        || a.Model.Contains(soeg, StringComparison.CurrentCultureIgnoreCase)
+        || a.Maskine.Contains(soeg, StringComparison.CurrentCultureIgnoreCase);
 
     private void Soeg_Aendret(object sender, TextChangedEventArgs e)
     {

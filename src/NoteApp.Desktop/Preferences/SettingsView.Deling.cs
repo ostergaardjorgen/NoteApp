@@ -1,4 +1,4 @@
-using System.IO;
+﻿using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using NoteApp.Core;
@@ -114,8 +114,25 @@ public partial class SettingsView
 
         if (tilstand == Parringstilstand.Parret)
         {
+            // ============ NOEGLEN KAN SENDES OVER ============
+            //
+            // Man har lige staaet og sammenlignet seks cifre paa to skaerme
+            // for at sige «det er mine to computere». At skulle finde
+            // API-noeglen frem og taste den ind een gang til er en daarlig
+            // beloenning for det - se Noegledeling.
+            if (Noegledeling.Sendt(m.Id))
+            {
+                knapper.Children.Add(Knap(Sprog.T("settingsview.deling_noegle_fortryd"),
+                    () => { Noegledeling.Fortryd(m.Id); VisDeling(); }));
+            }
+            else if (NoteApp.Core.Llm.SkyNoegle.Hent() is { Length: > 0 })
+            {
+                knapper.Children.Add(Knap(Sprog.T("settingsview.deling_send_noegle"),
+                    () => SendNoegle(m)));
+            }
+
             knapper.Children.Add(Knap(Sprog.T("settingsview.deling_fjern_parring"),
-                () => { Parring.Glem(m.Id); VisDeling(); }));
+                () => { Parring.Glem(m.Id); VisDeling(); }, venstremargin: 8));
         }
         else
         {
@@ -152,6 +169,8 @@ public partial class SettingsView
 
         var (besked, farve) = tilstand switch
         {
+            Parringstilstand.Parret when Noegledeling.Sendt(m.Id)
+                => ("settingsview.deling_noegle_venter", "Advarsel"),
             Parringstilstand.Parret => ("settingsview.deling_er_parret", "Godkendt"),
             Parringstilstand.Nyngle => ("settingsview.deling_ny_noegle", "FejlTekst"),
             _ => ("settingsview.deling_ikke_parret", "Advarsel"),
@@ -244,6 +263,42 @@ public partial class SettingsView
 
         Historik.Skriv(HaendelseType.Andet, Sprog.T("settingsview.deling_historik_parret", m.Navn),
             Sprog.T("settingsview.deling_historik_parret_detalje", kode), Udfald.Fuldført);
+
+        VisDeling();
+    }
+
+    /// <summary>
+    /// Sender API-nøglen til en godkendt computer.
+    /// </summary>
+    /// <remarks>
+    /// DER SPØRGES FØRST, og der står hvad det betyder. En adgangsnøgle, der
+    /// flytter sig, fordi appen syntes det var nemmere, er ikke en
+    /// bekvemmelighed — det er en overraskelse.
+    /// </remarks>
+    private void SendNoegle(Maskinoplysning m)
+    {
+        var ja = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
+            Sprog.T("settingsview.deling_send_noegle_titel", m.Navn),
+            Sprog.T("settingsview.deling_send_noegle_tekst", m.Navn),
+            godkend: Sprog.T("settingsview.deling_send_noegle_ja"),
+            annuller: Sprog.T("faelles.annuller"),
+            slags: Dialogs.Slags.Valg, godkendErStandard: false);
+
+        if (!ja) return;
+
+        try
+        {
+            Noegledeling.Send(m);
+
+            Historik.Skriv(HaendelseType.Andet,
+                Sprog.T("settingsview.deling_noegle_historik", m.Navn),
+                Sprog.T("settingsview.deling_noegle_historik_detalje"), Udfald.Fuldført);
+        }
+        catch (Exception ex)
+        {
+            Dialogs.AppDialog.Vis(Window.GetWindow(this),
+                Sprog.T("settingsview.deling_noegle_gik_galt"), ex.Message, Dialogs.Slags.Pas_paa);
+        }
 
         VisDeling();
     }

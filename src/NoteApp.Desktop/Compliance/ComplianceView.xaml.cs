@@ -234,7 +234,12 @@ public partial class ComplianceView : UserControl
 
             Naar = k.Tidspunkt.LocalDateTime.ToString("dd-MM-yyyy HH:mm:ss"),
 
-            Linje = $"{new Uri(k.Endepunkt).Host}  ·  {k.Model}  ·  " +
+            // MASKINEN STAAR FOERST. Naar to computere sender til den samme
+            // konto, er «hvem sendte det» det foerste, en revision spoerger
+            // om - foer model og pris. Tom paa kvitteringer fra dengang, der
+            // kun var een computer.
+            Linje = (k.Maskine.Length > 0 ? k.Maskine + "  ·  " : "")
+                    + $"{new Uri(k.Endepunkt).Host}  ·  {k.Model}  ·  " +
                     $"{k.Tegn:N0} tegn sendt  ·  {k.TokensInd:N0} ind / {k.TokensUd:N0} ud  ·  " +
                     $"€{k.PrisEur:0.0000} (ca. {k.PrisEur * KronerPrEuro:0.00} kr.)  ·  {k.Sekunder:0.0} sek",
 
