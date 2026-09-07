@@ -1332,6 +1332,23 @@
               </StackPanel>
             </Border>
 
+            <!-- ============ ARBEJDET MELLEM DE TO ============
+
+                 Etape 2: den baerbare sender sin lyd over, den kraftige
+                 skriver den ud. Ruden staar KUN, naar der ligger noget - en
+                 tom liste, der altid er der, er en linje, man laeser forbi.
+                 Se NoteApp.Core.Deling.Arbejdskoe. -->
+            <Border x:Name="Deling_Koerude" Visibility="Collapsed"
+                    Background="{DynamicResource Panel}" CornerRadius="10" Padding="20"
+                    Margin="0,14,0,0"
+                    BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
+              <StackPanel>
+                <TextBlock Text="{i18n:Oversat deling.koe_overskrift}"
+                           FontSize="14" FontWeight="SemiBold" />
+                <StackPanel x:Name="Deling_Koe" Margin="0,6,0,0" />
+              </StackPanel>
+            </Border>
+
             <!-- ========================== maskiner ======================== -->
             <Border Background="{DynamicResource Panel}" CornerRadius="10" Padding="20" Margin="0,14,0,20"
                     BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">

@@ -55,6 +55,7 @@ public partial class SettingsView
             Deling_Status.Text = Statuslinje(mappe);
 
             VisGuide();
+            VisKoe();
             VisMaskiner();
         }
         finally
@@ -180,6 +181,88 @@ public partial class SettingsView
         g.Children.Add(tekst);
 
         return g;
+    }
+
+    // ===================================================================== koeen
+
+    /// <summary>
+    /// Det arbejde, der er undervejs mellem de to computere.
+    /// </summary>
+    /// <remarks>
+    /// TO SLAGS LINJER: det, VI har sendt, og det, vi har taget for en anden.
+    /// Uden den anden slags ville den kraftige maskine skrive et fremmed møde
+    /// ud i tavshed, mens brugeren sad og undrede sig over, hvorfor
+    /// grafikkortet arbejdede.
+    /// </remarks>
+    private void VisKoe()
+    {
+        Deling_Koe.Children.Clear();
+
+        var linjer = new List<string>();
+
+        foreach (var min in Arbejdskoe.Mine())
+        {
+            var navn = Moedenavn(min.Moede);
+
+            var svar = Arbejdskoe.Svar(min.Id);
+
+            linjer.Add(Sprog.T(
+                svar is not null ? "deling.koe_faerdig"
+                : Taget(min) ? "deling.koe_i_gang"
+                : "deling.koe_sendt", navn));
+        }
+
+        if (Delt.Mappe is { } delt)
+        {
+            foreach (var opgave in Andres(delt))
+            {
+                var fra = Delt.Alle().FirstOrDefault(m => m.Id == opgave.Fra)?.Navn ?? "";
+
+                linjer.Add(Sprog.T("deling.koe_modtaget", fra, opgave.Spor));
+            }
+        }
+
+        Deling_Koerude.Visibility = linjer.Count == 0 ? Visibility.Collapsed : Visibility.Visible;
+
+        foreach (var linje in linjer)
+        {
+            Deling_Koe.Children.Add(new TextBlock
+            {
+                Text = linje,
+                FontSize = 12.5,
+                Margin = new Thickness(0, 6, 0, 0),
+                TextWrapping = TextWrapping.Wrap,
+                Foreground = (System.Windows.Media.Brush)FindResource("TekstSvag"),
+            });
+        }
+    }
+
+    /// <summary>Er en af vores opgaver taget af den anden computer?</summary>
+    private static bool Taget(Arbejdsopgave opgave) =>
+        Delt.Mappe is { } delt && Arbejdskoe.Taget(delt, opgave.Id) is not null;
+
+    /// <summary>Det arbejde, DEN HER maskine har taget for en anden.</summary>
+    private static IReadOnlyList<Arbejdsopgave> Andres(string delt) =>
+        Arbejdskoe.Venter()
+                  .Concat(Arbejdskoe.Mine())
+                  .Where(o => o.Fra != Maskinid.Id
+                              && Arbejdskoe.Taget(delt, o.Id)?.Maskine == Maskinid.Id)
+                  .ToList();
+
+    /// <summary>Mødets navn, som brugeren kender det.</summary>
+    private static string Moedenavn(string id)
+    {
+        try
+        {
+            if (MeetingStore.FindById(id) is { } fundet)
+                return fundet.Meta.Title ?? System.IO.Path.GetFileName(fundet.Mappe);
+        }
+        catch (Exception)
+        {
+            // Et moede, der er slettet, mens udskriften var undervejs.
+        }
+
+        return Sprog.T("faelles.optagelse");
     }
 
     // ================================================================== maskinerne

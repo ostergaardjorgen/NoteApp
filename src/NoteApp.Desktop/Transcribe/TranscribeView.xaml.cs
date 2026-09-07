@@ -1597,6 +1597,10 @@ public partial class TranscribeView : UserControl
         var valgt = Valgt;
         KoerKnap.IsEnabled = valgt?.HarLyd == true && _afbryd is null;
 
+        // Den anden computer kan vaere kommet til eller vaere slukket siden
+        // sidst. Se TranscribeView.Deling.cs.
+        VisSendknap();
+
         OpdaterDokumentfane();
 
         // «Ryd lyden» kraever BEGGE dele: en lydfil at slette og en udskrift

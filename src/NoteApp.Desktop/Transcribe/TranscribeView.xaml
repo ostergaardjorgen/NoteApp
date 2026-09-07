@@ -77,6 +77,14 @@
         <Button DockPanel.Dock="Right" x:Name="AfbrydKnap" Content="{i18n:Oversat faelles.afbryd}" Click="Afbryd_Click"
                 Visibility="Collapsed" Margin="8,0,0,0" />
 
+        <!-- ============ DEN ANDEN COMPUTER ============
+
+             Den staar KUN, naar der er en godkendt, kraftig maskine, der har
+             meldt sig for nylig. En knap, der er der altid og fejler hver
+             gang, er vaerre end ingen knap - se TranscribeView.Deling.cs. -->
+        <Button DockPanel.Dock="Right" x:Name="SendKnap" Click="Send_Click"
+                Visibility="Collapsed" MinWidth="178" Margin="8,0,0,0" />
+
         <Button DockPanel.Dock="Right" x:Name="KoerKnap" Click="Koer_Click"
                 Style="{StaticResource Primaer}" MinWidth="178" IsEnabled="False"
                 Content="{i18n:Oversat transcribeview.opret_transskription}"

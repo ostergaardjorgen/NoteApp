@@ -77,31 +77,76 @@ maskiner fra Google. De er i sync, fordi de henter fra det samme sted — der er
 intet at vedligeholde, og man logger ind én gang i alt.
 
 **Uden Google:** aftaler i `kalender.json` og opgaver i `Opgaver\opgaver.json`
-er lokale i datasættet. De rejser ikke endnu. Det er etape 2.
+er lokale i datasættet. De rejser ikke endnu — se «Det, der stadig mangler».
 
-## Etape 2 — det, der mangler
+## Etape 2 — møderne rejser
 
-Alt herunder er ikke bygget.
+**Bygget.** Den bærbare optager, den kraftige skriver ud.
 
-**Møderne.** Lyd ud fra den sekundære, udskrift hjem fra den primære. Markører
-i den fælles mappe, signeret med parringsnøglen; krav, kvitteringer og
-oprydning, og en «skriv ud her alligevel»-vej, når den primære ikke kan nås.
+```
+arbejde/<opgaveid>/
+   opgave.json     hvem, hvilket møde, hvilket spor, sprog, modelønske, lydens sum, segl
+   lyd.wav         selve lyden — slettes i samme øjeblik, svaret lægges
+   krav.json       hvem der har taget den, og hvornår den sidst blev rørt
+   svar.json       sprog, motor, tid — og fejlen, hvis det gik galt
+   udskrift.txt / udskrift.json
+```
 
-**Kalender og opgaver uden Google.** Samme regel som alt andet i mappen:
-**der skrives aldrig i andres filer.** Hver maskine ejer sin egen
-ændringsjournal — én fil pr. maskine, kun tilføjelser — og den anden læser
-den og anvender ændringerne. To skrivere på den samme fil gennem en
+**Sådan går det til.** Der trykkes på «Skriv ud på ‹navn›» ved optagelsen; der sendes
+aldrig noget af sig selv. Sproget spørges der om i det samme vindue som ved en
+lokal kørsel — vælges det forkert, er hvert eneste ord forkert, også når den
+anden maskine skriver ud. Et møde med to spor bliver til to opgaver, og de
+samles først hjemme, når begge svar er der: en udskrift af det halve møde ser
+færdig ud og er det ikke.
+
+Modtageren henter lyden **hjem**, før whisper kører — at læse hundrede megabyte
+gennem netværket, mens modellen arbejder, er ikke det samme som at have filen.
+Den tager kun én ad gangen og kun bag `HeavyJobLock`: to whisper-kørsler på ét
+grafikkort er ikke dobbelt så hurtigt, det er to, der løber tør for hukommelse.
+
+Hjemme får filerne **de navne, en lokal kørsel ville have givet dem**
+(`mikrofon_large-v3.json`). Resten af appen leder efter dem dér, og en udskrift,
+der ligger et andet sted, findes ikke.
+
+**Seglet.** Den, der kan skrive i mappen, kan lægge en opgave og skrive «fra den
+bærbare» på den. Derfor mærkes både opgave og svar med en HMAC under en nøgle,
+der er udledt af parringen. Seglet dækker alle felter **og lydfilens sum**:
+byttes lyden ud efter opgaven er lagt, passer det ikke. Prøverne dækker begge
+dele, og også den anden vej — et svar fra en fremmed hentes ikke hjem.
+
+**Kravet er en fil, der kun kan laves én gang.** `CreateNew` afgør, hvem der får
+opgaven — filsystemet, ikke en aftale mellem to programmer. Går maskinen ned
+midt i arbejdet, står hjerteslaget stille, og opgaven bliver ledig igen efter en
+halv time. En bruger skal ikke vente på en slukket maskine.
+
+**Lyden er ikke krypteret.** Den ligger på dit eget drev, og delingsskærmen
+siger lige ud, at den, der kan læse mappen, kan læse det, der ligger i den.
+Seglet beskytter mod at få lagt arbejde ind — ikke mod at nogen kigger med.
+
+## Det, der stadig mangler
+
+**Talergenkendelsen** kører hjemme hos den, der optog. Den er tung og kunne
+sendes med som sin egen slags opgave.
+
+**Kalender og opgaver uden Google.** Aftaler i `kalender.json` og opgaver i
+`Opgaver\opgaver.json` er lokale i datasættet. Samme regel som alt andet i
+mappen: **der skrives aldrig i andres filer.** Hver maskine ejer sin egen
+ændringsjournal — én fil pr. maskine, kun tilføjelser — og den anden læser den
+og anvender ændringerne. To skrivere på den samme fil gennem en
 synkroniseringsklient bliver til en «conflicted copy», og den slags opdager
 ingen.
 
-- Hver post har et id og et tidsstempel. Er den samme post rettet begge
-  steder, vinder den nyeste.
+- Hver post har et id og et tidsstempel. Er den samme post rettet begge steder,
+  vinder den nyeste.
 - Sletninger rejser som gravsten. Uden dem dukker en slettet aftale op igen,
   næste gang den anden maskine skriver sin journal.
-- Journalen beskæres, når begge maskiner har bekræftet, at de har læst frem
-  til et punkt.
+- Journalen beskæres, når begge maskiner har bekræftet, at de har læst frem til
+  et punkt.
 - Opgaver, appen selv har fundet i et møde, følger mødet og ikke journalen.
 
+**At sende af sig selv.** I dag trykker man på knappen. En indstilling om at
+gøre det automatisk, når den primære er vågen, hører til — men den skal være et
+valg, ikke en standard.
+
 **Det, der aldrig skal i mappen:** lyd under optagelse, `learning.db` og
-indstillinger. Se `Delt` og advarslen på delingsfanen om, hvem der kan læse
-med.
+indstillinger. Se `Delt` og advarslen på delingsfanen om, hvem der kan læse med.

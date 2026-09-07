@@ -21,67 +21,10 @@ namespace NoteApp.Tests;
 /// </remarks>
 public class Delingstest
 {
-    /// <summary>
-    /// En maskine: sin egen maskinrod, sit eget nøglepar.
-    /// </summary>
-    /// <remarks>
-    /// Maskinrod udledes af datamappen, og prøvernes datamappe kommer fra
-    /// miljøvariablen. Ved at skifte den skifter vi maskine — det er dét, der
-    /// gør, at to installationer kan spilles på én computer uden at snyde:
-    /// de deler ingen filer ud over den fælles mappe.
-    /// </remarks>
-    private sealed class Maskine : IDisposable
-    {
-        private readonly string? _foer;
+    // MASKINEN OG DEN FAELLES MAPPE LIGGER I Proevemaskine.cs. De bruges af
+    // arbejdskoeens proever ogsaa, og to kopier ville drive fra hinanden.
 
-        public Maskine(string navn, string delt, Maskinrolle rolle = Maskinrolle.Primaer)
-        {
-            Sti = Path.Combine(Path.GetTempPath(), "heypia-maskine", Guid.NewGuid().ToString("N"));
-            Directory.CreateDirectory(Sti);
-
-            _foer = Environment.GetEnvironmentVariable(UserDataPaths.OverrideVariable);
-
-            Tag();
-
-            Maskinid.Navn = navn;
-            Maskinid.Rolle = rolle;
-            Maskinid.Deltmappe = delt;
-
-            Navn = navn;
-            Slip();
-        }
-
-        public string Sti { get; }
-        public string Navn { get; }
-
-        /// <summary>Sætter den her maskine som den, koden kører på.</summary>
-        public void Tag()
-        {
-            Environment.SetEnvironmentVariable(UserDataPaths.OverrideVariable, Sti);
-            UserDataPaths.Glem();
-        }
-
-        private void Slip()
-        {
-            Environment.SetEnvironmentVariable(UserDataPaths.OverrideVariable, _foer);
-            UserDataPaths.Glem();
-        }
-
-        public void Dispose()
-        {
-            Slip();
-
-            try { if (Directory.Exists(Sti)) Directory.Delete(Sti, recursive: true); }
-            catch (IOException) { /* temp rydder Windows selv */ }
-        }
-    }
-
-    private static string Nydeltmappe()
-    {
-        var sti = Path.Combine(Path.GetTempPath(), "heypia-delt", Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(sti);
-        return sti;
-    }
+    private static string Nydeltmappe() => Proevemaskine.Nydeltmappe();
 
     // ================================================================ selve mappen
 
@@ -110,8 +53,8 @@ public class Delingstest
         var delt = Nydeltmappe();
         Delt.Klargoer(delt);
 
-        using var stationaer = new Maskine("Stationær", delt);
-        using var baerbar = new Maskine("Bærbar", delt, Maskinrolle.Sekundaer);
+        using var stationaer = new Proevemaskine("Stationær", delt);
+        using var baerbar = new Proevemaskine("Bærbar", delt, Maskinrolle.Sekundaer);
 
         stationaer.Tag();
         Assert.True(Delt.Meld());
@@ -136,8 +79,8 @@ public class Delingstest
         var delt = Nydeltmappe();
         Delt.Klargoer(delt);
 
-        using var a = new Maskine("A", delt);
-        using var b = new Maskine("B", delt);
+        using var a = new Proevemaskine("A", delt);
+        using var b = new Proevemaskine("B", delt);
 
         a.Tag();
         var idA = Maskinid.Id;
@@ -154,8 +97,8 @@ public class Delingstest
         var delt = Nydeltmappe();
         Delt.Klargoer(delt);
 
-        using var a = new Maskine("A", delt);
-        using var b = new Maskine("B", delt);
+        using var a = new Proevemaskine("A", delt);
+        using var b = new Proevemaskine("B", delt);
 
         a.Tag();
         var offentligA = Maskinid.Offentlignoegle();
@@ -180,9 +123,9 @@ public class Delingstest
         var delt = Nydeltmappe();
         Delt.Klargoer(delt);
 
-        using var a = new Maskine("A", delt);
-        using var b = new Maskine("B", delt);
-        using var c = new Maskine("C", delt);
+        using var a = new Proevemaskine("A", delt);
+        using var b = new Proevemaskine("B", delt);
+        using var c = new Proevemaskine("C", delt);
 
         a.Tag();
         var offentligA = Maskinid.Offentlignoegle();
@@ -204,8 +147,8 @@ public class Delingstest
         var delt = Nydeltmappe();
         Delt.Klargoer(delt);
 
-        using var a = new Maskine("A", delt);
-        using var b = new Maskine("B", delt);
+        using var a = new Proevemaskine("A", delt);
+        using var b = new Proevemaskine("B", delt);
 
         a.Tag();
         var pa = Maskinid.Offentlignoegle();
@@ -227,9 +170,9 @@ public class Delingstest
         var delt = Nydeltmappe();
         Delt.Klargoer(delt);
 
-        using var a = new Maskine("A", delt);
-        using var b = new Maskine("B", delt);
-        using var tyv = new Maskine("Tyven", delt);
+        using var a = new Proevemaskine("A", delt);
+        using var b = new Proevemaskine("B", delt);
+        using var tyv = new Proevemaskine("Tyven", delt);
 
         a.Tag();
         var pa = Maskinid.Offentlignoegle();
@@ -254,8 +197,8 @@ public class Delingstest
         var delt = Nydeltmappe();
         Delt.Klargoer(delt);
 
-        using var stationaer = new Maskine("Stationær", delt);
-        using var baerbar = new Maskine("Bærbar", delt, Maskinrolle.Sekundaer);
+        using var stationaer = new Proevemaskine("Stationær", delt);
+        using var baerbar = new Proevemaskine("Bærbar", delt, Maskinrolle.Sekundaer);
 
         stationaer.Tag();
         Delt.Meld();
@@ -281,8 +224,8 @@ public class Delingstest
         var delt = Nydeltmappe();
         Delt.Klargoer(delt);
 
-        using var stationaer = new Maskine("Stationær", delt);
-        using var baerbar = new Maskine("Bærbar", delt, Maskinrolle.Sekundaer);
+        using var stationaer = new Proevemaskine("Stationær", delt);
+        using var baerbar = new Proevemaskine("Bærbar", delt, Maskinrolle.Sekundaer);
 
         baerbar.Tag();
         Delt.Meld();
@@ -334,8 +277,8 @@ public class Delingstest
         var delt = Nydeltmappe();
         Delt.Klargoer(delt);
 
-        using var stationaer = new Maskine("Stationær", delt);
-        using var baerbar = new Maskine("Bærbar", delt, Maskinrolle.Sekundaer);
+        using var stationaer = new Proevemaskine("Stationær", delt);
+        using var baerbar = new Proevemaskine("Bærbar", delt, Maskinrolle.Sekundaer);
 
         stationaer.Tag();
         Delt.Meld();
@@ -349,7 +292,7 @@ public class Delingstest
         // Nogen retter i filen i den faelles mappe og saetter sin EGEN
         // offentlige noegle ind under det parrede id. Det er praecis dét,
         // pinningen er til for.
-        using var tyv = new Maskine("Tyven", delt);
+        using var tyv = new Proevemaskine("Tyven", delt);
         tyv.Tag();
         var tyvensNoegle = Maskinid.Offentlignoegle();
 
@@ -374,8 +317,8 @@ public class Delingstest
         var delt = Nydeltmappe();
         Delt.Klargoer(delt);
 
-        using var a = new Maskine("A", delt);
-        using var b = new Maskine("B", delt);
+        using var a = new Proevemaskine("A", delt);
+        using var b = new Proevemaskine("B", delt);
 
         a.Tag();
         Delt.Meld();
@@ -412,8 +355,8 @@ public class Delingstest
         var delt = Nydeltmappe();
         Delt.Klargoer(delt);
 
-        using var stationaer = new Maskine("Stationær", delt);
-        using var baerbar = new Maskine("Bærbar", delt, Maskinrolle.Sekundaer);
+        using var stationaer = new Proevemaskine("Stationær", delt);
+        using var baerbar = new Proevemaskine("Bærbar", delt, Maskinrolle.Sekundaer);
 
         stationaer.Tag();
         SaetNoegle("hemmelig-noegle-1234567890");
@@ -457,8 +400,8 @@ public class Delingstest
         var delt = Nydeltmappe();
         Delt.Klargoer(delt);
 
-        using var a = new Maskine("A", delt);
-        using var b = new Maskine("B", delt);
+        using var a = new Proevemaskine("A", delt);
+        using var b = new Proevemaskine("B", delt);
 
         a.Tag();
         SaetNoegle("hemmelig-noegle-1234567890");
@@ -481,9 +424,9 @@ public class Delingstest
         var delt = Nydeltmappe();
         Delt.Klargoer(delt);
 
-        using var stationaer = new Maskine("Stationær", delt);
-        using var baerbar = new Maskine("Bærbar", delt, Maskinrolle.Sekundaer);
-        using var tyv = new Maskine("Tyven", delt);
+        using var stationaer = new Proevemaskine("Stationær", delt);
+        using var baerbar = new Proevemaskine("Bærbar", delt, Maskinrolle.Sekundaer);
+        using var tyv = new Proevemaskine("Tyven", delt);
 
         stationaer.Tag();
         SaetNoegle("hemmelig-noegle-1234567890");
@@ -522,8 +465,8 @@ public class Delingstest
         var delt = Nydeltmappe();
         Delt.Klargoer(delt);
 
-        using var a = new Maskine("A", delt);
-        using var b = new Maskine("B", delt);
+        using var a = new Proevemaskine("A", delt);
+        using var b = new Proevemaskine("B", delt);
 
         a.Tag();
         SaetNoegle("noegle-fra-A-0123456789");
@@ -554,8 +497,8 @@ public class Delingstest
         var delt = Nydeltmappe();
         Delt.Klargoer(delt);
 
-        using var stationaer = new Maskine("Stationær", delt);
-        using var baerbar = new Maskine("Bærbar", delt, Maskinrolle.Sekundaer);
+        using var stationaer = new Proevemaskine("Stationær", delt);
+        using var baerbar = new Proevemaskine("Bærbar", delt, Maskinrolle.Sekundaer);
 
         stationaer.Tag();
         SaetNoegle(null);
@@ -599,8 +542,8 @@ public class Delingstest
         var delt = Nydeltmappe();
         Delt.Klargoer(delt);
 
-        using var stationaer = new Maskine("Stationær", delt);
-        using var baerbar = new Maskine("Bærbar", delt, Maskinrolle.Sekundaer);
+        using var stationaer = new Proevemaskine("Stationær", delt);
+        using var baerbar = new Proevemaskine("Bærbar", delt, Maskinrolle.Sekundaer);
 
         stationaer.Tag();
         SaetNoegle(null);
@@ -639,8 +582,8 @@ public class Delingstest
         var delt = Nydeltmappe();
         Delt.Klargoer(delt);
 
-        using var stationaer = new Maskine("Stationær", delt);
-        using var baerbar = new Maskine("Bærbar", delt, Maskinrolle.Sekundaer);
+        using var stationaer = new Proevemaskine("Stationær", delt);
+        using var baerbar = new Proevemaskine("Bærbar", delt, Maskinrolle.Sekundaer);
 
         stationaer.Tag();
         SaetNoegle("hemmelig-noegle-1234567890");
@@ -690,8 +633,8 @@ public class Delingstest
         var delt = Nydeltmappe();
         Delt.Klargoer(delt);
 
-        using var stationaer = new Maskine("Stationær", delt);
-        using var baerbar = new Maskine("Bærbar", delt, Maskinrolle.Sekundaer);
+        using var stationaer = new Proevemaskine("Stationær", delt);
+        using var baerbar = new Proevemaskine("Bærbar", delt, Maskinrolle.Sekundaer);
 
         stationaer.Tag();
         Delt.Meld();
@@ -724,7 +667,7 @@ public class Delingstest
     {
         var delt = Nydeltmappe();
 
-        using var alene = new Maskine("Alene", delt);
+        using var alene = new Proevemaskine("Alene", delt);
 
         alene.Tag();
         Maskinid.Deltmappe = null;
@@ -739,7 +682,7 @@ public class Delingstest
     {
         var delt = Nydeltmappe();
 
-        using var baerbar = new Maskine("Bærbar", delt, Maskinrolle.Sekundaer);
+        using var baerbar = new Proevemaskine("Bærbar", delt, Maskinrolle.Sekundaer);
 
         baerbar.Tag();
         SaetNoegle(null);
@@ -765,8 +708,8 @@ public class Delingstest
         var delt = Nydeltmappe();
         Delt.Klargoer(delt);
 
-        using var stationaer = new Maskine("Stationær", delt);
-        using var baerbar = new Maskine("Bærbar", delt, Maskinrolle.Sekundaer);
+        using var stationaer = new Proevemaskine("Stationær", delt);
+        using var baerbar = new Proevemaskine("Bærbar", delt, Maskinrolle.Sekundaer);
 
         stationaer.Tag();
         SaetNoegle("hemmelig-noegle-1234567890");
@@ -810,7 +753,7 @@ public class Delingstest
         var delt = Nydeltmappe();
         Delt.Klargoer(delt);
 
-        using var stationaer = new Maskine("Stationær", delt);
+        using var stationaer = new Proevemaskine("Stationær", delt);
 
         stationaer.Tag();
 
@@ -830,7 +773,7 @@ public class Delingstest
         var delt = Nydeltmappe();
         Delt.Klargoer(delt);
 
-        using var baerbar = new Maskine("Bærbar", delt, Maskinrolle.Sekundaer);
+        using var baerbar = new Proevemaskine("Bærbar", delt, Maskinrolle.Sekundaer);
 
         baerbar.Tag();
 
@@ -853,7 +796,7 @@ public class Delingstest
         var delt = Nydeltmappe();
         Delt.Klargoer(delt);
 
-        using var m = new Maskine("Stationær", delt);
+        using var m = new Proevemaskine("Stationær", delt);
         m.Tag();
 
         Delt.Meld();

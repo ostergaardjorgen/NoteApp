@@ -517,6 +517,12 @@ public partial class MainWindow : Window
             // minut. Koster ingenting, naar der ikke deles noget.
             Jobs.Delingsvagt.Start();
 
+            // ETAPE 2: den baerbare optager, den kraftige skriver ud. Vagten
+            // koerer paa begge maskiner - se Jobs.Arbejdsvagt. Fremdriften
+            // staar paa delingsfanen; her skal der ikke vises noget, for det
+            // er den ANDEN maskines moede, der bliver skrevet ud.
+            Jobs.Arbejdsvagt.Start();
+
             // Aftaler og opgaver hentes hvert kvarter - og med det samme her,
             // saa dagen er rigtig, naar man saetter sig. Koster ingenting,
             // naar ingen integration er forbundet.
