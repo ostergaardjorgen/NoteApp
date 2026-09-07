@@ -969,9 +969,10 @@ gratis.
             "Skabelon «Mødereferat» · Mistral Medium 3.5 · 4.812 tokens sendt, 1.190 modtaget",
             Udfald.Fuldført, "Mistral Medium 3.5", sekunder: 14.2);
 
-        Historik.Skriv(HaendelseType.Andet, "Demodata bygget",
-            "Det her er demotilstand. Optagelserne, aftalerne og opgaverne er opdigtede, "
-            + "og de ligger for sig selv — dine egne data er ikke rørt.",
+        Historik.Skriv(HaendelseType.Andet, "Eksemplet er klar",
+            "Du står i demotilstand. Møderne, aftalerne og opgaverne er eksempler, og de "
+            + "ligger for sig selv — dine egne optagelser og noter er urørte. Du er tilbage "
+            + "i dem med knappen nederst i menuen.",
             Udfald.Fuldført);
     }
 }
