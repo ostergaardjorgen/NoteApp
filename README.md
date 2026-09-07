@@ -65,6 +65,13 @@ Byg installationsfilen og kør den:
 powershell -File C:\NoteApp\scripts\byg-installer.ps1
 ```
 
+**Krav til maskinen:** Windows 10 eller 11, 8 GB RAM (16 anbefalet) og plads
+til motoren og en sprogmodel. Et NVIDIA-kort er ikke et krav, men det er
+forskellen på at vente og at lade den køre om natten. **Microsoft Visual C++
+Redistributable** skal være der — Whisper er bygget med den — og den følger med
+installationsfilen, hvis maskinen ikke har den i forvejen. Appen viser det hele
+under **Indstillinger → Krav til maskinen**, målt på den maskine, den kører på.
+
 Se [`INSTALLATION.md`](INSTALLATION.md) for hele vejen — første start,
 skærmene, datamappen, backup og opsætning forfra på en ny maskine.
 

@@ -20,13 +20,34 @@ powershell -File C:\NoteApp\scripts\byg-installer.ps1
 
 Der kommer to filer i `C:\NoteApp\installer\`:
 
-- **HeyPia-setup.exe** (ca. 109 MB) — den, der skal sendes eller
+- **HeyPia-setup.exe** (ca. 135 MB) — den, der skal sendes eller
   dobbeltklikkes. Beder selv om administratorrettigheder undervejs.
-- **HeyPia.msi** (ca. 107 MB) — nyttelasten, til automatisk udrulning.
+- **HeyPia.msi** (ca. 109 MB) — nyttelasten, til automatisk udrulning.
 
-Efter installation ligger programmet i `C:\Program Files\HeyPia` (ca. 233 MB),
+Efter installation ligger programmet i `C:\Program Files\HeyPia` (ca. 240 MB),
 med genveje i Startmenuen og på skrivebordet, og en post under **Tilføj/fjern
 programmer**.
+
+### Microsoft Visual C++ Redistributable følger med
+
+Whisper er skrevet i C++ og bygget med Microsofts værktøjer; `ggml-cpu-*.dll`
+kræver **VCOMP140.DLL** (OpenMP), og `whisper-cli.exe` kræver MSVCP140 og
+VCRUNTIME140. De kommer alle fra Microsofts Visual C++ Redistributable, som er
+på enhver maskine, der har været brugt til noget — men ikke på en frisk
+Windows.
+
+Målt 07-09-2026 på en ny bærbar: appen startede, mikrofonen virkede, og først i
+det øjeblik teksten skulle skrives ud, kom Windows' egen fejlkasse om en
+manglende DLL-fil.
+
+Derfor bærer bundtet Microsofts pakke med (de 25 MB af de 135) og installerer
+den **kun, hvis den mangler** — versionen slås op i registreringsdatabasen. Den
+fjernes aldrig igen: andre programmer bruger den samme. Filen hentes af
+`byg-installer.ps1` fra Microsofts egen adresse og ligger uden for git.
+
+Appen ser også selv efter den — se `Cppkomponent` og linjen på **Indstillinger
+→ Krav til maskinen**. Mangler den, siger appen det med sine egne ord frem for
+at gå i stå.
 
 **Byggeværktøj:** WiX 5, installeret som .NET-værktøj med
 `dotnet tool install --global wix --version 5.0.2`. Versionen er bevidst
@@ -188,7 +209,12 @@ udgave, uden at noget siger det. Det er sket.
 
 ```powershell
 winget install --id Microsoft.DotNet.SDK.8 --silent --accept-package-agreements --accept-source-agreements
+winget install --id Microsoft.VCRedist.2015+.x64 --silent --accept-package-agreements --accept-source-agreements
 ```
+
+Den anden linje er Microsofts C++-komponent. Whisper kan ikke starte uden den,
+og en frisk Windows har den ikke. Kører du installationsfilen frem for at bygge
+selv, følger den med — se ovenfor.
 
 En NVIDIA-GPU er ikke et krav, men den er forskellen på at vente og at lade den
 køre om natten.

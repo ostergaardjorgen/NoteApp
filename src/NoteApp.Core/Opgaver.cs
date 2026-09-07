@@ -176,6 +176,16 @@ public sealed record Opgave
 
     public DateTimeOffset Oprettet { get; init; } = DateTimeOffset.Now;
 
+    /// <summary>
+    /// Hvornår opgaven sidst blev rettet her.
+    /// </summary>
+    /// <remarks>
+    /// Til de to computere: er den samme opgave rettet begge steder, før de
+    /// har talt sammen, afgør tidsstemplet det. Se
+    /// <see cref="NoteApp.Core.Deling.Delingsjournal"/>.
+    /// </remarks>
+    public DateTimeOffset? Aendret { get; set; }
+
     /// <summary>Tidsstemplet i optagelsen, opgaven kom fra. Tom ved en manuel opgave.</summary>
     public string Kilde { get; init; } = "";
 

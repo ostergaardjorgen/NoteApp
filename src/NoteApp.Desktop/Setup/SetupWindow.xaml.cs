@@ -88,6 +88,7 @@ public partial class SetupWindow : Window
         // hentningen skal forberedes FOERST der, ellers skriver den «Faerdig»
         // paa en knap, der stadig skal videre.
         if (nr == 1) ForeslaaMaskine();
+        if (nr == 3) VisCpp();
         if (nr == 2) IndlaesValg();
         if (nr == 3) _ = ForberedHentning();
     }
@@ -325,6 +326,44 @@ public partial class SetupWindow : Window
         catch (Exception ex)
         {
             Dialogs.AppDialog.Vis(Window.GetWindow(this), "Kunne ikke skifte mappe", ex.Message, Dialogs.Slags.Pas_paa);
+        }
+    }
+
+    /// <summary>
+    /// Siger det, hvis Microsofts C++-komponent mangler.
+    /// </summary>
+    /// <remarks>
+    /// DEN STÅR FØR HENTNINGEN OG IKKE EFTER. Uden den kan Whisper ikke
+    /// starte, og så er 2,9 GB hentet til ingen verdens nytte. Kommer man
+    /// hertil fra installationsfilen, er den lagt ind undervejs — så står der
+    /// ingenting, og det er meningen.
+    /// </remarks>
+    private void VisCpp()
+    {
+        if (CppRude is null) return;
+
+        var mangler = NoteApp.Core.Cppkomponent.Mangler(
+            System.IO.Path.GetDirectoryName(WhisperInstall.Locate().WhisperCli));
+
+        CppRude.Visibility = mangler.Count == 0 ? Visibility.Collapsed : Visibility.Visible;
+
+        if (mangler.Count == 0) return;
+
+        CppTekst.Text = NoteApp.Core.Sprog.T("setupwindow.cpp_tekst");
+    }
+
+    private void Cpp_Klik(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(
+                NoteApp.Core.Cppkomponent.Hentesti) { UseShellExecute = true });
+        }
+        catch (Exception)
+        {
+            Dialogs.AppDialog.Vis(this,
+                NoteApp.Core.Sprog.T("setupwindow.cpp_overskrift"),
+                NoteApp.Core.Cppkomponent.Hentesti, Dialogs.Slags.Valg);
         }
     }
 

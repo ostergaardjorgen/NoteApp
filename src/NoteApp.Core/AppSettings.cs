@@ -588,6 +588,21 @@ public sealed class AppSettings
     public bool IntegrationerNyt { get; set; }
 
     /// <summary>
+    /// Skal optagelser sendes til den anden computer af sig selv?
+    /// </summary>
+    /// <remarks>
+    /// FRA SOM STANDARD. Lyden er det mest private, appen har, og den skal
+    /// ikke begynde at rejse, fordi to maskiner engang blev godkendt. Den, der
+    /// slår den til, har taget stilling.
+    ///
+    /// DER SENDES KUN DET, DER ER NYT. En optagelse fra i forgårs har man
+    /// allerede taget stilling til; ville den pludselig blive sendt, fordi
+    /// hakket blev sat i dag, var det en overraskelse. Grænsen står i
+    /// <see cref="NoteApp.Desktop.Jobs.Arbejdsvagt"/>.
+    /// </remarks>
+    public bool SendAutomatisk { get; set; }
+
+    /// <summary>
     /// Bredden på Cockpittets venstre spalte — kalenderen.
     ///
     /// SPALTEBREDDER ER ET VALG, DER SKAL OVERLEVE EN GENSTART. En bredde,

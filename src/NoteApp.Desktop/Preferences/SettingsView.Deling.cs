@@ -54,6 +54,13 @@ public partial class SettingsView
 
             Deling_Status.Text = Statuslinje(mappe);
 
+            // HAKKET STAAR KUN FOR DEN SEKUNDAERE. Den primaere skal ikke
+            // sende sit arbejde nogen steder - den ER stedet.
+            Deling_Automatisk.IsChecked = AppSettings.Current.SendAutomatisk;
+            Deling_Automatisk.Visibility = rolle == Maskinrolle.Sekundaer
+                ? Visibility.Visible
+                : Visibility.Collapsed;
+
             VisGuide();
             VisKoe();
             VisMaskiner();
@@ -608,6 +615,14 @@ public partial class SettingsView
 
         Maskinid.Deltmappe = null;
         VisDeling();
+    }
+
+    private void DelingAutomatisk_Klik(object sender, RoutedEventArgs e)
+    {
+        if (_delingIndlaeser) return;
+
+        AppSettings.Current.SendAutomatisk = Deling_Automatisk.IsChecked == true;
+        AppSettings.Current.Save();
     }
 
     private void DelingOpdater_Klik(object sender, RoutedEventArgs e)

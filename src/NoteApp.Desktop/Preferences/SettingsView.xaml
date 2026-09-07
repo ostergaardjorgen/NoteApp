@@ -1309,6 +1309,22 @@
                 <TextBlock x:Name="Deling_Status" FontSize="11.5" Margin="2,8,0,0" TextWrapping="Wrap"
                            LineHeight="18" Foreground="{DynamicResource TekstMeget}" />
 
+                <!-- ============ SKAL LYDEN SENDES AF SIG SELV? ============
+
+                     FRA SOM STANDARD. Lyden er det mest private, appen har, og
+                     den skal ikke begynde at rejse, fordi to maskiner engang
+                     blev godkendt. Se Jobs.Arbejdsvagt for de to graenser:
+                     kun optagelser fra det seneste doegn, og kun naar sproget
+                     er kendt. -->
+                <CheckBox x:Name="Deling_Automatisk" Margin="0,16,0,0"
+                          Click="DelingAutomatisk_Klik"
+                          Content="{i18n:Oversat settingsview.deling_automatisk}" />
+
+                <TextBlock FontSize="11.5" Margin="24,5,0,0" TextWrapping="Wrap" LineHeight="18"
+                           MaxWidth="520" HorizontalAlignment="Left"
+                           Foreground="{DynamicResource TekstMeget}"
+                           Text="{i18n:Oversat settingsview.deling_automatisk_hjaelp}" />
+
                 <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
                   <Button x:Name="Deling_Aabn" Content="{i18n:Oversat faelles.aabn_mappen}"
                           Click="DelingAabn_Klik" MinWidth="130" />

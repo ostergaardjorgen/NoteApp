@@ -85,6 +85,10 @@ public static class Opgavelager
     /// <summary>Lægger en opgave ind — eller retter den, hvis den findes.</summary>
     public static void Gem(Opgave o)
     {
+        // Se Kalender.Gem: tidsstemplet saettes her, og det roeres ikke, naar
+        // aendringen kommer fra den anden computer.
+        if (!Deling.Journal.Anvender) o.Aendret = DateTimeOffset.Now;
+
         var alle = Alle();
         var nr = alle.FindIndex(x => x.Id == o.Id);
 
@@ -92,13 +96,20 @@ public static class Opgavelager
         else alle[nr] = o;
 
         Gem(alle);
+
+        Deling.Delingsjournal.Gemt(o);
     }
 
     public static void Slet(Guid id)
     {
         var alle = Alle();
+        var var_lokal = alle.Any(o => o.Id == id && o.Herkomst == Opgavekilde.Lokal);
+
         alle.RemoveAll(o => o.Id == id);
         Gem(alle);
+
+        if (var_lokal)
+            Deling.Delingsjournal.Slettet(Deling.Delingsjournal.Opgaveslags, id.ToString());
     }
 
     /// <summary>

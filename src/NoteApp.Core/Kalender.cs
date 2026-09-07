@@ -70,6 +70,20 @@ public sealed record Aftale
     public Kalenderkilde Kilde { get; set; } = Kalenderkilde.Lokal;
 
     /// <summary>
+    /// Hvornår aftalen sidst blev rettet her.
+    /// </summary>
+    /// <remarks>
+    /// DEN ER TIL DE TO COMPUTERE. Er den samme aftale rettet begge steder,
+    /// før de har talt sammen, kan der kun være ét svar — og tidsstemplet er
+    /// det eneste, der kan afgøre det. Se
+    /// <see cref="NoteApp.Core.Deling.Delingsjournal"/>.
+    ///
+    /// Null på aftaler fra før feltet fandtes. De taber en sammenligning, og
+    /// det er den rigtige vej.
+    /// </remarks>
+    public DateTimeOffset? Aendret { get; set; }
+
+    /// <summary>
     /// Aftalens id HOS leverandøren. Tomt for en lokal aftale.
     ///
     /// Den findes, fordi en synkronisering skal kunne genkende en aftale, den
@@ -263,6 +277,14 @@ public static class Kalender
 
     public static void Gem(Aftale a)
     {
+        // TIDSSTEMPLET SAETTES HER OG IKKE AF KALDEREN. Et felt, hver kalder
+        // skal huske, bliver glemt - og saa kan to computere ikke afgoere,
+        // hvis udgave der er den nyeste.
+        //
+        // Kommer aendringen FRA den anden maskine, staar tidsstemplet allerede
+        // paa den, og det skal blive, hvor det er - se Deling.Journal.
+        if (!Deling.Journal.Anvender) a.Aendret = DateTimeOffset.Now;
+
         var alle = Alle();
         var nr = alle.FindIndex(x => x.Id == a.Id);
 
@@ -270,13 +292,22 @@ public static class Kalender
         else alle[nr] = a;
 
         Gem(alle);
+
+        Deling.Delingsjournal.Gemt(a);
     }
 
     public static void Slet(string id)
     {
         var alle = Alle();
+        var var_lokal = alle.Any(a => a.Id == id && a.Kilde == Kalenderkilde.Lokal);
+
         alle.RemoveAll(a => a.Id == id);
         Gem(alle);
+
+        // GRAVSTENEN SKRIVES KUN FOR VORES EGNE. En aftale fra Google
+        // forsvinder af sig selv paa den anden maskine, naeste gang den
+        // henter.
+        if (var_lokal) Deling.Delingsjournal.Slettet(Deling.Delingsjournal.Aftaleslags, id);
     }
 
     /// <summary>

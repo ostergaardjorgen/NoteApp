@@ -30,26 +30,8 @@ namespace NoteApp.Desktop.Transcribe;
 /// </remarks>
 public partial class TranscribeView
 {
-    /// <summary>Den computer, der kan tage arbejdet. Null, når der ikke er nogen.</summary>
-    /// <remarks>
-    /// TRE KRAV, OG DE ER DER ALLE TRE AF EN GRUND: den skal være godkendt
-    /// begge veje (ellers bliver arbejdet afvist i den anden ende), den skal
-    /// have meldt sig for nylig (ellers ligger lyden og venter på en slukket
-    /// maskine), og den skal være den primære (den bærbare skal ikke sende
-    /// arbejde til en anden bærbar).
-    /// </remarks>
-    private static Maskinoplysning? Modtager()
-    {
-        if (!Delt.Slaaet_til) return null;
-
-        return Delt.Andre()
-                   .Where(m => Parring.MaaUdveksle(m)
-                               && m.HarGodkendt(Maskinid.Id) != false
-                               && m.ILive
-                               && m.Rolle == Maskinrolle.Primaer)
-                   .OrderByDescending(m => m.SidstSet)
-                   .FirstOrDefault();
-    }
+    /// <summary>Den computer, der kan tage arbejdet. Se <see cref="Arbejdskoe.Modtager"/>.</summary>
+    private static Maskinoplysning? Modtager() => Arbejdskoe.Modtager();
 
     /// <summary>Viser eller skjuler knappen. Kaldes hver gang en optagelse vælges.</summary>
     private void VisSendknap()
@@ -68,14 +50,8 @@ public partial class TranscribeView
     }
 
     /// <summary>Ligger optagelsen allerede i køen?</summary>
-    private static bool Sendt(OptagelseVisning valgt)
-    {
-        var meta = MeetingStore.Load(valgt.Mappe);
-
-        if (meta is null) return false;
-
-        return Arbejdskoe.Mine().Any(o => o.Moede == meta.Id.ToString());
-    }
+    private static bool Sendt(OptagelseVisning valgt) =>
+        MeetingStore.Load(valgt.Mappe) is { } meta && Arbejdskoe.Ligger(meta.Id.ToString());
 
     private void Send_Click(object sender, RoutedEventArgs e)
     {

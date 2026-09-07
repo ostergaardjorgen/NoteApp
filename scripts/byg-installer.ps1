@@ -120,6 +120,103 @@ if ($mangler) {
 }
 
 
+function Rettigheder_foerst
+{
+    <#
+    .SYNOPSIS
+        Faar installationsvinduet til at bede om administratorrettigheder med
+        det samme - saa det ikke ender bagerst.
+
+    .DESCRIPTION
+        VINDUET LAA BAGERST, MENS DER BLEV INSTALLERET.
+
+        Bundtet koerer som «asInvoker». Naar man trykker Installer, starter det
+        en proces MED rettigheder, Windows viser sin godkendelse - og bagefter
+        maa det oprindelige vindue ikke laengere tage forgrunden. Det er
+        Windows' egen regel om, hvem der maa komme frem. Vinduet havner
+        bagerst, mens kopieringen sker i det skjulte.
+
+        TO VEJE ER PROEVET OG MAALT 07-09-2026:
+
+          1. HexExtendedStyle="8" (WS_EX_TOPMOST) paa <Window> i temaet.
+             Resultat: wixstdba oprettede slet ikke noget vindue - kun
+             WixBurnMessageWindow var tilbage, og der stod intet i loggen.
+
+          2. Rette manifestet i den FAERDIGE setup.exe med detach, mt.exe og
+             reattach. Resultat: «wix burn extract» kunne ikke laese
+             nyttelasten bagefter. mt.exe bygger ressourcerne om, filen
+             skifter stoerrelse, og de henvisninger, reattach skriver, passer
+             ikke laengere. Bundtet var i stykker.
+
+        Den her vej retter STUBBEN, foer bundtet bygges. Saa bygges hele filen
+        oven paa den rettede motor, og der er ingenting at komme bagefter og
+        rette i.
+
+        MOTOREN ER WiX' EGEN FIL i brugerens profil. Originalen laegges ved
+        siden af som .asinvoker foerste gang, saa den kan lægges tilbage. En
+        opdatering af WiX nulstiller den - og saa saetter scriptet den bare
+        igen ved naeste byg.
+    #>
+    param([Parameter(Mandatory)] [string] $Motor)
+
+    if (-not (Test-Path $Motor)) { return $false }
+
+    $bytes = [IO.File]::ReadAllBytes($Motor)
+    $tekst = [Text.Encoding]::UTF8.GetString($bytes)
+
+    if ($tekst -match 'requireAdministrator') { return $true }
+
+    $mt = Get-ChildItem 'C:\Program Files (x86)\Windows Kits\10\bin' -Recurse -Filter 'mt.exe' `
+              -ErrorAction SilentlyContinue |
+          Where-Object { $_.FullName -like '*\x64\*' } |
+          Sort-Object FullName -Descending |
+          Select-Object -First 1
+
+    if (-not $mt)
+    {
+        Write-Host "  mt.exe fra Windows SDK mangler - installationsvinduet kan lande bagerst." -ForegroundColor Yellow
+        return $false
+    }
+
+    $sikkerhed = "$Motor.asinvoker"
+    if (-not (Test-Path $sikkerhed)) { Copy-Item $Motor $sikkerhed }
+
+    $manifest = Join-Path $env:TEMP 'heypia-burn.manifest'
+
+    try
+    {
+        & $mt.FullName "-inputresource:$Motor;#1" "-out:$manifest" -nologo | Out-Null
+        if (-not (Test-Path $manifest)) { throw "motoren havde intet manifest." }
+
+        $m = Get-Content $manifest -Raw
+        if ($m -notmatch 'asInvoker') { throw "manifestet ser ikke ud som ventet." }
+
+        Set-Content $manifest $m.Replace('level="asInvoker"', 'level="requireAdministrator"') -Encoding UTF8
+
+        & $mt.FullName -manifest $manifest "-outputresource:$Motor;#1" -nologo | Out-Null
+
+        $nu = [Text.Encoding]::UTF8.GetString([IO.File]::ReadAllBytes($Motor))
+        if ($nu -notmatch 'requireAdministrator') { throw "ordet kom ikke med." }
+
+        return $true
+    }
+    catch
+    {
+        Write-Host "  Kunne ikke rette motoren: $($_.Exception.Message)" -ForegroundColor Yellow
+
+        # Den oprindelige laegges tilbage. En halvt rettet motor er vaerre end
+        # en, der bare virker som foer.
+        if (Test-Path $sikkerhed) { Copy-Item $sikkerhed $Motor -Force }
+
+        return $false
+    }
+    finally
+    {
+        Remove-Item $manifest -ErrorAction SilentlyContinue
+    }
+}
+
+
 # --- 2. Byg pakken --------------------------------------------------------
 Write-Host ""
 Write-Host "Bygger installationspakken ..." -ForegroundColor Cyan
@@ -185,6 +282,15 @@ try
     # hoejreklikkes — og mange mailfiltre lukker en .exe igennem, hvor en .msi
     # bliver stoppet.
     Write-Host "Bygger setup.exe ..." -ForegroundColor Cyan
+
+    # Vinduet skal staa forrest, mens der installeres - se funktionen.
+    $burn = Join-Path $env:USERPROFILE '.dotnet\tools\.store\wix\5.0.2\wix\5.0.2\tools\net6.0\any\x86\burn.exe'
+
+    if (Rettigheder_foerst -Motor $burn)
+    {
+        Write-Host "  Installationsvinduet beder om rettigheder foerst." -ForegroundColor DarkGray
+    }
+
     & $wix extension add --global WixToolset.BootstrapperApplications.wixext/5.0.2
     & $wix extension add --global WixToolset.Util.wixext/5.0.2
     & $wix build 'Bundle.wxs' -ext WixToolset.BootstrapperApplications.wixext -ext WixToolset.Util.wixext -d "Version=$msiVersion" -o 'HeyPia-setup.exe'

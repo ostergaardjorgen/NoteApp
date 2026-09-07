@@ -127,6 +127,32 @@ public static class Arbejdskoe
     public static string Udskriftsti(string delt, string id, string endelse) =>
         Path.Combine(Mappe(delt, id), "udskrift" + endelse);
 
+    /// <summary>
+    /// Den computer, der kan tage arbejdet. Null, når der ikke er nogen.
+    /// </summary>
+    /// <remarks>
+    /// TRE KRAV, OG DE ER DER ALLE TRE AF EN GRUND: den skal være godkendt
+    /// begge veje (ellers bliver arbejdet afvist i den anden ende), den skal
+    /// have meldt sig for nylig (ellers ligger lyden og venter på en slukket
+    /// maskine), og den skal være den primære — den bærbare skal ikke sende
+    /// arbejde til en anden bærbar.
+    /// </remarks>
+    public static Maskinoplysning? Modtager()
+    {
+        if (!Delt.Slaaet_til) return null;
+
+        return Delt.Andre()
+                   .Where(m => Parring.MaaUdveksle(m)
+                               && m.HarGodkendt(Maskinid.Id) != false
+                               && m.ILive
+                               && m.Rolle == Maskinrolle.Primaer)
+                   .OrderByDescending(m => m.SidstSet)
+                   .FirstOrDefault();
+    }
+
+    /// <summary>Ligger mødet allerede i køen?</summary>
+    public static bool Ligger(string moede) => Mine().Any(o => o.Moede == moede);
+
     // ===================================================================== læg op
 
     /// <summary>

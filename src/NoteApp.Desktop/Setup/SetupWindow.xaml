@@ -270,6 +270,26 @@
       <TextBlock Grid.Row="0" FontSize="13" Foreground="{DynamicResource TekstSvag}" Margin="0,0,0,16" LineHeight="20"
                  Text="{i18n:Oversat setupwindow.transskriptionen_laves_af_whisper_som_koer}" />
 
+      <!-- ============ MANGLER MICROSOFTS C++-DEL? ============
+
+           Whisper kan ikke starte uden den, og en frisk Windows har den ikke.
+           Kommer man hertil fra installationsfilen, er den lagt ind
+           undervejs; koerer man den udgivne app direkte, er den ikke. Saa
+           skal det staa HER - foer der hentes 2,9 GB, der ikke kan bruges.
+           Se NoteApp.Core.Cppkomponent. -->
+      <Border x:Name="CppRude" Grid.Row="1" Visibility="Collapsed"
+              Background="{DynamicResource AdvarselFlade}" CornerRadius="10" Padding="18,15"
+              BorderBrush="{DynamicResource Advarsel}" BorderThickness="1" Margin="0,0,0,12">
+        <StackPanel>
+          <TextBlock Text="{i18n:Oversat setupwindow.cpp_overskrift}" FontSize="14"
+                     FontWeight="SemiBold" Foreground="{DynamicResource Advarsel}" />
+          <TextBlock x:Name="CppTekst" FontSize="12.5" Margin="0,6,0,0" TextWrapping="Wrap"
+                     LineHeight="19" Foreground="{DynamicResource Tekst}" />
+          <Button x:Name="CppKnap" Content="{i18n:Oversat setupwindow.cpp_hent}"
+                  Click="Cpp_Klik" HorizontalAlignment="Left" Margin="0,12,0,0" Padding="14,7" />
+        </StackPanel>
+      </Border>
+
       <Border Grid.Row="1" Background="{DynamicResource Panel}" CornerRadius="10" Padding="18,15"
               BorderBrush="{DynamicResource PanelKant}" BorderThickness="1" Margin="0,0,0,12">
         <StackPanel>

@@ -70,6 +70,8 @@ public static class Arbejdsvagt
         {
             try
             {
+                Hentjournal();
+                Sendnye();
                 Hentsvar();
                 Tagarbejde();
                 Arbejdskoe.Ryd_gamle();
@@ -83,6 +85,122 @@ public static class Arbejdsvagt
                 _travlt = false;
             }
         });
+    }
+
+    /// <summary>
+    /// Henter de aftaler og opgaver ind, som den anden computer har lavet.
+    /// </summary>
+    /// <remarks>
+    /// DEN ER TIL DEM UDEN GOOGLE. Har man Google, henter begge maskiner fra
+    /// det samme sted, og der er ingenting at synkronisere — se
+    /// <see cref="Delingsjournal"/>.
+    /// </remarks>
+    private static void Hentjournal()
+    {
+        var antal = Delingsjournal.Hent();
+
+        if (antal == 0) return;
+
+        // KALENDEREN OG OPGAVELISTEN LAESER FRA FILEN, hver gang de tegnes -
+        // se Opgavelager.Alle. Der skal derfor ikke sendes noget videre her;
+        // der skal bare staa i historikken, at det skete.
+        Historik.Skriv(HaendelseType.Andet,
+            Sprog.T("deling.historik_journal", antal),
+            Sprog.T("deling.historik_journal_detalje"), Udfald.Fuldført);
+    }
+
+    // ============================================================== send af sig selv
+
+    /// <summary>Kun optagelser, der er nyere end det her, sendes af sig selv.</summary>
+    /// <remarks>
+    /// EN OPTAGELSE FRA I FORGAARS HAR MAN TAGET STILLING TIL. Uden en grænse
+    /// ville dagen, hakket blev sat, sende hele arkivet over netværket på én
+    /// gang — og det er ikke det, nogen bad om.
+    /// </remarks>
+    public static readonly TimeSpan Nyeste = TimeSpan.FromHours(24);
+
+    /// <summary>
+    /// Sender nye optagelser til den anden computer, hvis det er slået til.
+    /// </summary>
+    /// <remarks>
+    /// ============ DER SENDES KUN, NÅR SPROGET ER KENDT ============
+    ///
+    /// Vælges sproget forkert, er hvert eneste ord i udskriften forkert. Ved
+    /// appen det ikke — hverken fra optagelsen, fra aftalen eller fra
+    /// indstillingerne — så bliver optagelsen liggende, til nogen selv
+    /// trykker. Se <see cref="Udskriftsvalg"/>.
+    ///
+    /// Et gæt, der ligner et resultat, er den værste slags fejl.
+    /// </remarks>
+    private static void Sendnye()
+    {
+        if (!AppSettings.Current.SendAutomatisk) return;
+
+        if (Maskinid.Rolle != Maskinrolle.Sekundaer) return;
+
+        if (Arbejdskoe.Modtager() is not { } modtager) return;
+
+        if (!Directory.Exists(UserDataPaths.Meetings)) return;
+
+        foreach (var mappe in Directory.EnumerateDirectories(UserDataPaths.Meetings))
+        {
+            try { Sendmaaske(mappe, modtager); }
+            catch (Exception) { /* naeste optagelse. Og naeste gang. */ }
+        }
+    }
+
+    private static void Sendmaaske(string mappe, Maskinoplysning modtager)
+    {
+        var meta = MeetingStore.Load(mappe);
+
+        if (meta is null) return;
+
+        // Stadig i gang? Saa er lyden ikke faerdig.
+        if (meta.EndedAt is null) return;
+
+        if (DateTimeOffset.Now - meta.EndedAt.Value > Nyeste) return;
+
+        // Skrevet ud i forvejen - eller allerede paa vej.
+        if (Directory.GetFiles(mappe, "udskrift_*.txt").Length > 0) return;
+
+        if (Arbejdskoe.Ligger(meta.Id.ToString())) return;
+
+        var mik = Path.Combine(mappe, "mikrofon.wav");
+        var loop = Path.Combine(mappe, "loopback.wav");
+
+        var kunLoop = !File.Exists(mik) && File.Exists(loop);
+        var toSpor = File.Exists(mik) && File.Exists(loop);
+
+        if (!File.Exists(mik) && !kunLoop) return;
+
+        var sprog = Udskriftsvalg.Sprog(mappe, kunLoop);
+
+        if (!sprog.Kendt) return;
+
+        var model = AppSettings.Current.PreferredModel ?? WhisperInstall.Standard.Id;
+        var id = meta.Id.ToString();
+
+        if (kunLoop)
+        {
+            Arbejdskoe.Laeg(modtager, id, "loopback", loop, sprog.Mit!, model, "",
+                            Transcriber.WavSeconds(loop));
+        }
+        else
+        {
+            Arbejdskoe.Laeg(modtager, id, "mikrofon", mik, sprog.Mit!, model, "",
+                            Transcriber.WavSeconds(mik));
+
+            if (toSpor)
+                Arbejdskoe.Laeg(modtager, id, "loopback", loop, sprog.Deres ?? sprog.Mit!, model, "",
+                                Transcriber.WavSeconds(loop));
+        }
+
+        Historik.Skriv(HaendelseType.Transskription,
+            Sprog.T("deling.historik_sendt", modtager.Navn),
+            Sprog.T("deling.historik_sendt_automatisk", meta.Title ?? Path.GetFileName(mappe)),
+            Udfald.Fuldført);
+
+        Notifikationer.Meld();
     }
 
     // ============================================================== tag arbejde
