@@ -19,7 +19,6 @@ namespace NoteApp.Tests;
 /// Maskinerne spilles af hver sin «Maskinrod» — nøjagtig som to rigtige PC'er,
 /// der deler en mappe men ikke har adgang til hinandens diske.
 /// </remarks>
-[Collection(Maskinhold.Navn)]
 public class Delingstest
 {
     // MASKINEN OG DEN FAELLES MAPPE LIGGER I Proevemaskine.cs. De bruges af

@@ -80,6 +80,42 @@ $forskel = Compare-Object $foer $efter -ErrorAction SilentlyContinue
 Write-Host ''
 
 if ($forskel) {
+    # ============ APPEN SKRIVER OGSAA I DEN MAPPE ============
+    #
+    # Koerer HeyPia, mens proeverne koerer, roerer DEN datamappen: vagterne
+    # skriver hjerteslag, laeseposition og indstillinger, mens der ingenting
+    # sker. Saa er forskellen appens og ikke proevernes.
+    #
+    # DET ER SKET, OG DET KOSTEDE EN TIME. 07-09-2026 blev der ledt efter en
+    # fejl i proeverne, som ikke fandtes: journal-laest.json blev skrevet af
+    # Arbejdsvagt i den koerende app hvert minut. En advarsel, der peger det
+    # forkerte sted hen, er vaerre end ingen advarsel - saa siges det her.
+    $koerer = @(Get-Process -Name HeyPia -ErrorAction SilentlyContinue)
+
+    if ($koerer.Count -gt 0) {
+        Write-Host 'DATAMAPPEN AENDREDE SIG - MEN HeyPia KOERER.' -ForegroundColor Yellow
+        Write-Host "  $Rigtig" -ForegroundColor Yellow
+        Write-Host ''
+        Write-Host '  Appens egne vagter skriver i mappen, mens den er aaben.' -ForegroundColor Yellow
+        Write-Host '  Luk den og koer igen, foer du leder efter fejlen i proeverne:' -ForegroundColor Yellow
+        Write-Host '      Stop-Process -Name HeyPia' -ForegroundColor Yellow
+        Write-Host ''
+
+        $forskel | Select-Object -First 12 | ForEach-Object {
+            Write-Host ("  {0}" -f ($_.InputObject -split '\|')[0]) -ForegroundColor Yellow
+        }
+
+        Write-Host ''
+
+        if ($kode -eq 0) {
+            Write-Host 'ALLE PROEVER BESTAAET.' -ForegroundColor Green
+        } else {
+            Write-Host 'PROEVER FEJLEDE. Ret dem foer commit.' -ForegroundColor Red
+        }
+
+        exit $kode
+    }
+
     Write-Host 'ADVARSEL: den rigtige datamappe aendrede sig under proeverne!' -ForegroundColor Red
     Write-Host "  $Rigtig" -ForegroundColor Red
     Write-Host ''

@@ -196,8 +196,13 @@ helt; så arkiveres udskrifter, noter, referater og projekter stadig.
 
 **En optagelse, der er i gang, røres ikke.** Wav-filen vokser, mens der optages.
 En halv wav i arkivet ser hel ud — størrelsen passer med det, der blev læst — og
-den ville blive liggende sådan for evigt. Der arkiveres kun møder med et
-sluttidspunkt.
+den ville blive liggende sådan for evigt. Et møde uden sluttidspunkt springes
+derfor over — **men kun en time**. Går appen ned midt i en optagelse, får mødet
+aldrig et sluttidspunkt, og et krav om et ville holde netop det møde ude af
+arkivet for evigt. Segmenterne fra et nedbrud er dét, genopretningen skal bruge,
+og de findes kun ét sted. Der spørges i stedet, hvornår mappen sidst blev
+skrevet i: der optages til disken hele tiden, så en time uden en eneste
+skrivning er ikke en optagelse, der er i gang.
 
 **Der skrives aldrig direkte på målets navn.** Hver fil kopieres til
 `<navn>.delvis` og flyttes på plads bagefter. Falder netværket ud midt i en wav

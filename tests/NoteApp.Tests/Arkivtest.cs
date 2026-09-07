@@ -22,7 +22,6 @@ namespace NoteApp.Tests;
 ///
 /// At «hent hjem» ALDRIG overskriver noget lokalt.
 /// </remarks>
-[Collection(Maskinhold.Navn)]
 public class Arkivtest
 {
     private static (Proevemaskine A, Proevemaskine B, string Delt) Toparrede()
@@ -146,6 +145,38 @@ public class Arkivtest
         Assert.False(Arkiv.Gem(medLyd: true).Noget);
 
         Assert.False(Directory.Exists(Path.Combine(Arkiv.Mit(delt), "optagelser")));
+    }
+
+    [Fact]
+    public void Et_moede_fra_et_nedbrud_kommer_med_alligevel()
+    {
+        var (a, b, delt) = Toparrede();
+
+        using var _a = a;
+        using var _b = b;
+
+        a.Tag();
+        var mappe = Moede("Appen gik ned", faerdig: false);
+
+        // ============ ET NEDBRUD GIVER ALDRIG ET SLUTTIDSPUNKT ============
+        //
+        // Et krav om et ville holde netop DET moede ude af arkivet for evigt -
+        // og segmenterne fra et nedbrud er dét, genopretningen skal bruge. De
+        // findes kun eet sted.
+        //
+        // Saadan ser en mappe ud, ingen har roert i et doegn.
+        var i_gaar = DateTime.UtcNow.AddDays(-1);
+
+        foreach (var f in Directory.GetFiles(mappe, "*", SearchOption.AllDirectories))
+            File.SetLastWriteTimeUtc(f, i_gaar);
+
+        var kom = Arkiv.Gem(medLyd: true);
+
+        Assert.True(kom.Noget);
+
+        var lyd = Directory.GetFiles(Arkiv.Mit(delt), "mikrofon.wav", SearchOption.AllDirectories);
+
+        Assert.Single(lyd);
     }
 
     [Fact]

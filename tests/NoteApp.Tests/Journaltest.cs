@@ -19,7 +19,6 @@ namespace NoteApp.Tests;
 /// Og at en, der kan skrive i mappen, ikke kan lægge en aftale ind i en andens
 /// kalender.
 /// </remarks>
-[Collection(Maskinhold.Navn)]
 public class Journaltest
 {
     private static (Proevemaskine A, Proevemaskine B, string Delt) Toparrede()

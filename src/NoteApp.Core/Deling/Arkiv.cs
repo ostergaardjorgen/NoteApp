@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using NoteApp.Core.Documents;
@@ -322,9 +322,47 @@ public static class Arkiv
             try { meta = MeetingStore.Load(mappe); }
             catch (IOException) { continue; }
 
-            if (meta?.EndedAt is null) continue;
+            if (meta?.EndedAt is null && Stadig_i_gang(mappe)) continue;
 
             foreach (var f in Alle(mappe)) yield return f;
+        }
+    }
+
+    /// <summary>Et møde uden sluttidspunkt regnes som i gang så længe.</summary>
+    /// <remarks>
+    /// SLUTTIDSPUNKTET ALENE ER IKKE NOK. Gaar appen ned midt i en optagelse,
+    /// faar mødet ALDRIG et - og et krav om et sluttidspunkt ville dermed
+    /// holde netop det møde ude af arkivet for evigt.
+    ///
+    /// Det er den forkerte vej rundt. Segmenterne fra et nedbrud er dét,
+    /// genopretningen skal bruge, og de findes kun ét sted. Var de ikke
+    /// sikret, ville arkivet svigte i den ene situation, hvor det betød
+    /// noget.
+    ///
+    /// Derfor spørges der om, hvornår mappen sidst blev SKREVET i. Der optages
+    /// til disken hele tiden; en time uden en eneste skrivning er ikke en
+    /// optagelse, der er i gang. Og bliver et møde alligevel arkiveret midt i
+    /// noget, skifter filen størrelse bagefter og bliver sendt igen — se
+    /// <see cref="Ajour"/>.
+    /// </remarks>
+    public static readonly TimeSpan Roert_for_nylig = TimeSpan.FromHours(1);
+
+    private static bool Stadig_i_gang(string mappe)
+    {
+        try
+        {
+            var nyeste = Directory.EnumerateFiles(mappe, "*", SearchOption.AllDirectories)
+                                  .Select(f => File.GetLastWriteTimeUtc(f))
+                                  .DefaultIfEmpty(DateTime.MinValue)
+                                  .Max();
+
+            return DateTime.UtcNow - nyeste < Roert_for_nylig;
+        }
+        catch (IOException)
+        {
+            // Kan vi ikke se efter, lader vi den vaere. Det er den forsigtige
+            // vej: en halv optagelse i arkivet er vaerre end en, der mangler.
+            return true;
         }
     }
 
