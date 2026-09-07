@@ -28,7 +28,8 @@
                  Text="{i18n:Oversat settingsview.opstart_lyd_hvor_dine_filer_ligger_og_sikk}" />
     </StackPanel>
 
-    <TabControl Grid.Row="1" Style="{StaticResource Fanerude}">
+    <TabControl x:Name="Faner" Grid.Row="1" Style="{StaticResource Fanerude}"
+                SelectionChanged="Fane_Skiftet">
 
       <TabItem Header="{i18n:Oversat settingsview.opstart}" Style="{StaticResource Fane}">
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
@@ -621,7 +622,29 @@
            STÅ ØVERST. Alt andet bliver på maskinen; her taler appen med en
            amerikansk leverandør. Det er i orden — men det skal siges, og det
            skal siges før knapperne, ikke under dem. -->
-      <TabItem Header="{i18n:Oversat settingsview.integrationer}" Style="{StaticResource Fane}">
+      <TabItem x:Name="Integrationsfanen" Style="{StaticResource Fane}"
+               AutomationProperties.Name="{i18n:Oversat settingsview.integrationer}">
+        <!-- Samme tal som paa Deling - se den for, hvorfor farven bindes i
+             haanden. Her staar det for noget, der er KOMMET: en forbindelse
+             fra den anden computer, man ikke selv har sat op her. -->
+        <TabItem.Header>
+          <StackPanel Orientation="Horizontal">
+            <TextBlock Text="{i18n:Oversat settingsview.integrationer}" VerticalAlignment="Center"
+                       Foreground="{Binding Foreground,
+                         RelativeSource={RelativeSource AncestorType={x:Type TabItem}}}"
+                       FontSize="{Binding FontSize,
+                         RelativeSource={RelativeSource AncestorType={x:Type TabItem}}}"
+                       FontWeight="{Binding FontWeight,
+                         RelativeSource={RelativeSource AncestorType={x:Type TabItem}}}" />
+            <Border x:Name="IntegrationsMaerkat" Visibility="Collapsed"
+                    MinWidth="17" Height="17" CornerRadius="8.5" Margin="7,0,0,0"
+                    Background="{DynamicResource Advarsel}" VerticalAlignment="Center">
+              <TextBlock Text="1" FontSize="10.5" FontWeight="SemiBold"
+                         Foreground="{DynamicResource PaaAccent}"
+                         HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,0" />
+            </Border>
+          </StackPanel>
+        </TabItem.Header>
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
                       Padding="0,0,14,0">
           <StackPanel>
@@ -775,7 +798,7 @@
                                   Visibility="{Binding Forbindvis}"
                                   IsEnabled="{Binding MaaAktivere}"
                                   ToolTip="{Binding Aktivertip}" />
-                          <Button Content="{i18n:Oversat settingsview.hent_aftaler_nu}" Tag="{Binding Id}" Click="Hent_Klik"
+                          <Button Content="{Binding Hentknap}" Tag="{Binding Id}" Click="Hent_Klik"
                                   Padding="14,8" Visibility="{Binding Forbundetvis}" />
                           <Button Content="{i18n:Oversat settingsview.afbryd_forbindelsen}" Tag="{Binding Id}" Click="Afbryd_Klik"
                                   Padding="14,8" Margin="8,0,0,0"

@@ -21,6 +21,30 @@ public sealed class Maskinoplysning
     /// <summary>Appens version. Til at kunne se, om den ene er bagud.</summary>
     public string Udgave { get; set; } = "";
 
+    /// <summary>
+    /// Id'erne på de maskiner, den her computer har godkendt.
+    /// </summary>
+    /// <remarks>
+    /// ============ GODKENDELSEN SKAL SES FRA BEGGE SIDER ============
+    ///
+    /// Parringen skal gøres på BEGGE skærme — hver maskine fæstner den andens
+    /// nøgle. Før stod den ene og sagde «godkendt», mens den anden intet
+    /// vidste og intet spurgte om: nøglen blev sendt, og den blev afvist i
+    /// stilhed i den anden ende.
+    ///
+    /// Listen her er offentlig af natur — id'erne ligger allerede i mappen —
+    /// og den gør to ting mulige: den maskine, der mangler at godkende, kan
+    /// SELV spørge, og den, der har sendt noget, kan skrive på skærmen, at
+    /// den venter på den anden.
+    ///
+    /// NULL BETYDER «VED IKKE». En maskine på en ældre udgave skriver ikke
+    /// feltet, og så må der ikke stå, at den ikke har godkendt.
+    /// </remarks>
+    public List<string>? Godkendte { get; set; }
+
+    /// <summary>Har den her maskine godkendt os? Null når den ikke siger det.</summary>
+    public bool? HarGodkendt(string id) => Godkendte?.Contains(id);
+
     /// <summary>Hvor længe siden maskinen sidst meldte sig.</summary>
     public TimeSpan Siden => DateTimeOffset.Now - SidstSet;
 
@@ -169,6 +193,7 @@ public static class Delt
                 Noegle = Maskinid.Offentlignoegle(),
                 SidstSet = DateTimeOffset.Now,
                 Udgave = Appversion(),
+                Godkendte = Parring.Alle().Select(b => b.Id).ToList(),
             };
 
             var fil = Path.Combine(Maskinmappe(rod), mig.Id + ".json");

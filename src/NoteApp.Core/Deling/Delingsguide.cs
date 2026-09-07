@@ -1,4 +1,4 @@
-using NoteApp.Core.Llm;
+﻿using NoteApp.Core.Llm;
 
 namespace NoteApp.Core.Deling;
 
@@ -68,7 +68,19 @@ public static class Delingsguide
 
         var andre = mappeklar ? Delt.Andre().ToArray() : Array.Empty<Maskinoplysning>();
         var moedt = andre.Length > 0;
-        var godkendt = andre.Any(Parring.MaaUdveksle);
+
+        // ============ BEGGE VEJE, ELLER INGEN AF DEM ============
+        //
+        // Vi skal have godkendt DEN, og den skal have godkendt OS. Stod der
+        // hak, saa snart den ene halvdel var gjort, ville trinnet melde
+        // faerdigt, mens intet kunne udveksles.
+        //
+        // En maskine paa en aeldre udgave siger ikke, hvem den har godkendt.
+        // Saa maa der ikke staa, at den ikke har - se Maskinoplysning.Godkendte.
+        var godkendt = andre.Any(m => Parring.MaaUdveksle(m)
+                                      && m.HarGodkendt(Maskinid.Id) != false);
+
+        var venterPaaDen = !godkendt && andre.Any(Parring.MaaUdveksle);
 
         var noegle = !string.IsNullOrWhiteSpace(SkyNoegle.Hent());
 
@@ -95,7 +107,9 @@ public static class Delingsguide
             // ---------- 4: godkendelsen ----------
             new(4,
                 T("guide_godkend"),
-                T(godkendt ? "guide_godkend_klar" : "guide_godkend_under"),
+                T(godkendt ? "guide_godkend_klar"
+                  : venterPaaDen ? "guide_godkend_halvt"
+                  : "guide_godkend_under"),
                 godkendt ? Trinstand.Klar : moedt ? Trinstand.Naeste : Trinstand.Venter),
 
             // ---------- 5: noeglen til dokumenterne ----------

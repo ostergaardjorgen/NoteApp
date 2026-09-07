@@ -401,6 +401,19 @@ public partial class SettingsView : UserControl
 
         public bool ErForbundet => _o.ErForbundet;
 
+        /// <summary>
+        /// Hvad hente-knappen hedder.
+        /// </summary>
+        /// <remarks>
+        /// DER STOD «Hent aftaler nu» PÅ BEGGE. På opgaveintegrationen var
+        /// det forkert: den henter opgaver, ikke aftaler. En knap, der siger
+        /// noget andet end det, den gør, får man til at tro, at man har
+        /// trykket det forkerte sted.
+        /// </remarks>
+        public string Hentknap => Sprog.T(_i.Id == Googleopgaver.Id
+            ? "settingsview.hent_opgaver_nu"
+            : "settingsview.hent_aftaler_nu");
+
         public Visibility Opsaetningsvis =>
             _i.Klar && Googleklient.ErSatOp ? Visibility.Visible : Visibility.Collapsed;
 
@@ -470,6 +483,8 @@ public partial class SettingsView : UserControl
         VisNote();
 
         IntegrationerLaest.IsChecked = AppSettings.Current.IntegrationerLaest;
+
+        VisIntegrationsmaerkat();
 
         LaestNote.Visibility = AppSettings.Current.IntegrationerLaest
             ? Visibility.Collapsed : Visibility.Visible;
@@ -832,6 +847,43 @@ public partial class SettingsView : UserControl
 
         VisNote();
         Notestatus.Text = "Nulstillet til standardteksterne.";
+    }
+
+    /// <summary>
+    /// Viser mærkatet på integrationsfanen, hvis der er kommet noget.
+    /// </summary>
+    private void VisIntegrationsmaerkat()
+    {
+        if (IntegrationsMaerkat is null) return;
+
+        IntegrationsMaerkat.Visibility = AppSettings.Current.IntegrationerNyt
+            ? Visibility.Visible
+            : Visibility.Collapsed;
+    }
+
+    /// <summary>
+    /// Rydder mærkatet, når fanen har været åbnet.
+    /// </summary>
+    /// <remarks>
+    /// DET SKAL VÆRE SET, IKKE BARE SKET. Ryddede vi det, da forbindelsen
+    /// kom, ville mærkatet kun stå, mens appen kørte — og den, der lukkede
+    /// den og gik til frokost, ville aldrig få det at vide.
+    /// </remarks>
+    private void Fane_Skiftet(object sender, SelectionChangedEventArgs e)
+    {
+        // TabControl'en indeholder andre faneruder (sprogene under
+        // moedenoten). Deres skift bobler herop, og de siger intet om, hvad
+        // brugeren kigger paa heroppe.
+        if (!ReferenceEquals(e.OriginalSource, Faner)) return;
+
+        if (!ReferenceEquals(Faner.SelectedItem, Integrationsfanen)) return;
+
+        if (!AppSettings.Current.IntegrationerNyt) return;
+
+        AppSettings.Current.IntegrationerNyt = false;
+        AppSettings.Current.Save();
+
+        VisIntegrationsmaerkat();
     }
 
     private void IntegrationerLaest_Klik(object sender, RoutedEventArgs e)

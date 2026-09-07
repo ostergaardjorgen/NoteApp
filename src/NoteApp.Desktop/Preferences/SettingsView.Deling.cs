@@ -283,6 +283,11 @@ public partial class SettingsView
 
         var (besked, farve) = tilstand switch
         {
+            // DEN ANDEN HALVDEL MANGLER. Vi har godkendt den; den har ikke
+            // godkendt os. Der kan ikke udveksles noget, og skaermen skal
+            // sige hvorfor - ikke bare «godkendt».
+            Parringstilstand.Parret when m.HarGodkendt(Maskinid.Id) == false
+                => ("settingsview.deling_venter_paa_dem", "Advarsel"),
             Parringstilstand.Parret when Venter(m.Id).Count > 0
                 => ("settingsview.deling_noegle_venter", "Advarsel"),
             Parringstilstand.Parret => ("settingsview.deling_er_parret", "Godkendt"),
@@ -334,50 +339,17 @@ public partial class SettingsView
     // ================================================================== parringen
 
     /// <summary>
-    /// Viser koden og spørger, om den står ens på begge skærme.
+    /// Godkender en computer. Selve spørgsmålet står i
+    /// <see cref="Deling.Parringsdialog"/>.
     /// </summary>
     /// <remarks>
-    /// SPØRGSMÅLET SKAL VÆRE DET RIGTIGE. «Vil du parre?» er noget, man
-    /// trykker ja til. «Står der 412 908 på den anden skærm?» er noget, man
-    /// bliver nødt til at se efter — og det er hele beskyttelsen.
+    /// DET SAMME SPØRGSMÅL BEGGE STEDER. Dialogen kommer også af sig selv på
+    /// den maskine, der mangler at sige ja — og to steder med hver sin
+    /// ordlyd om den samme sikkerhed er ét sted for meget.
     /// </remarks>
     private void Par(Maskinoplysning m)
     {
-        if (m.Noegle.Length == 0)
-        {
-            Dialogs.AppDialog.Vis(Window.GetWindow(this),
-                Sprog.T("settingsview.deling_mangler_noegle_titel"),
-                Sprog.T("settingsview.deling_mangler_noegle"), Dialogs.Slags.Pas_paa);
-            return;
-        }
-
-        string kode;
-
-        try
-        {
-            kode = Parring.Kodevisning(Maskinid.Offentlignoegle(), m.Noegle);
-        }
-        catch (Exception ex)
-        {
-            Dialogs.AppDialog.Vis(Window.GetWindow(this),
-                Sprog.T("settingsview.deling_mangler_noegle_titel"), ex.Message, Dialogs.Slags.Fejl);
-            return;
-        }
-
-        var ja = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
-            Sprog.T("settingsview.deling_par_titel", m.Navn),
-            Sprog.T("settingsview.deling_par_tekst", kode, m.Navn),
-            godkend: Sprog.T("settingsview.deling_par_ja"),
-            annuller: Sprog.T("settingsview.deling_par_nej"),
-            slags: Dialogs.Slags.Valg, godkendErStandard: false);
-
-        if (!ja) return;
-
-        Parring.Betro(m);
-
-        Historik.Skriv(HaendelseType.Andet, Sprog.T("settingsview.deling_historik_parret", m.Navn),
-            Sprog.T("settingsview.deling_historik_parret_detalje", kode), Udfald.Fuldført);
-
+        Deling.Parringsdialog.Spoerg(Window.GetWindow(this), m);
         VisDeling();
     }
 

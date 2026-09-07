@@ -572,6 +572,22 @@ public sealed class AppSettings
     public bool IntegrationerLaest { get; set; }
 
     /// <summary>
+    /// Er der kommet en forbindelse fra den anden computer, som ikke er set
+    /// endnu?
+    /// </summary>
+    /// <remarks>
+    /// EN ÆNDRING, MAN IKKE SELV HAR LAVET, SKAL SIGE SIG SELV. Google-
+    /// forbindelsen kan komme over fra den maskine, man satte op først — se
+    /// <see cref="NoteApp.Core.Deling.Noegledeling"/>. Uden et mærkat kan man
+    /// først opdage det ved at gå ind på fanen og kigge, og så kan man lige
+    /// så godt sætte det op i hånden.
+    ///
+    /// Den ryddes, når fanen har været åbnet. Et mærkat, der bliver stående
+    /// efter man har set det, er et mærkat, man holder op med at tro på.
+    /// </remarks>
+    public bool IntegrationerNyt { get; set; }
+
+    /// <summary>
     /// Bredden på Cockpittets venstre spalte — kalenderen.
     ///
     /// SPALTEBREDDER ER ET VALG, DER SKAL OVERLEVE EN GENSTART. En bredde,

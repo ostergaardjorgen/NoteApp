@@ -1,4 +1,4 @@
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using NoteApp.Core.Llm;
@@ -156,6 +156,25 @@ public static class Noegledeling
         // fejl» hoerte til den anden computer og siger intet om den her; de
         // faar deres vaerdi ved foerste hentning.
         Integrationsfiler.Gem(id, new Integrationsopsaetning { Opdateringsnoegle = vaerdi });
+
+        // ============ HAKKET FOELGER MED ============
+        //
+        // «Dette er laest og forstaaet» er sat paa den maskine, forbindelsen
+        // kom fra - af det samme menneske, med den samme Google-konto. At
+        // skulle laese og kvittere for den samme tekst een gang til, fordi
+        // man skiftede computer, er ikke et samtykke mere; det er en
+        // forhindring, man klikker igennem uden at laese.
+        //
+        // Der skal to ting til, foer en forbindelse naar hertil: begge
+        // maskiner har godkendt hinanden med koden, og et menneske har
+        // trykket «Send opsaetningen». Ingen af delene sker af sig selv.
+        AppSettings.Current.IntegrationerLaest = true;
+
+        // Og der skal staa et maerkat paa fanen, til den har vaeret aabnet.
+        // Ellers er den eneste maade at opdage forbindelsen paa at gaa ind og
+        // kigge - og saa kunne man lige saa godt saette den op i haanden.
+        AppSettings.Current.IntegrationerNyt = true;
+        AppSettings.Current.Save();
     }
 
     // ==================================================================== send
@@ -235,6 +254,18 @@ public static class Noegledeling
 
         /// <summary>Der lå en, men den kunne ikke bruges. Den er ryddet.</summary>
         Afvist,
+
+        /// <summary>
+        /// Der ligger en fra en computer, vi ikke har godkendt endnu.
+        /// </summary>
+        /// <remarks>
+        /// DEN BLIVER LIGGENDE. Før blev den ryddet som «afvist», og det var
+        /// forkert: afsenderen er en maskine, der står i mappen, og det
+        /// eneste, der mangler, er godkendelsen på DEN HER skærm. Kuverten
+        /// bliver brugbar i samme øjeblik, der er trykket ja — og den
+        /// udløber af sig selv efter en time.
+        /// </remarks>
+        Ikkegodkendt,
     }
 
     /// <summary>Ser efter kuverter af alle slags.</summary>
@@ -285,11 +316,17 @@ public static class Noegledeling
 
         var afsender = Delt.Alle().FirstOrDefault(m => m.Id == kuvert.Fra);
 
-        if (afsender is null || !Parring.MaaUdveksle(afsender) || kuvert.Udloeber < DateTimeOffset.Now)
+        if (afsender is null || kuvert.Udloeber < DateTimeOffset.Now)
         {
             Ryd(fil);
             return Udfald.Afvist;
         }
+
+        // ============ VI HAR IKKE GODKENDT DEN ENDNU ============
+        //
+        // Afsenderen staar i mappen, og det eneste, der mangler, er et ja paa
+        // den her skaerm. Kuverten bliver liggende - se Udfald.Ikkegodkendt.
+        if (!Parring.MaaUdveksle(afsender)) return Udfald.Ikkegodkendt;
 
         try
         {

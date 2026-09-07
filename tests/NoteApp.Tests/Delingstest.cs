@@ -504,6 +504,11 @@ public class Delingstest
         tyv.Tag();
         SaetNoegle(null);
 
+        // HAN GODKENDER ENDDA AFSENDEREN. Det staar ham frit - en godkendelse
+        // er noget, han giver paa sin egen maskine, og den gaelder kun dér.
+        // Kuverten er stadig krypteret til den baerbares noegle.
+        Parring.Betro(Delt.Andre().Single(m => m.Navn == "Stationær"));
+
         var kuvert = Path.Combine(delt, "noegler", tilBaerbar.Id + ".json");
         File.Copy(kuvert, Path.Combine(delt, "noegler", Maskinid.Id + ".json"));
 
@@ -628,6 +633,90 @@ public class Delingstest
         Assert.Null(NoteApp.Core.Llm.SkyNoegle.Hent());
     }
 
+    [Fact]
+    public void En_kuvert_bliver_liggende_til_der_er_sagt_ja()
+    {
+        var delt = Nydeltmappe();
+        Delt.Klargoer(delt);
+
+        using var stationaer = new Maskine("Stationær", delt);
+        using var baerbar = new Maskine("Bærbar", delt, Maskinrolle.Sekundaer);
+
+        stationaer.Tag();
+        SaetNoegle("hemmelig-noegle-1234567890");
+        Delt.Meld();
+
+        baerbar.Tag();
+        SaetNoegle(null);
+        Delt.Meld();
+        Parring.Betro(Delt.Andre().Single());
+        Delt.Meld();
+
+        stationaer.Tag();
+        Parring.Betro(Delt.Andre().Single());
+        Noegledeling.Send(Delt.Andre().Single());
+
+        // Den baerbare har godkendt den stationaere - men her spilles den
+        // anden vej: den stationaere har IKKE godkendt afsenderen af en
+        // kuvert til sig selv. Vi tager derfor kuverten fra den baerbares
+        // side og glemmer godkendelsen dér.
+        baerbar.Tag();
+        Parring.Glem(Delt.Andre().Single().Id);
+
+        var kuvert = Path.Combine(delt, "noegler", Maskinid.Id + ".json");
+
+        Assert.True(File.Exists(kuvert));
+
+        // ============ DEN SMIDES IKKE VAEK ============
+        //
+        // Foer blev den ryddet som «afvist», og saa var noeglen vaek, uden at
+        // nogen havde gjort noget forkert. Det eneste, der mangler, er et ja
+        // paa den her skaerm.
+        Assert.Equal(Noegledeling.Udfald.Ikkegodkendt, Noegledeling.Hent());
+        Assert.True(File.Exists(kuvert));
+        Assert.Null(NoteApp.Core.Llm.SkyNoegle.Hent());
+
+        // Og saa siger man ja.
+        Parring.Betro(Delt.Andre().Single());
+
+        Assert.Equal(Noegledeling.Udfald.Hentet, Noegledeling.Hent());
+        Assert.Equal("hemmelig-noegle-1234567890", NoteApp.Core.Llm.SkyNoegle.Hent());
+        Assert.False(File.Exists(kuvert));
+    }
+
+    [Fact]
+    public void Maskinen_siger_hvem_den_har_godkendt()
+    {
+        var delt = Nydeltmappe();
+        Delt.Klargoer(delt);
+
+        using var stationaer = new Maskine("Stationær", delt);
+        using var baerbar = new Maskine("Bærbar", delt, Maskinrolle.Sekundaer);
+
+        stationaer.Tag();
+        Delt.Meld();
+        var mitId = Maskinid.Id;
+
+        baerbar.Tag();
+        Delt.Meld();
+
+        stationaer.Tag();
+
+        // Endnu ingen godkendelse: listen er tom, og det er et svar - ikke
+        // et «ved ikke».
+        Assert.False(Delt.Andre().Single().HarGodkendt(mitId));
+
+        baerbar.Tag();
+        Parring.Betro(Delt.Andre().Single());
+        Delt.Meld();
+
+        stationaer.Tag();
+
+        // DEN ANDEN SIDE KAN NU SES. Det er dét, der goer, at den maskine,
+        // der mangler at sige ja, kan spoerge af sig selv.
+        Assert.True(Delt.Andre().Single().HarGodkendt(mitId));
+    }
+
     // ================================================================ vejledningen
 
     [Fact]
@@ -693,7 +782,22 @@ public class Delingstest
         Assert.Equal(2, Delingsguide.Mangler());
 
         Parring.Betro(Delt.Andre().Single());
+        Delt.Meld();
         SaetNoegle("hemmelig-noegle-1234567890");
+
+        // ============ EEN HALVDEL ER IKKE NOK ============
+        //
+        // Vi har godkendt den anden. Den har ikke godkendt os, og saa kan der
+        // ikke udveksles noget. Stod der hak her, ville skaermen melde
+        // faerdigt, mens ingenting virkede - og det var praecis dét, der
+        // skete 07-09-2026: noeglen blev sendt og afvist i stilhed.
+        Assert.False(Delingsguide.Faerdig());
+
+        stationaer.Tag();
+        Parring.Betro(Delt.Andre().Single());
+        Delt.Meld();
+
+        baerbar.Tag();
 
         Assert.True(Delingsguide.Faerdig());
     }

@@ -1,6 +1,7 @@
 ﻿using System.Windows.Threading;
 using NoteApp.Core;
 using NoteApp.Core.Deling;
+using NoteApp.Desktop.Deling;
 
 namespace NoteApp.Desktop.Jobs;
 
@@ -68,6 +69,20 @@ public static class Delingsvagt
             // allerede har taget beslutningen paa den anden skaerm; at skulle
             // sige ja to gange til det samme er ikke en sikkerhed, det er en
             // forhindring.
+            // ============ VENTER DEN ANDEN PAA ET JA HER? ============
+            //
+            // Godkendelsen skal ske paa begge maskiner. Foer kunne den kun
+            // findes inde under Indstillinger, og den, der havde godkendt paa
+            // sin stationaere, fik intet at vide paa sin baerbare - noeglen
+            // blev sendt og afvist i stilhed. Nu spoerger den maskine, der
+            // mangler at sige ja, af sig selv.
+            if (Parringsdialog.SpoergOmNoedvendigt(System.Windows.Application.Current?.MainWindow))
+            {
+                // Der blev sagt ja. Kuverten, der laa og ventede, kan aabnes
+                // nu - der skal ikke gaa fem minutter mere.
+                Delt.Meld();
+            }
+
             // TALLET VED MENUPUNKTET FOELGER MED. Det er her, den anden
             // computer bliver opdaget - og den, der sidder og venter paa, at
             // den melder sig, skal ikke skulle aabne Indstillinger for at se,
@@ -81,7 +96,12 @@ public static class Delingsvagt
 
                 if (udfald == Noegledeling.Udfald.Hentet)
                 {
-                    Historik.Skriv(HaendelseType.Andet,
+                    // HaendelseType.Opsaetning OG IKKE Andet. Det er den
+                    // type, klokken viser - se Notifikationer.Vaerd. Uden
+                    // den staar der en linje i historikken, som ingen ved
+                    // findes, og saa sidder man og venter paa noget, der er
+                    // kommet for en time siden.
+                    Historik.Skriv(HaendelseType.Opsaetning,
                         api
                             ? "API-nøglen er modtaget fra din anden computer"
                             : "Google-forbindelsen er modtaget fra din anden computer",
@@ -95,13 +115,15 @@ public static class Delingsvagt
                 }
                 else if (udfald == Noegledeling.Udfald.Afvist)
                 {
-                    Historik.Skriv(HaendelseType.Andet,
+                    Historik.Skriv(HaendelseType.Opsaetning,
                         "Noget fra din anden computer blev afvist",
                         "Der lå noget til den her computer i den fælles mappe, men det kunne ikke "
                         + "åbnes — enten var det for gammelt, eller også kom det fra en computer, "
                         + "der ikke er godkendt. Det er ryddet væk.",
                         Udfald.SeEfter);
                 }
+
+                Notifikationer.Meld();
             }
         }
         catch (Exception)
