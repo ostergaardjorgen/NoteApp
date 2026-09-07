@@ -139,7 +139,18 @@ try
     # tal, saa revisionen klippes af — 0.18.0.0 bliver til 0.18.0.
     $msiVersion = ($version -split '\.')[0..2] -join '.'
 
-    & $wix build 'HeyPia.wxs' -ext WixToolset.UI.wixext -d "Version=$msiVersion" -o 'HeyPia.msi'
+    # ============ -arch x64: HVOR PROGRAMMET LANDER ============
+    #
+    # Uden den bygger wix en 32-bit pakke, og saa peger
+    # ProgramFiles6432Folder paa C:\Program Files (x86) - ogsaa naar filerne
+    # indeni er win-x64. Maalt paa maskinen 07-09-2026: 26 filer, 240,4 MB i
+    # (x86), mens installationsteksten sagde noget andet.
+    #
+    # SKIFTET KOSTER EEN OPGRADERING. En 64-bit pakke er en anden pakke end
+    # den 32-bit, der ligger; den gamle skal afinstalleres foerst, ellers kan
+    # der staa to poster under Tilfoej/fjern. Derefter opgraderer den som
+    # foer. Det blev gjort, mens der var to maskiner i verden.
+    & $wix build 'HeyPia.wxs' -arch x64 -ext WixToolset.UI.wixext -d "Version=$msiVersion" -o 'HeyPia.msi'
     if ($LASTEXITCODE -ne 0) { throw "wix build af MSI fejlede." }
 
     # Indpakningen: en setup.exe, der baerer MSI'en. Den beder selv om

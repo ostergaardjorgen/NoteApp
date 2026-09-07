@@ -7,7 +7,7 @@
   Startmenuen og kan afinstalleres rent.
 
   VIGTIGT: afinstallation rører ikke brugerens data. Pakken kender kun til
-  C:\Program Files\NoteApp. Optagelser, udskrifter, dokumenter, skabeloner og
+  C:\Program Files\HeyPia. Optagelser, udskrifter, dokumenter, skabeloner og
   indstillinger ligger i
   C:\AppNoter (eller hvor brugeren har valgt), og de bliver liggende. En
   afinstallation, der sletter et halvt års mødeoptagelser uden at spørge, er
@@ -47,7 +47,15 @@
 
     <!-- Programmet i Program Files. Mappen er skrivebeskyttet for almindelige
          brugere, og det er en fordel: koden ligger ét sted, data et andet, og
-         graensen haandhaeves af Windows i stedet for kun af vores egen kode. -->
+         graensen haandhaeves af Windows i stedet for kun af vores egen kode.
+
+         ============ DEN LOESES AF PAKKENS BITTAL ============
+
+         ProgramFiles6432Folder er C:\Program Files i en 64-bit pakke og
+         C:\Program Files (x86) i en 32-bit. Filerne indeni er win-x64, saa
+         pakken bygges med -arch x64 - se scripts\byg-installer.ps1. Indtil
+         07-09-2026 blev den bygget uden, og appen laa i (x86), mens teksten
+         i installationsprogrammet sagde noget andet. -->
     <StandardDirectory Id="ProgramFiles6432Folder">
       <Directory Id="INSTALLFOLDER" Name="HeyPia" />
     </StandardDirectory>
