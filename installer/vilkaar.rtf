@@ -4,34 +4,44 @@
 
 \b\fs28 Fra optagelse til f\'e6rdigt referat\b0\fs22\par
 \par
-\b0 NoteApp optager dine m\'f8der, skriver dem ud til tekst og laver referater og dokumenter ud af udskriften.\b0 \par
+HeyPia optager dine m\'f8der, skriver dem ud til tekst og laver referater og dokumenter ud af udskriften.\par
 \par
 \b\fs24 Hvor dine data er\b0\fs22\par
 \par
-\b0 \b Lyden forlader aldrig din maskine.\b0  Optagelsen og udskriften til tekst sker udelukkende p\'e5 din egen pc. Whisper k\'f8rer lokalt, og lydfilen bliver liggende hos dig.\b0 \par
+\b Lyden forlader aldrig din maskine.\b0  Optagelsen og udskriften til tekst sker udelukkende p\'e5 din egen pc. Whisper k\'f8rer lokalt, og lydfilen bliver liggende hos dig.\par
 \par
-\b0 \b Selve referatet laves ikke lokalt.\b0  N\'e5r du beder om et dokument, sendes \b udskriften\b0  \endash  teksten af det, der blev sagt \endash  til en sprogmodel hos Mistral p\'e5 deres europ\'e6iske endepunkt. Lyden sendes ikke med.\b0 \par
+\b Selve referatet laves ikke lokalt.\b0  N\'e5r du beder om et dokument, sendes udskriften \u8212? teksten af det, der blev sagt \u8212? til en sprogmodel hos Mistral p\'e5 deres europ\'e6iske endepunkt. Lyden sendes ikke med.\par
 \par
-\b0 Det kr\'e6ver din egen API-n\'f8gle hos Mistral. Der f\'f8lger ingen med appen, og appen opretter ingen konto for dig. Vil du ikke sende noget ud af huset, kan du bruge appen til optagelse og udskrift alene \endash  dokumentdelen er det eneste, der sender noget.\b0 \par
+Det kr\'e6ver din egen API-n\'f8gle hos Mistral. Der f\'f8lger ingen med appen, og appen opretter ingen konto for dig. Vil du ikke sende noget ud af huset, kan du bruge appen til optagelse og udskrift alene \u8212? dokumentdelen er det eneste, der sender noget.\par
 \par
-\b0 I appen under \b Compliance\b0  st\'e5r, hvad vi ved og ikke ved om leverand\'f8ren, og hvor du finder databehandleraftalen. L\'e6s den, hvis du behandler f\'f8lsomme oplysninger.\b0 \par
+I appen under Compliance st\'e5r, hvad vi ved og ikke ved om leverand\'f8ren, og hvor du finder databehandleraftalen. L\'e6s den, hvis du behandler f\'f8lsomme oplysninger.\par
 \par
 \b\fs24 Hvad bliver installeret\b0\fs22\par
 \par
-\bullet\tab \b0 Selve programmet i \b C:\\Program Files\\NoteApp\b0  \endash  cirka 160 MB.\b0 \par
-\bullet\tab \b0 En genvej i Startmenuen og en p\'e5 skrivebordet.\b0 \par
-\bullet\tab \b0 En post under Tilf\'f8j/fjern programmer, s\'e5 appen kan afinstalleres normalt.\b0 \par
+\bullet\tab Selve programmet i \b C:\\Program Files\\HeyPia\b0  \u8212? cirka 240 MB.\par
+\bullet\tab En genvej i Startmenuen og en p\'e5 skrivebordet.\par
+\bullet\tab En post under Tilf\'f8j/fjern programmer, s\'e5 appen kan afinstalleres normalt.\par
+\par
 \b\fs24 F\'f8rste gang du starter appen\b0\fs22\par
 \par
-\b0 Appen guider dig gennem to trin: hvor dine filer skal ligge, og hentning af Whisper, som laver selve udskriften.\b0 \par
+Appen guider dig gennem tre trin: hvad maskinen skal bruges til, hvor dine filer skal ligge, og hentning af Whisper, som laver selve udskriften.\par
 \par
-\b0 Whisper f\'f8lger ikke med i denne fil. Standardmodellen fylder 2,9 GB og skal v\'e6lges efter maskinen. Appen finder selv den rigtige udgave: har du et NVIDIA-kort, bliver det GPU-udgaven. P\'e5 ren CPU er standardmodellen for langsom til daglig brug, og s\'e5 kan du v\'e6lge en mindre. Du f\'e5r st\'f8rrelsen at se, f\'f8r der hentes noget.\b0 \par
+\b Appen ser efter, hvad din maskine kan.\b0  Den kigger p\'e5 grafikkort, hukommelse og processor og foresl\'e5r den motor og den sprogmodel, der passer til netop den. Har du et NVIDIA-kort, bliver det GPU-udgaven, som er cirka ti gange hurtigere end CPU. Der sendes intet ud af huset for at finde ud af det, og du f\'e5r st\'f8rrelserne at se, f\'f8r der hentes noget.\par
 \par
-\b0 Vil du ogs\'e5 lave dokumenter, s\'e6tter du din API-n\'f8gle ind under \b AI-modeller\b0  i appen. Optagelse og udskrift virker uden.\b0 \par
+Whisper f\'f8lger ikke med i denne fil. Standardmodellen fylder 2,9 GB. P\'e5 ren CPU er den for langsom til daglig brug, og s\'e5 foresl\'e5r appen en mindre.\par
 \par
-\b\fs24 Hvis du fjerner NoteApp igen\b0\fs22\par
+\b\fs24 Har du to computere?\b0\fs22\par
 \par
-\b0 Afinstallation fjerner \b kun programmet\b0 . Dine optagelser, udskrifter, dokumenter, skabeloner og indstillinger bliver liggende i datamappen \endash  som standard \b C:\\AppNoter\b0  \endash  og kan bruges igen, hvis du installerer appen p\'e5 ny. Vil du af med dem, skal du selv slette mappen.\b0 \par
+En station\'e6r og en b\'e6rbar kan dele det samme arkiv. F\'f8rste trin i ops\'e6tningen sp\'f8rger, hvilken slags maskine det her er:\par
 \par
-\fs20 Fort\'e6l altid deltagerne, at du optager. Ved et onlinem\'f8de giver m\'f8deprogrammet ikke besked, n\'e5r lyden optages p\'e5 denne m\'e5de \endash  s\'e5 beskeden skal komme fra dig. Til geng\'e6ld kan du fort\'e6lle dem, hvor optagelsen ender: den bliver p\'e5 din maskine og l\'e6gges ikke i nogen skytjeneste.\fs22\par
+\bullet\tab \b Prim\'e6r maskine\b0  \u8212? den, der har kr\'e6fterne. Den skriver m\'f8derne ud, ogs\'e5 dem, den anden optager. Det er den, du s\'e6tter op f\'f8rst.\par
+\bullet\tab \b Sekund\'e6r maskine\b0  \u8212? typisk den b\'e6rbare. Den optager og l\'e6ser alt som normalt, og det tunge arbejde sendes til den prim\'e6re. Den beh\'f8ver ikke den store sprogmodel.\par
+\par
+De to finder hinanden gennem en mappe, du selv v\'e6lger \u8212? en netv\'e6rksmappe p\'e5 din egen NAS eller et cloud-drev. Du godkender dem for hinanden ved at sammenligne en kode p\'e5 de to sk\'e6rme, og derefter kan API-n\'f8glen sendes over, s\'e5 den kun skal tastes ind \'e9n gang.\par
+\par
+Har du kun \'e9n computer, v\'e6lger du blot prim\'e6r og h\'f8rer ikke mere om det.\par
+\par
+\b\fs24 Hvis du fjerner HeyPia igen\b0\fs22\par
+\par
+Afinstallation fjerner kun programmet. Dine optagelser, udskrifter, dokumenter, skabeloner og indstillinger bliver liggende i datamappen \u8212? som standard C:\\AppNoter \u8212? og kan bruges igen, hvis du installerer appen p\'e5 ny. Vil du af med dem, skal mappen slettes med h\'e5nden.\par
 }

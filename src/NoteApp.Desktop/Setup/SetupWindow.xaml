@@ -64,7 +64,63 @@
       </Border>
     </StackPanel>
 
-    <!-- ================= Trin 2: sådan skal den virke ===================
+    <!-- ============== Trin 2: hvilken maskine er det her? ===============
+
+         DET SPOERGES FOERST, FORDI DET AENDRER RESTEN. En sekundaer maskine
+         skal ikke hente en model paa 2,9 GB ned for at kunne noget, den
+         sender videre alligevel.
+
+         «Primaer» og «sekundaer» og ikke «arbejdsstation» og «let»: den, der
+         staar med sin computer nummer to, kan svare paa hvilken en det er.
+         Se NoteApp.Core.Deling.Maskinrolle. -->
+    <StackPanel x:Name="Trin3" Grid.Row="1" Visibility="Collapsed">
+      <Border Background="{DynamicResource Panel}" CornerRadius="10" Padding="20"
+              BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
+        <StackPanel>
+          <TextBlock Text="{i18n:Oversat setupwindow.maskine_overskrift}" FontSize="16"
+                     FontWeight="SemiBold" Margin="0,0,0,10" />
+          <TextBlock FontSize="13" LineHeight="22" TextWrapping="Wrap"
+                     Foreground="{DynamicResource TekstSvag}"
+                     Text="{i18n:Oversat setupwindow.maskine_under}" />
+
+          <RadioButton x:Name="ValgPrimaer" GroupName="maskinrolle" Margin="0,18,0,0"
+                       IsChecked="True">
+            <StackPanel>
+              <TextBlock Text="{i18n:Oversat setupwindow.maskine_primaer}" FontSize="14"
+                         FontWeight="SemiBold" />
+              <TextBlock FontSize="12.5" Margin="0,3,0,0" TextWrapping="Wrap" LineHeight="19"
+                         MaxWidth="560" HorizontalAlignment="Left"
+                         Foreground="{DynamicResource TekstMeget}"
+                         Text="{i18n:Oversat setupwindow.maskine_primaer_under}" />
+            </StackPanel>
+          </RadioButton>
+
+          <RadioButton x:Name="ValgSekundaer" GroupName="maskinrolle" Margin="0,14,0,0">
+            <StackPanel>
+              <TextBlock Text="{i18n:Oversat setupwindow.maskine_sekundaer}" FontSize="14"
+                         FontWeight="SemiBold" />
+              <TextBlock FontSize="12.5" Margin="0,3,0,0" TextWrapping="Wrap" LineHeight="19"
+                         MaxWidth="560" HorizontalAlignment="Left"
+                         Foreground="{DynamicResource TekstMeget}"
+                         Text="{i18n:Oversat setupwindow.maskine_sekundaer_under}" />
+            </StackPanel>
+          </RadioButton>
+        </StackPanel>
+      </Border>
+
+      <Border Background="{DynamicResource Trykket}" CornerRadius="10" Padding="20" Margin="0,14,0,0"
+              BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
+        <StackPanel>
+          <TextBlock Text="{i18n:Oversat setupwindow.maskine_senere}" FontSize="13"
+                     FontWeight="SemiBold" />
+          <TextBlock FontSize="12.5" Margin="0,6,0,0" TextWrapping="Wrap" LineHeight="19"
+                     Foreground="{DynamicResource TekstMeget}"
+                     Text="{i18n:Oversat setupwindow.maskine_senere_under}" />
+        </StackPanel>
+      </Border>
+    </StackPanel>
+
+    <!-- ================= Trin 3: sådan skal den virke ===================
 
          HER SKAL DET HELE SPØRGES OM, OG DET ER HELE POINTEN MED TRINNET.
 

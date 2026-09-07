@@ -39,8 +39,8 @@ public partial class SettingsView
             Deling_Navn.Text = Maskinid.Navn;
 
             var rolle = Maskinid.Rolle;
-            Deling_Arbejdsstation.IsChecked = rolle == Maskinrolle.Arbejdsstation;
-            Deling_Let.IsChecked = rolle == Maskinrolle.Let;
+            Deling_Primaer.IsChecked = rolle == Maskinrolle.Primaer;
+            Deling_Sekundaer.IsChecked = rolle == Maskinrolle.Sekundaer;
 
             var mappe = Maskinid.Deltmappe;
 
@@ -158,9 +158,9 @@ public partial class SettingsView
 
         tekst.Children.Add(new TextBlock
         {
-            Text = Sprog.T(m.Rolle == Maskinrolle.Arbejdsstation
-                       ? "settingsview.deling_rolle_arbejdsstation"
-                       : "settingsview.deling_rolle_let")
+            Text = Sprog.T(m.Rolle == Maskinrolle.Primaer
+                       ? "settingsview.deling_rolle_primaer"
+                       : "settingsview.deling_rolle_sekundaer")
                    + " · " + Sidst(m),
             FontSize = 11.5,
             Margin = new Thickness(0, 3, 0, 0),
@@ -333,7 +333,7 @@ public partial class SettingsView
     {
         if (_delingIndlaeser) return;
 
-        Maskinid.Rolle = Deling_Let.IsChecked == true ? Maskinrolle.Let : Maskinrolle.Arbejdsstation;
+        Maskinid.Rolle = Deling_Sekundaer.IsChecked == true ? Maskinrolle.Sekundaer : Maskinrolle.Primaer;
         Delt.Meld();
     }
 

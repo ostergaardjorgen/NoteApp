@@ -26,8 +26,9 @@ public partial class SetupWindow : Window
     private static readonly (string Titel, string Under)[] Trin =
     {
         ("Velkommen til HeyPia", "Lyden bliver på din maskine — teksten bearbejdes i Europa"),
+        ("Er det din første maskine?", "HeyPia kan dele arbejdet mellem to computere"),
         ("Sådan skal den virke", "Navn, mikrofon, genvejstast og vågeord — sat én gang, her"),
-        ("Sidste trin: hent Whisper", "Motoren og en sprogmodel, så appen kan skrive dine møder ud")
+        ("Sidste trin: hent Whisper", "Appen ser efter, hvad din maskine kan, og henter det, der passer")
     };
 
     /// <summary>
@@ -64,8 +65,9 @@ public partial class SetupWindow : Window
         _trin = nr;
 
         Trin1.Visibility = nr == 0 ? Visibility.Visible : Visibility.Collapsed;
-        Trin2.Visibility = nr == 1 ? Visibility.Visible : Visibility.Collapsed;
-        Trin4.Visibility = nr == 2 ? Visibility.Visible : Visibility.Collapsed;
+        Trin3.Visibility = nr == 1 ? Visibility.Visible : Visibility.Collapsed;
+        Trin2.Visibility = nr == 2 ? Visibility.Visible : Visibility.Collapsed;
+        Trin4.Visibility = nr == 3 ? Visibility.Visible : Visibility.Collapsed;
 
         TrinTitel.Text = nr == 0 && _igen ? "Opsætning" : Trin[nr].Titel;
         TrinUnder.Text = Trin[nr].Under;
@@ -77,11 +79,16 @@ public partial class SetupWindow : Window
         {
             0 => _igen ? "Videre" : "Kom i gang",
             1 => "Videre",
+            2 => "Videre",
             _ => "Hent og afslut",
         };
 
-        if (nr == 1) IndlaesValg();
-        if (nr == 2) _ = ForberedHentning();
+        // TRINNENE FLYTTEDE SIG, DA MASKINVALGET KOM IND SOM NR. 2.
+        // «Saadan skal den virke» er nu nr. 3 og hentningen nr. 4 - og
+        // hentningen skal forberedes FOERST der, ellers skriver den «Faerdig»
+        // paa en knap, der stadig skal videre.
+        if (nr == 2) IndlaesValg();
+        if (nr == 3) _ = ForberedHentning();
     }
 
     // ------------------------------------------------ sådan skal den virke
@@ -260,12 +267,28 @@ public partial class SetupWindow : Window
             // enhver maskine uden NVIDIA-kort, altsaa praecis dem, grenen er
             // til for. Derfor slaas der nu op i katalogget frem for paa et
             // navn skrevet i haanden.
-            _modelValg = EngineInstaller.HasNvidiaGpu()
-                ? WhisperInstall.Standard
-                : WhisperInstall.Model("large-v3-turbo") ?? WhisperInstall.Standard;
+            // ============ EN SEKUNDAER MASKINE SKAL IKKE HENTE DEN STORE ============
+            //
+            // Den sender det tunge arbejde videre til den primaere. En model
+            // paa 2,9 GB paa en baerbar, der alligevel ikke skal bruge den, er
+            // en halv time ned ad en telefonforbindelse for ingenting.
+            //
+            // Den faar den lille i stedet - ikke ingenting. Uden en model kan
+            // den ikke skrive noget ud, og dét er praecis, hvad man har brug
+            // for i et tog, hvor den primaere ikke kan naas.
+            var sekundaer = ValgSekundaer.IsChecked == true;
+
+            _modelValg = sekundaer || !EngineInstaller.HasNvidiaGpu()
+                ? WhisperInstall.Model("large-v3-turbo") ?? WhisperInstall.Standard
+                : WhisperInstall.Standard;
 
             ModelValg.Text = $"{_modelValg.Id}  ({_modelValg.SizeText})";
-            ModelBegrundelse.Text = _modelValg.Summary + " Du kan skifte model senere under Motor og model.";
+
+            ModelBegrundelse.Text = sekundaer
+                ? "Den lille, fordi den her computer sender det tunge arbejde videre til din "
+                  + "primære. Den er nok til at skrive et møde ud på egen hånd, når du ikke "
+                  + "kan nå den anden. Du kan skifte model senere under Motor og model."
+                : _modelValg.Summary + " Du kan skifte model senere under Motor og model.";
         }
 
         var samlet = (_motorValg?.Bytes ?? 0) + (_modelValg?.Bytes ?? 0);
@@ -304,6 +327,31 @@ public partial class SetupWindow : Window
         }
     }
 
+    /// <summary>
+    /// Gemmer, om det er den første eller den anden computer.
+    /// </summary>
+    /// <remarks>
+    /// DEN SKAL SÆTTES, OGSÅ NÅR MAN IKKE RØRTE NOGET. Standarden er primær, og
+    /// den skal skrives ned — ellers står maskinfilen med en rolle, ingen har
+    /// taget stilling til, og den fejl viser sig først den dag, der er to
+    /// computere.
+    /// </remarks>
+    private void GemMaskinrolle()
+    {
+        try
+        {
+            NoteApp.Core.Deling.Maskinid.Rolle = ValgSekundaer.IsChecked == true
+                ? NoteApp.Core.Deling.Maskinrolle.Sekundaer
+                : NoteApp.Core.Deling.Maskinrolle.Primaer;
+        }
+        catch (Exception)
+        {
+            // Kan den ikke skrives, koerer opsaetningen videre. Rollen kan
+            // saettes under Indstillinger, og en opsaetning, der gaar i staa
+            // paa en fil, er vaerre end en rolle, der staar forkert.
+        }
+    }
+
     private void Tilbage_Click(object sender, RoutedEventArgs e) => VisTrin(Math.Max(0, _trin - 1));
 
     private async void Naeste_Click(object sender, RoutedEventArgs e)
@@ -322,7 +370,11 @@ public partial class SetupWindow : Window
         // Hakkene gemmes, NAAR MAN FORLADER TRINNET - ikke først til sidst.
         // Gaar hentningen galt bagefter, eller lukkes vinduet, er valgene
         // stadig truffet. Det er dem, der er svaerest at finde igen.
-        if (_trin == 1) GemValg();
+        // MASKINEN GEMMES, NAAR MAN FORLADER TRINNET - ikke foerst til sidst.
+        // Den afgoer, hvilken model der foreslaas paa naeste side.
+        if (_trin == 1) GemMaskinrolle();
+
+        if (_trin == 2) GemValg();
 
         if (_trin < Trin.Length - 1)
         {

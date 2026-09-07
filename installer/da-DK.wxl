@@ -30,7 +30,7 @@
   <String Id="InstallVersion" Value="Version [WixBundleVersion]. Er en tidligere version installeret, bliver den opdateret — og dine optagelser, udskrifter og dokumenter bliver liggende." />
   <String Id="InstallAcceptCheckbox" Value="Jeg har &amp;læst ovenstående" />
   <String Id="InstallOptionsButton" Value="&amp;Indstillinger" />
-  <String Id="InstallInstallButton" Value="&amp;Installér eller opdatér" />
+  <String Id="InstallInstallButton" Value="&amp;Installér" />
   <String Id="InstallCancelButton" Value="&amp;Annullér" />
   <String Id="InstallLicenseLinkText" Value="Om HeyPia" />
 
@@ -54,6 +54,8 @@
   <String Id="SuccessInstallHeader" Value="HeyPia er installeret" />
   <String Id="SuccessRepairHeader" Value="Reparationen er gennemført" />
   <String Id="SuccessUninstallHeader" Value="HeyPia er fjernet" />
+  <String Id="SuccessBody" Value="Du er klar. Start HeyPia, og lad den se dig an: den kigger p&#229; grafikkort, hukommelse og processor og henter den motor og den sprogmodel, der passer til netop din maskine. Det tager et par minutter &#8212; og der sendes intet ud af huset for at finde ud af det.&#10;&#10;PR&#216;V DET F&#216;RSTE GANG&#10;&#10;Optag lyden fra dit n&#230;ste m&#248;de. Eller s&#230;t den til at optage det n&#230;ste webinar, du alligevel sidder med.&#10;&#10;N&#229;r optagelsen er skrevet ud, st&#229;r hvert eneste ord i s&#248;gefeltet i HeyPia. Skriv et navn eller et fagord, og du lander pr&#230;cis dér, hvor det blev sagt &#8212; ogs&#229; om et halvt &#229;r. Det er dét, en komplet transskription giver dig.&#10;&#10;HUSK: du kan installere HeyPia p&#229; din b&#230;rbare ogs&#229;, ogs&#229; selv om den er mindre kraftig. De to computere deler det samme arkiv, du kan optage p&#229; dem begge, og det tunge arbejde bliver p&#229; den kraftige.&#10;&#10;God forn&#248;jelse." />
+  <String Id="SuccessBodyFjernet" Value="HeyPia er fjernet fra maskinen.&#10;&#10;Dine optagelser, udskrifter, dokumenter og indstillinger er ikke r&#248;rt. De ligger, hvor de l&#229; &#8212; som standard i C:\AppNoter &#8212; og bliver brugt igen, hvis du installerer HeyPia p&#229; ny.&#10;&#10;Vil du ogs&#229; af med dem, skal mappen slettes med h&#229;nden." />
   <String Id="SuccessLaunchButton" Value="&amp;Start HeyPia" />
   <String Id="SuccessRestartText" Value="Maskinen skal genstartes, før ændringerne træder i kraft." />
   <String Id="SuccessRestartButton" Value="&amp;Genstart" />

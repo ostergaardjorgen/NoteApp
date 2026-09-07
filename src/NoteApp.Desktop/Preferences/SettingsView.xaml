@@ -1187,25 +1187,25 @@
                 <TextBlock Text="{i18n:Oversat settingsview.deling_rolle}" Style="{StaticResource Underskrift}"
                            Margin="0,20,0,0" />
 
-                <RadioButton x:Name="Deling_Arbejdsstation" GroupName="delingsrolle" Margin="0,8,0,0"
+                <RadioButton x:Name="Deling_Primaer" GroupName="delingsrolle" Margin="0,8,0,0"
                              Checked="Delingsrolle_Aendret">
                   <StackPanel>
-                    <TextBlock Text="{i18n:Oversat settingsview.deling_rolle_arbejdsstation}" FontSize="13" />
+                    <TextBlock Text="{i18n:Oversat settingsview.deling_rolle_primaer}" FontSize="13" />
                     <TextBlock FontSize="11.5" Margin="0,2,0,0" TextWrapping="Wrap" MaxWidth="520"
                                HorizontalAlignment="Left"
                                Foreground="{DynamicResource TekstMeget}"
-                               Text="{i18n:Oversat settingsview.deling_rolle_arbejdsstation_hjaelp}" />
+                               Text="{i18n:Oversat settingsview.deling_rolle_primaer_hjaelp}" />
                   </StackPanel>
                 </RadioButton>
 
-                <RadioButton x:Name="Deling_Let" GroupName="delingsrolle" Margin="0,12,0,0"
+                <RadioButton x:Name="Deling_Sekundaer" GroupName="delingsrolle" Margin="0,12,0,0"
                              Checked="Delingsrolle_Aendret">
                   <StackPanel>
-                    <TextBlock Text="{i18n:Oversat settingsview.deling_rolle_let}" FontSize="13" />
+                    <TextBlock Text="{i18n:Oversat settingsview.deling_rolle_sekundaer}" FontSize="13" />
                     <TextBlock FontSize="11.5" Margin="0,2,0,0" TextWrapping="Wrap" MaxWidth="520"
                                HorizontalAlignment="Left"
                                Foreground="{DynamicResource TekstMeget}"
-                               Text="{i18n:Oversat settingsview.deling_rolle_let_hjaelp}" />
+                               Text="{i18n:Oversat settingsview.deling_rolle_sekundaer_hjaelp}" />
                   </StackPanel>
                 </RadioButton>
               </StackPanel>

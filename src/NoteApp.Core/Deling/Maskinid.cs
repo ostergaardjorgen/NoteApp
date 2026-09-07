@@ -1,26 +1,42 @@
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 
 namespace NoteApp.Core.Deling;
 
 /// <summary>Hvad den her PC laver i et opsæt med flere maskiner.</summary>
+/// <remarks>
+/// ============ FØRSTE OG ANDEN, IKKE STOR OG LILLE ============
+///
+/// De hed «Arbejdsstation» og «Let». Det er beskrivelser af maskinen, og de
+/// hjælper ikke den, der står med sin computer nummer to og skal vælge:
+/// «arbejdsstation» kan en bærbar også være, og «let» lyder som noget, man
+/// gerne vil have.
+///
+/// «Primær» og «sekundær» er derimod til at svare på uden at vide noget om
+/// appen: er det den første, jeg satte op, eller er det den anden? Rækkefølgen
+/// er det, brugeren KENDER.
+///
+/// TALLENE ER DE SAMME. De står i maskinfilen og i den fælles mappe som 0 og
+/// 1, og en maskine, der ikke er opdateret endnu, læser derfor det samme.
+/// Derfor må rækkefølgen her aldrig byttes om.
+/// </remarks>
 public enum Maskinrolle
 {
     /// <summary>
-    /// Skriver ud — også for de andre. Den maskine, der har kræfterne.
+    /// Den første maskine. Den skriver møderne ud — også dem, den anden optager.
     /// </summary>
-    Arbejdsstation,
+    Primaer,
 
     /// <summary>
-    /// Optager og læser, men sender det tunge arbejde videre.
+    /// Den anden maskine. Optager og læser, men sender det tunge arbejde videre.
     /// </summary>
     /// <remarks>
     /// DET ER EN STANDARD, IKKE EN LÅS. En bærbar kan stadig skrive ud med en
     /// mindre model, når man sidder i et tog og skal bruge det nu. Rollen
     /// afgør, hvad der sker af sig selv — ikke hvad man har lov til.
     /// </remarks>
-    Let,
+    Sekundaer,
 }
 
 /// <summary>
@@ -89,7 +105,7 @@ public static class Maskinid
         }
 
         var ny = new Gemt(Convert.ToHexString(RandomNumberGenerator.GetBytes(16)).ToLowerInvariant(),
-                          Environment.MachineName, Maskinrolle.Arbejdsstation, null);
+                          Environment.MachineName, Maskinrolle.Primaer, null);
 
         Skriv(ny);
         return ny;
