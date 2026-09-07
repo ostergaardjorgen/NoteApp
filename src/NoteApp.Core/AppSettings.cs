@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace NoteApp.Core;
 
@@ -18,7 +19,18 @@ namespace NoteApp.Core;
 /// </summary>
 public sealed class AppSettings
 {
-    private static readonly JsonSerializerOptions Options = new() { WriteIndented = true };
+    private static readonly JsonSerializerOptions Options = new()
+    {
+        WriteIndented = true,
+
+        // ============ ENUMS SKRIVES SOM TEKST ============
+        //
+        // Uden den her staar der «3» i indstillinger.json. Den dag nogen
+        // indsaetter en vaerdi i midten af en enum, skifter alle brugeres valg
+        // stille - og en fil, et menneske kan laese, er lettere at fejlfinde
+        // paa en fremmed maskine.
+        Converters = { new JsonStringEnumConverter() },
+    };
 
     public string? PreferredModel { get; set; }
 
@@ -632,6 +644,50 @@ public sealed class AppSettings
     /// </remarks>
     public bool ArkiverLyd { get; set; } = true;
 
+    /// <summary>Hvor tit arkivet ses efter. Se <see cref="Deling.Arkivplan"/>.</summary>
+    /// <remarks>
+    /// HVERT KVARTER SOM STANDARD. Det er ofte nok til, at en optagelse fra
+    /// formiddagen er i sikkerhed inden frokost, og sjældent nok til, at
+    /// spørgsmålene over netværket ikke er værd at tælle.
+    ///
+    /// Den kan sættes ned til to faste tidspunkter om dagen. En maskine, der
+    /// står tændt, har ingen grund til at gennemgå 352 filer kl. 03.
+    /// </remarks>
+    public Deling.Arkivtakt ArkivTakt { get; set; } = Deling.Arkivtakt.Kvarter;
+
+    /// <summary>Skal de hyppige takter holde sig inden for <see cref="ArkivFraKl"/>–<see cref="ArkivTilKl"/>?</summary>
+    public bool ArkivKunITidsrum { get; set; }
+
+    /// <summary>Tidsrummets start — eller det første faste tidspunkt.</summary>
+    public int ArkivFraKl { get; set; } = 8;
+
+    /// <summary>Tidsrummets slut — eller det andet faste tidspunkt.</summary>
+    public int ArkivTilKl { get; set; } = 17;
+
+    /// <summary>
+    /// Hvornår arkivet sidst blev kørt.
+    /// </summary>
+    /// <remarks>
+    /// DEN SKAL OVERLEVE EN GENSTART. Uden den ville «to gange om dagen» blive
+    /// til «hver gang appen åbnes», og den, der lukker og åbner appen fem
+    /// gange på en formiddag, ville få fem fulde gennemgange af netværket.
+    /// </remarks>
+    public DateTimeOffset? ArkivSidst { get; set; }
+
+    /// <summary>
+    /// Skal de andres nye ting hentes hjem af sig selv?
+    /// </summary>
+    /// <remarks>
+    /// TIL SOM STANDARD, og kun DET SKREVNE: udskrifter, referater, noter,
+    /// projekter og skabeloner. 25 MB, og det er dem, man leder efter.
+    ///
+    /// LYDEN HENTES IKKE AF SIG SELV. Den er 1,8 GB, og den, der optog, har
+    /// den allerede. Hentes den automatisk begge veje, ligger hver optagelse
+    /// tre steder — to maskiner og drevet — uden at nogen har bedt om det.
+    /// Skal den hjem, står knappen «Hent hjem» på delingsfanen.
+    /// </remarks>
+    public bool HentAutomatisk { get; set; } = true;
+
     /// <summary>
     /// Bredden på Cockpittets venstre spalte — kalenderen.
     ///
@@ -810,7 +866,18 @@ public sealed class AppSettings
         try
         {
             if (!File.Exists(sti)) return null;
-            return JsonSerializer.Deserialize<AppSettings>(File.ReadAllText(sti, Encoding.UTF8));
+
+            // ============ SAMME OPSAETNING BEGGE VEJE ============
+            //
+            // Skrives der med en omsaetter og laeses der uden, kaster
+            // deserialiseringen - og fangeren nedenfor giver null, som ER
+            // «indstillingerne er vaek». Det skete 07-09-2026, i det sekund
+            // enums begyndte at blive skrevet som tekst, og seks proever
+            // fangede det.
+            //
+            // JsonStringEnumConverter laeser BAADE tekst og tal, saa en fil
+            // fra en aeldre udgave kan stadig laeses.
+            return JsonSerializer.Deserialize<AppSettings>(File.ReadAllText(sti, Encoding.UTF8), Options);
         }
         catch (JsonException) { return null; }
         catch (IOException) { return null; }

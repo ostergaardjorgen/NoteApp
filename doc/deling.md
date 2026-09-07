@@ -220,11 +220,58 @@ parring med en maskine, der er væk. Et segl ville gøre arkivet ubrugeligt
 præcis den dag, det skulle bruges. Det er mappens egne rettigheder, der er
 grænsen, og det står på delingsskærmen.
 
-**Vagten viger.** `Arkivvagt` ser efter hvert kvarter — ikke hvert minut: hver
-kørsel spørger filsystemet om størrelse og dato på hver eneste fil, 352 den
-07-09-2026, og de spørgsmål går over SMB. Der arkiveres ikke, mens der optages,
-og ikke, mens der kører noget tungt. Arkiveringen kan altid tages om;
-optagelsen kan ikke.
+**Det skrevne hentes hjem af sig selv; lyden gør ikke.** Udskrifter, referater,
+noter, projekter og skabeloner fra den anden maskine kommer hjem, så et møde
+optaget på den bærbare kan læses på den stationære — 25 MB. Lyden bliver stående
+på drevet, til nogen trykker: hentedes den også, ville hver optagelse ligge tre
+steder — begge maskiner og drevet — uden at nogen havde bedt om det.
+
+**Vagten viger.** Der arkiveres ikke, mens der optages, og ikke, mens der kører
+noget tungt. Arkiveringen kan altid tages om; optagelsen kan ikke.
+
+### Hvor tit
+
+`Arkivvagt`s ur slår hvert minut, men det koster ét opslag på klokken. Selve
+kørslen spørger filsystemet om størrelse og dato på hver eneste fil — 352 den
+07-09-2026 — og de spørgsmål går over SMB. Det er den, der skal være sjælden, og
+hvor sjælden bestemmer brugeren (`Arkivplan`):
+
+| Takt | Betyder |
+|---|---|
+| Hvert 15. minut | standard |
+| Hver time / hver 4. time | |
+| To gange om dagen | to faste klokkeslæt, fx 8 og 17 |
+| Én gang om dagen | ét fast klokkeslæt |
+| Kun når jeg trykker | |
+
+De hyppige takter kan holdes inden for et **tidsrum**: en maskine, der står
+tændt om natten, har ingen grund til at gennemgå 352 filer kl. 03. Tidsrummet må
+gå over midnat — «22 til 6» er et rigtigt svar for den, der arbejder om aftenen.
+
+**De faste tidspunkter glider ikke.** Der spørges, om der er kørt siden *dagens*
+klokkeslæt, ikke om der er gået 24 timer. Med et mellemrum ville kl. 8 blive til
+kl. 11 inden for en uge. Var maskinen slukket kl. 8, tages turen, når den
+tændes — at springe dagen over er den slags, man opdager en uge senere.
+
+Uret slår hvert minut netop for at kunne ramme et klokkeslæt: slog det hvert
+kvarter, ville «kl. 8» blive til «engang mellem 8 og 8.15».
+
+### Det er ikke den eneste forbindelse
+
+Delingsfanen skriver de øvrige takter op ved siden af, selvom de ikke kan
+justeres. Uden dem ser arkivets kvarter ud som den eneste vej mellem de to
+maskiner, og så undrer man sig over, at en aftale er der med det samme, mens en
+optagelse ikke er.
+
+| Hvad | Hvor tit | Vagt |
+|---|---|---|
+| Aftaler, opgaver, færdige udskrifter, lyd der skal skrives ud | hvert minut | `Arbejdsvagt` |
+| Om den anden er tændt, og om der venter en opsætning | hvert 5. minut | `Delingsvagt` |
+| Arkivet | efter takten ovenfor | `Arkivvagt` |
+
+Tallene i den tabel hentes fra vagternes egne felter og ikke fra en tekst: en
+tabel, der er skrevet af i hånden, holder op med at passe den dag, et af tallene
+ændres — og det ser stadig rigtigt ud.
 
 ## Det, der stadig mangler
 

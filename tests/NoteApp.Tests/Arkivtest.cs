@@ -311,6 +311,46 @@ public class Arkivtest
         Assert.True(File.Exists(Path.Combine(hos_b, "mikrofon.wav")));
     }
 
+    [Fact]
+    public void Det_der_hentes_af_sig_selv_er_uden_lyd()
+    {
+        var (a, b, delt) = Toparrede();
+
+        using var _a = a;
+        using var _b = b;
+
+        a.Tag();
+        Moede("Optaget paa den stationære");
+        Arkiv.Gem(medLyd: true);
+
+        var fra = Maskinid.Id;
+
+        b.Tag();
+
+        // ============ SAADAN HENTER VAGTEN ============
+        //
+        // Se Jobs.Arkivvagt.Hentnye: medLyd er FALSK. Lyden er 1,8 GB og
+        // ligger allerede hos den, der optog; hentedes den ogsaa af sig selv,
+        // laa hver optagelse tre steder uden at nogen havde bedt om det.
+        var kom = Arkiv.Hent(fra, medLyd: false);
+
+        Assert.True(kom.Noget);
+        Assert.Equal(0, kom.Lydfiler);
+
+        var hjemme = Directory.GetFiles(UserDataPaths.Meetings, "*", SearchOption.AllDirectories);
+
+        Assert.Contains(hjemme, f => Path.GetFileName(f) == "udskrift_large-v3.txt");
+        Assert.DoesNotContain(hjemme, f => Path.GetFileName(f) == "mikrofon.wav");
+
+        // Mødet KAN LAESES nu - det er hele pointen.
+        var moede = Assert.Single(MeetingStore.Alle());
+
+        Assert.Equal("Optaget paa den stationære", moede.Title);
+
+        // Og lyden staar stadig og venter paa knappen.
+        Assert.Equal(1, Arkiv.Hjemme(fra, medLyd: true).Lydfiler);
+    }
+
     // ================================================================== halve filer
 
     [Fact]

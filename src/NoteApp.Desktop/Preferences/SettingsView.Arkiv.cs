@@ -1,4 +1,4 @@
-using System.IO;
+﻿using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
@@ -46,6 +46,10 @@ public partial class SettingsView
 
         Deling_Arkivautomatisk.IsChecked = AppSettings.Current.ArkiverAutomatisk;
         Deling_Arkivlyd.IsChecked = AppSettings.Current.ArkiverLyd;
+        Deling_Hentautomatisk.IsChecked = AppSettings.Current.HentAutomatisk;
+
+        VisTakt();
+        VisOversigt();
 
         Arkivfremdrift_vis();
 
@@ -72,6 +76,186 @@ public partial class SettingsView
         if (!IsVisible) { _arkivur?.Stop(); return; }
 
         Arkivfremdrift_vis();
+    }
+
+    // ======================================================================= takten
+
+    /// <summary>Én takt, som den står i listen.</summary>
+    private sealed record Taktvalg(Arkivtakt Takt, string Navn);
+
+    private static List<Taktvalg> Takter() =>
+        Enum.GetValues<Arkivtakt>()
+            .Select(t => new Taktvalg(t, Sprog.T("arkiv.takt_" + t.ToString().ToLowerInvariant())))
+            .ToList();
+
+    private void VisTakt()
+    {
+        var i = AppSettings.Current;
+
+        if (Deling_Arkivtakt.ItemsSource is null)
+        {
+            Deling_Arkivtakt.ItemsSource = Takter();
+
+            // ============ TIMERNE ER TAL, IKKE TEKST ============
+            //
+            // «08» og ikke «8», saa de to bokse er lige brede og ikke hopper,
+            // naar man vaelger. Og 0-23 og ikke 1-24: der findes ingen kl. 24.
+            var timer = Enumerable.Range(0, 24).ToList();
+
+            Deling_Arkivfra.ItemsSource = timer;
+            Deling_Arkivtil.ItemsSource = timer;
+        }
+
+        Deling_Arkivtakt.SelectedItem = ((List<Taktvalg>)Deling_Arkivtakt.ItemsSource)
+            .FirstOrDefault(t => t.Takt == i.ArkivTakt);
+
+        Deling_Arkivfra.SelectedItem = Math.Clamp(i.ArkivFraKl, 0, 23);
+        Deling_Arkivtil.SelectedItem = Math.Clamp(i.ArkivTilKl, 0, 23);
+
+        var faste = Arkivplan.Faste(i.ArkivTakt);
+        var manuelt = i.ArkivTakt == Arkivtakt.Manuelt;
+        var engang = i.ArkivTakt == Arkivtakt.Engang;
+
+        // ============ DE SAMME TO TAL BETYDER TO TING ============
+        //
+        // Ved de hyppige takter er de tidsrummets ender; ved de faste ER de
+        // tidspunkterne. Derfor skifter baade teksten og hakket - fire bokse
+        // til det samme ville vaere fire steder at tage fejl.
+        Deling_Arkivtidsrum.Visibility = faste || manuelt ? Visibility.Collapsed : Visibility.Visible;
+        Deling_Arkivtidsrum.IsChecked = i.ArkivKunITidsrum;
+
+        Deling_Arkivtidsrumtekst.Text = Sprog.T(faste ? "arkiv.klokken" : "arkiv.kun_mellem");
+
+        var vis = manuelt ? Visibility.Collapsed : Visibility.Visible;
+
+        Deling_Arkivtidsrumtekst.Visibility = vis;
+        Deling_Arkivfra.Visibility = vis;
+        Deling_Arkivtil.Visibility = engang || manuelt ? Visibility.Collapsed : Visibility.Visible;
+        Deling_Arkivog.Visibility = Deling_Arkivtil.Visibility;
+
+        // Timerne betyder kun noget, naar de bruges til noget.
+        Deling_Arkivfra.IsEnabled = faste || i.ArkivKunITidsrum;
+        Deling_Arkivtil.IsEnabled = Deling_Arkivfra.IsEnabled;
+
+        Deling_Arkivtakttekst.Text = Taktlinje(i);
+    }
+
+    /// <summary>Én linje, der siger hvad valget betyder — med klokkeslæt.</summary>
+    /// <remarks>
+    /// EN DROPDOWN ALENE FORTÆLLER IKKE, HVAD DER SKER. «To gange om dagen»
+    /// er ikke et svar, før der står hvornår. Linjen her er stedet, hvor
+    /// valget bliver til noget, man kan forudsige.
+    /// </remarks>
+    private static string Taktlinje(AppSettings i) => i.ArkivTakt switch
+    {
+        Arkivtakt.Manuelt => Sprog.T("arkiv.takt_linje_manuelt"),
+
+        Arkivtakt.Engang => Sprog.T("arkiv.takt_linje_engang", Kl(i.ArkivFraKl)),
+
+        Arkivtakt.Togange => Sprog.T("arkiv.takt_linje_togange", Kl(i.ArkivFraKl), Kl(i.ArkivTilKl)),
+
+        _ => i.ArkivKunITidsrum
+            ? Sprog.T("arkiv.takt_linje_tidsrum", Mellemrumsord(i.ArkivTakt),
+                      Kl(i.ArkivFraKl), Kl(i.ArkivTilKl))
+            : Sprog.T("arkiv.takt_linje_doegn", Mellemrumsord(i.ArkivTakt)),
+    };
+
+    /// <summary>Takten i tre ord. Til oversigten, hvor der ikke er plads til en sætning.</summary>
+    /// <remarks>
+    /// DEN LANGE LINJE HØRER OVENFOR, ved valget, hvor den forklarer hvad man
+    /// vælger. Gentaget nede i oversigten fylder den to linjer og siger intet
+    /// nyt — og så holder man op med at læse tabellen.
+    /// </remarks>
+    private static string Taktkort(AppSettings i) => i.ArkivTakt switch
+    {
+        Arkivtakt.Manuelt => Sprog.T("arkiv.ord_manuelt"),
+
+        Arkivtakt.Engang => Sprog.T("arkiv.kort_engang", Kl(i.ArkivFraKl)),
+
+        Arkivtakt.Togange => Sprog.T("arkiv.kort_togange", Kl(i.ArkivFraKl), Kl(i.ArkivTilKl)),
+
+        _ => i.ArkivKunITidsrum
+            ? Sprog.T("arkiv.kort_tidsrum", Mellemrumsord(i.ArkivTakt),
+                      Kl(i.ArkivFraKl), Kl(i.ArkivTilKl))
+            : Sprog.T("arkiv.kort_doegn", Mellemrumsord(i.ArkivTakt)),
+    };
+
+    private static string Mellemrumsord(Arkivtakt t) =>
+        Sprog.T("arkiv.ord_" + t.ToString().ToLowerInvariant());
+
+    private static string Kl(int time) => time.ToString("00") + ".00";
+
+    // ==================================================================== oversigten
+
+    /// <summary>
+    /// Hvad appen ellers spørger om i den fælles mappe — og hvor tit.
+    /// </summary>
+    /// <remarks>
+    /// DE HER KAN IKKE JUSTERES, OG DE STÅR ALLIGEVEL. Uden dem ser arkivets
+    /// kvarter ud som den eneste forbindelse mellem de to maskiner, og så
+    /// undrer man sig over, at en aftale er der med det samme, mens en
+    /// optagelse ikke er.
+    ///
+    /// TALLENE HENTES FRA VAGTERNES EGNE FELTER. En tabel, der er skrevet af i
+    /// hånden, holder op med at passe den dag, et af tallene ændres — og det
+    /// opdager ingen, for den ser stadig rigtig ud.
+    /// </remarks>
+    private void VisOversigt()
+    {
+        Deling_Takter.Children.Clear();
+
+        Linje(Sprog.T("arkiv.oversigt_arbejde"), Mellemrum(Jobs.Arbejdsvagt.Mellemrum));
+        Linje(Sprog.T("arkiv.oversigt_maskiner"), Mellemrum(Jobs.Delingsvagt.Mellemrum));
+        Linje(Sprog.T("arkiv.oversigt_arkiv"), Taktkort(AppSettings.Current), egen: true);
+    }
+
+    private void Linje(string hvad, string hvornaar, bool egen = false)
+    {
+        var raekke = new DockPanel { Margin = new Thickness(0, 4, 0, 0) };
+
+        var naar = new TextBlock
+        {
+            Text = hvornaar,
+            FontSize = 11.5,
+            Margin = new Thickness(14, 0, 0, 0),
+            TextAlignment = TextAlignment.Right,
+            TextWrapping = TextWrapping.Wrap,
+            MaxWidth = 260,
+            Foreground = (System.Windows.Media.Brush)FindResource(egen ? "Tekst" : "TekstMeget"),
+        };
+
+        DockPanel.SetDock(naar, Dock.Right);
+        raekke.Children.Add(naar);
+
+        raekke.Children.Add(new TextBlock
+        {
+            Text = hvad,
+            FontSize = 11.5,
+            TextWrapping = TextWrapping.Wrap,
+            Foreground = (System.Windows.Media.Brush)FindResource("TekstMeget"),
+        });
+
+        Deling_Takter.Children.Add(raekke);
+    }
+
+    /// <summary>Et mellemrum, som man ville sige det højt.</summary>
+    /// <remarks>
+    /// «HVERT 1. MINUT» ER IKKE DANSK. Tallet ét skal ud af sætningen, ikke
+    /// sættes ind i den — og det gælder også timen. Det er den slags, der
+    /// får en tekst til at ligne noget, en maskine har sat sammen.
+    /// </remarks>
+    private static string Mellemrum(TimeSpan t)
+    {
+        if (t.TotalMinutes < 1) return Sprog.T("arkiv.hvert_sekund", (int)t.TotalSeconds);
+
+        if (t.TotalMinutes < 60)
+            return (int)t.TotalMinutes == 1
+                ? Sprog.T("arkiv.hvert_minut_et")
+                : Sprog.T("arkiv.hvert_minut", (int)t.TotalMinutes);
+
+        return (int)t.TotalHours == 1
+            ? Sprog.T("arkiv.hver_time_en")
+            : Sprog.T("arkiv.hver_time", (int)t.TotalHours);
     }
 
     // ================================================================== fremdriften
@@ -348,6 +532,61 @@ public partial class SettingsView
         AppSettings.Current.Save();
 
         Arkivtal_hent();
+    }
+
+    private void Hentautomatisk_Klik(object sender, RoutedEventArgs e)
+    {
+        if (_delingIndlaeser) return;
+
+        AppSettings.Current.HentAutomatisk = Deling_Hentautomatisk.IsChecked == true;
+        AppSettings.Current.Save();
+    }
+
+    private void Arkivtakt_Valgt(object sender, SelectionChangedEventArgs e)
+    {
+        if (_delingIndlaeser) return;
+
+        if (Deling_Arkivtakt.SelectedItem is not Taktvalg valg) return;
+
+        if (valg.Takt == AppSettings.Current.ArkivTakt) return;
+
+        AppSettings.Current.ArkivTakt = valg.Takt;
+
+        // ============ ET SKIFT SKAL KUNNE MAERKES MED DET SAMME ============
+        //
+        // Uden det ville et skift fra «to gange om dagen» til «hvert kvarter»
+        // vente til i morgen kl. 8, fordi dagens tur allerede var taget. Den,
+        // der lige har valgt noget hyppigere, har gjort det, fordi han VIL
+        // have det nu.
+        AppSettings.Current.ArkivSidst = null;
+        AppSettings.Current.Save();
+
+        VisTakt();
+        VisOversigt();
+    }
+
+    private void Arkivtidsrum_Klik(object sender, RoutedEventArgs e)
+    {
+        if (_delingIndlaeser) return;
+
+        AppSettings.Current.ArkivKunITidsrum = Deling_Arkivtidsrum.IsChecked == true;
+        AppSettings.Current.Save();
+
+        VisTakt();
+        VisOversigt();
+    }
+
+    private void Arkivtimer_Valgt(object sender, SelectionChangedEventArgs e)
+    {
+        if (_delingIndlaeser) return;
+
+        if (Deling_Arkivfra.SelectedItem is int fra) AppSettings.Current.ArkivFraKl = fra;
+        if (Deling_Arkivtil.SelectedItem is int til) AppSettings.Current.ArkivTilKl = til;
+
+        AppSettings.Current.Save();
+
+        Deling_Arkivtakttekst.Text = Taktlinje(AppSettings.Current);
+        VisOversigt();
     }
 
     private void Arkivnu_Klik(object sender, RoutedEventArgs e)

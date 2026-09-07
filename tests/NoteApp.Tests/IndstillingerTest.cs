@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Text;
 using NoteApp.Core;
@@ -57,6 +57,42 @@ public class IndstillingerTest : IDisposable
 
         Assert.Equal("da", AppSettings.Current.Sprog);
         Assert.True(AppSettings.Current.SetupCompleted);
+        Assert.Null(AppSettings.Indlaesningsfejl);
+    }
+
+    [Fact]
+    public void Et_valg_af_en_enum_overlever_baade_ud_og_ind()
+    {
+        // ============ SKRIVES SOM TEKST, LAESES SOM TEKST ============
+        //
+        // 07-09-2026 blev enums skrevet som tekst, men laest med
+        // standardopsaetningen. Deserialiseringen kastede, fangeren gav null,
+        // og null ER «indstillingerne er vaek»: seks proever faldt paa een
+        // gang. Den her holder de to ender sammen.
+        AppSettings.Current.ArkivTakt = NoteApp.Core.Deling.Arkivtakt.Togange;
+        AppSettings.Current.ArkivFraKl = 7;
+        AppSettings.Current.Save();
+
+        Assert.Contains("\"Togange\"", File.ReadAllText(Fil));
+
+        AppSettings.Reload();
+
+        Assert.Equal(NoteApp.Core.Deling.Arkivtakt.Togange, AppSettings.Current.ArkivTakt);
+        Assert.Equal(7, AppSettings.Current.ArkivFraKl);
+        Assert.Null(AppSettings.Indlaesningsfejl);
+    }
+
+    [Fact]
+    public void En_fil_fra_foer_tekstomsaetteren_kan_stadig_laeses()
+    {
+        // En aeldre udgave ville have skrevet tallet. Den fil ligger paa
+        // maskiner, der opdaterer - og den maa ikke koste indstillingerne.
+        File.WriteAllText(Fil, "{ \"Sprog\": \"da\", \"ArkivTakt\": 3 }");
+
+        AppSettings.Reload();
+
+        Assert.Equal(NoteApp.Core.Deling.Arkivtakt.Togange, AppSettings.Current.ArkivTakt);
+        Assert.Equal("da", AppSettings.Current.Sprog);
         Assert.Null(AppSettings.Indlaesningsfejl);
     }
 
