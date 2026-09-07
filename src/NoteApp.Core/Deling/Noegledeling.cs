@@ -23,16 +23,36 @@ public sealed record Kuvert(
     DateTimeOffset Udloeber);
 
 /// <summary>
-/// Sender API-nøglen fra den ene af to parrede computere til den anden.
+/// Hvad en kuvert bærer.
+/// </summary>
+/// <remarks>
+/// HVER SLAGS HAR SIT EGET FORMÅL I UDLEDNINGEN. To slags hemmeligheder må
+/// ikke krypteres under den samme nøgle: kan en kuvert med den ene flyttes
+/// hen, hvor den anden læses, er der åbnet en dør, ingen havde tænkt på.
+/// </remarks>
+public enum Kuvertslags
+{
+    /// <summary>API-nøglen til den europæiske sprogmodel.</summary>
+    Apinoegle,
+
+    /// <summary>Adgangen til Google Kalender.</summary>
+    Googlekalender,
+
+    /// <summary>Adgangen til Google Tasks.</summary>
+    Googleopgaver,
+}
+
+/// <summary>
+/// Sender en adgang fra den ene af to parrede computere til den anden.
 /// </summary>
 /// <remarks>
 /// ============ HVORFOR DEN FINDES ============
 ///
-/// Nøglen til Mistral hører til maskinen, ikke til datasættet — der ligger
-/// derfor ikke én i den fælles mappe, som begge kan læse. Men når man lige har
-/// stået og sammenlignet seks cifre på to skærme for at sige «det er mine to
-/// computere», er det en dårlig belønning at skulle finde nøglen frem og taste
-/// den ind en gang til.
+/// Nøglen til Mistral og forbindelsen til Google hører til maskinen, ikke til
+/// datasættet — de ligger derfor ikke i den fælles mappe, som begge kan læse.
+/// Men når man lige har stået og sammenlignet seks cifre på to skærme for at
+/// sige «det er mine to computere», er det en dårlig belønning at skulle finde
+/// nøglen frem og logge ind hos Google en gang til.
 ///
 /// ============ DEN LIGGER ALDRIG I KLARTEKST ============
 ///
@@ -44,10 +64,10 @@ public sealed record Kuvert(
 /// maskiner er parret; bruges den direkte som krypteringsnøgle, krypteres to
 /// beskeder under den samme nøgle. Saltet gør, at hver kuvert får sin egen.
 ///
-/// AFSENDER, MODTAGER OG UDLØB ER BUNDET TIL KRYPTERINGEN. De står som
+/// AFSENDER, MODTAGER, UDLØB OG FORMÅL ER BUNDET TIL KRYPTERINGEN. De står som
 /// «yderligere data» i GCM: rettes ét tegn i dem, kan kuverten ikke åbnes.
-/// Uden det kunne en kuvert flyttes til en anden modtager eller få forlænget
-/// sit udløb af den, der kan skrive i mappen.
+/// Uden det kunne en kuvert flyttes til en anden modtager, få forlænget sit
+/// udløb eller blive læst som en anden slags af den, der kan skrive i mappen.
 ///
 /// ============ DEN LEVER EN TIME OG ÅBNES ÉN GANG ============
 ///
@@ -58,7 +78,7 @@ public sealed record Kuvert(
 /// ============ DEN SENDES MED HÅNDEN ============
 ///
 /// Der sendes aldrig noget af sig selv. Et menneske trykker på knappen på den
-/// maskine, der HAR nøglen. At kopiere en adgangsnøgle rundt uden at nogen har
+/// maskine, der HAR adgangen. At kopiere en adgang rundt uden at nogen har
 /// bedt om det er ikke en bekvemmelighed — det er en overraskelse.
 /// </remarks>
 public static class Noegledeling
@@ -66,7 +86,13 @@ public static class Noegledeling
     /// <summary>Hvor længe en kuvert kan åbnes.</summary>
     public static readonly TimeSpan Levetid = TimeSpan.FromHours(1);
 
-    private const string Formaal = "heypia-api-noegle-v1";
+    /// <summary>Alle de slags, der ses efter, når en computer melder sig.</summary>
+    public static readonly IReadOnlyList<Kuvertslags> Slags = new[]
+    {
+        Kuvertslags.Apinoegle,
+        Kuvertslags.Googlekalender,
+        Kuvertslags.Googleopgaver,
+    };
 
     private static readonly JsonSerializerOptions Format = new()
     {
@@ -76,19 +102,72 @@ public static class Noegledeling
 
     private static string Mappe(string rod) => Path.Combine(rod, "noegler");
 
-    private static string Fil(string rod, string modtager) =>
-        Path.Combine(Mappe(rod), modtager + ".json");
+    /// <summary>
+    /// Kuvertens navn i mappen.
+    /// </summary>
+    /// <remarks>
+    /// API-NØGLEN BEHOLDER SIT GAMLE NAVN. En computer, der endnu ikke er
+    /// opdateret, ser kun efter <c>&lt;id&gt;.json</c> — får den navnet et
+    /// endelsestillæg, holder nøgledelingen op med at virke mellem to udgaver,
+    /// og det ville vise sig som ingenting: kuverten bliver bare liggende.
+    /// </remarks>
+    private static string Fil(string rod, string modtager, Kuvertslags slags) =>
+        Path.Combine(Mappe(rod), slags == Kuvertslags.Apinoegle
+            ? modtager + ".json"
+            : $"{modtager}-{Kort(slags)}.json");
+
+    private static string Kort(Kuvertslags slags) => slags switch
+    {
+        Kuvertslags.Googlekalender => Googlekalender.Id,
+        Kuvertslags.Googleopgaver => Googleopgaver.Id,
+        _ => "api",
+    };
+
+    private static string Formaal(Kuvertslags slags) => slags switch
+    {
+        Kuvertslags.Apinoegle => "heypia-api-noegle-v1",
+        _ => $"heypia-{Kort(slags)}-v1",
+    };
+
+    // ================================================================ hvad der sendes
+
+    /// <summary>Det, der skal i kuverten. Tom, når der ikke er noget at sende.</summary>
+    private static string Indhold(Kuvertslags slags) => slags switch
+    {
+        Kuvertslags.Apinoegle => SkyNoegle.Hent() ?? "",
+        _ => Integrationsfiler.Hent(Kort(slags)).Opdateringsnoegle,
+    };
+
+    /// <summary>Er der allerede sådan en adgang på den her computer?</summary>
+    public static bool Findes(Kuvertslags slags) => !string.IsNullOrWhiteSpace(Indhold(slags));
+
+    /// <summary>Gemmer det, en kuvert bar, på den her computer.</summary>
+    private static void Gem(Kuvertslags slags, string vaerdi)
+    {
+        if (slags == Kuvertslags.Apinoegle)
+        {
+            SkyNoegle.Gem(vaerdi);
+            return;
+        }
+
+        var id = Kort(slags);
+
+        // RESTEN AF OPSAETNINGEN SKRIVES FORFRA. «Sidst hentet» og «sidste
+        // fejl» hoerte til den anden computer og siger intet om den her; de
+        // faar deres vaerdi ved foerste hentning.
+        Integrationsfiler.Gem(id, new Integrationsopsaetning { Opdateringsnoegle = vaerdi });
+    }
 
     // ==================================================================== send
 
     /// <summary>
-    /// Lægger nøglen i en lukket kuvert til en parret computer.
+    /// Lægger en adgang i en lukket kuvert til en parret computer.
     /// </summary>
     /// <returns>Sandt, hvis kuverten blev skrevet.</returns>
     /// <exception cref="InvalidOperationException">
-    /// Hvis modtageren ikke er parret, eller der ikke er en nøgle at sende.
+    /// Hvis modtageren ikke er parret, eller der ikke er noget at sende.
     /// </exception>
-    public static bool Send(Maskinoplysning modtager)
+    public static bool Send(Maskinoplysning modtager, Kuvertslags slags = Kuvertslags.Apinoegle)
     {
         if (Delt.Mappe is not { } rod)
             throw new InvalidOperationException("Der er ingen fælles mappe.");
@@ -96,30 +175,33 @@ public static class Noegledeling
         // ============ KUN TIL EN, DER ER GODKENDT ============
         //
         // Parringen ER tilladelsen. Uden den ved vi ikke, hvis noegle vi
-        // krypterer til - og en API-noegle sendt til den forkerte er ikke
+        // krypterer til - og en adgang sendt til den forkerte er ikke
         // noget, man kan kalde tilbage.
         if (!Parring.MaaUdveksle(modtager))
             throw new InvalidOperationException(
                 "Computeren er ikke godkendt. Sammenlign koden først.");
 
-        var noegle = SkyNoegle.Hent();
+        var noegle = Indhold(slags);
 
         if (string.IsNullOrWhiteSpace(noegle))
-            throw new InvalidOperationException("Der er ingen API-nøgle på den her computer.");
+            throw new InvalidOperationException(
+                slags == Kuvertslags.Apinoegle
+                    ? "Der er ingen API-nøgle på den her computer."
+                    : "Der er ingen Google-forbindelse på den her computer.");
 
         var udloeber = DateTimeOffset.Now + Levetid;
 
         var salt = RandomNumberGenerator.GetBytes(16);
         var nonce = RandomNumberGenerator.GetBytes(AesGcm.NonceByteSizes.MaxSize);
 
-        var laas = Laasenoegle(modtager.Noegle, salt);
+        var laas = Laasenoegle(modtager.Noegle, salt, slags);
 
         var klar = Encoding.UTF8.GetBytes(noegle);
         var lukket = new byte[klar.Length];
         var maerke = new byte[AesGcm.TagByteSizes.MaxSize];
 
         using (var gcm = new AesGcm(laas, maerke.Length))
-            gcm.Encrypt(nonce, klar, lukket, maerke, Bundet(Maskinid.Id, modtager.Id, udloeber));
+            gcm.Encrypt(nonce, klar, lukket, maerke, Bundet(Maskinid.Id, modtager.Id, udloeber, slags));
 
         var kuvert = new Kuvert(
             Maskinid.Id, modtager.Id,
@@ -131,7 +213,7 @@ public static class Noegledeling
 
         Directory.CreateDirectory(Mappe(rod));
 
-        var fil = Fil(rod, modtager.Id);
+        var fil = Fil(rod, modtager.Id, slags);
         var midlertidig = fil + ".ny";
 
         File.WriteAllText(midlertidig, JsonSerializer.Serialize(kuvert, Format), new UTF8Encoding(false));
@@ -148,27 +230,33 @@ public static class Noegledeling
         /// <summary>Der lå ingen.</summary>
         Ingenting,
 
-        /// <summary>Nøglen er hentet og gemt.</summary>
+        /// <summary>Adgangen er hentet og gemt.</summary>
         Hentet,
 
         /// <summary>Der lå en, men den kunne ikke bruges. Den er ryddet.</summary>
         Afvist,
     }
 
+    /// <summary>Ser efter kuverter af alle slags.</summary>
+    public static IReadOnlyList<(Kuvertslags Slags, Udfald Udfald)> HentAlle() =>
+        Slags.Select(s => (s, Hent(s)))
+             .Where(x => x.Item2 != Udfald.Ingenting)
+             .ToList();
+
     /// <summary>
-    /// Ser efter en kuvert til den her computer, og gemmer nøglen, hvis den
+    /// Ser efter en kuvert til den her computer, og gemmer indholdet, hvis den
     /// kan åbnes.
     /// </summary>
     /// <remarks>
-    /// EN NØGLE, DER ALLEREDE ER SAT, OVERSKRIVES IKKE. Har man selv tastet
-    /// en ind på den her maskine, er dét valget — og en kuvert, der lå fra i
+    /// EN ADGANG, DER ALLEREDE ER SAT, OVERSKRIVES IKKE. Har man selv sat en
+    /// op på den her maskine, er dét valget — og en kuvert, der lå fra i
     /// forgårs, må ikke stille og roligt bytte den ud.
     /// </remarks>
-    public static Udfald Hent()
+    public static Udfald Hent(Kuvertslags slags = Kuvertslags.Apinoegle)
     {
         if (Delt.Mappe is not { } rod) return Udfald.Ingenting;
 
-        var fil = Fil(rod, Maskinid.Id);
+        var fil = Fil(rod, Maskinid.Id, slags);
 
         Kuvert? kuvert;
 
@@ -187,9 +275,9 @@ public static class Noegledeling
 
         if (kuvert is null) return Udfald.Ingenting;
 
-        if (!string.IsNullOrWhiteSpace(SkyNoegle.Hent()))
+        if (Findes(slags))
         {
-            // Der ER en noegle i forvejen. Kuverten ryddes, saa den ikke
+            // Der ER en adgang i forvejen. Kuverten ryddes, saa den ikke
             // bliver liggende som en hemmelighed, ingen skal bruge.
             Ryd(fil);
             return Udfald.Ingenting;
@@ -210,11 +298,12 @@ public static class Noegledeling
             var maerke = Convert.FromBase64String(kuvert.Maerke);
             var lukket = Convert.FromBase64String(kuvert.Indhold);
 
-            var laas = Laasenoegle(afsender.Noegle, salt);
+            var laas = Laasenoegle(afsender.Noegle, salt, slags);
             var klar = new byte[lukket.Length];
 
             using (var gcm = new AesGcm(laas, maerke.Length))
-                gcm.Decrypt(nonce, lukket, maerke, klar, Bundet(kuvert.Fra, kuvert.Til, kuvert.Udloeber));
+                gcm.Decrypt(nonce, lukket, maerke, klar,
+                            Bundet(kuvert.Fra, kuvert.Til, kuvert.Udloeber, slags));
 
             var noegle = Encoding.UTF8.GetString(klar).Trim();
 
@@ -224,7 +313,7 @@ public static class Noegledeling
                 return Udfald.Afvist;
             }
 
-            SkyNoegle.Gem(noegle);
+            Gem(slags, noegle);
             Ryd(fil);
 
             return Udfald.Hentet;
@@ -245,29 +334,29 @@ public static class Noegledeling
     }
 
     /// <summary>Ligger der en kuvert til den her computer og venter?</summary>
-    public static bool Venter()
+    public static bool Venter(Kuvertslags slags = Kuvertslags.Apinoegle)
     {
         if (Delt.Mappe is not { } rod) return false;
 
-        try { return File.Exists(Fil(rod, Maskinid.Id)); }
+        try { return File.Exists(Fil(rod, Maskinid.Id, slags)); }
         catch (Exception) { return false; }
     }
 
     /// <summary>Ligger der en, vi har sendt, som ikke er hentet endnu?</summary>
-    public static bool Sendt(string modtagerId)
+    public static bool Sendt(string modtagerId, Kuvertslags slags = Kuvertslags.Apinoegle)
     {
         if (Delt.Mappe is not { } rod) return false;
 
-        try { return File.Exists(Fil(rod, modtagerId)); }
+        try { return File.Exists(Fil(rod, modtagerId, slags)); }
         catch (Exception) { return false; }
     }
 
     /// <summary>Fortryder en kuvert, der ikke er hentet endnu.</summary>
-    public static void Fortryd(string modtagerId)
+    public static void Fortryd(string modtagerId, Kuvertslags slags = Kuvertslags.Apinoegle)
     {
         if (Delt.Mappe is not { } rod) return;
 
-        Ryd(Fil(rod, modtagerId));
+        Ryd(Fil(rod, modtagerId, slags));
     }
 
     // ================================================================= det indre
@@ -278,24 +367,24 @@ public static class Noegledeling
     /// <remarks>
     /// Den fælles nøgle fra parringen er den samme hele tiden. HKDF med et
     /// nyt salt pr. kuvert giver hver besked sin egen nøgle, og formålet står
-    /// med i udledningen, så den samme fælles nøgle kan bære andre slags
-    /// beskeder senere uden at genbruge en nøgle på tværs.
+    /// med i udledningen, så den samme fælles nøgle kan bære flere slags
+    /// beskeder uden at genbruge en nøgle på tværs.
     /// </remarks>
-    private static byte[] Laasenoegle(string modpartensOffentlige, byte[] salt) =>
+    private static byte[] Laasenoegle(string modpartensOffentlige, byte[] salt, Kuvertslags slags) =>
         HKDF.DeriveKey(HashAlgorithmName.SHA256,
                        Maskinid.Faellesnoegle(modpartensOffentlige),
-                       32, salt, Encoding.UTF8.GetBytes(Formaal));
+                       32, salt, Encoding.UTF8.GetBytes(Formaal(slags)));
 
     /// <summary>
     /// Det, der er bundet til krypteringen uden at være krypteret.
     /// </summary>
     /// <remarks>
-    /// Rettes afsender, modtager eller udløb, kan kuverten ikke åbnes. Uden
-    /// det kunne den, der kan skrive i mappen, flytte en kuvert til en anden
-    /// modtager eller give den et nyt udløb.
+    /// Rettes afsender, modtager, udløb eller formål, kan kuverten ikke åbnes.
+    /// Uden det kunne den, der kan skrive i mappen, flytte en kuvert til en
+    /// anden modtager eller give den et nyt udløb.
     /// </remarks>
-    private static byte[] Bundet(string fra, string til, DateTimeOffset udloeber) =>
-        Encoding.UTF8.GetBytes($"{Formaal}|{fra}|{til}|{udloeber:o}");
+    private static byte[] Bundet(string fra, string til, DateTimeOffset udloeber, Kuvertslags slags) =>
+        Encoding.UTF8.GetBytes($"{Formaal(slags)}|{fra}|{til}|{udloeber:o}");
 
     private static void Ryd(string fil)
     {

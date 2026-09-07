@@ -541,6 +541,163 @@ public class Delingstest
         Assert.Equal("min-egen-noegle-9876543210", NoteApp.Core.Llm.SkyNoegle.Hent());
     }
 
+    // ====================================================== google-forbindelsen
+
+    [Fact]
+    public void Google_forbindelsen_kan_sendes_til_en_parret_computer()
+    {
+        var delt = Nydeltmappe();
+        Delt.Klargoer(delt);
+
+        using var stationaer = new Maskine("Stationær", delt);
+        using var baerbar = new Maskine("Bærbar", delt, Maskinrolle.Sekundaer);
+
+        stationaer.Tag();
+        SaetNoegle(null);
+        Integrationsfiler.Gem(Googlekalender.Id,
+            new Integrationsopsaetning { Opdateringsnoegle = "opdateringsnoegle-fra-google-42" });
+        Delt.Meld();
+
+        baerbar.Tag();
+        SaetNoegle(null);
+        Delt.Meld();
+        Parring.Betro(Delt.Andre().Single());
+
+        stationaer.Tag();
+        Parring.Betro(Delt.Andre().Single());
+
+        Assert.True(Noegledeling.Send(Delt.Andre().Single(), Kuvertslags.Googlekalender));
+
+        // DEN LIGGER IKKE I KLARTEKST. Forbindelsen er hele adgangen til
+        // brugerens kalender, og den udloeber ikke af sig selv.
+        var kuvert = Path.Combine(delt, "noegler",
+            $"{Delt.Andre().Single().Id}-{Googlekalender.Id}.json");
+
+        Assert.DoesNotContain("opdateringsnoegle-fra-google", File.ReadAllText(kuvert));
+
+        baerbar.Tag();
+
+        var hentet = Noegledeling.HentAlle();
+
+        Assert.Equal((Kuvertslags.Googlekalender, Noegledeling.Udfald.Hentet), Assert.Single(hentet));
+        Assert.Equal("opdateringsnoegle-fra-google-42",
+                     Integrationsfiler.Hent(Googlekalender.Id).Opdateringsnoegle);
+
+        // MAN SKAL IKKE LOGGE IND HOS GOOGLE EEN GANG TIL. Og kuverten er
+        // ryddet, saa adgangen ikke bliver liggende i en mappe.
+        Assert.False(File.Exists(kuvert));
+    }
+
+    [Fact]
+    public void En_kuvert_kan_ikke_laeses_som_en_anden_slags()
+    {
+        var delt = Nydeltmappe();
+        Delt.Klargoer(delt);
+
+        using var stationaer = new Maskine("Stationær", delt);
+        using var baerbar = new Maskine("Bærbar", delt, Maskinrolle.Sekundaer);
+
+        stationaer.Tag();
+        SaetNoegle(null);
+        Integrationsfiler.Gem(Googlekalender.Id,
+            new Integrationsopsaetning { Opdateringsnoegle = "opdateringsnoegle-fra-google-42" });
+        Delt.Meld();
+
+        baerbar.Tag();
+        SaetNoegle(null);
+        Delt.Meld();
+        Parring.Betro(Delt.Andre().Single());
+
+        stationaer.Tag();
+        var tilBaerbar = Delt.Andre().Single();
+        Parring.Betro(tilBaerbar);
+        Noegledeling.Send(tilBaerbar, Kuvertslags.Googlekalender);
+
+        // ============ FORMAALET ER BUNDET TIL KRYPTERINGEN ============
+        //
+        // Kuverten doebes om til den, API-noeglen ville have. Uden formaalet i
+        // udledningen ville den kunne aabnes og en Google-adgang ende som
+        // appens noegle til sprogmodellen.
+        var mappe = Path.Combine(delt, "noegler");
+        File.Move(Path.Combine(mappe, $"{tilBaerbar.Id}-{Googlekalender.Id}.json"),
+                  Path.Combine(mappe, $"{tilBaerbar.Id}.json"));
+
+        baerbar.Tag();
+
+        Assert.Equal(Noegledeling.Udfald.Afvist, Noegledeling.Hent(Kuvertslags.Apinoegle));
+        Assert.Null(NoteApp.Core.Llm.SkyNoegle.Hent());
+    }
+
+    // ================================================================ vejledningen
+
+    [Fact]
+    public void Den_der_kun_har_een_computer_faar_ingen_vejledning()
+    {
+        var delt = Nydeltmappe();
+
+        using var alene = new Maskine("Alene", delt);
+
+        alene.Tag();
+        Maskinid.Deltmappe = null;
+
+        // TALLET VED MENUPUNKTET STAAR KUN FOR DEN, DER HAR TO COMPUTERE. En
+        // primaer maskine uden faelles mappe deler ikke med nogen.
+        Assert.False(Delingsguide.Paabegyndt);
+    }
+
+    [Fact]
+    public void Vejledningen_peger_paa_det_naeste_trin()
+    {
+        var delt = Nydeltmappe();
+
+        using var baerbar = new Maskine("Bærbar", delt, Maskinrolle.Sekundaer);
+
+        baerbar.Tag();
+        SaetNoegle(null);
+        Maskinid.Deltmappe = null;
+
+        // Rollen alene raekker: den, der har sagt «det her er min anden
+        // computer», skal vejledes, ogsaa foer der er en mappe.
+        Assert.True(Delingsguide.Paabegyndt);
+
+        var trin = Delingsguide.Trin();
+
+        Assert.Equal(5, trin.Count);
+        Assert.Equal(Trinstand.Klar, trin[0].Stand);
+        Assert.Equal(Trinstand.Naeste, trin[1].Stand);
+        Assert.Equal(Trinstand.Venter, trin[2].Stand);
+        Assert.Equal(Trinstand.Venter, trin[3].Stand);
+        Assert.Equal(4, Delingsguide.Mangler());
+    }
+
+    [Fact]
+    public void Vejledningen_er_faerdig_naar_alt_er_paa_plads()
+    {
+        var delt = Nydeltmappe();
+        Delt.Klargoer(delt);
+
+        using var stationaer = new Maskine("Stationær", delt);
+        using var baerbar = new Maskine("Bærbar", delt, Maskinrolle.Sekundaer);
+
+        stationaer.Tag();
+        SaetNoegle("hemmelig-noegle-1234567890");
+        Delt.Meld();
+
+        baerbar.Tag();
+        SaetNoegle(null);
+        Delt.Meld();
+
+        // Mappen er der, og den anden computer har meldt sig - men de er ikke
+        // godkendt endnu. Saa er der to trin tilbage: godkendelsen og
+        // noeglen, der foelger med den.
+        Assert.Equal(2, Delingsguide.Mangler());
+
+        Parring.Betro(Delt.Andre().Single());
+        SaetNoegle("hemmelig-noegle-1234567890");
+
+        Assert.True(Delingsguide.Faerdig());
+    }
+
     // ============================================================ maskinen i loggen
 
     [Fact]

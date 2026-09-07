@@ -2130,6 +2130,42 @@ public partial class MainWindow : Window
         MotorMaerkat.Visibility = NoteApp.Core.Llm.SkyNoegle.Hent() is null
             ? Visibility.Visible
             : Visibility.Collapsed;
+
+        Opdaterdelingsmaerkat();
+    }
+
+    /// <summary>
+    /// Tallet ved «Indstillinger»: hvor mange trin der mangler, før to
+    /// computere arbejder sammen.
+    /// </summary>
+    /// <remarks>
+    /// DEN, DER KUN HAR ÉN COMPUTER, SER DET ALDRIG. Det er derfor
+    /// <see cref="NoteApp.Core.Deling.Delingsguide.Paabegyndt"/> spørges først:
+    /// enten har man valgt en fælles mappe, eller også har man sagt, at den
+    /// her maskine er den sekundære. Har man ingen af delene, er der ingen
+    /// deling at mangle noget i.
+    /// </remarks>
+    private void Opdaterdelingsmaerkat()
+    {
+        if (DelingMaerkatNav is null) return;
+
+        var mangler = 0;
+
+        try
+        {
+            if (NoteApp.Core.Deling.Delingsguide.Paabegyndt)
+                mangler = NoteApp.Core.Deling.Delingsguide.Mangler();
+        }
+        catch (Exception)
+        {
+            // Et drev, der ikke svarer lige nu, maa ikke vaelte menuen. Saa
+            // staar der ikke noget tal, og det retter sig selv, naest gang
+            // skaermen bygges.
+            mangler = 0;
+        }
+
+        DelingMaerkatNav.Visibility = mangler == 0 ? Visibility.Collapsed : Visibility.Visible;
+        DelingMaerkatNavTal.Text = mangler.ToString();
     }
 
     // ============================ MENUEN KLAPPES ============================

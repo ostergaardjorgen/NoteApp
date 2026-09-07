@@ -214,10 +214,30 @@ public partial class EngineView : System.Windows.Controls.UserControl
             ? $"Tilsluttet {new Uri(SkyKatalog.Endpoint).Host}. Dokumenter laves her."
             : "Ikke sat op endnu. Uden den kan appen optage og skrive ud, men ikke lave dokumenter.";
 
+        // ============ HVILKEN VEJ SKAL DEN HER COMPUTER GAA? ============
+        //
+        // Den sekundaere maskine, der er godkendt med sin primaere, skal
+        // ikke oprette en konto til. Den skal have noeglen sendt over, og
+        // det er eet tryk paa den anden skaerm. Stod den lange vejledning
+        // her ogsaa, ville halvdelen af dem oprette et abonnement mere.
+        var faarNoeglen = !tilsluttet
+                          && NoteApp.Core.Deling.Maskinid.Rolle
+                             == NoteApp.Core.Deling.Maskinrolle.Sekundaer
+                          && NoteApp.Core.Deling.Delt.Andre()
+                             .Any(NoteApp.Core.Deling.Parring.MaaUdveksle);
+
+        SkySekundaer.Visibility = faarNoeglen ? Visibility.Visible : Visibility.Collapsed;
+
         // Vejledningen staar kun, naar der mangler noget. En vejledning til
         // det, der allerede er gjort, laerer man at laese forbi - og saa
         // laeser man ogsaa forbi den dag, der staar noget nyt.
-        SkyVejledning.Visibility = tilsluttet ? Visibility.Collapsed : Visibility.Visible;
+        SkyVejledning.Visibility = tilsluttet || faarNoeglen
+            ? Visibility.Collapsed
+            : Visibility.Visible;
+
+        // Tallet paa fanen. Menupunktet ude i siden sagde, at der manglede
+        // noget; her staar det, hvilken af de tre faner det er.
+        SkyMaerkat.Visibility = tilsluttet ? Visibility.Collapsed : Visibility.Visible;
 
         // Maerkatet i menuen foelger den samme tilstand. Bliver noeglen sat
         // her, skal 1-tallet vaek med det samme og ikke ved naeste opstart.

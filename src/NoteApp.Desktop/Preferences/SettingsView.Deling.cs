@@ -54,6 +54,7 @@ public partial class SettingsView
 
             Deling_Status.Text = Statuslinje(mappe);
 
+            VisGuide();
             VisMaskiner();
         }
         finally
@@ -74,6 +75,111 @@ public partial class SettingsView
             ? Sprog.T("settingsview.deling_ikke_klargjort")
             : Sprog.T("settingsview.deling_klar", oplysning.Navn,
                       oplysning.Oprettet.ToLocalTime().ToString("d. MMMM yyyy", Sprog.Kultur));
+    }
+
+    // =================================================================== vejledningen
+
+    /// <summary>
+    /// Trinnene øverst på fanen: hvad er gjort, og hvad er det næste?
+    /// </summary>
+    /// <remarks>
+    /// DEN BYGGES FORFRA HVER GANG. Tilstanden ligger i den fælles mappe og på
+    /// den anden computer, ikke her — et kort, der blev sat op én gang og
+    /// derefter rettet i, ville før eller siden vise noget, der ikke passer.
+    /// </remarks>
+    private void VisGuide()
+    {
+        var trin = Delingsguide.Trin();
+        var mangler = trin.Count(t => t.Stand != Trinstand.Klar);
+
+        Deling_Guideoverskrift.Text = Sprog.T(mangler == 0
+            ? "settingsview.guide_overskrift_faerdig"
+            : "settingsview.guide_overskrift");
+
+        Deling_Guideunder.Text = Sprog.T(mangler == 0
+            ? "settingsview.guide_under_faerdig"
+            : "settingsview.guide_under");
+
+        Deling_Guide.Children.Clear();
+
+        foreach (var t in trin)
+            Deling_Guide.Children.Add(Guidekort(t));
+
+        // TALLET PAA FANEN OG UDE I MENUEN FOELGER DET SAMME. Sker der noget
+        // her - en mappe vaelges, en computer godkendes - skal begge to
+        // rette sig med det samme og ikke ved naeste opstart.
+        DelingMaerkat.Visibility = mangler == 0 ? Visibility.Collapsed : Visibility.Visible;
+        DelingMaerkatTal.Text = mangler.ToString();
+
+        (Application.Current.MainWindow as MainWindow)?.OpdaterOpsaetningsmaerkat();
+    }
+
+    /// <summary>Ét trin: et tal eller et hak, en overskrift og en forklaring.</summary>
+    private UIElement Guidekort(Delingstrin t)
+    {
+        var (flade, paa, tegn) = t.Stand switch
+        {
+            // Et hak frem for tallet. Man skal kunne se paa en halv skaerm,
+            // hvor langt man er, uden at laese en linje.
+            Trinstand.Klar => ("Godkendt", "PaaAccent", "\u2713"),
+            Trinstand.Naeste => ("Accent", "PaaAccent", t.Nummer.ToString()),
+            _ => ("Svaev", "TekstMeget", t.Nummer.ToString()),
+        };
+
+        var g = new Grid { Margin = new Thickness(0, 0, 0, 14) };
+        g.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+        g.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+
+        var ring = new Border
+        {
+            Width = 22,
+            Height = 22,
+            CornerRadius = new CornerRadius(11),
+            Margin = new Thickness(0, 1, 12, 0),
+            VerticalAlignment = VerticalAlignment.Top,
+            Background = (System.Windows.Media.Brush)FindResource(flade),
+            Child = new TextBlock
+            {
+                Text = tegn,
+                FontSize = 12,
+                FontWeight = FontWeights.SemiBold,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
+                Foreground = (System.Windows.Media.Brush)FindResource(paa),
+            },
+        };
+
+        Grid.SetColumn(ring, 0);
+        g.Children.Add(ring);
+
+        var tekst = new StackPanel();
+        Grid.SetColumn(tekst, 1);
+
+        tekst.Children.Add(new TextBlock
+        {
+            Text = t.Overskrift,
+            FontSize = 13,
+            FontWeight = FontWeights.SemiBold,
+            Foreground = (System.Windows.Media.Brush)FindResource(
+                t.Stand == Trinstand.Venter ? "TekstMeget" : "Tekst"),
+        });
+
+        tekst.Children.Add(new TextBlock
+        {
+            Text = t.Forklaring,
+            FontSize = 12.5,
+            LineHeight = 20,
+            TextWrapping = TextWrapping.Wrap,
+            MaxWidth = 560,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            Margin = new Thickness(0, 3, 0, 0),
+            Foreground = (System.Windows.Media.Brush)FindResource(
+                t.Stand == Trinstand.Naeste ? "TekstSvag" : "TekstMeget"),
+        });
+
+        g.Children.Add(tekst);
+
+        return g;
     }
 
     // ================================================================== maskinerne
@@ -114,21 +220,29 @@ public partial class SettingsView
 
         if (tilstand == Parringstilstand.Parret)
         {
-            // ============ NOEGLEN KAN SENDES OVER ============
+            // ============ OPSAETNINGEN KAN SENDES OVER ============
             //
             // Man har lige staaet og sammenlignet seks cifre paa to skaerme
             // for at sige «det er mine to computere». At skulle finde
-            // API-noeglen frem og taste den ind een gang til er en daarlig
-            // beloenning for det - se Noegledeling.
-            if (Noegledeling.Sendt(m.Id))
+            // API-noeglen frem OG logge ind hos Google een gang til er en
+            // daarlig beloenning for det - se Noegledeling.
+            //
+            // EEN KNAP OG IKKE TRE. Der er tre slags at sende, og tre knapper
+            // ved siden af hinanden ville goere et kort om en computer til en
+            // vaerktoejskasse. Dialogen skriver, hvad der er at sende.
+            if (Venter(m.Id).Count > 0)
             {
-                knapper.Children.Add(Knap(Sprog.T("settingsview.deling_noegle_fortryd"),
-                    () => { Noegledeling.Fortryd(m.Id); VisDeling(); }));
+                knapper.Children.Add(Knap(Sprog.T("settingsview.deling_opsaetning_fortryd"),
+                    () =>
+                    {
+                        foreach (var slags in Venter(m.Id)) Noegledeling.Fortryd(m.Id, slags);
+                        VisDeling();
+                    }));
             }
-            else if (NoteApp.Core.Llm.SkyNoegle.Hent() is { Length: > 0 })
+            else if (Haves().Count > 0)
             {
-                knapper.Children.Add(Knap(Sprog.T("settingsview.deling_send_noegle"),
-                    () => SendNoegle(m)));
+                knapper.Children.Add(Knap(Sprog.T("settingsview.deling_send_opsaetning"),
+                    () => SendOpsaetning(m)));
             }
 
             knapper.Children.Add(Knap(Sprog.T("settingsview.deling_fjern_parring"),
@@ -169,7 +283,7 @@ public partial class SettingsView
 
         var (besked, farve) = tilstand switch
         {
-            Parringstilstand.Parret when Noegledeling.Sendt(m.Id)
+            Parringstilstand.Parret when Venter(m.Id).Count > 0
                 => ("settingsview.deling_noegle_venter", "Advarsel"),
             Parringstilstand.Parret => ("settingsview.deling_er_parret", "Godkendt"),
             Parringstilstand.Nyngle => ("settingsview.deling_ny_noegle", "FejlTekst"),
@@ -267,37 +381,73 @@ public partial class SettingsView
         VisDeling();
     }
 
+    /// <summary>Det, den her computer har og kan sende videre.</summary>
+    private static List<Kuvertslags> Haves() =>
+        Noegledeling.Slags.Where(Noegledeling.Findes).ToList();
+
+    /// <summary>Det, der ligger og venter på at blive hentet af den anden.</summary>
+    private static List<Kuvertslags> Venter(string modtagerId) =>
+        Noegledeling.Slags.Where(s => Noegledeling.Sendt(modtagerId, s)).ToList();
+
+    private static string Punkt(Kuvertslags slags) => Sprog.T(slags switch
+    {
+        Kuvertslags.Apinoegle => "settingsview.deling_punkt_api",
+        Kuvertslags.Googlekalender => "settingsview.deling_punkt_google",
+        _ => "settingsview.deling_punkt_googleopgaver",
+    });
+
     /// <summary>
-    /// Sender API-nøglen til en godkendt computer.
+    /// Sender opsætningen til en godkendt computer.
     /// </summary>
     /// <remarks>
-    /// DER SPØRGES FØRST, og der står hvad det betyder. En adgangsnøgle, der
-    /// flytter sig, fordi appen syntes det var nemmere, er ikke en
-    /// bekvemmelighed — det er en overraskelse.
+    /// DER SPØRGES FØRST, OG DER STÅR HVAD DER SENDES. En adgang, der flytter
+    /// sig, fordi appen syntes det var nemmere, er ikke en bekvemmelighed —
+    /// det er en overraskelse. Punkterne skrives ud, så det ikke er
+    /// «opsætningen», man siger ja til, men netop de her tre ting.
+    ///
+    /// DEN ENE MÅ GERNE LYKKES, SELV OM DEN ANDEN FEJLER. Går det galt midt i,
+    /// står der i historikken, hvad der nåede af sted — en halv sending, der
+    /// meldes som ingenting, er det værste af begge dele.
     /// </remarks>
-    private void SendNoegle(Maskinoplysning m)
+    private void SendOpsaetning(Maskinoplysning m)
     {
+        var kan = Haves();
+
+        if (kan.Count == 0) return;
+
+        var punkter = string.Join("\n", kan.Select(Punkt));
+
         var ja = Dialogs.AppDialog.Spoerg(Window.GetWindow(this),
-            Sprog.T("settingsview.deling_send_noegle_titel", m.Navn),
-            Sprog.T("settingsview.deling_send_noegle_tekst", m.Navn),
-            godkend: Sprog.T("settingsview.deling_send_noegle_ja"),
+            Sprog.T("settingsview.deling_send_opsaetning_titel", m.Navn),
+            Sprog.T("settingsview.deling_send_opsaetning_tekst", punkter, m.Navn),
+            godkend: Sprog.T("settingsview.deling_send_opsaetning_ja"),
             annuller: Sprog.T("faelles.annuller"),
             slags: Dialogs.Slags.Valg, godkendErStandard: false);
 
         if (!ja) return;
 
+        var sendt = new List<Kuvertslags>();
+
         try
         {
-            Noegledeling.Send(m);
-
-            Historik.Skriv(HaendelseType.Andet,
-                Sprog.T("settingsview.deling_noegle_historik", m.Navn),
-                Sprog.T("settingsview.deling_noegle_historik_detalje"), Udfald.Fuldført);
+            foreach (var slags in kan)
+            {
+                Noegledeling.Send(m, slags);
+                sendt.Add(slags);
+            }
         }
         catch (Exception ex)
         {
             Dialogs.AppDialog.Vis(Window.GetWindow(this),
                 Sprog.T("settingsview.deling_noegle_gik_galt"), ex.Message, Dialogs.Slags.Pas_paa);
+        }
+
+        if (sendt.Count > 0)
+        {
+            Historik.Skriv(HaendelseType.Andet,
+                Sprog.T("settingsview.deling_opsaetning_historik", m.Navn),
+                string.Join("\n", sendt.Select(Punkt)) + "\n\n"
+                + Sprog.T("settingsview.deling_opsaetning_historik_detalje"), Udfald.Fuldført);
         }
 
         VisDeling();

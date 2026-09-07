@@ -305,7 +305,28 @@
            tilbage. Se Core/Llm/Opsummeringsvej. -->
 
       <!-- ===================== Dokumenter i Europa =================== -->
-      <TabItem Header="{i18n:Oversat engineview.dokumenter_i_skyen}" Style="{StaticResource Fane}">
+      <TabItem Style="{StaticResource Fane}"
+               AutomationProperties.Name="{i18n:Oversat engineview.dokumenter_i_skyen}">
+        <!-- Samme tal som ved menupunktet - se SettingsView.xaml for hvorfor
+             farven bindes i haanden. -->
+        <TabItem.Header>
+          <StackPanel Orientation="Horizontal">
+            <TextBlock Text="{i18n:Oversat engineview.dokumenter_i_skyen}" VerticalAlignment="Center"
+                       Foreground="{Binding Foreground,
+                         RelativeSource={RelativeSource AncestorType={x:Type TabItem}}}"
+                       FontSize="{Binding FontSize,
+                         RelativeSource={RelativeSource AncestorType={x:Type TabItem}}}"
+                       FontWeight="{Binding FontWeight,
+                         RelativeSource={RelativeSource AncestorType={x:Type TabItem}}}" />
+            <Border x:Name="SkyMaerkat" Visibility="Collapsed"
+                    MinWidth="17" Height="17" CornerRadius="8.5" Margin="7,0,0,0"
+                    Background="{DynamicResource Advarsel}" VerticalAlignment="Center">
+              <TextBlock Text="1" FontSize="10.5" FontWeight="SemiBold"
+                         Foreground="{DynamicResource PaaAccent}"
+                         HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,0" />
+            </Border>
+          </StackPanel>
+        </TabItem.Header>
         <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,12,0,0"
                       HorizontalScrollBarVisibility="Disabled">
         <Border Background="{DynamicResource Panel}" CornerRadius="10" Padding="20"
@@ -350,6 +371,26 @@
                  vigtigste er ikke dem, man selv ville gætte: betalingen skal
                  sættes op, før nøglen virker, og træningen skal slås fra på
                  kontoen — appen kan ikke gøre nogen af delene. -->
+            <!-- ============ DEN ANDEN COMPUTER HAR DEN ALLEREDE ============
+
+                 Her stod den samme vejledning paa begge maskiner: opret en
+                 konto, saet betaling op, lav en noegle. Paa den baerbare, der
+                 lige er godkendt med sin primaere, er det forkert - noeglen
+                 skal bare sendes over, og det er eet tryk paa den anden
+                 skaerm. Se NoteApp.Core.Deling.Noegledeling. -->
+            <Border x:Name="SkySekundaer" Visibility="Collapsed" Margin="0,16,0,0"
+                    Background="{DynamicResource Trykket}" BorderBrush="{DynamicResource Accent}"
+                    BorderThickness="1" CornerRadius="8" Padding="16,14">
+              <StackPanel>
+                <TextBlock Text="{i18n:Oversat engineview.sky_sekundaer_overskrift}" FontSize="13.5"
+                           FontWeight="SemiBold" />
+                <TextBlock FontSize="12.5" LineHeight="20" TextWrapping="Wrap" Margin="0,6,0,0"
+                           MaxWidth="620" HorizontalAlignment="Left"
+                           Foreground="{DynamicResource TekstSvag}"
+                           Text="{i18n:Oversat engineview.sky_sekundaer_tekst}" />
+              </StackPanel>
+            </Border>
+
             <Border x:Name="SkyVejledning" Visibility="Collapsed" Margin="0,16,0,0"
                     Background="{DynamicResource Trykket}" BorderBrush="{DynamicResource PanelKant}"
                     BorderThickness="1" CornerRadius="8" Padding="16,14">

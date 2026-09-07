@@ -238,9 +238,46 @@
                - det er indstillinger, man aabner den dag, man skal flytte
                datamappen eller gendanne noget. Nu to faner under
                «Indstillinger». Fjernet 19-08-2026. -->
-          <RadioButton x:Name="NavIndstillinger" Tag="&#xE713;" GroupName="nav" Content="{i18n:Oversat nav.indstillinger}"
+          <!-- ============ TALLET STAAR KUN FOR DEN, DER HAR TO COMPUTERE ============
+
+               Delingen skal saettes op i en bestemt raekkefoelge, og den, der
+               lige har installeret appen paa sin baerbare, ved ikke, at der
+               er noget at gaa ind til. Tallet siger, hvor mange trin der
+               mangler - se NoteApp.Core.Deling.Delingsguide.
+
+               Den, der kun har een computer, ser det ALDRIG. Et tal, der
+               staar for noget, man ikke har bedt om, er ikke en hjaelp; det
+               er en plet, man laerer at se forbi - ogsaa den dag, den
+               betyder noget.
+
+               Foregrunden bindes i haanden af samme grund som ved
+               AI-modeller lige ovenfor. -->
+          <RadioButton x:Name="NavIndstillinger" Tag="&#xE713;" GroupName="nav"
                        Checked="Nav_Changed"
-                       Style="{StaticResource NavKnap}" />
+                       AutomationProperties.Name="{i18n:Oversat nav.indstillinger}"
+                       Style="{StaticResource NavKnap}">
+            <Grid>
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+              </Grid.ColumnDefinitions>
+              <TextBlock Grid.Column="0" Text="{i18n:Oversat nav.indstillinger}" VerticalAlignment="Center"
+                         Foreground="{Binding Foreground,
+                           RelativeSource={RelativeSource AncestorType={x:Type RadioButton}}}" />
+              <Border Grid.Column="1" x:Name="DelingMaerkatNav" Visibility="Collapsed"
+                      MinWidth="18" Height="18" CornerRadius="9" Margin="8,0,0,0"
+                      Background="{DynamicResource Advarsel}" VerticalAlignment="Center"
+                      ToolTipService.InitialShowDelay="200" ToolTipService.ShowDuration="30000">
+                <Border.ToolTip>
+                  <TextBlock MaxWidth="280" TextWrapping="Wrap" LineHeight="19"
+                             Text="{i18n:Oversat settingsview.guide_mangler}" />
+                </Border.ToolTip>
+                <TextBlock x:Name="DelingMaerkatNavTal" FontSize="11" FontWeight="SemiBold"
+                           Foreground="{DynamicResource PaaAccent}"
+                           HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,0" />
+              </Border>
+            </Grid>
+          </RadioButton>
         </StackPanel>
 
         <StackPanel x:Name="Datafod" DockPanel.Dock="Bottom">

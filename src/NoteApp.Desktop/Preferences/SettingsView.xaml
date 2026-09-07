@@ -1163,10 +1163,62 @@
 
            Fanen her er etape 1: maskinen, mappen og parringen. Selve
            udvekslingen af moeder kommer i naeste etape. -->
-      <TabItem Header="{i18n:Oversat settingsview.deling}" Style="{StaticResource Fane}">
+      <TabItem Style="{StaticResource Fane}"
+               AutomationProperties.Name="{i18n:Oversat settingsview.deling}">
+        <!-- ============ TALLET SKAL OGSAA STAA PAA FANEN ============
+
+             Menupunktet ude i siden viste, at der manglede noget. Inde paa
+             skaermen var der ingenting - og med otte faner ved man ikke,
+             hvilken en af dem det handler om.
+
+             FARVEN SKAL BINDES I HAANDEN. Et TextBlock, der er skrevet her,
+             faar den globale TextBlock-stil med den normale tekstfarve, og
+             saa staar ALLE faner, som om de var valgt. Det er den samme
+             faelde som ved menupunktet i MainWindow. -->
+        <TabItem.Header>
+          <StackPanel Orientation="Horizontal">
+            <TextBlock Text="{i18n:Oversat settingsview.deling}" VerticalAlignment="Center"
+                       Foreground="{Binding Foreground,
+                         RelativeSource={RelativeSource AncestorType={x:Type TabItem}}}"
+                       FontSize="{Binding FontSize,
+                         RelativeSource={RelativeSource AncestorType={x:Type TabItem}}}"
+                       FontWeight="{Binding FontWeight,
+                         RelativeSource={RelativeSource AncestorType={x:Type TabItem}}}" />
+            <Border x:Name="DelingMaerkat" Visibility="Collapsed"
+                    MinWidth="17" Height="17" CornerRadius="8.5" Margin="7,0,0,0"
+                    Background="{DynamicResource Advarsel}" VerticalAlignment="Center">
+              <TextBlock x:Name="DelingMaerkatTal" FontSize="10.5" FontWeight="SemiBold"
+                         Foreground="{DynamicResource PaaAccent}"
+                         HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,0" />
+            </Border>
+          </StackPanel>
+        </TabItem.Header>
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
                       Padding="0,0,14,0">
           <StackPanel>
+
+            <!-- ======================= vejledningen =======================
+
+                 HVAD SKAL JEG GOERE FOERST? Skaermen kunne det hele og sagde
+                 ingenting: et navn, to valgmuligheder, en tom mappesti og en
+                 liste uden computere i. Raekkefoelgen laa i hovedet paa den,
+                 der byggede det.
+
+                 Trinnene laeser den virkelige tilstand - se
+                 NoteApp.Core.Deling.Delingsguide. Et hak, der saettes af den,
+                 der gjorde noget, staar tilbage den dag nogen glemmer det. -->
+            <Border Background="{DynamicResource Panel}" CornerRadius="10" Padding="20"
+                    Margin="0,0,0,14"
+                    BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
+              <StackPanel>
+                <TextBlock x:Name="Deling_Guideoverskrift" FontSize="15" FontWeight="SemiBold" />
+                <TextBlock x:Name="Deling_Guideunder" FontSize="12.5" Margin="0,6,0,0"
+                           TextWrapping="Wrap" LineHeight="19" MaxWidth="620"
+                           HorizontalAlignment="Left"
+                           Foreground="{DynamicResource TekstMeget}" />
+                <StackPanel x:Name="Deling_Guide" Margin="0,16,0,0" />
+              </StackPanel>
+            </Border>
 
             <!-- ========================= denne pc ========================= -->
             <Border Background="{DynamicResource Panel}" CornerRadius="10" Padding="20"

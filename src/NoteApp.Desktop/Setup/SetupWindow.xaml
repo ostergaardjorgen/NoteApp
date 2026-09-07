@@ -83,6 +83,20 @@
                      Foreground="{DynamicResource TekstSvag}"
                      Text="{i18n:Oversat setupwindow.maskine_under}" />
 
+          <!-- ============ APPEN HAR ALLEREDE SET EFTER ============
+
+               Den kigger paa maskinen for at vaelge motor og model. Naar den
+               alligevel ved, om der sidder et grafikkort i, skal den ogsaa
+               sige det her - og saette forslaget derefter. Det er den ene
+               oplysning, der goer spoergsmaalet til noget, man kan svare paa
+               uden at gaette. -->
+          <Border Background="{DynamicResource Trykket}" CornerRadius="8" Padding="12,10"
+                  Margin="0,14,0,0"
+                  BorderBrush="{DynamicResource PanelKant}" BorderThickness="1">
+            <TextBlock x:Name="MaskineFundet" FontSize="12.5" LineHeight="19" TextWrapping="Wrap"
+                       Foreground="{DynamicResource TekstSvag}" />
+          </Border>
+
           <RadioButton x:Name="ValgPrimaer" GroupName="maskinrolle" Margin="0,18,0,0"
                        IsChecked="True">
             <StackPanel>

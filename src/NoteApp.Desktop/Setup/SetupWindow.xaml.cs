@@ -26,7 +26,7 @@ public partial class SetupWindow : Window
     private static readonly (string Titel, string Under)[] Trin =
     {
         ("Velkommen til HeyPia", "Lyden bliver på din maskine — teksten bearbejdes i Europa"),
-        ("Er det din første maskine?", "HeyPia kan dele arbejdet mellem to computere"),
+        ("Hvilken af dine computere er det her?", "Den kraftige skriver ud, den bærbare optager"),
         ("Sådan skal den virke", "Navn, mikrofon, genvejstast og vågeord — sat én gang, her"),
         ("Sidste trin: hent Whisper", "Appen ser efter, hvad din maskine kan, og henter det, der passer")
     };
@@ -87,6 +87,7 @@ public partial class SetupWindow : Window
         // «Saadan skal den virke» er nu nr. 3 og hentningen nr. 4 - og
         // hentningen skal forberedes FOERST der, ellers skriver den «Faerdig»
         // paa en knap, der stadig skal videre.
+        if (nr == 1) ForeslaaMaskine();
         if (nr == 2) IndlaesValg();
         if (nr == 3) _ = ForberedHentning();
     }
@@ -325,6 +326,53 @@ public partial class SetupWindow : Window
         {
             Dialogs.AppDialog.Vis(Window.GetWindow(this), "Kunne ikke skifte mappe", ex.Message, Dialogs.Slags.Pas_paa);
         }
+    }
+
+    /// <summary>Sat, når forslaget er givet én gang.</summary>
+    private bool _maskineForeslaaet;
+
+    /// <summary>Svaret fra maskinen. Kigges kun efter én gang.</summary>
+    private bool? _harGrafikkort;
+
+    /// <summary>
+    /// Foreslår rollen ud fra det, maskinen har.
+    /// </summary>
+    /// <remarks>
+    /// ============ GRAFIKKORTET AFGØR DET, IKKE RÆKKEFØLGEN ============
+    ///
+    /// Den primære er den kraftige med grafikkortet; den sekundære er den
+    /// bærbare. Det er dét, forskellen ER — udskrivningen kører på
+    /// grafikkortet, og uden et sådant tager den mange gange så lang tid.
+    ///
+    /// Appen kigger alligevel efter kortet for at vælge motor og model. Så
+    /// skal den også sige, hvad den fandt, og sætte forslaget derefter: et
+    /// spørgsmål, man kan svare rigtigt på uden at vide, hvad der sidder i
+    /// maskinen.
+    ///
+    /// ============ FORSLAGET GIVES ÉN GANG ============
+    ///
+    /// Går man tilbage og frem igen, må maskinen ikke rette det, man lige
+    /// selv har valgt. Det er et forslag, ikke en afgørelse.
+    /// </remarks>
+    private void ForeslaaMaskine()
+    {
+        if (_harGrafikkort is null)
+        {
+            try { _harGrafikkort = EngineInstaller.HasNvidiaGpu(); }
+            catch (Exception) { _harGrafikkort = false; }
+        }
+
+        var gpu = _harGrafikkort == true;
+
+        MaskineFundet.Text = NoteApp.Core.Sprog.T(
+            gpu ? "setupwindow.maskine_fundet_gpu" : "setupwindow.maskine_fundet_intet");
+
+        if (_maskineForeslaaet) return;
+
+        _maskineForeslaaet = true;
+
+        ValgPrimaer.IsChecked = gpu;
+        ValgSekundaer.IsChecked = !gpu;
     }
 
     /// <summary>

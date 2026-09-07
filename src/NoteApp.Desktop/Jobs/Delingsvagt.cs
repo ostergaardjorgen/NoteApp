@@ -60,32 +60,48 @@ public static class Delingsvagt
 
             Delt.Meld();
 
-            // ============ LIGGER DER EN NOEGLE OG VENTER? ============
+            // ============ LIGGER DER NOGET OG VENTER? ============
             //
-            // Den anden computer har trykket «Send API-noeglen hertil». Den
-            // ligger krypteret i den faelles mappe og kan kun aabnes her - se
+            // Den anden computer har trykket «Send opsaetningen». Den ligger
+            // krypteret i den faelles mappe og kan kun aabnes her - se
             // Noegledeling. Den hentes af sig selv, fordi et menneske
             // allerede har taget beslutningen paa den anden skaerm; at skulle
             // sige ja to gange til det samme er ikke en sikkerhed, det er en
             // forhindring.
-            switch (Noegledeling.Hent())
-            {
-                case Noegledeling.Udfald.Hentet:
-                    Historik.Skriv(HaendelseType.Andet,
-                        "API-noeglen er modtaget fra en anden computer",
-                        "Noeglen laa krypteret i den faelles mappe og er nu gemt paa den her "
-                        + "computer. Kuverten er ryddet.",
-                        Udfald.Fuldført);
-                    break;
+            // TALLET VED MENUPUNKTET FOELGER MED. Det er her, den anden
+            // computer bliver opdaget - og den, der sidder og venter paa, at
+            // den melder sig, skal ikke skulle aabne Indstillinger for at se,
+            // at den er kommet.
+            (System.Windows.Application.Current?.MainWindow as MainWindow)
+                ?.OpdaterOpsaetningsmaerkat();
 
-                case Noegledeling.Udfald.Afvist:
+            foreach (var (slags, udfald) in Noegledeling.HentAlle())
+            {
+                var api = slags == Kuvertslags.Apinoegle;
+
+                if (udfald == Noegledeling.Udfald.Hentet)
+                {
                     Historik.Skriv(HaendelseType.Andet,
-                        "En noeglekuvert blev afvist",
-                        "Der laa en kuvert i den faelles mappe, men den kunne ikke aabnes - den "
-                        + "var udloebet, eller den kom fra en computer, der ikke er godkendt. "
-                        + "Den er ryddet.",
+                        api
+                            ? "API-nøglen er modtaget fra din anden computer"
+                            : "Google-forbindelsen er modtaget fra din anden computer",
+                        api
+                            ? "Nøglen lå krypteret i den fælles mappe og er nu gemt på den her "
+                              + "computer. Du kan lave referater og dokumenter med det samme."
+                            : "Forbindelsen lå krypteret i den fælles mappe. Din kalender og dine "
+                              + "opgaver kommer ind her ved næste hentning — du skal ikke logge "
+                              + "ind hos Google en gang til.",
+                        Udfald.Fuldført);
+                }
+                else if (udfald == Noegledeling.Udfald.Afvist)
+                {
+                    Historik.Skriv(HaendelseType.Andet,
+                        "Noget fra din anden computer blev afvist",
+                        "Der lå noget til den her computer i den fælles mappe, men det kunne ikke "
+                        + "åbnes — enten var det for gammelt, eller også kom det fra en computer, "
+                        + "der ikke er godkendt. Det er ryddet væk.",
                         Udfald.SeEfter);
-                    break;
+                }
             }
         }
         catch (Exception)
