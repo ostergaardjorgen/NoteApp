@@ -1,4 +1,4 @@
-# Recording
+﻿# Recording
 
 *Two tracks, four ways to start — and what happens if something goes wrong*
 
@@ -25,6 +25,81 @@ better: there is no echo from your own microphone and no overlapping speech.
 If the meeting was in person and no sound arrived on the speaker track, the
 empty track is deleted by itself when you stop. You do not have to choose
 between «in person» and «online» in advance.
+
+## Phone calls from your mobile
+
+With **Phone Link** you can take calls on the computer — and HeyPia can record
+the conversation like any other meeting.
+
+### Setting it up
+
+1. **Pair the phone.** Open *Phone Link* on the computer and follow the guide.
+   On an iPhone, Bluetooth must be on at both ends.
+
+2. **Let Phone Link use the microphone.** This is the step that is usually
+   missing: **Settings → Privacy → Microphone → Phone Link**.
+
+   Without it Phone Link can *play* the call but not *capture* you. It sounds
+   like a broken headset and is not: you can hear the other person, they
+   cannot hear you.
+
+3. **Make your headset the default communication device.** This is the
+   decisive step, and it is not the same as setting the default device.
+
+### The two defaults
+
+Windows has **two** default speakers and **two** default microphones:
+
+| | Used by |
+|---|---|
+| **Default device** | music, video, YouTube |
+| **Default communication device** | calls — Phone Link, Teams, Zoom |
+
+They can point in different directions, and often do: monitor speakers for
+music, headset for meetings. Set only one and the call ends up somewhere other
+than you think.
+
+To set them:
+
+1. Right-click the speaker icon by the clock → **Sound settings**
+2. Scroll to **More sound settings**
+3. The **Playback** and **Recording** tabs
+4. Right-click your headset in each tab → **Set as default communication device**
+
+If the phone is also paired directly over Bluetooth alongside Phone Link, it
+appears in the list as an audio device too — usually *"… Hands-Free"*. If that
+one is the communication device, Windows tries to use **the phone** as the
+microphone instead of your headset, and the headset's microphone will not work.
+
+### Making sure the whole conversation is captured
+
+A call has two voices arriving two different ways: **yours** through the
+microphone, **theirs** out of the speaker. HeyPia records both — but from the
+devices selected in the app, under **Settings → Sound**.
+
+**If those two do not point at the same place, the other person is missing from
+the recording.** Your own voice is there, the transcript looks complete, and you
+only find out when you go looking for something they said.
+
+So: pick **the same headset** in three places — as the default communication
+device in Windows (both tabs), and as microphone and speaker in HeyPia.
+
+If you don't, the app says so. The bubble asking whether to record gets a yellow
+line: *"Calls run on ‹device›, but HeyPia records from a different speaker."*
+Fix it before you press record — afterwards is too late.
+
+### The app asks when the phone rings
+
+When Phone Link opens the microphone, HeyPia notices and asks down by the clock
+whether the conversation should be recorded. It waits half a minute first, so a
+microphone test and a "can you hear me" do not trigger the question.
+
+**Nothing is ever recorded on its own.** The app can only ask. And tell the
+person you are talking to — the rules for recording a phone call are not the
+same everywhere.
+
+The recording lands in the **Telefon opkald** folder in the recordings list. The
+app puts it there; if that is wrong, drag it to another folder.
 
 ## The wake word
 
@@ -67,8 +142,8 @@ Nothing is recorded meanwhile; the microphone is released.
 ## How the recordings stand in the tree
 
 On the left under **Recordings** stand your own folders — the one for meetings,
-the one for webinars, and any others you have made — with the archive beside
-them. There is no longer a «Folders» root above them all. It answered a
+the one for webinars, and any others you have made. At the bottom stand two the
+app fills by itself: **Telefon opkald** and the archive. There is no longer a «Folders» root above them all. It answered a
 question nobody asks, and it cost a whole level of indentation in a narrow
 column.
 

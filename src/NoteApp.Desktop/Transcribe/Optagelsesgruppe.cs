@@ -1,4 +1,4 @@
-using System.IO;
+﻿using System.IO;
 using NoteApp.Core;
 
 namespace NoteApp.Desktop.Transcribe;
@@ -8,6 +8,16 @@ public enum Gruppe
 {
     /// <summary>Ligger fremme: holdt, men ikke færdigbehandlet.</summary>
     Moede,
+
+    /// <summary>
+    /// Et telefonopkald. Egen folder, fordi man leder efter dem for sig.
+    /// </summary>
+    /// <remarks>
+    /// Den ligger MELLEM møderne og arkivet, og det er ikke tilfældigt: et
+    /// opkald er stadig noget, der ligger fremme. Arkivet er der, tingene
+    /// lægges hen, når der ikke er mere at gøre ved dem — også opkald.
+    /// </remarks>
+    Opkald,
 
     /// <summary>Lagt væk, fordi der ikke er mere at gøre ved det.</summary>
     Arkiv
@@ -34,8 +44,15 @@ public enum Gruppe
 /// </summary>
 public static class Optagelsesgruppe
 {
+    /// <remarks>
+    /// ARKIVET VINDER OVER TELEFONEN. Et arkiveret opkald er arkiveret — det
+    /// skal ligge ét sted, og det sted er arkivet. Ellers ville en oprydning
+    /// se ud, som om den ikke virkede.
+    /// </remarks>
     public static Gruppe Af(string mappe, MeetingMetadata? meta) =>
-        meta?.ArchivedAt is not null ? Gruppe.Arkiv : Gruppe.Moede;
+        meta?.ArchivedAt is not null ? Gruppe.Arkiv
+        : meta?.Opkald == true ? Gruppe.Opkald
+        : Gruppe.Moede;
 
     /// <summary>
     /// Lægger et møde i arkivet, eller henter det frem igen.

@@ -71,7 +71,14 @@ public sealed class RecordingSession : IDisposable
             MicDeviceName = microphone.FriendlyName,
             LoopbackDeviceName = type is MeetingType.Online or MeetingType.Webinar
                 ? renderDevice!.FriendlyName
-                : null
+                : null,
+
+            // ============ ER DET TELEFONEN? ============
+            //
+            // Der spoerges HER og huskes ikke fra andetsteds. Telefonen er
+            // lagt paa, laenge foer nogen kigger paa listen; svaret findes kun
+            // i det oejeblik, der optages. Se Opkaldsprogrammer.IGang.
+            Opkald = Opkaldsprogrammer.IGang(),
         };
 
         // Skriv metadata FØR optagelsen begynder. Crasher maskinen, er der

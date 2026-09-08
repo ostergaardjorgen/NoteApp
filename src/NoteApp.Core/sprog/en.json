@@ -328,6 +328,9 @@
     "skriv_en_note_og_tryk_enter_ctrl_b_saetter": "Write a note and press Enter · Ctrl+B sets a bookmark without text"
   },
   "moedevagtpopup": {
+    "enhed_begge": "Calls run on “{0}” and “{1}”, but HeyPia records from other devices. Record now and audio will be missing — and you only see it afterwards.",
+    "enhed_hoejttaler": "Calls run on “{0}”, but HeyPia records from a different speaker. Record now and YOUR voice is captured — but not the other person's. Fix it under Settings → Sound, or pick “{0}” as the speaker in the app.",
+    "enhed_mikrofon": "Calls use the microphone “{0}”, but HeyPia records from a different one. Record now and your own voice may not be captured.",
     "ikke_nu": "Not now",
     "luk_der_spoerges_igen_naeste_gang_et_moede": "Close. You will be asked again the next time a meeting starts.",
     "sig_til_de_andre_at_du_optager_lyden_blive": "Tell the others you are recording. The audio stays on your machine, so it is easy to explain.",

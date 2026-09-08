@@ -77,6 +77,20 @@ public sealed class MeetingMetadata
     public bool RecoveredAfterCrash { get; set; }
 
     /// <summary>
+    /// Var det et telefonopkald? Så hører optagelsen i sin egen folder.
+    /// </summary>
+    /// <remarks>
+    /// SAT ÉN GANG, DA OPTAGELSEN BLEV OPRETTET, og aldrig regnet ud bagefter.
+    /// Telefonen er lagt på, længe før nogen kigger på listen — svaret findes
+    /// kun i det øjeblik, der optages. Se <see cref="Opkaldsprogrammer"/>.
+    ///
+    /// Feltet er brugerens: trækker man en optagelse over i eller ud af
+    /// telefonfolderen, er det DEN her, der ændrer sig. Appen gætter kun
+    /// første gang.
+    /// </remarks>
+    public bool Opkald { get; set; }
+
+    /// <summary>
     /// Hvilken prøvetekst der blev læst op: «dansk», «blandet», «engelsk».
     /// Null for rigtige møder.
     ///

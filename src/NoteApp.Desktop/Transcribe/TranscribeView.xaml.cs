@@ -451,6 +451,7 @@ public partial class TranscribeView : UserControl
     private OptagelseVisning? Valgt => _valgtKnude?.Optagelse;
 
     private Biblioteker.Biblioteksnode _rodMoeder = null!;
+    private Biblioteker.Biblioteksnode _rodOpkald = null!;
     private Biblioteker.Biblioteksnode _rodArkiv = null!;
     private bool _byggerTrae;
 
@@ -486,11 +487,17 @@ public partial class TranscribeView : UserControl
         // imellem i traeet, er ikke moeder — det er de foldere, man selv har
         // lagt tingene i. Navnet skal sige, hvad man vaelger imellem.
         _rodMoeder = Biblioteker.Biblioteksnode.Bibliotek("Foldere", "\uE8F1", Gruppe.Moede);
+        // ============ TELEFONOPKALD STAAR FOR SIG ============
+        //
+        // Et opkald optages som et moede, men man leder efter det paa en anden
+        // maade - «hvad sagde han i telefonen i tirsdags». Blandt moederne
+        // drukner de. Appen saetter folderen selv; se Opkaldsprogrammer.
+        _rodOpkald = Biblioteker.Biblioteksnode.Bibliotek("Telefon opkald", "\uE717", Gruppe.Opkald);
         _rodArkiv = Biblioteker.Biblioteksnode.Bibliotek("Arkiv", "\uE7B8", Gruppe.Arkiv);
 
         var mapper = NoteApp.Core.Mapper.Alle(NoteApp.Core.Mapper.Slags.Optagelser);
 
-        foreach (var rod in new[] { _rodMoeder, _rodArkiv })
+        foreach (var rod in new[] { _rodMoeder, _rodOpkald, _rodArkiv })
         {
             var iGruppen = alle.Where(o => o.Gruppe == rod.Gruppe).ToList();
             rod.Antal = iGruppen.Count;
@@ -558,7 +565,11 @@ public partial class TranscribeView : UserControl
         // _rodMoeder BLIVER, den tegnes bare ikke. Den er stadig det sted,
         // koden mener, naar den siger «ud af mappen»: se Trae_Slip, hvor et
         // slip ved siden af traeet nu betyder netop dét.
-        Trae.ItemsSource = _rodMoeder.Boern.Concat(new[] { _rodArkiv }).ToList();
+        // TELEFONOPKALD LIGGER LIGE OVER ARKIVET. Begge er steder, appen selv
+        // laegger noget hen; forskellen er, at det ene stadig ligger fremme.
+        Trae.ItemsSource = _rodMoeder.Boern
+            .Concat(new[] { _rodOpkald, _rodArkiv })
+            .ToList();
 
         // Alt starter foldet sammen. Kun det, der VAR foldet ud, foldes ud
         // igen - og foerste gang er der ingenting i den maengde.
@@ -629,7 +640,7 @@ public partial class TranscribeView : UserControl
     /// </summary>
     private void VisTomBesked()
     {
-        if (_rodMoeder.Antal > 0 || _rodArkiv.Antal > 0) return;
+        if (_rodMoeder.Antal > 0 || _rodOpkald.Antal > 0 || _rodArkiv.Antal > 0) return;
 
         Status.Text = "Ingen møder endnu.";
         ForklaringOverskrift.Text = "Der ligger ingen møder her";
@@ -1017,8 +1028,22 @@ public partial class TranscribeView : UserControl
         var meta = MeetingStore.Load(flyttet.Mappe) ?? Optagelsesgruppe.Nødmetadata(flyttet.Mappe);
 
         var skiftedeGruppe = flyttet.Gruppe != maal.Gruppe;
+
         if (skiftedeGruppe)
+        {
             meta.ArchivedAt = maal.Gruppe == Gruppe.Arkiv ? DateTimeOffset.Now : null;
+
+            // ============ BRUGEREN HAR DET SIDSTE ORD ============
+            //
+            // Appen gaetter, om en optagelse var et opkald - se
+            // Opkaldsprogrammer. Traekker man den ud af folderen, var gaettet
+            // forkert, og saa skal det BLIVE forkert. Ellers ville den hoppe
+            // tilbage naeste gang listen blev bygget.
+            //
+            // ARKIVET RAERER DET IKKE. Et arkiveret opkald er stadig et
+            // opkald, og hentes det frem igen, skal det tilbage i sin folder.
+            if (maal.Gruppe != Gruppe.Arkiv) meta.Opkald = maal.Gruppe == Gruppe.Opkald;
+        }
 
         meta.Mappe = maal.Mappe;      // null paa et bibliotek = ud af mappen
         MeetingStore.Save(flyttet.Mappe, meta);
@@ -1028,7 +1053,14 @@ public partial class TranscribeView : UserControl
             Historik.Skriv(
                 maal.Gruppe == Gruppe.Arkiv ? HaendelseType.Arkiveret : HaendelseType.HentetFrem,
                 flyttet.Titel,
-                maal.Gruppe == Gruppe.Arkiv ? "Lagt i arkivet" : "Hentet frem fra arkivet",
+                maal.Gruppe switch
+                {
+                    Gruppe.Arkiv => "Lagt i arkivet",
+                    Gruppe.Opkald => "Lagt under telefonopkald",
+                    _ => flyttet.Gruppe == Gruppe.Arkiv
+                        ? "Hentet frem fra arkivet"
+                        : "Taget ud af telefonopkald",
+                },
                 sti: flyttet.Mappe);
         }
 

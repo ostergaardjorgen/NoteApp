@@ -157,6 +157,77 @@ public static class AudioDevices
         }
     }
 
+    /// <summary>
+    /// Den højttaler, Windows sender OPKALD til. Kan være en anden end den
+    /// almindelige standard.
+    /// </summary>
+    /// <remarks>
+    /// ============ WINDOWS HAR TO STANDARDER, IKKE ÉN ============
+    ///
+    /// «Standardenhed» er den, musik og video bruger. «Standardkommunikations-
+    /// enhed» er den, opkald bruger — Teams, Telefonlink, Zoom. De kan pege
+    /// hvert sit sted, og det gør de tit: skærmens højttalere til musik,
+    /// headsettet til møder.
+    ///
+    /// DET ER DEN FORSKEL, DER KOSTER DEN ANDEN HALVDEL AF SAMTALEN.
+    ///
+    /// Optager appen loopback fra den almindelige standard, mens opkaldet
+    /// kører i headsettet, optages din egen stemme fint — og modparten
+    /// findes ikke. Udskriften ser hel ud. Den er det ikke, og man opdager det
+    /// først, når man leder efter noget, der blev sagt.
+    ///
+    /// Målt 08-09-2026: en Jabra SPEAK 510 stod som standardkommunikations-
+    /// enhed, mens skærmen stod som almindelig standard.
+    /// </remarks>
+    public static DeviceInfo? DefaultOpkaldshoejttaler() => Standard(DataFlow.Render, Role.Communications);
+
+    /// <summary>Den mikrofon, Windows bruger til opkald. Se <see cref="DefaultOpkaldshoejttaler"/>.</summary>
+    public static DeviceInfo? DefaultOpkaldsmikrofon() => Standard(DataFlow.Capture, Role.Communications);
+
+    private static DeviceInfo? Standard(DataFlow flow, Role role)
+    {
+        try
+        {
+            using var e = new MMDeviceEnumerator();
+            var d = e.GetDefaultAudioEndpoint(flow, role);
+            return new DeviceInfo(d.ID, d.FriendlyName);
+        }
+        catch (Exception)
+        {
+            // Ingen enhed af den slags. Kalderen viser det; her er null nok.
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Vil et opkald blive optaget helt med de enheder, der er valgt?
+    /// </summary>
+    /// <param name="valgtHoejttaler">Den højttaler, appen optager loopback fra.</param>
+    /// <param name="valgtMikrofon">Den mikrofon, appen optager fra.</param>
+    /// <returns>
+    /// Null når alt er, som det skal være. Ellers navnet på den enhed,
+    /// opkaldet faktisk kører på — dét, brugeren skal vælge.
+    /// </returns>
+    /// <remarks>
+    /// DER SAMMENLIGNES PÅ ID OG IKKE PÅ NAVN. To enheder kan hedde det samme
+    /// («Mikrofon»), og en enhed kan skifte navn, når en driver opdateres.
+    ///
+    /// FINDES DER INGEN KOMMUNIKATIONSENHED, ER DER INTET AT ADVARE OM. Så er
+    /// de to standarder den samme, og Windows svarer med den.
+    /// </remarks>
+    public static (string? Hoejttaler, string? Mikrofon) Opkaldsafvigelse(
+        string? valgtHoejttaler, string? valgtMikrofon)
+    {
+        var h = DefaultOpkaldshoejttaler();
+        var m = DefaultOpkaldsmikrofon();
+
+        return (
+            h is not null && !string.Equals(h.Id, valgtHoejttaler, StringComparison.OrdinalIgnoreCase)
+                ? h.FriendlyName : null,
+            m is not null && !string.Equals(m.Id, valgtMikrofon, StringComparison.OrdinalIgnoreCase)
+                ? m.FriendlyName : null);
+    }
+
     internal static MMDevice Resolve(string id)
     {
         var e = new MMDeviceEnumerator();

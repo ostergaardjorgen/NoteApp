@@ -55,6 +55,21 @@
                  Foreground="{DynamicResource TekstMeget}"
                  Text="{i18n:Oversat moedevagtpopup.sig_til_de_andre_at_du_optager_lyden_blive}" />
 
+      <!-- ============ OPTAGES DEN ANDEN HALVDEL OGSAA? ============
+
+           Windows har TO standardhoejttalere: en til musik og en til opkald.
+           Optager appen fra den forkerte, optages din egen stemme fint - og
+           modparten findes ikke. Udskriften ser hel ud.
+
+           Ruden staar KUN, naar de to peger hvert sit sted. Se
+           AudioDevices.Opkaldsafvigelse. -->
+      <Border x:Name="Enhedsadvarsel" Visibility="Collapsed" Margin="0,10,0,0"
+              Background="{DynamicResource AdvarselFlade}" BorderBrush="{DynamicResource Advarsel}"
+              BorderThickness="1" CornerRadius="8" Padding="10,8">
+        <TextBlock x:Name="Enhedsadvarseltekst" FontSize="11.5" LineHeight="17"
+                   TextWrapping="Wrap" Foreground="{DynamicResource Tekst}" />
+      </Border>
+
       <StackPanel Orientation="Horizontal" Margin="0,14,0,0">
         <Button Content="{i18n:Oversat faelles.optag_moedet}" Click="Optag_Klik" Padding="16,7" FontSize="12.5"
                 Style="{StaticResource Primaer}" />

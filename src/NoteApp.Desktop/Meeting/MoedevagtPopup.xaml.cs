@@ -1,4 +1,4 @@
-using System.Windows;
+﻿using System.Windows;
 using NoteApp.Core;
 
 namespace NoteApp.Desktop.Meeting;
@@ -30,7 +30,47 @@ public partial class MoedevagtPopup : Window
         Overskrift.Text = $"{bruger.Navn} bruger din mikrofon";
         AldrigKnap.Content = $"Spørg aldrig for {bruger.Navn}";
 
+        Visadvarsel();
+
         Loaded += (_, _) => Placer();
+    }
+
+    /// <summary>
+    /// Advarer, hvis opkaldet kører på en anden enhed end den, der optages fra.
+    /// </summary>
+    /// <remarks>
+    /// ============ DET ER HER, DEN FEJL SKAL FANGES ============
+    ///
+    /// Windows har to standardhøjttalere: en til musik og en til opkald. Peger
+    /// de hvert sit sted — og det gør de tit, skærmens højttalere til musik og
+    /// headsettet til møder — optager appen loopback fra den forkerte.
+    ///
+    /// Så optages din egen stemme fint, og modparten findes ikke. Udskriften
+    /// ser hel ud. Man opdager det først, når man leder efter noget, der blev
+    /// sagt, og det er for sent.
+    ///
+    /// Beskeden står PRÆCIS her, hvor der skal trykkes — ikke inde under
+    /// indstillinger, hvor ingen kigger, mens telefonen ringer.
+    /// </remarks>
+    private void Visadvarsel()
+    {
+        var i = AppSettings.Current;
+
+        var (hoejttaler, mikrofon) = AudioDevices.Opkaldsafvigelse(i.SpeakerId, i.MicrophoneId);
+
+        if (hoejttaler is null && mikrofon is null) return;
+
+        // HOEJTTALEREN NAEVNES FOERST. Er den forkert, mangler MODPARTEN i
+        // optagelsen, og det er det dyre. En forkert mikrofon koster din egen
+        // stemme, og det opdager man med det samme.
+        var hvad = hoejttaler is not null && mikrofon is not null
+            ? Sprog.T("moedevagtpopup.enhed_begge", hoejttaler, mikrofon)
+            : hoejttaler is not null
+                ? Sprog.T("moedevagtpopup.enhed_hoejttaler", hoejttaler)
+                : Sprog.T("moedevagtpopup.enhed_mikrofon", mikrofon!);
+
+        Enhedsadvarseltekst.Text = hvad;
+        Enhedsadvarsel.Visibility = Visibility.Visible;
     }
 
     /// <summary>
