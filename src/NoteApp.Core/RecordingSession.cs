@@ -61,24 +61,27 @@ public sealed class RecordingSession : IDisposable
         UserDataPaths.EnsureCreated();
 
         var startedAt = DateTimeOffset.Now;
+
+        // ============ ER DET TELEFONEN? ============
+        //
+        // Der spoerges HER og huskes ikke fra andetsteds. Telefonen er lagt
+        // paa, laenge foer nogen kigger paa listen; svaret findes kun i det
+        // oejeblik, der optages. Se Opkaldsprogrammer.IGang.
+        var opkald = Opkaldsprogrammer.IGang();
+
         var dir = MeetingStore.CreateSessionDirectory(title, startedAt);
 
         var meta = new MeetingMetadata
         {
             Type = type,
             StartedAt = startedAt,
-            Title = title,
+            Title = opkald && string.IsNullOrWhiteSpace(title) ? Opkaldsnavn(startedAt) : title,
             MicDeviceName = microphone.FriendlyName,
             LoopbackDeviceName = type is MeetingType.Online or MeetingType.Webinar
                 ? renderDevice!.FriendlyName
                 : null,
 
-            // ============ ER DET TELEFONEN? ============
-            //
-            // Der spoerges HER og huskes ikke fra andetsteds. Telefonen er
-            // lagt paa, laenge foer nogen kigger paa listen; svaret findes kun
-            // i det oejeblik, der optages. Se Opkaldsprogrammer.IGang.
-            Opkald = Opkaldsprogrammer.IGang(),
+            Opkald = opkald,
         };
 
         // Skriv metadata FØR optagelsen begynder. Crasher maskinen, er der
@@ -152,6 +155,29 @@ public sealed class RecordingSession : IDisposable
         _clock.Start();
         foreach (var t in _tracks) t.Start();
     }
+
+    /// <summary>
+    /// Navnet på et telefonopkald: dansk dato og klokkeslæt.
+    /// </summary>
+    /// <remarks>
+    /// ET OPKALD HAR INGEN TITEL. Man tager telefonen; man sidder ikke og
+    /// navngiver den først. Uden et navn stod de alle sammen som «Uden navn»,
+    /// og så kunne to opkald ikke skelnes.
+    ///
+    /// Datoen er den, man selv ville skrive: 08-09-2026, ikke 2026-09-08.
+    /// Kun timer og minutter — sekunder er der ingen, der leder efter.
+    ///
+    /// KOLONNET ER I ANFØRSELSTEGN. Uden dem er «:» en pladsholder for
+    /// kulturens egen tidsadskiller, og dansk bruger PUNKTUM: navnet ville
+    /// blive «22.45» på en dansk maskine og «22:45» på en engelsk. Det samme
+    /// gælder «_», der ellers er tavs.
+    ///
+    /// Mappenavnet paa disken roeres ikke — det er stadig
+    /// <c>2026-09-08_22-45</c>, som alle andre optagelser, saa sorteringen
+    /// paa disken bliver ved med at passe. Se <see cref="MeetingStore.Slug"/>.
+    /// </remarks>
+    public static string Opkaldsnavn(DateTimeOffset naar) =>
+        naar.ToString("dd-MM-yyyy'_'HH':'mm", System.Globalization.CultureInfo.InvariantCulture);
 
     public bool IsPaused { get; private set; }
 

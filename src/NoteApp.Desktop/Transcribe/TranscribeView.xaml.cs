@@ -12,6 +12,17 @@ namespace NoteApp.Desktop.Transcribe;
 
 public sealed class OptagelseVisning
 {
+    /// <summary>
+    /// Hvornår optagelsen blev lavet. Til sortering.
+    /// </summary>
+    /// <remarks>
+    /// IKKE MAPPENS TIDSSTEMPEL. Listen sorteres ellers på, hvornår mappen
+    /// sidst blev SKREVET i — og en udskrift, der bliver lavet i dag på et
+    /// møde fra i marts, flytter det møde op i toppen. Til telefonopkald, hvor
+    /// det nyeste skal stå øverst, er det forkert svar.
+    /// </remarks>
+    public DateTime Dato { get; }
+
     public OptagelseVisning(string mappe)
     {
         Mappe = mappe;
@@ -41,6 +52,8 @@ public sealed class OptagelseVisning
         var dato = start == default
             ? Directory.GetLastWriteTime(mappe)
             : start.LocalDateTime;
+
+        Dato = dato;
 
         var længde = TimeSpan.FromSeconds(Sekunder);
         // Samme fejl som i dialogen: mm klipper timerne af, saa et moede paa
@@ -520,6 +533,20 @@ public partial class TranscribeView : UserControl
         foreach (var rod in new[] { _rodMoeder, _rodOpkald, _rodArkiv })
         {
             var iGruppen = alle.Where(o => o.Gruppe == rod.Gruppe).ToList();
+
+            // ============ NYESTE OPKALD OEVERST ============
+            //
+            // Resten af listen sorteres paa, hvornaar mappen sidst blev skrevet
+            // i - det er rigtigt for moeder, hvor en ny udskrift eller et nyt
+            // dokument er grunden til at kigge igen.
+            //
+            // Et opkald bliver ikke arbejdet videre paa. Det, man leder efter,
+            // er «det jeg lige har talt med ham om», og saa skal det sorteres
+            // paa, hvornaar SAMTALEN var - ikke paa hvornaar filen sidst blev
+            // roert.
+            if (rod.Gruppe == Gruppe.Opkald)
+                iGruppen = iGruppen.OrderByDescending(o => o.Dato).ToList();
+
             rod.Antal = iGruppen.Count;
 
             // MAPPER I MAPPER.
@@ -600,10 +627,25 @@ public partial class TranscribeView : UserControl
         // _rodMoeder BLIVER, den tegnes bare ikke. Den er stadig det sted,
         // koden mener, naar den siger «ud af mappen»: se Trae_Slip, hvor et
         // slip ved siden af traeet nu betyder netop dét.
-        // TELEFONOPKALD LIGGER LIGE OVER ARKIVET. Begge er steder, appen selv
-        // laegger noget hen; forskellen er, at det ene stadig ligger fremme.
-        Trae.ItemsSource = _rodMoeder.Boern
+        // ============ FOLDERNE SAMLET, DE LOESE BAGEFTER ============
+        //
+        // _rodMoeder.Boern indeholder BEGGE dele: foerst mapperne, saa de
+        // optagelser, der ikke ligger i nogen. Blev listen brugt, som den er,
+        // kom «Telefon opkald» og «Arkiv» EFTER de loese optagelser - og saa
+        // laeser oejet dem som noget, der hoerer til den stump, ikke som
+        // sidestillede med «Moeder» og «Webinarer».
+        //
+        // Alle er roedder; det er maalt, de begynder samme sted. Men det
+        // hjaelper ikke, naar der ligger tre enkeltoptagelser imellem.
+        //
+        // Foldere foerst, saa de to appen selv fylder, og til sidst det, der
+        // ikke ligger nogen steder.
+        var foldere = _rodMoeder.Boern.Where(b => b.ErBeholder).ToList();
+        var loese = _rodMoeder.Boern.Where(b => !b.ErBeholder).ToList();
+
+        Trae.ItemsSource = foldere
             .Concat(new[] { _rodOpkald, _rodArkiv })
+            .Concat(loese)
             .ToList();
 
         // Alt starter foldet sammen. Kun det, der VAR foldet ud, foldes ud

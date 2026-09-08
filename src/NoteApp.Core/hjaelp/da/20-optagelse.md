@@ -98,8 +98,13 @@ et «kan du høre mig» ikke udløser spørgsmålet.
 taler med — reglerne for at optage en telefonsamtale er ikke de samme alle
 steder.
 
-Optagelsen lander i folderen **Telefon opkald** i optagelseslisten. Den sætter
-appen selv; passer det ikke, kan du trække optagelsen over i en anden folder.
+Optagelsen lander i folderen **Telefon opkald** i optagelseslisten, med det
+nyeste øverst. Kun opkald gennem Telefonlink havner der af sig selv — et
+Teams-møde er et møde og bliver, hvor møder er.
+
+Den får navn efter, hvornår du talte: **08-09-2026_22:45**. Man navngiver ikke
+et opkald, mens telefonen ringer, og uden et navn ville de alle sammen stå som
+«Uden navn». Passer folderen ikke, kan du trække optagelsen over i en anden.
 
 ## Vågeordet
 

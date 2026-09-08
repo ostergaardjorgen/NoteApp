@@ -98,8 +98,13 @@ microphone test and a "can you hear me" do not trigger the question.
 person you are talking to — the rules for recording a phone call are not the
 same everywhere.
 
-The recording lands in the **Telefon opkald** folder in the recordings list. The
-app puts it there; if that is wrong, drag it to another folder.
+The recording lands in the **Telefon opkald** folder in the recordings list,
+newest at the top. Only calls through Phone Link go there on their own — a Teams
+meeting is a meeting and stays where meetings are.
+
+It is named after when you spoke: **08-09-2026_22:45**. You do not name a call
+while the phone is ringing, and without a name they would all read "Untitled".
+If the folder is wrong, drag the recording to another one.
 
 ## The wake word
 
