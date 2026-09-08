@@ -1,4 +1,4 @@
-using NoteApp.Core;
+﻿using NoteApp.Core;
 using Xunit;
 
 namespace NoteApp.Tests;
@@ -83,5 +83,47 @@ public class MikrofonvagtTest
         // ellers kommer boblen tilbage netop dér.
         var sti = Motor + @"\whisper\bin\Release\whisper-command.exe";
         Assert.True(Mikrofonvagt.ErEgetProgram(Noegle(sti), null, Motor));
+    }
+
+    // ============================================================ Windows selv
+
+    [Theory]
+    [InlineData("windows.immersivecontrolpanel_cw5n1h2txyewy")]   // Indstillinger
+    [InlineData("Microsoft.Windows.Cortana_cw5n1h2txyewy")]
+    [InlineData("MicrosoftWindows.Client.CBS_cw5n1h2txyewy")]
+    public void Windows_egne_apps_er_ikke_et_moede(string pakke)
+    {
+        // ============ INDSTILLINGER AABNER MIKROFONEN ============
+        //
+        // Maalt 08-09-2026: staar man paa lydsiden i Indstillinger, holder den
+        // mikrofonen aaben, saa laenge siden er fremme - og vagten spurgte, om
+        // moedet skulle optages, mens brugeren kiggede paa sine lydenheder.
+        Assert.True(Mikrofonvagt.ErWindowsselv(pakke));
+    }
+
+    [Theory]
+    [InlineData("MSTeams_8wekyb3d8bbwe")]                    // et rigtigt moede
+    [InlineData("Microsoft.YourPhone_8wekyb3d8bbwe")]        // Telefonlink: et opkald
+    [InlineData("Microsoft.WindowsSoundRecorder_8wekyb3d8bbwe")]
+    [InlineData("us.zoom.pwa.videomeetings_v3vsq3knbhqfj")]
+    public void Microsofts_oevrige_apps_slipper_igennem(string pakke)
+    {
+        // ============ DET ER UDGIVEREN, IKKE NAVNET ============
+        //
+        // «Microsoft» i navnet betyder ingenting. Teams og Telefonlink er
+        // Butikkens udgiver-id og ikke styresystemets - og et Teams-moede er
+        // praecis dét, vagten er til for at opdage.
+        Assert.False(Mikrofonvagt.ErWindowsselv(pakke));
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("uden-understreg")]
+    [InlineData("slutter_med_understreg_")]
+    public void En_noegle_uden_udgiver_slipper_igennem(string pakke)
+    {
+        // Et spoergsmaal for meget er til at leve med. En vagt, der tier paa en
+        // noegle, den ikke forstod, er ikke.
+        Assert.False(Mikrofonvagt.ErWindowsselv(pakke));
     }
 }

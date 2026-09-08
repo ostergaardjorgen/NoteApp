@@ -101,6 +101,7 @@ public static class Mikrofonvagt
                 : DateTime.Now;
 
             if (ErOsSelv(navn)) continue;
+            if (pakket && ErWindowsselv(navn)) continue;
             if (!pakket && !Koerer(navn)) continue;
 
             ud.Add(new Mikrofonbruger(navn, Visningsnavn(navn, pakket), start));
@@ -149,6 +150,64 @@ public static class Mikrofonvagt
 
         var mappe = motormappe.TrimEnd('\\', '/') + '\\';
         return sti.StartsWith(mappe, StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// Windows' egen udgiver-id. Alt, der hører til selve styresystemet,
+    /// ligger under den.
+    /// </summary>
+    /// <remarks>
+    /// Den er den samme på hver eneste Windows-installation — den er udledt af
+    /// Microsofts OS-signeringsnøgle og kan ikke skiftes af en opdatering.
+    /// </remarks>
+    public const string Windowsudgiver = "cw5n1h2txyewy";
+
+    /// <summary>
+    /// Er det her Windows selv?
+    /// </summary>
+    /// <remarks>
+    /// ============ INDSTILLINGER ER IKKE ET MØDE ============
+    ///
+    /// Målt 08-09-2026: åbner man Indstillinger på lydsiden, ÅBNER den
+    /// mikrofonen for at vise udslaget — og bliver ved med at holde den, så
+    /// længe siden står åben. Vagten så et fremmed program på mikrofonen og
+    /// spurgte, om mødet skulle optages, mens brugeren sad og kiggede på sine
+    /// lydindstillinger.
+    ///
+    ///   windows.immersivecontrolpanel_cw5n1h2txyewy   LastUsedTimeStop = 0
+    ///
+    /// Det er den samme slags fejl som med whisper-command 29-08: et program,
+    /// der ikke er et møde, men som ligner et set gennem registret.
+    ///
+    /// ============ UDGIVEREN OG IKKE NAVNET ============
+    ///
+    /// «immersivecontrolpanel» på en liste ville løse præcis det ene tilfælde.
+    /// Kameraet, Lydoptager, Xbox-overlejringen og stemmeadgang gør det samme,
+    /// og listen ville skulle vedligeholdes, hver gang Windows fik en ny
+    /// indbygget app. Den bliver forkert i stilhed.
+    ///
+    /// Udgiver-id'et er stabilt: alt, der følger med Windows, er signeret
+    /// under <see cref="Windowsudgiver"/>. Det er den samme slags valg som
+    /// motormappen ovenfor — sammenlign med det, der IKKE ændrer sig.
+    ///
+    /// ============ MICROSOFTS ØVRIGE APPS SLIPPER IGENNEM ============
+    ///
+    /// Og det skal de. Teams er <c>MSTeams_8wekyb3d8bbwe</c> og Telefonlink er
+    /// <c>Microsoft.YourPhone_8wekyb3d8bbwe</c> — Butikkens udgiver-id, ikke
+    /// styresystemets. Et Teams-møde og et telefonopkald gennem Telefonlink er
+    /// præcis dét, vagten er til for at opdage.
+    ///
+    /// Efterprøvet på maskinen samme dag: ni pakker i registret, og kun
+    /// Indstillinger stod under Windows' eget id.
+    /// </remarks>
+    public static bool ErWindowsselv(string pakkefamilie)
+    {
+        var skille = pakkefamilie.LastIndexOf('_');
+
+        if (skille < 0 || skille == pakkefamilie.Length - 1) return false;
+
+        return pakkefamilie[(skille + 1)..]
+            .Equals(Windowsudgiver, StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>
