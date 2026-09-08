@@ -456,6 +456,26 @@ public partial class TranscribeView : UserControl
     private bool _byggerTrae;
 
     /// <summary>
+    /// Fjerner de mappenoder, der ikke har noget i sig.
+    /// </summary>
+    /// <remarks>
+    /// Der ryddes NEDEFRA OG OP. En mappe kan være tom selv og alligevel have
+    /// en undermappe med noget i — «Møder» tom, «Møder/Steen» med ét opkald —
+    /// og så skal begge blive. Ryddede vi oppefra, ville forælderen ryge og
+    /// tage barnet med sig.
+    /// </remarks>
+    private static void Ryd_tomme(Biblioteker.Biblioteksnode knude)
+    {
+        foreach (var barn in knude.Boern.Where(b => b.ErBeholder).ToList())
+            Ryd_tomme(barn);
+
+        // ObservableCollection har ingen RemoveAll, og der maa ikke fjernes
+        // under en igangvaerende gennemloebning.
+        foreach (var tom in knude.Boern.Where(b => b.ErBeholder && b.Boern.Count == 0).ToList())
+            knude.Boern.Remove(tom);
+    }
+
+    /// <summary>
     /// Bygger hele træet: biblioteker, mapper og optagelser.
     ///
     /// Træet bygges FORFRA hver gang frem for at blive rettet til. Det koster
@@ -548,6 +568,21 @@ public partial class TranscribeView : UserControl
             foreach (var o in iGruppen.Where(o => string.IsNullOrWhiteSpace(o.Emnemappe)
                                                   || !noder.ContainsKey(o.Emnemappe!)))
                 rod.Boern.Add(Biblioteker.Biblioteksnode.Optagelsesnode(o));
+
+            // ============ TOMME MAPPER UNDER DE AUTOMATISKE RODDER ============
+            //
+            // Mapperne er brugerens egne, og de er lavet til MOEDER. De blev
+            // bygget under hver rod, og saa stod «Moeder (0)», «Steen (0)»,
+            // «Webinarer (0)» under «Telefon opkald» - en hel mappestruktur,
+            // der ikke indeholdt noget og aldrig kommer til det.
+            //
+            // Under «Foldere» SKAL en tom mappe staa: det er dér, man laver
+            // dem, og det er dér, man traekker noget ind i dem. Under de
+            // rodder, appen selv fylder, er en tom mappe kun stoej.
+            //
+            // Den, der HAR noget i sig, bliver: traekker man et opkald ned i
+            // «Moeder/Steen», skal folderen kunne ses igen.
+            if (rod != _rodMoeder) Ryd_tomme(rod);
         }
 
         // ============ MAPPERNE ER ROEDDER ============
