@@ -30,20 +30,77 @@ spor slettet af sig selv, når du stopper. Du skal ikke vælge «fysisk» eller
 Med **Telefonlink** kan du tage telefonen på computeren — og så kan HeyPia
 optage samtalen som ethvert andet møde.
 
-### Sådan sættes det op
+### Hvad Telefonlink er — og hvad HeyPia gør ved det
 
-1. **Par telefonen.** Åbn *Telefonlink* på computeren og følg vejledningen.
-   Har du en iPhone, skal Bluetooth være tændt på begge.
+Telefonlink er Microsofts egen app. Den er med i Windows 11 i forvejen; er den
+væk, kan den hentes i Microsoft Store. Den forbinder din telefon til
+computeren, så opkald, beskeder og notifikationer kommer frem på skærmen.
 
-2. **Giv Telefonlink lov til at bruge mikrofonen.** Det er det, der oftest
-   mangler: **Indstillinger → Beskyttelse af personlige oplysninger →
-   Mikrofon → Telefonlink**.
+**HeyPia rører ikke Telefonlink.** De to taler ikke sammen, og der er ingen
+opsætning mellem dem. HeyPia hører bare efter, om et program har åbnet
+mikrofonen — og når Telefonlink gør det, er der et opkald i gang. Derfra er det
+en optagelse som enhver anden: lyden bliver på maskinen, den skrives ud til
+tekst her, og du kan lave et referat af den.
+
+Det betyder også, at rækkefølgen er ligegyldig. Har du Telefonlink kørende i
+forvejen, virker det med det samme, du installerer HeyPia — og omvendt.
+
+### Sæt Telefonlink op — Android
+
+Kravene er en pc med Windows 10 (opdateringen fra oktober 2022 eller nyere)
+eller Windows 11, og en telefon med **Android 10 eller nyere**. Telefon og pc
+skal være på **samme wi-fi**.
+
+1. Installér **Link til Windows** på telefonen — fra Google Play eller Galaxy
+   Store. På mange Samsung-telefoner er den der i forvejen.
+2. Åbn **Telefonlink** på computeren og vælg **Android**.
+3. Log ind i appen på telefonen med **den samme Microsoft-konto** som på pc'en.
+4. Scan QR-koden på pc-skærmen med telefonen, og godkend de tilladelser, den
+   beder om.
+5. Åbn **Opkald** i Telefonlink og tryk **Kom i gang**. Der kommer en besked på
+   telefonen — tryk **Tillad**.
+
+Opkald kræver **Bluetooth** mellem telefonen og pc'en. Wi-fi alene er ikke nok:
+beskeder og billeder kommer over nettet, men selve lyden går over Bluetooth.
+
+### Sæt Telefonlink op — iPhone
+
+Kravene er en pc med **Bluetooth Low Energy (BLE)** og en iPhone med **iOS 16
+eller nyere**. Du skal bruge en **personlig** Microsoft-konto — en arbejds-
+eller skolekonto virker ikke.
+
+1. Tænd **Bluetooth** på både pc og iPhone.
+2. Åbn **Telefonlink** på computeren og vælg **iPhone**.
+3. Scan QR-koden med iPhonens **kamera** — du skal ikke installere en app
+   først. *Link til Windows* findes i App Store, men er ikke nødvendig for at
+   parre.
+4. Godkend på telefonen. Slå derefter tilladelserne til under **Indstillinger →
+   Bluetooth → ⓘ ud for din pc**: systemnotifikationer, beskeder og kontakter.
+
+En iPhone giver mindre end en Android — Apple lukker mindre op. Opkald,
+beskeder og notifikationer virker; apps og billeder gør ikke.
+
+### Microsofts egne vejledninger
+
+Detaljerne skifter, og Microsoft er stedet, der har dem først:
+
+- [Krav og opsætning](https://support.microsoft.com/da-dk/windows/apps/phonelink/phone-link-requirements-and-setup)
+- [Opsætning af opkald](https://support.microsoft.com/da-dk/windows/apps/phonelink/setting-up-calls-in-the-phone-link)
+- [Ofte stillede spørgsmål](https://support.microsoft.com/da-dk/windows/apps/phonelink/frequently-asked-questions-about-the-phone-link)
+
+### Så skal HeyPia have to ting
+
+Når telefonen er koblet på, mangler der to indstillinger i Windows. Begge
+handler om lyd, og begge overses.
+
+1. **Giv Telefonlink lov til at bruge mikrofonen:** **Indstillinger →
+   Beskyttelse af personlige oplysninger → Mikrofon → Telefonlink**.
 
    Uden den kan Telefonlink godt *afspille* opkaldet, men ikke *optage* dig.
    Det lyder som en fejl i headsettet, og det er det ikke: du kan høre den
    anden, men den anden kan ikke høre dig.
 
-3. **Vælg dit headset som standardkommunikationsenhed.** Det her er det
+2. **Vælg dit headset som standardkommunikationsenhed.** Det her er det
    afgørende skridt, og det er ikke det samme som at vælge standardenhed.
 
 ### De to standarder

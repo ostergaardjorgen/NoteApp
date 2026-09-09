@@ -28,8 +28,6 @@ public class SkytjenesteTest
         "onedrive",
         "icloud",
         "apple",
-        "android",
-        "iphone",
         "dropbox",
     };
 
@@ -51,6 +49,24 @@ public class SkytjenesteTest
         "google",
         "telefon",
         "skytjeneste",
+
+        // ============ «ANDROID» OG «IPHONE» PEGER TO STEDER NU ============
+        //
+        // De stod som maerkenavne, der kun kunne betyde eet: hvor man henter
+        // filer fra sin telefon. Den 09-09-2026 kom afsnittet om Telefonlink,
+        // og siden peger de ogsaa paa DET - hvordan man kobler telefonen til
+        // computeren og optager et opkald.
+        //
+        // «iphone» rammer nu 20-optagelse foerst og 65-skytjenester bagefter,
+        // og det er det rigtige svar: den, der skriver «iphone», vil oftere
+        // koble sin telefon til end hente en fil fra iCloud.
+        //
+        // Kravet er derfor flyttet fra «foerst» til «blandt de tre foerste».
+        // Alternativet var at fylde flere «iCloud» ind i skytjenesteafsnittet,
+        // til tallet passede - og det goer haandbogen daarligere for at faa en
+        // proeve til at lyse groent.
+        "android",
+        "iphone",
 
         // DET ORD, FOLK FAKTISK SKRIVER. «Skytjeneste» er en korrekt
         // oversaettelse og ikke et ord, danskere bruger - de siger cloud

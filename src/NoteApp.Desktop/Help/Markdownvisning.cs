@@ -1,4 +1,4 @@
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
@@ -197,6 +197,42 @@ public static class Markdownvisning
     /// ville være kortere og fejle på det første ord, hvor der stod en enkelt
     /// stjerne midt i en sætning.
     /// </summary>
+    /// <summary>
+    /// Et klikbart link, der åbner i browseren.
+    /// </summary>
+    /// <remarks>
+    /// UseShellExecute er nødvendig: uden den forsøger .NET at starte adressen
+    /// som et program, og så sker der ingenting.
+    ///
+    /// En browser, der ikke vil åbne, må ikke vælte hjælpen. Der er ikke noget
+    /// fornuftigt at gøre ved det — adressen står stadig på skærmen.
+    /// </remarks>
+    private static Hyperlink Henvisning(string vist, Uri maal)
+    {
+        var link = new Hyperlink(new Run(vist)) { NavigateUri = maal };
+
+        link.RequestNavigate += (_, e) =>
+        {
+            try
+            {
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = e.Uri.AbsoluteUri,
+                    UseShellExecute = true,
+                });
+            }
+            catch (Exception)
+            {
+                // Ingen browser, eller en der naegtede. Adressen staar der
+                // stadig; der er ikke noget at melde.
+            }
+
+            e.Handled = true;
+        };
+
+        return link;
+    }
+
     private static void Indhold(InlineCollection ud, string tekst, Brush kodefarve)
     {
         var i = 0;
@@ -221,6 +257,46 @@ public static class Markdownvisning
                     ud.Add(new Run(tekst[(i + 2)..slut]) { FontWeight = FontWeights.SemiBold });
                     i = slut + 2;
                     continue;
+                }
+            }
+
+            // [tekst](adresse)
+            //
+            // ============ EN ADRESSE, MAN SKAL SKRIVE AF, ER INGEN HENVISNING ============
+            //
+            // Hjaelpen henviser til Microsofts egne sider om Telefonlink, og de
+            // adresser er lange. Stod de som raa tekst, skulle brugeren taste
+            // dem af fra et vindue, han ikke kan kopiere fra med musen paa den
+            // maade, han er vant til.
+            //
+            // KUN http og https. Hjaelpeteksterne er vores egne og ligger som
+            // indlejrede ressourcer - men en aabning, der tager HVAD SOM HELST,
+            // er en aabning, der en dag tager en file:- eller ms-settings:-sti,
+            // som ingen havde taenkt over.
+            if (tekst[i] == '[')
+            {
+                var slutTekst = tekst.IndexOf(']', i + 1);
+
+                if (slutTekst > i
+                    && slutTekst + 1 < tekst.Length
+                    && tekst[slutTekst + 1] == '(')
+                {
+                    var slutAdresse = tekst.IndexOf(')', slutTekst + 2);
+
+                    if (slutAdresse > slutTekst)
+                    {
+                        var vist = tekst[(i + 1)..slutTekst];
+                        var adresse = tekst[(slutTekst + 2)..slutAdresse];
+
+                        if (Uri.TryCreate(adresse, UriKind.Absolute, out var maal)
+                            && (maal.Scheme == Uri.UriSchemeHttp || maal.Scheme == Uri.UriSchemeHttps))
+                        {
+                            Tom();
+                            ud.Add(Henvisning(vist, maal));
+                            i = slutAdresse + 1;
+                            continue;
+                        }
+                    }
                 }
             }
 

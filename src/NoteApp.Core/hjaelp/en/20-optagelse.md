@@ -31,20 +31,79 @@ between «in person» and «online» in advance.
 With **Phone Link** you can take calls on the computer — and HeyPia can record
 the conversation like any other meeting.
 
-### Setting it up
+### What Phone Link is — and what HeyPia does with it
 
-1. **Pair the phone.** Open *Phone Link* on the computer and follow the guide.
-   On an iPhone, Bluetooth must be on at both ends.
+Phone Link is Microsoft's own app. It ships with Windows 11; if it is missing,
+get it from the Microsoft Store. It connects your phone to the computer so
+calls, messages and notifications appear on screen.
 
-2. **Let Phone Link use the microphone.** This is the step that is usually
-   missing: **Settings → Privacy → Microphone → Phone Link**.
+**HeyPia does not touch Phone Link.** The two do not talk to each other, and
+there is nothing to configure between them. HeyPia simply listens for a program
+opening the microphone — and when Phone Link does, a call is running. From
+there it is a recording like any other: the audio stays on the machine, it is
+transcribed here, and you can make a document out of it.
+
+That also means the order does not matter. If Phone Link is already running, it
+works the moment you install HeyPia — and the other way round.
+
+### Set up Phone Link — Android
+
+You need a PC running Windows 10 (October 2022 update or later) or Windows 11,
+and a phone running **Android 10 or later**. Phone and PC must be on the **same
+Wi-Fi**.
+
+1. Install **Link to Windows** on the phone — from Google Play or the Galaxy
+   Store. On many Samsung phones it is already there.
+2. Open **Phone Link** on the computer and choose **Android**.
+3. Sign in to the app on the phone with **the same Microsoft account** as on
+   the PC.
+4. Scan the QR code on the PC screen with the phone, and grant the permissions
+   it asks for.
+5. Open **Calls** in Phone Link and press **Get started**. A prompt appears on
+   the phone — tap **Allow**.
+
+Calls need **Bluetooth** between phone and PC. Wi-Fi alone is not enough:
+messages and photos travel over the network, but the audio goes over Bluetooth.
+
+### Set up Phone Link — iPhone
+
+You need a PC with **Bluetooth Low Energy (BLE)** and an iPhone running **iOS
+16 or later**. You need a **personal** Microsoft account — a work or school
+account will not do.
+
+1. Turn on **Bluetooth** on both PC and iPhone.
+2. Open **Phone Link** on the computer and choose **iPhone**.
+3. Scan the QR code with the iPhone **camera** — no app to install first. *Link
+   to Windows* exists in the App Store but is not needed for pairing.
+4. Approve on the phone. Then turn on the permissions under **Settings →
+   Bluetooth → ⓘ next to your PC**: system notifications, messages and
+   contacts.
+
+An iPhone gives you less than an Android — Apple opens up less. Calls, messages
+and notifications work; apps and photos do not.
+
+### Microsoft's own guides
+
+The details change, and Microsoft has them first:
+
+- [Requirements and setup](https://support.microsoft.com/en-us/windows/apps/phonelink/phone-link-requirements-and-setup)
+- [Setting up calls](https://support.microsoft.com/en-us/windows/apps/phonelink/setting-up-calls-in-the-phone-link)
+- [Frequently asked questions](https://support.microsoft.com/en-us/windows/apps/phonelink/frequently-asked-questions-about-the-phone-link)
+
+### Then HeyPia needs two things
+
+Once the phone is connected, two Windows settings remain. Both are about sound,
+and both get missed.
+
+1. **Let Phone Link use the microphone:** **Settings → Privacy → Microphone →
+   Phone Link**.
 
    Without it Phone Link can *play* the call but not *capture* you. It sounds
    like a broken headset and is not: you can hear the other person, they
    cannot hear you.
 
-3. **Make your headset the default communication device.** This is the
-   decisive step, and it is not the same as setting the default device.
+2. **Make your headset the default communication device.** This is the decisive
+   step, and it is not the same as setting the default device.
 
 ### The two defaults
 
