@@ -158,7 +158,7 @@ hverken før eller efter samtalen.
 taler med — reglerne for at optage en telefonsamtale er ikke de samme alle
 steder.
 
-Optagelsen lander i folderen **Telefon opkald** i optagelseslisten, med det
+Optagelsen lander i folderen **Opkald** i optagelseslisten, med det
 nyeste øverst. Kun opkald gennem Telefonlink havner der af sig selv — et
 Teams-møde er et møde og bliver, hvor møder er.
 

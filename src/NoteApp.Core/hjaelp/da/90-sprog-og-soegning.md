@@ -22,9 +22,19 @@ lavet.
 
 Flere ord betyder, at de alle skal stå tæt på hinanden.
 
+Du kan også skrive — eller sige — en hel sætning: *«Talte med en om Omada i
+sidste måned, kan du finde mødet»*. Så søges der på **Omada** i august, og
+linjen over fundene siger, hvad der blev forstået. Sætningen kan nævne en
+periode (*i går*, *sidste uge*, *i maj*, *for to uger siden*), en type
+(*opkaldet*, *webinarer*, *mine noter*), et sprog (*engelske*), en mappe
+(*i mappen Kunder*) og et projekt (*projektet Vagtsom*). Står noget i
+anførselstegn, søges der på præcis det.
+
 Filerne læses på din maskine. Der sendes intet.
 
-Under feltet kan der filtreres på periode, mappe, mødetype og sprog. Fanerne
+Under feltet kan der filtreres på periode, type, mappe, projekt og sprog. Typen
+er det, optagelsen var: et møde, et webinar, et opkald — eller dine egne noter.
+Fanerne
 deler resultaterne efter type, fordi de tre svarer på hver sit: hvad der blev
 **sagt**, hvad **du** skrev ned, og hvad der blev **skrevet**.
 

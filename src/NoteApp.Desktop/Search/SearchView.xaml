@@ -436,6 +436,15 @@
     </StackPanel>
     </StackPanel>
 
+    <!-- ============ HVAD SÆTNINGEN BLEV TIL ============
+
+         Skriver man en hel saetning, soeges der ikke paa hele saetningen.
+         Det, der blev taget ud, og den periode, der blev forstaaet, skal
+         kunne ses - ellers er det umuligt at vide, hvorfor et moede blev
+         fundet, eller hvorfor det ikke blev. Se Fritekst. -->
+    <TextBlock x:Name="Forstaaet" Style="{StaticResource Underskrift}" Visibility="Collapsed"
+               Margin="2,10,2,0" HorizontalAlignment="Center" Foreground="{DynamicResource Accent}" />
+
     <TextBlock x:Name="Status" Style="{StaticResource Underskrift}"
                Margin="2,10,2,4" HorizontalAlignment="Center" />
           </StackPanel>

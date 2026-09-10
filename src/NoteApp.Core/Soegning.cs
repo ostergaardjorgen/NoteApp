@@ -22,6 +22,30 @@ public enum Fundtype
 }
 
 /// <summary>
+/// Hvad en optagelse VAR — det, Cockpittets «Typer» afgrænser på.
+/// </summary>
+/// <remarks>
+/// ============ TYPER OG IKKE MØDETYPER ============
+///
+/// Filtret afgrænsede før på mødetype — skabelonen, et møde skrives ud
+/// efter: «Kundemøde», «Mødereferat». Det er et valg, man træffer om et
+/// dokument, og ikke den måde, man husker en samtale på. Man husker, at det
+/// var et OPKALD, et WEBINAR, eller noget, man selv skrev ned.
+///
+/// Typen står ikke som et felt, man udfylder; den ligger i optagelsen selv.
+/// Se <see cref="Soegefilter.TypeAf"/>.
+/// </remarks>
+public enum Soegetype
+{
+    Moede,
+    Webinar,
+    Opkald,
+
+    /// <summary>Dine egne noter fra en optagelse — uanset hvad optagelsen var.</summary>
+    Note,
+}
+
+/// <summary>
 /// Ét sted, ordet står — med teksten omkring og positionen i filen.
 /// </summary>
 /// <param name="Position">
@@ -119,8 +143,37 @@ public sealed record Soegefilter(IReadOnlyList<string>? Sprog = null,
                                  IReadOnlyList<string>? Moedetype = null,
                                  IReadOnlyList<string>? Mappe = null,
                                  DateTimeOffset? Fra = null, DateTimeOffset? Til = null,
-                                 IReadOnlyList<string>? Projekt = null)
+                                 IReadOnlyList<string>? Projekt = null,
+                                 IReadOnlyList<Soegetype>? Typer = null)
 {
+    /// <summary>Er der ikke valgt nogen type? Så gælder alle.</summary>
+    private bool IngenTyper => Typer is null || Typer.Count == 0;
+
+    /// <summary>Hvad optagelsen var: et opkald, et webinar eller et møde.</summary>
+    /// <remarks>
+    /// Opkaldet vinder over webinaret: et opkald er markeret af den, der
+    /// optog det, og det er det mest præcise, der vides.
+    /// </remarks>
+    public static Soegetype TypeAf(MeetingMetadata m) =>
+        m.Opkald ? Soegetype.Opkald
+        : m.Type == MeetingType.Webinar ? Soegetype.Webinar
+        : Soegetype.Moede;
+
+    /// <summary>Skal optagelsens udskrift med?</summary>
+    public bool TagerUdskrift(MeetingMetadata? m) =>
+        IngenTyper || (m is not null && Typer!.Contains(TypeAf(m)));
+
+    /// <summary>
+    /// Skal optagelsens noter med?
+    /// </summary>
+    /// <remarks>
+    /// Både når man beder om NOTER, og når man beder om den slags optagelse,
+    /// de er skrevet under. Noterne fra et opkald hører til opkaldet.
+    /// </remarks>
+    public bool TagerNoter(MeetingMetadata? m) =>
+        IngenTyper || Typer!.Contains(Soegetype.Note)
+                   || (m is not null && Typer!.Contains(TypeAf(m)));
+
     /// <summary>
     /// Skal der overhovedet ledes i projekternes filer?
     /// </summary>
@@ -132,7 +185,7 @@ public sealed record Soegefilter(IReadOnlyList<string>? Sprog = null,
     ///
     /// Datoen gælder derimod: filen har en dato, og den betyder det samme.
     /// </remarks>
-    public bool LederIProjekter => Tom(Moedetype) && Tom(Mappe);
+    public bool LederIProjekter => Tom(Moedetype) && Tom(Mappe) && IngenTyper;
 
     /// <summary>En afgrænsning, ingen har sat.</summary>
     public static bool Tom(IReadOnlyList<string>? valgte) => valgte is null || valgte.Count == 0;
@@ -249,12 +302,15 @@ public sealed record Soegefilter(IReadOnlyList<string>? Sprog = null,
         // op under august gennem bagdøren.
         var tid = kilde?.StartedAt ?? d.Created;
 
+        // Et dokument har den type, optagelsen bag det havde. Et referat af et
+        // opkald er et opkald. Uden en optagelse bag sig har det ingen type.
         return Ens(Sprog, SprogPaa(kilde)) && Ens(Moedetype, type) && Ens(Mappe, mappe)
-               && IPerioden(tid);
+               && IPerioden(tid)
+               && (IngenTyper || (kilde is not null && Typer!.Contains(TypeAf(kilde))));
     }
 
     public bool Tomt => Tom(Sprog) && Tom(Moedetype) && Tom(Mappe) && Tom(Projekt)
-                        && Fra is null && Til is null;
+                        && Fra is null && Til is null && IngenTyper;
 
     /// <summary>
     /// En optagelse uden oplysninger — en fra før felterne fandtes, eller en
@@ -421,11 +477,11 @@ public static class Soegning
             // to spor og fletningen — og uden det her ville hvert eneste ord
             // give tre fund af det samme.
             var udskrift = Udskriften(mappe);
-            if (udskrift is not null)
+            if (udskrift is not null && filter.TagerUdskrift(meta))
                 Tilfoej(fund, Fundtype.Udskrift, id, titel, tid, Laes(udskrift), ord);
 
             var noter = Path.Combine(mappe, "notes.jsonl");
-            if (File.Exists(noter))
+            if (File.Exists(noter) && filter.TagerNoter(meta))
                 Tilfoej(fund, Fundtype.Note, id, titel, tid, Laes(noter), ord);
         }
 

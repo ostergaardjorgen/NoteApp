@@ -1781,6 +1781,12 @@ public partial class SearchView : UserControl
 
     private IReadOnlyList<Fund> _fund = Array.Empty<Fund>();
     private string _ord = "";
+
+    /// <summary>
+    /// Mapper og projekter, som filtrene har dem. En sætning kan kun
+    /// afgrænse til noget, der også står i listerne. Se <see cref="Fritekst"/>.
+    /// </summary>
+    private Kendtenavne _kendte = Kendtenavne.Ingen;
     private Fundtype? _valgtType;
 
     /// <summary>
@@ -1954,20 +1960,28 @@ public partial class SearchView : UserControl
         Periodefilter.SelectedIndex = 0;
 
         var mapper = new List<(string, string?)>();
-        var typer = new List<(string, string?)>();
         var sprog = new List<(string, string?)>();
 
+        // ============ TYPER OG IKKE MOEDETYPER ============
+        //
+        // Hvad optagelsen VAR - ikke hvilken skabelon, den blev skrevet ud
+        // efter. Listen er fast og afhaenger ikke af arkivet: et opkald er et
+        // opkald, ogsaa foer det foerste er optaget. Se Soegetype.
+        var typer = new List<(string, string?)>
+        {
+            ("Møder", "moede"),
+            ("Webinarer", "webinar"),
+            ("Opkald", "opkald"),
+            ("Noter", "note"),
+        };
+
         var seteMapper = new HashSet<string>(StringComparer.CurrentCultureIgnoreCase);
-        var seteTyper = new HashSet<string>(StringComparer.CurrentCultureIgnoreCase);
         var seteSprog = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         foreach (var m in MeetingStore.Alle())
         {
             if (!string.IsNullOrWhiteSpace(m.Mappe) && seteMapper.Add(m.Mappe))
                 mapper.Add((m.Mappe, m.Mappe));
-
-            if (!string.IsNullOrWhiteSpace(m.Moedetype) && seteTyper.Add(m.Moedetype))
-                typer.Add((m.Moedetype, m.Moedetype));
 
             if (Soegefilter.SprogPaa(m) is { Length: > 0 } s && seteSprog.Add(s))
                 sprog.Add((Transcriber.LanguageName(s), s));
@@ -1987,8 +2001,12 @@ public partial class SearchView : UserControl
             .Select(p => (p.Navn, (string?)p.Id))
             .ToList();
 
+        _kendte = new Kendtenavne(
+            mapper.Select(m => m.Item1).ToList(),
+            projekter.Where(p => p.Item2 is not null).Select(p => (p.Item2!, p.Navn)).ToList());
+
         Saet(Mappefilter, mapper, Sprog.T("cockpit.allemapper"), "mapper");
-        Saet(Typefilter, typer, "Alle mødetyper", "mødetyper");
+        Saet(Typefilter, typer, "Alle typer", "typer");
         Saet(Projektfilter, projekter, "Alle projekter", "projekter");
         Saet(Sprogfilter, sprog, Sprog.T("cockpit.allesprog"), "sprog");
 
@@ -2060,11 +2078,43 @@ public partial class SearchView : UserControl
 
         return new Soegefilter(
             Sprog: Sprogfilter.Valgte,
-            Moedetype: Typefilter.Valgte,
             Mappe: Mappefilter.Valgte,
             Fra: fra, Til: til,
-            Projekt: Projektfilter.Valgte);
+            Projekt: Projektfilter.Valgte,
+            Typer: (Typefilter.Valgte ?? Array.Empty<string>())
+                .Select(Typen).OfType<Soegetype>().ToList());
     }
+
+    /// <summary>Værdien i typelisten som den type, søgningen afgrænser på.</summary>
+    private static Soegetype? Typen(string vaerdi) => vaerdi switch
+    {
+        "moede" => Soegetype.Moede,
+        "webinar" => Soegetype.Webinar,
+        "opkald" => Soegetype.Opkald,
+        "note" => Soegetype.Note,
+        _ => null,
+    };
+
+    /// <summary>
+    /// Lægger det, sætningen sagde, oven i filtrene.
+    /// </summary>
+    /// <remarks>
+    /// SÆTNINGEN VINDER, HVOR DEN SIGER NOGET. Den er det sidste, der blev
+    /// sagt, og den er mere præcis end en liste: «i sidste måned» over for
+    /// «Hele tiden». Hvor den ikke siger noget, gælder filtret uændret.
+    ///
+    /// Filtrene på skærmen røres ikke. Linjen over fundene siger, hvad der
+    /// blev forstået, og retter man sætningen, er afgrænsningen væk igen.
+    /// </remarks>
+    private static Soegefilter Flet(Soegefilter f, Fortolkning t) => f with
+    {
+        Fra = t.Periode is null ? f.Fra : t.Fra,
+        Til = t.Periode is null ? f.Til : t.Til,
+        Mappe = t.Mappe is null ? f.Mappe : new[] { t.Mappe },
+        Typer = t.Type is null ? f.Typer : new[] { t.Type.Value },
+        Projekt = t.Projekt is null ? f.Projekt : new[] { t.Projekt },
+        Sprog = t.Sprog is null ? f.Sprog : new[] { t.Sprog },
+    };
 
     private void Filter_Aendret(object sender, SelectionChangedEventArgs e)
     {
@@ -2164,9 +2214,21 @@ public partial class SearchView : UserControl
 
         Status.Text = "Leder …";
 
+        // ============ EN SAETNING BLIVER TIL EN SOEGNING ============
+        //
+        // «Talte med en om Omada i sidste måned» soeges som «Omada» i august.
+        // Det, der blev forstaaet, staar over fundene - ellers kan man ikke se,
+        // hvorfor et moede kom med, eller hvorfor det ikke gjorde. Se Fritekst.
+        var fortolket = Fritekst.Fortolk(spoergsmaal, DateTime.Now, _kendte);
+
+        Forstaaet.Text = fortolket.Aendret ? fortolket.Beskriv() : "";
+        Forstaaet.Visibility = fortolket.Aendret ? Visibility.Visible : Visibility.Collapsed;
+
+        spoergsmaal = fortolket.Soegeord;
+
         try
         {
-            var filter = Filteret();
+            var filter = Flet(Filteret(), fortolket);
 
             var ur = System.Diagnostics.Stopwatch.StartNew();
             var fund = await Task.Run(() => Soegning.Soeg(spoergsmaal, filter, ct), ct);

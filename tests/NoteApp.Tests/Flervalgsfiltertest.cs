@@ -78,6 +78,71 @@ public class Flervalgsfiltertest
         Assert.Equal("To", Assert.Single(fund).Overskrift);
     }
 
+    // ============ TYPER: HVAD OPTAGELSEN VAR ============
+
+    private static void Optagelse(string titel, MeetingType type, bool opkald, string udskrift, string? note = null)
+    {
+        var m = MeetingStore.CreateSessionDirectory(titel, DateTimeOffset.Now);
+
+        MeetingStore.Save(m, new MeetingMetadata
+        {
+            StartedAt = DateTimeOffset.Now, Title = titel, Type = type, Opkald = opkald,
+        });
+
+        File.WriteAllText(Path.Combine(m, "transskription.txt"), udskrift);
+
+        if (note is not null)
+            File.WriteAllText(Path.Combine(m, "notes.jsonl"), note);
+    }
+
+    private static void Fire()
+    {
+        Optagelse("Moedet", MeetingType.Online, false, "Om adgangsstyring.");
+        Optagelse("Webinaret", MeetingType.Webinar, false, "Om adgangsstyring.");
+        Optagelse("Opkaldet", MeetingType.Online, true, "Om adgangsstyring.",
+                  "{\"Tekst\":\"adgangsstyring noteret\"}");
+    }
+
+    [Theory]
+    [InlineData(Soegetype.Moede, "Moedet")]
+    [InlineData(Soegetype.Webinar, "Webinaret")]
+    [InlineData(Soegetype.Opkald, "Opkaldet")]
+    public void En_type_giver_kun_den_slags_optagelse(Soegetype type, string titel)
+    {
+        using var p = new Proevemappe();
+        Fire();
+
+        var fund = Soegning.Soeg("adgangsstyring", new Soegefilter(Typer: new[] { type }));
+
+        Assert.All(fund, f => Assert.Equal(titel, f.Overskrift));
+        Assert.Contains(fund, f => f.Slags == Fundtype.Udskrift);
+    }
+
+    [Fact]
+    public void Noter_giver_kun_noterne()
+    {
+        using var p = new Proevemappe();
+        Fire();
+
+        var fund = Soegning.Soeg("adgangsstyring", new Soegefilter(Typer: new[] { Soegetype.Note }));
+
+        Assert.Equal(Fundtype.Note, Assert.Single(fund).Slags);
+    }
+
+    [Fact]
+    public void Et_opkald_er_ikke_ogsaa_et_moede()
+    {
+        // Et opkald optages som et onlinemoede - to spor. Det maa ikke dukke
+        // op, naar man beder om moeder.
+        using var p = new Proevemappe();
+        Fire();
+
+        var fund = Soegning.Soeg("adgangsstyring", new Soegefilter(Typer: new[] { Soegetype.Moede }));
+
+        Assert.DoesNotContain(fund, f => f.Overskrift == "Opkaldet");
+        Assert.False(new Soegefilter(Typer: new[] { Soegetype.Moede }).Tomt);
+    }
+
     [Fact]
     public void Et_valg_der_ikke_findes_giver_ingenting()
     {

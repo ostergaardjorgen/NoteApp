@@ -36,7 +36,7 @@ public partial class MoedevagtPopup : Window
     /// ============ ET OPKALD FÅR ÉT SPØRGSMÅL, IKKE FIRE ============
     ///
     /// Et møde får mappe, mødetype og navn bagefter. Et opkald hører altid
-    /// under Telefon opkald og hedder dato og klokkeslæt — der er intet at
+    /// under Opkald og hedder dato og klokkeslæt — der er intet at
     /// svare på dér. Tilbage er sproget, og det kan ikke gættes uden at koste
     /// hele udskriften. Det står her, besvaret på forhånd med dansk.
     ///

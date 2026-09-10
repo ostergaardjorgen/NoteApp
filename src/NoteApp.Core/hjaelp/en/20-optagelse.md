@@ -160,7 +160,7 @@ name, neither before nor after the call.
 person you are talking to — the rules for recording a phone call are not the
 same everywhere.
 
-The recording lands in the **Telefon opkald** folder in the recordings list,
+The recording lands in the **Opkald** (Calls) folder in the recordings list,
 newest at the top. Only calls through Phone Link go there on their own — a Teams
 meeting is a meeting and stays where meetings are.
 
@@ -210,7 +210,7 @@ Nothing is recorded meanwhile; the microphone is released.
 
 On the left under **Recordings** stand your own folders — the one for meetings,
 the one for webinars, and any others you have made. At the bottom stand two the
-app fills by itself: **Telefon opkald** and the archive. There is no longer a «Folders» root above them all. It answered a
+app fills by itself: **Opkald** (Calls) and the archive. There is no longer a «Folders» root above them all. It answered a
 question nobody asks, and it cost a whole level of indentation in a narrow
 column.
 

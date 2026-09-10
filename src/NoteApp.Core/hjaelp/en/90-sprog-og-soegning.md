@@ -22,10 +22,19 @@ has made.
 
 More words means they must all appear close together.
 
+You can also type — or say — a whole sentence: *"Talked to someone about
+Omada last month, can you find the meeting"*. The search then looks for
+**Omada** in August, and the line above the results says what was understood.
+The sentence can name a period (*yesterday*, *last week*, *in May*), a type
+(*the call*, *webinars*, *my notes*), a language (*English*), a folder (*in the
+folder Clients*) and a project (*the project Vagtsom*). Anything in quotation
+marks is searched for exactly. Danish sentences are understood too.
+
 The files are read on your machine. Nothing is sent.
 
-Below the field you can filter by period, folder, meeting type and language.
-The tabs split the results by type, because the three answer different things:
+Below the field you can filter by period, type, folder, project and language.
+The type is what the recording was: a meeting, a webinar, a call — or your own
+notes. The tabs split the results by type, because the three answer different things:
 what was **said**, what **you** wrote down, and what was **written**.
 
 A meeting can only be searched once it has been transcribed. A recording on

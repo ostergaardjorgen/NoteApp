@@ -365,7 +365,7 @@ public partial class MeetingView : UserControl
     /// <param name="sprog">Sproget, valgt i beskeden: «da» eller «en».</param>
     /// <remarks>
     /// ET OPKALD HAR INGEN MAPPE OG INGEN MØDETYPE. Det lander altid under
-    /// Telefon opkald, og navnet er dato og klokkeslæt. Det eneste, der ikke
+    /// Opkald, og navnet er dato og klokkeslæt. Det eneste, der ikke
     /// kan gættes, er sproget — og det blev valgt, før der blev trykket.
     ///
     /// Opkaldet MARKERES her og overlades ikke til målingen i

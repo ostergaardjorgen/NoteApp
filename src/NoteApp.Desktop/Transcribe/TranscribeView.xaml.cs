@@ -525,7 +525,7 @@ public partial class TranscribeView : UserControl
         // Et opkald optages som et moede, men man leder efter det paa en anden
         // maade - «hvad sagde han i telefonen i tirsdags». Blandt moederne
         // drukner de. Appen saetter folderen selv; se Opkaldsprogrammer.
-        _rodOpkald = Biblioteker.Biblioteksnode.Bibliotek("Telefon opkald", "\uE717", Gruppe.Opkald);
+        _rodOpkald = Biblioteker.Biblioteksnode.Bibliotek("Opkald", "\uE717", Gruppe.Opkald);
         _rodArkiv = Biblioteker.Biblioteksnode.Bibliotek("Arkiv", "\uE7B8", Gruppe.Arkiv);
 
         var mapper = NoteApp.Core.Mapper.Alle(NoteApp.Core.Mapper.Slags.Optagelser);
@@ -600,7 +600,7 @@ public partial class TranscribeView : UserControl
             //
             // Mapperne er brugerens egne, og de er lavet til MOEDER. De blev
             // bygget under hver rod, og saa stod «Moeder (0)», «Steen (0)»,
-            // «Webinarer (0)» under «Telefon opkald» - en hel mappestruktur,
+            // «Webinarer (0)» under «Opkald» - en hel mappestruktur,
             // der ikke indeholdt noget og aldrig kommer til det.
             //
             // Under «Foldere» SKAL en tom mappe staa: det er dér, man laver
@@ -631,7 +631,7 @@ public partial class TranscribeView : UserControl
         //
         // _rodMoeder.Boern indeholder BEGGE dele: foerst mapperne, saa de
         // optagelser, der ikke ligger i nogen. Blev listen brugt, som den er,
-        // kom «Telefon opkald» og «Arkiv» EFTER de loese optagelser - og saa
+        // kom «Opkald» og «Arkiv» EFTER de loese optagelser - og saa
         // laeser oejet dem som noget, der hoerer til den stump, ikke som
         // sidestillede med «Moeder» og «Webinarer».
         //
