@@ -38,10 +38,10 @@ get it from the Microsoft Store. It connects your phone to the computer so
 calls, messages and notifications appear on screen.
 
 **HeyPia does not touch Phone Link.** The two do not talk to each other, and
-there is nothing to configure between them. HeyPia simply listens for a program
-opening the microphone — and when Phone Link does, a call is running. From
-there it is a recording like any other: the audio stays on the machine, it is
-transcribed here, and you can make a document out of it.
+there is nothing to configure between them. When a call starts, Windows
+connects the phone's audio to the computer over Bluetooth — and that is what
+HeyPia notices. From there it is a recording like any other: the audio stays on
+the machine, it is transcribed here, and you can make a document out of it.
 
 That also means the order does not matter. If Phone Link is already running, it
 works the moment you install HeyPia — and the other way round.
@@ -147,11 +147,14 @@ If you don't, the app says so. The bubble asking whether to record gets a yellow
 line: *"Calls run on ‹device›, but HeyPia records from a different speaker."*
 Fix it before you press record — afterwards is too late.
 
-### The app asks when the phone rings
+### The app asks when you call or get called
 
-When Phone Link opens the microphone, HeyPia notices and asks down by the clock
-whether the conversation should be recorded. It waits half a minute first, so a
-microphone test and a "can you hear me" do not trigger the question.
+As soon as the conversation is running, HeyPia asks down by the clock whether it
+should be recorded. That goes for calls you make and calls you take.
+
+You pick the language in the same bubble: **Danish** is selected in advance, and
+one click switches to **English**. Nothing else is asked — no folder and no
+name, neither before nor after the call.
 
 **Nothing is ever recorded on its own.** The app can only ask. And tell the
 person you are talking to — the rules for recording a phone call are not the

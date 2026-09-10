@@ -332,6 +332,13 @@
     "enhed_hoejttaler": "Calls run on “{0}”, but HeyPia records from a different speaker. Record now and YOUR voice is captured — but not the other person's. Fix it under Settings → Sound, or pick “{0}” as the speaker in the app.",
     "enhed_mikrofon": "Calls use the microphone “{0}”, but HeyPia records from a different one. Record now and your own voice may not be captured.",
     "ikke_nu": "Not now",
+    "opkald_overskrift": "Phone call in progress",
+    "opkald_tekst": "Record this call? It goes under Telefon opkald, named with the date and time.",
+    "opkald_sig_til": "Tell the other person you are recording. The audio stays on your machine.",
+    "opkald_sprog": "LANGUAGE OF THE CALL",
+    "dansk": "Danish",
+    "engelsk": "English",
+    "optag_samtalen": "Record the call",
     "luk_der_spoerges_igen_naeste_gang_et_moede": "Close. You will be asked again the next time a meeting starts.",
     "sig_til_de_andre_at_du_optager_lyden_blive": "Tell the others you are recording. The audio stays on your machine, so it is easy to explain.",
     "skal_moedet_optages_appen_optager_aldrig_a": "Record this meeting? The app never records on its own — only what you press happens."

@@ -37,10 +37,10 @@ væk, kan den hentes i Microsoft Store. Den forbinder din telefon til
 computeren, så opkald, beskeder og notifikationer kommer frem på skærmen.
 
 **HeyPia rører ikke Telefonlink.** De to taler ikke sammen, og der er ingen
-opsætning mellem dem. HeyPia hører bare efter, om et program har åbnet
-mikrofonen — og når Telefonlink gør det, er der et opkald i gang. Derfra er det
-en optagelse som enhver anden: lyden bliver på maskinen, den skrives ud til
-tekst her, og du kan lave et referat af den.
+opsætning mellem dem. Når et opkald går i gang, kobler Windows telefonens lyd
+til computeren over Bluetooth — og det er dét, HeyPia lægger mærke til. Derfra
+er det en optagelse som enhver anden: lyden bliver på maskinen, den skrives ud
+til tekst her, og du kan lave et referat af den.
 
 Det betyder også, at rækkefølgen er ligegyldig. Har du Telefonlink kørende i
 forvejen, virker det med det samme, du installerer HeyPia — og omvendt.
@@ -145,11 +145,14 @@ Gør du det ikke, siger appen selv til. Boblen, der spørger, om samtalen skal
 optages, får en gul linje: *«Opkald kører på ‹enhed›, men HeyPia optager fra en
 anden højttaler.»* Ret det, før du trykker optag — bagefter er det for sent.
 
-### Appen spørger selv, når telefonen ringer
+### Appen spørger selv, når du ringer eller bliver ringet op
 
-Når Telefonlink åbner mikrofonen, opdager HeyPia det og spørger nede ved uret,
-om samtalen skal optages. Der går et halvt minut først, så en mikrofonprøve og
-et «kan du høre mig» ikke udløser spørgsmålet.
+Så snart samtalen er i gang, spørger HeyPia nede ved uret, om den skal optages.
+Det gælder både, når du ringer op, og når du tager telefonen.
+
+Sproget vælger du i samme boble: **dansk** er valgt på forhånd, og ét tryk
+skifter til **engelsk**. Mere spørges der ikke om — ingen mappe og intet navn,
+hverken før eller efter samtalen.
 
 **Der optages aldrig af sig selv.** Appen kan kun spørge. Og sig det til den, du
 taler med — reglerne for at optage en telefonsamtale er ikke de samme alle

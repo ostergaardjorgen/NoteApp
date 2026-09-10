@@ -79,10 +79,17 @@ public static class Opkaldsprogrammer
     /// Her spørges der i stedet på det ene tidspunkt, hvor svaret bruges: da
     /// optagelsen blev oprettet. Så virker det også, når man selv trykker på
     /// genvejstasten midt i en samtale, og det er præcis lige så rigtigt.
+    ///
+    /// ============ TELEFONENS LYDENHED FØRST ============
+    ///
+    /// Mikrofonlisten alene var ikke nok: målt 10-09-2026 stod Telefonlink
+    /// der aldrig, heller ikke midt i et opkald. Se <see cref="Telefonlyd"/>.
+    /// Listen bliver stående som anden vej ind, hvis en senere Telefonlink
+    /// begynder at melde sig dér.
     /// </remarks>
     public static bool IGang()
     {
-        try { return Mikrofonvagt.IBrug().Any(b => Er(b.Noegle)); }
+        try { return Telefonlyd.IGang() || Mikrofonvagt.IBrug().Any(b => Er(b.Noegle)); }
         catch (Exception) { return false; }
     }
 }

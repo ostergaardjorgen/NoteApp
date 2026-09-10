@@ -603,6 +603,7 @@ public partial class MainWindow : Window
     public Moedevagt Moedevagten => _moedevagt ??= new Moedevagt(
         optagerAllerede: () => _moede.IsRecording,
         startOptagelse: LynstartOptagelse,
+        startOpkald: LynstartOpkald,
         ejer: () => this);
 
     private Kalendervagt? _kalendervagt;
@@ -2036,7 +2037,14 @@ public partial class MainWindow : Window
     /// <summary>Sat, mens et tryk er ved at blive udført.</summary>
     private bool _lynstartIGang;
 
-    private void LynstartOptagelse()
+    private void LynstartOptagelse() => Lynstart(() => _moede.Lynstart());
+
+    /// <summary>
+    /// Et telefonopkald: ingen spørgsmål bagefter, sproget er valgt i beskeden.
+    /// </summary>
+    private void LynstartOpkald(string sprog) => Lynstart(() => _moede.LynstartOpkald(sprog));
+
+    private void Lynstart(Action start)
     {
         // ============ ÉT TRYK ER ÉT TRYK ============
         //
@@ -2058,7 +2066,7 @@ public partial class MainWindow : Window
 
         try
         {
-            LynstartNu();
+            LynstartNu(start);
         }
         finally
         {
@@ -2069,7 +2077,7 @@ public partial class MainWindow : Window
         }
     }
 
-    private void LynstartNu()
+    private void LynstartNu(Action start)
     {
         // ============ VINDUET FREM FOERST - MEN DET MAA IKKE KUNNE STOPPE OS ============
         //
@@ -2094,7 +2102,7 @@ public partial class MainWindow : Window
             // Vinduet kom ikke frem. Der optages stadig.
         }
 
-        _moede.Lynstart();
+        start();
     }
 
     /// <summary>Grebet, der gælder nu. Null hvis vagten ikke kører.</summary>

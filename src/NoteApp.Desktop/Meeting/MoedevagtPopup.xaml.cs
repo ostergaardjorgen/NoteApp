@@ -19,16 +19,54 @@ public partial class MoedevagtPopup : Window
     /// <summary>Der blev sagt «spørg aldrig for det her program».</summary>
     public event Action<string>? Aldrig;
 
-    private readonly Mikrofonbruger _bruger;
+    private readonly Mikrofonbruger? _bruger;
 
-    public MoedevagtPopup(Mikrofonbruger bruger)
+    /// <summary>Er det beskeden ved et telefonopkald?</summary>
+    public bool ErOpkald { get; }
+
+    /// <summary>Sproget, der er valgt ved et opkald: «da» eller «en».</summary>
+    public string Valgtsprog => Engelsk.IsChecked == true ? "en" : "da";
+
+    public MoedevagtPopup(Mikrofonbruger bruger) : this(bruger, opkald: false) { }
+
+    /// <summary>
+    /// Beskeden ved et telefonopkald.
+    /// </summary>
+    /// <remarks>
+    /// ============ ET OPKALD FÅR ÉT SPØRGSMÅL, IKKE FIRE ============
+    ///
+    /// Et møde får mappe, mødetype og navn bagefter. Et opkald hører altid
+    /// under Telefon opkald og hedder dato og klokkeslæt — der er intet at
+    /// svare på dér. Tilbage er sproget, og det kan ikke gættes uden at koste
+    /// hele udskriften. Det står her, besvaret på forhånd med dansk.
+    ///
+    /// «Spørg aldrig» er væk: det er ikke et program, man fravælger, det er
+    /// telefonen. Vil man ikke spørges, slås vagten fra under Indstillinger.
+    /// </remarks>
+    public static MoedevagtPopup TilOpkald() => new(null, opkald: true);
+
+    private MoedevagtPopup(Mikrofonbruger? bruger, bool opkald)
     {
         InitializeComponent();
 
         _bruger = bruger;
+        ErOpkald = opkald;
 
-        Overskrift.Text = $"{bruger.Navn} bruger din mikrofon";
-        AldrigKnap.Content = $"Spørg aldrig for {bruger.Navn}";
+        if (opkald)
+        {
+            Title = Sprog.T("moedevagtpopup.opkald_overskrift");
+            Overskrift.Text = Title;
+            Broedtekst.Text = Sprog.T("moedevagtpopup.opkald_tekst");
+            Sigtil.Text = Sprog.T("moedevagtpopup.opkald_sig_til");
+            OptagKnap.Content = Sprog.T("moedevagtpopup.optag_samtalen");
+            Sprogpanel.Visibility = Visibility.Visible;
+            AldrigKnap.Visibility = Visibility.Collapsed;
+        }
+        else
+        {
+            Overskrift.Text = $"{bruger!.Navn} bruger din mikrofon";
+            AldrigKnap.Content = $"Spørg aldrig for {bruger.Navn}";
+        }
 
         Visadvarsel();
 
@@ -96,7 +134,7 @@ public partial class MoedevagtPopup : Window
 
     private void Aldrig_Klik(object sender, RoutedEventArgs e)
     {
-        Aldrig?.Invoke(_bruger.Noegle);
+        if (_bruger is not null) Aldrig?.Invoke(_bruger.Noegle);
         Close();
     }
 

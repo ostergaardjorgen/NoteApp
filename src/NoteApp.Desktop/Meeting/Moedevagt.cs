@@ -46,15 +46,21 @@ public sealed class Moedevagt
 
     private readonly Func<bool> _optagerAllerede;
     private readonly Action _startOptagelse;
+    private readonly Action<string> _startOpkald;
     private readonly Func<System.Windows.Window?> _ejer;
 
     private MoedevagtPopup? _aaben;
 
+    /// <summary>Der er spurgt om det opkald, der kører nu.</summary>
+    private bool _opkaldSpurgt;
+
+    /// <param name="startOpkald">Starter et opkald med det valgte sprog.</param>
     public Moedevagt(Func<bool> optagerAllerede, Action startOptagelse,
-                     Func<System.Windows.Window?> ejer)
+                     Action<string> startOpkald, Func<System.Windows.Window?> ejer)
     {
         _optagerAllerede = optagerAllerede;
         _startOptagelse = startOptagelse;
+        _startOpkald = startOpkald;
         _ejer = ejer;
 
         _ur.Tick += (_, _) => Kig();
@@ -84,8 +90,34 @@ public sealed class Moedevagt
 
     private void Kig()
     {
+        var opkald = Opkaldsprogrammer.IGang();
+
+        // Er der lagt paa, foer der blev svaret, skal beskeden vaek. Ellers
+        // staar der «Telefonopkald i gang» om en samtale, der er slut.
+        if (_aaben is { ErOpkald: true } && !opkald) _aaben.Close();
+
         if (_aaben is not null) return;
         if (_optagerAllerede()) return;
+
+        // ============ ET OPKALD SPOERGES OM MED DET SAMME ============
+        //
+        // Moeder venter et halvt minut, saa en diktering eller en
+        // mikrofonproeve kan passere. Et telefonopkald er ikke til at tage
+        // fejl af - telefonens lydenhed er kun tilsluttet, mens der tales - og
+        // det er kort. Et halvt minut er dér en god del af samtalen.
+        //
+        // Der spoerges én gang pr. opkald. Siger man nej, kommer der ikke en
+        // besked mere, foer der er lagt paa og ringet igen.
+        if (opkald)
+        {
+            if (_opkaldSpurgt) return;
+
+            _opkaldSpurgt = true;
+            SpoergOmOpkald();
+            return;
+        }
+
+        _opkaldSpurgt = false;
 
         var s = AppSettings.Current;
         var nu = DateTime.Now;
@@ -129,6 +161,24 @@ public sealed class Moedevagt
         // Ejeren saettes, hvis hovedvinduet er fremme. Er det skjult — det er
         // det under en optagelse — ville en ejer, der ikke vises, tage
         // beskeden med sig ned.
+        var ejer = _ejer();
+        if (ejer is { IsVisible: true }) p.Owner = ejer;
+
+        p.Show();
+    }
+
+    /// <summary>
+    /// Beskeden ved et telefonopkald: optag, og på hvilket sprog.
+    /// </summary>
+    private void SpoergOmOpkald()
+    {
+        var p = MoedevagtPopup.TilOpkald();
+
+        p.Optag += () => _startOpkald(p.Valgtsprog);
+        p.Closed += (_, _) => _aaben = null;
+
+        _aaben = p;
+
         var ejer = _ejer();
         if (ejer is { IsVisible: true }) p.Owner = ejer;
 

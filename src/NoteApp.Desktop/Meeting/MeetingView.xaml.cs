@@ -360,6 +360,41 @@ public partial class MeetingView : UserControl
     }
 
     /// <summary>
+    /// Optager et telefonopkald — uden spørgsmål.
+    /// </summary>
+    /// <param name="sprog">Sproget, valgt i beskeden: «da» eller «en».</param>
+    /// <remarks>
+    /// ET OPKALD HAR INGEN MAPPE OG INGEN MØDETYPE. Det lander altid under
+    /// Telefon opkald, og navnet er dato og klokkeslæt. Det eneste, der ikke
+    /// kan gættes, er sproget — og det blev valgt, før der blev trykket.
+    ///
+    /// Opkaldet MARKERES her og overlades ikke til målingen i
+    /// <see cref="RecordingSession"/>. Brugeren har lige sagt, at det er et
+    /// opkald; det svar skal ikke afhænge af, at målingen rammer i samme
+    /// sekund.
+    /// </remarks>
+    public void LynstartOpkald(string sprog)
+    {
+        if (IsRecording) return;
+
+        Start(new Opstart(sprog, null, null, null, ErWebinar: false));
+
+        if (_session is null || !IsRecording) return;
+
+        var m = _session.Meta;
+        m.Opkald = true;
+
+        if (string.IsNullOrWhiteSpace(m.Title))
+            m.Title = RecordingSession.Opkaldsnavn(m.StartedAt);
+
+        try { MeetingStore.Save(_session.SessionDir, m); }
+        catch (IOException)
+        {
+            // Skrives igen, naar optagelsen stoppes.
+        }
+    }
+
+    /// <summary>
     /// Svarene fra den aftale, der kører nu — hvis der er en. Sat af MainWindow.
     /// </summary>
     public Func<Opstart?>? AftalensSvar;
@@ -821,7 +856,20 @@ public partial class MeetingView : UserControl
         // dér er der ingen at spoerge, og laengden er ikke et fejltryk.
         var forKort = navn is null && spørgOmNavn && længde < ForKort;
 
-        var titel = forKort ? null : navn ?? (spørgOmNavn ? SpørgOmNavn() : null);
+        // ============ ET OPKALD HAR SIT NAVN I FORVEJEN ============
+        //
+        // Dato og klokkeslaet, sat da optagelsen begyndte. At spoerge «hvad
+        // skal moedet hedde?» efter hvert opkald er et spoergsmaal, der er
+        // besvaret - og det var dét, der blev bedt om at slippe for.
+        //
+        // Kasseres opkaldet fra baandet, er spoergOmNavn falsk, og saa
+        // kasseres det stadig: navnet maa ikke redde noget, man har sagt nej til.
+        var opkaldsnavn = _session.Meta.Opkald ? _session.Meta.Title : null;
+
+        var titel = forKort ? null
+            : navn ?? (!spørgOmNavn ? null
+                : !string.IsNullOrWhiteSpace(opkaldsnavn) ? opkaldsnavn
+                : SpørgOmNavn());
 
         // ============ SEGMENTERNE REDDES, HALEN KOERER BAGEFTER ============
         //

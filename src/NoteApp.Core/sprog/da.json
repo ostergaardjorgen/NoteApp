@@ -579,6 +579,13 @@
     "enhed_hoejttaler": "Opkald kører på «{0}», men HeyPia optager fra en anden højttaler. Optager du nu, kommer DIN stemme med — men ikke modpartens. Ret det under Indstillinger → Lyd, eller vælg «{0}» som højttaler i appen.",
     "enhed_mikrofon": "Opkald bruger mikrofonen «{0}», men HeyPia optager fra en anden. Optager du nu, kommer din egen stemme måske ikke med.",
     "ikke_nu": "Ikke nu",
+    "opkald_overskrift": "Telefonopkald i gang",
+    "opkald_tekst": "Skal samtalen optages? Den lægges under Telefon opkald med dato og klokkeslæt som navn.",
+    "opkald_sig_til": "Sig til den anden, at du optager. Lyden bliver på din maskine.",
+    "opkald_sprog": "SPROG I SAMTALEN",
+    "dansk": "Dansk",
+    "engelsk": "Engelsk",
+    "optag_samtalen": "Optag samtalen",
     "luk_der_spoerges_igen_naeste_gang_et_moede": "Luk. Der spørges igen, næste gang et møde begynder.",
     "sig_til_de_andre_at_du_optager_lyden_blive": "Sig til de andre, at du optager. Lyden bliver på din maskine, så det er til at forklare.",
     "skal_moedet_optages_appen_optager_aldrig_a": "Skal mødet optages? Appen optager aldrig af sig selv — der sker kun det, du trykker på."
