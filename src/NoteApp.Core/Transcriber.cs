@@ -105,10 +105,32 @@ public sealed class Transcriber
 
         var lyd = WavSeconds(request.WavPath);
 
+        // ============ FOR SVAG TALE LØFTES FØRST ============
+        //
+        // En højttalertelefon på bordet giver tale omkring −32 dBFS, hvor et
+        // headset giver −19. Målt 10-09-2026 på otte klip, dæmpet til det
+        // niveau: ordfejl 8,4 % uden forstærkning, 6,1 % med. Se Lydniveau og
+        // doc/findings.md.
+        //
+        // KOPIEN LIGGER I TEMP, IKKE VED OPTAGELSEN. Arkivet kopierer
+        // optagelsesmappen til fællesdrevet, og sletninger følger ikke med —
+        // en kopi, der lå der i det øjeblik, ville blive liggende for altid.
+        var forstaerket = Path.Combine(Path.GetTempPath(), $"heypia-{Guid.NewGuid():N}.wav");
+        double loeftet;
+
+        try { loeftet = Lydniveau.Forstaerk(request.WavPath, forstaerket); }
+        catch (Exception) { loeftet = 0; }
+
+        void Ryd()
+        {
+            if (loeftet <= 0) return;
+            try { File.Delete(forstaerket); } catch (Exception) { }
+        }
+
         var args = new List<string>
         {
             "-m", request.ModelPath,
-            "-f", request.WavPath,
+            "-f", loeftet > 0 ? forstaerket : request.WavPath,
             "-l", request.Language,
             "-otxt",
             "-oj",
@@ -199,6 +221,8 @@ public sealed class Transcriber
         var log = new StringBuilder();
         var ur = Stopwatch.StartNew();
 
+        if (loeftet > 0) log.AppendLine($"HeyPia: talen forstaerket {loeftet:F1} dB foer udskrift");
+
         using var p = new Process { StartInfo = psi, EnableRaisingEvents = true };
 
         // whisper.cpp skriver AL fremdrift til stderr — ogsaa det, der ikke er
@@ -232,7 +256,10 @@ public sealed class Transcriber
         var mangler = Cppkomponent.Mangler(Path.GetDirectoryName(_whisperCli));
 
         if (mangler.Count > 0)
+        {
+            Ryd();
             throw new InvalidOperationException(Cppkomponent.Besked(Path.GetDirectoryName(_whisperCli)));
+        }
 
         progress?.Report(new TranscriptionProgress(0, "Indlæser modellen …"));
 
@@ -248,6 +275,11 @@ public sealed class Transcriber
         {
             try { if (!p.HasExited) p.Kill(entireProcessTree: true); } catch { }
             throw;
+        }
+        finally
+        {
+            // Kopien er kun til whisper, og whisper er faerdig.
+            Ryd();
         }
 
         ur.Stop();

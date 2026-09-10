@@ -681,3 +681,56 @@ forvejen gemmer; den er lavet til at blive læst af noget andet.
 målingen — men ikke altid.** Første gang var det en fejl. Anden gang, hvor 32
 kbit/s slog 24 på blandet sprog, var det virkeligheden.
 
+## 10 · Svag tale fra en højttalertelefon — forstærkning før udskrift
+
+*Målt 10-09-2026, large-v3, dansk, samme indstillinger som appen (`-mc 0`,
+VAD med 200 ms luft).*
+
+**Udgangspunktet.** Tre opkald gennem Telefonlink med en Jabra SPEAK 510 på
+bordet: din egen stemme lå omkring −32 dBFS (talens niveau, målt som
+`Lydniveau.Taleniveau`), mod −19 på et møde med mikrofonen tæt på.
+
+**Indstillinger hjalp ikke på modpartens telefonlyd.** Fire varianter på et
+opkald (nuværende, uden VAD, med prompt «Telefonsamtale på dansk.», beam 8 /
+best-of 8) gav byte-identisk tekst. Telefonlyden er smalbåndet — 0,000 % af
+energien over 4 kHz på det ene opkald — og det, der er skåret væk, kan ikke
+hentes tilbage.
+
+**Forstærkning af det svage spor.** Otte klip à 120 s fra mødet 27-08
+(god mikrofon), dæmpet 14 dB til højttalerniveau, skrevet ud med og uden
+forstærkning til −20 dBFS. Ordfejl mod det samme klip i fuld styrke:
+
+| klip (s) | uden | med |
+|---|---|---|
+| 300 | 12,2 % | 7,4 % |
+| 600 | 4,9 % | 8,6 % |
+| 1200 | 14,8 % | 7,8 % |
+| 1500 | 10,7 % | 0,0 % |
+| 1800 | 4,6 % | 5,0 % |
+| 2100 | 3,2 % | 4,0 % |
+| 2400 | 8,1 % | 1,8 % |
+| 2700 | 8,5 % | 13,8 % |
+| **gennemsnit** | **8,4 %** | **6,1 %** |
+
+Omkring 151 ordfejl blev til 111. Fire klip bedre, to lige gode, to værre.
+Et niende klip (900 s) havde kun 1–2 ord og er udeladt.
+
+**Det er en gevinst i gennemsnit, ikke på hvert klip.** Derfor forstærkes der
+kun under −28 dBFS; et spor i orden røres ikke.
+
+**På de rigtige opkald var der ingen forskel at se.** De to korte (19 og 23 s)
+gav samme tekst med og uden. Det lange (143 s) blev anderledes, ikke entydigt
+bedre.
+
+#### Fælden: det, der lignede tilfældighed, var en anden fil
+
+Et opkald gav «Det skulle bare høre» den ene gang og «Jeg skulle bare høre»
+den næste. Det lignede, at whisper svarede tilfældigt. Det gør den ikke: fem
+filer kørt to gange gav **0,0 % forskel**. Forskellen var, at filen var
+skrevet om af måleprogrammet — samme lyd, et andet hoved. Så lidt kan vippe en
+sætning, og det er baggrundsstøjen, en forbedring skal måles mod.
+
+**Kopien ligger i temp og ikke ved optagelsen.** Arkivet kopierer
+optagelsesmappen til fællesdrevet, og sletninger følger ikke med; en kopi, der
+lå der i det forkerte sekund, ville blive liggende.
+
