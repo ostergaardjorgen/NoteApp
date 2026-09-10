@@ -65,9 +65,9 @@ public static class Telefonlyd
             var lydtjeneste = Lydtjenestens_proces();
             if (lydtjeneste == 0) return false;
 
-            using var e = new MMDeviceEnumerator();
+            if (!Telefon_parret()) return false;
 
-            if (!Telefon_parret(e)) return false;
+            using var e = new MMDeviceEnumerator();
 
             foreach (var d in e.EnumerateAudioEndPoints(DataFlow.Capture, DeviceState.Active))
             {
@@ -102,30 +102,43 @@ public static class Telefonlyd
         return false;
     }
 
-    /// <summary>Er der en telefon parret med computeren?</summary>
+    /// <summary>Er der en telefon forbundet med computeren over Bluetooth?</summary>
     /// <remarks>
-    /// Alle lydenheder tælles med, også dem, der ikke er tilsluttet: målt
-    /// står telefonens lydenheder som ikke tilsluttet, også midt i et opkald.
+    /// ============ DER SLÅS OP I ENHEDSLISTEN, IKKE I LYDENHEDERNE ============
+    ///
+    /// Første udgave gennemgik lydenhederne og fulgte hver enkelt op til
+    /// Bluetooth. Målt midt i et opkald 10-09-2026: Windows' lyd-API lister
+    /// slet ikke telefonens lydenheder — heller ikke når der bedes om alle,
+    /// også de frakoblede — selvom enhederne findes og kan slås op én for én.
+    /// Svaret blev derfor altid nej.
+    ///
+    /// Her spørges Windows' enhedsliste direkte: findes der en Bluetooth-
+    /// enhed, der udbyder telefontjenesten, og er den til stede?
     /// </remarks>
-    private static bool Telefon_parret(MMDeviceEnumerator e)
+    private static bool Telefon_parret()
     {
-        foreach (var d in e.EnumerateAudioEndPoints(DataFlow.All, DeviceState.All))
-        {
-            using (d)
-            {
-                try
-                {
-                    if (ErTelefon(d.ID)) return true;
-                }
-                catch (Exception)
-                {
-                    // En enhed, der er forsvundet undervejs. Videre.
-                }
-            }
-        }
+        const uint Filter = CmGetIdListFilterEnumerator | CmGetIdListFilterPresent;
 
-        return false;
+        if (CM_Get_Device_ID_List_SizeW(out var laengde, "BTHENUM", Filter) != 0 || laengde == 0)
+            return false;
+
+        var buf = new char[laengde];
+
+        if (CM_Get_Device_ID_ListW("BTHENUM", buf, laengde, Filter) != 0) return false;
+
+        return new string(buf)
+            .Split('\0', StringSplitOptions.RemoveEmptyEntries)
+            .Any(ErTelefonsti);
     }
+
+    private const uint CmGetIdListFilterEnumerator = 0x00000001;
+    private const uint CmGetIdListFilterPresent = 0x00000100;
+
+    [DllImport("cfgmgr32.dll", CharSet = CharSet.Unicode)]
+    private static extern int CM_Get_Device_ID_List_SizeW(out uint len, string filter, uint flags);
+
+    [DllImport("cfgmgr32.dll", CharSet = CharSet.Unicode)]
+    private static extern int CM_Get_Device_ID_ListW(string filter, char[] buffer, uint len, uint flags);
 
     /// <summary>Hører lydenheden til en telefon?</summary>
     /// <param name="endepunkt">Lydenhedens id, som Windows' lyd-API giver det.</param>
