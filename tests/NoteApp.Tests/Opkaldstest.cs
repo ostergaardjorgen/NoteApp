@@ -57,8 +57,9 @@ public class Opkaldstest
     // ============ TELEFONENS LYDENHED ============
     //
     // Maalt 10-09-2026 paa en parret iPhone. Telefonlink stod aldrig paa
-    // mikrofonlisten; det, der kan ses, er telefonens egen lydenhed. Se
-    // Telefonlyd.
+    // mikrofonlisten. Et opkald kendes paa, at Windows' lydtjeneste optager
+    // fra mikrofonen - og kun naar en telefon er parret. Det er den sidste
+    // halvdel, der proeves her. Se Telefonlyd.
 
     [Theory]
     [InlineData(@"BTHENUM\{0000111f-0000-1000-8000-00805f9b34fb}_VID&0001004c_PID&7807\7&2a22be62&0&44A10EB22CB4_C00000000")]
