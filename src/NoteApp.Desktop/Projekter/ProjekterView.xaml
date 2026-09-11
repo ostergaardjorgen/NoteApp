@@ -312,8 +312,19 @@
 
                       <StackPanel Grid.Column="0">
                         <TextBlock Text="{i18n:Oversat projekterview.skabelon}" FontSize="12.5" />
-                        <ComboBox x:Name="Skabelonvalg" Margin="0,4,0,0" FontSize="12.5"
-                                  DisplayMemberPath="Name" />
+                        <!-- ITEMTEMPLATE OG IKKE DISPLAYMEMBERPATH.
+                             Appens egen ComboBox-skabelon (App.xaml) viser det
+                             valgte gennem SelectionBoxItemTemplate. Med
+                             DisplayMemberPath er der ingen skabelon, og feltet
+                             viste typenavnet: «NoteApp.Core.Llm.PromptTemplate».
+                             Set 11-09-2026. -->
+                        <ComboBox x:Name="Skabelonvalg" Margin="0,4,0,0" FontSize="12.5">
+                          <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                              <TextBlock Text="{Binding Name}" />
+                            </DataTemplate>
+                          </ComboBox.ItemTemplate>
+                        </ComboBox>
                       </StackPanel>
 
                       <StackPanel Grid.Column="2">
