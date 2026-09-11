@@ -282,7 +282,8 @@
                  Text="{i18n:Oversat cockpit.under}" />
     </StackPanel>
 
-    <Border Background="{DynamicResource Panel}" CornerRadius="12"
+    <Border x:Name="Soegeramme" SizeChanged="Soegeramme_Stoerrelse"
+            Background="{DynamicResource Panel}" CornerRadius="12"
             BorderBrush="{DynamicResource Accent}" BorderThickness="1" Padding="8"
             MaxWidth="820" HorizontalAlignment="Stretch">
       <Border.Effect>
@@ -292,6 +293,7 @@
         <Grid.ColumnDefinitions>
           <ColumnDefinition Width="Auto" />
           <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="Auto" />
           <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
 
@@ -333,6 +335,89 @@
             </ControlTemplate>
           </Button.Template>
         </Button>
+
+        <!-- ============ TIPS TIL SØGNING ============
+
+             To måder at søge på - ord og hele sætninger - og de opfører sig
+             forskelligt. Forskellen skal kunne slås op, når man er i tvivl,
+             men den må ikke stå fremme hele tiden: skærmen er søgefeltet.
+
+             Derfor en lille knap i højre side af søgefeltet og en rude, der
+             lukker sig selv, når man klikker et andet sted.
+
+             DEN STOD FØRST FOR ENDEN AF FILTRENE. Målt 11-09-2026 i bredderne
+             1420, 1100 og 900: rækken brækkede hver gang, og knappen fik en
+             linje for sig selv, 36 px under filtrene. I søgefeltet fylder den
+             ingenting - og den står dér, hvor man er i tvivl. -->
+        <Button x:Name="TipsKnap" Grid.Column="3" Click="Tips_Klik" Margin="0,0,8,0"
+                VerticalAlignment="Center" Cursor="Hand"
+                Foreground="{DynamicResource Accent}"
+                ToolTip="{i18n:Oversat searchview.tips_hjaelp}">
+          <Button.Template>
+            <ControlTemplate TargetType="Button">
+              <Border x:Name="flade" CornerRadius="12" Background="Transparent" Padding="8,4">
+                  <ContentPresenter VerticalAlignment="Center" />
+              </Border>
+              <ControlTemplate.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                  <Setter TargetName="flade" Property="Background" Value="{DynamicResource Svaev}" />
+                </Trigger>
+              </ControlTemplate.Triggers>
+            </ControlTemplate>
+          </Button.Template>
+          <StackPanel Orientation="Horizontal">
+            <TextBlock Text="&#xE946;" FontFamily="Segoe MDL2 Assets" FontSize="12"
+                       VerticalAlignment="Center" />
+            <TextBlock x:Name="TipsTekst" Text="{i18n:Oversat searchview.tips_knap}" FontSize="11"
+                       VerticalAlignment="Center" Margin="5,0,0,0" />
+          </StackPanel>
+        </Button>
+
+        <Popup x:Name="Tipsrude" PlacementTarget="{Binding ElementName=TipsKnap}" Placement="Bottom"
+               StaysOpen="False" AllowsTransparency="True" PopupAnimation="Fade"
+               Closed="Tipsrude_Lukket">
+          <Border Background="{DynamicResource AccentFlade}" BorderBrush="{DynamicResource Accent}"
+                  BorderThickness="1" CornerRadius="10" Padding="18,14" Margin="8">
+            <Border.Effect>
+              <DropShadowEffect BlurRadius="16" ShadowDepth="3" Opacity="0.5" Color="#FF000000" />
+            </Border.Effect>
+
+            <StackPanel Width="420">
+              <TextBlock Text="{i18n:Oversat searchview.tips_titel}" FontSize="14" FontWeight="SemiBold" />
+
+              <!-- 1. ORD -->
+              <TextBlock Text="{i18n:Oversat searchview.tips_ord_titel}" FontSize="12.5" FontWeight="SemiBold"
+                         Margin="0,12,0,0" Foreground="{DynamicResource Accent}" />
+              <TextBlock Text="{i18n:Oversat searchview.tips_ord_tekst}" FontSize="12" TextWrapping="Wrap"
+                         LineHeight="18" Margin="0,4,0,0" Foreground="{DynamicResource TekstSvag}" />
+              <Border Background="{DynamicResource Trykket}" CornerRadius="6" Padding="10,5"
+                      Margin="0,7,0,0" HorizontalAlignment="Left">
+                <TextBlock Text="{i18n:Oversat searchview.tips_ord_eksempel}" FontFamily="Consolas" FontSize="12" />
+              </Border>
+
+              <!-- 2. EN SAETNING -->
+              <TextBlock Text="{i18n:Oversat searchview.tips_saetning_titel}" FontSize="12.5" FontWeight="SemiBold"
+                         Margin="0,14,0,0" Foreground="{DynamicResource Accent}" />
+              <TextBlock Text="{i18n:Oversat searchview.tips_saetning_tekst}" FontSize="12" TextWrapping="Wrap"
+                         LineHeight="18" Margin="0,4,0,0" Foreground="{DynamicResource TekstSvag}" />
+              <Border Background="{DynamicResource Trykket}" CornerRadius="6" Padding="10,5"
+                      Margin="0,7,0,0" HorizontalAlignment="Left">
+                <TextBlock Text="{i18n:Oversat searchview.tips_saetning_eksempel}" FontFamily="Consolas" FontSize="12" />
+              </Border>
+              <TextBlock Text="{i18n:Oversat searchview.tips_forstaar}" FontSize="11.5" TextWrapping="Wrap"
+                         LineHeight="17" Margin="0,7,0,0" Foreground="{DynamicResource TekstMeget}" />
+              <TextBlock Text="{i18n:Oversat searchview.tips_tale}" FontSize="11.5" TextWrapping="Wrap"
+                         LineHeight="17" Margin="0,5,0,0" Foreground="{DynamicResource TekstMeget}" />
+
+              <!-- HVORNAAR HVAD -->
+              <Border BorderBrush="{DynamicResource PanelKant}" BorderThickness="0,1,0,0"
+                      Margin="0,12,0,0" Padding="0,10,0,0">
+                <TextBlock Text="{i18n:Oversat searchview.tips_hvornaar}" FontSize="12" TextWrapping="Wrap"
+                           LineHeight="18" Foreground="{DynamicResource Tekst}" />
+              </Border>
+            </StackPanel>
+          </Border>
+        </Popup>
       </Grid>
     </Border>
 

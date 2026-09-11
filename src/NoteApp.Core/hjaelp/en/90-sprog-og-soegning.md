@@ -30,6 +30,9 @@ The sentence can name a period (*yesterday*, *last week*, *in May*), a type
 folder Clients*) and a project (*the project Vagtsom*). Anything in quotation
 marks is searched for exactly. Danish sentences are understood too.
 
+Not sure which way fits? Press **Search tips** on the right of the search field. It
+shows the difference briefly and closes again when you click elsewhere.
+
 The files are read on your machine. Nothing is sent.
 
 Below the field you can filter by period, type, folder, project and language.

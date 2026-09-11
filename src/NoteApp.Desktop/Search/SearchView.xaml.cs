@@ -2168,6 +2168,39 @@ public partial class SearchView : UserControl
         Filter_Aendret(sender, e);
     }
 
+    /// <summary>Hvornår tipsruden sidst lukkede. Se <see cref="Tips_Klik"/>.</summary>
+    private DateTime _tipsLukket;
+
+    /// <summary>
+    /// Åbner tipsruden — og lukker den, hvis den allerede står.
+    /// </summary>
+    /// <remarks>
+    /// Ruden lukker sig selv, når der klikkes et andet sted, og det gælder
+    /// OGSÅ knappen: den er lukket, allerede når musen trykkes ned, og så
+    /// åbnede klikket den igen med det samme. Et klik på knappen lige efter,
+    /// at ruden lukkede, er derfor et «luk» og ikke et «åbn».
+    /// </remarks>
+    private void Tips_Klik(object sender, RoutedEventArgs e)
+    {
+        if ((DateTime.Now - _tipsLukket).TotalMilliseconds < 250) return;
+
+        Tipsrude.IsOpen = true;
+    }
+
+    private void Tipsrude_Lukket(object sender, EventArgs e) => _tipsLukket = DateTime.Now;
+
+    /// <summary>
+    /// Teksten på tipsknappen står kun, når søgefeltet har plads til den.
+    /// </summary>
+    /// <remarks>
+    /// MÅLT 11-09-2026: knappen er 107 px bred med tekst. I en smal spalte tog
+    /// den halvdelen af feltet — ved bredden 900 var der 96 px tilbage, ikke
+    /// plads til «Hvad leder du efter?». Så står kun ikonet, og værktøjstippet
+    /// siger resten. Søgefeltet er skærmen; knappen er en hjælp til det.
+    /// </remarks>
+    private void Soegeramme_Stoerrelse(object sender, SizeChangedEventArgs e) =>
+        TipsTekst.Visibility = e.NewSize.Width >= 520 ? Visibility.Visible : Visibility.Collapsed;
+
     private void RydFilter_Klik(object sender, RoutedEventArgs e)
     {
         Mappefilter.Ryd();

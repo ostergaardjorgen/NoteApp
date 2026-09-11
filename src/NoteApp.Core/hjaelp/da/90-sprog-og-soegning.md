@@ -30,6 +30,10 @@ periode (*i går*, *sidste uge*, *i maj*, *for to uger siden*), en type
 (*i mappen Kunder*) og et projekt (*projektet Vagtsom*). Står noget i
 anførselstegn, søges der på præcis det.
 
+Er du i tvivl om, hvilken måde der passer, så tryk **Tips til søgning** i
+højre side af søgefeltet. Den viser forskellen kort og lukker igen, når du klikker
+et andet sted.
+
 Filerne læses på din maskine. Der sendes intet.
 
 Under feltet kan der filtreres på periode, type, mappe, projekt og sprog. Typen
