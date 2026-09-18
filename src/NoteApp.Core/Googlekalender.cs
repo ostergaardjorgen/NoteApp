@@ -566,21 +566,11 @@ public static class Googlekalender
 
         var noegle = await FriskNoegle(klientId, hemmelighed, opdateringsnoegle, ct);
 
-        var zone = TimeZoneInfo.Local.Id;
-
         var krop = new Dictionary<string, object?>
         {
             ["summary"] = aftale.Titel,
-            ["start"] = new Dictionary<string, string>
-            {
-                ["dateTime"] = aftale.Start.ToString("yyyy-MM-ddTHH:mm:sszzz"),
-                ["timeZone"] = zone
-            },
-            ["end"] = new Dictionary<string, string>
-            {
-                ["dateTime"] = aftale.Slutter.ToString("yyyy-MM-ddTHH:mm:sszzz"),
-                ["timeZone"] = zone
-            }
+            ["start"] = Tidspunkt(aftale.Start),
+            ["end"] = Tidspunkt(aftale.Slutter)
         };
 
         var adresse = $"{Aftaler}/{Uri.EscapeDataString(aftale.FremmedId)}" +
@@ -601,6 +591,66 @@ public static class Googlekalender
                 Kort(await svar.Content.ReadAsStringAsync(ct)));
     }
 
+    /// <summary>
+    /// Et tidspunkt, som Google vil have det: dato og klokkeslæt med
+    /// tidsforskel, og tidszonen ved sit IANA-navn.
+    /// </summary>
+    /// <remarks>
+    /// ============ WINDOWS OG GOOGLE KALDER ZONEN NOGET FORSKELLIGT ============
+    ///
+    /// Her stod <c>TimeZoneInfo.Local.Id</c>. På Windows er det «Romance
+    /// Standard Time», og Google kender kun IANA-navne som «Europe/Copenhagen».
+    /// Set 18-09-2026: hver ny aftale blev afvist med 400, «Invalid time zone
+    /// definition for start time», og kom aldrig i kalenderen.
+    ///
+    /// ============ KOLONNET SKAL VÆRE ET KOLON ============
+    ///
+    /// «HH:mm:ss» i den aktuelle kultur giver punktum på dansk — «09.30.00».
+    /// Derfor InvariantCulture.
+    ///
+    /// Kan zonen ikke oversættes, sendes den ikke med. Tidsforskellen står i
+    /// selve tidspunktet, og det er nok for en enkeltstående aftale.
+    /// </remarks>
+    public static Dictionary<string, string> Tidspunkt(DateTimeOffset t, string? zone)
+    {
+        var ud = new Dictionary<string, string>
+        {
+            ["dateTime"] = t.ToString("yyyy-MM-dd'T'HH':'mm':'sszzz", System.Globalization.CultureInfo.InvariantCulture),
+        };
+
+        if (!string.IsNullOrWhiteSpace(zone)) ud["timeZone"] = zone;
+
+        return ud;
+    }
+
+    private static Dictionary<string, string> Tidspunkt(DateTimeOffset t)
+    {
+        string? region = null;
+        try { region = System.Globalization.RegionInfo.CurrentRegion.TwoLetterISORegionName; }
+        catch (Exception) { /* uden region vælges zonens hovedby */ }
+
+        return Tidspunkt(t, Tidszone(TimeZoneInfo.Local, region));
+    }
+
+    /// <summary>
+    /// Zonens IANA-navn, eller null hvis den ikke kan oversættes.
+    /// </summary>
+    /// <remarks>
+    /// REGIONEN ER MED. «Romance Standard Time» dækker både København, Paris
+    /// og Bruxelles; uden land bliver det «Europe/Paris». Reglerne er de samme,
+    /// men det er Paris, der står i aftalen hos Google.
+    /// </remarks>
+    public static string? Tidszone(TimeZoneInfo zone, string? region)
+    {
+        if (zone.HasIanaId) return zone.Id;
+
+        if (!string.IsNullOrWhiteSpace(region)
+            && TimeZoneInfo.TryConvertWindowsIdToIanaId(zone.Id, region, out var medLand))
+            return medLand;
+
+        return TimeZoneInfo.TryConvertWindowsIdToIanaId(zone.Id, out var iana) ? iana : null;
+    }
+
     public static async Task<Googlesvar> OpretAsync(Aftale aftale, string opdateringsnoegle,
                                                     bool medMeet = true,
                                                     bool medNote = false,
@@ -611,21 +661,11 @@ public static class Googlekalender
 
         var noegle = await FriskNoegle(klientId, hemmelighed, opdateringsnoegle, ct);
 
-        var zone = TimeZoneInfo.Local.Id;
-
         var krop = new Dictionary<string, object?>
         {
             ["summary"] = aftale.Titel,
-            ["start"] = new Dictionary<string, string>
-            {
-                ["dateTime"] = aftale.Start.ToString("yyyy-MM-ddTHH:mm:sszzz"),
-                ["timeZone"] = zone
-            },
-            ["end"] = new Dictionary<string, string>
-            {
-                ["dateTime"] = aftale.Slutter.ToString("yyyy-MM-ddTHH:mm:sszzz"),
-                ["timeZone"] = zone
-            }
+            ["start"] = Tidspunkt(aftale.Start),
+            ["end"] = Tidspunkt(aftale.Slutter)
         };
 
         // Stedet og linket er det samme felt hos Google, naar der ikke er tale
