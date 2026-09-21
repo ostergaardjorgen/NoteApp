@@ -261,9 +261,46 @@ public sealed class Transcriber
             throw new InvalidOperationException(Cppkomponent.Besked(Path.GetDirectoryName(_whisperCli)));
         }
 
+        // ============ ÉN AD GANGEN ============
+        //
+        // To large-v3 kan ikke være på et 6 GB-kort samtidig, og målt
+        // 21-09-2026 kørte der tre: maskinen holdt op med at svare. Se
+        // Motorlaas.
+        IDisposable laas;
+
+        try
+        {
+            laas = await Motorlaas.TagAsync(
+                () => progress?.Report(new TranscriptionProgress(0, "Venter på, at en anden udskrift bliver færdig …")),
+                ct);
+        }
+        catch (OperationCanceledException)
+        {
+            Ryd();
+            throw;
+        }
+
         progress?.Report(new TranscriptionProgress(0, "Indlæser modellen …"));
 
-        p.Start();
+        try
+        {
+            p.Start();
+        }
+        catch (Exception)
+        {
+            laas.Dispose();
+            Ryd();
+            throw;
+        }
+
+        // ============ MASKINEN SKAL BLIVE VED MED AT SVARE ============
+        //
+        // Udskriften kan vente et sekund; musen, telefonen og det møde, der
+        // måske stadig kører, kan ikke. Lavere prioritet koster intet, når
+        // maskinen ellers er ledig.
+        try { p.PriorityClass = ProcessPriorityClass.BelowNormal; }
+        catch (Exception) { /* processen kan allerede vaere faerdig */ }
+
         p.BeginOutputReadLine();
         p.BeginErrorReadLine();
 
@@ -278,7 +315,9 @@ public sealed class Transcriber
         }
         finally
         {
-            // Kopien er kun til whisper, og whisper er faerdig.
+            // Kopien er kun til whisper, og whisper er faerdig - saa kan den
+            // naeste faa motoren.
+            laas.Dispose();
             Ryd();
         }
 
