@@ -27,8 +27,8 @@ undgås. Målt virkede porten: 3.221 fund i udgangspunktet, 0 i resultatet.
    halvdelen.
 3. Erstat efter et **ordnet** kort, ikke et alfabetisk: repo-URL'er og
    domæner før det generiske produktnavn, ellers brydes de.
-4. Tjek for kollisioner, før du kører: her kunne "ID Connect" have ramt
-   Microsofts eget "Entra Connection". Det gjorde det ikke — men det skal
+4. Tjek for kollisioner, før du kører: det gamle firmanavn kunne her have
+   ramt et kendt Microsoft-produktnavn. Det gjorde det ikke — men det skal
    efterprøves, ikke antages.
 5. Husk de fire kategorier, en navneerstatning **ikke** fanger:
    driftsidentitet (domæner, bøtter, serverstier), fremmed sporbarhed
@@ -41,9 +41,11 @@ undgås. Målt virkede porten: 3.221 fund i udgangspunktet, 0 i resultatet.
    `IDC` i VagtsomIAM — i konstanter, data-id'er, MCP-værktøjsnavne,
    HTTP-headere og i18n-nøgler. Jørgen vil have dem væk, og han accepterer
    både omskrivning af historik og sletning + genoprettelse af repoet for
-   at nå det. Ordlisten kan ikke rumme `IDC` alene: scriptet matcher som
-   delstreng og ville flage hver `OIDC`. Skriv de præcise former
-   (`idc-role-`, `X-IDC-`, `idc_tenant`, `IDC_SYSTEM` …).
+   at nå det. Ordlisten kan ikke rumme den korte forkortelse alene:
+   scriptet matcher som delstreng og ville flage hvert `OIDC`. Skriv de
+   præcise former hver for sig — præfikset i et data-id, i en
+   HTTP-header, i et databasenavn, i en konstant — ikke det fælles korte
+   navn.
 8. Erstat med en **eksplicit ordliste**, ikke et bredt mønster. Et
    `IDC_` → `VAGTSOM_` ramte `OIDC_RESPONSE_TYPE_CODE`; `appRoleIdCache`
    er samme fælde. Brug negativt lookbehind på `[oO]` til de generelle.

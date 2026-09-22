@@ -254,7 +254,11 @@ if (-not $erGit) {
         # patch-teksten for hele historikken soeges med en flerlinjet regel.
         $flerordH = @($termer | Where-Object { $_.Term.Trim() -match '\s' })
         if ($flerordH.Count -gt 0) {
-            $patch = (git log --all -p --no-color --format='@@LEVERANCETJEK-COMMIT@@ %H' 2>$null) -join "`n"
+            # --no-textconv: uden den proever git at goere Word-filer i
+            # historikken til tekst med docx2txt.exe. Den findes ikke paa
+            # maskinen, git stoppede med «fatal: unable to read files to diff»,
+            # og tjekket sagde stop uden at have fundet noget. Set 22-09-2026.
+            $patch = (git log --all -p --no-color --no-textconv --format='@@LEVERANCETJEK-COMMIT@@ %H' 2>$null) -join "`n"
             $patch = Rens $patch
             foreach ($t in $flerordH) {
                 $ord = $t.Term.Trim() -split '\s+' | ForEach-Object { [regex]::Escape($_) }
