@@ -1,144 +1,164 @@
-﻿# Fortsæt her
+# Fortsæt her
 
-*Skrevet 23-08-2026 ved v1.0.65. Læs den her først — så kan arbejdet fortsætte
-uden samtalehistorikken.*
+*Opdateret 22-09-2026 ved v1.3.78. Læs den her først — så kan arbejdet
+fortsætte uden samtalehistorikken, også med en ny Claude-konto.*
 
 ## Hvis du er en ny session
 
-Læs de her fire, i den rækkefølge. Det tager et kvarter og sparer en dag.
+Læs de her, i den rækkefølge:
 
-1. **[`../kontinuitet/arbejdsmaade.md`](../kontinuitet/arbejdsmaade.md)** —
-   reglerne. Den vigtigste af dem alle: koden kan læses, reglerne kan ikke
-   udledes af den.
-2. **[`produkt.md`](produkt.md)** — hvem appen er til, og hvad den skal kunne.
-3. **[`cockpit-plan.md`](cockpit-plan.md)** — planen og hvor langt den er nået.
+1. **[`../CLAUDE.md`](../CLAUDE.md)** — reglerne for repoet. Indlæses af sig
+   selv, når Claude Code startes med `C:\NoteApp` som mappe.
+2. **[`../kontinuitet/arbejdsmaade.md`](../kontinuitet/arbejdsmaade.md)** —
+   hvordan der arbejdes, og hvordan Jørgen vil have svar. Reglerne kan ikke
+   udledes af koden.
+3. **[`roadmap.md`](roadmap.md)** — hvad der er på vej, og hvad der venter.
 4. **[`findings.md`](findings.md)** — alt, der er målt. Kig HER, før noget
    bliver undersøgt igen.
 
-Spørg brugeren, hvis noget er uklart. **Gæt aldrig på et tal.**
+Spørg Jørgen, hvis noget er uklart. **Gæt aldrig på et tal.**
+
+## Ny Claude-konto — sådan kommer du i gang
+
+### Samme maskine
+
+1. Log ud og ind med den nye konto i Claude Code (`/login` i terminalen, eller
+   log ud og ind i Claude-appen).
+2. Hukommelse, skills og de globale regler ligger som filer i
+   `%USERPROFILE%\.claude` og følger maskinen, ikke kontoen. Tjek, at de er
+   der:
+
+   ```powershell
+   powershell -File C:\NoteApp\scripts\gendan-kontinuitet.ps1
+   ```
+
+   Den lægger kun det på plads, der mangler, og rører ikke en fil, der er
+   anderledes — den kan være nyere end kopien i git.
+3. Start Claude Code i `C:\ClaudeCode` med `C:\NoteApp` som ekstra mappe —
+   det er den opsætning, hukommelsen hører til (`C--ClaudeCode`). Første
+   besked: *«Læs C:\NoteApp\doc\fortsaet-her.md og fortsæt.»*
+
+### Ny maskine
+
+1. Installér Git, GitHub CLI, .NET 10 SDK og Claude Code.
+2. `gh auth login` som **ostergaardjorgen** — repoet er privat.
+3. Hent koden til **`C:\NoteApp`** (stien bruges i scripts og dokumentation):
+
+   ```powershell
+   git clone https://github.com/ostergaardjorgen/NoteApp.git C:\NoteApp
+   ```
+
+4. Læg hukommelse og skills på plads:
+
+   ```powershell
+   powershell -File C:\NoteApp\scripts\gendan-kontinuitet.ps1
+   ```
+
+5. Hent det, der **aldrig er i git**, fra den gamle maskines
+   `C:\NoteApp-backup\lokalt-ikke-i-git\`:
+
+   | Fil | Lægges i |
+   |---|---|
+   | `forbudte-termer.txt` | `%USERPROFILE%\.claude\skills\leverancetjek\` |
+   | `globale-regler-CLAUDE.md` | `%USERPROFILE%\.claude\CLAUDE.md` |
+   | `client_secret_*.json` | `C:\NoteApp\hemmeligheder\` |
+
+   **Mappen ligger kun på den gamle maskine.** Er den væk, skal
+   `forbudte-termer.txt` skrives igen i hånden — uden den godkender
+   leverancetjekket alt. Formatet står i
+   [`../kontinuitet/skills/leverancetjek/SKILL.md`](../kontinuitet/skills/leverancetjek/SKILL.md).
+6. Data (`C:\AppNoter`) hentes med appens egen sikkerhedskopi, eller fra
+   arkivet på fællesdrevet under Indstillinger → Deling. Whisper-motoren og
+   modellerne hentes af appen selv ved første start.
 
 ## Hvad appen er
 
-En Windows-app (WPF, .NET 8) til at optage møder og webinarer, skrive dem ud
-til tekst lokalt, og finde tilbage til det, der blev sagt.
+**HeyPia** — en Windows-app (WPF, .NET 10) til at optage møder, webinarer og
+telefonopkald, skrive dem ud til tekst lokalt, og finde tilbage til det, der
+blev sagt. Kunden er studerende, iværksættere og mindre selvstændige; der
+måles op mod **Granola**.
 
 **Transkription er ikke produktet — det er prisen for at komme ind.** Værdien
-vokser med arkivet: efter to hundrede møder er appen det eneste sted, hvor man
-kan finde ud af, hvad der *faktisk* blev sagt. Søgningen er derfor ikke en
-funktion i cockpittet; den ER cockpittet.
-
-Kunden er studerende, iværksættere og mindre selvstændige. Der måles op mod
-**Granola**.
+vokser med arkivet, og søgningen er derfor ikke en funktion i Cockpittet; den
+ER Cockpittet.
 
 ## Hvor tingene ligger
 
 | Hvad | Hvor |
 |---|---|
-| Kode | `C:\NoteApp` (dette repo) |
+| Kode | `C:\NoteApp` — GitHub `ostergaardjorgen/NoteApp` (privat) |
+| Udviklingsudgaven | `C:\NoteApp\app\HeyPia.exe` — genvejen «HeyPia_dev» |
+| Installeret udgave | `C:\Program Files\HeyPia\HeyPia.exe` |
 | Brugerens data | `C:\AppNoter` — aldrig i git |
-| Udgivet app | `C:\NoteApp\app\NoteApp.exe` — skrivebordsgenvejen peger her |
-| Installeret app | `C:\Program Files (x86)\NoteApp` |
+| Motor og modeller | `C:\AppNoter\motor` (`modeller\` har ggml-filerne) |
+| Fællesdrev | `P:\HeyPia\deling` (arkiv og deling mellem maskiner) |
+| Installationsfiler | `P:\HeyPia\setup` |
 | Legitimationer | `C:\NoteApp\hemmeligheder\` — aldrig i git |
-| Modeller | `C:\NoteApp\models`, motorer i `C:\AppNoter\motor` |
+| Kode-backup | `C:\NoteApp-backup` — git-bundter og det, der ikke må i git |
 
-Maskinen: RTX 2060 med 6 GB VRAM, i7-1165G7, 32 GB RAM, Windows 11.
+Maskinen: RTX 2060 med 6 GB VRAM, i7-1165G7 (4 kerner), 32 GB RAM, Windows 11.
 **Alle tal i `findings.md` er målt på den.**
 
-## Sådan bygger og udgiver du
+Navnet i koden er stadig **NoteApp** (mapper, namespaces, repo). Omdøbningen
+til HeyPia venter på Jørgens besked.
 
-```powershell
-powershell -File C:\NoteApp\scripts\udgiv.ps1
-```
+## Det daglige
 
-Versionsnummeret kommer fra den seneste commit (`vX.Y.Z: …`). Commit **først**,
-udgiv bagefter — ellers får udgivelsen samme nummer som sidst. Meld altid
-nummeret og tidspunktet i chatten.
-
-Installationsfilen: `powershell -File C:\NoteApp\scripts\byg-installer.ps1`.
-
-Kør altid leverancetjek før commit og push.
-
-## Status ved v1.0.65
-
-| Etape | Status |
+| Hvad | Sådan |
 |---|---|
-| 0 · Cockpittet findes | Gjort |
-| 1 · Optag et webinar | Gjort — afprøvet på to rigtige, 22 og 54 min |
-| 2 · Søgningen bliver god | Gjort — målt til 90 % / 100 % |
-| 3 · Opgaver på tværs + kalender | Gjort |
-| 4 · Webinarområdet gøres færdigt | **Næste** |
-| 5 · Diktafonen | Ikke begyndt |
+| Prøverne | `powershell -File C:\NoteApp\scripts\proev.ps1` |
+| Leverancetjek | `powershell -File "$env:USERPROFILE\.claude\skills\leverancetjek\tjek-leverance.ps1" -Sti C:\NoteApp` |
+| Udgiv udviklingsudgaven | `powershell -File C:\NoteApp\scripts\udgiv.ps1` |
+| Push (hver dag) | `powershell -File C:\NoteApp\scripts\sikker-kode.ps1 -Push` |
+| Installationsfil | skill `byg` — kun når Jørgen beder om det |
 
-### Det, der virker i dag
+Rækkefølgen: **prøver → leverancetjek → commit `vX.Y.Z: …` → udgiv → start
+appen → meld versionsnummer og tidspunkt.** Versionsnummeret kommer fra den
+seneste commit, der starter med `vX.Y.Z:`.
 
-Optagelse af møder (to spor) og webinarer (ét spor, stopper selv efter fem
-minutters stilhed og klipper stilheden af). Transkription lokalt med
-whisper.cpp på GPU, 0,09 gange realtid. Talergenkendelse, der skiller stemmer
-ad. Søgning på tværs med faner, sortering og fire filtre. Opgaver på tværs med
-dansk datoforståelse. Kalender, lokal og med Google. Dokumenter via Mistral i
-EU. Mødevagt, der spørger, når et program åbner mikrofonen.
+**`udgiv.ps1` lukker den kørende app.** Udgiv aldrig, mens der optages eller
+skrives ud — tjek først, at ingen `whisper-cli` kører.
 
-### Det, der mangler i etape 4
+`sikker-kode.ps1 -Push` opdaterer også `kontinuitet/` fra `~/.claude`, så
+hukommelse og skills følger med hvert push.
 
-- **Planlagt optagelse**, der virker med appen lukket — kræver en planlagt
-  opgave i Windows. Det er den tunge del.
-- **Påmindelse** før et webinar. Må aldrig afbryde en optagelse; den skal
-  vente eller lande på klokken.
-- **Oversættelse med originalen ved siden af.** Målt: lokalt ~3 min for et
-  22-minutters webinar, ~11 min for 50 — men kvaliteten er synligt
-  maskinoversat med modellerne på maskinen. Beslutningen er ikke truffet.
-- **Microsoft 365-kalender.** `Integrationer.Alle` er skrevet, så den er en
-  post på en liste og ikke et særtilfælde.
-
-## De tre beslutninger, der venter
-
-**Semantisk søgning.** Ikke afvist — den venter bevidst. De tyve prøver er alle
-ord, der STÅR i teksten, og det er dét, ordsøgning er god til. Målingen, der
-afgør spørgsmålet, er tyve spørgsmål stillet med ANDRE ord end dem, der blev
-sagt («hvad sagde de om prissætning»). Den kan først laves ærligt, når arkivet
-er stort nok til, at man ikke selv kan huske svaret.
-
-**Navneudtræk** — «find leverandørerne nævnt i denne måned». Målt til at virke
-i blokke, ~1 minut pr. times møde, og efterprøvningen kasserer 18-30 % som
-opfundet. Men det, der overlever, blander rigtige navne med almindelige ord
-(«dag», «uge», «kunder»). Der mangler ét led: at afgøre, om noget ER et navn.
-Tre billige veje står i `findings.md`.
-
-**Google-verifikation.** Projektet er **udgivet til produktion, uverificeret**
-— efterprøvet i konsollen 27-08-2026, hvor tælleren stod på 1 af 100. Dermed
-er syv-dages-udløbet væk, og det haster ikke. Det, der er tilbage, er
-advarselsskærmen «Google har ikke verificeret denne app», som hver ny kunde
-skal klikke sig forbi — en salgsspærring, ikke en teknisk. Verifikationen
-kræver ingen sikkerhedsvurdering, fordi områderne er følsomme og ikke
-begrænsede. Alt sammen skrevet ud i
-[`google-integration.md`](google-integration.md).
-
-## Roadmap uden for etaperne
-
-Står i [`roadmap.md`](roadmap.md). Det største punkt: **appen justerer sig selv
-ud fra brug og kan skrue tilbage.** Indstillingerne er målt på ÉN stemme, ÉN
-mikrofon og ét møde; hos en anden kunde rammer de næppe lige så godt. Brugerens
-egne rettelser ER målingen.
-
-## Hvis noget skal efterprøves
+Udviklingsværktøjet (`src\NoteApp.Tools`, bygges til `heypia.exe`):
 
 ```bash
-heypia maalsoegning   # tyve søgeprøver med kendt facit
-heypia maaldato       # tyve datoer i talesprog
-heypia motor          # hvilken whisper-motor og model der bruges
 heypia status         # hvor data ligger, og hvad de indeholder
+heypia motor          # hvilken whisper-motor og model der bruges
+heypia maalsoegning   # søgeprøver med kendt facit
+heypia maaldato       # datoer i talesprog
 ```
 
-Værktøjet bygges fra `src\NoteApp.Tools`.
+## Status ved v1.3.78
 
-## Det, der IKKE er i git
+### Lavet siden v1.2.81 (04-09-2026)
 
-- `C:\AppNoter` — optagelser, transkriptioner, dokumenter, indstillinger
-- `hemmeligheder/google-klient.json` — se `google-integration.md`
-- `forbudte-termer.txt` i leverancetjek-skillen — se
-  [`../kontinuitet/README.md`](../kontinuitet/README.md)
-- Modelfilerne (flere GB)
+- **Arkiv på fællesdrevet**: optagelser, projekter og skabeloner fra begge
+  maskiner, med tidsplan og automatisk hentning. Se [`deling.md`](deling.md).
+- **Telefonopkald via Telefonlink**: boble med sprogvalg, folderen **Opkald**,
+  navn efter dato og klokkeslæt. Opkaldet kendes på, at Windows' lydtjeneste
+  optager fra mikrofonen, mens en telefon er parret (Bluetooth 0x111F).
+- **Fri søgning**: en hel sætning forstås — periode, type, sprog, mappe og
+  projekt. Filtret **Typer** (møder, webinarer, opkald, noter). Tips til
+  søgning i søgefeltet.
+- **Svag tale forstærkes** før udskrift. Målt: 8,4 % → 6,1 % ordfejl.
+  [`findings.md`](findings.md) afsnit 10.
+- **Kun én udskrift ad gangen** (`Motorlaas`). Tre samtidige large-v3 låste
+  maskinen 21-09-2026.
+- **Google Kalender**: tidszonen sendes som IANA-navn; nye aftaler blev afvist.
 
-**Data tages med appens egen sikkerhedskopi** under Indstillinger →
-Sikkerhedskopi. Den er ikke det samme som git, og den ene erstatter ikke den
-anden.
+### Ikke efterprøvet endnu
+
+- Et rigtigt opkald med v1.3.78: bliver samtalen skrevet ud undervejs?
+- En ny aftale oprettet i Google Kalender efter v1.3.77.
+
+### Venter
+
+- **Talergenkendelse på den anden maskine** — det sidste punkt i etape 2.
+- **Omdøbning NoteApp → HeyPia** (kode, mapper, repo) — venter på Jørgen.
+- **Installeren skal signeres** — Smart App Control blokerer den på en ny
+  maskine. Se [`roadmap.md`](roadmap.md).
+- Resten står i [`roadmap.md`](roadmap.md) og i hukommelsen
+  (`project-heypia-aabne-punkter.md`).

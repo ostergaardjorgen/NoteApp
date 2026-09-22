@@ -1,0 +1,3 @@
+# Udtryk, der rummer en forbudt term som delstreng, men er noget andet.
+# Et udtryk pr. linje, med begrundelse efter kolon. Se tjek-leverance.ps1.
+OpenID Connect: den aabne standard for login (OIDC). Besluttet af Joergen 21-09-2026 - skal kunne staa, hvor det handler om loesning og arkitektur.

@@ -66,6 +66,32 @@ foreach ($linje in Get-Content $TermListe -Encoding UTF8) {
 }
 if (-not $termer) { throw "Termlisten er tom: $TermListe" }
 
+# --- Undtagelser -----------------------------------------------------------
+# Udtryk, der indeholder en forbudt term som delstreng, men som er noget
+# helt andet — fx navnet på en åben login-standard (OIDC), der rummer en af
+# termerne som en del af ordet. Termen skrives ikke her: så ville scriptet
+# selv blive et fund, når det ligger i kontinuitet/ i et repo.
+# Jørgen besluttede 21-09-2026, at standardens navn skal kunne stå, hvor det
+# handler om løsning og arkitektur. Udtrykkene fjernes fra teksten, FØR der
+# søges efter forbudte termer; alt andet på samme linje tjekkes stadig.
+# Listen ligger i undtagelser.txt ved siden af scriptet — ét udtryk pr.
+# linje, med en begrundelse efter kolon.
+$undtagelsesFil = Join-Path (Split-Path -Parent $TermListe) 'undtagelser.txt'
+$undtagelser = @()
+if (Test-Path $undtagelsesFil) {
+    foreach ($linje in Get-Content $undtagelsesFil -Encoding UTF8) {
+        $l = $linje.Trim()
+        if (-not $l -or $l.StartsWith('#')) { continue }
+        $udtryk = ($l -split ':', 2)[0].Trim()
+        if ($udtryk) { $undtagelser += [regex]::new([regex]::Escape($udtryk), 'IgnoreCase') }
+    }
+}
+function Rens([string] $tekst) {
+    if (-not $tekst) { return $tekst }
+    foreach ($u in $undtagelser) { $tekst = $u.Replace($tekst, '') }
+    return $tekst
+}
+
 # Alle termer som ét saet argumenter til git grep: -e term1 -e term2 ...
 # Et kald pr. term gennemgik det samme materiale forfra hver gang. Maalt
 # 04-09-2026 paa HeyPia: 414 sek med seks kald mod 65 sek med ét — samme fund.
@@ -102,10 +128,39 @@ Write-Host "1  Forbudte termer i sporede filer ... " -NoNewline
 if ($erGit) {
     $træf = @(git grep -n -i -F @termArgs 2>$null)
     foreach ($linje in $træf) {
-        $lav = $linje.ToLowerInvariant()
+        $lav = (Rens $linje).ToLowerInvariant()
         foreach ($t in $termer) {
             if ($lav.Contains($t.Lav)) {
                 Tilføj 'forbudt-term' $linje "$($t.Term) — $($t.Forklaring)"
+            }
+        }
+    }
+
+    # Et navn delt over et linjeskift ("...ID" / "// Connect...") ses ikke af
+    # en linjebaseret søgning. Fundet 21-09-2026 i seks kommentarer, der havde
+    # bestået tjekket i ugevis. Flerordstermer søges derfor også på tværs af
+    # linjer, med mellemrum og kommentarmarkører imellem. Kun fund, der faktisk
+    # spænder over et linjeskift, meldes her — resten er fanget ovenfor.
+    $flerord = @($termer | Where-Object { $_.Term.Trim() -match '\s' })
+    if ($flerord.Count -gt 0) {
+        $mønstre = foreach ($t in $flerord) {
+            $ord = $t.Term.Trim() -split '\s+' | ForEach-Object { [regex]::Escape($_) }
+            @{ T = $t; Rx = [regex]::new(($ord -join '[\s/*#-]+'), 'IgnoreCase') }
+        }
+        foreach ($rel in @(git ls-files 2>$null)) {
+            $fuld = Join-Path $Sti $rel
+            $fi = Get-Item -LiteralPath $fuld -ErrorAction SilentlyContinue
+            if (-not $fi -or $fi.Length -gt 2MB) { continue }
+            $indhold = try { [IO.File]::ReadAllText($fuld) } catch { $null }
+            if (-not $indhold -or $indhold.IndexOf([char]0) -ge 0) { continue }
+            $indhold = Rens $indhold
+            foreach ($m in $mønstre) {
+                foreach ($hit in $m.Rx.Matches($indhold)) {
+                    if ($hit.Value -notmatch "`n") { continue }
+                    $linjenr = ($indhold.Substring(0, $hit.Index) -split "`n").Count
+                    $vist = $hit.Value -replace '\s+', ' '
+                    Tilføj 'forbudt-term' "${rel}:${linjenr}: (delt over linjeskift) $vist" "$($m.T.Term) — $($m.T.Forklaring)"
+                }
             }
         }
     }
@@ -115,6 +170,7 @@ if ($erGit) {
     foreach ($f in $filer) {
         $indhold = try { Get-Content $f.FullName -Raw -ErrorAction Stop } catch { $null }
         if (-not $indhold) { continue }
+        $indhold = Rens $indhold
         foreach ($t in $termer) {
             if ($indhold -like "*$($t.Term)*") {
                 Tilføj 'forbudt-term' $f.FullName "$($t.Term) — $($t.Forklaring)"
@@ -137,7 +193,7 @@ if ($erGit) {
         Where-Object { $_ -match '^\+' -and $_ -notmatch '^\+\+\+' }) -join "`n"
 
     if ($tilføjede) {
-        $lav = $tilføjede.ToLowerInvariant()
+        $lav = (Rens $tilføjede).ToLowerInvariant()
         foreach ($t in $termer) {
             if ($lav.Contains($t.Term.ToLowerInvariant())) {
                 Tilføj 'staged-term' 'tilføjet linje i staged diff' "$($t.Term) — $($t.Forklaring)"
@@ -161,15 +217,27 @@ if (-not $erGit) {
         Write-Host "springes over (ingen commits)" -ForegroundColor DarkGray
     }
     else {
-        # ÉT kald med alle termer. Loftet paa 1000 linjer er en sikkerhedsventil:
+        # Alle termer i hvert kald. Loftet paa 1000 linjer er en sikkerhedsventil:
         # i et staerkt forurenet repo standser den gennemgangen i stedet for at
         # laese titusinder af traef ind, som ingen alligevel naar at se paa.
-        $træf = @(git grep -i -F @termArgs $revs 2>$null | Select-Object -First 1000)
+        # Revisionerne gives i portioner: alle paa én kommandolinje sprænger
+        # Windows' graense paa 32.767 tegn ("Filnavnet eller filtypenavnet er
+        # for langt") i et repo med tusindvis af commits, fx plane-dk.
+        $portion = 200
+        $træf = @()
+        for ($i = 0; $i -lt $revs.Count -and $træf.Count -lt 1000; $i += $portion) {
+            $slut = [Math]::Min($i + $portion, $revs.Count) - 1
+            Write-Progress -Activity 'Git-historikken' -Status "revision $($i + 1)-$($slut + 1) af $($revs.Count)" `
+                -PercentComplete ([int](100 * $i / $revs.Count))
+            $træf += @(git grep -i -F @termArgs $revs[$i..$slut] 2>$null |
+                Select-Object -First (1000 - $træf.Count))
+        }
+        Write-Progress -Activity 'Git-historikken' -Completed
 
         # Hoejst 5 fund pr. term, som foer — resten er den samme historie igen.
         $prTerm = @{}
         foreach ($linje in $træf) {
-            $lav = $linje.ToLowerInvariant()
+            $lav = (Rens $linje).ToLowerInvariant()
             foreach ($t in $termer) {
                 if (-not $lav.Contains($t.Lav)) { continue }
                 if (-not $prTerm.ContainsKey($t.Term)) { $prTerm[$t.Term] = 0 }
@@ -177,6 +245,28 @@ if (-not $erGit) {
                 $prTerm[$t.Term]++
                 Tilføj 'historik-term' $linje "$($t.Term) — findes stadig i historikken" 'ADVARSEL'
                 $antal3++
+            }
+        }
+
+        # Samme blinde plet som i tjek 1: git grep er linjebaseret og ser ikke
+        # et navn delt over et linjeskift. Den linje, der indfoerte teksten,
+        # staar i en patch som to paa hinanden foelgende '+'-linjer, saa
+        # patch-teksten for hele historikken soeges med en flerlinjet regel.
+        $flerordH = @($termer | Where-Object { $_.Term.Trim() -match '\s' })
+        if ($flerordH.Count -gt 0) {
+            $patch = (git log --all -p --no-color --format='@@LEVERANCETJEK-COMMIT@@ %H' 2>$null) -join "`n"
+            $patch = Rens $patch
+            foreach ($t in $flerordH) {
+                $ord = $t.Term.Trim() -split '\s+' | ForEach-Object { [regex]::Escape($_) }
+                $rx = [regex]::new(($ord -join '[ \t/*#-]*\r?\n[+ \t/*#-]*'), 'IgnoreCase')
+                $vist = 0
+                foreach ($hit in $rx.Matches($patch)) {
+                    if ($vist -ge 5) { break }
+                    $foer = $patch.LastIndexOf("@@LEVERANCETJEK-COMMIT@@ ", $hit.Index)
+                    $commit = if ($foer -ge 0) { $patch.Substring($foer + 25, 12) } else { '?' }
+                    Tilføj 'historik-term' "${commit}: (delt over linjeskift) $($hit.Value -replace '\s+', ' ')" "$($t.Term) — findes stadig i historikken" 'ADVARSEL'
+                    $antal3++; $vist++
+                }
             }
         }
         Write-Host $(if ($antal3 -eq 0) { 'rent' } else { "$antal3 fund" }) -ForegroundColor $(if ($antal3 -eq 0) { 'Green' } else { 'Yellow' })
@@ -205,7 +295,7 @@ $navne = if ($erGit) { git ls-files 2>$null } else {
 }
 foreach ($n in $navne) {
     foreach ($t in $termer) {
-        if ($n.ToLowerInvariant().Contains($t.Term.ToLowerInvariant())) {
+        if ((Rens $n).ToLowerInvariant().Contains($t.Term.ToLowerInvariant())) {
             Tilføj 'filnavn' $n "$($t.Term) i stien"; $antal5++; break
         }
     }

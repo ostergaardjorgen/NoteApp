@@ -64,6 +64,35 @@ Sig ''
 # --- 1. Hvor staar vi? -----------------------------------------------------
 Push-Location $Rod
 try {
+    # --- 0. Hukommelsen og skills med i git --------------------------------
+    #
+    # De rettes i ~/.claude, og kopien i kontinuitet/ blev kun opdateret, naar
+    # nogen huskede det. 22-09-2026 manglede 14 af 24 hukommelsesfiler. Nu
+    # foelger de med hvert push - leverancetjekket paa det staged tjekker dem,
+    # FOER de committes.
+    if ($Push) {
+        Sig 'Opdaterer kontinuitet/ fra ~/.claude ...'
+        & powershell -File (Join-Path $PSScriptRoot 'opdater-kontinuitet.ps1')
+        if ($LASTEXITCODE -ne 0) { throw 'kontinuitet/ kunne ikke opdateres.' }
+
+        if (@(git status --porcelain -- kontinuitet).Count -gt 0) {
+            git add -- kontinuitet
+
+            $tjekStaged = Join-Path $env:USERPROFILE '.claude\skills\leverancetjek\tjek-leverance.ps1'
+            & powershell -File $tjekStaged -Sti $Rod
+            if ($LASTEXITCODE -ne 0) {
+                git reset -q -- kontinuitet
+                throw ("Leverancetjekket fandt noget i hukommelsen eller skills. " +
+                       "Intet er committet. Ret filen i ~/.claude, og koer igen.")
+            }
+
+            git commit -q -m "kontinuitet: hukommelse og skills fra ~/.claude" -- kontinuitet
+            if ($LASTEXITCODE -ne 0) { throw 'kontinuitet/ kunne ikke committes.' }
+            God 'kontinuitet/ opdateret og committet'
+        }
+        Sig ''
+    }
+
     $urene = @(git status --porcelain)
     if ($urene.Count -gt 0) {
         Advar "$($urene.Count) fil(er) er ikke committet. De kommer IKKE med i bundtet."

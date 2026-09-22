@@ -119,7 +119,7 @@ er forsvarligt, og hvad der til gengæld skal være styr på.
 powershell -File C:\NoteApp\scripts\udgiv.ps1
 ```
 
-Skrivebordsgenvejen peger på `C:\NoteApp\app\NoteApp.exe`. Bygger du kun til
+Skrivebordsgenvejen peger på `C:\NoteApp\app\HeyPia.exe`. Bygger du kun til
 `bin\Release`, bliver genvejen ved med at åbne en **gammel udgave** — uden at
 noget siger det. Det er sket: en udgave med et transskriptions-loop i sig blev
 ved med at ligge der en halv dag.
@@ -181,7 +181,23 @@ powershell -File "$env:USERPROFILE\.claude\skills\leverancetjek\tjek-leverance.p
 
 Uopfordret. Se [`skills/leverancetjek/SKILL.md`](skills/leverancetjek/SKILL.md).
 
-## 12. Skriv kommentarer, der forklarer HVORFOR
+## 12. Sådan svares Jørgen
+
+Står også i de globale regler (`~/.claude/CLAUDE.md`), som ikke er i git. De
+står her, så en ny konto på en ny maskine har dem fra første svar.
+
+- **Dansk.** Alle svar i chatten, også efter en komprimering.
+- **Konklusion først, højst 3-5 linjer.** Uddyb kun, når der spørges.
+- **Genfortæl ikke** det, der lige er gjort, trin for trin.
+- **Kodeblokke kun** til noget, Jørgen selv skal køre eller indsætte.
+- **Ingen planer, opsummeringer eller «næste skridt»**, medmindre de er bedt om.
+- **Ét spørgsmål**, og kun når svaret ændrer, hvad der gøres.
+- **Fejl siges rent ud** med fil og linje. Ingen undskyldninger.
+- **Tal frem for påstande.** Mål det.
+- **Kommandoer til Jørgen er PowerShell**, og skal, administrator og mappe står
+  over blokken.
+
+## 13. Skriv kommentarer, der forklarer HVORFOR
 
 Koden i det her projekt har usædvanligt fyldige kommentarer, og det er med
 vilje. De forklarer ikke, hvad linjen gør — de forklarer, **hvilken fejl der
@@ -217,8 +233,12 @@ Værd at kende, før den samme time bruges igen.
 - XML-kommentarer må ikke indeholde `--`.
 - **Binding til en privat type fejler i stilhed** — felterne står bare tomme.
   Typer, XAML binder til, skal være `public`.
-- `DisplayMemberPath` slog ikke igennem ét sted; en `ItemTemplate` med et
-  `{Binding}` gør. Rullelisten viste «Punkt { Navn = …, Under = … }».
+- `DisplayMemberPath` slår ikke igennem i appens egen ComboBox-skabelon; en
+  `ItemTemplate` med et `{Binding}` gør. Rullelisten viste «Punkt { Navn = …,
+  Under = … }» og senere «NoteApp.Core.Llm.PromptTemplate» (11-09-2026).
+- **Formatstrenge: `:` og `_` er pladsholdere.** «HH:mm» giver «22.45» på en
+  dansk maskine. Skriv `"HH':'mm"` med `CultureInfo.InvariantCulture`. Det
+  ramte både opkaldsnavnene og tidspunktet til Google Kalender.
 - `AppContext.BaseDirectory` er exe-mappen — også for en enkeltfils-udgivelse.
   Efterprøvet.
 - Startskærmen sættes i `MainWindow`-konstruktøren, **ikke** af `Nav_Changed`.

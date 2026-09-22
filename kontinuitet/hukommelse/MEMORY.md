@@ -1,8 +1,23 @@
-﻿- [Dagligt push](dagligt-push.md) — commit og push hver dag; er det ikke sket i går, er det dagens første handling
+- [Dagligt push](dagligt-push.md) — commit og push hver dag; er det ikke sket i går, er det dagens første handling
 - [Danske tegn i brugerfladen](dansk-tegn-i-brugerflade.md) — æ, ø og å skal staves rigtigt i alt, brugeren ser; ASCII kun i kode og commits
 - [Meld altid release-nummer](meld-altid-release-nummer.md) — versionsnummer og tidsstempel skal stå i chatten efter hver udgivelse
-- [HeyPias version kommer fra commit](heypia-version-fra-commit.md) — udgivelser uden commit imellem får samme nummer
+- [NoteApps version kommer fra commit](noteapp-version-fra-commit.md) — 99 er højeste tal i hvert led; tredje led vises med to cifre
+- [Modeller ligger ét sted](noteapp-modeller-eet-sted.md) — ggml-filer hører i datamappen, aldrig i kodelageret
 - [Office på maskinen](office-paa-maskinen.md) — Word, Excel og PowerPoint kan styres via COM; brug dem til at efterprøve Office-filer, du laver
 - [Test på udsnit først](test-paa-udsnit-foerst.md) — nye indstillinger prøves af på et kort klip, aldrig på hele lydfilen først
-- [Målgruppe og Granola](maalgruppe-og-granola.md) — HeyPia måles op mod Granola; kunden er studerende, iværksættere og mindre selvstændige
+- [Målgruppe og Granola](maalgruppe-og-granola.md) — NoteApp måles op mod Granola; kunden er studerende, iværksættere og mindre selvstændige
 - [Lokalt før skyen](lokalt-foerst.md) — kan noget gøres begge steder, står den lokale mulighed først og er standardvalget
+- [Google-konto](google-konto-vagtsom.md) — Google og kalenderen er jorgen@vagtsom.com; ic67.dk er kun Claude
+- [Vagtsom IAM](project-vagtsom-iam.md) — aktiv linje er C:\Vagtsom\VagtsomIAM (grenen test); vagtsom-iam-3 er parkeret; køreplan, lokal opstart og rollemodel
+- [Leverancetjek som port](feedback-leverancetjek-som-port.md) — ved navneskifte: dekontaminér før første commit, og lad scriptet definere færdig
+- [PowerShell altid](feedback-powershell-hvor-staar-jeg.md) — Jørgen bruger PowerShell; shell, mappe og administrator står over blokken, aldrig i den; NAS-kommandoer starter med ssh-login
+- [Vis altid hvad der kører](feedback-vis-altid-hvad-der-koerer.md) — hold brugeren orienteret hele vejen: ét sted der bevæger sig, og aldrig et tal, der står stille
+- [HeyPia — åbne punkter](project-heypia-aabne-punkter.md) — status 22-09-2026 (v1.3.78): opkald og Google-aftale ikke efterprøvet live; talergenkendelse, omdøbning og signering venter
+- [Byg efter commit](feedback-byg-efter-commit.md) — udgiv dev-appen og start den efter hvert commit; installeren bygges kun på kommando
+- [Tekster til kunden](feedback-tekster-til-kunden.md) — alt i brugerfladen skrives til en kunde, der bruger appen; ikke til den, der byggede den
+- [Plane DK](project-plane-dk.md) — dansk Plane-fork paa Synology NAS; kode, release og driftsstier
+- [Plane DK samler updates](feedback-plane-dk-samlede-updates.md) — push loebende, men opdater foerst NAS naar flere aendringer er samlet
+- [Plane DK Excel-import](project-plane-dk-excelimport.md) — designvalg for import af projektplan; Faseplan er standard
+- [Plane DK uden import](feedback-plane-dk-uafhaengig-af-import.md) — alt skal virke på et projekt oprettet i hånden; importen er aldrig forudsætningen
+- [Plane DK upstream-ændringer](feedback-plane-dk-upstream-aendringer.md) — Planes filer må ændres, når det markeres og dokumenteres; budgettet er ikke en grænse
+- [Svar på dansk](feedback-svar-paa-dansk.md) — alle chatsvar på dansk, også efter komprimering

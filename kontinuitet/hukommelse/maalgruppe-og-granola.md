@@ -1,6 +1,6 @@
-﻿---
+---
 name: maalgruppe-og-granola
-description: "HeyPias målgruppe er studerende, iværksættere og mindre selvstændige, og produktet måles op mod Granola"
+description: "NoteApps målgruppe er studerende, iværksættere og mindre selvstændige, og produktet måles op mod Granola"
 metadata: 
   node_type: memory
   type: project
@@ -8,7 +8,7 @@ metadata:
   modified: 2026-08-21T09:30:25.079Z
 ---
 
-HeyPia skal sammenlignes med **Granola** — ikke Otter eller Teams' egne
+NoteApp skal sammenlignes med **Granola** — ikke Otter eller Teams' egne
 referater. Den ideelle kunde er **studerende, iværksættere og mindre
 selvstændige**, der har brug for ét sted til alle online-aktiviteter: møder,
 webinarer og lydfiler optaget på en almindelig telefon og lagt ind via upload.
