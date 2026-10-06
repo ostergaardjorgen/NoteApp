@@ -342,13 +342,20 @@ public partial class OpstartWindow : Window
         var link = Link.Text.Trim();
         Kilde = link.Length > 0 ? link : null;
 
+        // KUN DialogResult - IKKE ET Close() EFTERFOELGENDE.
+        //
+        // At saette DialogResult lukker selv dialogen. Et ekstra Close()
+        // bagefter koerer, mens lukningen allerede er i gang, og saa
+        // returnerer ShowDialog() FALSE: kalderen ser et «Fortryd», selv om
+        // der blev trykket paa Optag. Maalt 06-10-2026 paa v1.3.78: dialogen
+        // lukkede, ShowDialog gav False, Start() blev aldrig kaldt, og der
+        // kom hverken fejlbesked eller optagelsesmappe. Uden Close() gav den
+        // True, og webinaret startede.
         DialogResult = true;
-        Close();
     }
 
     private void Fortryd_Klik(object sender, RoutedEventArgs e)
     {
         DialogResult = false;
-        Close();
     }
 }

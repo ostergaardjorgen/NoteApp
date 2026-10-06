@@ -449,8 +449,9 @@ public partial class SetupWindow : Window
         // tilbage at gøre, og knappen hedder «Luk».
         if (_faerdig)
         {
+            // DialogResult lukker selv; et Close() efter giver ShowDialog() False.
+            // Se OpstartWindow.Start_Klik.
             DialogResult = true;
-            Close();
             return;
         }
 
@@ -598,6 +599,5 @@ public partial class SetupWindow : Window
         }
 
         DialogResult = true;
-        Close();
     }
 }
